@@ -1,0 +1,1 @@
+{{ site }} New User Approval Require

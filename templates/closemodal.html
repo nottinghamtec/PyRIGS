@@ -1,0 +1,8 @@
+{% if messages %}
+	{% for message in messages %}
+		<script>{{message|safe}}</script>
+	{% endfor %}
+{% endif %}
+<script>
+$('.modal').modal('hide');
+</script>

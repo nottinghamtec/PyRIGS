@@ -37,6 +37,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'RIGS',
+
+    'registration',
+    'widget_tweaks',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -64,10 +67,26 @@ DATABASES = {
     }
 }
 
+# User system
+AUTH_USER_MODEL = 'RIGS.Profile'
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/user/login'
+LOGOUT_URL = '/user/logout'
+
+ACCOUNT_ACTIVATION_DAYS = 7
+
+# Email
+EMAIL_TEST = False
+if not DEBUG or EMAIL_TEST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
 TIME_ZONE = 'UTC'
 

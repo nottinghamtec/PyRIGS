@@ -1,0 +1,14 @@
+{% load nice_errors from filters %}
+{% if form.errors %}
+	<div class="alert alert-danger alert-dismissable">
+		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+		<dl class="dl-horizontal">
+			{% with form|nice_errors as qq %}
+				{% for error_name,desc in qq.items %}
+					<dt>{{error_name}}</dt>
+					<dd>{{desc}}</dd>
+				{% endfor %}
+			{% endwith %}
+		</dl>
+	</div>
+{% endif %}

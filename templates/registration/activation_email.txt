@@ -1,0 +1,5 @@
+Congratulations {{ user.first_name }}. You are now fully registered on {{ site }}.
+
+{% if is_generated %}
+You password for this site has been automatically set to {{ password }}. It is recommend you change this as soon as possible.
+{% endif %}

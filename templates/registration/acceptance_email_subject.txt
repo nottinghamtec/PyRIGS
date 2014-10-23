@@ -1,0 +1,1 @@
+{{ site }} user {{ user }} activation {{ activation_key }}
