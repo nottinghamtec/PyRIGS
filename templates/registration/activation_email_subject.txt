@@ -1,0 +1,1 @@
+{{ user }} activation successful

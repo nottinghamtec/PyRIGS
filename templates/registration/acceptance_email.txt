@@ -1,0 +1,12 @@
+{% load url from future %}
+Welcome {{ profile.first_name }},
+
+You request to become a user on {{ site }} has been approved by an administrator.
+
+To continue the registration process please visit http://{{ site.domain }}{% url 'registration_activate' activation_key=activation_key %}.
+This link will be active for the next {{ expiration_days }} days.
+
+{% if message %}
+Message from administrator:
+{{ message }}
+{% endif %} 
