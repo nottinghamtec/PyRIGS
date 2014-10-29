@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'RIGS',
 
+    'debug_toolbar',
     'registration',
     'reversion',
     'widget_tweaks',
