@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
 import RIGS
+from RIGS import views
 
 urlpatterns = patterns('',
     # Examples:
@@ -10,5 +11,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url('^user/login/$', 'RIGS.views.login', name='login'),
+
+    # People
+    url(r'^people/$', views.PersonIndex.as_view(), name='person')
 )
 
