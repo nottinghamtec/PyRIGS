@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url('^user/login/$', 'RIGS.views.login', name='login'),
 
     # People
-    url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonIndex.as_view()), name='person')
+    url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonIndex.as_view()), name='person_list'),
+    url(r'^people/add$', permission_required_with_403('RIGS.add_person')(views.PersonCreate.as_view()), name='person_add'),
 )
 
