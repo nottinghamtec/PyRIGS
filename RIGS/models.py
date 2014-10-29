@@ -30,7 +30,7 @@ class Person(models.Model):
 
     address = models.TextField(blank=True, null=True)
 
-    comments = models.ManyToManyField('ModelComment')
+    comments = models.ManyToManyField('ModelComment', blank=True)
 
     def __unicode__(self):
         string = self.name

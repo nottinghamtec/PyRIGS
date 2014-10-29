@@ -1,5 +1,5 @@
-from django.shortcuts import render
 from django.http.response import HttpResponseRedirect
+from django.core.urlresolvers import reverse_lazy
 from django.views import generic
 import models
 
@@ -14,3 +14,7 @@ def login(request, **kwargs):
 
 class PersonIndex(generic.ListView):
     model = models.Person
+
+class PersonCreate(generic.CreateView):
+    model = models.Person
+    success_url = reverse_lazy('person_list')
