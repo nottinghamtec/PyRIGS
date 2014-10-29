@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http.response import HttpResponseRedirect
+from django.views import generic
+import models
 
 # Create your views here.
 def login(request, **kwargs):
@@ -9,3 +11,6 @@ def login(request, **kwargs):
     else:
         from django.contrib.auth.views import login
         return login(request)
+
+class PersonIndex(generic.ListView):
+    model = models.Person
