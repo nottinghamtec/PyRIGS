@@ -1,0 +1,44 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}People list{% endblock %}
+
+{% block content %}
+    <div class="col-sm-10 col-sm-offset-1">
+        <h3>People</h3>
+        <a class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
+        <div class="align-right">{% include 'pagination.html' %}</div>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <td></td>
+                    <td>Name</td>
+                    <td>eMail</td>
+                    <td>Phone</td>
+                    <td>Comments</td>
+                    <td></td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for person in person_list %}
+                    <tr>
+                        <td>{{ person.pk }}</td>
+                        <td>{{ person.name }}</td>
+                        <td>{{ person.email }}</td>
+                        <td>{{ person.phone }}</td>
+                        <td>{{ person.comment_list|length }}</td>
+                        <td>Add buttons</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td></td>
+                        <td colspan="5">No people stored</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="align-right">{% include 'pagination.html' %}</div>
+    </div>
+{% endblock %}
