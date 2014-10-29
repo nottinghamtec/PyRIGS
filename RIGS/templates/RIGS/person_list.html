@@ -6,7 +6,7 @@
 {% block content %}
     <div class="col-sm-10 col-sm-offset-1">
         <h3>People</h3>
-        <a class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
+        <a href="{% url 'person_add' %}" class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
         <div class="align-right">{% include 'pagination.html' %}</div>
         <div>
             <table class="table table-striped">
@@ -14,7 +14,7 @@
                 <tr>
                     <td></td>
                     <td>Name</td>
-                    <td>eMail</td>
+                    <td>Email</td>
                     <td>Phone</td>
                     <td>Comments</td>
                     <td></td>
