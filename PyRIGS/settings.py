@@ -39,10 +39,12 @@ INSTALLED_APPS = (
     'RIGS',
 
     'registration',
+    'reversion',
     'widget_tweaks',
 )
 
 MIDDLEWARE_CLASSES = (
+    'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
