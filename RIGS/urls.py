@@ -13,6 +13,9 @@ urlpatterns = patterns('',
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonIndex.as_view()), name='person_list'),
-    url(r'^people/add$', permission_required_with_403('RIGS.add_person')(views.PersonCreate.as_view()), name='person_add'),
+    url(r'^people/(?P<pk>\d+)/$', permission_required_with_403('RIGS.view_person')(views.PersonDetail.as_view()),
+        name='person_detail'),
+    url(r'^people/add/$', permission_required_with_403('RIGS.add_person')(views.PersonCreate.as_view()), name='person_add'),
+    url(r'^people/(?P<pk>\d+)/edit/$', permission_required_with_403('RIGS.change_person')(views.PersonUpdate.as_view()), name='person_update'),
 )
 
