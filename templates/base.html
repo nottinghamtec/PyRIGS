@@ -116,6 +116,8 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modal"></div>
+
 	<script src="//code.jquery.com/jquery-latest.min.js"></script>
 	<script>
 		Date.prototype.getISOString = function() {
@@ -133,6 +135,7 @@
 		$('.navbar-collapse').addClass('collapse')
 	</script>
 	<script src="{% static "js/dropdown.js" %}"></script>
+    <script src="{% static "js/modal.js" %}"></script>
     {% block js %}
     {% endblock %}
   </body>

@@ -6,8 +6,10 @@
 {% block content %}
     <div class="col-sm-10 col-sm-offset-1">
         <h3>{{ object.name }}</h3>
+
         <div class="pull-right">
-            <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span class="glyphicon glyphicon-pencil"></span></a>
+            <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span
+                    class="glyphicon glyphicon-pencil"></span></a>
         </div>
         <div class="row col-sm-12">
             <div class="col-sm-6">
@@ -23,6 +25,9 @@
 
                     <dt>Address</dt>
                     <dd>{{ object.address|linebreaksbr }}</dd>
+
+                    <dt>Notes</dt>
+                    <dd>{{ object.notes|linebreaksbr }}</dd>
                 </dl>
             </div>
         </div>
