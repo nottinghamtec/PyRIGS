@@ -1,7 +1,7 @@
 {% extends request.is_ajax|yesno:'base_ajax.html,base.html' %}
 {% load widget_tweaks %}
 
-{% block title %}Add Person{% endblock %}
+{% block title %}{% if object.pk %}Edit {{ object.name }}{% else %}Add Person{% endif %}{% endblock %}
 
 {% block content %}
     <div class="col-sm-offset-1 col-sm-10">

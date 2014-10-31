@@ -1,0 +1,30 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block content %}
+    <div class="col-sm-10 col-sm-offset-1">
+        <h3>{{ object.name }}</h3>
+        <div class="pull-right">
+            <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span class="glyphicon glyphicon-pencil"></span></a>
+        </div>
+        <div class="row col-sm-12">
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Name</dt>
+                    <dd>{{ object.name }}</dd>
+
+                    <dt>Phone</dt>
+                    <dd><a href="tel:{{ object.phone }}">{{ object.phone }}</a></dd>
+
+                    <dt>Email</dt>
+                    <dd><a href="mailto:{{ object.email }}">{{ object.email }}</a></dd>
+
+                    <dt>Address</dt>
+                    <dd>{{ object.address|linebreaksbr }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}

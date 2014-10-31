@@ -15,6 +15,21 @@ def login(request, **kwargs):
 class PersonIndex(generic.ListView):
     model = models.Person
 
+class PersonDetail(generic.DetailView):
+    model = models.Person
+
 class PersonCreate(generic.CreateView):
     model = models.Person
-    success_url = reverse_lazy('person_list')
+
+    def get_success_url(self):
+        return reverse_lazy('person_detail', kwargs={
+            'pk': self.object.pk,
+        })
+
+class PersonUpdate(generic.UpdateView):
+    model = models.Person
+
+    def get_success_url(self):
+        return reverse_lazy('person_detail', kwargs={
+            'pk': self.object.pk,
+        })

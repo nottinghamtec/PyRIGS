@@ -34,6 +34,6 @@ class Person(models.Model):
 
     def __unicode__(self):
         string = self.name
-        if self.comments:
+        if self.comments.count() > 0:
             string += "*"
         return string
