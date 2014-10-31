@@ -16,12 +16,6 @@ class Profile(AbstractUser):
             url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=identicon&s=500"
         return url
 
-class ModelComment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    postedAt = models.DateTimeField(auto_now=True)
-
-    message = models.TextField()
-
 @reversion.register
 class Person(models.Model):
     name = models.CharField(max_length=50)
@@ -30,10 +24,10 @@ class Person(models.Model):
 
     address = models.TextField(blank=True, null=True)
 
-    comments = models.ManyToManyField('ModelComment', blank=True)
+    notes = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
         string = self.name
-        if self.comments.count() > 0:
+        if len(self.notes) > 0:
             string += "*"
         return string

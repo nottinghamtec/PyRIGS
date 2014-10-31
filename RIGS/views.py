@@ -12,6 +12,18 @@ def login(request, **kwargs):
         from django.contrib.auth.views import login
         return login(request)
 
+"""
+Called from a modal window (e.g. when an item is submitted to an event/invoice).
+May optionally also include some javascript in a success message to cause a load of
+the new information onto the page.
+"""
+class CloseModal(generic.TemplateView):
+    template_name = 'closemodal.html'
+
+    def get_context_data(self, **kwargs):
+        from django.contrib import messages
+        return {'messages', messages.get_messages(self.request)}
+
 class PersonIndex(generic.ListView):
     model = models.Person
 

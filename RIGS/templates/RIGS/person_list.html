@@ -16,7 +16,7 @@
                     <td>Name</td>
                     <td>Email</td>
                     <td>Phone</td>
-                    <td>Comments</td>
+                    <td>Notes</td>
                     <td></td>
                 </tr>
                 </thead>
@@ -27,7 +27,7 @@
                         <td>{{ person.name }}</td>
                         <td>{{ person.email }}</td>
                         <td>{{ person.phone }}</td>
-                        <td>{{ person.comment_list|length }}</td>
+                        <td>{{ person.notes|yesno|capfirst }}</td>
                         <td>Add buttons</td>
                     </tr>
                 {% empty %}
