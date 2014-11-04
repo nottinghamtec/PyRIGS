@@ -6,7 +6,7 @@ import reversion
 
 # Create your models here.
 class Profile(AbstractUser):
-    initials = models.CharField(max_length=5, unique=True)
+    initials = models.CharField(max_length=5, unique=True, null=True, blank=True)
     phone = models.CharField(max_length=13, null=True, blank=True)
 
     @property

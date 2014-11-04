@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="12359522">
+  <component name="DataSourceManagerImpl" format="xml" hash="3810298710">
     <data-source source="LOCAL" name="Django default" uuid="09730cb6-cd27-4034-9959-d242e7905a51">
       <driver-ref>sqlite.xerial</driver-ref>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:D:\Users\Ghost\PycharmProjects\pyrigs\db.sqlite3</jdbc-url>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/db.sqlite3</jdbc-url>
       <table-pattern>.*</table-pattern>
       <libraries />
     </data-source>
@@ -19,6 +19,14 @@
         <property name="zeroDateTimeBehavior" value="convertToNull" />
         <property name="tinyInt1isBit" value="false" />
       </driver-properties>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Django legacy" uuid="04d2e6df-d917-475c-8507-d831cabc32c0">
+      <driver-ref>mysql</driver-ref>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://alfie.codedinternet.com/tec_rigs</jdbc-url>
+      <user-name>tec_rigs</user-name>
+      <user-password>dfd2dfe7dfe4dfc8df82dfc8df81dfeddfc3dfdfdff7df8c</user-password>
       <libraries />
     </data-source>
   </component>
