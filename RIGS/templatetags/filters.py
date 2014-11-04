@@ -40,6 +40,7 @@ def paginator(context, adjacent_pages=3):
             if n > 0 and n <= paginator.num_pages]
 
     dict = {
+        'request': context['request'],
         'is_paginated': paginator.num_pages > 0,
         'page_obj': page,
         'paginator': paginator,
@@ -60,3 +61,27 @@ def paginator(context, adjacent_pages=3):
 
     return dict
 register.inclusion_tag('pagination.html', takes_context=True)(paginator)
+
+@register.simple_tag
+def url_replace(request, field, value):
+
+    dict_ = request.GET.copy()
+
+    dict_[field] = value
+
+    return dict_.urlencode()
+
+@register.simple_tag
+def orderby(request, field, attr):
+
+    dict_ = request.GET.copy()
+
+    if dict_[field] == attr:
+        if not dict_[field].startswith("-"):
+            dict_[field] = "-" + attr
+        else:
+            dict_[field] = attr
+    else:
+        dict_[field] = attr
+
+    return dict_.urlencode()
