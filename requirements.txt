@@ -1,0 +1,5 @@
+Django==1.7.1
+django-debug-toolbar==1.2.2
+django-registration-redux==1.1
+django-reversion==1.8.5
+sqlparse==0.1.13
