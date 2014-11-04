@@ -1,13 +1,20 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 {% load widget_tweaks %}
+{% load paginator from filters %}
 
 {% block title %}People list{% endblock %}
 
 {% block content %}
     <div class="col-sm-10 col-sm-offset-1">
-        <h3>People</h3>
-        <a href="{% url 'person_add' %}" class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
-        <div class="align-right">{% include 'pagination.html' %}</div>
+        <div class="row">
+            <div class="col-sm-10">
+                <h3>People</h3>
+            </div>
+            <div class="col-sm-2">
+                <a href="{% url 'person_add' %}" class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
+            </div>
+        </div>
+        <div class="pull-right">{% paginator %}</div>
         <div>
             <table class="table table-striped">
                 <thead>
@@ -29,7 +36,7 @@
                         <td>{{ person.phone }}</td>
                         <td>{{ person.notes|yesno|capfirst }}</td>
                         <td>
-                            <a href="{% url 'person_detail' person.pk %}" class="btn btn-default" data-toggle="modal" data-target="#modal">
+                            <a href="{% url 'person_detail' person.pk %}" class="btn btn-default modal-href">
                                 <span class="glyphicon glyphicon-eye-open"></span>
                             </a>
                             <a href="{% url 'person_update' person.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -44,6 +51,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="align-right">{% include 'pagination.html' %}</div>
+        <div class="align-right">{% paginator %}</div>
     </div>
 {% endblock %}

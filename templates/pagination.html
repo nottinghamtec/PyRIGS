@@ -1,27 +1,35 @@
-{% if request.is_paginated %}
+{% if is_paginated %}
 	<div>
 		<ul class="pagination">
-			{% if page_obj.has_previous %}
-				<li><a href="?page{{ page_obj.previous_page_number }}{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo;</a></li>
+			{% if has_previous %}
+				<li><a href="?page={{ previous }}{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo;</a></li>
 			{% else %}
 				<li class="disabled prev"><a href="#">&lsaquo;&lsaquo;</a></li>
 			{% endif %}
-			{% for page in pages %}
-	        {% if page %}
-	            {% ifequal page page_obj.number %}
-	                <li class="current page active"><a href="#">{{ page }}</a></li>
-	            {% else %}
-	                <li><a href="?page={{ page }}{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
-	            {% endifequal %}
-	        {% else %}
-	            ...
-	        {% endif %}
-	    {% endfor %}
-	    {% if page_obj.has_next %}
-	        <li><a href="?page={{ page_obj.next_page_number }}{{ getvars }}{{ hashtag }}" class="next">&rsaquo;&rsaquo;</a></li>
-	    {% else %}
-	        <li class="disabled next"><a href="#">&rsaquo;&rsaquo;</a></li>
-	    {% endif %}
-		</ul>
+
+            {% if show_first %}
+                <li><a href="?page={{ first }}{{ getvars }}{{ hashtag }}" class="prev">{{ first }}</a></li>
+                <li><span>&hellip;</span></li>
+            {% endif %}
+
+            {% for page in page_numbers %}
+                {% ifequal page page_obj.number %}
+                    <li class="current page active"><a href="#">{{ page }}</a></li>
+                {% else %}
+                    <li><a href="?page={{ page }}{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
+                {% endifequal %}
+            {% endfor %}
+
+            {% if show_last %}
+                <li><span>&hellip;</span></li>
+                <li><a href="?page={{ last }}{{ getvars }}{{ hashtag }}" class="prev">{{ last }}</a></li>
+            {% endif %}
+
+            {% if has_next %}
+                <li><a href="?page={{ next}}{{ getvars }}{{ hashtag }}" class="next">&rsaquo;&rsaquo;</a></li>
+            {% else %}
+                <li class="disabled next"><a href="#">&rsaquo;&rsaquo;</a></li>
+            {% endif %}
+            </ul>
 	</div>
 {% endif %}
