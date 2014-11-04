@@ -830,4 +830,7 @@
       <primary-key name="PRIMARY" columns="id"/>
     </table>
   </data-source>
+  <data-source source="LOCAL" name="Django legacy" uuid="04d2e6df-d917-475c-8507-d831cabc32c0">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
 </component>

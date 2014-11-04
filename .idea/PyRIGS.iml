@@ -11,7 +11,7 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.3.3 virtualenv at D:\Users\Ghost\.virtualenvs\pyrigs" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.4.2 virtualenv at ~/.virtualenvs/pyrigs" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sass-stdlib" level="application" />
   </component>
