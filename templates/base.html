@@ -126,7 +126,6 @@
 			var dd  = this.getDate().toString();
 			return yyyy + '-' + (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]); // padding
 		};
-
 	</script>
 	<script src="{% static "js/jquery.cookie.js" %}"></script>
 	<script src="{% static "js/alert.js" %}"></script>
@@ -136,6 +135,16 @@
 	</script>
 	<script src="{% static "js/dropdown.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
+    <script>
+        jQuery(document).ready(function() {
+            jQuery(document).on('click', '.modal-href', function(e) {
+                e.preventDefault()
+                jQuery('#modal').load(jQuery(this).attr('href'), function(e) {
+                    jQuery('#modal').modal();
+                });
+            });
+        });
+    </script>
     {% block js %}
     {% endblock %}
   </body>

@@ -1,7 +1,7 @@
 from django.http.response import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.views import generic
-import models
+from RIGS import models
 
 # Create your views here.
 def login(request, **kwargs):
@@ -26,6 +26,7 @@ class CloseModal(generic.TemplateView):
 
 class PersonIndex(generic.ListView):
     model = models.Person
+    paginate_by = 20
 
 class PersonDetail(generic.DetailView):
     model = models.Person
