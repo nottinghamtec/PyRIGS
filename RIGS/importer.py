@@ -7,7 +7,9 @@ django.setup()
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import ConnectionDoesNotExist
+from django.db import transaction
 from RIGS import models
+import reversion
 
 def setup_cursor():
     try:
@@ -40,6 +42,8 @@ def import_people():
         person, created = models.Person.objects.get_or_create(pk=row[0], name=row[1], phone=row[2], email=email, address=row[4], notes=notes)
         if created:
             print("Created: " + person.__unicode__())
+            with transaction.atomic(), reversion.create_revision():
+                person.save()
         else:
             print("Found: " + person.__unicode__())
 
