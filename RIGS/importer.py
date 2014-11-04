@@ -27,10 +27,7 @@ def import_people():
     sql = """SELECT `id`, `name`, `phone`, `email`, `address`, `status` FROM `people`"""
     cursor.execute(sql)
     resp = cursor.fetchall()
-    i=0
     for row in resp:
-        if (i+1) > 1:
-            break
         email = row[3]
         if email is not "" and "@" not in email:
             email += "@nottingham.ac.uk"
@@ -47,8 +44,32 @@ def import_people():
         else:
             print("Found: " + person.__unicode__())
 
+def import_organisations():
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT `id`, `name`, `phone`, `address`, `union_account`, `status` FROM `organisations`"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        unionAccount = False
+        if row[4] == "1":
+            unionAccount = True
+
+        notes = ""
+        if row[5] !=  "Normal":
+            notes = row[5]
+
+        object, created = models.Organisation.objects.get_or_create(pk=row[0], name=row[1], phone=row[2], address=row[3], unionAccount=unionAccount, notes=notes)
+        if created:
+            print("Created: " + object.__unicode__())
+            with transaction.atomic(), reversion.create_revision():
+                object.save()
+        else:
+            print("Found: " + object.__unicode__())
+
 def main():
-    import_people()
+    #import_people()
+    import_organisations()
 
 if __name__=="__main__":
     main()
