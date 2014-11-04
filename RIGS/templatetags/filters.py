@@ -59,5 +59,4 @@ def paginator(context, adjacent_pages=3):
         dict['previous'] = page.previous_page_number()
 
     return dict
-
 register.inclusion_tag('pagination.html', takes_context=True)(paginator)

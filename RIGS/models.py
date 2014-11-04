@@ -16,8 +16,20 @@ class Profile(AbstractUser):
             url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=identicon&s=500"
         return url
 
+class RevisionMixin(object):
+    @property
+    def last_edited_at(self):
+        version = reversion.get_for_object(self)[0]
+        return version.revision.date_created
+
+    @property
+    def last_edited_by(self):
+        version = reversion.get_for_object(self)[0]
+        return version.revision.user
+
+
 @reversion.register
-class Person(models.Model):
+class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
@@ -31,3 +43,4 @@ class Person(models.Model):
         if len(self.notes) > 0:
             string += "*"
         return string
+

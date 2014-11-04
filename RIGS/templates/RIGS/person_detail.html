@@ -7,7 +7,6 @@
     <div class="row">
         {% if not request.is_ajax %}
             <h3>{{ object.name }}</h3>
-
             <div class="pull-right">
                 <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span
                         class="glyphicon glyphicon-pencil"></span></a>
@@ -38,9 +37,16 @@
 
 {% if request.is_ajax %}
     {% block footer %}
-        <div class="pull-right">
-            <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span
-                    class="glyphicon glyphicon-pencil"></span></a>
+        <div class="row">
+            <div class="col-sm-10 align-left">
+                Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ user }}
+            </div>
+            <div class="col-sm-2">
+                <div class="pull-right">
+                    <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span
+                            class="glyphicon glyphicon-pencil"></span></a>
+                </div>
+            </div>
         </div>
     {% endblock %}
 {% endif %}
