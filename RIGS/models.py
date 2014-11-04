@@ -44,3 +44,19 @@ class Person(models.Model, RevisionMixin):
             string += "*"
         return string
 
+@reversion.register
+class Organisation(models.Model, RevisionMixin):
+    name = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    address = models.TextField(blank=True, null=True)
+
+    notes = models.TextField(blank=True, null=True)
+    unionAccount = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        string = self.name
+        if len(self.notes) > 0:
+            string += "*"
+        return string
