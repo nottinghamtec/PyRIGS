@@ -1,14 +1,15 @@
 {% if is_paginated %}
+    {% load url_replace from filters %}
 	<div>
 		<ul class="pagination">
 			{% if has_previous %}
-				<li><a href="?page={{ previous }}{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo;</a></li>
+				<li><a href="?{% url_replace request 'page' previous %}" class="prev">&lsaquo;&lsaquo;</a></li>
 			{% else %}
 				<li class="disabled prev"><a href="#">&lsaquo;&lsaquo;</a></li>
 			{% endif %}
 
             {% if show_first %}
-                <li><a href="?page={{ first }}{{ getvars }}{{ hashtag }}" class="prev">{{ first }}</a></li>
+                <li><a href="?{% url_replace request 'page' first %}" class="prev">{{ first }}</a></li>
                 <li><span>&hellip;</span></li>
             {% endif %}
 
@@ -16,17 +17,17 @@
                 {% ifequal page page_obj.number %}
                     <li class="current page active"><a href="#">{{ page }}</a></li>
                 {% else %}
-                    <li><a href="?page={{ page }}{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
+                    <li><a href="?{% url_replace request 'page' page %}" class="page">{{ page }}</a></li>
                 {% endifequal %}
             {% endfor %}
 
             {% if show_last %}
                 <li><span>&hellip;</span></li>
-                <li><a href="?page={{ last }}{{ getvars }}{{ hashtag }}" class="prev">{{ last }}</a></li>
+                <li><a href="?{% url_replace request 'page' last %}" class="prev">{{ last }}</a></li>
             {% endif %}
 
             {% if has_next %}
-                <li><a href="?page={{ next}}{{ getvars }}{{ hashtag }}" class="next">&rsaquo;&rsaquo;</a></li>
+                <li><a href="?{% url_replace request 'page' next %}" class="next">&rsaquo;&rsaquo;</a></li>
             {% else %}
                 <li class="disabled next"><a href="#">&rsaquo;&rsaquo;</a></li>
             {% endif %}
