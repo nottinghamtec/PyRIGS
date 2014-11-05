@@ -13,12 +13,14 @@
                 <h3>People</h3>
             </div>
             <div class="col-sm-2">
-                <a href="{% url 'person_add' %}" class="btn btn-default pull-right">New <span class="glyphicon glyphicon-plus"></span></a>
+                <a href="{% url 'person_create' %}" class="btn btn-default pull-right">New <span
+                        class="glyphicon glyphicon-plus"></span></a>
             </div>
             <div class="col-sm-3 col-sm-offset-9">
                 <form class="form form-horizontal col-sm-12">
                     <div class="form-group">
-                        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}" class="form-control" />
+                        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
+                               class="form-control"/>
                     </div>
                 </form>
             </div>
@@ -48,7 +50,8 @@
                             <a href="{% url 'person_detail' person.pk %}" class="btn btn-default modal-href">
                                 <span class="glyphicon glyphicon-eye-open"></span>
                             </a>
-                            <a href="{% url 'person_update' person.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
+                            <a href="{% url 'person_update' person.pk %}" class="btn btn-default"><span
+                                    class="glyphicon glyphicon-pencil"></span></a>
                         </td>
                     </tr>
                 {% empty %}
