@@ -45,20 +45,8 @@
                         <li><a href="#">Other Events</a></li>
                     </ul>
                 </li>
-                {% if perms.RIGS.view_vatrate or perms.RIGS.view_invoice %}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            Finance<b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            {% if perms.RIGS.view_invoice %}
-                                <li><a href="">Invoices</a></li>
-                            {% endif %}
-                            {% if perms.RIGS.view_vatrate %}
-                                <li><a href="">VAT</a></li>
-                            {% endif %}
-                        </ul>
-                    </li>
+                {% if perms.RIGS.view_invoice %}
+                    <li><a href="">Invoices</a></li>
                 {% endif %}
                 {% if perms.RIGS.view_person %}
                     <li><a href="{% url 'person_list' %}">People</a></li>
