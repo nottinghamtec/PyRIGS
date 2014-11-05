@@ -72,9 +72,27 @@ def import_organisations():
             print("Found: " + object.__unicode__())
 
 
+def import_vat_rates():
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT `id`, `start_date`, `start_time`, `comment`, `rate` FROM `vat_rates`"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=row[1] + " " + row[2],
+                                                               comment=row[3], rate=row[4])
+        if created:
+            print("Created: " + object.__unicode__())
+            with transaction.atomic(), reversion.create_revision():
+                object.save()
+        else:
+            print("Found: " + object.__unicode__())
+
+
 def main():
     # import_people()
-    import_organisations()
+    # import_organisations()
+    import_vat_rates()
 
 
 if __name__ == "__main__":
