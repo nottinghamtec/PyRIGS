@@ -100,13 +100,13 @@ def import_venues(delete=False):
     cursor.execute(sql)
     for row in cursor.fetchall():
 	print("Searching for %s", row[0])
-	object = models.Venue.objects.get(name__iexact=row[0])
-	if object:
+	try:
+		object = models.Venue.objects.get(name__iexact=row[0])
 		if not object.three_phase_available and row[1]:
 			with transaction.atomic(), reversion.create_revision():
 				object.three_phase_available = row[1]
 				object.save()
-	else:
+	except ObjectDoesNotExist:
 		with transaction.atomic(), reversion.create_revision():
 			object = models.Venue(name=row[0], three_phase_available=row[1])
 			object.save()
