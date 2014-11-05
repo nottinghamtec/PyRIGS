@@ -19,14 +19,6 @@
     		</div>
     	</div>
     {% endfor %}
-    {% for field in supplement_form %}
-    	<div class="form-group">
-    		<label for="{{ field.id_for_label }}" class="control-label col-sm-2">{{ field.label }}</label>
-    		<div class="controls col-sm-10">
-    			{% render_field field class+="form-control" placeholder=field.label %}
-    		</div>
-    	</div>
-    {% endfor %}
     <p><input type="submit" value="Register" class="btn btn-primary pull-right"></p>
 </form>
 {% endblock %}
