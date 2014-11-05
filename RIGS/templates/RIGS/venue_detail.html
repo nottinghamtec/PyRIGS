@@ -1,0 +1,52 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        {% if not request.is_ajax %}
+            <h3>{{ object.name }}</h3>
+            <div class="pull-right">
+                <a href="{% url 'venue_update' object.pk %}" class="btn btn-primary">Edit <span
+                        class="glyphicon glyphicon-pencil"></span></a>
+            </div>
+        {% endif %}
+        <div class="col-sm-10 col-sm-offset-1">
+            <div class="">
+                <dl class="dl-horizontal">
+                    <dt>Name</dt>
+                    <dd>{{ object.name }}</dd>
+
+                    <dt>Phone</dt>
+                    <dd><a href="tel:{{ object.phone }}">{{ object.phone }}</a></dd>
+
+                    <dt>Email</dt>
+                    <dd><a href="mailto:{{ object.email }}">{{ object.email }}</a></dd>
+
+                    <dt>Address</dt>
+                    <dd>{{ object.address|linebreaksbr }}</dd>
+
+                    <dt>Notes</dt>
+                    <dd>{{ object.notes|linebreaksbr }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% if request.is_ajax %}
+    {% block footer %}
+        <div class="row">
+            <div class="col-sm-10 align-left">
+                Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ object.last_edited_by }}
+            </div>
+            <div class="col-sm-2">
+                <div class="pull-right">
+                    <a href="{% url 'venue_update' object.pk %}" class="btn btn-primary">Edit <span
+                            class="glyphicon glyphicon-pencil"></span></a>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

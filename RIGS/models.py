@@ -86,6 +86,8 @@ class Venue(models.Model, RevisionMixin):
     three_phase_available = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
 
+    address = models.TextField(blank=True, null=True)
+
     def __str__(self):
         string = self.name
         if self.notes and len(self.notes) > 0:

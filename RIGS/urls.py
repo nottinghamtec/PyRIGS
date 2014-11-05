@@ -38,5 +38,19 @@ urlpatterns = patterns('',
                        url(r'^organisations/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_organisation')(views.OrganisationUpdate.as_view()),
                            name='organisation_update'),
+
+                       # Venues
+                       url(r'^venues/$',
+                           permission_required_with_403('RIGS.view_venue')(views.VenueList.as_view()),
+                           name='venue_list'),
+                       url(r'^venues/add/$',
+                           permission_required_with_403('RIGS.add_venue')(views.VenueCreate.as_view()),
+                           name='venue_create'),
+                       url(r'^venues/(?P<pk>\d+)/$',
+                           permission_required_with_403('RIGS.view_venue')(views.VenueDetail.as_view()),
+                           name='venue_detail'),
+                       url(r'^venues/(?P<pk>\d+)/edit/$',
+                           permission_required_with_403('RIGS.change_venue')(views.VenueUpdate.as_view()),
+                           name='venue_update'),
 )
 
