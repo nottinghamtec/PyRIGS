@@ -43,11 +43,11 @@ def import_people():
         person, created = models.Person.objects.get_or_create(pk=row[0], name=row[1], phone=row[2], email=email,
                                                               address=row[4], notes=notes)
         if created:
-            print("Created: " + person.__unicode__())
+            print("Created: " + person.__str__())
             with transaction.atomic(), reversion.create_revision():
                 person.save()
         else:
-            print("Found: " + person.__unicode__())
+            print("Found: " + person.__str__())
 
 
 def import_organisations():
@@ -65,11 +65,11 @@ def import_organisations():
                                                                     address=row[3],
                                                                     union_account=row[4], notes=notes)
         if created:
-            print("Created: " + object.__unicode__())
+            print("Created: " + object.__str__())
             with transaction.atomic(), reversion.create_revision():
                 object.save()
         else:
-            print("Found: " + object.__unicode__())
+            print("Found: " + object.__str__())
 
 
 def import_vat_rates():
@@ -83,11 +83,11 @@ def import_vat_rates():
         object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=start_at,
                                                                comment=row[3], rate=row[4])
         if created:
-            print("Created: " + object.__unicode__())
+            print("Created: " + object.__str__())
             with transaction.atomic(), reversion.create_revision():
                 object.save()
         else:
-            print("Found: " + object.__unicode__())
+            print("Found: " + object.__str__())
 
 
 def main():
