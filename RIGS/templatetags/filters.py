@@ -76,7 +76,7 @@ def orderby(request, field, attr):
 
     dict_ = request.GET.copy()
 
-    if dict_[field] == attr:
+    if dict_.__contains__(field) and dict_[field] == attr:
         if not dict_[field].startswith("-"):
             dict_[field] = "-" + attr
         else:
