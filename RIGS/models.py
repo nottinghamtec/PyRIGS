@@ -38,7 +38,7 @@ class Person(models.Model, RevisionMixin):
 
     notes = models.TextField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         string = self.name
         if len(self.notes) > 0:
             string += "*"
@@ -55,7 +55,7 @@ class Organisation(models.Model, RevisionMixin):
     notes = models.TextField(blank=True, null=True)
     union_account = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         string = self.name
         if len(self.notes) > 0:
             string += "*"
@@ -68,8 +68,9 @@ class VatRate(models.Model, RevisionMixin):
     rate = models.DecimalField(max_digits=6, decimal_places=6)
     comment = models.CharField(max_length=255)
 
+    @property
     def as_percent(self):
-        return self.rate * 100
+        return (self.rate * 100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
