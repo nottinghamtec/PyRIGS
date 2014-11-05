@@ -12,18 +12,23 @@ def login(request, **kwargs):
         return HttpResponseRedirect(request.REQUEST.get('next', '/'))
     else:
         from django.contrib.auth.views import login
+
         return login(request)
+
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
 May optionally also include some javascript in a success message to cause a load of
 the new information onto the page.
 """
+
+
 class CloseModal(generic.TemplateView):
     template_name = 'closemodal.html'
 
     def get_context_data(self, **kwargs):
         from django.contrib import messages
+
         return {'messages', messages.get_messages(self.request)}
 
 
@@ -42,8 +47,10 @@ class PersonList(generic.ListView):
             object_list = object_list.order_by(orderBy)
         return object_list
 
+
 class PersonDetail(generic.DetailView):
     model = models.Person
+
 
 class PersonCreate(generic.CreateView):
     model = models.Person
@@ -52,6 +59,7 @@ class PersonCreate(generic.CreateView):
         return reverse_lazy('person_detail', kwargs={
             'pk': self.object.pk,
         })
+
 
 class PersonUpdate(generic.UpdateView):
     model = models.Person
@@ -77,8 +85,10 @@ class OrganisationList(generic.ListView):
             object_list = object_list.order_by(orderBy)
         return object_list
 
+
 class OrganisationDetail(generic.DetailView):
     model = models.Organisation
+
 
 class OrganisationCreate(generic.CreateView):
     model = models.Organisation
@@ -88,10 +98,49 @@ class OrganisationCreate(generic.CreateView):
             'pk': self.object.pk,
         })
 
+
 class OrganisationUpdate(generic.UpdateView):
     model = models.Organisation
 
     def get_success_url(self):
         return reverse_lazy('organisation_detail', kwargs={
+            'pk': self.object.pk,
+        })
+
+
+class VenueList(generic.ListView):
+    model = models.Venue
+    paginate_by = 20
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+        if len(q) >= 3:
+            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
+        else:
+            object_list = self.model.objects.all()
+        orderBy = self.request.GET.get('orderBy', "")
+        if orderBy is not "":
+            object_list = object_list.order_by(orderBy)
+        return object_list
+
+
+class VenueDetail(generic.DetailView):
+    model = models.Venue
+
+
+class VenueCreate(generic.CreateView):
+    model = models.Venue
+
+    def get_success_url(self):
+        return reverse_lazy('venue_detail', kwargs={
+            'pk': self.object.pk,
+        })
+
+
+class VenueUpdate(generic.UpdateView):
+    model = models.Venue
+
+    def get_success_url(self):
+        return reverse_lazy('venue_detail', kwargs={
             'pk': self.object.pk,
         })
