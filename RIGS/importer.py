@@ -90,7 +90,9 @@ def import_vat_rates():
             print("Found: " + object.__str__())
 
 
-def import_venues():
+def import_venues(delete=False):
+    if delete:
+        models.Venue.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -116,8 +118,7 @@ def main():
     # import_people()
     # import_organisations()
     # import_vat_rates()
-    import_venues()
-
+    import_venues(True)
 
 if __name__ == "__main__":
     main()
