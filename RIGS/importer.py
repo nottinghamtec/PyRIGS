@@ -12,7 +12,7 @@ from django.db.utils import ConnectionDoesNotExist
 from django.db import transaction
 from RIGS import models
 import reversion
-
+from datetime import datetime
 
 def setup_cursor():
     try:
@@ -79,7 +79,8 @@ def import_vat_rates():
     sql = """SELECT `id`, `start_date`, `start_time`, `comment`, `rate` FROM `vat_rates`"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-        object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=row[1] + " " + row[2],
+	start_at = datetime.combine(row[1], row[2])
+        object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=start_at,
                                                                comment=row[3], rate=row[4])
         if created:
             print("Created: " + object.__unicode__())
