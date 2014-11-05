@@ -29,7 +29,7 @@ def import_users():
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT `id`, `login`, `password`, `email`, `first_name`, `last_name`, `verified`, `initials`, `phone_number` FROM `users`"""
+    sql = """SELECT `id`, `login`, `email`, `first_name`, `last_name`, `verified`, `initials`, `phone_number` FROM `users`"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         try:
@@ -37,15 +37,15 @@ def import_users():
             object.first_name = row[3]
             object.last_name = row[4]
             object.initials = row[6]
-            object.phone_number = row[7]
+            object.phone = row[7]
             object.save()
-            print("Updated " + object)
+            print("Updated " + str(object))
         except ObjectDoesNotExist:
-            object = models.Profile(pk=row[0], username=row[1], email=row[3], first_name=row[4], last_name=row[5],
-                                    active=row[6], initials=row[7], phone_number=row[8])
+            object = models.Profile(pk=row[0], username=row[1], email=row[2], first_name=row[3], last_name=row[4],
+                                    is_active=row[5], initials=row[6], phone=row[7])
             object.set_unusable_password()
             object.save()
-            print("Created " + object)
+            print("Created " + str(object))
 
 def import_people():
     cursor = setup_cursor()
@@ -142,11 +142,12 @@ def import_events():
 
 
 def main():
+    import_users()
     # import_people()
     # import_organisations()
     # import_vat_rates()
     # import_venues(True)
-    import_events()
+    # import_events()
 
 
 if __name__ == "__main__":
