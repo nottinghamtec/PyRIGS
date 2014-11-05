@@ -60,3 +60,13 @@ class Organisation(models.Model, RevisionMixin):
         if len(self.notes) > 0:
             string += "*"
         return string
+
+
+@reversion.register
+class VatRate(models.Model, RevisionMixin):
+    start_at = models.DateTimeField()
+    rate = models.DecimalField(max_digits=6, decimal_places=6)
+    comment = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.comment + " " + self.start_at + " @ " + self.rate
