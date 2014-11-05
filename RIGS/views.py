@@ -26,7 +26,8 @@ class CloseModal(generic.TemplateView):
         from django.contrib import messages
         return {'messages', messages.get_messages(self.request)}
 
-class PersonIndex(generic.ListView):
+
+class PersonList(generic.ListView):
     model = models.Person
     paginate_by = 20
 
@@ -60,7 +61,8 @@ class PersonUpdate(generic.UpdateView):
             'pk': self.object.pk,
         })
 
-class OrganisationIndex(generic.ListView):
+
+class OrganisationList(generic.ListView):
     model = models.Organisation
     paginate_by = 20
 
