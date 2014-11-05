@@ -99,20 +99,17 @@ def import_venues(delete=False):
     sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` WHERE `venue` IS NOT NULL"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-        object, created = models.Venue.objects.get_or_create(name__iexact=row[0])
-        if created:
-            print("Created: " + object.__str__())
-            with transaction.atomic(), reversion.create_revision():
-                object.three_phase_available = row[1]
-                object.save()
-        else:
-            if not object.three_phase_available and row[1] == 1:
-                print("Updating: " + object.__str__())
-                with transaction.atomic(), reversion.create_revision():
-                    object.three_phase_available = row[1]
-                    object.save()
-            else:
-                print("Found: " + object.__str__())
+	print("Searching for %s", row[0])
+	object = models.Venue.objects.get(name__iexact=row[0])
+	if object:
+		if not object.three_phase_available and row[1]:
+			with transaction.atomic(), reversion.create_revision():
+				object.three_phase_available = row[1]
+				object.save()
+	else:
+		with transaction.atomic(), reversion.create_revision():
+			object = models.Venue(name=row[0], three_phase_available=row[1])
+			object.save()
 
 def main():
     # import_people()

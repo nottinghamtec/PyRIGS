@@ -88,8 +88,8 @@ class Venue(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes and len(self.notes) > 0:
+           string += "*"
         return string
 
 
