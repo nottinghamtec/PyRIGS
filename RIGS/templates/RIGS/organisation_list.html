@@ -35,7 +35,6 @@
                     <td>Email</td>
                     <td>Phone</td>
                     <td>Notes</td>
-                    l
                     <td>Union Account</td>
                     <td></td>
                 </tr>
@@ -48,7 +47,7 @@
                         <td>{{ object.email }}</td>
                         <td>{{ object.phone }}</td>
                         <td>{{ object.notes|yesno|capfirst }}</td>
-                        <td>{{ object.unionAccount|yesno|capfirst }}</td>
+                        <td>{{ object.union_account|yesno|capfirst }}</td>
                         <td>
                             <a href="{% url 'organisation_detail' object.pk %}" class="btn btn-default modal-href">
                                 <span class="glyphicon glyphicon-eye-open"></span>
@@ -60,7 +59,7 @@
                 {% empty %}
                     <tr>
                         <td></td>
-                        <td colspan="5">No people stored</td>
+                        <td colspan="5">No organisations found</td>
                     </tr>
                 {% endfor %}
                 </tbody>
