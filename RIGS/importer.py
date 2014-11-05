@@ -25,6 +25,27 @@ def setup_cursor():
         return None
 
 
+def import_users():
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT `id`, `login`, `password`, `email`, `first_name`, `last_name`, `verified`, `initials`, `phone_number` FROM `users`"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        try:
+            object = models.Profile.objects.get(pk=row[0])
+            object.first_name = row[3]
+            object.last_name = row[4]
+            object.initials = row[6]
+            object.phone_number = row[7]
+            object.save()
+        except ObjectDoesNotExist:
+            object = models.Profile(pk=row[0], username=row[1], email=row[3], first_name=row[4], last_name=row[5],
+                                    active=row[6], initials=row[7], phone_number=row[8])
+            object.set_unusable_password()
+            object.save()
+
+
 def import_people():
     cursor = setup_cursor()
     if cursor is None:
@@ -113,11 +134,18 @@ def import_venues(delete=False):
                 object.save()
 
 
+def import_events():
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+
+
 def main():
     # import_people()
     # import_organisations()
     # import_vat_rates()
-    import_venues(True)
+    # import_venues(True)
+    import_events()
 
 
 if __name__ == "__main__":
