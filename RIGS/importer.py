@@ -39,12 +39,13 @@ def import_users():
             object.initials = row[6]
             object.phone_number = row[7]
             object.save()
+            print("Updated " + object)
         except ObjectDoesNotExist:
             object = models.Profile(pk=row[0], username=row[1], email=row[3], first_name=row[4], last_name=row[5],
                                     active=row[6], initials=row[7], phone_number=row[8])
             object.set_unusable_password()
             object.save()
-
+            print("Created " + object)
 
 def import_people():
     cursor = setup_cursor()
