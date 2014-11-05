@@ -14,6 +14,7 @@ from RIGS import models
 import reversion
 from datetime import datetime
 
+
 def setup_cursor():
     try:
         cursor = connections['legacy'].cursor()
@@ -79,7 +80,7 @@ def import_vat_rates():
     sql = """SELECT `id`, `start_date`, `start_time`, `comment`, `rate` FROM `vat_rates`"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-	start_at = datetime.combine(row[1], row[2])
+        start_at = datetime.combine(row[1], row[2])
         object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=start_at,
                                                                comment=row[3], rate=row[4])
         if created:
@@ -99,23 +100,25 @@ def import_venues(delete=False):
     sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` WHERE `venue` IS NOT NULL"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-	print("Searching for %s", row[0])
-	try:
-		object = models.Venue.objects.get(name__iexact=row[0])
-		if not object.three_phase_available and row[1]:
-			with transaction.atomic(), reversion.create_revision():
-				object.three_phase_available = row[1]
-				object.save()
-	except ObjectDoesNotExist:
-		with transaction.atomic(), reversion.create_revision():
-			object = models.Venue(name=row[0], three_phase_available=row[1])
-			object.save()
+        print(("Searching for %s", row[0]))
+        try:
+            object = models.Venue.objects.get(name__iexact=row[0])
+            if not object.three_phase_available and row[1]:
+                with transaction.atomic(), reversion.create_revision():
+                    object.three_phase_available = row[1]
+                    object.save()
+        except ObjectDoesNotExist:
+            with transaction.atomic(), reversion.create_revision():
+                object = models.Venue(name=row[0], three_phase_available=row[1])
+                object.save()
+
 
 def main():
     # import_people()
     # import_organisations()
     # import_vat_rates()
     import_venues(True)
+
 
 if __name__ == "__main__":
     main()
