@@ -59,3 +59,37 @@ class PersonUpdate(generic.UpdateView):
         return reverse_lazy('person_detail', kwargs={
             'pk': self.object.pk,
         })
+
+class OrganisationIndex(generic.ListView):
+    model = models.Organisation
+    paginate_by = 20
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+        if len(q) >= 3:
+            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
+        else:
+            object_list = self.model.objects.all()
+        orderBy = self.request.GET.get('orderBy', "")
+        if orderBy is not "":
+            object_list = object_list.order_by(orderBy)
+        return object_list
+
+class OrganisationDetail(generic.DetailView):
+    model = models.Organisation
+
+class OrganisationCreate(generic.CreateView):
+    model = models.Organisation
+
+    def get_success_url(self):
+        return reverse_lazy('organisation_detail', kwargs={
+            'pk': self.object.pk,
+        })
+
+class OrganisationUpdate(generic.UpdateView):
+    model = models.Organisation
+
+    def get_success_url(self):
+        return reverse_lazy('organisation_detail', kwargs={
+            'pk': self.object.pk,
+        })
