@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('RIGS', '0009_auto_20141105_1916'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='EventCrew',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
+                ('rig', models.BooleanField(default=False)),
+                ('run', models.BooleanField(default=False)),
+                ('derig', models.BooleanField(default=False)),
+                ('notes', models.TextField(blank=True, null=True)),
+                ('event', models.ForeignKey(related_name='crew', to='RIGS.Event')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='event',
+            name='collector',
+            field=models.CharField(max_length=255, blank=True, null=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='eventitem',
+            name='event',
+            field=models.ForeignKey(related_name='items', to='RIGS.Event'),
+            preserve_default=True,
+        ),
+    ]
