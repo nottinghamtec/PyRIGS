@@ -135,6 +135,7 @@ class Event(models.Model, RevisionMixin):
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True)
+    collector = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
@@ -154,3 +155,12 @@ class EventItem(models.Model):
 
     def __str__(self):
         return self.event.name + " | " + self.name
+
+
+class EventCrew(models.Model):
+    event = models.ForeignKey('Event', related_name='crew')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    rig = models.BooleanField(default=False)
+    run = models.BooleanField(default=False)
+    derig = models.BooleanField(default=False)
+    notes = models.TextField(blank=True, null=True)
