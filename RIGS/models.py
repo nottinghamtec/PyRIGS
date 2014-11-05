@@ -68,5 +68,8 @@ class VatRate(models.Model, RevisionMixin):
     rate = models.DecimalField(max_digits=6, decimal_places=6)
     comment = models.CharField(max_length=255)
 
+    def as_percent(self):
+        return self.rate * 100
+
     def __unicode__(self):
-        return self.comment + " " + str(self.start_at) + " @ " + str(self.rate)
+        return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
