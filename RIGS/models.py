@@ -69,4 +69,4 @@ class VatRate(models.Model, RevisionMixin):
     comment = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return self.comment + " " + self.start_at + " @ " + self.rate
+        return self.comment + " " + str(self.start_at) + " @ " + str(self.rate)
