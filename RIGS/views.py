@@ -1,7 +1,9 @@
 from django.http.response import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.views import generic
-import models
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from RIGS import models
 
 # Create your views here.
 def login(request, **kwargs):
@@ -26,6 +28,18 @@ class CloseModal(generic.TemplateView):
 
 class PersonIndex(generic.ListView):
     model = models.Person
+    paginate_by = 20
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+        if len(q) >= 3:
+            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(email__icontains=q))
+        else:
+            object_list = self.model.objects.all()
+        orderBy = self.request.GET.get('orderBy', None)
+        if orderBy is not None:
+            object_list = object_list.order_by(orderBy)
+        return object_list
 
 class PersonDetail(generic.DetailView):
     model = models.Person
