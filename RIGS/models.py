@@ -53,7 +53,7 @@ class Organisation(models.Model, RevisionMixin):
     address = models.TextField(blank=True, null=True)
 
     notes = models.TextField(blank=True, null=True)
-    unionAccount = models.BooleanField(default=False)
+    union_account = models.BooleanField(default=False)
 
     def __unicode__(self):
         string = self.name

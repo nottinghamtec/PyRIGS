@@ -63,7 +63,7 @@ def import_organisations():
 
         object, created = models.Organisation.objects.get_or_create(pk=row[0], name=row[1], phone=row[2],
                                                                     address=row[3],
-                                                                    unionAccount=row[4], notes=notes)
+                                                                    union_account=row[4], notes=notes)
         if created:
             print("Created: " + object.__unicode__())
             with transaction.atomic(), reversion.create_revision():
