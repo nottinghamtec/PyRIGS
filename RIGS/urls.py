@@ -35,7 +35,7 @@ urlpatterns = patterns('',
                        url(r'^organisations/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_organisation')(views.OrganisationDetail.as_view()),
                            name='organisation_detail'),
-                       url(r'^organisation/(?P<pk>\d+)/edit/$',
+                       url(r'^organisations/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_organisation')(views.OrganisationUpdate.as_view()),
                            name='organisation_update'),
 )
