@@ -90,10 +90,33 @@ def import_vat_rates():
             print("Found: " + object.__str__())
 
 
+def import_venues():
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` WHERE `venue` IS NOT NULL"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        object, created = models.Venue.objects.get_or_create(name__iexact=row[0])
+        if created:
+            print("Created: " + object.__str__())
+            with transaction.atomic(), reversion.create_revision():
+                object.three_phase_available = row[1]
+                object.save()
+        else:
+            if not object.three_phase_available and row[1] == 1:
+                print("Updating: " + object.__str__())
+                with transaction.atomic(), reversion.create_revision():
+                    object.three_phase_available = row[1]
+                    object.save()
+            else:
+                print("Found: " + object.__str__())
+
 def main():
     # import_people()
     # import_organisations()
-    import_vat_rates()
+    # import_vat_rates()
+    import_venues()
 
 
 if __name__ == "__main__":
