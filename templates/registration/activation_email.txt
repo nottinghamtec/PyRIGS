@@ -1,5 +1,7 @@
-Congratulations {{ user.first_name }}. You are now fully registered on {{ site }}.
+{% load url from future %}
+Welcome {{ user }},
 
-{% if is_generated %}
-You password for this site has been automatically set to {{ password }}. It is recommend you change this as soon as possible.
-{% endif %}
+Thank you for registering on {{ site }}
+
+To continue the registration process please visit http://{{ site.domain }}{% url 'registration_activate' activation_key=activation_key %}.
+This link will be active for the next {{ expiration_days }} days.

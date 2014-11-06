@@ -1,1 +1,1 @@
-{{ user }} activation successful
+{{ user }} activation required

@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Page not found{% endblock %}
+{% load staticfiles %}
+{% block title %}Page Not Found{% endblock %}
 
 {% block content %}
-The page you requested could not be found.
+    <div class="text-center">
+        <img src="{% static 'imgs/404.jpg' %}"/>
+    </div>
 {% endblock %}
