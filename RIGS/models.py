@@ -3,7 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 import hashlib
 import reversion
-from datetime import datetime
+import datetime
+
 
 # Create your models here.
 class Profile(AbstractUser):
@@ -66,8 +67,8 @@ class Organisation(models.Model, RevisionMixin):
 
 
 class VatManager(models.Manager):
-    def currentRate(self):
-        return self.find_rate(datetime.now())
+    def current_rate(self):
+        return self.find_rate(datetime.datetime.now())
 
     def find_rate(self, date):
         # return self.filter(startAt__lte=date).latest()
@@ -89,7 +90,7 @@ class VatRate(models.Model, RevisionMixin):
 
     @property
     def as_percent(self):
-        return (self.rate * 100)
+        return self.rate * 100
 
     class Meta:
         ordering = ['-start_at']
@@ -112,8 +113,35 @@ class Venue(models.Model, RevisionMixin):
     def __str__(self):
         string = self.name
         if self.notes and len(self.notes) > 0:
-           string += "*"
+            string += "*"
         return string
+
+
+class EventManager(models.Manager):
+    def current_events(self):
+        # startAfter = self.filter(startDate__gte=datetime.date.today(), endDate__isnull=True)
+        # endAfter = self.filter(endDate__gte=datetime.date.today())
+        # activeDryHire = filter(dryHire=True, checkedInBy__isnull=False, canceled=False)
+        # canceledDryHire = filter(dry_hire=True, canceled=True)
+        # events = chain(startAfter, endAfter, activeDryHire, canceledDryHire)
+        # return sorted(events, key=operator.attrgetter('start_date'))
+        events = self.filter(
+            models.Q(start_date__gte=datetime.date.today(), end_date_isnull=True) |  # Starts after with no end
+            models.Q(end_date__gte=datetime.date.today()) |  # Ends after
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__neq=Event.CANCELLED) |  # Active dry hire
+            models.Q(dry_hire=True, status=Event.CANCELLED, start_date__gte=datetime.date.today())
+            # Canceled but not started
+        ).sort('meet_at', 'start_at')
+        return events
+
+    def rig_count(self):
+        events = self.filter(
+            models.Q(start_date__gte=datetime.date.today(), end_date_isnull=True) |  # Starts after with no end
+            models.Q(end_date__gte=datetime.date.today()) |  # Ends after
+            models.Q(dry_hire=True, checked_in_by__isnull=False),  # Active dry hire
+            status__neq=Event.CANCELLED
+        ).sort('meet_at', 'start_at')
+        return len(list(events))
 
 
 @reversion.register(follow=['items'])
@@ -163,10 +191,10 @@ class Event(models.Model, RevisionMixin):
     # Calculated values
     @property
     def sum_total(self):
-        sum = 0
+        total = 0
         for item in self.items.all():
-            sum += item.total_cost
-        return sum
+            total += item.total_cost
+        return total
 
     @property
     def vat_rate(self):
@@ -179,6 +207,8 @@ class Event(models.Model, RevisionMixin):
     @property
     def total(self):
         return self.sum_total + self.vat
+
+    objects = EventManager()
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
