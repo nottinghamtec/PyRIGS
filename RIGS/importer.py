@@ -24,6 +24,9 @@ def setup_cursor():
         return None
 
 
+def clean_ascii(text):
+    return ''.join([i if ord(i) < 128 else '' for i in text])
+
 def import_users():
     cursor = setup_cursor()
     if cursor is None:
@@ -134,9 +137,6 @@ def import_venues(delete=False):
                 object = models.Venue(name=row[0], three_phase_available=row[1])
                 object.save()
 
-def clean_ascii(text):
-    return ''.join([i if ord(i) < 128 else '' for i in text])
-
 def import_rigs(delete=False):
     if delete:
         models.Event.objects.all().delete()
@@ -196,6 +196,33 @@ def import_rigs(delete=False):
             object.collector = row[23]
             object.save()
 
+
+def import_eventitem(delete=True):
+    if delete:
+        models.EventItem.objects.all().delete()
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT i.id, r.id, i.name, i.description, i.quantity, i.cost, i.sortorder FROM rig_items AS i INNER JOIN eventdetails AS e ON i.eventdetail_id = e.id INNER JOIN rigs AS r ON e.describable_id = r.id"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        with transaction.atomic():
+            event = models.Event.objects.get(pk=row[1])
+            try:
+                object = models.EventItem.objects.get(pk=row[0])
+            except:
+                object = models.EventItem(pk=row[0])
+            object.event = event
+            object.name = row[2]
+            object.description = row[3]
+            object.quantity = row[4]
+            object.cost = row[5]
+            object.order = row[6]
+            object.save()
+            with reversion.create_revision():
+                event.save()
+
+
 def main():
     # import_users()
     # import_people()
@@ -203,7 +230,7 @@ def main():
     # import_vat_rates()
     # import_venues(True)
     # import_events()
-    import_rigs(True)
+    import_rigs(False)
 
 
 if __name__ == "__main__":
