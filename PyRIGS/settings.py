@@ -91,8 +91,8 @@ LOGOUT_URL = '/user/logout'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # Email
-EMAIL_TEST = False
-if not DEBUG or EMAIL_TEST:
+EMAILER_TEST = False
+if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
