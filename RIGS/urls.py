@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views
+from RIGS import views, rigboard
 
 from PyRIGS.decorators import permission_required_with_403
 
@@ -52,5 +52,8 @@ urlpatterns = patterns('',
                        url(r'^venues/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_venue')(views.VenueUpdate.as_view()),
                            name='venue_update'),
+
+                       # Rigboard
+                       url(r'^rigboard/$', rigboard.RigboardIndex.as_view(), name='rigboard'),
 )
 
