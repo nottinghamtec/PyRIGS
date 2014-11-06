@@ -1,3 +1,0 @@
-A new user has just registered on {{ site }} with username {{ user.username }} and email {{ user.email }}.
-
-Please visit {{ site.domain }}{% url admin:registration_registrationprofile_change user.registration_profile.id %} to moderate this activation.
