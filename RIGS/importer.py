@@ -47,6 +47,7 @@ def import_users():
             object.save()
             print("Created " + str(object))
 
+
 def import_people():
     cursor = setup_cursor()
     if cursor is None:
@@ -135,19 +136,56 @@ def import_venues(delete=False):
                 object.save()
 
 
-def import_events():
+def import_rigs():
     cursor = setup_cursor()
     if cursor is None:
         return
+    sql = """SELECT e.id, event, person_id, organisation_id, venue, description, status, start_date, start_time, end_date, end_time, access_date, access_time, meet_date, meet_time, meet_info, based_on_id, based_on_type, user_id, payment_method, order_no, payment_received, collectorsid FROM eventdetails AS e LEFT JOIN rigs AS r ON e.id = r.id WHERE describable_type = 'Rig'"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        with transaction.atomic(), reversion.revision():
+            venue = models.Venue.objects.get(name__iexact=row[4])
+            status = {
+                'Booked': models.Event.BOOKED,
+                'Provisional': models.Event.PROVISIONAL,
+                'Cancelled': models.Event.CANCELLED,
+            }
+            try:
+                object = models.Event.objects.get(pk=row[0])
+            except ObjectDoesNotExist:
+                object = models.Event(pk=row[0])
+            object.name = row[1]
+            object.person = row[2]
+            object.organisation = row[3]
+            object.venue = venue
+            object.notes = row[5]
+            object.status = status[row[6]]
+            object.start_date = row[7]
+            object.start_time = row[8]
+            object.end_date = row[9]
+            object.end_time = row[10]
+            object.access_at = datetime.combine(row[11], row[12])
+            object.meet_at = datetime.combine(row[13], row[14])
+            object.meet_info = row[15]
+            if row[17] == "Rig":
+                object.based_on = row[16]
+            object.dry_hire = row[18]
+            object.is_rig = True
+            object.mic = row[19]
+            object.payment_method = row[20]
+            object.purchase_order = row[21]
+            object.payment_received = row[22]
+            object.collector = row[23]
 
 
 def main():
-    import_users()
+    # import_users()
     # import_people()
     # import_organisations()
     # import_vat_rates()
     # import_venues(True)
     # import_events()
+    import_rigs()
 
 
 if __name__ == "__main__":
