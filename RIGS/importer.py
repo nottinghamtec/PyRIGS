@@ -137,11 +137,13 @@ def import_venues(delete=False):
 def clean_ascii(text):
     return ''.join([i if ord(i) < 128 else '' for i in text])
 
-def import_rigs():
+def import_rigs(delete=False):
+    if delete:
+        models.Event.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT e.id, event, person_id, organisation_id, venue, description, status, start_date, start_time, end_date, end_time, access_date, access_time, meet_date, meet_time, meet_info, based_on_id, based_on_type, dry_hire, user_id, payment_method, order_no, payment_received, collectorsid FROM eventdetails AS e INNER JOIN rigs AS r ON e.id = r.id WHERE describable_type = 'Rig' AND venue IS NOT NULL"""
+    sql = """SELECT r.id, event, person_id, organisation_id, venue, description, status, start_date, start_time, end_date, end_time, access_date, access_time, meet_date, meet_time, meet_info, based_on_id, based_on_type, dry_hire, user_id, payment_method, order_no, payment_received, collectorsid FROM eventdetails AS e INNER JOIN rigs AS r ON e.describable_id = r.id WHERE describable_type = 'Rig' AND venue IS NOT NULL"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
@@ -201,7 +203,7 @@ def main():
     # import_vat_rates()
     # import_venues(True)
     # import_events()
-    import_rigs()
+    import_rigs(True)
 
 
 if __name__ == "__main__":
