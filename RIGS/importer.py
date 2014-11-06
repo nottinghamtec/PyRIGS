@@ -206,18 +206,22 @@ def import_eventitem(delete=True):
     sql = """SELECT i.id, r.id, i.name, i.description, i.quantity, i.cost, i.sortorder FROM rig_items AS i INNER JOIN eventdetails AS e ON i.eventdetail_id = e.id INNER JOIN rigs AS r ON e.describable_id = r.id"""
     cursor.execute(sql)
     for row in cursor.fetchall():
+    	print(row)
         with transaction.atomic():
-            event = models.Event.objects.get(pk=row[1])
+            try:
+	        event = models.Event.objects.get(pk=row[1])
+            except ObjectDoesNotExist:
+	        continue
             try:
                 object = models.EventItem.objects.get(pk=row[0])
-            except:
+            except ObjectDoesNotExist:
                 object = models.EventItem(pk=row[0])
             object.event = event
-            object.name = row[2]
-            object.description = row[3]
+            object.name = clean_ascii(row[2])
+            object.description = clean_ascii(row[3])
             object.quantity = row[4]
             object.cost = row[5]
-            object.order = row[6]
+            object.order = row[6] if row[6] else 0
             object.save()
             with reversion.create_revision():
                 event.save()
@@ -230,7 +234,8 @@ def main():
     # import_vat_rates()
     # import_venues(True)
     # import_events()
-    import_rigs(False)
+    # import_rigs(False)
+    import_eventitem(True)
 
 
 if __name__ == "__main__":
