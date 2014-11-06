@@ -137,10 +137,13 @@ class EventManager(models.Manager):
 
     def rig_count(self):
         events = self.filter(
-            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True) |  # Starts after with no end
-            models.Q(end_date__gte=datetime.date.today()) |  # Ends after
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED) |  # Active dry hire LT
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED)  # Active dry hire GT
+            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True,
+                     is_rig=True) |  # Starts after with no end
+            models.Q(end_date__gte=datetime.date.today(), is_rig=True) |  # Ends after
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED,
+                     is_rig=True) |  # Active dry hire LT
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED, is_rig=True)
+            # Active dry hire GT
         ).order_by('meet_at', 'start_date')
         return len(events)
 
