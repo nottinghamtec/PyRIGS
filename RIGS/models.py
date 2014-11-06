@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 import hashlib
 import reversion
+from datetime import datetime
 
 # Create your models here.
 class Profile(AbstractUser):
@@ -64,15 +65,35 @@ class Organisation(models.Model, RevisionMixin):
         return string
 
 
+class VatManager(models.Manager):
+    def currentRate(self):
+        return self.find_rate(datetime.now())
+
+    def find_rate(self, date):
+        # return self.filter(startAt__lte=date).latest()
+        try:
+            return self.filter(start_at__lte=date).latest()
+        except VatRate.DoesNotExist:
+            r = VatRate
+            r.rate = 0
+            return r
+
+
 @reversion.register
 class VatRate(models.Model, RevisionMixin):
     start_at = models.DateTimeField()
     rate = models.DecimalField(max_digits=6, decimal_places=6)
     comment = models.CharField(max_length=255)
 
+    objects = VatManager()
+
     @property
     def as_percent(self):
         return (self.rate * 100)
+
+    class Meta:
+        ordering = ['-start_at']
+        get_latest_by = 'start_at'
 
     def __str__(self):
         return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
@@ -139,6 +160,26 @@ class Event(models.Model, RevisionMixin):
     purchase_order = models.CharField(max_length=255, blank=True, null=True)
     collector = models.CharField(max_length=255, blank=True, null=True)
 
+    # Calculated values
+    @property
+    def sum_total(self):
+        sum = 0
+        for item in self.items.all():
+            sum += item.total_cost
+        return sum
+
+    @property
+    def vat_rate(self):
+        return VatRate.objects.find_rate(self.start_date)
+
+    @property
+    def vat(self):
+        return self.sum_total * self.vat_rate.rate
+
+    @property
+    def total(self):
+        return self.sum_total + self.vat
+
     def __str__(self):
         return str(self.pk) + ": " + self.name
 
@@ -155,8 +196,11 @@ class EventItem(models.Model):
     def total_cost(self):
         return self.cost * self.quantity
 
+    class Meta:
+        ordering = ['order']
+
     def __str__(self):
-        return self.event.name + " | " + self.name
+        return str(self.event.pk) + "." + str(self.order) + ": " + self.event.name + " | " + self.name
 
 
 class EventCrew(models.Model):
