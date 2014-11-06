@@ -209,6 +209,14 @@ class Event(models.Model, RevisionMixin):
     def total(self):
         return self.sum_total + self.vat
 
+    @property
+    def cancelled(self):
+        return (self.status == self.CANCELLED)
+
+    @property
+    def confirmed(self):
+        return (self.status == self.BOOKED or self.status == self.CONFIRMED)
+
     objects = EventManager()
 
     def __str__(self):
