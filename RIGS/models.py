@@ -126,22 +126,23 @@ class EventManager(models.Manager):
         # events = chain(startAfter, endAfter, activeDryHire, canceledDryHire)
         # return sorted(events, key=operator.attrgetter('start_date'))
         events = self.filter(
-            models.Q(start_date__gte=datetime.date.today(), end_date_isnull=True) |  # Starts after with no end
+            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True) |  # Starts after with no end
             models.Q(end_date__gte=datetime.date.today()) |  # Ends after
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__neq=Event.CANCELLED) |  # Active dry hire
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED) |  # Active dry hire LT
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED) |  # Active dry hire GT
             models.Q(dry_hire=True, status=Event.CANCELLED, start_date__gte=datetime.date.today())
             # Canceled but not started
-        ).sort('meet_at', 'start_at')
+        ).order_by('meet_at', 'start_date')
         return events
 
     def rig_count(self):
         events = self.filter(
-            models.Q(start_date__gte=datetime.date.today(), end_date_isnull=True) |  # Starts after with no end
+            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True) |  # Starts after with no end
             models.Q(end_date__gte=datetime.date.today()) |  # Ends after
-            models.Q(dry_hire=True, checked_in_by__isnull=False),  # Active dry hire
-            status__neq=Event.CANCELLED
-        ).sort('meet_at', 'start_at')
-        return len(list(events))
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED) |  # Active dry hire LT
+            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED)  # Active dry hire GT
+        ).order_by('meet_at', 'start_date')
+        return len(events)
 
 
 @reversion.register(follow=['items'])
