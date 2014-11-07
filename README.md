@@ -5,6 +5,8 @@ The purpose of this project is to make the system more compatible and easier to 
 
 At this stage the project is very early on, and the main focus has been on getting a working system that can be tested and put into use ASAP due to the imminent failure of the existing system. Because of this, the documentation is still quite weak, but this should be fixed as time goes on.
 
+This document is intended to get you up and running, but if don't care about what I have to say, just clone the sodding repository and have a poke around with what's in it, but for GODS SAKE DO NOT PUSH WITHOUT TESTING.
+
 ### What is this repository for? ###
 For the rapid development of the application for medium term deployment, the main branch is being used.
 Once the application is deployed in a production environment, other branches should be used to properly stage edits and pushes of new features.
@@ -66,3 +68,6 @@ To run the server under normal conditions when you are already in the virtualenv
 python manage.py runserver
 ```
 Please refer to Django documentation for a full list of options available here.
+
+### Committing, pushing and testing ###
+Feel free to commit as you wish, on your own branch. On my branch (master for development) do not commit code that you either know doesn't work or don't know works. If you must commit this code, please make sure you say in the commit message that it isn't work, and if you can why it isn't working. If and only if you absolutely must push, then please don't leave it as the HEAD for too long, it's not much to ask but when you are done just make sure you haven't broken the HEAD for the next person.
