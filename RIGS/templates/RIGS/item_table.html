@@ -1,0 +1,42 @@
+<div class="panel">
+	<table class="table table-hover" id="item-table">
+		<thead>
+			<tr>
+				<td>Item</td>
+				<td>Price</td>
+				<td>Quantity</td>
+				<td>Sub-total</td>
+				{% if response.edit %}
+				<td class="text-right">
+					<button type="button" class="btn btn-default btn-xs item-add"
+						data-url="{#% url eventitem_add object.pk %#}" data-toggle="modal"
+						data-target="#itemModal">
+						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+				</td>
+				{% endif %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in object.items.all %}
+				{% include 'RIGS/item_row.html' %}
+			{% endfor %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td rowspan="3" colspan="2"></td>
+				<td>Sum Total</td>
+				<td colspan="2">£ <span id="sumtotal">{{object.sum_total}}</span></td>
+			</tr>
+			<tr>
+				<td id="vat-rate" data-rate="{{object.vat_rate.rate}}">VAT @
+					{{object.vat_rate.as_percent|floatformat}}%</td>
+				<td colspan="2">£ <span id="vat">{{object.vat|floatformat:2}}</span></td>
+			</tr>
+			<tr>
+				<td>Total</td>
+				<td colspan="2">£ <span id="total">{{object.total|floatformat:2}}</span></td>
+			</tr>
+		</tfoot>
+	</table>
+</div>

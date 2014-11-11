@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Event {% if object.is_rig %}N{{object.pk|stringformat:"05d"}}{% else %}{{object.pk}}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+	<div class="col-sm-8">
+		<h1>N{{object.pk|stringformat:"05d"}}</h1>
+	</div>
+	<div class="col-sm-4 text-right">
+		<div class="btn-group btn-page">
+			<a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span></a>
+			<a href="{#% url event_print event.pk %#}" class="btn btn-default"><span class="glyphicon glyphicon-print"></span></a>
+		</div>
+	</div>
+</div>
+
+{% if object.is_rig %}
+{# only need contact details for a rig #}
+	<div class="col-sm-5">
+		<div class="panel panel-default">
+			<div class="panel-heading">Contact Details</div>
+			<div class="panel-body">
+				<dl class="dl-horizontal">
+					<dt>Person</dt>
+					<dd>{{object.person.name}}</dd>
+
+					<dt>Email</dt>
+					<dd>{{object.person.email}}</dd>
+
+					<dt>Phone Number</dt>
+					<dd>{{object.person.phone}}</dd>
+				</dl>
+			</div>
+		</div>
+		{% if event.organisation %}
+			<div class="panel panel-default">
+				<div class="panel-heading">Organisation</div>
+				<div class="panel-body">
+					<dl class="dl-horizontal">
+						<dt>Organisation</dt>
+						<dd>{{object.organisation.name}}</dd>
+						
+						<dt>Phone Number</dt>
+						<dd>{{object.organisation.phone}}</dd>
+
+						<dt>Has SU Account</dt>
+						<dd>{{event.organisation.union_account|yesno|capfirst}}</dd>
+					</dl>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+{% endif %}
+<div class="col-sm-{{event.is_rig|yesno:"7,12"}}">
+	<div class="panel panel-info">
+		<div class="panel-heading">{{object.name}}</div>
+		<div class="panel-body">
+			<dl class="dl-horizontal">
+				<dt>Event Venue</dt>
+				<dd>{{object.venue}}</dd>
+
+				<dt>Event MIC</dt>
+				<dd>{{event.mic.get_full_name}}</dd>
+
+				<dd>&nbsp;</dd>
+
+				{% if event.is_rig %}
+					<dt>Crew Meet</dt>
+					<dd>{{event.meet_at|date:"d M Y H:i"|default:""}}</dd>
+					<dd>{{event.meet_info|default:""}}</dd>
+
+					<dt>Access From</dt>
+					<dd>{{event.access_at|date:"d M Y H:i"|default:""}}</dd>
+				{% endif %}
+
+				<dt>Event Starts</dt>
+				<dd>{{event.start_date|date:"d M Y"}} {{event.start_time|date:"H:i"}}</dd>
+
+				<dt>Event Ends</dt>
+				<dd>{{event.end_date|date:"d M Y"}} {{event.end_time|date:"H:i"}}</dd>
+
+				<dd>&nbsp;</dd>
+
+				<dt>Event Description</dt>
+				<dd>{{event.description|linebreaksbr}}</dd>
+			</dl>
+		</div>
+	</div>
+</div>
+<div class="col-sm-12 text-right">
+	<div class="btn-group btn-page">
+		<a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span></a>
+		<a href="{#% url event_print event.pk %#}" class="btn btn-default"><span class="glyphicon glyphicon-print"></span></a>
+	</div>
+</div>
+<div class="col-sm-12">
+	<div class="panel panel-default">
+		<div class="panel-heading">Event Details</div>
+		<div class="panel-body">
+			<div class="well well-sm">
+				<h4>Notes</h4>
+				{{event.notes|linebreaksbr}}
+			</div>
+			{% if event.is_rig %}
+				{% include 'RIGS/item_table.html' %}
+			{% endif %}
+		</div>
+	</div>
+</div>
+<div class="col-sm-12 text-right">
+	<div class="btn-group btn-page">
+		<a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span></a>
+		<a href="{#% url event_print event.pk %#}" class="btn btn-default"><span class="glyphicon glyphicon-print"></span></a>
+	</div>
+	<div>Last edited at {{object.last_edited_at|date:"SHORT_DATETIME_FORMAT"}} by {{object.last_edited_by}}.</div>
+</div>
+{% endblock %}
