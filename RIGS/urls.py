@@ -55,5 +55,14 @@ urlpatterns = patterns('',
 
                        # Rigboard
                        url(r'^rigboard/$', rigboard.RigboardIndex.as_view(), name='rigboard'),
+		       url(r'^event/(?P<pk>\d+)/$', 
+		           permission_required_with_403('RIGS.view_event')(rigboard.EventDetail.as_view()),
+			   name='event_detail'),
+		       url(r'^event/create/$', 
+		           permission_required_with_403('RIGS.add_event')(rigboard.EventCreate.as_view()),
+			   name='event_create'),
+		       url(r'^event/(?P<pk>\d+)/edit/$', 
+		           permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
+			   name='event_update'),
 )
 

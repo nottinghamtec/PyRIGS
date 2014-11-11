@@ -1,0 +1,25 @@
+<tr id="item-{{item.pk}}" data-url="{#% url item_row item.pk %#}" data-pk="{{item.pk}}">
+	<td>
+		{{ item.name }}
+		{% if item.description %}
+			<br />
+			<em>{{item.description|linebreaksbr}}</em>
+		{% endif %}
+	</td>
+	<td>£&nbsp;{{item.cost}}</td>
+	<td>{{item.quantity}}</td>
+	<td class="sub-total" data-subtotal="{{item.total_cost}}">£&nbsp;{{item.total_cost}}</td>
+	{% if response.edit %}
+	<td class="vert-align text-right">
+		<button type="button" class="item-edit btn btn-xs btn-default" 
+				data-pk="{{item.pk}}"
+				data-toggle="modal" data-target="#itemModal">
+			<span class="glyphicon glyphicon-edit"></span>
+		</button>
+		<button type="button" class="item-delete btn btn-xs btn-danger" 
+				data-pk="{{item.pk}}">
+			<span class="glyphicon glyphicon-remove"></span>
+		</button>
+	</td>
+	{% endif %}
+</tr>
