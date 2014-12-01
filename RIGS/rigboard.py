@@ -16,27 +16,30 @@ class RigboardIndex(generic.TemplateView):
         context['events'] = models.Event.objects.current_events()
         return context
 
+
 class EventDetail(generic.DetailView):
     model = models.Event
+
 
 class EventCreate(generic.CreateView):
     model = models.Event
 
     def get_context_data(self, **kwargs):
-    	context = super(EventCreate, self).get_context_data(**kwargs)
-	context['edit'] = True
-	return context
-    
+        context = super(EventCreate, self).get_context_data(**kwargs)
+        context['edit'] = True
+        return context
+
     def get_success_url(self):
         return reverse_laze('event_detail', kwargs={'pk': self.object.pk})
+
 
 class EventUpdate(generic.UpdateView):
     model = models.Event
 
     def get_context_data(self, **kwargs):
-    	context = super(EventUpdate, self).get_context_data(**kwargs)
-	context['edit'] = True
-	return context
+        context = super(EventUpdate, self).get_context_data(**kwargs)
+        context['edit'] = True
+        return context
 
     def get_success_url(self):
         return reverse_laze('event_detail', kwargs={'pk': self.object.pk})
