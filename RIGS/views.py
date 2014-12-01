@@ -2,11 +2,13 @@ from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse_lazy
 from django.views import generic
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core import serializers
+
 from RIGS import models
+import simplejson
+
 
 # Create your views here.
 def login(request, **kwargs):
