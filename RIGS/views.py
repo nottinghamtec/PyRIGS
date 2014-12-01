@@ -1,8 +1,11 @@
 from django.http.response import HttpResponseRedirect
+from django.http import HttpResponse
 from django.core.urlresolvers import reverse_lazy
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.core import serializers
 from RIGS import models
 
 # Create your views here.
@@ -144,3 +147,59 @@ class VenueUpdate(generic.UpdateView):
         return reverse_lazy('venue_detail', kwargs={
             'pk': self.object.pk,
         })
+
+
+class SecureAPIRequest(generic.View):
+    models = {
+        'venue': models.Venue,
+        'person': models.Person,
+        'organisation': models.Organisation,
+    }
+
+    '''
+    Validate the request is allowed based on user permissions.
+    Raises 403 if denied.
+    Potential to add API key validation at a later date.
+    '''
+
+    def __validate__(self, request, key, perm):
+        if request.user.is_active:
+            if request.user.is_superuser or request.user.is_staff:
+                return True
+            elif request.user.has_perm(perm):
+                return True
+        raise PermissionDenied()
+
+    def get(self, request, model, pk=None, param=None):
+        # Request permission validation things
+        key = request.GET.get('apikey', None)
+        perm = 'RIGS.view_' + model
+        self.__validate__(request, key, perm)
+
+        # Response format where applicable
+        format = request.GET.get('format', 'json')
+
+        # Supply data for one record
+        if pk:
+            object = get_object_or_404(self.models[model], pk=pk)
+            fields = request.GET.get('fields', None)
+            data = serializers.serialize(format, [object], fields=fields)
+            return HttpResponse(data, content_type="application/" + format)
+
+        # Supply data for autocomplete ajax request in json form
+        term = request.GET.get('term', None)
+        if term:
+            objects = self.models[model].objects.filter(name__icontains=term)[:20]
+            results = []
+            for o in objects:
+                data = {
+                    'pk': o.pk,
+                    'value': o.pk,
+                    'label': o.name,
+                }
+                results.append(data)
+            # todo: fix simplejson issues
+            json = simplejson.dumps(results)
+            return HttpResponse(json, content_type="application/json")  # Always json
+
+        return HttpResponse(model)

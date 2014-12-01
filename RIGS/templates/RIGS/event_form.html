@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load multiply from filters %}
+{% block title %}{% if object.pk %}Event {{ object.pk }}{% else %}New Event{% endif %}{% endblock %}
+
+{% block css %}
+    <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
+{% endblock %}
+
+{% block js %}
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="{% static "js/interaction.js" %}"></script>
+    <script src="{% static "js/modal.js" %}"></script>
+
+    <script src="{% static "js/autocompleter.js" %}"></script>
+
+    <script>
+        function setTime23Hours() {
+            $('.endTime').val('23:00');
+        }
+
+        function setTime02Hours() {
+
+
+            if ($('.startDate').val() == $('.endDate').val()) {
+                var endDate = new Date($('.endDate').val());
+                endDate.setDate(endDate.getDate() + 1);
+                $('.endDate').val(endDate.getISOString());
+            }
+            $('.endTime').val('02:00');
+        }
+
+        $(document).ready(function () {
+            {% if not object.pk and not form.errors%}
+
+
+                $('.form-hws').slideUp(function () {
+                    $('.form-isRig').slideUp();
+                });
+
+            {% elif not object.pk and form.errors %}
+                if ($('#{{form.isRig.auto_id}}').attr('checked') != 'checked') {
+                    $('.form-isRig').hide();
+                }
+            {% endif %}
+
+            {% if not object.pk %}
+                $('#isRig-selector button').on('click', function () {
+                    $('.form-nonRig').slideDown();
+                    if ($(this).data('isrig') == 1) {
+                        $('#{{form.isRig.auto_id}}').attr('checked', true);
+                        if ($('.form-nonRig').is(':hidden')) {
+                            $('.form-isRig').show();
+                        } else {
+                            $('.form-isRig').slideDown();
+                        }
+                    } else {
+                        $('#{{form.isRig.auto_id}}').attr('checked', false);
+                        $('.form-isRig').slideUp();
+                    }
+                })
+            {% endif %}
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h2>
+        {% if object.pk %}
+            Event {{ object.pk }}
+        {% else %}
+            New Event
+        {% endif %}
+    </h2>
+    {% include 'form_errors.html' %}
+    <form class="form-horizontal" role="form" method="POST">{% csrf_token %}
+        {% render_field form.isRig style="display: none" %}
+        {% if not object.pk %}
+            <div class="col-md-12 well">
+                <div class="form-group" id="isRig-selector">
+                    <div class="col-sm-12">
+					<span class="col-sm-6">
+						<button type="button" class="btn btn-primary col-xs-12" data-isrig="1">Rig</button>
+					</span>
+					<span class="col-sm-6">
+						<button type="button" class="btn btn-info col-xs-12" data-isrig="0">Non-Rig</button>
+					</span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="col-md-6">
+            <div class="panel panel-default form-hws form-isRig">
+                <div class="panel-heading">Contact Details</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="{{ form.person.id_for_label }}"
+                               class="col-sm-4 control-label">{{ form.person.label }}</label>
+
+                        <div class="col-sm-8">
+                            <div class="row">
+                                <input type="hidden" id="{{ form.person.id_for_label }}" name="{{ form.person.name }}"
+                                       value="{{ form.person.value }}"/>
+
+                                <div class="col-xs-9">
+                                    <input type="text" id="{{ form.person.id_for_label }}-input"
+                                           class="form-control autocomplete-json"
+                                           data-valueurl="{% if form.person.value %}
+											{% url 'api_secure' model='person' pk=form.person.value %}
+										{% else %}
+											{% url 'api_secure' model='person' %}
+										{% endif %}?fields=name"
+                                           data-sourceurl="{% url 'api_secure' model='person' %}"
+                                           data-target="{{ form.person.id_for_label }}"/>
+                                </div>
+                                <div class="col-xs-3 align-right">
+                                    <button type="button" class="btn btn-default"
+                                            data-url="{#% url invoiceitem_add object.pk %#}"
+                                            data-toggle="modal" data-target="#itemModal">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.organisation.id_for_label }}"
+                               class="col-sm-4 control-label">{{ form.organisation.label }}</label>
+
+                        <div class="col-sm-8">
+                            <div class="row">
+                                <input type="hidden" id="{{ form.organisation.id_for_label }}"
+                                       name="{{ form.organisation.name }}" value="{{ form.organisation.value }}"/>
+
+                                <div class="col-xs-9">
+                                    <input type="text" id="{{ form.organisation.id_for_label }}-input"
+                                           class="form-control autocomplete-json"
+                                           data-valueurl="{% if form.organisation.value %}
+												{% url 'api_secure' model='organisation' pk=form.organisation.value %}
+											{% else %}
+												{% url 'api_secure' model='organisation' %}
+											{% endif %}?fields=name"
+                                           data-sourceurl="{% url 'api_secure' model='organisation' %}"
+                                           data-target="{{ form.organisation.id_for_label }}"/>
+                                </div>
+                                <div class="col-xs-3 align-right">
+                                    <button type="button" class="btn btn-default"
+                                            data-url="{#% url invoiceitem_add object.pk %#}"
+                                            data-toggle="modal" data-target="#itemModal">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default form-hws form-nonRig">
+                <div class="panel-heading">Event Description</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}"
+                               class="col-sm-4 control-label">{{ form.description.label }}</label>
+
+                        <div class="col-sm-8">
+                            {% render_field form.description class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-6 -->
+
+        <div class="col-md-6">
+            <div class="panel panel-default form-hws form-nonRig">
+                <div class="panel-heading">Event Details</div>
+                <div class="panel-body">
+                    <div id="form-hws">
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.name.label }}</label>
+
+                            <div class="col-sm-8">
+                                {% render_field form.name class+="form-control" %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.venue.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.venue.label }}</label>
+
+                            <div class="col-sm-8">
+                                <div class="row">
+                                    <input type="hidden" id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}"
+                                           value="{{ form.venue.value }}"/>
+
+                                    <div class="col-xs-9">
+                                        <input type="text" id="{{ form.venue.id_for_label }}-input"
+                                               class="form-control autocomplete-json"
+                                               data-valueurl="{% if form.venue.value %}
+												{% url 'api_secure' model='venue' pk=form.venue.value %}
+											{% else %}
+												{% url 'api_secure' model='venue' %}
+											{% endif %}?fields=name"
+                                               data-sourceurl="{% url 'api_secure' model='venue' %}"
+                                               data-target="{{ form.venue.id_for_label }}"/>
+                                    </div>
+                                    <div class="col-xs-3 align-right">
+                                        <button type="button" class="btn btn-default"
+                                                data-url="{#% url invoiceitem_add object.pk %#}"
+                                                data-toggle="modal" data-target="#itemModal">
+                                            <span class="glyphicon glyphicon-plus"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.invoiceDate.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.startDate.label }}</label>
+
+                            <div class="col-sm-4">
+                                {% render_field form.startDate type="date" class+="form-control startDate" required="" %}
+                            </div>
+                            <div class="col-sm-4">
+                                {% render_field form.startTime type="time" class+="form-control" %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.invoiceDate.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.endDate.label }}</label>
+
+                            <div class="col-sm-4">
+                                {% render_field form.endDate type="date" class+="form-control endDate" required="" %}
+                            </div>
+                            <div class="col-sm-4">
+                                {% render_field form.endTime type="time" class+="form-control endTime" %}
+                            </div>
+                            <div class="col-sm-offset-8 col-sm-4">
+                                <div class="btn-group btn-group-justified">
+                                    <btn class="btn btn-default btn-xs" onclick="setTime23Hours()">23:00</btn>
+                                    <btn class="btn btn-default btn-xs" onclick="setTime02Hours()">02:00</btn>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Rig only information #}
+                        <div class="form-isRig {% if object.pk and not object.isRig %}hidden{% endif %}">
+                            <div class="form-group">
+                                <label for="{{ form.accessAt.id_for_label }}"
+                                       class="col-sm-4 control-label">{{ form.accessAt.label }}</label>
+
+                                <div class="col-sm-8">
+                                    {% render_field form.accessAt type="datetime-local" class+="form-control" %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.meetAt.id_for_label }}"
+                                       class="col-sm-4 control-label">{{ form.meetAt.label }}</label>
+
+                                <div class="col-sm-8">
+                                    {% render_field form.meetAt type="datetime-local" class+="form-control" %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-4 col-sm-8">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% render_field form.dryHire %}{{ form.dryHire.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {#% include 'RIGS/eventitem_table.html' %#}
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="pull-right">
+                                <div class="form-group">
+                                    <input type="submit" value="Submit" class="btn btn-primary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="modal fade" id="itemModal" role="dialog" aria-labelledby="itemModal" aria-hidded="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

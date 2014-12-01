@@ -64,5 +64,9 @@ urlpatterns = patterns('',
                        url(r'^event/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
                            name='event_update'),
+
+                       # API
+                       url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
+                       url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
 )
 
