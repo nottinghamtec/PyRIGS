@@ -214,7 +214,7 @@ class SecureAPIRequest(generic.View):
                         'label': o.name,
                     }
                     results.append(data)
-            json = simplejson.dumps(results)
+            json = simplejson.dumps(results[:20])
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
