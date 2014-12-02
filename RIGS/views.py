@@ -5,13 +5,22 @@ from django.views import generic
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core import serializers
+import simplejson
+from django.contrib import messages
 
 from RIGS import models
-import simplejson
 
+"""
+Displays the current rig count along with a few other bits and pieces
+"""
+class Index(generic.TemplateView):
+    template_name = 'RIGS/index.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(Index, self).get_context_data(**kwargs)
+        context['rig_count'] = models.Event.objects.rig_count()
+        return context
 
-# Create your views here.
 def login(request, **kwargs):
     if request.user.is_authenticated():
         next = request.REQUEST.get('next', '/')
@@ -33,9 +42,7 @@ class CloseModal(generic.TemplateView):
     template_name = 'closemodal.html'
 
     def get_context_data(self, **kwargs):
-        from django.contrib import messages
-
-        return {'messages', messages.get_messages(self.request)}
+        return {'messages': messages.get_messages(self.request)}
 
 
 class PersonList(generic.ListView):

@@ -8,6 +8,7 @@ urlpatterns = patterns('',
                        # Examples:
                        # url(r'^$', 'PyRIGS.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
+                       url('^$', views.Index.as_view(), name='index'),
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),

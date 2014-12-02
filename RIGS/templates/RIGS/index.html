@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}RIGS{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <h2>Rig Information Gathering System</h2>
+    </div>
+    <div class="col-sm-6">
+        <div class="well">
+            {% if request.user %}
+                <h3>Welcome back {{ request.user.get_full_name }}.<br />
+                <small>Your rigboard initials are {{ request.user.initials }}</small></h3>
+            {% endif %}
+            <h3>There are currently {{ rig_count }} rigs coming up.</h3>
+            <a class="btn btn-default" href="{% url 'rigboard' %}">View Rigboard</a>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="well">
+            <div>
+                <h4><a href="{% url 'person_list' %}">People</a></h4>
+                <form class="form-inline" role="form" action="{% url 'person_list' %}" method="GET">
+                    <input type="search" name="q" class="form-control" placeholder="Search People" />
+                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
+                </form>
+            </div>
+            <div>
+                <h4><a href="{% url 'organisation_list' %}">Organisations</a></h4>
+                <form class="form-inline" role="form" action="{% url 'organisation_list' %}" method="GET">
+                    <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
+                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
+                </form>
+            </div>
+            <div>
+                <h4><a href="{% url 'venue_list' %}">Venues</a></h4>
+                <form class="form-inline" role="form" action="{% url 'venue_list' %}" method="GET">
+                    <input type="search" name="q" class="form-control" placeholder="Search Venues" />
+                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
