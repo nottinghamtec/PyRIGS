@@ -8,6 +8,7 @@ $(document).ready(function() {
 		$(this).autocomplete({
 			source: source,
 			minLength: 3,
+            delay: 500,
 			focus: function(e, ui) {
 				e.preventDefault();
 				$(this).val(ui.item.label);
@@ -17,7 +18,12 @@ $(document).ready(function() {
 				e.preventDefault();
 				$(this).val(ui.item.label);
 				$("#"+$(this).data('target')).val(ui.item.value)
-			},
+            }
 		});
+        $(this).on('blur', function () {
+            if ($(this).val() == "") {
+                $("#" + $(this).data('target')).val('');
+            }
+        })
 	});
 });
