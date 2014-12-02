@@ -10,6 +10,7 @@ from RIGS import models
 import simplejson
 
 
+
 # Create your views here.
 def login(request, **kwargs):
     if request.user.is_authenticated():
@@ -156,6 +157,7 @@ class SecureAPIRequest(generic.View):
         'venue': models.Venue,
         'person': models.Person,
         'organisation': models.Organisation,
+        'mic': models.Profile,
     }
 
     '''
@@ -180,27 +182,31 @@ class SecureAPIRequest(generic.View):
 
         # Response format where applicable
         format = request.GET.get('format', 'json')
+        fields = request.GET.get('fields', None).split(',')
 
         # Supply data for one record
         if pk:
             object = get_object_or_404(self.models[model], pk=pk)
-            fields = request.GET.get('fields', None)
             data = serializers.serialize(format, [object], fields=fields)
             return HttpResponse(data, content_type="application/" + format)
 
         # Supply data for autocomplete ajax request in json form
         term = request.GET.get('term', None)
         if term:
-            objects = self.models[model].objects.filter(name__icontains=term)[:20]
+            if fields is None:
+                fields = ['name']
+            all_objects = self.models[model].objects
             results = []
-            for o in objects:
-                data = {
-                    'pk': o.pk,
-                    'value': o.pk,
-                    'label': o.name,
-                }
-                results.append(data)
-            # todo: fix simplejson issues
+            for field in fields:
+                filter = field + "__icontains"
+                objects = all_objects.filter(**{filter: term})
+                for o in objects:
+                    data = {
+                        'pk': o.pk,
+                        'value': o.pk,
+                        'label': o.name,
+                    }
+                    results.append(data)
             json = simplejson.dumps(results)
             return HttpResponse(json, content_type="application/json")  # Always json
 

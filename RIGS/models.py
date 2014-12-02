@@ -1,9 +1,11 @@
+import hashlib
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-import hashlib
 import reversion
-import datetime
+
 
 
 # Create your models here.
@@ -18,6 +20,9 @@ class Profile(AbstractUser):
             url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=identicon&s=500"
         return url
 
+    @property
+    def name(self):
+        return self.get_full_name() + ' "' + self.initials + '"'
 
 class RevisionMixin(object):
     @property
@@ -163,7 +168,7 @@ class Event(models.Model, RevisionMixin):
     )
 
     name = models.CharField(max_length=255)
-    person = models.ForeignKey('Person')
+    person = models.ForeignKey('Person', null=True, blank=True)
     organisation = models.ForeignKey('Organisation', blank=True, null=True)
     venue = models.ForeignKey('Venue')
     description = models.TextField(blank=True, null=True)
