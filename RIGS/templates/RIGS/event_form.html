@@ -106,11 +106,7 @@
                             <div class="col-xs-9">
                                 <input type="text" id="{{ form.person.id_for_label }}-input"
                                        class="form-control autocomplete-json"
-                                       data-valueurl="{% if form.person.value %}
-											{% url 'api_secure' model='person' pk=form.person.value %}
-										{% else %}
-											{% url 'api_secure' model='person' %}
-										{% endif %}?fields=name"
+                                       value="{{ object.person|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='person' %}"
                                        data-target="{{ form.person.id_for_label }}"/>
                             </div>
@@ -137,11 +133,7 @@
                             <div class="col-xs-9">
                                 <input type="text" id="{{ form.organisation.id_for_label }}-input"
                                        class="form-control autocomplete-json"
-                                       data-valueurl="{% if form.organisation.value %}
-												{% url 'api_secure' model='organisation' pk=form.organisation.value %}
-											{% else %}
-												{% url 'api_secure' model='organisation' %}
-											{% endif %}?fields=name"
+                                       value="{{ object.organisation|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='organisation' %}"
                                        data-target="{{ form.organisation.id_for_label }}"/>
                             </div>
@@ -295,14 +287,9 @@
 
                                 <input type="text" id="{{ form.mic.id_for_label }}-input"
                                        class="form-control autocomplete-json"
-                                       data-valueurl="
-                                        {% if form.mic.value %}
-											{% url 'api_secure' model='mic' pk=form.mic.value %}
-										{% else %}
-											{% url 'api_secure' model='mic' %}
-										{% endif %}?fields=name"
                                        data-sourceurl="{% url 'api_secure' model='mic' %}?fields=first_name,username,initials"
-                                       data-target="{{ form.mic.id_for_label }}"/>
+                                       data-target="{{ form.mic.id_for_label }}"
+                                       value="{{ object.mic.name|default_if_none:"" }}"/>
                             </div>
                         </div>
                         {#% include 'RIGS/eventitem_table.html' %#}

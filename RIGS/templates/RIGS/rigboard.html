@@ -47,7 +47,7 @@
 						{% elif event.mic %}
 							warning
 						{% else %}
-							danger
+							danger text-danger
 						{% endif %}
                         ">
                             <td class="hidden-xs">{{ event.pk }}</td>
@@ -100,8 +100,12 @@
                                     {% endif %}
                                 </dl>
                             </td>
-                            <td>
-                                {{ event.mic.initials }}
+                            <td class="text-center">
+                                {% if event.mic or not event.is_rig %}
+                                    {{ event.mic.initials }}
+                                {% else %}
+                                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
