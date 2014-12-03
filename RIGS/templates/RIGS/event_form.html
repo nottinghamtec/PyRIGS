@@ -34,7 +34,6 @@
         $(document).ready(function () {
             {% if not object.pk and not form.errors %}
 
-
                 $('.form-hws').slideUp(function () {
                     $('.form-is_rig').slideUp();
                 });
@@ -111,11 +110,9 @@
                                        data-target="{{ form.person.id_for_label }}"/>
                             </div>
                             <div class="col-xs-3 align-right">
-                                <button type="button" class="btn btn-default"
-                                        data-url="{#% url invoiceitem_add object.pk %#}"
-                                        data-toggle="modal" data-target="#itemModal">
+                                <a href="{% url 'person_create' %}" class="btn btn-default modal-href" data-target="#{{ form.person.id_for_label }}">
                                     <span class="glyphicon glyphicon-plus"></span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -138,11 +135,9 @@
                                        data-target="{{ form.organisation.id_for_label }}"/>
                             </div>
                             <div class="col-xs-3 align-right">
-                                <button type="button" class="btn btn-default"
-                                        data-url="{#% url invoiceitem_add object.pk %#}"
-                                        data-toggle="modal" data-target="#itemModal">
+                                <a href="{% url 'organisation_create' %}" class="btn btn-default modal-href" data-target="#{{ form.organisation.id_for_label }}">
                                     <span class="glyphicon glyphicon-plus"></span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -199,11 +194,9 @@
                                            data-target="{{ form.venue.id_for_label }}"/>
                                 </div>
                                 <div class="col-xs-3 align-right">
-                                    <button type="button" class="btn btn-default"
-                                            data-url="{#% url invoiceitem_add object.pk %#}"
-                                            data-toggle="modal" data-target="#itemModal">
+                                    <a href="{% url 'venue_create' %}" class="btn btn-default modal-href" data-target="#{{ form.venue.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>

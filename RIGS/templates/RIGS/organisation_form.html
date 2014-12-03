@@ -7,7 +7,7 @@
     <div class="col-sm-offset-1 col-sm-10">
         <h3>{{ object.pk|yesno:"Edit,Add" }} Organisation</h3>
 
-        <form action="{{ form.action }}" method="post" class="form-horizontal">{% csrf_token %}
+        <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal">{% csrf_token %}
             <div class="row">
                 <div class="col-md-6">
                     {% include 'form_errors.html' %}
