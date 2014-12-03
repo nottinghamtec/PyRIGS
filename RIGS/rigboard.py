@@ -1,7 +1,7 @@
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 
-from RIGS import models
+from RIGS import models, forms
 
 
 __author__ = 'ghost'
@@ -25,6 +25,7 @@ class EventDetail(generic.DetailView):
 
 class EventCreate(generic.CreateView):
     model = models.Event
+    form_class = forms.EventForm
 
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
@@ -37,6 +38,7 @@ class EventCreate(generic.CreateView):
 
 class EventUpdate(generic.UpdateView):
     model = models.Event
+    form_class = forms.EventForm
 
     def get_context_data(self, **kwargs):
         context = super(EventUpdate, self).get_context_data(**kwargs)

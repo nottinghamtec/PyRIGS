@@ -110,7 +110,8 @@
                                        data-target="{{ form.person.id_for_label }}"/>
                             </div>
                             <div class="col-xs-3 align-right">
-                                <a href="{% url 'person_create' %}" class="btn btn-default modal-href" data-target="#{{ form.person.id_for_label }}">
+                                <a href="{% url 'person_create' %}" class="btn btn-default modal-href"
+                                   data-target="#{{ form.person.id_for_label }}">
                                     <span class="glyphicon glyphicon-plus"></span>
                                 </a>
                             </div>
@@ -135,7 +136,8 @@
                                        data-target="{{ form.organisation.id_for_label }}"/>
                             </div>
                             <div class="col-xs-3 align-right">
-                                <a href="{% url 'organisation_create' %}" class="btn btn-default modal-href" data-target="#{{ form.organisation.id_for_label }}">
+                                <a href="{% url 'organisation_create' %}" class="btn btn-default modal-href"
+                                   data-target="#{{ form.organisation.id_for_label }}">
                                     <span class="glyphicon glyphicon-plus"></span>
                                 </a>
                             </div>
@@ -194,7 +196,8 @@
                                            data-target="{{ form.venue.id_for_label }}"/>
                                 </div>
                                 <div class="col-xs-3 align-right">
-                                    <a href="{% url 'venue_create' %}" class="btn btn-default modal-href" data-target="#{{ form.venue.id_for_label }}">
+                                    <a href="{% url 'venue_create' %}" class="btn btn-default modal-href"
+                                       data-target="#{{ form.venue.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </a>
                                 </div>
@@ -242,7 +245,10 @@
                                    class="col-sm-4 control-label">{{ form.access_at.label }}</label>
 
                             <div class="col-sm-8">
-                                {% render_field form.access_at type="datetime-local" class+="form-control" %}
+                                <input type="datetime-local" name="{{ form.access_at.name }}"
+                                       id="{{ form.access_at.id_for_label }}"
+                                       class="form-control"
+                                       value="{{ form.access_at.value|date:"c" }}"/>
                             </div>
                         </div>
                         <div class="form-group">
@@ -250,7 +256,10 @@
                                    class="col-sm-4 control-label">{{ form.meet_at.label }}</label>
 
                             <div class="col-sm-8">
-                                {% render_field form.meet_at type="datetime-local" class+="form-control" %}
+                                <input type="datetime-local" name="{{ form.meet_at.name }}"
+                                       id="{{ form.meet_at.id_for_label }}"
+                                       class="form-control"
+                                       value="{{ form.meet_at.value|date:"c" }}"/>
                             </div>
                         </div>
                         <div class="form-group">
