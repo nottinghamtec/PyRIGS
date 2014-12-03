@@ -294,7 +294,6 @@
                                        value="{{ object.mic.name|default_if_none:"" }}"/>
                             </div>
                         </div>
-                        {#% include 'RIGS/eventitem_table.html' %#}
                     </div>
                     <div class="col-sm-12">
                         <div class="pull-right">
@@ -306,6 +305,18 @@
                 </div>
             </div>
         </div>
+    </div>
+    <!-- /.col-md-6 -->
+    <div class="col-sm-12">
+         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                    {% render_field form.notes class+="form-control" %}
+                </div>
+                {% include "RIGS/item_table.html" %}
+            </div>
+         </div>
     </div>
     </form>
     <div class="modal fade" id="itemModal" role="dialog" aria-labelledby="itemModal" aria-hidded="true">

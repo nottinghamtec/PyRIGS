@@ -10,6 +10,7 @@ class EventForm(forms.ModelForm):
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     name = forms.CharField(min_length=3)
+
     class Meta:
         model = models.Event
         fields = ['is_rig', 'name', 'venue', 'start_date', 'start_time', 'end_date',
