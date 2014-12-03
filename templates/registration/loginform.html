@@ -1,22 +1,20 @@
 {% load url from future %}
 {% load widget_tweaks %}
-{% if form.errors %}
-<div class="error">Your username or password was incorrect</div>
-{% endif %}
+{% include 'form_errors.html' %}
 <div class="col-md-4 col-md-offset-4">
 
-	<form action="{% url 'login' %}" method="post" role="form">{% csrf_token %}
-		<div class="form-group">
-			<label for="id_username">{{ form.username.label }}</label>
-			{% render_field form.username class+="form-control" placeholder=form.username.label %}
-		</div>
-		<div class="form-group">
-			<label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-			{% render_field form.password class+="form-control" placeholder=form.password.label %}
-		</div>
-		<a href="{% url 'registration_register' %}" class="btn">Register</a>
-		<a href="{% url 'password_reset' %}" class="btn">Forgotten Password</a>
-		<input type="submit" value="Login" class="btn btn-primary" />
-		<input type="hidden" name="next" value="{{next}}" />
-	</form>
+    <form action="{% url 'login' %}" method="post" role="form">{% csrf_token %}
+        <div class="form-group">
+            <label for="id_username">{{ form.username.label }}</label>
+            {% render_field form.username class+="form-control" placeholder=form.username.label %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {% render_field form.password class+="form-control" placeholder=form.password.label %}
+        </div>
+        <a href="{% url 'registration_register' %}" class="btn">Register</a>
+        <a href="{% url 'password_reset' %}" class="btn">Forgotten Password</a>
+        <input type="submit" value="Login" class="btn btn-primary"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
 </div>
