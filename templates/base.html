@@ -81,7 +81,7 @@
                             </li>
                         </ul>
                     {% else %}
-                        <a href="{% url "login" %}?next={{ request.build_absolute_uri }}">
+                        <a href="{% url "login" %}?next={{ request.path }}">
                             <span class="icon-user"></span>
                             Hi guest
                         </a>
