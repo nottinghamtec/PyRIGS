@@ -1,4 +1,4 @@
-<tr id="item-{{item.pk}}" data-url="{#% url item_row item.pk %#}" data-pk="{{item.pk}}">
+<tr id="item-{{item.pk}}" data-url="{% url 'api_secure' item.pk %}" data-pk="{{item.pk}}">
 	<td>
 		{{ item.name }}
 		{% if item.description %}
@@ -9,7 +9,7 @@
 	<td>£&nbsp;{{item.cost}}</td>
 	<td>{{item.quantity}}</td>
 	<td class="sub-total" data-subtotal="{{item.total_cost}}">£&nbsp;{{item.total_cost}}</td>
-	{% if response.edit %}
+	{% if edit %}
 	<td class="vert-align text-right">
 		<button type="button" class="item-edit btn btn-xs btn-default" 
 				data-pk="{{item.pk}}"
