@@ -138,9 +138,17 @@
     jQuery(document).ready(function () {
         jQuery(document).on('click', '.modal-href', function (e) {
             e.preventDefault()
+            modaltarget = jQuery(this).data('target')
+            modalobject = "";
             jQuery('#modal').load(jQuery(this).attr('href'), function (e) {
                 jQuery('#modal').modal();
             });
+            jQuery('#modal').on('hide.bs.modal', function(e) {
+                if(modaltarget != "" && modalobject != "") {
+                    jQuery(modaltarget).val(modalobject[0]['pk']);
+                    jQuery(modaltarget+'-input').val(modalobject[0]['fields']['name']);
+                }
+            })
         });
     });
 </script>
