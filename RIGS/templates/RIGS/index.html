@@ -7,9 +7,9 @@
     </div>
     <div class="col-sm-6">
         <div class="well">
-            {% if request.user %}
-                <h3>Welcome back {{ request.user.get_full_name }}.<br />
-                <small>Your rigboard initials are {{ request.user.initials }}</small></h3>
+            {% if user.is_authenticated %}
+                <h3>Welcome back {{ user.get_full_name }}.<br />
+                <small>Your rigboard initials are {{ user.initials }}</small></h3>
             {% endif %}
             <h3>There are currently {{ rig_count }} rigs coming up.</h3>
             <a class="btn btn-default" href="{% url 'rigboard' %}">View Rigboard</a>
