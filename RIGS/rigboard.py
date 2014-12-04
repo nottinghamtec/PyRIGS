@@ -35,7 +35,6 @@ class EventCreate(generic.CreateView):
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
-
 class EventUpdate(generic.UpdateView):
     model = models.Event
     form_class = forms.EventForm

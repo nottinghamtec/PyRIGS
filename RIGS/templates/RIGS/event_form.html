@@ -61,6 +61,10 @@
                 })
             {% endif %}
         })
+
+        $(document).ready(function() {
+            setupItemTable($("#{{ form.items_json.id_for_label }}").val());
+        });
     </script>
 {% endblock %}
 
@@ -75,6 +79,9 @@
     {% include 'form_errors.html' %}
     <form class="form-horizontal" role="form" method="POST">{% csrf_token %}
     {% render_field form.is_rig style="display: none" %}
+    <input type="hidden" name="{{ form.items_json.name }}" id="{{ form.items_json.id_for_label }}" value="{{ form.items_json.value }}" />
+
+    {# New rig buttons #}
     {% if not object.pk %}
         <div class="col-md-12 well">
             <div class="form-group" id="is_rig-selector">
@@ -89,6 +96,8 @@
             </div>
         </div>
     {% endif %}
+
+    {# Contact details #}
     <div class="col-md-6">
         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
             <div class="panel-heading">Contact Details</div>
@@ -162,6 +171,7 @@
     </div>
     <!-- /.col-md-6 -->
 
+    {# Event details #}
     <div class="col-md-6">
         <div class="panel panel-default form-hws form-non_rig">
             <div class="panel-heading">Event Details</div>
@@ -307,8 +317,10 @@
         </div>
     </div>
     <!-- /.col-md-6 -->
+
+    {# Notes and item shit #}
     <div class="col-sm-12">
-         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
+        <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
             <div class="panel-body">
                 <div class="form-group">
                     <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
@@ -316,9 +328,10 @@
                 </div>
                 {% include "RIGS/item_table.html" %}
             </div>
-         </div>
+        </div>
     </div>
     </form>
+
     <div class="modal fade" id="itemModal" role="dialog" aria-labelledby="itemModal" aria-hidded="true">
         <div class="modal-dialog">
             <div class="modal-content">
