@@ -232,7 +232,7 @@ class Event(models.Model, RevisionMixin):
 
 
 class EventItem(models.Model):
-    event = models.ForeignKey('Event', related_name='items')
+    event = models.ForeignKey('Event', related_name='items', blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     quantity = models.IntegerField()

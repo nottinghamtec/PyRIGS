@@ -1,3 +1,10 @@
+function setupItemTable(items_json) {
+    objectitems = JSON.parse(items_json)
+    $.each(objectitems, function(key, val) {
+        objectitems[key] = JSON.parse(val);
+    })
+}
+
 function updatePrices() {
 	var sum = 0;
 	$('.sub-total').each(function() {
@@ -122,7 +129,6 @@ $("#item-table tbody").sortable({
 			pk = $('#'+value).data('pk');
 			itemorder[key] = pk;
 		});
-		data = JSON.stringify(itemorder);
-		$.post($('#item-table').data('orderurl'), data);
+
 	}
 });
