@@ -1,11 +1,9 @@
-<tr id="item-{{item.pk}}" data-url="{% url 'api_secure' item.pk %}" data-pk="{{item.pk}}" class="item_row">
+<tr id="item-{{item.pk}}" data-pk="{{item.pk}}" class="item_row">
 	<td>
 		<span class="name">{{ item.name }}</span>
-		{% if item.description %}
-			<div class="description">
-			    <em>{{item.description|linebreaksbr}}</em>
-			</div>
-		{% endif %}
+        <div>
+            <em class="description">{{item.description|linebreaksbr}}</em>
+        </div>
 	</td>
 	<td>£&nbsp;<span class="cost">{{item.cost|floatformat:2}}</span></td>
 	<td class="quantity">{{item.quantity}}</td>
