@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+# Add report lab things
+import sys
+sys.path.insert(0,'reportlab.zip')
+sys.path.insert(0,'z3c.zip')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
