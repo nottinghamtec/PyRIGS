@@ -6,6 +6,11 @@ function setupItemTable(items_json) {
     newitem = -1;
 }
 
+function nl2br (str, is_xhtml) {
+    var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+}
+
 function updatePrices() {
     // individual rows
     var sum = 0;
@@ -92,7 +97,7 @@ $('body').on('submit', '#item-form', function (e) {
     // update the table
     $row = $('#item-' + pk);
     $row.find('.name').html(fields.name);
-    $row.find('.description').html(fields.description);
+    $row.find('.description').html(nl2br(fields.description));
     $row.find('.cost').html(parseFloat(fields.cost).toFixed(2));
     $row.find('.quantity').html(fields.quantity);
 
