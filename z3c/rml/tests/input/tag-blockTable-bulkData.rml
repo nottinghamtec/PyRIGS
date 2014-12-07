@@ -1,0 +1,27 @@
+<!DOCTYPE document SYSTEM "rml.dtd">
+<document
+    filename="tag-pre.pdf"
+    xmlns:doc="http://namespaces.zope.org/rml/doc">
+
+  <template>
+    <pageTemplate id="main">
+      <frame id="first" x1="72" y1="72" width="451" height="698"/>
+    </pageTemplate>
+  </template>
+
+  <story>
+
+    <title><font face="Courier">&lt;bulkData&gt;</font> Tag Demo</title>
+    <blockTable >
+      <bulkData doc:example=""><![CDATA[
+Product,Profit
+Sprockets,26
+Widgets,34
+Thingummies,217
+Bits & Bobs,23
+Total,277
+        ]]></bulkData>
+    </blockTable>
+
+  </story>
+</document>
