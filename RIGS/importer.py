@@ -27,7 +27,9 @@ def setup_cursor():
 def clean_ascii(text):
     return ''.join([i if ord(i) < 128 else '' for i in text])
 
-def import_users():
+def import_users(delete=False):
+    if(delete):
+        models.Event.objects.get(is_rig=False).delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -50,7 +52,9 @@ def import_users():
             print("Created " + str(object))
 
 
-def import_people():
+def import_people(delete=False):
+    if(delete):
+        models.Event.objects.get(is_rig=False).delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -76,7 +80,9 @@ def import_people():
             print("Found: " + person.__str__())
 
 
-def import_organisations():
+def import_organisations(delete=False):
+    if(delete):
+        models.Event.objects.get(is_rig=False).delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -98,7 +104,9 @@ def import_organisations():
             print("Found: " + object.__str__())
 
 
-def import_vat_rates():
+def import_vat_rates(delete=False):
+    if(delete):
+        models.Event.objects.get(is_rig=False).delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -122,7 +130,7 @@ def import_venues(delete=False):
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` WHERE `venue` IS NOT NULL"""
+    sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` GROUP BY `venue` WHERE `venue` IS NOT NULL"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(("Searching for %s", row[0]))
@@ -226,6 +234,26 @@ def import_eventitem(delete=True):
             with reversion.create_revision():
                 event.save()
 
+def import_nonrigs(delete=False):
+    if(delete):
+        models.Event.objects.get(is_rig=False).delete()
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT name, start_date, start_time, end_date, end_time, description, user_id FROM non_rigs WHERE active = 1;"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        print(row)
+        with transaction.atomic(), reversion.create_revision():
+            event = models.Event()
+            event.name = row[0]
+            event.start_date = row[1]
+            event.start_time = row[2]
+            event.end_date = row[3]
+            event.end_time = row[4]
+            event.description = row[5]
+            event.mic = models.Profile.objects.get(pk=row[6])
+            event.save()
 
 def main():
     # import_users()
@@ -233,9 +261,9 @@ def main():
     # import_organisations()
     # import_vat_rates()
     # import_venues(True)
-    # import_events()
     # import_rigs(False)
-    import_eventitem(True)
+    # import_eventitem(True)
+    import_nonrigs(True)
 
 
 if __name__ == "__main__":

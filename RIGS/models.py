@@ -24,6 +24,7 @@ class Profile(AbstractUser):
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
 
+
 class RevisionMixin(object):
     @property
     def last_edited_at(self):
@@ -52,6 +53,11 @@ class Person(models.Model, RevisionMixin):
             string += "*"
         return string
 
+    class Meta:
+        permissions = (
+            ('view_person', 'Can view Persons'),
+        )
+
 
 @reversion.register
 class Organisation(models.Model, RevisionMixin):
@@ -69,6 +75,11 @@ class Organisation(models.Model, RevisionMixin):
         if len(self.notes) > 0:
             string += "*"
         return string
+    
+    class Meta:
+        permissions = (
+            ('view_organisation', 'Can view Organisations'),
+        )
 
 
 class VatManager(models.Manager):
@@ -120,6 +131,11 @@ class Venue(models.Model, RevisionMixin):
         if self.notes and len(self.notes) > 0:
             string += "*"
         return string
+    
+    class Meta:
+        permissions = (
+            ('view_venue', 'Can view Venues'),
+        )
 
 
 class EventManager(models.Manager):
@@ -170,7 +186,7 @@ class Event(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     person = models.ForeignKey('Person', null=True, blank=True)
     organisation = models.ForeignKey('Organisation', blank=True, null=True)
-    venue = models.ForeignKey('Venue')
+    venue = models.ForeignKey('Venue', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
@@ -229,6 +245,11 @@ class Event(models.Model, RevisionMixin):
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
+    
+    class Meta:
+        permissions = (
+            ('view_event', 'Can view Events'),
+        )
 
 
 class EventItem(models.Model):

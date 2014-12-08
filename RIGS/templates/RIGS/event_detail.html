@@ -107,7 +107,7 @@
         <div class="btn-group btn-page">
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-edit"></span></a>
-            <a href="{#% url event_print event.pk %#}" class="btn btn-default"><span
+            <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-print"></span></a>
         </div>
     </div>
@@ -129,7 +129,7 @@
         <div class="btn-group btn-page">
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-edit"></span></a>
-            <a href="{#% url event_print event.pk %#}" class="btn btn-default"><span
+            <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-print"></span></a>
         </div>
         <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }} by {{ object.last_edited_by }}.
