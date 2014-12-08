@@ -135,3 +135,5 @@ STATIC_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
+
+TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/pdf/terms.pdf"
