@@ -278,3 +278,30 @@ class EventCrew(models.Model):
     run = models.BooleanField(default=False)
     derig = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
+
+
+class Invoice(models.Model):
+    event = models.OneToOneField('Event')
+    invoice_date = models.DateField(auto_now_add=True)
+    void = models.BooleanField()
+
+
+
+class Payment(models.Model):
+    CASH = 'C'
+    INTERNAL = 'I'
+    EXTERNAL = 'E'
+    SUCORE = 'SU'
+    MEMBERS = 'M'
+    METHODS = (
+        (CASH, 'Cash'),
+        (INTERNAL, 'Internal'),
+        (EXTERNAL, 'External'),
+        (SUCORE, 'SU Core'),
+        (MEMBERS, 'Members'),
+    )
+
+    invoice = models.ForeignKey('Invoice')
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
+    method = models.CharField(max_length=2, choices=METHODS)
