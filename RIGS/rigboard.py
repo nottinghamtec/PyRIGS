@@ -98,3 +98,19 @@ class EventPrint(generic.View):
         response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, object.name)
         response.write(merged.getvalue())
         return response
+
+
+class EventDuplicate(generic.RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        new = get_object_or_404(models.Event, pk=kwargs['pk'])
+        new.pk = None
+        new.save()
+
+        old = get_object_or_404(models.Event, pk=kwargs['pk'])
+        for item in old.items.all():
+            item.pk = None
+            item.event = new
+            item.save()
+
+        return reverse_lazy('event_update', kwargs={'pk': new.pk})
