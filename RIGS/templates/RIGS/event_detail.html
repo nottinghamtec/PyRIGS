@@ -5,7 +5,7 @@
 {% block content %}
     <div class="col-sm-12">
         <div class="col-sm-8">
-            <h1>N{{ object.pk|stringformat:"05d" }}</h1>
+            <h1>Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}</h1>
         </div>
         <div class="col-sm-4 text-right">
             <div class="btn-group btn-page">
@@ -13,7 +13,7 @@
                         class="glyphicon glyphicon-edit"></span></a>
                 <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                         class="glyphicon glyphicon-print"></span></a>
-                <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default"><span
+                <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                         class="glyphicon glyphicon-duplicate"></span></a>
             </div>
         </div>
@@ -111,6 +111,8 @@
                     class="glyphicon glyphicon-edit"></span></a>
             <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-print"></span></a>
+            <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                    class="glyphicon glyphicon-duplicate"></span></a>
         </div>
     </div>
     <div class="col-sm-12">
@@ -133,6 +135,8 @@
                     class="glyphicon glyphicon-edit"></span></a>
             <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-print"></span></a>
+            <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                    class="glyphicon glyphicon-duplicate"></span></a>
         </div>
         <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }} by {{ object.last_edited_by }}.
         </div>
