@@ -7,7 +7,6 @@ from django.conf import settings
 import reversion
 
 
-
 # Create your models here.
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=True)
@@ -75,7 +74,7 @@ class Organisation(models.Model, RevisionMixin):
         if len(self.notes) > 0:
             string += "*"
         return string
-    
+
     class Meta:
         permissions = (
             ('view_organisation', 'Can view Organisations'),
@@ -131,7 +130,7 @@ class Venue(models.Model, RevisionMixin):
         if self.notes and len(self.notes) > 0:
             string += "*"
         return string
-    
+
     class Meta:
         permissions = (
             ('view_venue', 'Can view Venues'),
@@ -245,7 +244,7 @@ class Event(models.Model, RevisionMixin):
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
-    
+
     class Meta:
         permissions = (
             ('view_event', 'Can view Events'),
@@ -284,7 +283,6 @@ class Invoice(models.Model):
     event = models.OneToOneField('Event')
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField()
-
 
 
 class Payment(models.Model):
