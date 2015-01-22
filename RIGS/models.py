@@ -204,7 +204,7 @@ class Event(models.Model, RevisionMixin):
 
     # Crew management
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True)
-    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True)
+    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True, verbose_name="MIC")
 
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
