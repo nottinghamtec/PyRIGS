@@ -4,6 +4,7 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.utils.functional import cached_property
 import reversion
 
 
@@ -55,7 +56,7 @@ class Person(models.Model, RevisionMixin):
     @property
     def organisations(self):
         o = []
-        for e in self.event_set.all():
+        for e in Event.objects.filter(person=self).select_related('organisation'):
             if e.organisation and e.organisation not in o:
                 o.append(e.organisation)
         return o
@@ -90,7 +91,7 @@ class Organisation(models.Model, RevisionMixin):
     @property
     def persons(self):
         p = []
-        for e in self.event_set.all():
+        for e in Event.objects.filter(organisation=self).select_related('person'):
             if e.person and e.person not in p:
                 p.append(e.person)
         return p
@@ -248,7 +249,7 @@ class Event(models.Model, RevisionMixin):
             total += item.total_cost
         return total
 
-    @property
+    @cached_property
     def vat_rate(self):
         return VatRate.objects.find_rate(self.start_date)
 
