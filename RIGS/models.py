@@ -52,6 +52,18 @@ class Person(models.Model, RevisionMixin):
             string += "*"
         return string
 
+    @property
+    def organisations(self):
+        o = []
+        for e in self.event_set.all():
+            if e.organisation and e.organisation not in o:
+                o.append(e.organisation)
+        return o
+
+    @property
+    def latest_events(self):
+        return self.event_set.order_by('-start_date')
+
     class Meta:
         permissions = (
             ('view_person', 'Can view Persons'),
@@ -74,6 +86,18 @@ class Organisation(models.Model, RevisionMixin):
         if len(self.notes) > 0:
             string += "*"
         return string
+
+    @property
+    def persons(self):
+        p = []
+        for e in self.event_set.all():
+            if e.person and e.person not in p:
+                p.append(e.person)
+        return p
+
+    @property
+    def latest_events(self):
+        return self.event_set.order_by('-start_date')
 
     class Meta:
         permissions = (
@@ -130,6 +154,10 @@ class Venue(models.Model, RevisionMixin):
         if self.notes and len(self.notes) > 0:
             string += "*"
         return string
+
+    @property
+    def latest_events(self):
+        return self.event_set.order_by('-start_date')
 
     class Meta:
         permissions = (

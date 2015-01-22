@@ -35,6 +35,14 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            {% with object.latest_events as events %}
+                {% include 'RIGS/event_table.html' %}
+            {% endwith %}
+        </div>
+    </div>
 {% endblock %}
 
 {% if request.is_ajax %}

@@ -1,0 +1,85 @@
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+        <td class="hidden-xs">#</td>
+        <td>Event Date</td>
+        <td>Event Details</td>
+        <td>Event Timings</td>
+        <td>MIC</td>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr class="
+                        {% if event.cancelled %}
+							active
+						{% elif event.confirmed and event.mic or not event.is_rig %}
+						{# interpreated as (booked and mic) or is non rig #}
+							success
+						{% elif event.mic %}
+							warning
+						{% else %}
+							danger
+						{% endif %}
+                        ">
+                <td class="hidden-xs">{{ event.pk }}</td>
+                <td>
+                    <div><strong>{{ event.start_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                    {% if event.end_date and event.end_date != event.start_date %}
+                        <div><strong>{{ event.end_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                    {% endif %}
+                </td>
+                <td>
+                    <h4>
+                        <a href="{% url 'event_detail' event.pk %}">{{ event.name }}</a>
+                        {% if event.venue %}
+                            <small>at {{ event.venue }}</small>
+                        {% endif %}
+                    </h4>
+                    {% if event.is_rig %}
+                        <h5>
+                            {{ event.person.name }}
+                            {% if event.organisation %}
+                                for {{ event.organisation.name }}
+                            {% endif %}
+                        </h5>
+                    {% endif %}
+                    {% if not event.cancelled and event.description %}
+                        <div>
+                            {{ event.description|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <dl class="dl-horizontal">
+                        {% if event.meet_at %}
+                            <dt>Crew meet</dt>
+                            <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
+                        {% endif %}
+                        {% if event.start_time %}
+                            <dt>Event starts</dt>
+                            <dd>
+                                {{ event.start_time|date:"H:i" }}<br/>
+                                {{ event.start_date|date:"(Y-m-d)" }}
+                            </dd>
+                        {% endif %}
+                        {% if event.end_time and event.start_time != event.end_time %}
+                            <dt>Event ends</dt>
+                            <dd>
+                                {{ event.end_time|date:"H:i" }}<br/>
+                                {{ event.end_date|date:"(Y-m-d)" }}
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </td>
+                <td class="text-center">
+                    {% if event.mic or not event.is_rig %}
+                        {{ event.mic.initials }}
+                    {% else %}
+                        <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

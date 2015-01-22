@@ -25,6 +25,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = ['127.0.0.1', '10.20.30.20']
+
 
 # Application definition
 
