@@ -138,7 +138,8 @@
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                     class="glyphicon glyphicon-duplicate"></span></a>
         </div>
-        <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }} by {{ object.last_edited_by }}.
+        <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
+            by {{ object.last_edited_by.name }}.
         </div>
     </div>
 {% endblock %}
