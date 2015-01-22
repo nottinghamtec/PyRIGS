@@ -42,6 +42,8 @@ $('#item-table').on('click', '.item-add', function () {
     $('#item_description').val('');
     $('#item_quantity').val('');
     $('#item_cost').val('');
+
+    $($(this).data('target')).modal('show');
 });
 
 $('#item-table').on('click', '.item-edit', function () {
@@ -55,6 +57,8 @@ $('#item-table').on('click', '.item-edit', function () {
     $('#item_description').val(fields.description);
     $('#item_quantity').val(fields.quantity);
     $('#item_cost').val(fields.cost);
+
+    $($(this).data('target')).modal('show');
 });
 
 $('body').on('submit', '#item-form', function (e) {
