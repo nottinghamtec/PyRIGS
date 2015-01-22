@@ -2,7 +2,8 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load multiply from filters %}
-{% block title %}{% if object.pk %}Event {{ object.pk }}{% else %}New Event{% endif %}{% endblock %}
+{% block title %}{% if object.pk %}Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}
+    {{ object.pk }}{% endif %}{% else %}New Event{% endif %}{% endblock %}
 
 {% block css %}
     <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
@@ -69,15 +70,25 @@
 {% endblock %}
 
 {% block content %}
-    <h2>
-        {% if object.pk %}
-            Event {{ object.pk }}
-        {% else %}
-            New Event
-        {% endif %}
-    </h2>
-    {% include 'form_errors.html' %}
     <form class="form-horizontal itemised_form" role="form" method="POST">{% csrf_token %}
+    <div class="col-sm-12">
+        <div class="col-sm-8">
+            <h2>
+                {% if object.pk %}
+                    Event N{{ object.pk|stringformat:"05d" }}
+                {% else %}
+                    New Event
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-sm-4 text-right">
+            <div class="btn-group btn-page">
+                <button type="submit" class="btn btn-default" title="Save"><span
+                        class="glyphicon glyphicon-save"></span></button>
+            </div>
+        </div>
+    </div>
+    {% include 'form_errors.html' %}
     {% render_field form.is_rig style="display: none" %}
     <input type="hidden" name="{{ form.items_json.name }}" id="{{ form.items_json.id_for_label }}"
            value="{{ form.items_json.value }}"/>
@@ -306,14 +317,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12">
-                        <div class="pull-right">
-                            <div class="form-group">
-                                <input type="submit" value="Submit" class="btn btn-primary"/>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-sm-12 text-right">
+            <div class="btn-group btn-page">
+                <button type="submit" class="btn btn-default" title="Save"><span
+                        class="glyphicon glyphicon-save"></span>
+                </button>
             </div>
         </div>
     </div>
