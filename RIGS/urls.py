@@ -69,7 +69,7 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
                            name='event_update'),
                        url(r'^event/(?P<pk>\d+)/duplicate/$',
-                           permission_required_with_403('RIGS.change_event')(rigboard.EventDuplicate.as_view()),
+                           permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
                            name='event_duplicate'),
 
                        # API
