@@ -103,7 +103,6 @@ class EventPrint(generic.View):
 
 
 class EventDuplicate(generic.RedirectView):
-
     def get_redirect_url(self, *args, **kwargs):
         new = get_object_or_404(models.Event, pk=kwargs['pk'])
         new.pk = None
@@ -116,6 +115,7 @@ class EventDuplicate(generic.RedirectView):
             item.save()
 
         return reverse_lazy('event_update', kwargs={'pk': new.pk})
+
 
 class EventArchive(generic.ArchiveIndexView):
     model = models.Event
@@ -139,4 +139,4 @@ class EventArchive(generic.ArchiveIndexView):
         else:
             qs = self.model.objects.all()
 
-        return qs.select_related('person','organisation','venue','mic')
+        return qs.select_related('person', 'organisation', 'venue', 'mic')
