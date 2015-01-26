@@ -10,10 +10,12 @@ from django.template import Context, RequestContext
 from django.template.loader import get_template
 from django.conf import settings
 from django.http import HttpResponse
+from django.db.models import Q
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from RIGS import models, forms
+import datetime
 
 __author__ = 'ghost'
 
@@ -114,3 +116,27 @@ class EventDuplicate(generic.RedirectView):
             item.save()
 
         return reverse_lazy('event_update', kwargs={'pk': new.pk})
+
+class EventArchive(generic.ArchiveIndexView):
+    model = models.Event
+    date_field = "start_date"
+    paginate_by = 25
+
+    def get_queryset(self):
+        start = self.request.GET.get('start', None)
+        end = self.request.GET.get('end', datetime.date.today())
+        filter = False
+        if end != "":
+            filter = Q(start_date__lte=end)
+        if start:
+            if filter:
+                filter = filter & Q(start_date__gte=start)
+            else:
+                filter = Q(start_date__gte=start)
+
+        if filter:
+            qs = self.model.objects.filter(filter)
+        else:
+            qs = self.model.objects.all()
+
+        return qs.select_related('person','organisation','venue','mic')

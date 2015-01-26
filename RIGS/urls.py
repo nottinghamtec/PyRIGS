@@ -71,6 +71,7 @@ urlpatterns = patterns('',
                        url(r'^event/(?P<pk>\d+)/duplicate/$',
                            permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
                            name='event_duplicate'),
+                       url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()), name='event_archive'),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
