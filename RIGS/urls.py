@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
 from RIGS import views, rigboard
+from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
 
@@ -56,6 +57,8 @@ urlpatterns = patterns('',
 
                        # Rigboard
                        url(r'^rigboard/$', rigboard.RigboardIndex.as_view(), name='rigboard'),
+                       url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
+
                        url(r'^event/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_event')(rigboard.EventDetail.as_view()),
                            name='event_detail'),
@@ -69,11 +72,19 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
                            name='event_update'),
                        url(r'^event/(?P<pk>\d+)/duplicate/$',
-                           permission_required_with_403('RIGS.change_event')(rigboard.EventDuplicate.as_view()),
+                           permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
                            name='event_duplicate'),
+                       url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()), name='event_archive'),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
                        url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
+
+                       # Legacy URL's
+                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(pattern_name='event_detail')),
+                       url(r'^bookings/$', RedirectView.as_view(pattern_name='rigboard')),
+                       url(r'^bookings/past/$', RedirectView.as_view(pattern_name='event_archive')),
+                       # Calendar may have gone away, redirect to the archive for now
+                       url(r'^rigboard/calendar/$', RedirectView.as_view(pattern_name='event_archive', permanent=False)),
 )
 
