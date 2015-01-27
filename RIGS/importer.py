@@ -14,6 +14,13 @@ from RIGS import models
 import reversion
 from datetime import datetime
 
+
+def fix_email(email):
+    if not (email is None or email is "") and ("@" not in email):
+        email += "@nottingham.ac.uk"
+    return email
+
+
 def setup_cursor():
     try:
         cursor = connections['legacy'].cursor()
@@ -63,8 +70,7 @@ def import_people(delete=False):
     resp = cursor.fetchall()
     for row in resp:
         email = row[3]
-        if (email is not None) and ("@" not in email):
-            email += "@nottingham.ac.uk"
+        fix_email(email)
 
         notes = ""
         if row[5] != "Normal":
@@ -256,14 +262,14 @@ def import_nonrigs(delete=False):
             event.save()
 
 def main():
-    # import_users()
-    # import_people()
-    # import_organisations()
-    # import_vat_rates()
-    # import_venues(True)
-    # import_rigs(False)
-    # import_eventitem(True)
-    import_nonrigs(True)
+    import_users()
+    import_people()
+    import_organisations()
+    import_vat_rates()
+    import_venues(False)
+    import_rigs(False)
+    import_eventitem(False)
+    import_nonrigs(False)
 
 
 if __name__ == "__main__":
