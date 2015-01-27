@@ -63,7 +63,7 @@ class Person(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date')
+        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
 
     class Meta:
         permissions = (
@@ -98,7 +98,7 @@ class Organisation(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date')
+        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
 
     class Meta:
         permissions = (
@@ -158,7 +158,7 @@ class Venue(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date')
+        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
 
     class Meta:
         permissions = (
@@ -181,11 +181,11 @@ class EventManager(models.Manager):
             models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED) |  # Active dry hire GT
             models.Q(dry_hire=True, status=Event.CANCELLED, start_date__gte=datetime.date.today())
             # Canceled but not started
-        ).order_by('meet_at', 'start_date')
+        ).order_by('meet_at', 'start_date').select_related('person','organisation','venue','mic')
         return events
 
     def rig_count(self):
-        events = self.filter(
+        event_count = self.filter(
             models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True,
                      is_rig=True) |  # Starts after with no end
             models.Q(end_date__gte=datetime.date.today(), is_rig=True) |  # Ends after
@@ -193,8 +193,8 @@ class EventManager(models.Manager):
                      is_rig=True) |  # Active dry hire LT
             models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED, is_rig=True)
             # Active dry hire GT
-        ).order_by('meet_at', 'start_date')
-        return len(events)
+        ).order_by('meet_at', 'start_date').count()
+        return event_count
 
 
 @reversion.register(follow=['items'])
