@@ -63,7 +63,7 @@ def import_people(delete=False):
     resp = cursor.fetchall()
     for row in resp:
         email = row[3]
-        if email is not "" and "@" not in email:
+        if (email is not None) and ("@" not in email):
             email += "@nottingham.ac.uk"
 
         notes = ""
