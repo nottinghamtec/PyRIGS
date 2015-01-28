@@ -67,6 +67,9 @@
                     <dt>Event MIC</dt>
                     <dd>{{ event.mic.name }}</dd>
 
+                    <dt>Status</dt>
+                    <dd>{{ event.get_status_display }}</dd>
+
                     <dd>&nbsp;</dd>
 
                     {% if event.is_rig %}
@@ -101,6 +104,11 @@
                             </a>
                         {% endif %}
                     </dd>
+
+                    {% if event.dry_hire %}
+                        <dt>Checked In By</dt>
+                        <dd>{{ object.checked_in_by.name }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>
