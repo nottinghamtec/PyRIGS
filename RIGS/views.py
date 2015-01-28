@@ -193,6 +193,7 @@ class SecureAPIRequest(generic.View):
         'person': models.Person,
         'organisation': models.Organisation,
         'mic': models.Profile,
+        'profile': models.Profile,
     }
 
     '''
