@@ -63,7 +63,7 @@ class Person(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
+        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     class Meta:
         permissions = (
@@ -98,7 +98,7 @@ class Organisation(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
+        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     class Meta:
         permissions = (
@@ -158,7 +158,7 @@ class Venue(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person','organisation','venue','mic')
+        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     class Meta:
         permissions = (
@@ -168,20 +168,17 @@ class Venue(models.Model, RevisionMixin):
 
 class EventManager(models.Manager):
     def current_events(self):
-        # startAfter = self.filter(startDate__gte=datetime.date.today(), endDate__isnull=True)
-        # endAfter = self.filter(endDate__gte=datetime.date.today())
-        # activeDryHire = filter(dryHire=True, checkedInBy__isnull=False, canceled=False)
-        # canceledDryHire = filter(dry_hire=True, canceled=True)
-        # events = chain(startAfter, endAfter, activeDryHire, canceledDryHire)
-        # return sorted(events, key=operator.attrgetter('start_date'))
         events = self.filter(
-            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True) |  # Starts after with no end
-            models.Q(end_date__gte=datetime.date.today()) |  # Ends after
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED) |  # Active dry hire LT
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED) |  # Active dry hire GT
-            models.Q(dry_hire=True, status=Event.CANCELLED, start_date__gte=datetime.date.today())
-            # Canceled but not started
-        ).order_by('meet_at', 'start_date').select_related('person','organisation','venue','mic')
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
+                status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=False) & (
+                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
+        ).order_by('meet_at', 'start_date').select_related('person', 'organisation', 'venue', 'mic')
         return events
 
     def rig_count(self):
@@ -233,7 +230,8 @@ class Event(models.Model, RevisionMixin):
 
     # Crew management
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True)
-    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True, verbose_name="MIC")
+    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
+                            verbose_name="MIC")
 
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
