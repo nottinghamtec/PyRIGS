@@ -34,8 +34,9 @@ def setup_cursor():
 def clean_ascii(text):
     return ''.join([i if ord(i) < 128 else '' for i in text])
 
+
 def import_users(delete=False):
-    if(delete):
+    if (delete):
         models.Event.objects.get(is_rig=False).delete()
     cursor = setup_cursor()
     if cursor is None:
@@ -60,7 +61,7 @@ def import_users(delete=False):
 
 
 def import_people(delete=False):
-    if(delete):
+    if (delete):
         models.Person.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
@@ -69,10 +70,10 @@ def import_people(delete=False):
     cursor.execute(sql)
     resp = cursor.fetchall()
     for row in resp:
-        pk=row[0]
-        name=clean_ascii(row[1])
-        phone=clean_ascii(row[2].replace(' ',''))
-        address=clean_ascii(row[4])
+        pk = row[0]
+        name = clean_ascii(row[1])
+        phone = clean_ascii(row[2].replace(' ', ''))
+        address = clean_ascii(row[4])
         email = clean_ascii(row[3])
         fix_email(email)
 
@@ -92,7 +93,7 @@ def import_people(delete=False):
 
 
 def import_organisations(delete=False):
-    if(delete):
+    if (delete):
         models.Organisation.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
@@ -116,7 +117,7 @@ def import_organisations(delete=False):
 
 
 def import_vat_rates(delete=False):
-    if(delete):
+    if (delete):
         models.VatRate.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
@@ -157,6 +158,7 @@ def import_venues(delete=False):
                 object = models.Venue(name=name, three_phase_available=row[1])
                 object.save()
 
+
 def import_rigs(delete=False):
     if delete:
         models.Event.objects.all().delete()
@@ -169,23 +171,23 @@ def import_rigs(delete=False):
         print(row)
         person = models.Person.objects.get(pk=row[2])
         if row[3]:
-   	    organisation = models.Organisation.objects.get(pk=row[3])
-	else:
-	    organisation = None
+            organisation = models.Organisation.objects.get(pk=row[3])
+        else:
+            organisation = None
         venue = models.Venue.objects.get(name__iexact=row[4].strip())
         status = {
             'Booked': models.Event.BOOKED,
             'Provisional': models.Event.PROVISIONAL,
             'Cancelled': models.Event.CANCELLED,
         }
-	mic = models.Profile.objects.get(pk=row[19])
-	if row[16] and row[17] == "Rig":
-	    try:
-	        based_on = models.Event.objects.get(pk=row[16])
+        mic = models.Profile.objects.get(pk=row[19])
+        if row[16] and row[17] == "Rig":
+            try:
+                based_on = models.Event.objects.get(pk=row[16])
             except ObjectDoesNotExist:
-	        based_on = None
-	else:
-	    based_on = None
+                based_on = None
+        else:
+            based_on = None
         with transaction.atomic(), reversion.create_revision():
             try:
                 object = models.Event.objects.get(pk=row[0])
@@ -201,7 +203,7 @@ def import_rigs(delete=False):
             object.start_time = row[8]
             object.end_date = row[9]
             object.end_time = row[10]
-	    if row[11] and row[12]:
+            if row[11] and row[12]:
                 object.access_at = datetime.combine(row[11], row[12])
             if row[13] and row[14]:
                 object.meet_at = datetime.combine(row[13], row[14])
@@ -214,6 +216,8 @@ def import_rigs(delete=False):
             object.purchase_order = row[21]
             object.payment_received = row[22]
             object.collector = row[23]
+            if object.dry_hire and object.end_time < datetime.date.today():
+                object.checked_in_by = mic
             object.save()
 
 
@@ -226,12 +230,12 @@ def import_eventitem(delete=True):
     sql = """SELECT i.id, r.id, i.name, i.description, i.quantity, i.cost, i.sortorder FROM rig_items AS i INNER JOIN eventdetails AS e ON i.eventdetail_id = e.id INNER JOIN rigs AS r ON e.describable_id = r.id"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-    	print(row)
+        print(row)
         with transaction.atomic():
             try:
-	        event = models.Event.objects.get(pk=row[1])
+                event = models.Event.objects.get(pk=row[1])
             except ObjectDoesNotExist:
-	        continue
+                continue
             try:
                 object = models.EventItem.objects.get(pk=row[0])
             except ObjectDoesNotExist:
@@ -246,8 +250,9 @@ def import_eventitem(delete=True):
             with reversion.create_revision():
                 event.save()
 
+
 def import_nonrigs(delete=False):
-    if(delete):
+    if (delete):
         try:
             models.Event.objects.get(is_rig=False).delete()
         except:
@@ -255,24 +260,35 @@ def import_nonrigs(delete=False):
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT name, start_date, start_time, end_date, end_time, description, user_id FROM non_rigs WHERE active = 1;"""
+    sql = """SELECT id, name, start_date, start_time, end_date, end_time, description, user_id FROM non_rigs WHERE active = 1;"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
         mic = models.Profile.objects.get(pk=row[6])
         with transaction.atomic(), reversion.create_revision():
-            event = models.Event(pk=None, name=row[0], start_date=row[1], start_time=row[2], end_date=row[3], end_time=row[4], description=row[5], mic=mic)
-            print(event)
-            event.save()
+            try:
+                object = models.Event.objects.get(pk=row[0])
+            except ObjectDoesNotExist:
+                object = models.Event()
+            object.name = row[1]
+            object.start_date = row[2]
+            object.start_time = row[3]
+            object.end_date = row[4]
+            object.end_time = row[5]
+            object.description = row[6]
+            object.mic = row[7]
+            print(object)
+            object.save()
+
 
 def main():
-#    import_users()
-#    import_people(True)
-#    import_organisations(True)
-#    import_vat_rates(True)
-#    import_venues(True)
-#    import_rigs(True)
-#    import_eventitem(True)
+    # import_users()
+    # import_people(True)
+    #    import_organisations(True)
+    #    import_vat_rates(True)
+    #    import_venues(True)
+    #    import_rigs(True)
+    #    import_eventitem(True)
     import_nonrigs(True)
 
 
