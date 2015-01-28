@@ -175,7 +175,7 @@ class EventManager(models.Manager):
                 status=Event.CANCELLED)) |  # Ends after
             (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
                 status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=False) & (
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
         ).order_by('meet_at', 'start_date').select_related('person', 'organisation', 'venue', 'mic')
@@ -183,14 +183,16 @@ class EventManager(models.Manager):
 
     def rig_count(self):
         event_count = self.filter(
-            models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True,
-                     is_rig=True) |  # Starts after with no end
-            models.Q(end_date__gte=datetime.date.today(), is_rig=True) |  # Ends after
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__lt=Event.CANCELLED,
-                     is_rig=True) |  # Active dry hire LT
-            models.Q(dry_hire=True, checked_in_by__isnull=False, status__gt=Event.CANCELLED, is_rig=True)
-            # Active dry hire GT
-        ).order_by('meet_at', 'start_date').count()
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False,
+                      is_rig=True) & ~models.Q(
+                status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False, is_rig=True) & ~models.Q(
+                status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today(), is_rig=True) & ~models.Q(
+                status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True, is_rig=True) & (
+                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED)))  # Active dry hire GT
+        ).count()
         return event_count
 
 
