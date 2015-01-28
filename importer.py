@@ -61,7 +61,7 @@ def import_users(delete=False):
 
 def import_people(delete=False):
     if(delete):
-        models.Event.objects.get(is_rig=False).delete()
+        models.Person.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -69,15 +69,20 @@ def import_people(delete=False):
     cursor.execute(sql)
     resp = cursor.fetchall()
     for row in resp:
-        email = row[3]
+        pk=row[0]
+        name=clean_ascii(row[1])
+        phone=clean_ascii(row[2].replace(' ',''))
+        address=clean_ascii(row[4])
+        email = clean_ascii(row[3])
         fix_email(email)
 
         notes = ""
         if row[5] != "Normal":
             notes = row[5]
 
-        person, created = models.Person.objects.get_or_create(pk=row[0], name=row[1], phone=row[2], email=email,
-                                                              address=row[4], notes=notes)
+        print("Trying %s %s %s" % (pk, name, phone))
+        person, created = models.Person.objects.get_or_create(pk=pk, name=name, phone=phone, email=email,
+                                                              address=address, notes=notes)
         if created:
             print("Created: " + person.__str__())
             with transaction.atomic(), reversion.create_revision():
@@ -88,7 +93,7 @@ def import_people(delete=False):
 
 def import_organisations(delete=False):
     if(delete):
-        models.Event.objects.get(is_rig=False).delete()
+        models.Organisation.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -112,7 +117,7 @@ def import_organisations(delete=False):
 
 def import_vat_rates(delete=False):
     if(delete):
-        models.Event.objects.get(is_rig=False).delete()
+        models.VatRate.objects.all().delete()
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -136,19 +141,20 @@ def import_venues(delete=False):
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` GROUP BY `venue` WHERE `venue` IS NOT NULL"""
+    sql = """SELECT `venue`, `threephasepower` FROM `eventdetails` WHERE `venue` IS NOT NULL GROUP BY `venue`"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-        print(("Searching for %s", row[0]))
+        name = row[0].strip()
+        print(("Searching for %s", name))
         try:
-            object = models.Venue.objects.get(name__iexact=row[0])
+            object = models.Venue.objects.get(name__iexact=name)
             if not object.three_phase_available and row[1]:
                 with transaction.atomic(), reversion.create_revision():
                     object.three_phase_available = row[1]
                     object.save()
         except ObjectDoesNotExist:
             with transaction.atomic(), reversion.create_revision():
-                object = models.Venue(name=row[0], three_phase_available=row[1])
+                object = models.Venue(name=name, three_phase_available=row[1])
                 object.save()
 
 def import_rigs(delete=False):
@@ -157,7 +163,7 @@ def import_rigs(delete=False):
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT r.id, event, person_id, organisation_id, venue, description, status, start_date, start_time, end_date, end_time, access_date, access_time, meet_date, meet_time, meet_info, based_on_id, based_on_type, dry_hire, user_id, payment_method, order_no, payment_received, collectorsid FROM eventdetails AS e INNER JOIN rigs AS r ON e.describable_id = r.id WHERE describable_type = 'Rig' AND venue IS NOT NULL"""
+    sql = """SELECT r.id, event, person_id, organisation_id, venue, description, status, start_date, start_time, end_date, end_time, access_date, access_time, meet_date, meet_time, meet_info, based_on_id, based_on_type, dry_hire, user_id, payment_method, order_no, payment_received, collectorsid FROM eventdetails AS e INNER JOIN rigs AS r ON e.describable_id = r.id WHERE describable_type = 'Rig' AND `venue` IS NOT NULL"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
@@ -166,7 +172,7 @@ def import_rigs(delete=False):
    	    organisation = models.Organisation.objects.get(pk=row[3])
 	else:
 	    organisation = None
-        venue = models.Venue.objects.get(name__iexact=row[4])
+        venue = models.Venue.objects.get(name__iexact=row[4].strip())
         status = {
             'Booked': models.Event.BOOKED,
             'Provisional': models.Event.PROVISIONAL,
@@ -242,7 +248,10 @@ def import_eventitem(delete=True):
 
 def import_nonrigs(delete=False):
     if(delete):
-        models.Event.objects.get(is_rig=False).delete()
+        try:
+            models.Event.objects.get(is_rig=False).delete()
+        except:
+            pass
     cursor = setup_cursor()
     if cursor is None:
         return
@@ -250,26 +259,21 @@ def import_nonrigs(delete=False):
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
+        mic = models.Profile.objects.get(pk=row[6])
         with transaction.atomic(), reversion.create_revision():
-            event = models.Event()
-            event.name = row[0]
-            event.start_date = row[1]
-            event.start_time = row[2]
-            event.end_date = row[3]
-            event.end_time = row[4]
-            event.description = row[5]
-            event.mic = models.Profile.objects.get(pk=row[6])
+            event = models.Event(pk=None, name=row[0], start_date=row[1], start_time=row[2], end_date=row[3], end_time=row[4], description=row[5], mic=mic)
+            print(event)
             event.save()
 
 def main():
-    import_users()
-    import_people()
-    import_organisations()
-    import_vat_rates()
-    import_venues(False)
-    import_rigs(False)
-    import_eventitem(False)
-    import_nonrigs(False)
+#    import_users()
+#    import_people(True)
+#    import_organisations(True)
+#    import_vat_rates(True)
+#    import_venues(True)
+#    import_rigs(True)
+#    import_eventitem(True)
+    import_nonrigs(True)
 
 
 if __name__ == "__main__":

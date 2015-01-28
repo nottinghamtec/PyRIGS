@@ -95,6 +95,11 @@ ACCOUNT_ACTIVATION_DAYS = 7
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'server.techost.co.uk'
+    EMAIL_PORT = 465
+    EMAIL_HOST_USER = 'tec'
+    EMAIL_HOST_PASSWORD = '***REMOVED***'
+    DEFAULT_FROM_EMAIL = 'rigs@nottinghamtec.co.uk'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
