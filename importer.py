@@ -13,7 +13,7 @@ from django.db import transaction
 from RIGS import models
 import reversion
 from datetime import datetime
-
+import uuid
 
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
@@ -55,7 +55,7 @@ def import_users(delete=False):
         except ObjectDoesNotExist:
             object = models.Profile(pk=row[0], username=row[1], email=row[2], first_name=row[3], last_name=row[4],
                                     is_active=row[5], initials=row[6], phone=row[7])
-            object.set_unusable_password()
+            object.set_password(uuid.uuid4().hex)
             object.save()
             print("Created " + str(object))
 
