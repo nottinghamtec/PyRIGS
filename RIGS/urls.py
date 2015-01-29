@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard
+from RIGS import views, rigboard, finance
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
@@ -74,7 +74,25 @@ urlpatterns = patterns('',
                        url(r'^event/(?P<pk>\d+)/duplicate/$',
                            permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
                            name='event_duplicate'),
-                       url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()), name='event_archive'),
+                       url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()),
+                           name='event_archive'),
+
+                       # Finance
+                       url(r'^invoice/$',
+                           permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
+                           name='invoice_list'),
+                       url(r'^invoice/(?P<pk>\d+)/$',
+                           permission_required_with_403('RIGS.view_invoice')(finance.InvoiceDetail.as_view()),
+                           name='invoice_detail'),
+                       url(r'^invoice/(?P<pk>\d+)/void/$',
+                           permission_required_with_403('RIGS.change_invoice')(finance.InvoiceVoid.as_view()),
+                           name='invoice_void'),
+                       url(r'^payment/create/$',
+                           permission_required_with_403('RIGS.add_payment')(finance.PaymentCreate.as_view()),
+                           name='payment_create'),
+                       url(r'^payment/(?P<pk>\d+)/delete/$',
+                           permission_required_with_403('RIGS.add_payment')(finance.PaymentDelete.as_view()),
+                           name='payment_delete'),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
@@ -85,6 +103,7 @@ urlpatterns = patterns('',
                        url(r'^bookings/$', RedirectView.as_view(pattern_name='rigboard')),
                        url(r'^bookings/past/$', RedirectView.as_view(pattern_name='event_archive')),
                        # Calendar may have gone away, redirect to the archive for now
-                       url(r'^rigboard/calendar/$', RedirectView.as_view(pattern_name='event_archive', permanent=False)),
+                       url(r'^rigboard/calendar/$',
+                           RedirectView.as_view(pattern_name='event_archive', permanent=False)),
 )
 

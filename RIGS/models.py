@@ -242,6 +242,9 @@ class Event(models.Model, RevisionMixin):
     collector = models.CharField(max_length=255, blank=True, null=True)
 
     # Calculated values
+    """
+    EX Vat
+    """
     @property
     def sum_total(self):
         total = 0
@@ -257,6 +260,9 @@ class Event(models.Model, RevisionMixin):
     def vat(self):
         return self.sum_total * self.vat_rate.rate
 
+    """
+    Inc VAT
+    """
     @property
     def total(self):
         return self.sum_total + self.vat
@@ -313,19 +319,44 @@ class Invoice(models.Model):
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField()
 
+    @property
+    def sum_total(self):
+        return self.event.sum_total
+
+    @property
+    def total(self):
+        return self.event.total
+
+    @property
+    def payment_total(self):
+        total = 0
+        for payment in self.payment_set.all():
+            total += payment.amount
+        return total
+
+    @property
+    def balance(self):
+        return self.sum_total - self.payment_total
+
+    def __str__(self):
+        return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
+
+    class Meta:
+        permissions = (
+            ('view_invoice', 'Can view Invoices'),
+        )
+
 
 class Payment(models.Model):
     CASH = 'C'
     INTERNAL = 'I'
     EXTERNAL = 'E'
     SUCORE = 'SU'
-    MEMBERS = 'M'
     METHODS = (
         (CASH, 'Cash'),
         (INTERNAL, 'Internal'),
         (EXTERNAL, 'External'),
         (SUCORE, 'SU Core'),
-        (MEMBERS, 'Members'),
     )
 
     invoice = models.ForeignKey('Invoice')

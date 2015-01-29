@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Active Invoices{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <h2>Active Invoices</h2>
+        <table class="table table-responsive table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Event</th>
+                <th>Invoice Date</th>
+                <th>Balance</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>{{ object.pk }}</td>
+                    <td>{{ object.event }}</td>
+                    <td>{{ object.invoice_date }}</td>
+                    <td>{{ object.balance|floatformat:2 }}</td>
+                    <td class="text-right">
+                        <a href="{% url 'invoice_detail' object.pk %}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
