@@ -8,39 +8,43 @@
 @import "jq-ui-bootstrap/_tooltip";
 
 body, .pad-top {
-	padding-top: 50px;
+  padding-top: 50px;
 }
 
 #content {
-	padding: 40px 15px;
+  padding: 40px 15px;
 }
 
 #userdropdown > li {
-	padding: 0 0.3em;
-	
-	&.media {
-		display: inline-flex;
-	}
+  padding: 0 0.3em;
+
+  .media-object {
+    max-width: 3em;
+  }
 }
 
-.table tbody>tr>td.vert-align
-{
-    vertical-align: middle;
+.table tbody > tr > td.vert-align {
+  vertical-align: middle;
 }
 
 .align-right {
-	text-align: right;
+  text-align: right;
 }
 
 textarea {
-	width: 100%;
-	resize: vertical;
+  width: 100%;
+  resize: vertical;
 }
 
-.btn-page, .btn-pad { // .btn-page should be refactored out to .btn-page in the future
-	margin: 0 0 0.5em;
+.btn-page, .btn-pad {
+  // .btn-page should be refactored out to .btn-page in the future
+  margin: 0 0 0.5em;
 }
 
 .custom-combobox {
-	display: block;
+  display: block;
+}
+
+.event-mic-photo {
+  max-width: 2em;
 }
