@@ -64,11 +64,11 @@
                             Hi {{ user.first_name }}
                             <b class="caret"></b>
                         </a>
-                        <ul class="dropdown-menu nav media-list pull-right">
+                        <ul class="dropdown-menu nav media-list pull-right" id="userdropdown">
                             <li class="media">
-	    							<span class="pull-left">
-	    								<img src="{{ request.user.profile_picture }}" class="media-object"/>
-	    							</span>
+                                <div class="media-left">
+                                    <img src="{{ request.user.profile_picture }}" class="media-object"/>
+                                </div>
 
                                 <div class="media-body">
                                     <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
@@ -110,7 +110,7 @@
     </div>
 
     <div id="sidebar" class="column">
-    {% block sidebar %}
+        {% block sidebar %}
         {% endblock %}
     </div>
 </div>
@@ -143,10 +143,10 @@
             jQuery('#modal').load(jQuery(this).attr('href'), function (e) {
                 jQuery('#modal').modal();
             });
-            jQuery('#modal').on('hide.bs.modal', function(e) {
-                if(modaltarget != "" && modalobject != "") {
+            jQuery('#modal').on('hide.bs.modal', function (e) {
+                if (modaltarget != "" && modalobject != "") {
                     jQuery(modaltarget).val(modalobject[0]['pk']);
-                    jQuery(modaltarget+'-input').val(modalobject[0]['fields']['name']);
+                    jQuery(modaltarget + '-input').val(modalobject[0]['fields']['name']);
                 }
             })
         });

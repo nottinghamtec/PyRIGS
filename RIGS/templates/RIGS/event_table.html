@@ -71,9 +71,12 @@
                         {% endif %}
                     </dl>
                 </td>
-                <td class="text-center">
+                <td class="text-right">
                     {% if event.mic or not event.is_rig %}
                         {{ event.mic.initials }}
+                        <div>
+                            <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                        </div>
                     {% else %}
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
                     {% endif %}
