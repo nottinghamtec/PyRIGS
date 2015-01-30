@@ -4,7 +4,17 @@
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Invoice {{ object.pk }}</h2>
+        <div class="row">
+            <div class="col-sm-8">
+                <h2>Invoice {{ object.pk }}</h2>
+            </div>
+
+            <div class="col-sm-4 text-right">
+                <a href="{% url 'invoice_void' object.pk %}" class="btn btn-default" title="Void Invoice">
+                    <span class="glyphicon glyphicon-text-background"></span>
+                </a>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-sm-6">

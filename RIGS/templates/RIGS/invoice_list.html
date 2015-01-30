@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
+{% load paginator from filters %}
 
-{% block title %}Active Invoices{% endblock %}
+{% block title %}Invoices{% endblock %}
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Active Invoices</h2>
+        <h2>Invoices</h2>
+        {% if is_paginated %}
+            <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
+                {% paginator %}
+            </div>
+        {% endif %}
         <table class="table table-responsive table-hover">
             <thead>
             <tr>
@@ -17,8 +23,8 @@
             </thead>
             <tbody>
             {% for object in object_list %}
-                <tr>
-                    <td>{{ object.pk }}</td>
+                <tr class="{% if object.void %}danger{% elif object.balance == 0 %}success{% endif %}">
+                <td>{{ object.pk }}</td>
                     <td>{{ object.event }}</td>
                     <td>{{ object.invoice_date }}</td>
                     <td>{{ object.balance|floatformat:2 }}</td>
@@ -31,5 +37,10 @@
             {% endfor %}
             </tbody>
         </table>
+        {% if is_paginated %}
+            <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
+                {% paginator %}
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

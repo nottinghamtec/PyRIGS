@@ -15,6 +15,10 @@
                         class="glyphicon glyphicon-print"></span></a>
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                         class="glyphicon glyphicon-duplicate"></span></a>
+                {% if perms.RIGS.add_invoice %}
+                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                            class="glyphicon glyphicon-gbp"></span></a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -121,6 +125,10 @@
                     class="glyphicon glyphicon-print"></span></a>
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                     class="glyphicon glyphicon-duplicate"></span></a>
+            {% if perms.RIGS.add_invoice %}
+                <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                        class="glyphicon glyphicon-gbp"></span></a>
+            {% endif %}
         </div>
     </div>
     <div class="col-sm-12">
@@ -145,6 +153,10 @@
                     class="glyphicon glyphicon-print"></span></a>
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                     class="glyphicon glyphicon-duplicate"></span></a>
+            {% if perms.RIGS.add_invoice %}
+                <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                        class="glyphicon glyphicon-gbp"></span></a>
+            {% endif %}
         </div>
         <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
             by {{ object.last_edited_by.name }}.
