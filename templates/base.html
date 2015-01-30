@@ -44,7 +44,7 @@
                     </ul>
                 </li>
                 {% if perms.RIGS.view_invoice %}
-                    <li><a href="">Invoices</a></li>
+                    <li><a href="{% url 'invoice_list' %}">Invoices</a></li>
                 {% endif %}
                 {% if perms.RIGS.view_person %}
                     <li><a href="{% url 'person_list' %}">People</a></li>
