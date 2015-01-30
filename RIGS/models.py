@@ -317,7 +317,7 @@ class EventCrew(models.Model):
 class Invoice(models.Model):
     event = models.OneToOneField('Event')
     invoice_date = models.DateField(auto_now_add=True)
-    void = models.BooleanField()
+    void = models.BooleanField(default=False)
 
     @property
     def sum_total(self):
