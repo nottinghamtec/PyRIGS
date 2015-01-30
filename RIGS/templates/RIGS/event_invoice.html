@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load paginator from filters %}
+
+{% block title %}Events for Invoice{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <h2>Events for Invoice</h2>
+        {% if is_paginated %}
+            <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
+                {% paginator %}
+            </div>
+        {% endif %}
+        <table class="table table-responsive table-hover">
+            <thead>
+            <tr>
+                <th class="hiddenx-xs">#</th>
+                <th>Date</th>
+                <th>Event</th>
+                <th>Client</th>
+                <th>Cost</th>
+                <th class="hidden-xs">MIC</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr class="
+                        {% if event.cancelled %}
+							active
+						{% elif event.confirmed and event.mic or not event.is_rig %}
+						{# interpreated as (booked and mic) or is non rig #}
+							success
+						{% elif event.mic %}
+							warning
+						{% else %}
+							danger
+						{% endif %}
+                        ">
+                    <td class="hidden-xs">N{{ object.pk|stringformat:"05d" }}</td>
+                    <td>{{ object.end_date }}</td>
+                    <td>{{ object.name }}</td>
+                    <td>
+                        {% if object.organisation %}
+                            {{ object.organisation.name }}
+                        {% else %}
+                            {{ object.person.name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ object.sum_total|floatformat:2 }}</td>
+                    <td class="text-center">
+                        {{ object.mic.initials }}<br/>
+                        <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
+                    </td>
+                    <td class="text-right">
+                        <a href="{% url 'invoice_event' object.pk %}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if is_paginated %}
+            <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
+                {% paginator %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

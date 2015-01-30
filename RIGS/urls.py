@@ -77,10 +77,22 @@ urlpatterns = patterns('',
                        url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()),
                            name='event_archive'),
 
+
                        # Finance
                        url(r'^invoice/$',
                            permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
                            name='invoice_list'),
+                       url(r'^invoice/archive/$',
+                           permission_required_with_403('RIGS.view_invoice')(finance.InvoiceArchive.as_view()),
+                           name='invoice_archive'),
+                       url(r'^invoice/waiting/$',
+                           permission_required_with_403('RIGS.add_invoice')(finance.InvoiceWaiting.as_view()),
+                           name='invoice_waiting'),
+
+                       url(r'^event/(?P<pk>\d+)/invoice/$',
+                           permission_required_with_403('RIGS.add_invoice')(finance.InvoiceEvent.as_view()),
+                           name='invoice_event'),
+
                        url(r'^invoice/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_invoice')(finance.InvoiceDetail.as_view()),
                            name='invoice_detail'),
