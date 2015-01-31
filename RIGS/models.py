@@ -362,4 +362,4 @@ class Payment(models.Model):
     invoice = models.ForeignKey('Invoice')
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
-    method = models.CharField(max_length=2, choices=METHODS)
+    method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)

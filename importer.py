@@ -280,6 +280,43 @@ def import_nonrigs(delete=False):
             print(object)
             object.save()
 
+def import_invoices(delete=False):
+    if delete:
+        try:
+            models.Invoice.objects.all().delete()
+            models.Payment.objects.all().delete()
+        except:
+            pass
+    cursor = setup_cursor()
+    if cursor is None:
+        return
+    sql = """SELECT id, rig_id, invoice_date, payment_date, amount FROM invoices"""
+    cursor.execute(sql)
+    for row in cursor.fetchall():
+        print(row)
+        try:
+            event = models.Event.objects.get(pk=row[1])
+        except ObjectDoesNotExist:
+            continue
+
+        try:
+            invoice = models.Invoice.objects.get(event=event)
+        except ObjectDoesNotExist:
+            invoice = models.Invoice(pk=row[0], event=event)
+        invoice.save()
+        invoice.invoice_date = row[2]
+        invoice.save()
+
+        try:
+            payment = models.Payment.objects.get(invoice=invoice)
+        except ObjectDoesNotExist:
+            payment = models.Payment(invoice=invoice)
+        if row[4] >= event.sum_total:
+            payment.amount = event.sum_total
+        else:
+            payment.amount = row[4]
+        payment.date = row[3]
+        payment.save()
 
 def main():
     # import_users()
@@ -289,7 +326,8 @@ def main():
     #    import_venues(True)
     #    import_rigs(True)
     #    import_eventitem(True)
-    import_nonrigs(True)
+    # import_nonrigs(True)
+    import_invoices(True)
 
 
 if __name__ == "__main__":
