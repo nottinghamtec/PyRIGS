@@ -12,8 +12,9 @@ from django.db.utils import ConnectionDoesNotExist
 from django.db import transaction
 from RIGS import models
 import reversion
-from datetime import datetime
+import datetime
 import uuid
+from multiprocessing import Process
 
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
@@ -86,7 +87,7 @@ def import_people(delete=False):
                                                               address=address, notes=notes)
         if created:
             print("Created: " + person.__str__())
-            with transaction.atomic(), reversion.create_revision():
+            with reversion.create_revision():
                 person.save()
         else:
             print("Found: " + person.__str__())
@@ -110,7 +111,7 @@ def import_organisations(delete=False):
                                                                     union_account=row[4], notes=notes)
         if created:
             print("Created: " + object.__str__())
-            with transaction.atomic(), reversion.create_revision():
+            with reversion.create_revision():
                 object.save()
         else:
             print("Found: " + object.__str__())
@@ -125,12 +126,12 @@ def import_vat_rates(delete=False):
     sql = """SELECT `id`, `start_date`, `start_time`, `comment`, `rate` FROM `vat_rates`"""
     cursor.execute(sql)
     for row in cursor.fetchall():
-        start_at = datetime.combine(row[1], row[2])
+        start_at = datetime.datetime.combine(row[1], row[2])
         object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=start_at,
                                                                comment=row[3], rate=row[4])
         if created:
             print("Created: " + object.__str__())
-            with transaction.atomic(), reversion.create_revision():
+            with reversion.create_revision():
                 object.save()
         else:
             print("Found: " + object.__str__())
@@ -150,11 +151,11 @@ def import_venues(delete=False):
         try:
             object = models.Venue.objects.get(name__iexact=name)
             if not object.three_phase_available and row[1]:
-                with transaction.atomic(), reversion.create_revision():
+                with reversion.create_revision():
                     object.three_phase_available = row[1]
                     object.save()
         except ObjectDoesNotExist:
-            with transaction.atomic(), reversion.create_revision():
+            with reversion.create_revision():
                 object = models.Venue(name=name, three_phase_available=row[1])
                 object.save()
 
@@ -188,7 +189,7 @@ def import_rigs(delete=False):
                 based_on = None
         else:
             based_on = None
-        with transaction.atomic(), reversion.create_revision():
+        with reversion.create_revision():
             try:
                 object = models.Event.objects.get(pk=row[0])
             except ObjectDoesNotExist:
@@ -204,9 +205,9 @@ def import_rigs(delete=False):
             object.end_date = row[9]
             object.end_time = row[10]
             if row[11] and row[12]:
-                object.access_at = datetime.combine(row[11], row[12])
+                object.access_at = datetime.datetime.combine(row[11], row[12])
             if row[13] and row[14]:
-                object.meet_at = datetime.combine(row[13], row[14])
+                object.meet_at = datetime.datetime.combine(row[13], row[14])
             object.meet_info = row[15]
             object.based_on = based_on
             object.dry_hire = row[18]
@@ -216,7 +217,7 @@ def import_rigs(delete=False):
             object.purchase_order = row[21]
             object.payment_received = row[22]
             object.collector = row[23]
-            if object.dry_hire and object.end_time < datetime.date.today():
+            if object.dry_hire and object.end_date < datetime.date.today():
                 object.checked_in_by = mic
             object.save()
 
@@ -231,24 +232,23 @@ def import_eventitem(delete=True):
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
-        with transaction.atomic():
-            try:
-                event = models.Event.objects.get(pk=row[1])
-            except ObjectDoesNotExist:
-                continue
-            try:
-                object = models.EventItem.objects.get(pk=row[0])
-            except ObjectDoesNotExist:
-                object = models.EventItem(pk=row[0])
-            object.event = event
-            object.name = clean_ascii(row[2])
-            object.description = clean_ascii(row[3])
-            object.quantity = row[4]
-            object.cost = row[5]
-            object.order = row[6] if row[6] else 0
-            object.save()
-            with reversion.create_revision():
-                event.save()
+        try:
+            event = models.Event.objects.get(pk=row[1])
+        except ObjectDoesNotExist:
+            continue
+        try:
+            object = models.EventItem.objects.get(pk=row[0])
+        except ObjectDoesNotExist:
+            object = models.EventItem(pk=row[0])
+        object.event = event
+        object.name = clean_ascii(row[2])
+        object.description = clean_ascii(row[3])
+        object.quantity = row[4]
+        object.cost = row[5]
+        object.order = row[6] if row[6] else 0
+        object.save()
+        with reversion.create_revision():
+            event.save()
 
 
 def import_nonrigs(delete=False):
@@ -279,6 +279,7 @@ def import_nonrigs(delete=False):
             object.mic = row[7]
             print(object)
             object.save()
+
 
 def import_invoices(delete=False):
     if delete:
@@ -318,15 +319,29 @@ def import_invoices(delete=False):
         payment.date = row[3]
         payment.save()
 
+        if invoice.invoice_date < (datetime.date.today() - datetime.timedelta(days=365)) and invoice.balance:
+            p2 = models.Payment(amount=invoice.balance)
+            payment.method = payment.ADJUSTMENT
+            payment.date = datetime.date.today()
+            payment.save()
+
+@transaction.atomic
 def main():
-    # import_users()
-    # import_people(True)
-    #    import_organisations(True)
-    #    import_vat_rates(True)
-    #    import_venues(True)
-    #    import_rigs(True)
-    #    import_eventitem(True)
-    # import_nonrigs(True)
+    processs = []
+    processs.append(Process(target=import_users))
+    processs.append(Process(target=import_people, args=(True,)))
+    processs.append(Process(target=import_organisations, args=(True,)))
+    processs.append(Process(target=import_vat_rates, args=(True,)))
+    processs.append(Process(target=import_venues, args=(True,)))
+
+     # Start all processs
+    [x.start() for x in processs]
+    # Wait for all processs to finish
+    [x.join() for x in processs]
+
+    import_rigs(True)
+    import_eventitem(True)
+    import_nonrigs(True)
     import_invoices(True)
 
 
