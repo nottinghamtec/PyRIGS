@@ -13,7 +13,8 @@ class InvoiceIndex(generic.ListView):
     template_name = 'RIGS/invoice_list.html'
 
     def get_queryset(self):
-        active = self.model.objects.filter(void=False).select_related('payment_set')
+        active = self.model.objects.filter(void=False).select_related('payment_set', 'event').prefetch_related(
+            'event__items').defer('event__person', 'event__organisation', 'event__venue', 'event__mic')
         set = []
         for invoice in active:
             if invoice.balance != 0:
