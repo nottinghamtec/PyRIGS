@@ -248,7 +248,7 @@ class Event(models.Model, RevisionMixin):
     @property
     def sum_total(self):
         total = 0
-        for item in self.items.all():
+        for item in self.items.filter(cost__gt=0):
             total += item.total_cost
         return total
 
@@ -329,9 +329,9 @@ class Invoice(models.Model):
 
     @property
     def payment_total(self):
-        total = 0
-        for payment in self.payment_set.all():
-            total += payment.amount
+        total = self.payment_set.aggregate(models.Sum('amount'))
+        # for payment in self.payment_set.all():
+        #     total += payment.amount
         return total
 
     @property
@@ -352,11 +352,13 @@ class Payment(models.Model):
     INTERNAL = 'I'
     EXTERNAL = 'E'
     SUCORE = 'SU'
+    ADJUSTMENT = 'T'
     METHODS = (
         (CASH, 'Cash'),
         (INTERNAL, 'Internal'),
         (EXTERNAL, 'External'),
         (SUCORE, 'SU Core'),
+        (ADJUSTMENT, 'TEC Adjustment'),
     )
 
     invoice = models.ForeignKey('Invoice')
