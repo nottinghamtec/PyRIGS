@@ -329,10 +329,12 @@ class Invoice(models.Model):
 
     @property
     def payment_total(self):
-        total = self.payment_set.aggregate(models.Sum('amount'))
+        sum = self.payment_set.aggregate(models.Sum('amount'))['amount__sum']
         # for payment in self.payment_set.all():
         #     total += payment.amount
-        return total
+        if sum:
+            return sum
+        return 0
 
     @property
     def balance(self):

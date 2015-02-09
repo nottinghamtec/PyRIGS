@@ -254,31 +254,28 @@ def import_eventitem(delete=True):
 def import_nonrigs(delete=False):
     if (delete):
         try:
-            models.Event.objects.get(is_rig=False).delete()
+            models.Event.objects.filter(is_rig=False).delete()
         except:
             pass
     cursor = setup_cursor()
     if cursor is None:
         return
-    sql = """SELECT id, name, start_date, start_time, end_date, end_time, description, user_id FROM non_rigs WHERE active = 1;"""
+    sql = """SELECT name, start_date, start_time, end_date, end_time, description, user_id FROM non_rigs WHERE active = 1;"""
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
         mic = models.Profile.objects.get(pk=row[6])
-        with transaction.atomic(), reversion.create_revision():
-            try:
-                object = models.Event.objects.get(pk=row[0])
-            except ObjectDoesNotExist:
-                object = models.Event()
-            object.name = row[1]
-            object.start_date = row[2]
-            object.start_time = row[3]
-            object.end_date = row[4]
-            object.end_time = row[5]
-            object.description = row[6]
-            object.mic = row[7]
-            print(object)
-            object.save()
+        object = models.Event()
+        object.name = row[0]
+        object.start_date = row[1]
+        object.start_time = row[2]
+        object.end_date = row[3]
+        object.end_time = row[4]
+        object.description = row[5]
+        object.is_rig = False
+        object.mic = mic
+        print(object)
+        object.save()
 
 
 def import_invoices(delete=False):
@@ -295,10 +292,13 @@ def import_invoices(delete=False):
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
+        print row[1]
         try:
             event = models.Event.objects.get(pk=row[1])
         except ObjectDoesNotExist:
+            print "Event %d not found" % row[1]
             continue
+        print(event)
 
         try:
             invoice = models.Invoice.objects.get(event=event)
@@ -307,42 +307,46 @@ def import_invoices(delete=False):
         invoice.save()
         invoice.invoice_date = row[2]
         invoice.save()
+        print(invoice)
 
-        try:
-            payment = models.Payment.objects.get(invoice=invoice)
-        except ObjectDoesNotExist:
-            payment = models.Payment(invoice=invoice)
-        if row[4] >= event.sum_total:
-            payment.amount = event.sum_total
-        else:
-            payment.amount = row[4]
-        payment.date = row[3]
-        payment.save()
+        if row[3]:
+            try:
+                payment = models.Payment.objects.get(invoice=invoice)
+            except ObjectDoesNotExist:
+                payment = models.Payment(invoice=invoice)
+            if row[4] >= event.sum_total:
+                payment.amount = event.sum_total
+            else:
+                payment.amount = row[4]
+            payment.date = row[3]
+            payment.save()
+            print(payment)
 
         if invoice.invoice_date < (datetime.date.today() - datetime.timedelta(days=365)) and invoice.balance:
             p2 = models.Payment(amount=invoice.balance)
-            payment.method = payment.ADJUSTMENT
-            payment.date = datetime.date.today()
-            payment.save()
+            p2.invoice = invoice
+            p2.method = payment.ADJUSTMENT
+            p2.date = datetime.date.today()
+            p2.save()
 
 @transaction.atomic
 def main():
-    processs = []
-    processs.append(Process(target=import_users))
-    processs.append(Process(target=import_people, args=(True,)))
-    processs.append(Process(target=import_organisations, args=(True,)))
-    processs.append(Process(target=import_vat_rates, args=(True,)))
-    processs.append(Process(target=import_venues, args=(True,)))
-
-     # Start all processs
-    [x.start() for x in processs]
-    # Wait for all processs to finish
-    [x.join() for x in processs]
-
-    import_rigs(True)
-    import_eventitem(True)
-    import_nonrigs(True)
+    # processs = []
+    # processs.append(Process(target=import_users))
+    # processs.append(Process(target=import_people, args=(True,)))
+    # processs.append(Process(target=import_organisations, args=(True,)))
+    # processs.append(Process(target=import_vat_rates, args=(True,)))
+    # processs.append(Process(target=import_venues, args=(True,)))
+    #
+    #  # Start all processs
+    # [x.start() for x in processs]
+    # # Wait for all processs to finish
+    # [x.join() for x in processs]
+    #
+    # import_rigs(True)
+    # import_eventitem(True)
     import_invoices(True)
+    # import_nonrigs(False)
 
 
 if __name__ == "__main__":
