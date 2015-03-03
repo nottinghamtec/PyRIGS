@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse_lazy
+from django.db import connection
 from django.http import Http404, HttpResponseRedirect
 from django.views import generic
 from django.shortcuts import get_object_or_404
@@ -14,12 +15,16 @@ class InvoiceIndex(generic.ListView):
 
     def get_queryset(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
-        query = self.model.objects.raw(
-            "SELECT *, "
-            "(SELECT SUM(ei.cost * ei.quantity) FROM RIGS_eventitem AS ei WHERE ei.event_id = i.event_id) AS cost, "
-            "(SELECT SUM(p.amount) FROM RIGS_payment AS p WHERE p.invoice_id = i.id) AS payments FROM RIGS_invoice as i "
-            "HAVING (cost - payments) > 0;"
-        )
+        if connection.vendor == 'postgresql':
+            sql = """SELECT * FROM (SELECT *,
+(SELECT SUM (ei.cost * ei.quantity) FROM "RIGS_eventitem" AS ei where ei.event_id = i.event_id) AS cost,
+(SELECT SUM(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id = i.id) AS payments
+FROM "RIGS_invoice" as i) AS sub
+WHERE (cost - payments) > 0;"""
+        else:
+            sql = "SELECT *, (SELECT SUM(ei.cost * ei.quantity) FROM RIGS_eventitem AS ei WHERE ei.event_id = i.event_id) AS cost, (SELECT SUM(p.amount) FROM RIGS_payment AS p WHERE p.invoice_id = i.id) AS payments FROM RIGS_invoice as i HAVING (cost - payments) > 0;"
+
+        query = self.model.objects.raw(sql)
 
         items = []
 

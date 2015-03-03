@@ -1,7 +1,7 @@
 import hashlib
 import datetime
 
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -248,7 +248,11 @@ class Event(models.Model, RevisionMixin):
     @property
     def sum_total(self):
         # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        total = self.items.raw("SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id)[0]
+        if connection.vendor == 'postgresql':
+            sql = "SELECT SUM(quantity * cost) AS sum_total FROM \"RIGS_eventitem\" WHERE event_id=%i" % self.id
+        else:
+            sql = "SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id
+        total = self.items.raw(sql)[0]
         if total.sum_total:
             return total.sum_total
         return 0.0
@@ -331,7 +335,11 @@ class Invoice(models.Model):
     @property
     def payment_total(self):
         # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        total = self.payment_set.raw("SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id)[0]
+        if connection.vendor == 'postgresql':
+            sql = "SELECT SUM(amount) AS total FROM \"RIGS_payment\" WHERE invoice_id=%i" % self.id
+        else:
+            sql = "SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id
+        total = self.payment_set.raw(sql)[0]
         if total.total:
             return total.total
         return 0.0
