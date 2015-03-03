@@ -247,10 +247,11 @@ class Event(models.Model, RevisionMixin):
     """
     @property
     def sum_total(self):
-        total = 0
-        for item in self.items.filter(cost__gt=0):
-            total += item.total_cost
-        return total
+        # Manual querying is required for efficiency whilst maintaining floating point arithmetic
+        total = self.items.raw("SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id)[0]
+        if total.sum_total:
+            return total.sum_total
+        return 0.0
 
     @cached_property
     def vat_rate(self):
@@ -329,16 +330,15 @@ class Invoice(models.Model):
 
     @property
     def payment_total(self):
-        sum = self.payment_set.aggregate(models.Sum('amount'))['amount__sum']
-        # for payment in self.payment_set.all():
-        #     total += payment.amount
-        if sum:
-            return sum
-        return 0
+        # Manual querying is required for efficiency whilst maintaining floating point arithmetic
+        total = self.payment_set.raw("SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id)[0]
+        if total.total:
+            return total.total
+        return 0.0
 
     @property
     def balance(self):
-        return self.sum_total - self.payment_total
+        return float(self.sum_total) - float(self.payment_total)
 
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
