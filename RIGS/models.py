@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 import reversion
 
+from decimal import Decimal
 
 # Create your models here.
 class Profile(AbstractUser):
@@ -248,14 +249,20 @@ class Event(models.Model, RevisionMixin):
     @property
     def sum_total(self):
         # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        if connection.vendor == 'postgresql':
-            sql = "SELECT SUM(quantity * cost) AS sum_total FROM \"RIGS_eventitem\" WHERE event_id=%i" % self.id
-        else:
-            sql = "SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id
-        total = self.items.raw(sql)[0]
-        if total.sum_total:
-            return total.sum_total
-        return 0.0
+        # if connection.vendor == 'postgresql':
+        #    sql = "SELECT SUM(quantity * cost) AS sum_total FROM \"RIGS_eventitem\" WHERE event_id=%i" % self.id
+        # else:
+        #    sql = "SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id
+        #total = self.items.raw(sql)[0]
+        #if total.sum_total:
+        #    return total.sum_total
+        #total = 0.0
+        #for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
+        #    total += item.sum
+        total = EventItem.objects.filter(event=self, cost__gt=0).aggregate(sum_total=models.Sum('cost',field="quantity * cost"))['sum_total']
+        if total:
+            return total
+        return Decimal("0.00")
 
     @cached_property
     def vat_rate(self):
@@ -335,18 +342,22 @@ class Invoice(models.Model):
     @property
     def payment_total(self):
         # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        if connection.vendor == 'postgresql':
-            sql = "SELECT SUM(amount) AS total FROM \"RIGS_payment\" WHERE invoice_id=%i" % self.id
-        else:
-            sql = "SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id
-        total = self.payment_set.raw(sql)[0]
-        if total.total:
-            return total.total
-        return 0.0
+        #if connection.vendor == 'postgresql':
+        #    sql = "SELECT SUM(amount) AS total FROM \"RIGS_payment\" WHERE invoice_id=%i" % self.id
+        #else:
+        #    sql = "SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id
+        #total = self.payment_set.raw(sql)[0]
+        #if total.total:
+        #    return total.total
+        #return 0.0
+        total = self.payment_set.aggregate(total=models.Sum('amount'))['total']
+        if total:
+            return total
+        return Decimal("0.00")
 
     @property
     def balance(self):
-        return float(self.sum_total) - float(self.payment_total)
+        return self.sum_total - self.payment_total
 
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
