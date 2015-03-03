@@ -13,13 +13,20 @@ class InvoiceIndex(generic.ListView):
     template_name = 'RIGS/invoice_list.html'
 
     def get_queryset(self):
-        active = self.model.objects.filter(void=False).select_related('payment_set', 'event').prefetch_related(
-            'event__items').defer('event__person', 'event__organisation', 'event__venue', 'event__mic')
-        set = []
-        for invoice in active:
-            if invoice.balance != 0:
-                set.append(invoice)
-        return set
+        # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
+        query = self.model.objects.raw(
+            "SELECT *, "
+            "(SELECT SUM(ei.cost * ei.quantity) FROM RIGS_eventitem AS ei WHERE ei.event_id = i.event_id) AS cost, "
+            "(SELECT SUM(p.amount) FROM RIGS_payment AS p WHERE p.invoice_id = i.id) AS payments FROM RIGS_invoice as i "
+            "HAVING (cost - payments) > 0;"
+        )
+
+        items = []
+
+        for invoice in query:
+            items.append(invoice)
+
+        return query
 
 
 class InvoiceDetail(generic.DetailView):
