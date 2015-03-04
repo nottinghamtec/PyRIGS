@@ -22,7 +22,7 @@ class InvoiceIndex(generic.ListView):
               "(SELECT SUM(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
               "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
               "AS sub " \
-              "WHERE ((((cost - payments) <> 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
+              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
 
         query = self.model.objects.raw(sql)
 
