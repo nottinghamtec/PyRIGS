@@ -15,21 +15,16 @@ class InvoiceIndex(generic.ListView):
 
     def get_queryset(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
-        if connection.vendor == 'postgresql':
-            sql = """SELECT * FROM (SELECT *,
-(SELECT SUM (ei.cost * ei.quantity) FROM "RIGS_eventitem" AS ei where ei.event_id = i.event_id) AS cost,
-(SELECT SUM(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id = i.id) AS payments
-FROM "RIGS_invoice" as i) AS sub
-WHERE (cost - payments) > 0;"""
-        else:
-            sql = "SELECT *, (SELECT SUM(ei.cost * ei.quantity) FROM RIGS_eventitem AS ei WHERE ei.event_id = i.event_id) AS cost, (SELECT SUM(p.amount) FROM RIGS_payment AS p WHERE p.invoice_id = i.id) AS payments FROM RIGS_invoice as i HAVING (cost - payments) > 0;"
+        sql = "SELECT * FROM " \
+              "(SELECT " \
+              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
+              "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
+              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
+              "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
+              "AS sub " \
+              "WHERE ((((cost - payments) <> 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
 
         query = self.model.objects.raw(sql)
-
-        items = []
-
-        for invoice in query:
-            items.append(invoice)
 
         return query
 
