@@ -22,7 +22,8 @@ class InvoiceIndex(generic.ListView):
               "(SELECT SUM(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
               "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
               "AS sub " \
-              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
+              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
+              "ORDER BY invoice_date"
 
         query = self.model.objects.raw(sql)
 
@@ -56,9 +57,13 @@ class InvoiceWaiting(generic.ListView):
     template_name = 'RIGS/event_invoice.html'
 
     def get_queryset(self):
+        # @todo find a way to select items
         events = self.model.objects.filter(is_rig=True, end_date__lt=datetime.date.today(),
-                                           invoice__isnull=True).select_related('person', 'organisation', 'venue',
-                                                                                'mic')  # @todo find a way to select items
+                                           invoice__isnull=True) \
+            .order_by('start_date') \
+            .select_related('person',
+                            'organisation',
+                            'venue', 'mic')
         return events
 
 
