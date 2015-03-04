@@ -366,6 +366,7 @@ class Invoice(models.Model):
         permissions = (
             ('view_invoice', 'Can view Invoices'),
         )
+        ordering = ['-invoice_date']
 
 
 class Payment(models.Model):
