@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.template import Context, RequestContext
 from django.template.loader import get_template
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.db.models import Q
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
@@ -129,8 +129,6 @@ class EventArchive(generic.ArchiveIndexView):
         if end != "":
             filter = Q(start_date__lte=end)
         if start:
-            if start > end:
-                raise Http404("The selected start date is after the end date")
             if filter:
                 filter = filter & Q(start_date__gte=start)
             else:
