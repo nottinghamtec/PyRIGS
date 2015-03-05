@@ -6,11 +6,12 @@ import urllib2
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.template import Context, RequestContext
+from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.db.models import Q
+from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
@@ -125,6 +126,13 @@ class EventArchive(generic.ArchiveIndexView):
     def get_queryset(self):
         start = self.request.GET.get('start', None)
         end = self.request.GET.get('end', datetime.date.today())
+
+        # Assume idiots, always check
+        if start and start > end:
+            messages.add_message(self.request, messages.INFO,
+                                 "Muppet! Check the dates, it has been fixed for you.")
+            start, end = end, start  # Stop the impending fail
+
         filter = False
         if end != "":
             filter = Q(start_date__lte=end)
@@ -139,4 +147,10 @@ class EventArchive(generic.ArchiveIndexView):
         else:
             qs = self.model.objects.all()
 
-        return qs.select_related('person', 'organisation', 'venue', 'mic')
+        # Preselect related for efficiency
+        qs.select_related('person', 'organisation', 'venue', 'mic')
+
+        if len(qs) == 0:
+            messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
+
+        return qs
