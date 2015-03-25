@@ -4,8 +4,19 @@
 
 {% block content %}
 <div class="col-sm-10 col-sm-offset-1">
-	<div class="col-sm-6">
+	<div class="col-sm-10">
 		<h3>{{object.name}}</h3>
+	</div>
+	{% if object.pk == user.pk %}
+	<div class="col-sm-2">
+		<div class="pull-right">
+			<a href="{% url 'profile_update_self' %}" class="btn btn-primary">
+				Edit <span class="glyphicon glyphicon-pencil"></span>
+			</a>
+		</div>
+	</div>
+	{% endif %}
+	<div class="col-sm-6">
 		<dl class="dl-horizontal">
 			<dt>First Name</dt>
 			<dd>{{object.first_name}}</dd>
@@ -29,7 +40,7 @@
 			<dd>{{object.phone}}</dd>
 		</dl>
 	</div>
-	<div class="col-sm-3 col-sm-offset-3">
+	<div class="col-sm-3 col-sm-offset-2">
 		<div class="center-block">
 			<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />
 	</div>
