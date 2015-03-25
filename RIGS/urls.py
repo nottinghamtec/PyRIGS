@@ -106,6 +106,13 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.add_payment')(finance.PaymentDelete.as_view()),
                            name='payment_delete'),
 
+                       # User editing
+                       url(r'^user/$', login_required(views.ProfileDetail.as_view()), name='profile_detail'),
+                       url(r'^user/(?P<pk>\d+)/$',
+                        permission_required_with_403('RIGS.view_profile')(views.ProfileDetail.as_view()), 
+                        name='profile_detail'),
+                       # url(r'^user/edit/')
+
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
                        url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
