@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}RIGS Profile {{object.pk}}{% endblock %}
+
+{% block content %}
+<div class="col-sm-10 col-sm-offset-1">
+	<div class="col-sm-6">
+		<h3>{{object.name}}</h3>
+		<dl class="dl-horizontal">
+			<dt>First Name</dt>
+			<dd>{{object.first_name}}</dd>
+
+			<dt>Last Name</dt>
+			<dd>{{object.last_name}}</dd>
+
+			<dt>Email</dt>
+			<dd>{{object.email}}</dd>
+
+			<dt>Last Login</dt>
+			<dd>{{object.last_login}}</dd>
+
+			<dt>Date Joined</dt>
+			<dd>{{object.date_joined}}</dd>
+
+			<dt>Initials</dt>
+			<dd>{{object.initials}}</dd>
+
+			<dt>Phone</dt>
+			<dd>{{object.phone}}</dd>
+		</dl>
+	</div>
+	<div class="col-sm-3 col-sm-offset-3">
+		<div class="center-block">
+			<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />
+	</div>
+</div>
+{% endblock %}

@@ -250,3 +250,15 @@ class SecureAPIRequest(generic.View):
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
+
+class ProfileDetail(generic.DetailView):
+    model = models.Profile
+
+    def get_queryset(self):
+        try:
+            pk = self.kwargs['pk']
+        except KeyError:
+            pk = self.request.user.id
+            self.kwargs['pk'] = pk
+
+        return self.model.objects.filter(pk=pk)
