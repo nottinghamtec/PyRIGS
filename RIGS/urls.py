@@ -111,7 +111,8 @@ urlpatterns = patterns('',
                        url(r'^user/(?P<pk>\d+)/$',
                         permission_required_with_403('RIGS.view_profile')(views.ProfileDetail.as_view()), 
                         name='profile_detail'),
-                       # url(r'^user/edit/')
+                       url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
+                        name='profile_update_self'),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
