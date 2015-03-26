@@ -3,10 +3,15 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from registration.forms import RegistrationFormUniqueEmail 
 import simplejson
 
 from RIGS import models
 
+#Registration
+class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
+    initials = forms.CharField(required=True, max_length=5)
+    phone = forms.CharField(required=False, max_length=13)
 
 # Events Shit
 class EventForm(forms.ModelForm):
