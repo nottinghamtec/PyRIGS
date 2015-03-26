@@ -197,6 +197,14 @@ class SecureAPIRequest(generic.View):
         'profile': models.Profile,
     }
 
+    perms = {
+        'venue': 'RIGS.view_venue',
+        'person': 'RIGS.view_person',
+        'organisation': 'RIGS.view_organisation',
+        'mic': None,
+        'profile': None,
+    }
+
     '''
     Validate the request is allowed based on user permissions.
     Raises 403 if denied.
@@ -205,7 +213,7 @@ class SecureAPIRequest(generic.View):
 
     def __validate__(self, request, key, perm):
         if request.user.is_active:
-            if request.user.is_superuser or request.user.is_staff:
+            if request.user.is_superuser or perm is None:
                 return True
             elif request.user.has_perm(perm):
                 return True
@@ -214,7 +222,7 @@ class SecureAPIRequest(generic.View):
     def get(self, request, model, pk=None, param=None):
         # Request permission validation things
         key = request.GET.get('apikey', None)
-        perm = 'RIGS.view_' + model
+        perm = self.perms[model]
         self.__validate__(request, key, perm)
 
         # Response format where applicable
