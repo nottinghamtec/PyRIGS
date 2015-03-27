@@ -9,7 +9,7 @@ from django.core import serializers
 import simplejson
 from django.contrib import messages
 
-from RIGS import models
+from RIGS import models, forms
 
 """
 Displays the current rig count along with a few other bits and pieces
@@ -258,3 +258,29 @@ class SecureAPIRequest(generic.View):
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
+
+class ProfileDetail(generic.DetailView):
+    model = models.Profile
+
+    def get_queryset(self):
+        try:
+            pk = self.kwargs['pk']
+        except KeyError:
+            pk = self.request.user.id
+            self.kwargs['pk'] = pk
+
+        return self.model.objects.filter(pk=pk)
+
+class ProfileUpdateSelf(generic.UpdateView):
+    model = models.Profile
+    fields = ['first_name', 'last_name', 'email', 'initials', 'phone']
+
+    def get_queryset(self):
+        pk = self.request.user.id
+        self.kwargs['pk'] = pk
+
+        return self.model.objects.filter(pk=pk)
+
+    def get_success_url(self):
+        url =  reverse_lazy('profile_detail')
+        return url
