@@ -323,7 +323,7 @@
 
                                 <input type="text" id="{{ form.mic.id_for_label }}-input"
                                        class="form-control autocomplete-json"
-                                       data-sourceurl="{% url 'api_secure' model='mic' %}?fields=first_name,username,initials"
+                                       data-sourceurl="{% url 'api_secure' model='mic' %}?fields=first_name,last_name,initials"
                                        data-target="{{ form.mic.id_for_label }}"
                                        value="{{ object.mic.name|default_if_none:"" }}"/>
                             </div>
