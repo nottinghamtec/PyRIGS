@@ -5,6 +5,7 @@ from django.db import models, connection
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.functional import cached_property
+from django.utils.encoding import python_2_unicode_compatible
 import reversion
 
 from decimal import Decimal
@@ -39,6 +40,7 @@ class RevisionMixin(object):
 
 
 @reversion.register
+@python_2_unicode_compatible
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -73,6 +75,7 @@ class Person(models.Model, RevisionMixin):
 
 
 @reversion.register
+@python_2_unicode_compatible
 class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -122,6 +125,7 @@ class VatManager(models.Manager):
 
 
 @reversion.register
+@python_2_unicode_compatible
 class VatRate(models.Model, RevisionMixin):
     start_at = models.DateTimeField()
     rate = models.DecimalField(max_digits=6, decimal_places=6)
@@ -142,6 +146,7 @@ class VatRate(models.Model, RevisionMixin):
 
 
 @reversion.register
+@python_2_unicode_compatible
 class Venue(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -198,6 +203,7 @@ class EventManager(models.Manager):
 
 
 @reversion.register(follow=['items'])
+@python_2_unicode_compatible
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
     PROVISIONAL = 0
@@ -326,6 +332,7 @@ class EventCrew(models.Model):
     notes = models.TextField(blank=True, null=True)
 
 
+@python_2_unicode_compatible
 class Invoice(models.Model):
     event = models.OneToOneField('Event')
     invoice_date = models.DateField(auto_now_add=True)
@@ -369,6 +376,7 @@ class Invoice(models.Model):
         ordering = ['-invoice_date']
 
 
+@python_2_unicode_compatible
 class Payment(models.Model):
     CASH = 'C'
     INTERNAL = 'I'
@@ -387,3 +395,6 @@ class Payment(models.Model):
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
     method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)
+
+    def __str__(self):
+        return "%s: %d" % (self.get_method_display(), self.amount)
