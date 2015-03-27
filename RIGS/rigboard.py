@@ -107,6 +107,7 @@ class EventDuplicate(generic.RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         new = get_object_or_404(models.Event, pk=kwargs['pk'])
         new.pk = None
+        new.based_on = models.Event.objects.get(pk=kwargs['pk'])
         new.save()
 
         old = get_object_or_404(models.Event, pk=kwargs['pk'])
