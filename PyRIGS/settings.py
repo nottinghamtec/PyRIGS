@@ -23,7 +23,7 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INTERNAL_IPS = ['127.0.0.1', '10.20.30.20']
 
@@ -142,5 +142,7 @@ STATIC_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
+
+USE_GRAVATAR=True
 
 TERMS_OF_HIRE_URL = "http://dev.nottinghamtec.co.uk/wp-content/uploads/2014/11/terms.pdf"

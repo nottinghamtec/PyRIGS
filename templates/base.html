@@ -76,18 +76,22 @@
                         </a>
                         <ul class="dropdown-menu nav media-list pull-right" id="userdropdown">
                             <li class="media">
-                                <div class="media-left">
-                                    <img src="{{ request.user.profile_picture }}" class="media-object"/>
-                                </div>
+                                <a href="{% url 'profile_detail' %}">
+                                    <div class="media-left">
+                                        <img src="{{ request.user.profile_picture }}" class="media-object"/>
+                                    </div>
 
-                                <div class="media-body">
-                                    <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
+                                    <div class="media-body">
+                                        <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
 
-                                    <p class="muted">{{ request.user.email }}</p>
-                                </div>
+                                        <p class="muted">{{ request.user.email }}</p>
+                                    </div>
+                                </a>
                             </li>
                             <li>
-                                <a href="{% url 'logout' %}" class="btn btn-primary pull-right">Logout</a>
+                                <div class="col-sm-12 text-right">
+                                    <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+                                </div>
                             </li>
                         </ul>
                     {% else %}
