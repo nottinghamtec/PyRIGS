@@ -11,13 +11,17 @@
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                         class="glyphicon glyphicon-edit"></span></a>
-                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span></a>
+                {% if event.is_rig %}
+                    <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
+                            class="glyphicon glyphicon-print"></span></a>
+                {% endif %}
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                         class="glyphicon glyphicon-duplicate"></span></a>
-                {% if perms.RIGS.add_invoice %}
-                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                            class="glyphicon glyphicon-gbp"></span></a>
+                {% if event.is_rig %}
+                    {% if perms.RIGS.add_invoice %}
+                        <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
+                                class="glyphicon glyphicon-gbp"></span></a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -68,8 +72,10 @@
                     <dt>Event Venue</dt>
                     <dd>{{ object.venue }}</dd>
 
-                    <dt>Event MIC</dt>
-                    <dd>{{ event.mic.name }}</dd>
+                    {% if event.is_rig %}
+                        <dt>Event MIC</dt>
+                        <dd>{{ event.mic.name }}</dd>
+                    {% endif %}
 
                     <dt>Status</dt>
                     <dd>{{ event.get_status_display }}</dd>
@@ -114,8 +120,10 @@
                         <dd>{{ object.checked_in_by.name }}</dd>
                     {% endif %}
 
-                    <dt>Collected By</dt>
-                    <dd>{{ object.collector }}</dd>
+                    {% if event.is_rig %}
+                        <dt>Collected By</dt>
+                        <dd>{{ object.collector }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>
@@ -124,45 +132,49 @@
         <div class="btn-group btn-page">
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-edit"></span></a>
-            <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-print"></span></a>
+            {% if event.is_rig %}
+                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
+                        class="glyphicon glyphicon-print"></span></a>
+            {% endif %}
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                     class="glyphicon glyphicon-duplicate"></span></a>
-            {% if perms.RIGS.add_invoice %}
-                <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-gbp"></span></a>
+            {% if event.is_rig %}
+                {% if perms.RIGS.add_invoice %}
+                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
+                            class="glyphicon glyphicon-gbp"></span></a>
+                {% endif %}
             {% endif %}
         </div>
     </div>
-    <div class="col-sm-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">Event Details</div>
-            <div class="panel-body">
-                <div class="well well-sm">
-                    <h4>Notes</h4>
-                    {{ event.notes|linebreaksbr }}
-                </div>
-                {% if event.is_rig %}
+    {% if event.is_rig %}
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Event Details</div>
+                <div class="panel-body">
+                    <div class="well well-sm">
+                        <h4>Notes</h4>
+                        {{ event.notes|linebreaksbr }}
+                    </div>
                     {% include 'RIGS/item_table.html' %}
-                {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-sm-12 text-right">
-        <div class="btn-group btn-page">
-            <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-edit"></span></a>
-            <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-print"></span></a>
-            <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                    class="glyphicon glyphicon-duplicate"></span></a>
-            {% if perms.RIGS.add_invoice %}
-                <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-gbp"></span></a>
-            {% endif %}
+        <div class="col-sm-12 text-right">
+            <div class="btn-group btn-page">
+                <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
+                        class="glyphicon glyphicon-edit"></span></a>
+                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
+                        class="glyphicon glyphicon-print"></span></a>
+                <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
+                        class="glyphicon glyphicon-duplicate"></span></a>
+                {% if perms.RIGS.add_invoice %}
+                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
+                            class="glyphicon glyphicon-gbp"></span></a>
+                {% endif %}
+            </div>
+            <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
+                by {{ object.last_edited_by.name }}.
+            </div>
         </div>
-        <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
-            by {{ object.last_edited_by.name }}.
-        </div>
-    </div>
+    {% endif %}
 {% endblock %}
