@@ -6,7 +6,7 @@ import django
 
 django.setup()
 
-from django.db import connections
+from django.db import connection, connections
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import ConnectionDoesNotExist
 from django.db import transaction
@@ -15,6 +15,9 @@ import reversion
 import datetime
 import uuid
 from multiprocessing import Process
+
+# Slight fix for needing to restablish the connection
+connection.close()
 
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
