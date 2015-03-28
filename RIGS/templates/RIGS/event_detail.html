@@ -25,7 +25,7 @@
 
     {% if object.is_rig %}
         {# only need contact details for a rig #}
-        <div class="col-sm-5">
+        <div class="col-sm-12 col-md-6 col-lg-5">
             <div class="panel panel-default">
                 <div class="panel-heading">Contact Details</div>
                 <div class="panel-body">
@@ -60,7 +60,7 @@
             {% endif %}
         </div>
     {% endif %}
-    <div class="col-sm-{{ event.is_rig|yesno:"7,12" }}">
+    <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
         <div class="panel panel-info">
             <div class="panel-heading">{{ object.name }}</div>
             <div class="panel-body">
