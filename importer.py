@@ -331,22 +331,22 @@ def import_invoices(delete=False):
 
 @transaction.atomic
 def main():
-    # processs = []
-    # processs.append(Process(target=import_users))
-    # processs.append(Process(target=import_people, args=(True,)))
-    # processs.append(Process(target=import_organisations, args=(True,)))
-    # processs.append(Process(target=import_vat_rates, args=(True,)))
-    # processs.append(Process(target=import_venues, args=(True,)))
-    #
-    #  # Start all processs
-    # [x.start() for x in processs]
-    # # Wait for all processs to finish
-    # [x.join() for x in processs]
-    #
-    # import_rigs(True)
-    # import_eventitem(True)
+    processs = []
+    processs.append(Process(target=import_users))
+    processs.append(Process(target=import_people, args=(True,)))
+    processs.append(Process(target=import_organisations, args=(True,)))
+    processs.append(Process(target=import_vat_rates, args=(True,)))
+    processs.append(Process(target=import_venues, args=(True,)))
+    
+     # Start all processs
+    [x.start() for x in processs]
+    # Wait for all processs to finish
+    [x.join() for x in processs]
+    
+    import_rigs(True)
+    import_eventitem(True)
     import_invoices(True)
-    # import_nonrigs(False)
+    import_nonrigs(False)
 
 
 if __name__ == "__main__":
