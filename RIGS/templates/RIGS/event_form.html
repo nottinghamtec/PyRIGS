@@ -347,6 +347,15 @@
                                 </div>
                             </div>
                         {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ form.collector.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.collector.label }}</label>
+
+                            <div class="col-sm-8">
+                                {% render_field form.collector class+="form-control" %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
