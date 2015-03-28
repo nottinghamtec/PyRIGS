@@ -334,17 +334,22 @@ def import_invoices(delete=False):
 
 @transaction.atomic
 def main():
-    processs = []
-    processs.append(Process(target=import_users))
-    processs.append(Process(target=import_people, args=(True,)))
-    processs.append(Process(target=import_organisations, args=(True,)))
-    processs.append(Process(target=import_vat_rates, args=(True,)))
-    processs.append(Process(target=import_venues, args=(True,)))
+    # processs = []
+    # processs.append(Process(target=import_users))
+    # processs.append(Process(target=import_people, args=(True,)))
+    # processs.append(Process(target=import_organisations, args=(True,)))
+    # processs.append(Process(target=import_vat_rates, args=(True,)))
+    # processs.append(Process(target=import_venues, args=(True,)))
     
-     # Start all processs
-    [x.start() for x in processs]
-    # Wait for all processs to finish
-    [x.join() for x in processs]
+    #  # Start all processs
+    # [x.start() for x in processs]
+    # # Wait for all processs to finish
+    # [x.join() for x in processs]
+    import_users()
+    import_people(True)
+    import_organisations(True)
+    import_vat_rates(True)
+    import_venues(True)
     
     import_rigs(True)
     import_eventitem(True)
