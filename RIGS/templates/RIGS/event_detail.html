@@ -37,7 +37,7 @@
                         <dt>Person</dt>
                         <dd>
                             <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
-                                {{ object.person.name }}
+                                {{ object.person }}
                             </a>
                         </dd>
 
@@ -61,7 +61,7 @@
                             <dt>Organisation</dt>
                             <dd>
                                 <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
-                                    {{ object.organisation.name }}
+                                    {{ object.organisation }}
                                 </a>
                             </dd>
 
