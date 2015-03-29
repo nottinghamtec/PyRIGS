@@ -123,18 +123,23 @@
                             <input type="hidden" id="{{ form.person.id_for_label }}" name="{{ form.person.name }}"
                                    value="{{ form.person.value|default_if_none:"" }}"/>
 
-                            <div class="col-xs-9">
+                            <div class="col-sm-9 col-md-7 col-lg-8">
                                 <input type="text" id="{{ form.person.id_for_label }}-input"
-                                       class="form-control autocomplete-json"
+                                       class="form-control autocomplete-json autocomplete-update"
                                        value="{{ object.person|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='person' %}"
                                        data-target="{{ form.person.id_for_label }}"/>
                             </div>
-                            <div class="col-xs-3 align-right">
-                                <a href="{% url 'person_create' %}" class="btn btn-default modal-href"
-                                   data-target="#{{ form.person.id_for_label }}">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </a>
+                            <div class="col-sm-3 col-md-5 col-lg-4 align-right">
+                                <div class="btn-group">
+                                    <a href="{% url 'person_create' %}" class="btn btn-default modal-href"
+                                       data-target="#{{ form.person.id_for_label }}">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </a>
+                                    <a href="{% if object.person %}{% url 'person_update' object.person.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.person.id_for_label }}-update">
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -149,18 +154,23 @@
                                    name="{{ form.organisation.name }}"
                                    value="{{ form.organisation.value|default_if_none:"" }}"/>
 
-                            <div class="col-xs-9">
+                            <div class="col-sm-9 col-md-7 col-lg-8">
                                 <input type="text" id="{{ form.organisation.id_for_label }}-input"
-                                       class="form-control autocomplete-json"
+                                       class="form-control autocomplete-json autocomplete-update"
                                        value="{{ object.organisation|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='organisation' %}"
                                        data-target="{{ form.organisation.id_for_label }}"/>
                             </div>
-                            <div class="col-xs-3 align-right">
-                                <a href="{% url 'organisation_create' %}" class="btn btn-default modal-href"
-                                   data-target="#{{ form.organisation.id_for_label }}">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </a>
+                            <div class="col-sm-3 col-md-5 col-lg-4 align-right">
+                                <div class="btn-group">
+                                    <a href="{% url 'organisation_create' %}" class="btn btn-default modal-href"
+                                       data-target="#{{ form.organisation.id_for_label }}">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </a>
+                                    <a href="{% if object.organisation %}{% url 'organisation_update' object.organisation.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.organisation.id_for_label }}-update">
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -206,22 +216,23 @@
                                 <input type="hidden" id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}"
                                        value="{{ form.venue.value|default_if_none:"" }}"/>
 
-                                <div class="col-xs-9">
+                                <div class="col-sm-9 col-md-7 col-lg-8">
                                     <input type="text" id="{{ form.venue.id_for_label }}-input"
-                                           class="form-control autocomplete-json"
-                                           data-valueurl="{% if form.venue.value %}
-												{% url 'api_secure' model='venue' pk=form.venue.value %}
-											{% else %}
-												{% url 'api_secure' model='venue' %}
-											{% endif %}?fields=name"
+                                           class="form-control autocomplete-json autocomplete-update"
+                                           value="{{ object.venue|default_if_none:"" }}"
                                            data-sourceurl="{% url 'api_secure' model='venue' %}"
                                            data-target="{{ form.venue.id_for_label }}"/>
                                 </div>
-                                <div class="col-xs-3 align-right">
-                                    <a href="{% url 'venue_create' %}" class="btn btn-default modal-href"
-                                       data-target="#{{ form.venue.id_for_label }}">
-                                        <span class="glyphicon glyphicon-plus"></span>
-                                    </a>
+                                <div class="col-sm-3 col-md-5 col-lg-4 align-right">
+                                    <div class="btn-group">
+                                        <a href="{% url 'venue_create' %}" class="btn btn-default modal-href"
+                                           data-target="#{{ form.venue.id_for_label }}">
+                                            <span class="glyphicon glyphicon-plus"></span>
+                                        </a>
+                                        <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.venue.id_for_label }}-update">
+                                            <span class="glyphicon glyphicon-pencil"></span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
