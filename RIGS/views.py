@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -193,7 +193,6 @@ class SecureAPIRequest(generic.View):
         'venue': models.Venue,
         'person': models.Person,
         'organisation': models.Organisation,
-        'mic': models.Profile,
         'profile': models.Profile,
     }
 
@@ -201,7 +200,6 @@ class SecureAPIRequest(generic.View):
         'venue': 'RIGS.view_venue',
         'person': 'RIGS.view_person',
         'organisation': 'RIGS.view_organisation',
-        'mic': None,
         'profile': None,
     }
 
@@ -253,6 +251,12 @@ class SecureAPIRequest(generic.View):
                         'value': o.pk,
                         'label': o.name,
                     }
+
+                    try: # See if there is an update url or don't bother with it otherwise
+                        data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
+                    except NoReverseMatch:
+                        pass
+
                     results.append(data)
             json = simplejson.dumps(results[:20])
             return HttpResponse(json, content_type="application/json")  # Always json
