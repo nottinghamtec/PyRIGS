@@ -11,7 +11,7 @@
         {% for event in events %}
             <tr class="
                         {% if event.cancelled %}
-							active
+							active text-muted
                         {% elif not event.is_rig %}
                             info
 						{% elif event.confirmed and event.mic %}
@@ -29,6 +29,7 @@
                     {% if event.end_date and event.end_date != event.start_date %}
                         <div><strong>{{ event.end_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
                     {% endif %}
+                    <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
                 <td>
                     <h4>
@@ -37,7 +38,7 @@
                             <small>at {{ event.venue }}</small>
                         {% endif %}
                     </h4>
-                    {% if event.is_rig %}
+                    {% if event.is_rig and not event.cancelled %}
                         <h5>
                             {{ event.person.name }}
                             {% if event.organisation %}
@@ -52,26 +53,28 @@
                     {% endif %}
                 </td>
                 <td>
-                    <dl class="dl-horizontal">
-                        {% if event.meet_at %}
-                            <dt>Crew meet</dt>
-                            <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
-                        {% endif %}
-                        {% if event.start_time %}
-                            <dt>Event starts</dt>
-                            <dd>
-                                {{ event.start_time|date:"H:i" }}<br/>
-                                {{ event.start_date|date:"(Y-m-d)" }}
-                            </dd>
-                        {% endif %}
-                        {% if event.end_time and event.start_time != event.end_time %}
-                            <dt>Event ends</dt>
-                            <dd>
-                                {{ event.end_time|date:"H:i" }}<br/>
-                                {{ event.end_date|date:"(Y-m-d)" }}
-                            </dd>
-                        {% endif %}
-                    </dl>
+                    {% if not event.cancelled %}
+                        <dl class="dl-horizontal">
+                            {% if event.meet_at %}
+                                <dt>Crew meet</dt>
+                                <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
+                            {% endif %}
+                            {% if event.start_time %}
+                                <dt>Event starts</dt>
+                                <dd>
+                                    {{ event.start_time|date:"H:i" }}<br/>
+                                    {{ event.start_date|date:"(Y-m-d)" }}<br/>
+                                </dd>
+                            {% endif %}
+                            {% if event.end_time and event.start_time != event.end_time %}
+                                <dt>Event ends</dt>
+                                <dd>
+                                    {{ event.end_time|date:"H:i" }}<br/>
+                                    {{ event.end_date|date:"(Y-m-d)" }}
+                                </dd>
+                            {% endif %}
+                        </dl>
+                    {% endif %}
                 </td>
                 <td class="text-right">
                     {% if event.mic or not event.is_rig %}
