@@ -12,8 +12,10 @@
             <tr class="
                         {% if event.cancelled %}
 							active
-						{% elif event.confirmed and event.mic or not event.is_rig %}
-						{# interpreated as (booked and mic) or is non rig #}
+                        {% elif not event.is_rig %}
+                            info
+						{% elif event.confirmed and event.mic %}
+						{# interpreated as (booked and mic) #}
 							success
 						{% elif event.mic %}
 							warning
