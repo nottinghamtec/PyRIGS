@@ -184,7 +184,7 @@ class EventManager(models.Manager):
             (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
-        ).order_by('meet_at', 'start_date').select_related('person', 'organisation', 'venue', 'mic')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
 
     def rig_count(self):
