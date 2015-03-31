@@ -168,3 +168,18 @@ class EventTestCase(TestCase):
 		self.assertTrue(event.confirmed)
 		event.status = models.Event.PROVISIONAL
 		event.save()
+
+class EventItemTestCase(TestCase):
+	def setUp(self):
+		self.e1 = models.Event.objects.create(name="TI E1", start_date=date.today())
+		self.e2 = models.Event.objects.create(name="TI E2", start_date=date.today())
+
+	def test_item_cost(self):
+		item = models.EventItem.objects.create(event=self.e1, name="TI I1", quantity=1, cost=1.00, order=1)
+		self.assertEqual(item.total_cost, 1.00)
+
+		item.cost = 2.50
+		self.assertEqual(item.total_cost, 2.50)
+
+		item.quantity = 4
+		self.assertEqual(item.total_cost, 10.00)
