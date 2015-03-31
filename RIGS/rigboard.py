@@ -17,6 +17,7 @@ from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from RIGS import models, forms
 import datetime
+import re
 
 __author__ = 'ghost'
 
@@ -44,6 +45,17 @@ class EventCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
         context['edit'] = True
+
+        form = context['form']
+        if re.search('"-\d+"', form['items_json'].value()):
+            messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
+        
+
+        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+        for field, model in form.related_models.iteritems():
+            value = form[field].value()
+            if value is not None and value != '':
+                context[field] = model.objects.get(pk=value)
         return context
 
     def get_success_url(self):
@@ -57,6 +69,14 @@ class EventUpdate(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(EventUpdate, self).get_context_data(**kwargs)
         context['edit'] = True
+
+        form = context['form']
+
+        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+        for field, model in form.related_models.iteritems():
+            value = form[field].value()
+            if value is not None and value != '':
+                context[field] = model.objects.get(pk=value)
         return context
 
     def get_success_url(self):
