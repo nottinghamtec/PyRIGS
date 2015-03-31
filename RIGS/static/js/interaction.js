@@ -87,6 +87,7 @@ $('body').on('submit', '#item-form', function (e) {
 
         // Add the new table
         $('#new-item-row').clone().attr('id', 'item-' + pk).data('pk', pk).appendTo('#item-table-body');
+        $('#item-'+pk+' .item-delete, #item-'+pk+' .item-edit').data('pk', pk)
     } else {
         // Existing item
         // update data structure
