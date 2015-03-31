@@ -114,6 +114,41 @@ class EventTestCase(TestCase):
 		self.assertItemsEqual(events[:2], o1.latest_events)
 		self.assertItemsEqual(events[3:4], o2.latest_events)
 
+	def test_organisation_person_join(self):
+		p1 = models.Person.objects.create(name="TE P1")
+		p2 = models.Person.objects.create(name="TE P2")
+		o1 = models.Organisation.objects.create(name="TE O1")
+		o2 = models.Organisation.objects.create(name="TE O2")
+
+		events = models.Event.objects.all()
+		# p1 in o1 + o2, p2 in o1
+		for event in events[:2]:
+			event.person = p1
+			event.organisation = o1
+			event.save()
+		for event in events[3:4]:
+			event.person = p1
+			event.organisation = o2
+			event.save()
+		for event in events[5:7]:
+			event.person = p2
+			event.organisation = o1
+			event.save()
+
+		events = models.Event.objects.all()
+
+		# Check person's organisations
+		self.assertIn(o1, p1.organisations)
+		self.assertIn(o2, p1.organisations)
+		self.assertIn(o1, p2.organisations)
+		self.assertNotIn(o2, p2.organisations)
+
+		# Check organisation's persons
+		self.assertIn(p1, o1.persons)
+		self.assertIn(p2, o1.persons)
+		self.assertIn(p1, o2.persons)		
+		self.assertNotIn(p2, o2.persons)
+
 	def test_cancelled_property(self):
 		event = models.Event.objects.all()[0]
 		event.status = models.Event.CANCELLED
