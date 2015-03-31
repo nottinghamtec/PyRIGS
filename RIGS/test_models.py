@@ -183,3 +183,14 @@ class EventItemTestCase(TestCase):
 
 		item.quantity = 4
 		self.assertEqual(item.total_cost, 10.00)
+
+		# need to tidy up
+		item.delete()
+
+	def test_item_order(self):
+		i1 = models.EventItem.objects.create(event=self.e1, name="TI I1", quantity=1, cost=1.00, order=1)
+		i2 = models.EventItem.objects.create(event=self.e1, name="TI I2", quantity=1, cost=1.00, order=2)
+
+		items = self.e1.items.all()
+		self.assertListEqual([i1, i2], list(items))
+		
