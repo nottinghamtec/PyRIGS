@@ -44,6 +44,11 @@ class EventForm(forms.ModelForm):
         super(EventForm, self).__init__(*args, **kwargs)
 
         self.fields['items_json'].initial = self._get_items_json
+        self.fields['start_date'].widget.format = '%Y-%m-%d'
+        self.fields['end_date'].widget.format = '%Y-%m-%d'
+
+        self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
+        self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
 
     def init_items(self):
         self.items = self.process_items_json()
@@ -98,6 +103,7 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = models.Event
-        fields = ['is_rig', 'name', 'venue', 'start_date', 'start_time', 'end_date',
+        fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
-                  'person', 'organisation', 'dry_hire', 'checked_in_by', 'status', 'collector']
+                  'person', 'organisation', 'dry_hire', 'checked_in_by', 'status', 
+                  'collector',]
