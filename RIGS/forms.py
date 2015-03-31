@@ -23,6 +23,14 @@ class EventForm(forms.ModelForm):
 
     items = {}
 
+    related_models = {
+        'person': models.Person,
+        'organisation': models.Organisation,
+        'venue': models.Venue,
+        'mic': models.Profile,
+        'checked_in_by': models.Profile,
+    }
+
     @property
     def _get_items_json(self):
         items = {}
@@ -36,6 +44,10 @@ class EventForm(forms.ModelForm):
         super(EventForm, self).__init__(*args, **kwargs)
 
         self.fields['items_json'].initial = self._get_items_json
+
+    def init_items(self):
+        self.items = self.process_items_json()
+        return self.items
 
     def process_items_json(self, event=None):
         data = simplejson.loads(self.cleaned_data['items_json'])

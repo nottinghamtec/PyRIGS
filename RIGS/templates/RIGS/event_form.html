@@ -18,18 +18,19 @@
 
     <script>
         function setTime23Hours() {
-            $('.end_time').val('23:00');
+            $('#{{ form.end_time.id_for_label }}').val('23:00');
         }
 
         function setTime02Hours() {
-
-
-            if ($('.start_date').val() == $('.end_date').val()) {
-                var end_date = new Date($('.end_date').val());
+            var id_start = "{{ form.start_date.id_for_label }}"
+            var id_end_date = "{{ form.end_date.id_for_label }}"
+            var id_end_time = "{{ form.end_time.id_for_label }}"
+            if ($('#'+id_start).val() == $('#'+id_end_date).val()) {
+                var end_date = new Date($('#'+id_end_date).val());
                 end_date.setDate(end_date.getDate() + 1);
-                $('.end_date').val(end_date.getISOString());
+                $('#'+id_end_date).val(end_date.getISOString());
             }
-            $('.end_time').val('02:00');
+            $('#'+id_end_time).val('02:00');
         }
 
         $(document).ready(function () {
@@ -71,20 +72,22 @@
 
 {% block content %}
     <form class="form-horizontal itemised_form" role="form" method="POST">{% csrf_token %}
+    <div class="row">
     <div class="col-sm-12">
-        <div class="col-sm-8">
-            <h2>
-                {% if object.pk %}
-                    Event N{{ object.pk|stringformat:"05d" }}
-                {% else %}
-                    New Event
-                {% endif %}
-            </h2>
-        </div>
-        <div class="col-sm-4 text-right">
-            <div class="btn-group btn-page">
-                <button type="submit" class="btn btn-default" title="Save"><span
-                        class="glyphicon glyphicon-floppy-disk"></span></button>
+            <div class="col-sm-8">
+                <h2>
+                    {% if object.pk %}
+                        Event N{{ object.pk|stringformat:"05d" }}
+                    {% else %}
+                        New Event
+                    {% endif %}
+                </h2>
+            </div>
+            <div class="col-sm-4 text-right">
+                <div class="btn-group btn-page">
+                    <button type="submit" class="btn btn-default" title="Save"><span
+                            class="glyphicon glyphicon-floppy-disk"></span></button>
+                </div>
             </div>
         </div>
     </div>
@@ -126,7 +129,7 @@
                             <div class="col-sm-9 col-md-7 col-lg-8">
                                 <input type="text" id="{{ form.person.id_for_label }}-input"
                                        class="form-control autocomplete-json autocomplete-update"
-                                       value="{{ object.person|default_if_none:"" }}"
+                                       value="{{ person|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='person' %}"
                                        data-target="{{ form.person.id_for_label }}"/>
                             </div>
@@ -136,7 +139,7 @@
                                        data-target="#{{ form.person.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </a>
-                                    <a href="{% if object.person %}{% url 'person_update' object.person.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.person.id_for_label }}-update">
+                                    <a href="{% if form.person.value %}{% url 'person_update' form.person.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.person.id_for_label }}-update">
                                         <span class="glyphicon glyphicon-pencil"></span>
                                     </a>
                                 </div>
@@ -157,7 +160,7 @@
                             <div class="col-sm-9 col-md-7 col-lg-8">
                                 <input type="text" id="{{ form.organisation.id_for_label }}-input"
                                        class="form-control autocomplete-json autocomplete-update"
-                                       value="{{ object.organisation|default_if_none:"" }}"
+                                       value="{{ organisation|default_if_none:"" }}"
                                        data-sourceurl="{% url 'api_secure' model='organisation' %}"
                                        data-target="{{ form.organisation.id_for_label }}"/>
                             </div>
@@ -167,7 +170,7 @@
                                        data-target="#{{ form.organisation.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </a>
-                                    <a href="{% if object.organisation %}{% url 'organisation_update' object.organisation.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.organisation.id_for_label }}-update">
+                                    <a href="{% if form.organisation.value %}{% url 'organisation_update' form.organisation.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.organisation.id_for_label }}-update">
                                         <span class="glyphicon glyphicon-pencil"></span>
                                     </a>
                                 </div>
@@ -219,7 +222,7 @@
                                 <div class="col-sm-9 col-md-7 col-lg-8">
                                     <input type="text" id="{{ form.venue.id_for_label }}-input"
                                            class="form-control autocomplete-json autocomplete-update"
-                                           value="{{ object.venue|default_if_none:"" }}"
+                                           value="{{ venue|default_if_none:"" }}"
                                            data-sourceurl="{% url 'api_secure' model='venue' %}"
                                            data-target="{{ form.venue.id_for_label }}"/>
                                 </div>
@@ -244,10 +247,7 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-12 col-md-7">
-                                    <input type="date" name="{{ form.start_date.name }}"
-                                           id="{{ form.start_date.id_for_label }}"
-                                           class="form-control start_date" required
-                                           value="{{ form.start_date.value|date:"Y-m-d" }}"/>
+                                    {% render_field form.start_date type="date" class+="form-control" %}
                                 </div>
                                 <div class="col-sm-12 col-md-5">
                                     {% render_field form.start_time type="time" class+="form-control" %}
@@ -262,13 +262,10 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-12 col-md-7">
-                                    <input type="date" name="{{ form.end_date.name }}"
-                                           id="{{ form.end_date.id_for_label }}"
-                                           class="form-control end_date" required
-                                           value="{{ form.end_date.value|date:"Y-m-d" }}"/>
+                                    {% render_field form.end_date type="date" class+="form-control" %}
                                 </div>
                                 <div class="col-sm-12 col-md-5">
-                                    {% render_field form.end_time type="time" class+="form-control end_time" %}
+                                    {% render_field form.end_time type="time" class+="form-control" %}
                                 </div>
                             </div>
 
@@ -290,10 +287,7 @@
                                    class="col-sm-4 control-label">{{ form.access_at.label }}</label>
 
                             <div class="col-sm-8">
-                                <input type="datetime-local" name="{{ form.access_at.name }}"
-                                       id="{{ form.access_at.id_for_label }}"
-                                       class="form-control"
-                                       value="{{ form.access_at.value|date:"c" }}"/>
+                                {% render_field form.access_at type="datetime-local" class+="form-control" %}
                             </div>
                         </div>
                         <div class="form-group">
@@ -301,10 +295,7 @@
                                    class="col-sm-4 control-label">{{ form.meet_at.label }}</label>
 
                             <div class="col-sm-8">
-                                <input type="datetime-local" name="{{ form.meet_at.name }}"
-                                       id="{{ form.meet_at.id_for_label }}"
-                                       class="form-control"
-                                       value="{{ form.meet_at.value|date:"c" }}"/>
+                                {% render_field form.meet_at type="datetime-local" class+="form-control" %}
                             </div>
                         </div>
                         <div class="form-group">
@@ -341,7 +332,7 @@
                                        class="form-control autocomplete-json"
                                        data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials"
                                        data-target="{{ form.mic.id_for_label }}"
-                                       value="{{ object.mic.name|default_if_none:"" }}"/>
+                                       value="{{ mic.name|default_if_none:"" }}"/>
                             </div>
                         </div>
 
@@ -357,9 +348,9 @@
 
                                     <input type="text" id="{{ form.checked_in_by.id_for_label }}-input"
                                            class="form-control autocomplete-json"
-                                           data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,username,initials"
+                                           data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials"
                                            data-target="{{ form.checked_in_by.id_for_label }}"
-                                           value="{{ object.checked_in_by.name|default_if_none:"" }}"/>
+                                           value="{{ checked_in_by.name|default_if_none:"" }}"/>
                                 </div>
                             </div>
                         {% endif %}
