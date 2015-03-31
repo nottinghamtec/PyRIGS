@@ -13,6 +13,14 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
 
+    def clean_initials(self):
+        """
+        Validate that the supplied initials are unique.
+        """
+        if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
+            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
+        return self.cleaned_data['initials']
+
 # Events Shit
 class EventForm(forms.ModelForm):
     datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
