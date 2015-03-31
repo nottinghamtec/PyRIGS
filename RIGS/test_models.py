@@ -26,7 +26,7 @@ class EventTestCase(TestCase):
 		self.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
 
 		# produce 7 normal events
-		models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6), description="start future no end")
+		models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6), description="start future no end") 
 		models.Event.objects.create(name="TE E2", start_date=date.today(), description="start today no end")
 		models.Event.objects.create(name="TE E3", start_date=date.today(), end_date=date.today(), description="start today with end")
 		models.Event.objects.create(name="TE E4", start_date='2014-03-20', description="start past no end")
@@ -58,3 +58,12 @@ class EventTestCase(TestCase):
 	def test_rig_count(self):
 		# by my count this is 7
 		self.assertEqual(models.Event.objects.rig_count(), 7)
+
+	def test_current_events(self):
+		# by my count 7 + 4 + 1
+		current_events = models.Event.objects.current_events()
+		# for event in current_events:
+		# 	print event
+		self.assertEqual(len(current_events), 7+4+1)
+		self.assertIn(models.Event.objects.get(name="TE E12"), current_events)
+		
