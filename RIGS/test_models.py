@@ -19,10 +19,7 @@ class VatRateTestCase(TestCase):
 
 class EventTestCase(TestCase):
 	def setUp(self):
-		self.vatrate = models.VatRate.objects.create(start_at='2014-03-01',rate=0.20,comment='test1')
-		self.person = models.Person.objects.create(name="TE P1")
-		self.organisation = models.Organisation.objects.create(name="TE O1")
-		self.venue = models.Venue.objects.create(name="TE V1")
+		self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
 		self.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
 
 		# produce 7 normal events
@@ -66,4 +63,41 @@ class EventTestCase(TestCase):
 		# 	print event
 		self.assertEqual(len(current_events), 7+4+1)
 		self.assertIn(models.Event.objects.get(name="TE E12"), current_events)
-		
+
+	def test_related_venue(self):
+		v1 = models.Venue.objects.create(name="TE V1")
+		v2 = models.Venue.objects.create(name="TE V2")
+		events = models.Event.objects.all()
+		for event in events[:2]:
+			event.venue = v1
+			event.save()
+		for event in events[3:4]:
+			event.venue = v2
+			event.save()
+
+		events = models.Event.objects.all()
+		self.assertItemsEqual(events[:2], v1.latest_events)
+		self.assertItemsEqual(events[3:4], v2.latest_events)
+
+	def test_related_vatrate(self):
+		self.assertEqual(self.vatrate, models.Event.objects.all()[0].vat_rate)
+
+	def test_cancelled_property(self):
+		event = models.Event.objects.all()[0]
+		event.status = models.Event.CANCELLED
+		event.save()
+		event = models.Event.objects.all()[0]
+		self.assertEqual(event.status, models.Event.CANCELLED)
+		self.assertTrue(event.cancelled)
+		event.status = models.Event.PROVISIONAL
+		event.save()
+
+	def test_confirmed_property(self):
+		event = models.Event.objects.all()[0]
+		event.status = models.Event.CONFIRMED
+		event.save()
+		event = models.Event.objects.all()[0]
+		self.assertEqual(event.status, models.Event.CONFIRMED)
+		self.assertTrue(event.confirmed)
+		event.status = models.Event.PROVISIONAL
+		event.save()
