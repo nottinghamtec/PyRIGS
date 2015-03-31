@@ -18,7 +18,6 @@ class EventForm(forms.ModelForm):
     datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
-    name = forms.CharField(min_length=3)
 
     items_json = forms.CharField()
 
