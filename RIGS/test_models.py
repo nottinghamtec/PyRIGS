@@ -82,6 +82,38 @@ class EventTestCase(TestCase):
 	def test_related_vatrate(self):
 		self.assertEqual(self.vatrate, models.Event.objects.all()[0].vat_rate)
 
+	def test_related_person(self):
+		p1 = models.Person.objects.create(name="TE P1")
+		p2 = models.Person.objects.create(name="TE P2")
+
+		events = models.Event.objects.all()
+		for event in events[:2]:
+			event.person = p1
+			event.save()
+		for event in events[3:4]:
+			event.person = p2
+			event.save()
+
+		events = models.Event.objects.all()
+		self.assertItemsEqual(events[:2], p1.latest_events)
+		self.assertItemsEqual(events[3:4], p2.latest_events)
+
+	def test_related_organisation(self):
+		o1 = models.Organisation.objects.create(name="TE O1")
+		o2 = models.Organisation.objects.create(name="TE O2")
+
+		events = models.Event.objects.all()
+		for event in events[:2]:
+			event.organisation = o1
+			event.save()
+		for event in events[3:4]:
+			event.organisation = o2
+			event.save()
+
+		events = models.Event.objects.all()
+		self.assertItemsEqual(events[:2], o1.latest_events)
+		self.assertItemsEqual(events[3:4], o2.latest_events)
+
 	def test_cancelled_property(self):
 		event = models.Event.objects.all()[0]
 		event.status = models.Event.CANCELLED
