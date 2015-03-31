@@ -36,9 +36,11 @@
                     <dl class="dl-horizontal">
                         <dt>Person</dt>
                         <dd>
-                            <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
-                                {{ object.person }}
-                            </a>
+                            {% if object.person %}
+                                <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
+                                    {{ object.person }}
+                                </a>
+                            {% endif %}
                         </dd>
 
                         <dt>Email</dt>
@@ -60,9 +62,11 @@
                         <dl class="dl-horizontal">
                             <dt>Organisation</dt>
                             <dd>
-                                <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
-                                    {{ object.organisation }}
-                                </a>
+                                {% if object.organisation %}
+                                    <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
+                                        {{ object.organisation }}
+                                    </a>
+                                {% endif %}
                             </dd>
 
                             <dt>Phone Number</dt>
@@ -86,7 +90,13 @@
             <div class="panel-body">
                 <dl class="dl-horizontal">
                     <dt>Event Venue</dt>
-                    <dd><a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">{{ object.venue }}</a></dd>
+                    <dd>
+                        {% if object.venue %}
+                            <a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">
+                                {{ object.venue }}
+                            </a>
+                        {% endif %}
+                    </dd>
 
                     {% if event.is_rig %}
                         <dt>Event MIC</dt>
