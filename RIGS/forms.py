@@ -10,8 +10,18 @@ from RIGS import models
 
 #Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
+    first_name = forms.CharField(required=False, max_length=50)
+    last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
+
+    def clean_initials(self):
+        """
+        Validate that the supplied initials are unique.
+        """
+        if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
+            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
+        return self.cleaned_data['initials']
 
 # Events Shit
 class EventForm(forms.ModelForm):
