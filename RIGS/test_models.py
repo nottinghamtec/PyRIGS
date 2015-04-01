@@ -1,6 +1,7 @@
 from django.test import TestCase
 from RIGS import models
 from datetime import date, timedelta
+from decimal import *
 
 class VatRateTestCase(TestCase):
 	def setUp(self):
@@ -194,3 +195,34 @@ class EventItemTestCase(TestCase):
 		items = self.e1.items.all()
 		self.assertListEqual([i1, i2], list(items))
 		
+class EventPricingTestCase(TestCase):
+	def setUp(self):
+		models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
+		models.VatRate.objects.create(rate=0.10, comment="TP V2", start_at=date.today()-timedelta(days=1))
+		self.e1 = models.Event.objects.create(name="TP E1", start_date=date.today()-timedelta(days=2))
+		self.e2 = models.Event.objects.create(name="TP E2", start_date=date.today())
+
+		# Create some items E1, total 70.40
+		# Create some items E2, total 381.20
+		self.i1 = models.EventItem.objects.create(event=self.e1, name="TP I1", quantity=1, cost=50.00, order=1)
+		self.i2 = models.EventItem.objects.create(event=self.e1, name="TP I2", quantity=2, cost=3.20, order=2)
+		self.i3 = models.EventItem.objects.create(event=self.e1, name="TP I3", quantity=7, cost=2.00, order=3)
+		self.i4 = models.EventItem.objects.create(event=self.e2, name="TP I4", quantity=2, cost=190.60, order=1)
+
+	# Decimal type is needed here as that is what is returned from the model.
+	# Using anything else results in a failure due to floating point arritmetic
+	def test_sum_totals(self):
+		self.assertEqual(self.e1.sum_total, Decimal('70.40'))
+		self.assertEqual(self.e2.sum_total, Decimal('381.20'))
+
+	def test_vat_rate(self):
+		self.assertEqual(self.e1.vat_rate.rate, Decimal('0.20'))
+		self.assertEqual(self.e2.vat_rate.rate, Decimal('0.10'))
+
+	def test_vat_ammount(self):
+		self.assertEqual(self.e1.vat, Decimal('14.08'))
+		self.assertEqual(self.e2.vat, Decimal('38.12'))
+
+	def test_grand_total(self):
+		self.assertEqual(self.e1.total, Decimal('84.48'))
+		self.assertEqual(self.e2.total, Decimal('419.32'))
