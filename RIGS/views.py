@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 import simplejson
 from django.contrib import messages
+from django_ical.views import ICalFeed
 
 from RIGS import models, forms
 
@@ -262,6 +263,91 @@ class SecureAPIRequest(generic.View):
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
+
+class CalendarICS(ICalFeed):
+    """
+    A simple event calender
+    """
+    product_id = '-//example.com//Example//EN'
+    timezone = 'UTC'
+    file_name = "event.ics"
+
+    def items(self):
+        return models.Event.objects.all().order_by('-start_date')
+
+    def item_title(self, item):
+        title = ''
+        if item.cancelled:
+            title += 'CANCELLED: '
+
+        if not item.is_rig:
+            title += 'NON-RIG: '
+
+        if item.dry_hire:
+            title += 'DRY HIRE: '
+
+        title += item.name
+        
+        title += ' ('+str(item.status)+')'
+
+        return title
+
+    def item_start_datetime(self, item):
+        startDateTime = item.start_date#.strftime("%Y%M%d")
+
+        #if item.start_time:
+        #    startDateTime += 'T'+item.start_time.strftime("%H%i")
+
+        return startDateTime
+
+    def item_end_datetime(self, item):
+        endDateTime = item.start_date.strftime("%Y%M%d")
+
+        #if item.end_date:
+        #    endDateTime = item.end_date.strftime("%Y%M%d")
+        #
+        #if item.start_time and item.end_time: # don't allow an event with specific end but no specific start
+        #    endDateTime += 'T'+item.end_time.strftime("%H%i")
+        #elif item.start_time: # if there's a start time specified then an end time should also be specified
+        #    endDateTime += 'T2359'
+        #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
+        #    endDateTime += '' # do nothing
+
+        return endDateTime
+
+    def item_location(self,item):
+        return item.venue
+
+    def item_description(self, item):
+        desc = 'Rig ID = '+str(item.pk)+'\n'
+        desc += 'MIC = ' + (item.mic.name if item.mic else '---') + '\n'
+        desc += 'Status = ' + str(item.status) + '\n'
+        desc += 'Event = ' + item.name + '\n'
+        desc += 'Venue = ' + (item.venue.name if item.venue else '---') + '\n'
+        if item.is_rig and item.person:
+            desc += 'Client = ' + item.person.name + ( ('for'+item.organisation.name) if item.organisation else '') + '\n'
+        desc += '\n\n'
+        if item.description:
+            desc += 'Event Description:\n'+item.description
+        if item.notes:
+            desc += 'Notes:\n'+item.notes
+
+        
+
+
+        return item.description
+
+    def item_link(self, item):
+        return ''
+
+    # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?)
+    #     return ''
+
+    def item_updated(self, item):
+        return item.last_edited_at
+
+    def item_guid(self, item):
+        return item.pk
 
 class ProfileDetail(generic.DetailView):
     model = models.Profile

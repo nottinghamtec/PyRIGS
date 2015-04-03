@@ -10,3 +10,4 @@ pillow==2.7.0
 reportlab==2.7
 z3c.rml==2.7.2
 pyPDF2==1.23
+django-ical==1.3
