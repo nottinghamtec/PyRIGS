@@ -115,7 +115,7 @@ urlpatterns = patterns('',
                         name='profile_update_self'),
 
                        # ICS Calendar
-                       url(r'^ics/$', (views.CalendarICS()), name="ics_calendar"),
+                       url(r'^calendar/rigs.ics$', (views.CalendarICS()), name="ics_calendar"),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
