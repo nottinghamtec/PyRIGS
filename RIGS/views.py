@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 import simplejson
 from django.contrib import messages
-import datetime
 
 from RIGS import models, forms
 

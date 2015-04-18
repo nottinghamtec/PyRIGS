@@ -8,21 +8,23 @@ class CalendarICS(ICalFeed):
     """
     A simple event calender
     """
+    #Metadata which is passed on to clients
     product_id = 'PyRIGS'
     title = 'PyRIGS Calendar'
     timezone = 'UTC'
     file_name = "rigs.ics"
 
     def items(self):
-        #get events for today +- 1 year
-        start = datetime.datetime.now() - datetime.timedelta(days=31*3)
-        end = datetime.date.today() + datetime.timedelta(days=31*3)
+        #include events from up to 1 year ago
+        start = datetime.datetime.now() - datetime.timedelta(days=365)
         filter = Q(start_date__gte=start)
 
-        return models.Event.objects.filter(filter).select_related('person', 'organisation', 'venue', 'mic').order_by('-start_date')
+        return models.Event.objects.filter(filter).order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def item_title(self, item):
         title = ''
+
+        # Prefix title with status (if it's a critical status)
         if item.cancelled:
             title += 'CANCELLED: '
 
@@ -32,8 +34,10 @@ class CalendarICS(ICalFeed):
         if item.dry_hire:
             title += 'DRY HIRE: '
 
+        # Add the rig name
         title += item.name
         
+        # Add the status
         title += ' ('+str(item.get_status_display())+')'
 
         return title
@@ -52,8 +56,10 @@ class CalendarICS(ICalFeed):
         return startDateTime
 
     def item_end_datetime(self, item):
+        # Assume end is same as start
         endDateTime = item.start_date
 
+        # If end date defined then use it
         if item.end_date:
             endDateTime = item.end_date
         
@@ -70,6 +76,9 @@ class CalendarICS(ICalFeed):
         return item.venue
 
     def item_description(self, item):
+        # Create a nice information-rich description
+        # note: only making use of information available to "non-keyholders"
+
         desc = 'Rig ID = '+str(item.pk)+'\n'
         desc += 'Event = ' + item.name + '\n'
         desc += 'Venue = ' + (item.venue.name if item.venue else '---') + '\n'
@@ -99,13 +108,14 @@ class CalendarICS(ICalFeed):
         return desc
 
     def item_link(self, item):
+        # Make a link to the event in the web interface
         return '/event/'+str(item.pk)+'/'
 
-    # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?)
+    # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?) - not really necessary though
     #     return ''
 
-    def item_updated(self, item):
+    def item_updated(self, item): # some ical clients will display this
         return item.last_edited_at
 
-    def item_guid(self, item):
+    def item_guid(self, item): # use the rig-id as the ical unique event identifier
         return item.pk

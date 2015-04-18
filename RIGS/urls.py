@@ -114,8 +114,8 @@ urlpatterns = patterns('',
                        url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
                         name='profile_update_self'),
 
-                       # ICS Calendar
-                       url(r'^calendar/rigs.ics$', (ical.CalendarICS()), name="ics_calendar"),
+                       # ICS Calendar - no authentication!
+                       url(r'^ical/rigs.ics$', (ical.CalendarICS()), name="ics_calendar"),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
