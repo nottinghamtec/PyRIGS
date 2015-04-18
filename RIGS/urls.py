@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard, finance
+from RIGS import views, rigboard, finance, ical
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
@@ -115,7 +115,7 @@ urlpatterns = patterns('',
                         name='profile_update_self'),
 
                        # ICS Calendar
-                       url(r'^calendar/rigs.ics$', (views.CalendarICS()), name="ics_calendar"),
+                       url(r'^calendar/rigs.ics$', (ical.CalendarICS()), name="ics_calendar"),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
