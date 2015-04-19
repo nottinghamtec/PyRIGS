@@ -43,7 +43,8 @@
 		
 		<div class="pull-right">
 			<a href="{% url 'reset_api_key' %}" class="btn">
-				Reset API Key <span class="glyphicon glyphicon-repeat"></span>
+				{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
+				<span class="glyphicon glyphicon-repeat"></span>
 			</a>
 		</div>
 	
@@ -51,11 +52,24 @@
 
 		<dl class="dl-horizontal">
 			<dt>API Key</dt>
-			<dd>{{user.api_key}}</dd>
+			<dd>
+				{% if user.api_key %}
+					{{user.api_key}}
+				{% else %}
+					No API Key Generated
+				{% endif %}
+			</dd>
 
 			<dt>Calendar URL</dt>
-			<dd><pre>https://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre></dd>
+			<dd>
+				{% if user.api_key %}
+					<pre>https://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
+				{% else %}
+					<pre>No API Key Generated</pre>
+				{% endif %}
+			</dd>
 		</dl>
+
 		{% endif %}
 	</div>
 	
