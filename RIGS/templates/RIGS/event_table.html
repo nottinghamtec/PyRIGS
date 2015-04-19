@@ -69,13 +69,13 @@
                                     {{ event.start_date|date:"(Y-m-d)" }}<br/>
                                 </dd>
                             {% endif %}
-                            {% if event.end_time and (event.start_time != event.end_time or event.start_date != event.end_date) %}
+                            {% if event.end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
                                 <dt>Event ends</dt>
                                 <dd>
                                     {{ event.end_time|date:"H:i" }}<br/>
                                     {{ event.end_date|date:"(Y-m-d)" }}
                                 </dd>
-                            {% endif %}
+                            {% endif %}{% endif %}
                         </dl>
                     {% endif %}
                 </td>
