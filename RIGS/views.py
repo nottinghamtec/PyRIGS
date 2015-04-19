@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 import simplejson
 from django.contrib import messages
+import datetime
 
 from RIGS import models, forms
 
@@ -194,6 +195,7 @@ class SecureAPIRequest(generic.View):
         'person': models.Person,
         'organisation': models.Organisation,
         'profile': models.Profile,
+        'event': models.Event,
     }
 
     perms = {
@@ -201,6 +203,7 @@ class SecureAPIRequest(generic.View):
         'person': 'RIGS.view_person',
         'organisation': 'RIGS.view_organisation',
         'profile': None,
+        'event': 'RIGS.view_event',
     }
 
     '''
@@ -259,6 +262,71 @@ class SecureAPIRequest(generic.View):
 
                     results.append(data)
             json = simplejson.dumps(results[:20])
+            return HttpResponse(json, content_type="application/json")  # Always json
+
+        start = request.GET.get('start', None)
+        end = request.GET.get('end', None)
+
+        if model == "event" and start and end:
+            # Probably a calendar request
+            start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%SZ" )
+            end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%SZ" )
+            all_objects = self.models[model].objects
+            results = []
+            filter = Q(start_date__lte=end_datetime) & Q(start_date__gte=start_datetime)
+            objects = all_objects.filter(filter).select_related('person', 'organisation', 'venue', 'mic').order_by('-start_date')
+            for item in objects:
+                data = {
+                    'pk': item.pk,
+                    'title': item.name
+                }
+                
+                data['is_rig'] = item.is_rig
+                data['status'] = str(item.get_status_display())
+
+                if item.start_date:
+                    data['start_date'] = item.start_date.strftime('%Y-%m-%d')
+
+                if item.start_time:
+                    data['start_time'] = item.start_time.strftime('%H:%M:%SZ')
+                
+                if item.end_date:
+                    data['end_date'] = item.end_date.strftime('%Y-%m-%d')
+
+                if item.end_time:
+                    data['end_time'] = item.end_time.strftime('%H:%M:%SZ')
+
+                if item.meet_at:
+                    data['meet_at'] = item.meet_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+                
+                if item.access_at:
+                    data['access_at'] = item.access_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+                
+                if item.venue:
+                    data['venue'] = item.venue.name
+
+                if item.person:
+                    data['person'] = item.person.name
+
+                if item.organisation:
+                    data['organisation'] = item.organisation.name
+
+                if item.mic:
+                    data['mic'] = {
+                        'name':item.mic.get_full_name(),
+                        'initials':item.mic.initials
+                    }
+
+                if item.description:
+                    data['description'] = item.description
+
+                if item.notes:
+                    data['notes'] = item.notes
+
+                data['url'] = str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
+
+                results.append(data)
+            json = simplejson.dumps(results)
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
