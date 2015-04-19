@@ -16,8 +16,8 @@ from decimal import Decimal
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
-    api_key = models.CharField(max_length=40,blank=False,editable=True,default=lambda: make_api_key())
-    
+    api_key = models.CharField(max_length=40,blank=True,editable=False, null=True)
+
     @classmethod
     def make_api_key(cls):
         size=20
