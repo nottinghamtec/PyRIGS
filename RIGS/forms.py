@@ -58,7 +58,7 @@ class EventForm(forms.ModelForm):
         self.fields['end_date'].widget.format = '%Y-%m-%d'
 
         self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
-        self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
+        self.fields['meet_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
 
     def init_items(self):
         self.items = self.process_items_json()
