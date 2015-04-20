@@ -1,6 +1,7 @@
 from RIGS import models, forms
 from django_ical.views import ICalFeed
 from django.db.models import Q
+from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
 
 import datetime
 
@@ -102,14 +103,17 @@ class CalendarICS(ICalFeed):
         if item.description:
             desc += 'Event Description:\n'+item.description+'\n\n'
         if item.notes:
-            desc += 'Notes:\n'+item.notes
+            desc += 'Notes:\n'+item.notes+'\n\n'
 
+        base_url = "https://pyrigs.nottinghamtec.co.uk"
+        desc += 'URL = '+base_url+str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
         
         return desc
 
     def item_link(self, item):
         # Make a link to the event in the web interface
-        return '/event/'+str(item.pk)+'/'
+        base_url = "https://pyrigs.nottinghamtec.co.uk"
+        return base_url+str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
 
     # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?) - not really necessary though
     #     return ''
