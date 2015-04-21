@@ -2,6 +2,8 @@ import os
 import cStringIO as StringIO
 from io import BytesIO
 import urllib2
+import logging
+
 
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
@@ -14,6 +16,7 @@ from django.db.models import Q
 from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
+import reversion
 
 from RIGS import models, forms
 import datetime
@@ -21,7 +24,7 @@ import re
 
 __author__ = 'ghost'
 
-
+logger = logging.getLogger('project.interesting.stuff')
 class RigboardIndex(generic.TemplateView):
     template_name = 'RIGS/rigboard.html'
 
@@ -177,3 +180,16 @@ class EventArchive(generic.ArchiveIndexView):
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
 
         return qs
+
+class RevisionList(generic.ListView):
+    model = reversion.revisions.Version
+    template_name = "RIGS/revision_list.html"
+
+    def get_queryset(self):
+        thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
+        items = reversion.get_for_object(thisEvent)
+        logger.info('There are '+str(len(items)))
+        return items
+
+
+

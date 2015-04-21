@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Revisions{% endblock %}
+
+{% block content %}
+hello
+	<ul>
+	{% for version in object_list %}
+		<li>
+	    {{ version.date_created|date:"y" }}
+		</li>
+	{% endfor %}
+	</ul>
+{% endblock %}
