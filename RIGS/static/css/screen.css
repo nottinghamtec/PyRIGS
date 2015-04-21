@@ -9029,3 +9029,8 @@ textarea {
 .event-mic-photo {
   max-width: 2em;
 }
+
+/* line 52, ../scss/screen.scss */
+.item-description {
+  margin-left: 1em;
+}
