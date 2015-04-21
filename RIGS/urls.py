@@ -57,6 +57,7 @@ urlpatterns = patterns('',
 
                        # Rigboard
                        url(r'^rigboard/$', rigboard.RigboardIndex.as_view(), name='rigboard'),
+                       url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
                        url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
 
                        url(r'^event/(?P<pk>\d+)/$',
@@ -122,8 +123,5 @@ urlpatterns = patterns('',
                        url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(pattern_name='event_detail')),
                        url(r'^bookings/$', RedirectView.as_view(pattern_name='rigboard')),
                        url(r'^bookings/past/$', RedirectView.as_view(pattern_name='event_archive')),
-                       # Calendar may have gone away, redirect to the archive for now
-                       url(r'^rigboard/calendar/$',
-                           RedirectView.as_view(pattern_name='event_archive', permanent=False)),
 )
 

@@ -33,6 +33,8 @@ class RigboardIndex(generic.TemplateView):
         context['events'] = models.Event.objects.current_events()
         return context
 
+class WebCalendar(generic.TemplateView):
+    template_name = 'RIGS/calendar.html'
 
 class EventDetail(generic.DetailView):
     model = models.Event
