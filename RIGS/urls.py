@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard, finance
+from RIGS import views, rigboard, finance, ical
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
+from PyRIGS.decorators import api_key_required
 
 urlpatterns = patterns('',
                        # Examples:
@@ -114,6 +115,10 @@ urlpatterns = patterns('',
                         name='profile_detail'),
                        url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
                         name='profile_update_self'),
+                       url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)), name='reset_api_key'),
+
+                       # ICS Calendar - API key authentication
+                       url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()), name="ics_calendar"),
 
                        # API
                        url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),

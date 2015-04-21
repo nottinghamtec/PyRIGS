@@ -7,6 +7,9 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
 import reversion
+import string
+import random
+from django.core.urlresolvers import reverse_lazy
 
 from decimal import Decimal
 
@@ -14,6 +17,14 @@ from decimal import Decimal
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
+    api_key = models.CharField(max_length=40,blank=True,editable=False, null=True)
+
+    @classmethod
+    def make_api_key(cls):
+        size=20
+        chars=string.ascii_letters + string.digits
+        new_api_key = ''.join(random.choice(chars) for x in range(size))
+        return new_api_key;
 
     @property
     def profile_picture(self):
@@ -25,7 +36,6 @@ class Profile(AbstractUser):
     @property
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
-
 
 class RevisionMixin(object):
     @property
@@ -294,6 +304,9 @@ class Event(models.Model, RevisionMixin):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
 
     objects = EventManager()
+
+    def get_absolute_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return str(self.pk) + ": " + self.name

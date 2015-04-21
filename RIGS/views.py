@@ -356,3 +356,11 @@ class ProfileUpdateSelf(generic.UpdateView):
     def get_success_url(self):
         url =  reverse_lazy('profile_detail')
         return url
+
+class ResetApiKey(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.request.user.api_key = self.request.user.make_api_key()
+        
+        self.request.user.save()
+
+        return reverse_lazy('profile_detail')
