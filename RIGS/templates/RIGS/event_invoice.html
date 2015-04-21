@@ -37,7 +37,7 @@
 							danger
 						{% endif %}
                         ">
-                    <td class="hidden-xs"><a href="{% url 'event_detail' object.pk %}">N{{ object.pk|stringformat:"05d" }}</a></td>
+                    <td class="hidden-xs"><a href="{% url 'event_detail' object.pk %}" target="_blank">N{{ object.pk|stringformat:"05d" }}</a></td>
                     <td>{{ object.end_date }}</td>
                     <td>{{ object.name }}</td>
                     <td>
