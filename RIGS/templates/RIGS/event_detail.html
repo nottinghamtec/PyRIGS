@@ -21,7 +21,7 @@
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                         class="glyphicon glyphicon-edit"></span></a>
                 {% if event.is_rig %}
-                    <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
+                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
                             class="glyphicon glyphicon-print"></span></a>
                 {% endif %}
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
@@ -169,7 +169,7 @@
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                     class="glyphicon glyphicon-edit"></span></a>
             {% if event.is_rig %}
-                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
+                <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
                         class="glyphicon glyphicon-print"></span></a>
             {% endif %}
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
@@ -201,10 +201,15 @@
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
                         class="glyphicon glyphicon-edit"></span></a>
+<<<<<<< HEAD
                 {% if event.is_rig %}
                     <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
                             class="glyphicon glyphicon-print"></span></a>
                 {% endif %}
+=======
+                <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
+                        class="glyphicon glyphicon-print"></span></a>
+>>>>>>> master
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
                         class="glyphicon glyphicon-duplicate"></span></a>
                 {% if event.is_rig %}
