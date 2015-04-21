@@ -63,7 +63,7 @@
 			<dt>Calendar URL</dt>
 			<dd>
 				{% if user.api_key %}
-					<pre>https://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
+					<pre>http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
 				{% else %}
 					<pre>No API Key Generated</pre>
 				{% endif %}
