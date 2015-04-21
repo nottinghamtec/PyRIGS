@@ -9,6 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 import reversion
 import string
 import random
+from django.core.urlresolvers import reverse_lazy
 
 from decimal import Decimal
 
@@ -303,6 +304,9 @@ class Event(models.Model, RevisionMixin):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
 
     objects = EventManager()
+
+    def get_absolute_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
