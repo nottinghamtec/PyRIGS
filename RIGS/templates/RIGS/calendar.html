@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Calendar{% endblock %}
+
+{% block css %}
+<link href="{% static "css/fullcalendar.css" %}" rel='stylesheet' />
+<link href="{% static "css/fullcalendar.print.css" %}" rel='stylesheet' media='print' />
+{% endblock %}
+
+{% block js %}
+    {# <script src="//code.jquery.com/jquery-latest.min.js"></script> #}
+    <script src="{% static "js/moment.min.js" %}"></script>
+    <script src="{% static "js/fullcalendar.js" %}"></script>
+    <script>
+        $(document).ready(function() {
+
+            $('#calendar').fullCalendar({
+                //defaultDate: '2015-02-12',
+                editable: false,
+                eventLimit: true, // allow "more" link when too many events
+                firstDay: 1,
+                aspectRatio: 1.5,
+                timeFormat: 'HH:mm',
+                views: {
+                    basic: {
+                        // options apply to basicWeek and basicDay views
+                    },
+                    agenda: {
+                        // options apply to agendaWeek and agendaDay views
+                    },
+                    week: {
+                        columnFormat:'ddd D/M'
+                    },
+                    day: {
+                        // options apply to basicDay and agendaDay views
+                    }
+                },
+                buttonText:{
+                    today:    'Today',
+                    month:    'Month',
+                    week:     'Week',
+                    day:      'Day'
+                },
+                header:{
+                    left:   'title',
+                    center: '',
+                    right:  'today prev,next month,agendaWeek,agendaDay'
+                },
+                events: function(start_moment, end_moment, timezone, callback) {
+                    
+                    $.ajax({
+                        url: '/api/event',
+                        dataType: 'json',
+                        data: {
+                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]"),
+                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]")
+                        },
+                        success: function(doc) {
+                            var events = [];
+                            var colours = 
+                            $(doc).each(function() {
+                                thisEvent = [];
+                                colours = {'Provisional': 'orange',
+                                    'Confirmed': 'green' ,
+                                    'Booked': 'green' ,
+                                    'Cancelled': 'grey' 
+                                };
+
+                                thisEvent['start'] = $(this).attr('start_date');
+                                if ($(this).attr('start_time')) {
+                                    thisEvent['start'] += 'T' + $(this).attr('start_time');
+
+                                }
+
+                                if ($(this).attr('end_date')) {
+                                    thisEvent['end'] = $(this).attr('end_date');
+                                    if ($(this).attr('end_time')) {
+                                        thisEvent['end'] += 'T' + $(this).attr('end_time');
+                                    }
+                                }
+                                thisEvent['className'] = 'modal-href';
+
+                                thisEvent['title'] = $(this).attr('title');
+                                
+                                thisEvent['color'] = colours[$(this).attr('status')];
+
+                                thisEvent['url'] = $(this).attr('url');
+                                
+                                events.push(thisEvent);
+                            });
+                            callback(events);
+                        }
+                    });
+                }
+            });
+           
+        });
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div style="col-sm-12">
+            <div id='calendar'>
+            </div>
+        </div>
+    </div>
+{% endblock %}
