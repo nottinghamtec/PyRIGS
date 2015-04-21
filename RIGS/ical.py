@@ -112,8 +112,8 @@ class CalendarICS(ICalFeed):
 
     def item_link(self, item):
         # Make a link to the event in the web interface
-        base_url = "https://pyrigs.nottinghamtec.co.uk"
-        return base_url+str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
+        # base_url = "https://pyrigs.nottinghamtec.co.uk"
+        return item.get_absolute_url()
 
     # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?) - not really necessary though
     #     return ''
