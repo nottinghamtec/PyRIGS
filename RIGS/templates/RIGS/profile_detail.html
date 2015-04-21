@@ -22,10 +22,7 @@
 	    </div>
 	</div>
 	{% endif %}
-
-	</div>
-
-	<div class="col-sm-6">
+	<div class="col-sm-8	">
 		<dl class="dl-horizontal">
 			<dt>First Name</dt>
 			<dd>{{object.first_name}}</dd>
@@ -48,10 +45,44 @@
 			<dt>Phone</dt>
 			<dd>{{object.phone}}</dd>
 		</dl>
+		{% if object.pk == user.pk %}
+		
+		<div class="pull-right">
+			<a href="{% url 'reset_api_key' %}" class="btn">
+				{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
+				<span class="glyphicon glyphicon-repeat"></span>
+			</a>
+		</div>
+	
+		<h4>Personal iCal Details</h4>
+
+		<dl class="dl-horizontal">
+			<dt>API Key</dt>
+			<dd>
+				{% if user.api_key %}
+					{{user.api_key}}
+				{% else %}
+					No API Key Generated
+				{% endif %}
+			</dd>
+
+			<dt>Calendar URL</dt>
+			<dd>
+				{% if user.api_key %}
+					<pre>http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
+				{% else %}
+					<pre>No API Key Generated</pre>
+				{% endif %}
+			</dd>
+		</dl>
+
+		{% endif %}
 	</div>
-	<div class="col-sm-3 col-sm-offset-2">
+	
+	<div class="col-sm-3">
 		<div class="center-block">
 			<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />
 	</div>
+
 </div>
 {% endblock %}
