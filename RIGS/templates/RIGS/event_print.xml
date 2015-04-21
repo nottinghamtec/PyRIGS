@@ -65,23 +65,26 @@
         </blockTableStyle>
     </stylesheet>
 
-    <template>
+    <template> {# Note: page is 595x842 points (1 point=1/72in) #}
             <pageTemplate id="Headed">
                 <pageGraphics>
-                    <image file="http://images.nottinghamtec.co.uk/rigs_logo.jpg" x="50" y="702"/>
-                    <setFont name="OpenSans-Bold" size="14" leading="10"/>
-                    <drawString x="140" y="775">TEC PA &amp; Lighting</drawString>
+                    <image file="RIGS/static/imgs/paperwork/corner.jpg" x="395" y="642" height="200" width="200"/>
+
+                    {# logo positioned 42 from left, 33 from top #}
+                    <image file="RIGS/static/imgs/paperwork/tec-logo.jpg" x="42" y="719" height="90" width="84"/>
+                    
+                    <setFont name="OpenSans-Bold" size="22.5" leading="10"/>
+                    <drawString x="137" y="780">TEC PA &amp; Lighting</drawString>
+
+                    <setFont name="OpenSans" size="9"/>
+                    <drawString x="137" y="760">Portland Building, University Park, Nottingham, NG7 2RD</drawString>
+                    <drawString x="137" y="746">Phone: (0115) 846 8720</drawString>
+                    <drawString x="137" y="732">www.nottinghamtec.co.uk</drawString>
+                    <drawString x="265" y="732">info@nottinghamtec.co.uk</drawString>
+
+                    
 
                     <setFont name="OpenSans" size="10"/>
-                    <drawString x="140" y="762">Portland Building</drawString>
-                    <drawString x="140" y="751">University Park</drawString>
-                    <drawString x="140" y="740">Nottingham</drawString>
-                    <drawString x="140" y="729">NG7 2RD</drawString>
-                    <drawString x="140" y="718">0115 846 8720</drawString>
-                    <drawString x="140" y="707">info@nottinghamtec.co.uk</drawString>
-
-                    <image file="http://images.nottinghamtec.co.uk/rigs_union_logo.jpg" x="365" y="746"/>
-
                     <drawCenteredString x="302.5" y="50">[{{ copy }} Copy]</drawCenteredString>
                 </pageGraphics>
                 <frame id="jobDetails" x1="50" y1="682" width="495" height="20"/>
