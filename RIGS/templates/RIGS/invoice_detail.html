@@ -6,7 +6,7 @@
     <div class="col-sm-12">
         <div class="row">
             <div class="col-sm-8">
-                <h2>Invoice {{ object.pk }}</h2>
+                <h2>Invoice {{ object.pk }} ({{ object.invoice_date|date:"d/m/Y"}})</h2>
             </div>
 
             <div class="col-sm-4 text-right">
@@ -40,13 +40,19 @@
                             <dd>N{{ object.event.pk|stringformat:"05d" }}</dd>
 
                             <dt>Event</dt>
-                            <dd>{{ objet.event.pk }}</dd>
+                            <dd>{{ object.event.name }}</dd>
 
                             <dt>Event Venue</dt>
                             <dd>{{ object.event.venue }}</dd>
 
                             <dt>Event MIC</dt>
                             <dd>{{ object.event.mic.name }}</dd>
+
+                            <dt>Event Starts</dt>
+                            <dd>{{ object.event.start_date|date:"d M Y" }} {{ object.event.start_time|date:"H:i" }}</dd>
+
+                            <dt>Event Ends</dt>
+                            <dd>{{ object.event.end_date|date:"d M Y" }} {{ object.event.end_time|date:"H:i" }}</dd>
 
                             <dt>Status</dt>
                             <dd>{{ object.event.get_status_display }}</dd>
