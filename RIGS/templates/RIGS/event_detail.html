@@ -2,13 +2,6 @@
 {% block title %}Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}
 {% endif %}{% endblock %}
 
-{% block buttons %}
-    {% if not request.is_ajax %}
-
-    
-    {% endif %}
-{% endblock %}
-
 {% block content %}
 <div class="row">
     {% if not request.is_ajax %}
@@ -16,25 +9,30 @@
         <div class="col-sm-8">
             <h1>Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}</h1>
         </div>
+    </div>
         <div class="col-sm-12 text-right">
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span></a>
+                        class="glyphicon glyphicon-edit"></span> <span
+                            class="hidden-xs">Edit</span></a>
                 {% if event.is_rig %}
                     <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                            class="glyphicon glyphicon-print"></span></a>
+                            class="glyphicon glyphicon-print"></span> <span
+                            class="hidden-xs">Print</span></a>
                 {% endif %}
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span></a>
+                        class="glyphicon glyphicon-duplicate"></span> <span
+                            class="hidden-xs">Duplicate</span></a>
                 {% if event.is_rig %}
                     {% if perms.RIGS.add_invoice %}
                         <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span></a>
+                                class="glyphicon glyphicon-gbp"></span> <span
+                            class="hidden-xs">Invoice</span></a>
                     {% endif %}
                 {% endif %}
             </div>
         </div>
-    </div>
+    
     {% endif %}
     {% if object.is_rig %}
         {# only need contact details for a rig #}
@@ -167,17 +165,21 @@
     <div class="col-sm-12 text-right">
         <div class="btn-group btn-page">
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-edit"></span></a>
+                    class="glyphicon glyphicon-edit"></span> <span
+                        class="hidden-xs">Edit</span></a>
             {% if event.is_rig %}
                 <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span></a>
+                        class="glyphicon glyphicon-print"></span> <span
+                        class="hidden-xs">Print</span></a>
             {% endif %}
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                    class="glyphicon glyphicon-duplicate"></span></a>
+                    class="glyphicon glyphicon-duplicate"></span> <span
+                        class="hidden-xs">Duplicate</span></a>
             {% if event.is_rig %}
                 {% if perms.RIGS.add_invoice %}
                     <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                            class="glyphicon glyphicon-gbp"></span></a>
+                            class="glyphicon glyphicon-gbp"></span> <span
+                        class="hidden-xs">Invoice</span></a>
                 {% endif %}
             {% endif %}
         </div>
@@ -200,19 +202,21 @@
         <div class="col-sm-12 text-right">
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span></a>
+                        class="glyphicon glyphicon-edit"></span> <span
+                            class="hidden-xs">Edit</span></a>
                 {% if event.is_rig %}
-                    <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                            class="glyphicon glyphicon-print"></span></a>
+                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
+                            class="glyphicon glyphicon-print"></span> <span
+                            class="hidden-xs">Print</span></a>
                 {% endif %}
-                <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span></a>
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span></a>
+                        class="glyphicon glyphicon-duplicate"></span> <span
+                            class="hidden-xs">Duplicate</span></a>
                 {% if event.is_rig %}
                     {% if perms.RIGS.add_invoice %}
                         <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span></a>
+                                class="glyphicon glyphicon-gbp"></span> <span
+                            class="hidden-xs">Invoice</span></a>
                     {% endif %}
                 {% endif %}
             </div>
