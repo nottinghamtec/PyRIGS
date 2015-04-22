@@ -62,6 +62,44 @@
                     }
                 })
             {% endif %}
+
+            function supportsDate() {
+                //return false; //for development
+                var input = document.createElement('input');
+                input.setAttribute('type','date');
+                var notADateValue = 'not-a-date';
+                input.setAttribute('value', notADateValue); 
+                return !(input.value === notADateValue);
+            }
+            if(supportsDate()){
+                //Good, we'll use the browser implementation
+            }else{
+                //Rubbish browser - do JQuery backup
+                $('<link>')
+                  .appendTo('head')
+                  .attr({type : 'text/css', rel : 'stylesheet'})
+                  .attr('href', '{% static "css/bootstrap-datetimepicker.min.css" %}');
+                $.when(
+                    $.getScript( "{% static "js/moment.min.js" %}" ),
+                    $.getScript( "{% static "js/transition.js" %}" ),
+                    $.getScript( "{% static "js/bootstrap-datetimepicker.min.js" %}" ),
+                    $.Deferred(function( deferred ){
+                        $( deferred.resolve );
+                    })
+                ).done(function(){
+                    $('input[type=date]').attr('type','text').datetimepicker({
+                        format: 'YYYY-MM-DD',
+                    });
+                    $('input[type=time]').attr('type','text').datetimepicker({
+                        format: 'HH:mm',
+                    });
+                    $('input[type=datetime-local]').attr('type','text').datetimepicker({
+                        format: 'YYYY-MM-DD[T]HH:mm',
+                        sideBySide: true,
+                    });
+                });
+
+            }
         })
 
         $(document).ready(function () {
