@@ -18,7 +18,7 @@ class CalendarICS(ICalFeed):
     def items(self):
         #include events from up to 3 months ago
         start = datetime.datetime.now() - datetime.timedelta(days=365)
-        filter = Q(start_date__gte=start)
+        filter = Q(start_date__gte=start) & ~Q(status=models.Event.CANCELLED)
 
         return models.Event.objects.filter(filter).order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
