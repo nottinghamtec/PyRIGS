@@ -1,85 +1,93 @@
-<setNextFrame name="jobDetails"/>
-<nextFrame/>
-<blockTable style="headerTable" colWidths="123,124,123,123">
-<tr>
-    <td>Event Date:</td>
-    <td>{{ object.start_date }}</td>
-    <td>JOB NUMBER:</td>
-    <td>N{{ object.pk|stringformat:"05d" }}</td>
-</tr>
-</blockTable>
-
-<setNextFrame name="client"/>
-<nextFrame/>
-<keepInFrame>
-<h2>Hirer</h2>
-<h3>{{ object.person.name }}</h3>
-<h3>{{ object.organisation.name|default_if_none:"" }}</h3>
-
-{% if object.person.phone %}
-    <para>Tel: {{ object.person.phone }}</para>
-{% elif object.organisation.phone %}
-    <para>Tel: {{ object.organisation.phone }}</para>
-{% endif %}
-
-{% if object.person.email %}
-    <para>Email: {{ object.person.email }}</para>
-{% elif object.organisation.email %}
-    <para>Email: {{ object.organisation.email }}</para>
-{% endif %}
-</keepInFrame>
-
-<setNextFrame name="venue"/>
-<nextFrame/>
-<keepInFrame>
-<h2>Venue</h2>
-<h3>{{ object.venue.name }}</h3>
-<para>{{ object.venue.address|default_if_none:""|linebreaks }}</para>
-</keepInFrame>
-
-<setNextFrame name="event"/>
-<nextFrame/>
-<h2>Event Details</h2>
-<blockTable style="eventDetails" colWidths="75,75">
-<tr>
-    <td>Start Time</td>
-    <td>
-        <para>{{ object.start_time|time:"H:i" }}
-            <br/>
-            {{ object.start_date|date:"(d/m/Y)" }}
-        </para>
-    </td>
-</tr>
-<tr>
-    <td>End Time</td>
-    <td>
-        <para>{{ object.end_time|time:"H:i" }}
-            <br/>
-            {{ object.end_date|date:"(d/m/Y)" }}
-        </para>
-    </td>
-</tr>
-<tr>
-    <td>Earliest Access</td>
-    <td>
-        <para>{{ object.access_at|time:"H:i" }}
-            <br/>
-            {{ object.access_at|date:"d/m/Y" }}
-        </para>
-    </td>
-</tr>
-</blockTable>
-
-<setNextTemplate name="Main"/>
 <setNextFrame name="main"/>
 <nextFrame/>
+
+<h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'<small></small></h1>
+
+<para style="style.event_description">
+<b>{{object.start_date|date:"D jS N Y"}}</b>
+</para>
+<keepInFrame maxHeight="30">
+<para style="style.event_description">
+{{ object.description|default_if_none:""|linebreaks }}
+    </para>
+</keepInFrame>
+<spacer length="15"/>
+<blockTable style="eventSpecifics" colWidths="165,165,165">
+    <tr>
+        <td leftPadding="0">
+                <h2>Hirer</h2>
+                <h3>{{ object.person.name }}</h3>
+                <h3>{{ object.organisation.name|default_if_none:"" }}</h3>
+                
+                <keepInFrame>
+                    {% if object.person.phone %}
+                        <para style="specific_description">{{ object.person.phone }}</para>
+                    {% elif object.organisation.phone %}
+                        <para style="specific_description">{{ object.organisation.phone }}</para>
+                    {% endif %}
+                </keepInFrame>
+                <keepInFrame>
+                    {% if object.person.email %}
+                        <para style="specific_description">{{ object.person.email }}</para>
+                    {% elif object.organisation.email %}
+                        <para style="specific_description">{{ object.organisation.email }}</para>
+                    {% endif %}
+                </keepInFrame>
+        </td>
+        <td>
+            <h2>Venue</h2>
+            <h3>{{ object.venue.name }}</h3>
+            <keepInFrame>
+            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaks }}</para>
+            </keepInFrame>
+        </td>
+        <td rightPadding="0">
+            
+                <h2>Timings</h2>
+                <blockTable style="eventDetails" colWidths="55,75">
+                <tr>
+                    <td leftPadding="0" topPadding="0"><h3>Start</h3></td>
+                    <td>
+                        <para style="times">{{ object.start_time|time:"H:i" }}
+                            {{ object.start_date|date:"d/m/Y" }}
+                        </para>
+                    </td>
+                </tr>
+                <tr>
+                    <td leftPadding="0"><h3>End</h3></td>
+                    <td>
+                        <para style="times">{{ object.end_time|default_if_none:""|time:"H:i" }}
+                            {{ object.end_date|date:"d/m/Y" }}
+                        </para>
+                    </td>
+                </tr>
+                {% if object.access_at %}
+                <tr>
+                    <td leftPadding="0"><h3>Access</h3></td>
+                    <td>
+                        <para style="times">{{ object.access_at|time:"H:i" }}
+                            {{ object.access_at|date:"d/m/Y" }}
+                        </para>
+                    </td>
+                </tr>
+                {% endif %}
+                </blockTable>
+        </td>
+
+    </tr>
+</blockTable>
+
+<spacer length="15"/>
+
+<setNextTemplate name="Main"/>
+
 
 <blockTable style="itemTable" colWidths="300,80,35,80">
 <tr>
     {# Bold tags need to be in a para in order to render in reportlab #}
     <td>
         <para>
-            <b>Equipment Details</b>
+            <b>Item</b>
         </para>
     </td>
     <td>
@@ -103,8 +111,11 @@
         <td>
             <para>{{ item.name }}
                 {% if item.description %}
-                    <br/>
+                    </para>
+                    <para style="item_description">
                     <em>{{ item.description|linebreaks }}</em>
+                    </para>
+                    <para>
                 {% endif %}
             </para>
         </td>
@@ -114,36 +125,38 @@
     </tr>
 {% endfor %}
 </blockTable>
-<blockTable style="totalTable" colWidths="300,115,80">
-<tr>
-    <td>VAT may be charged at the current rate date of event ({{ object.vat_rate.as_percent|floatformat:2 }}%)</td>
-    <td>Sum-total</td>
-    <td>£ {{ object.sum_total|floatformat:2 }}</td>
-</tr>
-<tr>
-    <td>VAT Registration Number: 116252989</td>
-    <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
-    <td>£ {{ object.vat|floatformat:2 }}</td>
-</tr>
-<tr>
-    <td>
-        <para>
-            <b>The full hire fee is payable at least 10 days before the event.</b>
-        </para>
-    </td>
-    <td>
-        <para>
-            <b>Total</b>
-        </para>
-    </td>
-    <td>
-        <para>
-            <b>£ {{ object.total|floatformat:2 }}</b>
-        </para>
-    </td>
-</tr>
-</blockTable>
-
+<keepTogether>
+    <blockTable style="totalTable" colWidths="300,115,80">
+    <tr>
+        <td>VAT may be charged at the current rate date of event ({{ object.vat_rate.as_percent|floatformat:2 }}%)</td>
+        <td>Total (ex. VAT)</td>
+        <td>£ {{ object.sum_total|floatformat:2 }}</td>
+    </tr>
+    <tr>
+        <td>VAT Registration Number: 116252989</td>
+        <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
+        <td>£ {{ object.vat|floatformat:2 }}</td>
+    </tr>
+    <tr>
+        <td>
+            <para>
+                <b>The full hire fee is payable at least 10 days before the event.</b>
+            </para>
+        </td>
+        <td>
+            <para>
+                <b>Total</b>
+            </para>
+        </td>
+        <td>
+            <para>
+                <b>£ {{ object.total|floatformat:2 }}</b>
+            </para>
+        </td>
+    </tr>
+    </blockTable>
+</keepTogether>
+<keepTogether>
 <blockTable style="infoTable">
 <tr>
     <td>
@@ -157,17 +170,9 @@
     <td>24 Hour Emergency Contacts: 07825 065681 or 07825 065678</td>
 </tr>
 </blockTable>
-
-<blockTable style="paymentTable" colWidths="100,146,93,154">
-<tr></tr>
-<tr>
-    <td>Payment Received:</td>
-    <td>{{ object.payment_received }}</td>
-    <td>Payment Method:</td>
-    <td>{{ object.payment_method }}</td>
-</tr>
-<tr></tr>
-</blockTable>
+</keepTogether>
+<spacer length="15"/>
+<keepTogether>
 
 <para style="blockPara">
 <b>To be signed on booking:</b>
@@ -221,7 +226,7 @@
     </para>
 
     {% include "RIGS/event_print_signature.xml" %}
-
+    <spacer length="10"/>
     <para style="blockPara">
     <b>To be signed on the day of the event/hire:</b>
     </para>
@@ -234,3 +239,5 @@
 {% endif %}
 
 {% include "RIGS/event_print_signature.xml" %}
+</keepTogether>
+<namedString id="lastPage"><pageNumber/></namedString>
