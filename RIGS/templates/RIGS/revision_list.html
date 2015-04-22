@@ -1,14 +1,43 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Revisions{% endblock %}
 
+{% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script src="{% static "js/popover.js" %}"></script>
+    <script>
+    	$(function () {
+		  $('[data-toggle="popover"]').popover()
+		})
+    </script>
+{% endblock %}
+
 {% block content %}
-hello
-	<ul>
-	{% for version in object_list %}
-		<li>
-	    {{ version.date_created|date:"y" }}
-		</li>
-	{% endfor %}
-	</ul>
+	<table class="table table-striped">
+        <thead>
+        <tr>
+            <td></td>
+            <td>Date</td>
+            <td>User</td>
+            <td>Changes</td>
+        </tr>
+        </thead>
+        <tbody>
+        	{% for version in object_list %}
+            <tr>
+           		<td>{{ version.revision.pk }}</td>
+                <td>{{ version.revision.date_created }}</td>
+                <td>{{ version.revision.user.name }}</td>
+                <td>{% for key, value in version.changedKeys.iteritems %}
+                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content="{{ value }}">{{ key }}</button>
+                	{% endfor %}</td>
+            </tr>
+			{% endfor %}
+
+        </tbody>
+    </table>
+	
+
+	{{ thediff }}
 {% endblock %}

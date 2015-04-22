@@ -17,6 +17,9 @@ from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import reversion
+import diff_match_patch
+import simplejson
+from reversion.helpers import generate_patch_html
 
 from RIGS import models, forms
 import datetime
@@ -181,15 +184,55 @@ class EventArchive(generic.ArchiveIndexView):
 
         return qs
 
-class RevisionList(generic.ListView):
+class EventRevisions(generic.ListView):
     model = reversion.revisions.Version
     template_name = "RIGS/revision_list.html"
 
-    def get_queryset(self):
+    # def get_queryset(self):
+    #     thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
+    #     items = reversion.get_for_object(thisEvent)
+    #     #logger.info('There are '+items[0].date_created)
+    #     return items
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        #context = super(PublisherDetail, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context = {}
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-        items = reversion.get_for_object(thisEvent)
-        logger.info('There are '+str(len(items)))
-        return items
+        revisions = reversion.get_for_object(thisEvent)
+        #logger.info('There are '+items[0].date_created)
+        items = []
+        for revisionNo, thisRevision in enumerate(revisions):
+            thisItem = {}
+            thisItem['revision'] = thisRevision.revision
+            if revisionNo >= len(revisions)-1:
+                thisItem['changedKeys'] = {}
+            else:
+                old_version = revisions[revisionNo+1]
+                new_version = thisRevision
+                old_version_obj = simplejson.loads(old_version.serialized_data)[0]['fields']
+                new_version_obj = simplejson.loads(new_version.serialized_data)[0]['fields']
 
+                thisItem['changedKeys'] = {}
+                for key,value in new_version_obj.iteritems():
+                    if value != old_version_obj[key]:
+                        thisItem['changedKeys'][key] = generate_patch_html(old_version, new_version, key, cleanup="semantic")
+            items.append(thisItem)
+            logger.info(thisItem)
+        context['object_list'] = items                        
+        logger.info('done')
 
+        return context
 
+class EventRevision(generic.DetailView):
+    model = reversion.revisions.Revision
+    template_name = "RIGS/event_revision.html"
+
+    def get_queryset(self):
+        pk=self.kwargs['pk']
+        thisVersion = get_object_or_404(reversion.models.Revision, pk=self.kwargs['pk'])
+        #items = reversion.revisions.Version
+        #thisVersion.
+
+        return self.model.objects.filter(pk=pk)

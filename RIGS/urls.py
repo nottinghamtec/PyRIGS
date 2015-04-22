@@ -78,8 +78,12 @@ urlpatterns = patterns('',
                            name='event_duplicate'),
                        url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()),
                            name='event_archive'),
-                       url(r'^event/(?P<pk>\d+)/revisions/$',
-                           permission_required_with_403('RIGS.view_event')(rigboard.RevisionList.as_view()),
+
+                       url(r'^event_revisions/(?P<pk>\d+)/$',
+                           permission_required_with_403('RIGS.view_event')(rigboard.EventRevisions.as_view()),
+                           name='event_revisions'),
+                        url(r'^event_revision/(?P<pk>\d+)/$',
+                           permission_required_with_403('RIGS.view_event')(rigboard.EventRevision.as_view()),
                            name='event_revisions'),
 
                        # Finance
