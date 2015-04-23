@@ -16,7 +16,7 @@ class CalendarICS(ICalFeed):
     file_name = "rigs.ics"
 
     def items(self):
-        #include events from up to 3 months ago
+        #include events from up to 1 year ago
         start = datetime.datetime.now() - datetime.timedelta(days=365)
         filter = Q(start_date__gte=start) & ~Q(status=models.Event.CANCELLED)
 
