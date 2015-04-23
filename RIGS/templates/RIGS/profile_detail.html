@@ -48,7 +48,7 @@
 		{% if object.pk == user.pk %}
 		
 		<div class="pull-right">
-			<a href="{% url 'reset_api_key' %}" class="btn">
+			<a href="{% url 'reset_api_key' %}" class="btn btn-default">
 				{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
 				<span class="glyphicon glyphicon-repeat"></span>
 			</a>
@@ -70,9 +70,12 @@
 			<dd>
 				{% if user.api_key %}
 					<pre>http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
+					<small><a href="http://www.google.com/calendar/render?cid=http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}">Click here</a> to add to google calendar.<br/>
+					To sync from google calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "PyRIGS Calendar".</small>
 				{% else %}
 					<pre>No API Key Generated</pre>
 				{% endif %}
+				
 			</dd>
 		</dl>
 
