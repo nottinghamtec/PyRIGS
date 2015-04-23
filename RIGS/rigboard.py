@@ -194,34 +194,42 @@ class EventRevisions(generic.ListView):
     #     #logger.info('There are '+items[0].date_created)
     #     return items
 
+    def compare(self, obj1, obj2, excluded_keys):
+        d1, d2 = obj1, obj2
+        key, old, new = [],[],[]
+        for k,v in d1.items():
+            if k in excluded_keys:
+                continue
+            try:
+                if v != d2[k]:
+                    key.append(k)
+                    old.append(v)
+                    new.append(d2[k])
+            except KeyError:
+                old.update({k: v})
+        
+        return zip(key,old,new)
+    
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        #context = super(PublisherDetail, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        context = {}
+
+        
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
         revisions = reversion.get_for_object(thisEvent)
-        #logger.info('There are '+items[0].date_created)
         items = []
         for revisionNo, thisRevision in enumerate(revisions):
             thisItem = {}
             thisItem['revision'] = thisRevision.revision
+            logger.info(thisRevision.revision.version_set.all())
             if revisionNo >= len(revisions)-1:
-                thisItem['changedKeys'] = {}
+                thisItem['changes'] = {}
             else:
-                old_version = revisions[revisionNo+1]
-                new_version = thisRevision
-                old_version_obj = simplejson.loads(old_version.serialized_data)[0]['fields']
-                new_version_obj = simplejson.loads(new_version.serialized_data)[0]['fields']
-
-                thisItem['changedKeys'] = {}
-                for key,value in new_version_obj.iteritems():
-                    if value != old_version_obj[key]:
-                        thisItem['changedKeys'][key] = generate_patch_html(old_version, new_version, key, cleanup="semantic")
+                changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict,[])
+                thisItem['changes'] = changes
             items.append(thisItem)
             logger.info(thisItem)
+
+        context = {}
         context['object_list'] = items                        
-        logger.info('done')
 
         return context
 
