@@ -29,8 +29,14 @@
            		<td>{{ version.revision.pk }}</td>
                 <td>{{ version.revision.date_created }}</td>
                 <td>{{ version.revision.user.name }}</td>
-                <td>{% for key, value in version.changedKeys.iteritems %}
-                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content="{{ value }}">{{ key }}</button>
+                <td>{% for key, old, new in version.changes %}
+                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+
+                	{% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
+                	{% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
+                	
+                		
+                		'>{{ key }}</button>
                 	{% endfor %}</td>
             </tr>
 			{% endfor %}
