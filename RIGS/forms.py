@@ -116,4 +116,4 @@ class EventForm(forms.ModelForm):
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status', 
-                  'collector',]
+                  'collector','purchase_order']
