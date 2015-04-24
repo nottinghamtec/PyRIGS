@@ -12,7 +12,6 @@ class CalendarICS(ICalFeed):
     #Metadata which is passed on to clients
     product_id = 'PyRIGS'
     title = 'PyRIGS Calendar'
-    timezone = 'UTC'
     file_name = "rigs.ics"
 
     def items(self):
@@ -49,7 +48,7 @@ class CalendarICS(ICalFeed):
             startDateTime = item.meet_at.replace(tzinfo=None)
         elif item.access_at:
             startDateTime = item.access_at.replace(tzinfo=None)
-        elif item.start_time:
+        elif item.has_start_time:
             startDateTime = datetime.datetime.combine(item.start_date,item.start_time).replace(tzinfo=None)
         else:
             startDateTime = item.start_date
@@ -64,9 +63,9 @@ class CalendarICS(ICalFeed):
         if item.end_date:
             endDateTime = item.end_date
         
-        if item.start_time and item.end_time: # don't allow an event with specific end but no specific start
+        if item.has_start_time and item.has_end_time: # don't allow an event with specific end but no specific start
             endDateTime = datetime.datetime.combine(endDateTime,item.end_time).replace(tzinfo=None)
-        elif item.start_time: # if there's a start time specified then an end time should also be specified
+        elif item.has_end_time: # if there's a start time specified then an end time should also be specified
             endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00)).replace(tzinfo=None)
         #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
              # do nothing
@@ -95,9 +94,9 @@ class CalendarICS(ICalFeed):
         if item.access_at:
             desc += 'Access At = ' + item.access_at.strftime('%Y-%m-%d %H:%M') + '\n'
         if item.start_date:
-            desc += 'Event Start = ' + item.start_date.strftime('%Y-%m-%d') + ((' '+item.start_time.strftime('%H:%M')) if item.start_time else '') + '\n'
+            desc += 'Event Start = ' + item.start_date.strftime('%Y-%m-%d') + ((' '+item.start_time.strftime('%H:%M')) if item.has_start_time else '') + '\n'
         if item.end_date:
-            desc += 'Event End = ' + item.end_date.strftime('%Y-%m-%d') + ((' '+item.end_time.strftime('%H:%M')) if item.end_time else '') + '\n'
+            desc += 'Event End = ' + item.end_date.strftime('%Y-%m-%d') + ((' '+item.end_time.strftime('%H:%M')) if item.has_end_time else '') + '\n'
 
         desc += '\n'
         if item.description:

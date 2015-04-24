@@ -62,14 +62,14 @@
                                 <dt>Crew meet</dt>
                                 <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
                             {% endif %}
-                            {% if event.start_time %}
+                            {% if event.has_start_time %}
                                 <dt>Event starts</dt>
                                 <dd>
                                     {{ event.start_time|date:"H:i" }}<br/>
                                     {{ event.start_date|date:"(Y-m-d)" }}<br/>
                                 </dd>
                             {% endif %}
-                            {% if event.end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
+                            {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
                                 <dt>Event ends</dt>
                                 <dd>
                                     {{ event.end_time|date:"H:i" }}<br/>
