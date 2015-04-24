@@ -135,12 +135,13 @@ ACCOUNT_ACTIVATION_DAYS = 7
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'server.techost.co.uk'
+    EMAIL_HOST = 'mail.nottinghamtec.co.uk'
     EMAIL_PORT = 465
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'tec'
-    EMAIL_HOST_PASSWORD = 's7m4R3X'
-    DEFAULT_FROM_EMAIL = 'rigs@nottinghamtec.co.uk'
+    EMAIL_HOST_USER = 'pyrigs@nottinghamtec.co.uk'
+    EMAIL_HOST_PASSWORD = 'N_dF9T&dD(Th'
+    EMAIL_USE_TLS = False
+    EMAIL_USE_SSL = True
+    DEFAULT_FROM_EMAIL = 'pyrigs@nottinghamtec.co.uk'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
