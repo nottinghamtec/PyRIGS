@@ -387,6 +387,14 @@
                                 {% render_field form.collector class+="form-control" %}
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="{{ form.purchase_order.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.purchase_order.label }}</label>
+
+                            <div class="col-sm-8">
+                                {% render_field form.purchase_order class+="form-control" %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
