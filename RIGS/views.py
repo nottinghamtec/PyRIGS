@@ -299,10 +299,10 @@ class SecureAPIRequest(generic.View):
                 if item.start_date:
                     data['start_date'] = item.start_date.strftime('%Y-%m-%d')
 
-                if item.start_time:
+                if item.has_start_time:
                     data['start_time'] = item.start_time.strftime('%H:%M:%SZ')
                 
-                if item.has_end_date:
+                if item.end_date:
                     data['end_date'] = item.end_date.strftime('%Y-%m-%d')
 
                 if item.has_end_time:
