@@ -255,8 +255,8 @@ class Event(models.Model, RevisionMixin):
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
-    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='Purchase Order')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected By')
+    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
+    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected by')
 
     # Calculated values
     """
