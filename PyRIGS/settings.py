@@ -10,7 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -19,13 +21,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_IPS = ['127.0.0.1', '10.20.30.20']
+INTERNAL_IPS = ['127.0.0.1']
 
 
 # Application definition
@@ -63,24 +65,8 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-try:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-except ImportError:
-    pass
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-    'legacy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'alfie.codedinternet.com',
-        'NAME': 'tec_rigs',
-        'USER': 'tec_rigs',
-        'PASSWORD': 'xMNb(b+Giu]&',
-    }
-}
+import dj_database_url
+DATABASES['default'] = dj_database_url.config()
 
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
