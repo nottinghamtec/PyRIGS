@@ -303,6 +303,14 @@ class Event(models.Model, RevisionMixin):
     def confirmed(self):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
 
+    @property
+    def has_start_time(self):
+        return self.start_time is not None
+
+    @property
+    def has_end_time(self):
+        return self.end_time is not None
+
     objects = EventManager()
 
     def get_absolute_url(self):
