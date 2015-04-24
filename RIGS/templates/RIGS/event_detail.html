@@ -157,6 +157,11 @@
                         <dt>Collected By</dt>
                         <dd>{{ object.collector }}</dd>
                     {% endif %}
+
+                    {% if event.is_rig %}
+                        <dt>PO</dt>
+                        <dd>{{ object.purchase_order }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>
