@@ -137,6 +137,7 @@ if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'server.techost.co.uk'
     EMAIL_PORT = 465
+    EMAIL_USE_TLS = True
     EMAIL_HOST_USER = 'tec'
     EMAIL_HOST_PASSWORD = '***REMOVED***'
     DEFAULT_FROM_EMAIL = 'rigs@nottinghamtec.co.uk'
