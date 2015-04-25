@@ -26,7 +26,7 @@
         <tbody>
         	{% for version in object_list %}
             <tr>
-           		<td>{{ version.pk }}</td>
+           		<td>{{ version.revision.pk }}</td>
                 <td>{{ version.revision.date_created }}</td>
                 <td>{{ version.revision.user.name }}</td>
                 <td>{% for key, old, new in version.changes %}
@@ -37,7 +37,43 @@
                 	
                 		
                 		'>{{ key }}</button>
-                	{% endfor %}</td>
+                	{% endfor %}
+                    {% for key, old, new in version.item_changes %}
+                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+
+                    {% if new %}
+                        <div class="alert alert-success">
+                            <dl>
+                                <dt>Name</dt>
+                                <dd>{{new.name}}</dd>
+                                <dt>Description</dt>
+                                <dd>{{new.description}}</dd>
+                                <dt>Quantity</dt>
+                                <dd>{{new.quantity}}</dd>
+                                <dt>Price</dt>
+                                <dd>{{new.price}}
+                            </dl>
+                        </div>
+                    {% endif %}
+                    {% if old %}
+                        <div class="alert alert-danger">
+                            <dl>
+                                <dt>Name</dt>
+                                <dd>{{old.name}}</dd>
+                                <dt>Description</dt>
+                                <dd>{{old.description}}</dd>
+                                <dt>Quantity</dt>
+                                <dd>{{old.quantity}}</dd>
+                                <dt>Price</dt>
+                                <dd>{{old.price}}
+                            </dl>
+                        </div>
+                    {% endif %}
+                    
+                        
+                        '>{{ key }}</button>
+                    {% endfor %}
+                </td>
             </tr>
 			{% endfor %}
 

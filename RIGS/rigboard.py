@@ -229,29 +229,41 @@ class EventRevisions(generic.ListView):
         # Build some dicts of what we have
         item_dict = {}
         for item in old_items:
-            item_dict[item.object_id] = ItemCompare(old=item)
+            compare = ItemCompare(old=item)
+            compare.old.field_dict['event_id'] = compare.old.field_dict.pop('event')
+            item_dict[item.object_id] = compare
 
         for item in new_items:
             try:
-                item_dict[item.object_id].new = item
+                compare = item_dict[item.object_id]
+                compare.new = item
             except KeyError:
-                item_dict[item.object_id] = ItemCompare(new=item)
+                compare = ItemCompare(new=item)
+            compare.new.field_dict['event_id'] = compare.new.field_dict.pop('event')
+            item_dict[item.object_id] = compare
 
         # calculate changes
         key, old, new = [], [], []
-        for items in item_dict:
+        for (_, items) in item_dict.items():
             if items.new is None:
                 key.append("Deleted \"%s\"" % items.old.field_dict['name'])
-                old.append(models.EventItem(**old.field_dict))
+                old.append(models.EventItem(**items.old.field_dict))
                 new.append(None)
+
             elif items.old is None:
                 key.append("Added \"%s\"" % items.new.field_dict['name'])
                 old.append(None)
-                new.append(models.EventItem(**new.field_dict))
-            if items.old.field_dict != items.new.field_dict:
-                key.append("Changed \"%s\"" % items.old.field_dict['name'])
-                old.append(models.EventItem(**old.field_dict))
-                new.append(models.EventItem(**new.field_dict))
+                new.append(models.EventItem(**items.new.field_dict))
+
+            elif items.old.field_dict != items.new.field_dict:
+                if items.old.field_dict['name'] == items.new.field_dict['name']:
+                    change_text = "\"%s\"" % items.old.field_dict['name']
+                else:
+                    change_text = "\"%s\" to \"%s\"" % (items.old.field_dict['name'], items.new.field_dict['name'])
+                key.append("Changed %s" % change_text)
+
+                old.append(models.EventItem(**items.old.field_dict))
+                new.append(models.EventItem(**items.new.field_dict))
 
         return zip(key,old,new)
 
@@ -273,13 +285,15 @@ class EventRevisions(generic.ListView):
             else:
                 changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict)
                 thisItem['item_changes'] = self.compare_items(revisions[revisionNo+1], thisRevision)
+                logger.debug(thisItem['item_changes'])
                 thisItem['changes'] = changes
 
             items.append(thisItem)
             logger.info(thisItem)
 
-        context = {}
-        context['object_list'] = items                        
+        context = {
+            'object_list': items
+        }                     
 
         return context
 
