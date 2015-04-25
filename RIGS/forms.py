@@ -4,6 +4,7 @@ from django.utils import formats
 from django.conf import settings
 from django.core import serializers
 from registration.forms import RegistrationFormUniqueEmail 
+from captcha.fields import ReCaptchaField
 import simplejson
 
 from RIGS import models
@@ -14,6 +15,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
+    captcha = ReCaptchaField()
 
     def clean_initials(self):
         """
