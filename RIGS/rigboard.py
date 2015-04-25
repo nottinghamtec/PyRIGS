@@ -214,10 +214,10 @@ class EventRevisions(generic.ListView):
 
         
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-        revisions = reversion.get_for_object(thisEvent)
+        revisions = reversion.get_unique_for_object(thisEvent)
         items = []
         for revisionNo, thisRevision in enumerate(revisions):
-            thisItem = {}
+            thisItem = {'pk': thisRevision.pk}
             thisItem['revision'] = thisRevision.revision
             logger.info(thisRevision.revision.version_set.all())
             if revisionNo >= len(revisions)-1:
@@ -233,14 +233,32 @@ class EventRevisions(generic.ListView):
 
         return context
 
-class EventRevision(generic.DetailView):
+class EventRevision(generic.TemplateView):
     model = reversion.revisions.Revision
-    template_name = "RIGS/event_revision.html"
+    template_name = "RIGS/event_detail.html"
 
-    def get_queryset(self):
-        pk=self.kwargs['pk']
-        thisVersion = get_object_or_404(reversion.models.Revision, pk=self.kwargs['pk'])
-        #items = reversion.revisions.Version
-        #thisVersion.
+    def get_context_data(self, pk, source, dest=None):
+        model = get_object_or_404(models.Event, pk=pk)
+        revisions = reversion.get_for_object(model)
+        source = revisions.get(pk=source)
 
-        return self.model.objects.filter(pk=pk)
+        if dest:
+            dest = revisions.get(pk=dest)
+        else:
+            dest = reversion.get_for_date(model, datetime.datetime.today())
+
+        diff = {
+            'pk': pk, # need this for the edit button to work
+        }
+        for field in source.field_dict:
+            html = generate_patch_html(source, dest, field, cleanup="semantic")
+            # tidy up
+            html = html.replace("&para;", "")
+            diff[field] = html
+
+        context = {
+            'object': diff,
+            'event': diff
+        }
+
+        return context
