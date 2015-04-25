@@ -88,7 +88,7 @@ DATABASES = {
     }
 }
 
-if False: #not DEBUG:
+if not DEBUG:
     import dj_database_url
     DATABASES['default'] = dj_database_url.config()
 
