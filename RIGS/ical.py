@@ -12,13 +12,12 @@ class CalendarICS(ICalFeed):
     #Metadata which is passed on to clients
     product_id = 'PyRIGS'
     title = 'PyRIGS Calendar'
-    timezone = 'UTC'
     file_name = "rigs.ics"
 
     def items(self):
         #include events from up to 1 year ago
         start = datetime.datetime.now() - datetime.timedelta(days=365)
-        filter = Q(start_date__gte=start)
+        filter = Q(start_date__gte=start) & ~Q(status=models.Event.CANCELLED)
 
         return models.Event.objects.filter(filter).order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
@@ -46,11 +45,11 @@ class CalendarICS(ICalFeed):
     def item_start_datetime(self, item):
         #set start date to the earliest defined time for the event
         if item.meet_at:
-            startDateTime = item.meet_at
+            startDateTime = item.meet_at.replace(tzinfo=None)
         elif item.access_at:
-            startDateTime = item.access_at
-        elif item.start_time:
-            startDateTime = datetime.datetime.combine(item.start_date,item.start_time)
+            startDateTime = item.access_at.replace(tzinfo=None)
+        elif item.has_start_time:
+            startDateTime = datetime.datetime.combine(item.start_date,item.start_time).replace(tzinfo=None)
         else:
             startDateTime = item.start_date
 
@@ -64,10 +63,10 @@ class CalendarICS(ICalFeed):
         if item.end_date:
             endDateTime = item.end_date
         
-        if item.start_time and item.end_time: # don't allow an event with specific end but no specific start
-            endDateTime = datetime.datetime.combine(endDateTime,item.end_time)
-        elif item.start_time: # if there's a start time specified then an end time should also be specified
-            endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00))
+        if item.has_start_time and item.has_end_time: # don't allow an event with specific end but no specific start
+            endDateTime = datetime.datetime.combine(endDateTime,item.end_time).replace(tzinfo=None)
+        elif item.has_end_time: # if there's a start time specified then an end time should also be specified
+            endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00)).replace(tzinfo=None)
         #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
              # do nothing
 
@@ -95,9 +94,9 @@ class CalendarICS(ICalFeed):
         if item.access_at:
             desc += 'Access At = ' + item.access_at.strftime('%Y-%m-%d %H:%M') + '\n'
         if item.start_date:
-            desc += 'Event Start = ' + item.start_date.strftime('%Y-%m-%d') + ((' '+item.start_time.strftime('%H:%M')) if item.start_time else '') + '\n'
+            desc += 'Event Start = ' + item.start_date.strftime('%Y-%m-%d') + ((' '+item.start_time.strftime('%H:%M')) if item.has_start_time else '') + '\n'
         if item.end_date:
-            desc += 'Event End = ' + item.end_date.strftime('%Y-%m-%d') + ((' '+item.end_time.strftime('%H:%M')) if item.end_time else '') + '\n'
+            desc += 'Event End = ' + item.end_date.strftime('%Y-%m-%d') + ((' '+item.end_time.strftime('%H:%M')) if item.has_end_time else '') + '\n'
 
         desc += '\n'
         if item.description:
@@ -106,7 +105,7 @@ class CalendarICS(ICalFeed):
             desc += 'Notes:\n'+item.notes+'\n\n'
 
         base_url = "https://pyrigs.nottinghamtec.co.uk"
-        desc += 'URL = '+base_url+str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
+        desc += 'URL = '+base_url+str(item.get_absolute_url())
         
         return desc
 
@@ -119,7 +118,7 @@ class CalendarICS(ICalFeed):
     #     return ''
 
     def item_updated(self, item): # some ical clients will display this
-        return item.last_edited_at
+        return item.last_edited_at.replace(tzinfo=None)
 
     def item_guid(self, item): # use the rig-id as the ical unique event identifier
         return item.pk

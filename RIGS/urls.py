@@ -57,7 +57,7 @@ urlpatterns = patterns('',
                            name='venue_update'),
 
                        # Rigboard
-                       url(r'^rigboard/$', rigboard.RigboardIndex.as_view(), name='rigboard'),
+                       url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
                        url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
                        url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
 
