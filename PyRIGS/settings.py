@@ -25,9 +25,13 @@ DEBUG = False
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
 INTERNAL_IPS = ['127.0.0.1']
+
+ADMINS = (
+    ('Tom Price', 'tomtom5152@gmail.com')
+)
 
 
 # Application definition
@@ -84,7 +88,7 @@ DATABASES = {
     }
 }
 
-if not DEBUG:
+if False: #not DEBUG:
     import dj_database_url
     DATABASES['default'] = dj_database_url.config()
 
@@ -112,13 +116,27 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        }
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+             # But the emails are plain text by default - HTML is nicer
+            'include_html': True,
+        },
     },
     'loggers': {
-        'RIGS': {
+         # Again, default Django configuration to email unhandled exceptions
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # Might as well log any errors anywhere else in Django
+        'django': {
             'handlers': ['console'],
-            'level': 'INFO',
-        }
+            'level': 'ERROR',
+            'propagate': False,
+        },
     }
 }
 
