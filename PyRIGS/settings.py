@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
@@ -19,13 +21,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_IPS = ['127.0.0.1', '10.20.30.20']
+INTERNAL_IPS = ['127.0.0.1']
 
 
 # Application definition
@@ -82,6 +84,44 @@ DATABASES = {
     }
 }
 
+if not DEBUG:
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config()
+
+# Logging 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
+                       'pathname=%(pathname)s lineno=%(lineno)s ' +
+                       'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'RIGS': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
+    }
+}
+
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
 
@@ -95,11 +135,13 @@ ACCOUNT_ACTIVATION_DAYS = 7
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'server.techost.co.uk'
+    EMAIL_HOST = 'mail.nottinghamtec.co.uk'
     EMAIL_PORT = 465
-    EMAIL_HOST_USER = 'tec'
-    EMAIL_HOST_PASSWORD = '***REMOVED***'
-    DEFAULT_FROM_EMAIL = 'rigs@nottinghamtec.co.uk'
+    EMAIL_HOST_USER = 'pyrigs@nottinghamtec.co.uk'
+    EMAIL_HOST_PASSWORD = 'N_dF9T&dD(Th'
+    EMAIL_USE_TLS = False
+    EMAIL_USE_SSL = True
+    DEFAULT_FROM_EMAIL = 'pyrigs@nottinghamtec.co.uk'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

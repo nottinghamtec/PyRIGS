@@ -345,6 +345,7 @@ def main():
     # [x.start() for x in processs]
     # # Wait for all processs to finish
     # [x.join() for x in processs]
+
     import_users()
     import_people(True)
     import_organisations(True)
@@ -354,8 +355,18 @@ def main():
     import_rigs(True)
     import_eventitem(True)
     import_invoices(True)
+
+    # Do this before doing non rigs else it gets ugly
+    sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % ('event', 'event')
+    cursor = connections['default'].cursor()
+    cursor.execute(sql)
     import_nonrigs(False)
 
+    sequences = ['profile', 'person', 'organisation', 'vatrate', 'venue', 'event', 'eventitem', 'invoice', 'payment']
+    for seq in sequences:
+        sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (seq, seq)
+        cursor = connections['default'].cursor()
+        cursor.execute(sql)
 
 if __name__ == "__main__":
     main()

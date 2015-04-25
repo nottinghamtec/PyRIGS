@@ -71,7 +71,9 @@ class PersonCreate(generic.CreateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('person_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('person_detail', kwargs={
                 'pk': self.object.pk,
@@ -85,7 +87,9 @@ class PersonUpdate(generic.UpdateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('person_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('person_detail', kwargs={
                 'pk': self.object.pk,
@@ -119,7 +123,9 @@ class OrganisationCreate(generic.CreateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('organisation_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('organisation_detail', kwargs={
                 'pk': self.object.pk,
@@ -133,7 +139,9 @@ class OrganisationUpdate(generic.UpdateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('organisation_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('organisation_detail', kwargs={
                 'pk': self.object.pk,
@@ -167,7 +175,9 @@ class VenueCreate(generic.CreateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('venue_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('venue_detail', kwargs={
                 'pk': self.object.pk,
@@ -181,7 +191,9 @@ class VenueUpdate(generic.UpdateView):
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('venue_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('venue_detail', kwargs={
                 'pk': self.object.pk,
@@ -287,13 +299,13 @@ class SecureAPIRequest(generic.View):
                 if item.start_date:
                     data['start_date'] = item.start_date.strftime('%Y-%m-%d')
 
-                if item.start_time:
+                if item.has_start_time:
                     data['start_time'] = item.start_time.strftime('%H:%M:%SZ')
                 
                 if item.end_date:
                     data['end_date'] = item.end_date.strftime('%Y-%m-%d')
 
-                if item.end_time:
+                if item.has_end_time:
                     data['end_time'] = item.end_time.strftime('%H:%M:%SZ')
 
                 if item.meet_at:
