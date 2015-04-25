@@ -16,10 +16,14 @@ from django.db.models import Q
 from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
+
+# Versioning
 import reversion
 import diff_match_patch
 import simplejson
 from reversion.helpers import generate_patch_html
+from reversion.models import Version
+from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
 
 from RIGS import models, forms
 import datetime
@@ -194,7 +198,7 @@ class EventRevisions(generic.ListView):
     #     #logger.info('There are '+items[0].date_created)
     #     return items
 
-    def compare(self, obj1, obj2, excluded_keys):
+    def compare(self, obj1, obj2, excluded_keys=[]):
         d1, d2 = obj1, obj2
         key, old, new = [],[],[]
         for k,v in d1.items():
@@ -209,22 +213,68 @@ class EventRevisions(generic.ListView):
                 old.update({k: v})
         
         return zip(key,old,new)
+
+    def compare_items(self, old, new):
+        # Need to manually query the version history to get each items events.
+        # THIS WHOLE METHOD WILL BE SLOW
+        item_type = ContentType.objects.get_for_model(models.EventItem)
+        old_items = Version.objects.filter(revision_id=old.revision_id, content_type=item_type)
+        new_items = Version.objects.filter(revision_id=new.revision_id, content_type=item_type)
+
+        class ItemCompare(object):
+            def __init__(self, old=None, new=None):
+                self.old = old
+                self.new = new
+
+        # Build some dicts of what we have
+        item_dict = {}
+        for item in old_items:
+            item_dict[item.object_id] = ItemCompare(old=item)
+
+        for item in new_items:
+            try:
+                item_dict[item.object_id].new = item
+            except KeyError:
+                item_dict[item.object_id] = ItemCompare(new=item)
+
+        # calculate changes
+        key, old, new = [], [], []
+        for items in item_dict:
+            if items.new is None:
+                key.append("Deleted \"%s\"" % items.old.field_dict['name'])
+                old.append(models.EventItem(**old.field_dict))
+                new.append(None)
+            elif items.old is None:
+                key.append("Added \"%s\"" % items.new.field_dict['name'])
+                old.append(None)
+                new.append(models.EventItem(**new.field_dict))
+            if items.old.field_dict != items.new.field_dict:
+                key.append("Changed \"%s\"" % items.old.field_dict['name'])
+                old.append(models.EventItem(**old.field_dict))
+                new.append(models.EventItem(**new.field_dict))
+
+        return zip(key,old,new)
+
     
     def get_context_data(self, **kwargs):
 
         
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-        revisions = reversion.get_unique_for_object(thisEvent)
+        revisions = reversion.get_for_object(thisEvent)
         items = []
         for revisionNo, thisRevision in enumerate(revisions):
             thisItem = {'pk': thisRevision.pk}
             thisItem['revision'] = thisRevision.revision
             logger.info(thisRevision.revision.version_set.all())
+
             if revisionNo >= len(revisions)-1:
+                # current HEAD
                 thisItem['changes'] = {}
             else:
-                changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict,[])
+                changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict)
+                thisItem['item_changes'] = self.compare_items(revisions[revisionNo+1], thisRevision)
                 thisItem['changes'] = changes
+
             items.append(thisItem)
             logger.info(thisItem)
 
