@@ -30,7 +30,7 @@ def login(request, **kwargs):
     else:
         from django.contrib.auth.views import login
 
-        return login(request)
+        return login(request, authentication_form=forms.LoginForm)
 
 
 """
