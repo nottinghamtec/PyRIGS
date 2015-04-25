@@ -233,7 +233,7 @@ class EventRevisions(generic.ListView):
 
         return context
 
-class EventRevision(generic.TemplateView):
+class EventDiff(generic.TemplateView):
     model = reversion.revisions.Revision
     template_name = "RIGS/event_detail.html"
 
@@ -255,6 +255,7 @@ class EventRevision(generic.TemplateView):
             # tidy up
             html = html.replace("&para;", "")
             diff[field] = html
+
 
         context = {
             'object': diff,
