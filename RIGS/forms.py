@@ -3,7 +3,9 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail 
+from captcha.fields import ReCaptchaField
 import simplejson
 
 from RIGS import models
@@ -14,6 +16,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
+    captcha = ReCaptchaField()
 
     def clean_initials(self):
         """
@@ -22,6 +25,13 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
+
+# Login form
+class LoginForm(AuthenticationForm):
+    captcha = ReCaptchaField(label='Captcha')
+
+class PasswordReset(PasswordResetForm):
+    captcha = ReCaptchaField(label='Captcha')
 
 # Events Shit
 class EventForm(forms.ModelForm):

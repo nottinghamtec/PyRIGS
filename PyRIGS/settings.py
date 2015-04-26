@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'registration',
     'reversion',
+    'captcha',
     'widget_tweaks',
 )
 
@@ -148,6 +149,11 @@ LOGIN_URL = '/user/login'
 LOGOUT_URL = '/user/logout'
 
 ACCOUNT_ACTIVATION_DAYS = 7
+
+# reCAPTCHA settings
+RECAPTCHA_PUBLIC_KEY = '6Le16gUTAAAAAO5f-6te_x0NjWmF65_h7saBI6Cg'
+RECAPTCHA_PRIVATE_KEY = '6Le16gUTAAAAAByo-ZxRRX3RKyoBngf7ms3dnoEW'
+NOCAPTCHA = True
 
 # Email
 EMAILER_TEST = False
