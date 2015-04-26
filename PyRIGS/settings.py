@@ -211,4 +211,4 @@ TEMPLATE_DIRS = (
 
 USE_GRAVATAR=True
 
-TERMS_OF_HIRE_URL = "http://dev.nottinghamtec.co.uk/wp-content/uploads/2014/11/terms.pdf"
+TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
