@@ -46,11 +46,11 @@ class CalendarICS(ICalFeed):
     def item_start_datetime(self, item):
         #set start date to the earliest defined time for the event
         if item.meet_at:
-            startDateTime = item.meet_at.replace(tzinfo=None)
+            startDateTime = item.meet_at
         elif item.access_at:
-            startDateTime = item.access_at.replace(tzinfo=None)
+            startDateTime = item.access_at
         elif item.has_start_time:
-            startDateTime = datetime.datetime.combine(item.start_date,item.start_time).replace(tzinfo=None)
+            startDateTime = datetime.datetime.combine(item.start_date,item.start_time)
         else:
             startDateTime = item.start_date
 
@@ -65,9 +65,9 @@ class CalendarICS(ICalFeed):
             endDateTime = item.end_date
         
         if item.has_start_time and item.has_end_time: # don't allow an event with specific end but no specific start
-            endDateTime = datetime.datetime.combine(endDateTime,item.end_time).replace(tzinfo=None)
+            endDateTime = datetime.datetime.combine(endDateTime,item.end_time)
         elif item.has_end_time: # if there's a start time specified then an end time should also be specified
-            endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00)).replace(tzinfo=None)
+            endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00))
         #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
              # do nothing
 
@@ -119,7 +119,7 @@ class CalendarICS(ICalFeed):
     #     return ''
 
     def item_updated(self, item): # some ical clients will display this
-        return item.last_edited_at.replace(tzinfo=None)
+        return item.last_edited_at
 
     def item_guid(self, item): # use the rig-id as the ical unique event identifier
         return item.pk
