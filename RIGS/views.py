@@ -257,6 +257,7 @@ class SecureAPIRequest(generic.View):
                 fields = ['name']
             all_objects = self.models[model].objects
             results = []
+            # This code is all bollocks, suggest rewriting it
             for field in fields:
                 filter = field + "__icontains"
                 objects = all_objects.filter(**{filter: term})
