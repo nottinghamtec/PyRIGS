@@ -10,13 +10,15 @@
     <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
 {% endblock %}
 
+{% block preload_js %}
+    <script src="{% static "js/bootstrap-select.js" %}"></script>
+    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
+{% endblock %}
+
 {% block js %}
     <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
-
-    <script src="{% static "js/bootstrap-select.js" %}"></script>
-    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
 
     <script src="{% static "js/autocompleter.js" %}"></script>
 
@@ -420,6 +422,13 @@
                     </div>
                 </div>
                 {% include "RIGS/item_table.html" %}
+            </div>
+        </div>
+        <div class="col-sm-12 text-right">
+            <div class="btn-group btn-page">
+                <button type="submit" class="btn btn-default" title="Save"><span
+                        class="glyphicon glyphicon-floppy-disk"></span>
+                </button>
             </div>
         </div>
     </div>
