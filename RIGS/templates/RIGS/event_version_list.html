@@ -27,7 +27,7 @@
         	{% for version in object_list %}
             <tr>
            		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                <td>{{ version.revision.date_created }}</td>
+                <td>{{ version.revision.date_created|date:"d/m/Y H:i" }}</td>
                 <td>{{ version.revision.user.name }}</td>
                 <td>{% for key, old, new in version.changes %}
                 	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='

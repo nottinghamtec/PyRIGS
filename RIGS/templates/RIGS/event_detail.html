@@ -227,7 +227,7 @@
             </div>
             <div>
                 <a href="{% url 'event_history' object.pk %}">
-                    Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ object.last_edited_by.name }}
+                    Lasted edited at {{ object.last_edited_at|date:"d/m/Y H:i" }} by {{ object.last_edited_by.name }}
                 </a>
             </div>
         </div>
@@ -241,7 +241,7 @@
         <div class="row">
             <div class="col-sm-10 align-left">
                 <a href="{% url 'event_history' object.pk %}">
-                    Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ object.last_edited_by.name }}
+                    Lasted edited at {{ object.last_edited_at|date:"d/m/Y H:i" }} by {{ object.last_edited_by.name }}
                 </a>
             </div>
             <div class="col-sm-2">
