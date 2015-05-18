@@ -78,7 +78,7 @@ body .fc { /* extra precedence to overcome jqui */
 	font-size: 1em;
 	text-align: center;
 	overflow: hidden;
-	font-family: "Courier New", Courier, monospace;
+	font-family: "Open Sans", sans-serif;
 }
 
 /*
