@@ -206,7 +206,7 @@ class EventRevisions(generic.ListView):
                 continue
             try:
                 if v != d2[k]:
-                    key.append(k)
+                    key.append(models.Event._meta.get_field_by_name(k)[0].verbose_name)
                     old.append(v)
                     new.append(d2[k])
             except KeyError:
