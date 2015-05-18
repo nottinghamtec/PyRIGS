@@ -59,3 +59,7 @@ textarea {
   max-width: 100%;
   overflow: hidden;
 }
+
+.modal-dialog {
+  z-index: inherit; // bug fix introduced in 52682ce
+}
