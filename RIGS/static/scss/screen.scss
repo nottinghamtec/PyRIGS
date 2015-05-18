@@ -52,3 +52,14 @@ textarea {
 .item-description {
   margin-left: 1em;
 }
+
+.overflow-ellipsis {
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.modal-dialog {
+  z-index: inherit; // bug fix introduced in 52682ce
+}

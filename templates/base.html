@@ -11,6 +11,10 @@
 
     <meta name="viewport" content="initial-scale=1">
 
+    <link rel="icon" type="image/png" href="/static/imgs/pyrigs-avatar.png">
+    <link rel="apple-touch-icon" href="/static/imgs/pyrigs-avatar.png">
+
+
     <link rel="stylesheet" type="text/css" href="{% static "css/screen.css" %}">
     {% block css %}
     {% endblock %}
@@ -44,6 +48,7 @@
                         <li><a href="{% url 'rigboard' %}">Rigboard</a></li>
                         <li><a href="{% url 'event_archive' %}">Archive</a></li>
                         <li><a href="{% url 'web_calendar' %}">Calendar</a></li>
+                        <li><a href="{% url 'event_create' %}">New</a></li>
                     </ul>
                 </li>
                 {% if perms.RIGS.view_invoice %}
@@ -135,7 +140,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modal"></div>
+<div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
 <script>
     Date.prototype.getISOString = function () {
