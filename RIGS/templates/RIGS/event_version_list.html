@@ -26,7 +26,7 @@
         <tbody>
         	{% for version in object_list %}
             <tr>
-           		<td>{{ version.revision.pk }}</td>
+           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
                 <td>{{ version.revision.date_created }}</td>
                 <td>{{ version.revision.user.name }}</td>
                 <td>{% for key, old, new in version.changes %}
