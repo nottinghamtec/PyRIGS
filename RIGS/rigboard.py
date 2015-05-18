@@ -190,7 +190,7 @@ class EventArchive(generic.ArchiveIndexView):
 
 class EventRevisions(generic.ListView):
     model = reversion.revisions.Version
-    template_name = "RIGS/revision_list.html"
+    template_name = "RIGS/event_version_list.html"
 
     # def get_queryset(self):
     #     thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
