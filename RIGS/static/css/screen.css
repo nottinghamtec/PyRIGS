@@ -9055,4 +9055,7 @@ textarea {
 /* line 56, ../scss/screen.scss */
 .overflow-ellipsis {
   text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
 }
