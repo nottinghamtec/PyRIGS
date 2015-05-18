@@ -7,7 +7,10 @@
     {% if not request.is_ajax %}
     <div class="col-sm-12">
         <div class="col-sm-8">
-            <h1>Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}</h1>
+            <h1>
+                {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
+                {{ object.name }}
+            </h1>
         </div>
     </div>
         <div class="col-sm-12 text-right">
@@ -93,7 +96,7 @@
     {% endif %}
     <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
         <div class="panel panel-info">
-            <div class="panel-heading">{{ object.name }}</div>
+            <div class="panel-heading">Event Info</div>
             <div class="panel-body">
                 <dl class="dl-horizontal">
                     <dt>Event Venue</dt>
