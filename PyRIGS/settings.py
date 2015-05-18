@@ -18,16 +18,20 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
+SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
 INTERNAL_IPS = ['127.0.0.1']
+
+ADMINS = (
+    ('Tom Price', 'tomtom5152@gmail.com')
+)
 
 
 # Application definition
@@ -44,6 +48,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'registration',
     'reversion',
+    'captcha',
     'widget_tweaks',
 )
 
@@ -112,13 +117,27 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        }
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+             # But the emails are plain text by default - HTML is nicer
+            'include_html': True,
+        },
     },
     'loggers': {
-        'RIGS': {
+         # Again, default Django configuration to email unhandled exceptions
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # Might as well log any errors anywhere else in Django
+        'django': {
             'handlers': ['console'],
-            'level': 'INFO',
-        }
+            'level': 'ERROR',
+            'propagate': False,
+        },
     }
 }
 
@@ -130,6 +149,11 @@ LOGIN_URL = '/user/login'
 LOGOUT_URL = '/user/logout'
 
 ACCOUNT_ACTIVATION_DAYS = 7
+
+# reCAPTCHA settings
+RECAPTCHA_PUBLIC_KEY = '6Le16gUTAAAAAO5f-6te_x0NjWmF65_h7saBI6Cg'
+RECAPTCHA_PRIVATE_KEY = '6Le16gUTAAAAAByo-ZxRRX3RKyoBngf7ms3dnoEW'
+NOCAPTCHA = True
 
 # Email
 EMAILER_TEST = False
@@ -187,4 +211,4 @@ TEMPLATE_DIRS = (
 
 USE_GRAVATAR=True
 
-TERMS_OF_HIRE_URL = "http://dev.nottinghamtec.co.uk/wp-content/uploads/2014/11/terms.pdf"
+TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
