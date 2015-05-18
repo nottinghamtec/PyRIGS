@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 {% load static %}
 
 {% block title %}Revisions{% endblock %}
