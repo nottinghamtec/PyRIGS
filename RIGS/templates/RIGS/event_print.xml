@@ -84,9 +84,9 @@
 
                     <setFont name="OpenSans" size="9"/>
                     <drawString x="137" y="760">Portland Building, University Park, Nottingham, NG7 2RD</drawString>
-                    <drawString x="137" y="746">Phone: (0115) 846 8720</drawString>
-                    <drawString x="137" y="732">www.nottinghamtec.co.uk</drawString>
-                    <drawString x="265" y="732">info@nottinghamtec.co.uk</drawString>
+                    <drawString x="137" y="746">www.nottinghamtec.co.uk</drawString>
+                    <drawString x="265" y="746">info@nottinghamtec.co.uk</drawString>
+                    <drawString x="137" y="732">Phone: (0115) 846 8720</drawString>
 
                     
 

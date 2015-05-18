@@ -128,7 +128,7 @@
 <keepTogether>
     <blockTable style="totalTable" colWidths="300,115,80">
     <tr>
-        <td>VAT may be charged at the current rate date of event ({{ object.vat_rate.as_percent|floatformat:2 }}%)</td>
+        <td></td>
         <td>Total (ex. VAT)</td>
         <td>£ {{ object.sum_total|floatformat:2 }}</td>
     </tr>
