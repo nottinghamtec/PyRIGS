@@ -2,18 +2,25 @@ from RIGS import models, forms
 from django_ical.views import ICalFeed
 from django.db.models import Q
 from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
+from django.utils import timezone
+from django.conf import settings
 
-import datetime
+import datetime, pytz
 
 class CalendarICS(ICalFeed):
     """
     A simple event calender
     """
     #Metadata which is passed on to clients
-    product_id = 'PyRIGS'
-    title = 'PyRIGS Calendar'
-    timezone = 'Europe/London'
+    product_id = 'RIGS'
+    title = 'RIGS Calendar'
+    timezone = 'UTC'
     file_name = "rigs.ics"
+
+    def get(self, *args, **kwargs):
+        timezone.activate(timezone.UTC)
+        return super(CalendarICS, self).get(*args, **kwargs)
+
 
     def items(self):
         #include events from up to 1 year ago
@@ -51,6 +58,8 @@ class CalendarICS(ICalFeed):
             startDateTime = item.access_at
         elif item.has_start_time:
             startDateTime = datetime.datetime.combine(item.start_date,item.start_time)
+            tz = pytz.timezone(settings.TIME_ZONE)
+            startDateTime = tz.normalize(tz.localize(startDateTime)).astimezone(pytz.timezone(self.timezone))
         else:
             startDateTime = item.start_date
 
@@ -66,6 +75,8 @@ class CalendarICS(ICalFeed):
         
         if item.has_start_time and item.has_end_time: # don't allow an event with specific end but no specific start
             endDateTime = datetime.datetime.combine(endDateTime,item.end_time)
+            tz = pytz.timezone(settings.TIME_ZONE)
+            endDateTime = tz.normalize(tz.localize(endDateTime)).astimezone(pytz.timezone(self.timezone))
         elif item.has_end_time: # if there's a start time specified then an end time should also be specified
             endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00))
         #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
