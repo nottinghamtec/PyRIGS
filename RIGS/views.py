@@ -9,6 +9,7 @@ from django.core import serializers
 import simplejson
 from django.contrib import messages
 import datetime
+import operator
 
 from RIGS import models, forms
 
@@ -253,28 +254,38 @@ class SecureAPIRequest(generic.View):
         # Supply data for autocomplete ajax request in json form
         term = request.GET.get('term', None)
         if term:
-            if fields is None:
+            if fields is None: # Default to just name
                 fields = ['name']
-            all_objects = self.models[model].objects
+            
+            # Build a list of Q objects for use later
+            queries = []
+            for part in term.split(" "):
+                qs = []
+                for field in fields:
+                    q = Q(**{field + "__icontains": part})
+                    qs.append(q)
+                queries.append(reduce(operator.or_, qs))
+
+
+            # Build the data response list
             results = []
-            # This code is all bollocks, suggest rewriting it
-            for field in fields:
-                filter = field + "__icontains"
-                objects = all_objects.filter(**{filter: term})
-                for o in objects:
-                    data = {
-                        'pk': o.pk,
-                        'value': o.pk,
-                        'label': o.name,
-                    }
+            query = reduce(operator.and_, queries)
+            objects = self.models[model].objects.filter(query)
+            print objects.query
+            for o in objects:
+                data = {
+                    'pk': o.pk,
+                    'value': o.pk,
+                    'label': o.name,
+                }
+                try: # See if there is a valid update URL
+                    data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
+                except NoReverseMatch:
+                    pass
+                results.append(data)
 
-                    try: # See if there is an update url or don't bother with it otherwise
-                        data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
-                    except NoReverseMatch:
-                        pass
-
-                    results.append(data)
-            json = simplejson.dumps(results[:20])
+            # return a data response
+            json = simplejson.dumps(results)
             return HttpResponse(json, content_type="application/json")  # Always json
 
         start = request.GET.get('start', None)
