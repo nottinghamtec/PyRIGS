@@ -271,7 +271,6 @@ class SecureAPIRequest(generic.View):
             results = []
             query = reduce(operator.and_, queries)
             objects = self.models[model].objects.filter(query)
-            print objects.query
             for o in objects:
                 data = {
                     'pk': o.pk,
