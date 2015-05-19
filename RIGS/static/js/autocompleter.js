@@ -25,7 +25,7 @@ function refreshUpdateHref(obj) {
 	//	console.log('Trying to disable');
 		targetObject.attr('disabled', true);
 	} else {
-	//	targetObject.attr('href', update_url);
+		targetObject.attr('href', update_url);
 		targetObject.attr('disabled', false);
 	}
 }
