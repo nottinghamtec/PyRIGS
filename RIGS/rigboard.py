@@ -280,8 +280,8 @@ class EventRevisions(generic.ListView):
             logger.info(thisRevision.revision.version_set.all())
 
             if revisionNo >= len(revisions)-1:
-                # current HEAD
-                thisItem['changes'] = {}
+                # oldest version
+                thisItem['changes'] = [["(event initially created)",None,"Event Created"]]
             else:
                 changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict)
                 thisItem['item_changes'] = self.compare_items(revisions[revisionNo+1], thisRevision)
@@ -292,7 +292,8 @@ class EventRevisions(generic.ListView):
             logger.info(thisItem)
 
         context = {
-            'object_list': items
+            'object_list': items,
+            'object': thisEvent
         }                     
 
         return context
