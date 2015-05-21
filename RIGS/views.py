@@ -33,18 +33,6 @@ def login(request, **kwargs):
 
         return login(request, authentication_form=forms.LoginForm)
 
-
-class ProfileRegistrationView(RegistrationView):
-    form_class = forms.ProfileRegistrationFormUniqueEmail
-
-    def register(self, request, **form):
-        model = models.Profile()
-        for (key,value) in form.items():
-            setattr(model, key, value)
-        model.set_password(form['password1'])
-        model.is_active = False
-        return model.save()
-
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
 May optionally also include some javascript in a success message to cause a load of
