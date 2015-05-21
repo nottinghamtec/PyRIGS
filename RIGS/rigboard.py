@@ -215,11 +215,10 @@ class EventRevisions(generic.ListView):
         return zip(key,old,new)
 
     def compare_items(self, old, new):
-        # Need to manually query the version history to get each items events.
-        # THIS WHOLE METHOD WILL BE SLOW
+
         item_type = ContentType.objects.get_for_model(models.EventItem)
-        old_items = Version.objects.filter(revision_id=old.revision_id, content_type=item_type)
-        new_items = Version.objects.filter(revision_id=new.revision_id, content_type=item_type)
+        old_items = old.revision.version_set.filter(content_type=item_type)
+        new_items = new.revision.version_set.filter(content_type=item_type)
 
         class ItemCompare(object):
             def __init__(self, old=None, new=None):
