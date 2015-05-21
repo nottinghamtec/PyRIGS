@@ -14,7 +14,7 @@ class CalendarICS(ICalFeed):
     #Metadata which is passed on to clients
     product_id = 'RIGS'
     title = 'RIGS Calendar'
-    timezone = 'UTC'
+    timezone = settings.TIME_ZONE
     file_name = "rigs.ics"
 
     def get(self, *args, **kwargs):
