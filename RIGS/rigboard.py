@@ -281,7 +281,7 @@ class EventRevisions(generic.ListView):
 
             if revisionNo >= len(revisions)-1:
                 # oldest version
-                thisItem['changes'] = [["(event initially created)",None,"Event Created"]]
+                thisItem['changes'] = [["(initial version)",None,"Event Created"]]
             else:
                 changes = self.compare(revisions[revisionNo+1].field_dict,thisRevision.field_dict)
                 thisItem['item_changes'] = self.compare_items(revisions[revisionNo+1], thisRevision)
