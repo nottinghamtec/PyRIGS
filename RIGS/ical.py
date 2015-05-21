@@ -102,7 +102,7 @@ class CalendarICS(ICalFeed):
         
         desc += '\n'
         if item.meet_at:
-            desc += 'Crew Meet = ' + item.meet_at.strftime('%Y-%m-%d %H:%M') + (('('+item.meet_info+')') if item.meet_info else '---') + '\n'
+            desc += 'Crew Meet = ' + (item.meet_at.strftime('%Y-%m-%d %H:%M') if item.meet_at else '---') + '\n'
         if item.access_at:
             desc += 'Access At = ' + item.access_at.strftime('%Y-%m-%d %H:%M') + '\n'
         if item.start_date:
