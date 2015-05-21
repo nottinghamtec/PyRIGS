@@ -4,6 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
 from registration.backends.default.views import RegistrationView
 import RIGS
+from RIGS import regbackend
 
 urlpatterns = patterns('',
     # Examples:
@@ -11,7 +12,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^', include('RIGS.urls')),
-    url('^user/register/$', RIGS.views.ProfileRegistrationView.as_view()),
+    url('^user/register/$', RegistrationView.as_view(form_class=RIGS.forms.ProfileRegistrationFormUniqueEmail), 
+        name="registration_register"),
     url('^user/', include('django.contrib.auth.urls')),
     url('^user/', include('registration.backends.default.urls')),
 
