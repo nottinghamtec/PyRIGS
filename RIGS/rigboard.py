@@ -192,12 +192,6 @@ class EventRevisions(generic.ListView):
     model = reversion.revisions.Version
     template_name = "RIGS/event_version_list.html"
 
-    # def get_queryset(self):
-    #     thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-    #     items = reversion.get_for_object(thisEvent)
-    #     #logger.info('There are '+items[0].date_created)
-    #     return items
-
     def compare(self, obj1, obj2, excluded_keys=[]):
         d1, d2 = obj1, obj2
         key, old, new = [],[],[]
