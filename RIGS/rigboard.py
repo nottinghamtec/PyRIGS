@@ -210,7 +210,10 @@ class EventRevisions(generic.ListView):
                     old.append(v)
                     new.append(d2[k])
             except KeyError:
-                old.update({k: v})
+                old.append({k: v})
+            except TypeError:
+                # avoids issues with naive vs tz-aware datetimes
+                old.append({k: v})
         
         return zip(key,old,new)
 
