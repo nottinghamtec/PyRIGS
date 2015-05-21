@@ -116,7 +116,7 @@ class CalendarICS(ICalFeed):
         if item.notes:
             desc += 'Notes:\n'+item.notes+'\n\n'
 
-        base_url = "https://pyrigs.nottinghamtec.co.uk"
+        base_url = "http://rigs.nottinghamtec.co.uk"
         desc += 'URL = '+base_url+str(item.get_absolute_url())
         
         return desc
