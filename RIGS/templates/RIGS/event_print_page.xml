@@ -8,7 +8,7 @@
 </para>
 <keepInFrame maxHeight="30">
 <para style="style.event_description">
-{{ object.description|default_if_none:""|linebreaks }}
+{{ object.description|default_if_none:""|linebreaksbr }}
     </para>
 </keepInFrame>
 <spacer length="15"/>
@@ -38,7 +38,7 @@
             <h2>Venue</h2>
             <h3>{{ object.venue.name }}</h3>
             <keepInFrame>
-            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaks }}</para>
+            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksbr }}</para>
             </keepInFrame>
         </td>
         <td rightPadding="0">
@@ -113,7 +113,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                    <em>{{ item.description|linebreaks }}</em>
+                    <em>{{ item.description|linebreaksbr }}</em>
                     </para>
                     <para>
                 {% endif %}
