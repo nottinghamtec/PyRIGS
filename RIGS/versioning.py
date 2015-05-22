@@ -112,16 +112,6 @@ def get_versions_for_model(model):
 
     return versions
 
-def strip_duplicate_versions(versions): #probably don't need this function
-    changed_versions = []
-    last_serialized_data = None
-    for version in versions:
-        if last_serialized_data != version.serialized_data:
-            changed_versions.append(version)
-        last_serialized_data = version.serialized_data
-
-    return changed_versions
-
 def get_previous_version(version):
     thisEventId = version.object_id
     thisVersionId = version.pk
