@@ -49,11 +49,11 @@
                                 <dt>Name</dt>
                                 <dd>{{new.name}}</dd>
                                 <dt>Description</dt>
-                                <dd>{{new.description}}</dd>
+                                <dd>{{new.description|linebreaks}}</dd>
                                 <dt>Quantity</dt>
                                 <dd>{{new.quantity}}</dd>
                                 <dt>Price</dt>
-                                <dd>{{new.cost}}
+                                <dd>£ {{new.cost|default:0|floatformat:2}}
                             </dl>
                         </div>
                     {% endif %}
@@ -63,11 +63,11 @@
                                 <dt>Name</dt>
                                 <dd>{{old.name}}</dd>
                                 <dt>Description</dt>
-                                <dd>{{old.description}}</dd>
+                                <dd>{{old.description|linebreaks}}</dd>
                                 <dt>Quantity</dt>
                                 <dd>{{old.quantity}}</dd>
                                 <dt>Price</dt>
-                                <dd>{{old.cost}}
+                                <dd>£ {{old.cost|default:0|floatformat:2}}
                             </dl>
                         </div>
                     {% endif %}
