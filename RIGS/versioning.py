@@ -23,7 +23,7 @@ logger = logging.getLogger('tec.pyrigs')
 
 
 def compare_events(obj1, obj2, excluded_keys=[]):
-    theFields = obj1._meta.fields
+    theFields = obj1._meta.fields #This becomes deprecated in Django 1.8!!!!!!!!!!!!! (but an alternative becomes available)
 
     d1, d2 = obj1, obj2
     field, old, new = [],[],[]
@@ -126,8 +126,10 @@ def get_previous_version(version):
       return False 
 
 def get_changes_for_version(thisVersion, previousVersion=None):
+    #Pass in a previous version if you already know it (for efficiency)
+    #if not provided then it will be looked up in the database
 
-    if previousVersion == None:
+    if previousVersion == None: 
         previousVersion = get_previous_version(thisVersion)
 
     compare = {}
