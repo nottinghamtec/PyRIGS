@@ -102,9 +102,9 @@ class EventRevisions(generic.ListView):
     
     def get_context_data(self, **kwargs):
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-        revisions = reversion.get_for_object(thisEvent)
+        versions = reversion.get_for_object(thisEvent)
         items = []
-        for revisionNo, thisRevision in enumerate(revisions):
+        for revisionNo, thisRevision in enumerate(versions):
             thisItem = {'pk': thisRevision.pk}
             thisItem['revision'] = thisRevision.revision
             logger.info(thisRevision.revision.version_set.all())
