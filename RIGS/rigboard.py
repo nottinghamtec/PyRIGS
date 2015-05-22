@@ -2,8 +2,6 @@ import os
 import cStringIO as StringIO
 from io import BytesIO
 import urllib2
-import logging
-
 
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
@@ -23,7 +21,7 @@ import re
 
 __author__ = 'ghost'
 
-logger = logging.getLogger('tec.pyrigs')
+
 class RigboardIndex(generic.TemplateView):
     template_name = 'RIGS/rigboard.html'
 
@@ -179,5 +177,3 @@ class EventArchive(generic.ArchiveIndexView):
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
 
         return qs
-
-
