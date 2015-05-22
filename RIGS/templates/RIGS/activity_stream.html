@@ -58,7 +58,7 @@
            		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
                 <td>{{ version.revision.user.name }}</td>
                 <td>{% for key, old, new in version.changes %}
-                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
 
                 	{% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
                 	{% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
@@ -67,7 +67,7 @@
                 		'>{{ key }}</button>
                 	{% endfor %}
                     {% for key, old, new in version.item_changes %}
-                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
 
                     {% if new %}
                         <div class="alert alert-success">
@@ -75,7 +75,7 @@
                                 <dt>Name</dt>
                                 <dd>{{new.name}}</dd>
                                 <dt>Description</dt>
-                                <dd>{{new.description}}</dd>
+                                <dd>{{new.description|linebreaks}}</dd>
                                 <dt>Quantity</dt>
                                 <dd>{{new.quantity}}</dd>
                                 <dt>Price</dt>
@@ -89,7 +89,7 @@
                                 <dt>Name</dt>
                                 <dd>{{old.name}}</dd>
                                 <dt>Description</dt>
-                                <dd>{{old.description}}</dd>
+                                <dd>{{old.description|linebreaks}}</dd>
                                 <dt>Quantity</dt>
                                 <dd>{{old.quantity}}</dd>
                                 <dt>Price</dt>
@@ -123,7 +123,7 @@
             '>{{ key }}</button>
         {% endfor %}
         {% for key, old, new in version.item_changes %}
-        <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+        <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
 
         {% if new %}
             <div class="alert alert-success">
@@ -131,7 +131,7 @@
                     <dt>Name</dt>
                     <dd>{{new.name}}</dd>
                     <dt>Description</dt>
-                    <dd>{{new.description}}</dd>
+                    <dd>{{new.description|linebreaks}}</dd>
                     <dt>Quantity</dt>
                     <dd>{{new.quantity}}</dd>
                     <dt>Price</dt>
@@ -145,7 +145,7 @@
                     <dt>Name</dt>
                     <dd>{{old.name}}</dd>
                     <dt>Description</dt>
-                    <dd>{{old.description}}</dd>
+                    <dd>{{old.description|linebreaks}}</dd>
                     <dt>Quantity</dt>
                     <dd>{{old.quantity}}</dd>
                     <dt>Price</dt>
