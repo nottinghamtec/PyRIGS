@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard, finance, ical, forms
+from RIGS import views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
@@ -81,7 +81,7 @@ urlpatterns = patterns('',
                            name='event_archive'),
 
                        url(r'^event/(?P<pk>\d+)/history/$',
-                           permission_required_with_403('RIGS.view_event')(rigboard.EventRevisions.as_view()),
+                           permission_required_with_403('RIGS.view_event')(versioning.EventRevisions.as_view()),
                            name='event_history'),
 
                        # Finance
