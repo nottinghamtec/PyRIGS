@@ -1,0 +1,156 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load static %}
+
+{% block title %}Rigboard Activity Stream{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script src="{% static "js/popover.js" %}"></script>
+    <script src="{% static "js/moment.min.js" %}"></script>
+    <script>
+    	$(function () {
+		  $('[data-toggle="popover"]').popover();
+
+          $(function () {
+              $('.date').each(function (index, dateElem) {
+                var $dateElem = $(dateElem);
+                var formatted = moment($dateElem.text()).fromNow();
+                $dateElem.text(formatted);
+               })
+             });
+
+		})
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<h2>Rigboard Activity Stream</h2>
+<br>
+	<table class="table table-striped">
+        <thead>
+        <tr>
+            <td>Date</td>
+            <td>Event</td>
+            <td>Version ID</td>
+            <td>User</td>
+            <td>Changes</td>
+        </tr>
+        </thead>
+        <tbody>
+        	{% for version in object_list %}
+            <tr>
+                <td>{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</td>
+                <td><a href="{% url 'event_detail' version.thisVersion.object_id_int %}">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</a></td>
+           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
+                <td>{{ version.revision.user.name }}</td>
+                <td>{% for key, old, new in version.changes %}
+                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+
+                	{% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
+                	{% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
+                	
+                		
+                		'>{{ key }}</button>
+                	{% endfor %}
+                    {% for key, old, new in version.item_changes %}
+                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+
+                    {% if new %}
+                        <div class="alert alert-success">
+                            <dl>
+                                <dt>Name</dt>
+                                <dd>{{new.name}}</dd>
+                                <dt>Description</dt>
+                                <dd>{{new.description}}</dd>
+                                <dt>Quantity</dt>
+                                <dd>{{new.quantity}}</dd>
+                                <dt>Price</dt>
+                                <dd>{{new.cost}}
+                            </dl>
+                        </div>
+                    {% endif %}
+                    {% if old %}
+                        <div class="alert alert-danger">
+                            <dl>
+                                <dt>Name</dt>
+                                <dd>{{old.name}}</dd>
+                                <dt>Description</dt>
+                                <dd>{{old.description}}</dd>
+                                <dt>Quantity</dt>
+                                <dd>{{old.quantity}}</dd>
+                                <dt>Price</dt>
+                                <dd>{{old.cost}}
+                            </dl>
+                        </div>
+                    {% endif %}
+                    
+                        
+                        '>{{ key }}</button>
+                    {% endfor %}
+                </td>
+            </tr>
+			{% endfor %}
+
+        </tbody>
+    </table>
+	
+    <div>
+    <h2>Stream View</h2>
+{% for version in object_list %}
+    <div class="well">
+        <button title="title" type="button" class="btn btn-default btn-xs">{{ version.revision.user.first_name|default_if_none:"(unknown)" }}</button> changed 
+        {% for key, old, new in version.changes %}
+        <button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
+
+        {% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
+        {% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
+        
+            
+            '>{{ key }}</button>
+        {% endfor %}
+        {% for key, old, new in version.item_changes %}
+        <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
+
+        {% if new %}
+            <div class="alert alert-success">
+                <dl>
+                    <dt>Name</dt>
+                    <dd>{{new.name}}</dd>
+                    <dt>Description</dt>
+                    <dd>{{new.description}}</dd>
+                    <dt>Quantity</dt>
+                    <dd>{{new.quantity}}</dd>
+                    <dt>Price</dt>
+                    <dd>{{new.cost}}
+                </dl>
+            </div>
+        {% endif %}
+        {% if old %}
+            <div class="alert alert-danger">
+                <dl>
+                    <dt>Name</dt>
+                    <dd>{{old.name}}</dd>
+                    <dt>Description</dt>
+                    <dd>{{old.description}}</dd>
+                    <dt>Quantity</dt>
+                    <dd>{{old.quantity}}</dd>
+                    <dt>Price</dt>
+                    <dd>{{old.cost}}
+                </dl>
+            </div>
+        {% endif %}
+        
+            
+            '>{{ key }}</button>
+            {% endfor %}
+            in <button title="title" type="button" class="btn btn-default btn-xs">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</button> <small>(<span class="date">{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</span>)</small>
+
+    </div>
+{% endfor %}    
+
+
+    </div>
+
+	{{ thediff }}
+{% endblock %}

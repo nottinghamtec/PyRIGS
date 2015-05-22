@@ -95,6 +95,57 @@ def compare_items(old, new):
 
     return zip(key,old,new)
 
+def get_versions_for_model(model):
+    content_type = ContentType.objects.get_for_model(model)
+    versions = reversion.models.Version.objects.filter(
+        content_type = content_type,
+    ).select_related("revision").order_by("-pk")
+
+    return versions
+
+def strip_duplicate_versions(versions): #probably don't need this function
+    changed_versions = []
+    last_serialized_data = None
+    for version in versions:
+        if last_serialized_data != version.serialized_data:
+            changed_versions.append(version)
+        last_serialized_data = version.serialized_data
+
+    return changed_versions
+
+def get_previous_version(version):
+    thisEventId = version.object_id
+    thisVersionId = version.pk
+
+    versions = reversion.get_for_object_reference(models.Event, thisEventId)
+
+    previousVersions = versions.filter(pk__lt=thisVersionId)
+
+    if len(previousVersions) >= 1:
+      return previousVersions[0]
+    else: #this is probably the initial version
+      return False 
+
+def get_changes_for_version(thisVersion, previousVersion=None):
+
+    if previousVersion == None:
+        previousVersion = get_previous_version(thisVersion)
+
+    compare = {}
+    compare['pk'] = thisVersion.pk
+    compare['thisVersion'] = thisVersion
+    compare['prevVersion'] = previousVersion
+    compare['revision'] = thisVersion.revision
+
+    if previousVersion:
+        compare['changes'] = compare_events(previousVersion.field_dict,thisVersion.field_dict)
+        compare['item_changes'] = compare_items(previousVersion, thisVersion)
+    else:
+        compare['changes'] = [["(initial version)",None,"Event Created"]]
+
+    return compare
+
+    
 
 class EventRevisions(generic.ListView):
     model = reversion.revisions.Version
@@ -104,22 +155,13 @@ class EventRevisions(generic.ListView):
         thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
         versions = reversion.get_for_object(thisEvent)
         items = []
-        for revisionNo, thisRevision in enumerate(versions):
-            thisItem = {'pk': thisRevision.pk}
-            thisItem['revision'] = thisRevision.revision
-            logger.info(thisRevision.revision.version_set.all())
-
-            if revisionNo >= len(revisions)-1:
-                # oldest version
-                thisItem['changes'] = [["(initial version)",None,"Event Created"]]
+        for versionNo, thisVersion in enumerate(versions):
+            if versionNo >= len(versions)-1:
+                thisItem = get_changes_for_version(thisVersion, None)
             else:
-                changes = compare_events(revisions[revisionNo+1].field_dict,thisRevision.field_dict)
-                thisItem['item_changes'] = compare_items(revisions[revisionNo+1], thisRevision)
-                logger.debug(thisItem['item_changes'])
-                thisItem['changes'] = changes
+                thisItem = get_changes_for_version(thisVersion, versions[versionNo+1])
 
             items.append(thisItem)
-            logger.info(thisItem)
 
         context = {
             'object_list': items,
@@ -128,3 +170,22 @@ class EventRevisions(generic.ListView):
 
         return context
 
+class ActivityStream(generic.ListView):
+    model = reversion.revisions.Version
+    template_name = "RIGS/activity_stream.html"
+    
+    def get_context_data(self, **kwargs):
+        
+        versions = get_versions_for_model(models.Event);
+
+        items = []
+
+        for thisVersion in versions[:20]:
+            thisItem = get_changes_for_version(thisVersion, None)
+            items.append(thisItem)
+
+        context =  {
+            'object_list': items,
+        } 
+
+        return context
