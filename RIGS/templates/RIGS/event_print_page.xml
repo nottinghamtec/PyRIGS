@@ -194,7 +194,7 @@
         <td>£ {{ object.sum_total|floatformat:2 }}</td>
     </tr>
     <tr>
-        <td>VAT Registration Number: 116252989</td>
+        <td>{% if not invoice %}VAT Registration Number: 116252989{% endif %}</td>
         <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
         <td>£ {{ object.vat|floatformat:2 }}</td>
     </tr>
@@ -202,7 +202,11 @@
         <td>
              
             <para>
-                <b>The full hire fee is payable at least 10 days before the event.</b>
+                {% if invoice %}
+                    VAT Registration Number: 116252989
+                {% else %}
+                    <b>The full hire fee is payable at least 10 days before the event.</b>
+                {% endif %}
             </para>
             
         </td>
