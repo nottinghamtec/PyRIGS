@@ -84,6 +84,10 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event')(versioning.EventRevisions.as_view()),
                            name='event_history'),
 
+                       url(r'^rigboard/activity$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityStream.as_view()),
+                           name='activity_stream'),
+
                        # Finance
                        url(r'^invoice/$',
                            permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
