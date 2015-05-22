@@ -11,9 +11,7 @@ from django.contrib import messages
 
 # Versioning
 import reversion
-import diff_match_patch
 import simplejson
-from reversion.helpers import generate_patch_html
 from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
 
@@ -25,23 +23,34 @@ logger = logging.getLogger('tec.pyrigs')
 
 
 def compare_events(obj1, obj2, excluded_keys=[]):
+    theFields = obj1._meta.fields
+
     d1, d2 = obj1, obj2
-    key, old, new = [],[],[]
-    for k,v in d1.items():
+    field, old, new = [],[],[]
+
+    for thisField in theFields:
+        k = thisField.name
+        v1 = getattr(d1, k)
+        v2 = getattr(d2, k)
+        logger.info('k:'+str(k)+" v1:"+str(v1)+" v2:"+str(v2))
         if k in excluded_keys:
             continue
         try:
-            if v != d2[k]:
-                key.append(models.Event._meta.get_field_by_name(k)[0].verbose_name)
-                old.append(v)
-                new.append(d2[k])
+            if v1 != v2:
+                field.append(thisField.verbose_name)
+                old.append(v1)
+                new.append(v2)
         except KeyError:
-            old.append({k: v})
+            field.append(thisField.verbose_name)
+            old.append(v1)
+            new.append(v2)
         except TypeError:
             # avoids issues with naive vs tz-aware datetimes
-            old.append({k: v})
+            field.append(thisField.verbose_name)
+            old.append(v1)
+            new.append(v2)
     
-    return zip(key,old,new)
+    return zip(field,old,new)
 
 def compare_items(old, new):
 
@@ -138,7 +147,7 @@ def get_changes_for_version(thisVersion, previousVersion=None):
     compare['revision'] = thisVersion.revision
 
     if previousVersion:
-        compare['changes'] = compare_events(previousVersion.field_dict,thisVersion.field_dict)
+        compare['changes'] = compare_events(previousVersion.object_version.object, thisVersion.object_version.object)
         compare['item_changes'] = compare_items(previousVersion, thisVersion)
     else:
         compare['changes'] = [["(initial version)",None,"Event Created"]]
