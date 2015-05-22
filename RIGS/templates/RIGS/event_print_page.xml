@@ -42,7 +42,7 @@
             <tr>
                 <td><para style="invoice_titles">PO Number</para></td>
                 <td>
-                    <para style="invoice_numbers">{{ object.purchase_order|default_if_none:"" }}hello</para>
+                    <para style="invoice_numbers">{{ object.purchase_order|default_if_none:"" }}</para>
                 </td>
             </tr>
 
