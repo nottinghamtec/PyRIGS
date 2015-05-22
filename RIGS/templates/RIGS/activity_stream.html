@@ -11,13 +11,24 @@
     	$(function () {
 		  $('[data-toggle="popover"]').popover();
 
-          $(function () {
-              $('.date').each(function (index, dateElem) {
+          // This keeps timeago values correct, but uses an insane amount of resources
+          // $(function () {
+          //     setInterval(function() {
+          //         $('.date').each(function (index, dateElem) {
+          //           var $dateElem = $(dateElem);
+          //           var formatted = moment($dateElem.attr('data-date')).fromNow();
+          //           $dateElem.text(formatted);
+          //          })
+          //        });
+          //     }, 10000);
+
+
+            $('.date').each(function (index, dateElem) {
                 var $dateElem = $(dateElem);
-                var formatted = moment($dateElem.text()).fromNow();
+                var formatted = moment($dateElem.attr('data-date')).fromNow();
                 $dateElem.text(formatted);
-               })
-             });
+               });
+             
 
 		})
 
@@ -25,6 +36,8 @@
 {% endblock %}
 
 {% block content %}
+{% comment "table view" %}
+
 <h2>Rigboard Activity Stream</h2>
 <br>
 	<table class="table table-striped">
@@ -94,7 +107,7 @@
 
         </tbody>
     </table>
-	
+{% endcomment %}
     <div>
     <h2>Stream View</h2>
 {% for version in object_list %}
@@ -144,7 +157,7 @@
             
             '>{{ key }}</button>
             {% endfor %}
-            in <button title="title" type="button" class="btn btn-default btn-xs">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</button> <small>(<span class="date">{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</span>)</small>
+            in <button title="title" type="button" class="btn btn-default btn-xs">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</button> <small>(<span data-date='{{ version.revision.date_created|date:"Y-m-d H:i:s" }}' class="date">{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</span>)</small>
 
     </div>
 {% endfor %}    
