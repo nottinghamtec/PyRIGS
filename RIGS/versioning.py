@@ -175,9 +175,9 @@ class VersionHistory(generic.ListView):
         
         return context
 
-class ActivityStream(generic.ListView):
+class ActivityTable(generic.ListView):
     model = reversion.revisions.Version
-    template_name = "RIGS/activity_stream.html"
+    template_name = "RIGS/activity_table.html"
     paginate_by = 25
     
     def get_queryset(self):
@@ -187,7 +187,31 @@ class ActivityStream(generic.ListView):
     def get_context_data(self, **kwargs):
 
         # Call the base implementation first to get a context
-        context = super(ActivityStream, self).get_context_data(**kwargs)
+        context = super(ActivityTable, self).get_context_data(**kwargs)
+        
+        items = []
+
+        for thisVersion in context['object_list']:
+            thisItem = get_changes_for_version(thisVersion, None)
+            items.append(thisItem)
+
+        context ['object_list'] = items
+         
+        return context
+
+class ActivityFeed(generic.ListView):
+    model = reversion.revisions.Version
+    template_name = "RIGS/activity_feed.html"
+    paginate_by = 25
+    
+    def get_queryset(self):
+        versions = get_versions_for_model([models.Event,models.Venue,models.Person,models.Organisation])
+        return versions
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(ActivityFeed, self).get_context_data(**kwargs)
         
         items = []
 

@@ -85,36 +85,4 @@
         </div>
         <div class="align-right">{% paginator %}</div>
     </div>
-
-
-
-
-    <div>
-        <br>
-    <h2>Rigboard Activity Stream - Scrollable Stream View <br/><small>Possibly to go on homepage</small></h2>
-    <br>
-    <div style="
-    max-height: 500px;
-    max-width: 300px;
-    overflow-y:scroll;
-    border:1px solid black;">
-{% for version in object_list %}
-    {% if version.item_changes or version.field_changes or version.old == None %}
-        <div class="well">
-            {% include 'RIGS/profile_button.html' with profile=version.revision.user %}
-
-            {% if version.old == None %}
-              created
-            {% else %}
-              changed {% include 'RIGS/version_changes.html' %} in
-            {% endif %}
-            {% include 'RIGS/object_button.html' with object=version.current %}
-
-        </div>
-    {% endif %}
-{% endfor %}    
-</div>
-
-    </div>
-
 {% endblock %}
