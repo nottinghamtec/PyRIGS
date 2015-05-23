@@ -122,6 +122,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
     compare = {}
     compare['revision'] = newVersion.revision    
     compare['new'] = newVersion.object_version.object
+    compare['current'] = models.Event.objects.get(pk=compare['new'].pk)
     compare['version'] = newVersion
 
     if oldVersion:
