@@ -8,8 +8,12 @@
     <script src="{% static "js/popover.js" %}"></script>
     <script>
     	$(function () {
-		  $('[data-toggle="popover"]').popover()
-		})
+            $('[data-toggle="popover"]').popover().click(function(){
+                    if($(this).attr('href')){
+                      window.location.href = $(this).attr('href');
+                    }
+                  });		
+        })
     </script>
 {% endblock %}
 

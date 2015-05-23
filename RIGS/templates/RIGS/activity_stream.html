@@ -1,5 +1,6 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 {% load static %}
+{% load paginator from filters %}
 
 {% block title %}Rigboard Activity Stream{% endblock %}
 
@@ -40,48 +41,62 @@
 {% endblock %}
 
 {% block content %}
-{# comment "table view" #}
+<div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Rigboard Activity Stream</h3>
+            </div>
+            <div class="text-right col-sm-12">{% paginator %}</div>
+        </div>
+        <div class="table-responsive">
 
-<h2>Rigboard Activity Stream - Table View</h2>
-<br>
-	<table class="table table-striped">
-        <thead>
-        <tr>
-            <td>Date</td>
-            <td>Event</td>
-            <td>Version ID</td>
-            <td>User</td>
-            <td>Changes</td>
-        </tr>
-        </thead>
-        <tbody>
-        	{% for version in object_list %}
-                {% if version.item_changes or version.field_changes or version.old == None%}
-                    <tr>
-                        <td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
-                        <td><a href="{% url 'event_detail' version.new.pk %}">N{{ version.new.pk|stringformat:"05d" }}</a></td>
-                   		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
-                        <td>{{ version.revision.user.name }}</td>
-                        <td>
-                          {% if version.old == None %}
-                            Event Created
-                          {% else %}
-                            {% include 'RIGS/event_version_changes.html' %}
-                          {% endif %}                        </td>
-                    </tr>
-                {% endif %}
-			{% endfor %}
+        	<table class="table table-striped">
+                <thead>
+                <tr>
+                    <td>Date</td>
+                    <td>Event</td>
+                    <td>Version ID</td>
+                    <td>User</td>
+                    <td>Changes</td>
+                </tr>
+                </thead>
+                <tbody>
+                	{% for version in object_list %}
+                        
+                            <tr>
+                                <td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
+                                <td><a href="{% url 'event_detail' version.new.pk %}">N{{ version.new.pk|stringformat:"05d" }}</a></td>
+                           		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                                <td>{{ version.revision.user.name }}</td>
+                                <td>
+                                  {% if version.old == None %}
+                                    Event Created
+                                  {% else %}
+                                    {% include 'RIGS/event_version_changes.html' %}
+                                  {% endif %}                        </td>
+                            </tr>
+                        
+        			{% endfor %}
 
-        </tbody>
-    </table>
-{# endcomment #}
+                </tbody>
+            </table>
+
+        </div>
+        <div class="align-right">{% paginator %}</div>
+    </div>
+
 
 
 
     <div>
         <br>
-    <h2>Rigboard Activity Stream - Stream View</h2>
+    <h2>Rigboard Activity Stream - Scrollable Stream View <br/><small>Possibly to go on homepage</small></h2>
     <br>
+    <div style="
+    max-height: 500px;
+    max-width: 300px;
+    overflow-y:scroll;
+    border:1px solid black;">
 {% for version in object_list %}
     {% if version.item_changes or version.field_changes or version.old == None %}
         <div class="well">
@@ -97,9 +112,8 @@
         </div>
     {% endif %}
 {% endfor %}    
-
+</div>
 
     </div>
 
-	{{ thediff }}
 {% endblock %}
