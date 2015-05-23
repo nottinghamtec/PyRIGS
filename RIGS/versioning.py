@@ -22,87 +22,74 @@ import re
 logger = logging.getLogger('tec.pyrigs')
 
 
-def compare_events(obj1, obj2, excluded_keys=[]):
-    theFields = obj1._meta.fields #This becomes deprecated in Django 1.8!!!!!!!!!!!!! (but an alternative becomes available)
+def model_compare(oldObj, newObj, excluded_keys=[]):
+    # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
+    try:
+        theFields = oldObj._meta.fields #This becomes deprecated in Django 1.8!!!!!!!!!!!!! (but an alternative becomes available)
+    except AttributeError:
+        theFields = newObj._meta.fields
 
-    d1, d2 = obj1, obj2
-    field, old, new = [],[],[]
 
-    for thisField in theFields:
-        k = thisField.name
-        v1 = getattr(d1, k)
-        v2 = getattr(d2, k)
-        logger.info('k:'+str(k)+" v1:"+str(v1)+" v2:"+str(v2))
-        if k in excluded_keys:
-            continue
-        try:
-            if v1 != v2:
-                field.append(thisField.verbose_name)
-                old.append(v1)
-                new.append(v2)
-        except KeyError:
-            field.append(thisField.verbose_name)
-            old.append(v1)
-            new.append(v2)
-        except TypeError:
-            # avoids issues with naive vs tz-aware datetimes
-            field.append(thisField.verbose_name)
-            old.append(v1)
-            new.append(v2)
-    
-    return zip(field,old,new)
-
-def compare_items(old, new):
-
-    item_type = ContentType.objects.get_for_model(models.EventItem)
-    old_items = old.revision.version_set.filter(content_type=item_type)
-    new_items = new.revision.version_set.filter(content_type=item_type)
-
-    class ItemCompare(object):
-        def __init__(self, old=None, new=None):
+    class FieldCompare(object):
+        def __init__(self, field=None, old=None, new=None):
+            self.field = field
             self.old = old
             self.new = new
 
-    # Build some dicts of what we have
-    item_dict = {}
-    for item in old_items:
-        compare = ItemCompare(old=item)
-        compare.old.field_dict['event_id'] = compare.old.field_dict.pop('event')
-        item_dict[item.object_id] = compare
+    changes = []
 
-    for item in new_items:
+    for thisField in theFields:
+        name = thisField.name
+        oldValue = getattr(oldObj, name, None)
+        newValue = getattr(newObj, name, None)
+
+        if name in excluded_keys:
+            continue # if we're excluding this field, skip over it
+
         try:
-            compare = item_dict[item.object_id]
-            compare.new = item
-        except KeyError:
-            compare = ItemCompare(new=item)
-        compare.new.field_dict['event_id'] = compare.new.field_dict.pop('event')
-        item_dict[item.object_id] = compare
+            if oldValue != newValue:
+                compare = FieldCompare(thisField,oldValue,newValue) 
+                changes.append(compare)
+        except TypeError: # logs issues with naive vs tz-aware datetimes
+            logger.error('TypeError when comparing models')
+    
+    return changes
 
-    # calculate changes
-    key, old, new = [], [], []
-    for (_, items) in item_dict.items():
-        if items.new is None:
-            key.append("Deleted \"%s\"" % items.old.field_dict['name'])
-            old.append(models.EventItem(**items.old.field_dict))
-            new.append(None)
+def compare_event_items(old, new):
+    # Recieves two event version objects and compares their items, returns an array of ItemCompare objects
 
-        elif items.old is None:
-            key.append("Added \"%s\"" % items.new.field_dict['name'])
-            old.append(None)
-            new.append(models.EventItem(**items.new.field_dict))
+    item_type = ContentType.objects.get_for_model(models.EventItem)
+    old_item_versions = old.revision.version_set.filter(content_type=item_type)
+    new_item_versions = new.revision.version_set.filter(content_type=item_type)
 
-        elif items.old.field_dict != items.new.field_dict:
-            if items.old.field_dict['name'] == items.new.field_dict['name']:
-                change_text = "\"%s\"" % items.old.field_dict['name']
-            else:
-                change_text = "\"%s\" to \"%s\"" % (items.old.field_dict['name'], items.new.field_dict['name'])
-            key.append("Changed %s" % change_text)
+    class ItemCompare(object):
+        def __init__(self, old=None, new=None, changes=None):
+            self.old = old
+            self.new = new
+            self.changes = changes
 
-            old.append(models.EventItem(**items.old.field_dict))
-            new.append(models.EventItem(**items.new.field_dict))
+    # Build some dicts of what we have
+    item_dict = {} # build a list of items, key is the item_pk
+    for version in old_item_versions: # put all the old versions in a list
+        compare = ItemCompare(old=version.object_version.object)
+        item_dict[version.object_id] = compare
 
-    return zip(key,old,new)
+    for version in new_item_versions: # go through the new versions
+        try: 
+            compare = item_dict[version.object_id] # see if there's a matching old version
+            compare.new = version.object_version.object # then add the new version to the dictionary
+        except KeyError: # there's no matching old version, so add this item to the dictionary by itself
+            compare = ItemCompare(new=version.object_version.object)
+        
+        item_dict[version.object_id] = compare # update the dictionary with the changes
+
+    changes = [] 
+    for (_, compare) in item_dict.items():
+        if compare.old != compare.new: # has it changed at all (or been created/deleted)
+            compare.changes = model_compare(compare.old, compare.new, ['id','event','order']) # see what's changed
+            changes.append(compare) # transfer into a sequential array to make it easier to deal with later
+
+    return changes
 
 def get_versions_for_model(model):
     content_type = ContentType.objects.get_for_model(model)
@@ -125,28 +112,24 @@ def get_previous_version(version):
     else: #this is probably the initial version
       return False 
 
-def get_changes_for_version(thisVersion, previousVersion=None):
-    #Pass in a previous version if you already know it (for efficiency)
+def get_changes_for_version(newVersion, oldVersion=None):
+    #Pass in a previous version if you already know it (for efficiancy)
     #if not provided then it will be looked up in the database
 
-    if previousVersion == None: 
-        previousVersion = get_previous_version(thisVersion)
+    if oldVersion == None: 
+        oldVersion = get_previous_version(newVersion)
 
     compare = {}
-    compare['pk'] = thisVersion.pk
-    compare['thisVersion'] = thisVersion
-    compare['prevVersion'] = previousVersion
-    compare['revision'] = thisVersion.revision
+    compare['revision'] = newVersion.revision    
+    compare['new'] = newVersion.object_version.object
+    compare['version'] = newVersion
 
-    if previousVersion:
-        compare['changes'] = compare_events(previousVersion.object_version.object, thisVersion.object_version.object)
-        compare['item_changes'] = compare_items(previousVersion, thisVersion)
-    else:
-        compare['changes'] = [["(initial version)",None,"Event Created"]]
+    if oldVersion:
+        compare['old'] = oldVersion.object_version.object
+        compare['field_changes'] = model_compare(compare['old'], compare['new'])
+        compare['item_changes'] = compare_event_items(oldVersion, newVersion)
 
     return compare
-
-    
 
 class EventRevisions(generic.ListView):
     model = reversion.revisions.Version
@@ -161,7 +144,7 @@ class EventRevisions(generic.ListView):
                 thisItem = get_changes_for_version(thisVersion, None)
             else:
                 thisItem = get_changes_for_version(thisVersion, versions[versionNo+1])
-
+                    
             items.append(thisItem)
 
         context = {
