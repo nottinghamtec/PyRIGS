@@ -65,7 +65,7 @@
                 	{% for version in object_list %}
                         
                             <tr>
-                                <td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
+                                <td>{{ version.revision.date_created }}</td>
                                 <td><a href="{{ version.current.get_absolute_url }}">{{version.current|to_class_name}} {{ version.new.pk|stringformat:"05d" }}</a></td>
                            		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>

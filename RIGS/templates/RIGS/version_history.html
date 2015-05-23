@@ -41,7 +41,7 @@
                 	{% for version in object_list %}
                         {% if version.item_changes or version.field_changes or version.old == None %}
                             <tr>
-                           		<td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
+                           		<td>{{ version.revision.date_created }}</td>
                                 <td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
