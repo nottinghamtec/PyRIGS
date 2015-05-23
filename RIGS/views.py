@@ -10,6 +10,7 @@ import simplejson
 from django.contrib import messages
 import datetime
 import operator
+from registration.views import RegistrationView
 
 from RIGS import models, forms
 
@@ -32,7 +33,6 @@ def login(request, **kwargs):
         from django.contrib.auth.views import login
 
         return login(request, authentication_form=forms.LoginForm)
-
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
