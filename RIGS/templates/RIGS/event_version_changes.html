@@ -10,7 +10,7 @@
 {% endfor %}
 
 {% for itemChange in version.item_changes %}
-    <button title="Changes to item '{{ itemChange.new.name }}'" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
+    <button title="Changes to item '{{ itemChange.new.name|default:itemChange.old.name }}'" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
         {% for change in itemChange.changes %}
             <h4>{{ change.field.verbose_name }}</h4>
 
@@ -19,5 +19,5 @@
 
         {% endfor %}
         
-        '>item '{{ itemChange.new.name }}'</button>
+        '>item '{{ itemChange.new.name|default:itemChange.old.name }}'</button>
 {% endfor %}

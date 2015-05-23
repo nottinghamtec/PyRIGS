@@ -14,6 +14,7 @@ import reversion
 import simplejson
 from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from RIGS import models, forms
 import datetime
@@ -85,8 +86,8 @@ def compare_event_items(old, new):
 
     changes = [] 
     for (_, compare) in item_dict.items():
-        if compare.old != compare.new: # has it changed at all (or been created/deleted)
-            compare.changes = model_compare(compare.old, compare.new, ['id','event','order']) # see what's changed
+        compare.changes = model_compare(compare.old, compare.new, ['id','event','order']) # see what's changed
+        if len(compare.changes) >= 1:
             changes.append(compare) # transfer into a sequential array to make it easier to deal with later
 
     return changes
@@ -95,7 +96,7 @@ def get_versions_for_model(model):
     content_type = ContentType.objects.get_for_model(model)
     versions = reversion.models.Version.objects.filter(
         content_type = content_type,
-    ).select_related("revision").order_by("-pk")
+    ).select_related("revision","revision.version_set").order_by("-pk")
 
     return versions
 
@@ -105,12 +106,12 @@ def get_previous_version(version):
 
     versions = reversion.get_for_object_reference(models.Event, thisEventId)
 
-    previousVersions = versions.filter(pk__lt=thisVersionId)
+    try:
+        previousVersions = versions.filter(pk__lt=thisVersionId).latest(field_name='pk') # this is very slow :(
+    except:
+        return False
 
-    if len(previousVersions) >= 1:
-      return previousVersions[0]
-    else: #this is probably the initial version
-      return False 
+    return previousVersions
 
 def get_changes_for_version(newVersion, oldVersion=None):
     #Pass in a previous version if you already know it (for efficiancy)
@@ -132,7 +133,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
     return compare
 
-class EventRevisions(generic.ListView):
+class EventRevisions(generic.TemplateView):
     model = reversion.revisions.Version
     template_name = "RIGS/event_version_list.html"
     
@@ -158,19 +159,24 @@ class EventRevisions(generic.ListView):
 class ActivityStream(generic.ListView):
     model = reversion.revisions.Version
     template_name = "RIGS/activity_stream.html"
+    paginate_by = 25
     
-    def get_context_data(self, **kwargs):
-        
-        versions = get_versions_for_model(models.Event);
+    def get_queryset(self):
+        versions = get_versions_for_model(models.Event)
+        return versions
 
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(ActivityStream, self).get_context_data(**kwargs)
+        
         items = []
 
-        for thisVersion in versions[:20]:
+        for thisVersion in context['object_list']:
             thisItem = get_changes_for_version(thisVersion, None)
             items.append(thisItem)
 
-        context =  {
-            'object_list': items,
-        } 
+        context ['object_list'] = items
+         
 
         return context
