@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard, finance, ical, versioning, forms
+from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
@@ -25,6 +25,9 @@ urlpatterns = patterns('',
                        url(r'^people/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_person')(views.PersonDetail.as_view()),
                            name='person_detail'),
+                       url(r'^people/(?P<pk>\d+)/history/$',
+                           permission_required_with_403('RIGS.view_person')(versioning.VersionHistory.as_view()),
+                           name='person_history', kwargs={'model': models.Person}),
                        url(r'^people/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_person')(views.PersonUpdate.as_view()),
                            name='person_update'),
@@ -81,8 +84,8 @@ urlpatterns = patterns('',
                            name='event_archive'),
 
                        url(r'^event/(?P<pk>\d+)/history/$',
-                           permission_required_with_403('RIGS.view_event')(versioning.EventRevisions.as_view()),
-                           name='event_history'),
+                           permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
+                           name='event_history', kwargs={'model': models.Event}),
 
                        url(r'^rigboard/activity$',
                            permission_required_with_403('RIGS.view_event')(versioning.ActivityStream.as_view()),
