@@ -1,6 +1,7 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 {% load static %}
 {% load paginator from filters %}
+{% load to_class_name from filters %}
 
 {% block title %}Rigboard Activity Stream{% endblock %}
 
@@ -54,7 +55,7 @@
                 <thead>
                 <tr>
                     <td>Date</td>
-                    <td>Event</td>
+                    <td>Object</td>
                     <td>Version ID</td>
                     <td>User</td>
                     <td>Changes</td>
@@ -65,14 +66,14 @@
                         
                             <tr>
                                 <td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
-                                <td><a href="{% url 'event_detail' version.new.pk %}">N{{ version.new.pk|stringformat:"05d" }}</a></td>
+                                <td><a href="{{ version.current.get_absolute_url }}">{{version.current|to_class_name}} {{ version.new.pk|stringformat:"05d" }}</a></td>
                            		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
                                   {% if version.old == None %}
                                     Event Created
                                   {% else %}
-                                    {% include 'RIGS/event_version_changes.html' %}
+                                    {% include 'RIGS/version_changes.html' %}
                                   {% endif %}                        </td>
                             </tr>
                         
@@ -105,7 +106,7 @@
             {% if version.old == None %}
               created
             {% else %}
-              changed {% include 'RIGS/event_version_changes.html' %} in
+              changed {% include 'RIGS/version_changes.html' %} in
             {% endif %}
             {% include 'RIGS/event_button.html' with event=version.current %}
 
