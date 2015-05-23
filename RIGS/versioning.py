@@ -48,7 +48,8 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
             continue # if we're excluding this field, skip over it
 
         try:
-            if oldValue != newValue:
+            bothBlank = (not oldValue) and (not newValue)
+            if oldValue != newValue and not bothBlank:
                 compare = FieldCompare(thisField,oldValue,newValue) 
                 changes.append(compare)
         except TypeError: # logs issues with naive vs tz-aware datetimes
@@ -92,19 +93,22 @@ def compare_event_items(old, new):
 
     return changes
 
-def get_versions_for_model(model):
-    content_type = ContentType.objects.get_for_model(model)
+def get_versions_for_model(models):
+    content_types = []
+    for model in models:
+        content_types.append(ContentType.objects.get_for_model(model))
+    
     versions = reversion.models.Version.objects.filter(
-        content_type = content_type,
+        content_type__in = content_types,
     ).select_related("revision","revision.version_set").order_by("-pk")
 
     return versions
 
 def get_previous_version(version):
-    thisEventId = version.object_id
+    thisId = version.object_id
     thisVersionId = version.pk
 
-    versions = reversion.get_for_object_reference(models.Event, thisEventId)
+    versions = reversion.get_for_object_reference(version.content_type.model_class(), thisId)
 
     try:
         previousVersions = versions.filter(pk__lt=thisVersionId).latest(field_name='pk') # this is very slow :(
@@ -120,10 +124,12 @@ def get_changes_for_version(newVersion, oldVersion=None):
     if oldVersion == None: 
         oldVersion = get_previous_version(newVersion)
 
+    modelClass = newVersion.content_type.model_class()
+
     compare = {}
     compare['revision'] = newVersion.revision    
     compare['new'] = newVersion.object_version.object
-    compare['current'] = models.Event.objects.get(pk=compare['new'].pk)
+    compare['current'] = modelClass.objects.get(pk=compare['new'].pk)
     compare['version'] = newVersion
 
     if oldVersion:
@@ -162,7 +168,7 @@ class ActivityStream(generic.ListView):
     paginate_by = 25
     
     def get_queryset(self):
-        versions = get_versions_for_model(models.Event)
+        versions = get_versions_for_model([models.Event,models.Venue,models.Person,models.Organisation])
         return versions
 
     def get_context_data(self, **kwargs):
