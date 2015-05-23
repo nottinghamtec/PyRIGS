@@ -139,14 +139,29 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
     return compare
 
-class EventRevisions(generic.TemplateView):
+class VersionHistory(generic.ListView):
     model = reversion.revisions.Version
-    template_name = "RIGS/event_version_list.html"
-    
+    template_name = "RIGS/version_history.html"
+    paginate_by = 25
+
+    def get_queryset(self, **kwargs):
+        thisModel = self.kwargs['model']
+
+        # thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
+        versions = reversion.get_for_object_reference(thisModel, self.kwargs['pk'])
+
+        return versions
+
     def get_context_data(self, **kwargs):
-        thisEvent = get_object_or_404(models.Event, pk=self.kwargs['pk'])
-        versions = reversion.get_for_object(thisEvent)
+        thisModel = self.kwargs['model']
+        
+        context = super(VersionHistory, self).get_context_data(**kwargs)
+
+        versions = context['object_list']
+        thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
+
         items = []
+
         for versionNo, thisVersion in enumerate(versions):
             if versionNo >= len(versions)-1:
                 thisItem = get_changes_for_version(thisVersion, None)
@@ -155,11 +170,9 @@ class EventRevisions(generic.TemplateView):
                     
             items.append(thisItem)
 
-        context = {
-            'object_list': items,
-            'object': thisEvent
-        }                     
-
+        context['object_list'] = items
+        context['object'] = thisObject
+        
         return context
 
 class ActivityStream(generic.ListView):

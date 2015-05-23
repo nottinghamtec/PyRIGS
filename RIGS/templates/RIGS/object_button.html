@@ -1,0 +1,4 @@
+{% load to_class_name from filters %}
+{# pass in variable "object" to this template #}
+
+<a title="{{object|to_class_name}} {{ object.pk|stringformat:"05d" }} | {{object.name}}" type="button" href="{{ object.get_absolute_url }}" class="btn btn-default btn-xs">{{object|to_class_name}} {{ object.pk|stringformat:"05d" }}</a>

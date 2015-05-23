@@ -71,7 +71,7 @@
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
                                   {% if version.old == None %}
-                                    Event Created
+                                    Object Created
                                   {% else %}
                                     {% include 'RIGS/version_changes.html' %}
                                   {% endif %}                        </td>
@@ -108,7 +108,7 @@
             {% else %}
               changed {% include 'RIGS/version_changes.html' %} in
             {% endif %}
-            {% include 'RIGS/event_button.html' with event=version.current %}
+            {% include 'RIGS/object_button.html' with object=version.current %}
 
         </div>
     {% endif %}
