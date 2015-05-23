@@ -27,61 +27,18 @@
         </thead>
         <tbody>
         	{% for version in object_list %}
-            <tr>
-           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                <td>{{ version.revision.date_created|date:"d/m/Y H:i" }}</td>
-                <td>{{ version.revision.user.name }}</td>
-                <td>{% for key, old, new in version.changes %}
-                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
-
-                	{% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
-                	{% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
-                	
-                		
-                		'>{{ key }}</button>
-                	{% endfor %}
-                    {% for key, old, new in version.item_changes %}
-                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-placement='left' data-toggle="popover" data-content='
-
-                    {% if new %}
-                        <div class="alert alert-success">
-                            <dl>
-                                <dt>Name</dt>
-                                <dd>{{new.name}}</dd>
-                                <dt>Description</dt>
-                                <dd>{{new.description|linebreaks}}</dd>
-                                <dt>Quantity</dt>
-                                <dd>{{new.quantity}}</dd>
-                                <dt>Price</dt>
-                                <dd>£ {{new.cost|default:0|floatformat:2}}
-                            </dl>
-                        </div>
-                    {% endif %}
-                    {% if old %}
-                        <div class="alert alert-danger">
-                            <dl>
-                                <dt>Name</dt>
-                                <dd>{{old.name}}</dd>
-                                <dt>Description</dt>
-                                <dd>{{old.description|linebreaks}}</dd>
-                                <dt>Quantity</dt>
-                                <dd>{{old.quantity}}</dd>
-                                <dt>Price</dt>
-                                <dd>£ {{old.cost|default:0|floatformat:2}}
-                            </dl>
-                        </div>
-                    {% endif %}
-                    
-                        
-                        '>{{ key }}</button>
-                    {% endfor %}
-                </td>
-            </tr>
+                {% if version.item_changes or version.field_changes %}
+                    <tr>
+                   		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                        <td>{{ version.revision.date_created|date:"d/m/Y H:i" }}</td>
+                        <td>{{ version.revision.user.name }}</td>
+                        <td>
+                            {% include 'RIGS/event_version_changes.html' %}
+                        </td>
+                    </tr>
+                {% endif %}
 			{% endfor %}
 
         </tbody>
     </table>
-	
-
-	{{ thediff }}
 {% endblock %}

@@ -36,9 +36,9 @@
 {% endblock %}
 
 {% block content %}
-{% comment "table view" %}
+{# comment "table view" #}
 
-<h2>Rigboard Activity Stream</h2>
+<h2>Rigboard Activity Stream - Table View</h2>
 <br>
 	<table class="table table-striped">
         <thead>
@@ -52,114 +52,40 @@
         </thead>
         <tbody>
         	{% for version in object_list %}
-            <tr>
-                <td>{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</td>
-                <td><a href="{% url 'event_detail' version.thisVersion.object_id_int %}">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</a></td>
-           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                <td>{{ version.revision.user.name }}</td>
-                <td>{% for key, old, new in version.changes %}
-                	<button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
-
-                	{% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
-                	{% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
-                	
-                		
-                		'>{{ key }}</button>
-                	{% endfor %}
-                    {% for key, old, new in version.item_changes %}
-                    <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
-
-                    {% if new %}
-                        <div class="alert alert-success">
-                            <dl>
-                                <dt>Name</dt>
-                                <dd>{{new.name}}</dd>
-                                <dt>Description</dt>
-                                <dd>{{new.description|linebreaks}}</dd>
-                                <dt>Quantity</dt>
-                                <dd>{{new.quantity}}</dd>
-                                <dt>Price</dt>
-                                <dd>{{new.cost}}
-                            </dl>
-                        </div>
-                    {% endif %}
-                    {% if old %}
-                        <div class="alert alert-danger">
-                            <dl>
-                                <dt>Name</dt>
-                                <dd>{{old.name}}</dd>
-                                <dt>Description</dt>
-                                <dd>{{old.description|linebreaks}}</dd>
-                                <dt>Quantity</dt>
-                                <dd>{{old.quantity}}</dd>
-                                <dt>Price</dt>
-                                <dd>{{old.cost}}
-                            </dl>
-                        </div>
-                    {% endif %}
-                    
-                        
-                        '>{{ key }}</button>
-                    {% endfor %}
-                </td>
-            </tr>
+                {% if version.item_changes or version.field_changes %}
+                    <tr>
+                        <td>{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</td>
+                        <td><a href="{% url 'event_detail' version.new.pk %}">N{{ version.new.pk|stringformat:"05d" }}</a></td>
+                   		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                        <td>{{ version.revision.user.name }}</td>
+                        <td>
+                            {% include 'RIGS/event_version_changes.html' %}
+                        </td>
+                    </tr>
+                {% endif %}
 			{% endfor %}
 
         </tbody>
     </table>
-{% endcomment %}
+{# endcomment #}
+
+
+
     <div>
-    <h2>Stream View</h2>
+        <br>
+    <h2>Rigboard Activity Stream - Stream View</h2>
+    <br>
 {% for version in object_list %}
-    <div class="well">
-        <button title="title" type="button" class="btn btn-default btn-xs">{{ version.revision.user.first_name|default_if_none:"(unknown)" }}</button> changed 
-        {% for key, old, new in version.changes %}
-        <button title="Changes to {{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
-
-        {% if new %}<div class="alert alert-success">{{new}}</div>{% endif %}
-        {% if old %}<div class="alert alert-danger">{{old}}</div>{% endif %}
-        
+    {% if version.item_changes or version.field_changes %}
+        <div class="well">
+            <button title="title" type="button" class="btn btn-default btn-xs">{{ version.revision.user.first_name|default_if_none:"(unknown)" }}</button> changed 
             
-            '>{{ key }}</button>
-        {% endfor %}
-        {% for key, old, new in version.item_changes %}
-        <button title="{{ key }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
-
-        {% if new %}
-            <div class="alert alert-success">
-                <dl>
-                    <dt>Name</dt>
-                    <dd>{{new.name}}</dd>
-                    <dt>Description</dt>
-                    <dd>{{new.description|linebreaks}}</dd>
-                    <dt>Quantity</dt>
-                    <dd>{{new.quantity}}</dd>
-                    <dt>Price</dt>
-                    <dd>{{new.cost}}
-                </dl>
-            </div>
-        {% endif %}
-        {% if old %}
-            <div class="alert alert-danger">
-                <dl>
-                    <dt>Name</dt>
-                    <dd>{{old.name}}</dd>
-                    <dt>Description</dt>
-                    <dd>{{old.description|linebreaks}}</dd>
-                    <dt>Quantity</dt>
-                    <dd>{{old.quantity}}</dd>
-                    <dt>Price</dt>
-                    <dd>{{old.cost}}
-                </dl>
-            </div>
-        {% endif %}
-        
+            {% include 'RIGS/event_version_changes.html' %}
             
-            '>{{ key }}</button>
-            {% endfor %}
-            in <button title="title" type="button" class="btn btn-default btn-xs">N{{ version.thisVersion.object_id_int|stringformat:"05d" }}</button> <small>(<span data-date='{{ version.revision.date_created|date:"Y-m-d H:i:s" }}' class="date">{{ version.revision.date_created|date:"Y-m-d H:i:s" }}</span>)</small>
+            in <button title="title" type="button" class="btn btn-default btn-xs">N{{ version.new.pk|stringformat:"05d" }}</button> <small>(<span data-date='{{ version.revision.date_created|date:"Y-m-d H:i:s" }}' class="date">{{ version.revision.date_created|date:"RIGS_DATETIME_FORMAT" }}</span>)</small>
 
-    </div>
+        </div>
+    {% endif %}
 {% endfor %}    
 
 
