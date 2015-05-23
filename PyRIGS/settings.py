@@ -185,6 +185,7 @@ USE_TZ = True
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M','%Y-%m-%dT%H:%M:%S')
 
 RIGS_DATETIME_FORMAT = ('d/m/Y H:i')
+RIGS_DATE_FORMAT = ('d/m/Y')
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",

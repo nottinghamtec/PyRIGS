@@ -1,0 +1,18 @@
+{# pass in variable "event" to this template #}
+
+<button title="N{{ event.pk|stringformat:"05d" }} | {{event.name}}" type="button" href="{% url 'event_detail' event.pk %}" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
+        <dl class="dl-vertical">
+			<dt>Date</dt>
+			<dd>{{event.start_date|date:"RIGS_DATE_FORMAT"}}</dd>			
+
+			<dt>Status</dt>
+			<dd>{{event.get_status_display}}</dd>
+
+			<dt>MIC</dt>
+			<dd>{{event.mic.name}}</dd>
+
+			<dt>Venue</dt>
+			<dd>{{event.venue}}</dd>
+		</dl>
+			
+        '>N{{ event.pk|stringformat:"05d" }}</button>
