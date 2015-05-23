@@ -9,7 +9,9 @@
             <h4>Details</h4>
             {% if not request.is_ajax %}
                 <h3>{{ object.name }}<br/>
-                    <span class="small">Last edited {{ object.last_edited_at }} by {{ object.last_edited_by.name }}</span>
+                    <span class="small"><a href="{% url 'person_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at|date:"d/m/Y H:i" }} by {{ object.last_edited_by.name }}
+                </a></span>
                 </h3>
                 <div class="pull-right">
                     <a href="{% url 'person_update' object.pk %}" class="btn btn-primary">Edit <span
@@ -59,7 +61,9 @@
     {% block footer %}
         <div class="row">
             <div class="col-sm-10 align-left">
-                Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ object.last_edited_by.name }}
+                <a href="{% url 'person_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at|date:"d/m/Y H:i" }} by {{ object.last_edited_by.name }}
+                </a>
             </div>
             <div class="col-sm-2">
                 <div class="pull-right">
