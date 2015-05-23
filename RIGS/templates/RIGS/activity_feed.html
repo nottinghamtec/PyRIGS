@@ -1,0 +1,110 @@
+{% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base.html" %}
+
+{% load static %}
+{% load paginator from filters %}
+{% load to_class_name from filters %}
+
+{% block title %}Rigboard Activity Stream{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script src="{% static "js/popover.js" %}"></script>
+    <script src="{% static "js/moment.min.js" %}"></script>
+    <script src="{% static "js/moment-twitter.js" %}"></script>
+    <script>
+    	$(function () {
+		  $('[data-toggle="popover"]').popover().click(function(){
+        if($(this).attr('href')){
+          window.location.href = $(this).attr('href');
+        }
+      });
+
+          // This keeps timeago values correct, but uses an insane amount of resources
+          // $(function () {
+          //     setInterval(function() {
+          //         $('.date').each(function (index, dateElem) {
+          //           var $dateElem = $(dateElem);
+          //           var formatted = moment($dateElem.attr('data-date')).fromNow();
+          //           $dateElem.text(formatted);
+          //          })
+          //        });
+          //     }, 10000);
+            moment().twitter();
+
+            $('.date').each(function (index, dateElem) {
+                var $dateElem = $(dateElem);
+                var formatted = moment($dateElem.attr('data-date'),"DD/MM/YYYY HH:mm").twitterLong();
+                $dateElem.text(formatted);
+               });
+             
+
+		})
+
+    </script>
+{% endblock %}
+
+{% block content %}
+{% if not request.is_ajax %}
+<div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Rigboard Activity Stream</h3>
+            </div>
+            <div class="text-right col-sm-12">{% paginator %}</div>
+        </div>
+        {% endif %}
+
+
+
+
+
+          <div class="row">
+            <div class="col-sm-12" style="overflow-y:scroll;">
+              <div class="list-group">
+                <div class="list-group-item" style="background-color: #eee;">
+                  <h4 class="list-group-item-heading" style="margin:0;">Recent Changes</h4>
+                </div>
+
+                <div style="max-height:514px; overflow:scroll;">
+            {% for version in object_list %}
+                {% if version.item_changes or version.field_changes or version.old == None %}
+                    <div class="list-group-item" style="border-radius:0">
+                      <div class="media" >
+                        <div class="media-left">
+                          <a href="#">
+                            <img class="media-object" src="{{ version.revision.user.profile_picture}}" style="max-width:3em;">
+                          </a>
+                        </div>
+                        <div class="media-body">
+                          <b>{{version.revision.user.name}}</b>
+                          <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created}}"></span></small></span>
+                          <br>
+                          <small>
+                          {% if version.old == None %}
+                            Created
+                          {% else %}
+                            Changed {% include 'RIGS/version_changes.html' %} in
+                          {% endif %}
+                            
+
+                          {% include 'RIGS/object_button.html' with object=version.current %}
+                        </small>
+                        </div>
+                      </div>
+                    </div>
+                {% endif %}
+            {% endfor %}   
+            </div> 
+            <div class="list-group-item" style="background-color: #eee;"></div>
+          </div>
+            </div>
+          </div>
+
+
+
+
+        {% if not request.is_ajax %}
+        <div class="align-right">{% paginator %}</div>
+    </div>
+    {% endif %}
+{% endblock %}

@@ -93,9 +93,13 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
                            name='event_history', kwargs={'model': models.Event}),
 
-                       url(r'^rigboard/activity$',
-                           permission_required_with_403('RIGS.view_event')(versioning.ActivityStream.as_view()),
-                           name='activity_stream'),
+                       url(r'^rigboard/activity/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
+                           name='activity_table'),
+
+                       url(r'^rigboard/activity/feed/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
+                           name='activity_feed'),
 
                        # Finance
                        url(r'^invoice/$',
