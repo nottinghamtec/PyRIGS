@@ -202,7 +202,7 @@ class ActivityTable(generic.ListView):
 
 class ActivityFeed(generic.ListView):
     model = reversion.revisions.Version
-    template_name = "RIGS/activity_feed.html"
+    template_name = "RIGS/activity_feed_data.html"
     paginate_by = 25
     
     def get_queryset(self):
