@@ -16,7 +16,7 @@
 
 <keepInFrame maxHeight="30">
     <para style="style.event_description">
-    {{ object.description|default_if_none:""|linebreaks }}
+    {{ object.description|default_if_none:""|linebreaksbr }}
         </para>
 </keepInFrame>
 
@@ -98,7 +98,7 @@
             <h3>{{ object.venue.name }}</h3>
             {% if not invoice %}
             <keepInFrame>
-            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaks }}</para>
+            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksbr }}</para>
             </keepInFrame>
             {% endif %}
         </td>
@@ -174,7 +174,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                    <em>{{ item.description|linebreaks }}</em>
+                    <em>{{ item.description|linebreaksbr }}</em>
                     </para>
                     <para>
                 {% endif %}
