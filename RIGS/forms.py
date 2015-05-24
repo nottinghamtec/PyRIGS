@@ -16,7 +16,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
-    # captcha = ReCaptchaField()
+    captcha = ReCaptchaField()
 
     class Meta:
         model = models.Profile
