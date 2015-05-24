@@ -10,7 +10,7 @@ urlpatterns = patterns('',
                        # Examples:
                        # url(r'^$', 'PyRIGS.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
-                       url('^$', views.Index.as_view(), name='index'),
+                       url('^$', login_required(views.Index.as_view()), name='index'),
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
@@ -70,6 +70,12 @@ urlpatterns = patterns('',
                        url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
                        url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
                        url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
+                       url(r'^rigboard/activity/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
+                           name='activity_table'),
+                       url(r'^rigboard/activity/feed/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
+                           name='activity_feed'),
 
                        url(r'^event/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_event')(rigboard.EventDetail.as_view()),
@@ -93,13 +99,7 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
                            name='event_history', kwargs={'model': models.Event}),
 
-                       url(r'^rigboard/activity/$',
-                           permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
-                           name='activity_table'),
-
-                       url(r'^rigboard/activity/feed/$',
-                           permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
-                           name='activity_feed'),
+                       
 
                        # Finance
                        url(r'^invoice/$',
