@@ -80,12 +80,12 @@
                     {% endif %}
                 </td>
                 <td class="text-right">
-                    {% if event.mic or not event.is_rig %}
+                    {% if event.mic %}
                         {{ event.mic.initials }}
                         <div>
                             <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
                         </div>
-                    {% else %}
+                    {% elif event.is_rig %}
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
                     {% endif %}
                 </td>
