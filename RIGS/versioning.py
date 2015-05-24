@@ -41,11 +41,12 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
 
     for thisField in theFields:
         name = thisField.name
-        oldValue = getattr(oldObj, name, None)
-        newValue = getattr(newObj, name, None)
-
+        
         if name in excluded_keys:
             continue # if we're excluding this field, skip over it
+
+        oldValue = getattr(oldObj, name, None)
+        newValue = getattr(newObj, name, None)
 
         try:
             bothBlank = (not oldValue) and (not newValue)
@@ -129,7 +130,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
     compare = {}
     compare['revision'] = newVersion.revision    
     compare['new'] = newVersion.object_version.object
-    compare['current'] = modelClass.objects.get(pk=compare['new'].pk)
+    compare['current'] = modelClass.objects.filter(pk=compare['new'].pk).first()
     compare['version'] = newVersion
 
     if oldVersion:
