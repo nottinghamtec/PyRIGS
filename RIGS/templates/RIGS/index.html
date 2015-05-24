@@ -13,6 +13,61 @@
 {% endblock %}
 
 {% block content %}
+
+<style>
+    /* columns of same height styles */
+
+.row-full-height {
+  height: 100%;
+}
+.col-full-height {
+  height: 100%;
+  vertical-align: middle;
+}
+.row-same-height {
+  display: table;
+  width: 100%;
+  /* fix overflow */
+  table-layout: fixed;
+}
+.col-xs-height {
+  display: table-cell;
+  float: none !important;
+}
+
+@media (min-width: 768px) {
+  .col-sm-height {
+    display: table-cell;
+    float: none !important;
+  }
+}
+@media (min-width: 992px) {
+  .col-md-height {
+    display: table-cell;
+    float: none !important;
+  }
+}
+@media (min-width: 1200px) {
+  .col-lg-height {
+    display: table-cell;
+    float: none !important;
+  }
+}
+
+/* vertical alignment styles */
+
+.col-top {
+  vertical-align: top;
+}
+.col-middle {
+  vertical-align: middle;
+}
+.col-bottom {
+  vertical-align: bottom;
+}
+
+</style>
+
     <div class="col-sm-12">
         <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
     </div>
@@ -20,7 +75,8 @@
         <p><h4 class="list-group-item-heading" style="margin:0;">Welcome back, {{ user.get_full_name }}, there are {{ rig_count }} rigs coming up.</h4>
         </p>
     </div>
-    <div class="col-sm-6">
+    <div class="row"><div class="row-same-height">
+    <div class="col-sm-6 col-sm-height col-top">
         
         <div class="list-group">
             <div class="list-group-item" style="background-color: #eee;">
@@ -29,9 +85,7 @@
             
                     <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
                     <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
-                    <a class="list-group-item" href="{% url 'event_create' %}">
-                        <span class="glyphicon glyphicon-plus"></span> New Event
-                    </a>
+                    <a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>
                             <div class="list-group-item" style="background-color: #eee;"></div>
 
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/forum" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Forum</a>
@@ -79,8 +133,9 @@
             <div class="list-group-item" style="background-color: #eee;"></div>
         </div>
     </div>
-    <div class="col-sm-6" id="activity">
-        
+    <div class="col-sm-6 col-sm-height col-top" >
+        {% include 'RIGS/activity_feed.html' %}    
         
     </div>
+</div></div>
 {% endblock %}
