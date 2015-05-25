@@ -10,6 +10,7 @@
       <div class="media">
         {% for version in object_list %}
             {% if version.item_changes or version.field_changes or version.old == None %}
+
                 {% ifchanged version.revision.user %}
                   {% if version != object_list|first %}
                       </div> {#/.media-body#}
@@ -25,9 +26,8 @@
                       </div>
                       <div class="media-body">
                         <h5>{{ version.revision.user.name }}</h5>
-                {% else %}
-                      <br />
                 {% endifchanged %}
+                      <p>
                       <small>
                         {% if version.old == None %}
                           Created
@@ -35,9 +35,10 @@
                           Changed {% include 'RIGS/version_changes.html' %} in
                         {% endif %}
                           
-
                         {% include 'RIGS/object_button.html' with object=version.new %}
                       </small>
+                      </p>
+
             {% endif %}
         {% endfor %}
         </div>
