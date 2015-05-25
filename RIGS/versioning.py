@@ -128,11 +128,17 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
     modelClass = newVersion.content_type.model_class()
 
-    compare = {}
-    compare['revision'] = newVersion.revision    
-    compare['new'] = newVersion.object_version.object
-    compare['current'] = modelClass.objects.filter(pk=compare['new'].pk).first()
-    compare['version'] = newVersion
+    compare = {
+        'revision': newVersion.revision,
+        'new': newVersion.object_version.object,
+        'current': modelClass.objects.filter(pk=newVersion.pk).first(),
+        'version': newVersion,
+
+        # Old things that may not be used
+        'old': None,
+        'field_changes': None,
+        'item_changes': None,
+    }
 
     if oldVersion:
         compare['old'] = oldVersion.object_version.object
@@ -219,7 +225,8 @@ class ActivityFeed(generic.ListView):
 
         for thisVersion in context['object_list']:
             thisItem = get_changes_for_version(thisVersion, None)
-            items.append(thisItem)
+            if thisItem['item_changes'] or thisItem['field_changes'] or thisItem['old'] == None:
+                items.append(thisItem)
 
         context ['object_list'] = items
          

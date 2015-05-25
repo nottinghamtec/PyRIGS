@@ -9,10 +9,9 @@
     <div class="list-group-item">
       <div class="media">
         {% for version in object_list %}
-            {% if version.item_changes or version.field_changes or version.old == None %}
 
                 {% ifchanged version.revision.user %}
-                  {% if version != object_list|first %}
+                  {% if not forloop.first %}
                       </div> {#/.media-body#}
                     </div> {#/.media#}
                   </div>
@@ -38,8 +37,7 @@
                         {% include 'RIGS/object_button.html' with object=version.new %}
                       </small>
                       </p>
-
-            {% endif %}
+                      
         {% endfor %}
         </div>
       </div>
