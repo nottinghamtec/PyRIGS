@@ -17,7 +17,9 @@ body, .pad-top {
 
 #userdropdown > li {
   padding: 0 0.3em;
+}
 
+#userdropdown > li, #activity {
   .media-object {
     max-width: 3em;
   }
