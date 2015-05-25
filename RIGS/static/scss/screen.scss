@@ -65,3 +65,9 @@ textarea {
 .modal-dialog {
   z-index: inherit; // bug fix introduced in 52682ce
 }
+
+.panel-default {
+  .default {
+    background-color: $panel-default-heading-bg;
+  }
+}

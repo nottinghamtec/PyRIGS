@@ -12,59 +12,60 @@
     <div class="row">
     <div class="col-sm-6">
         
-        <div class="list-group">
-            <div class="list-group-item" style="background-color: #eee;">
-                 <h4 class="list-group-item-heading" style="margin:0;">Quick Links</h4>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                 <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
-            
+            <div class="list-group">
                     <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
                     <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
                     <a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>
-                            <div class="list-group-item" style="background-color: #eee;"></div>
+
+                    <div class="list-group-item default"></div>
 
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/forum" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Forum</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Wiki</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
                 
-            
-            <div class="list-group-item" style="background-color: #eee;"></div>
+            </div>
         </div>
 
-        <div class="list-group">
-            <div class="list-group-item" style="background-color: #eee;">
-              <h4 class="list-group-item-heading" style="margin:0;">Search Rigboard</h4>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">Search Rigboard</h4>
             </div>
-            <div class="list-group-item">
-                <form class="form" role="form" action="{% url 'person_list' %}" method="GET">
-                    <div class="input-group">
-                        <input type="search" name="q" class="form-control" placeholder="Search People" />
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                        </span>
-                    </div>
-                </form>
+            <div class="list-group">
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'person_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search People" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'organisation_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'venue_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Venues" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="list-group-item">
-                <form class="form" role="form" action="{% url 'organisation_list' %}" method="GET">
-                    <div class="input-group">
-                        <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                        </span>
-                    </div>
-                </form>
-            </div>
-            <div class="list-group-item">
-                <form class="form" role="form" action="{% url 'venue_list' %}" method="GET">
-                    <div class="input-group">
-                        <input type="search" name="q" class="form-control" placeholder="Search Venues" />
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                        </span>
-                    </div>
-                </form>
-            </div>
-            <div class="list-group-item" style="background-color: #eee;"></div>
         </div>
     </div>
     <div class="col-sm-6" >
