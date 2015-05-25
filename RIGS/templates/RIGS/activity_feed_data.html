@@ -6,35 +6,42 @@
 
 {% block content %}
   {% if request.is_ajax %}
-
-      {% for version in object_list %}
-          {% if version.item_changes or version.field_changes or version.old == None %}
-              <div class="list-group-item" style="border-radius:0">
-                <div class="media" >
-                  <div class="media-left">
-                    <a href="#">
-                      <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" style="max-width:3em;">
-                    </a>
+    <div class="list-group-item">
+      <div class="media">
+        {% for version in object_list %}
+            {% if version.item_changes or version.field_changes or version.old == None %}
+                {% ifchanged version.revision.user %}
+                  {% if version != object_list|first %}
+                      </div> {#/.media-body#}
+                    </div> {#/.media#}
                   </div>
-                  <div class="media-body">
-                    <b>{{version.revision.user.name}}</b>
-                    <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created}}"></span></small></span>
-                    <br>
-                    <small>
-                    {% if version.old == None %}
-                      Created
-                    {% else %}
-                      Changed {% include 'RIGS/version_changes.html' %} in
-                    {% endif %}
-                      
+                  <div class="list-group-item">
+                    <div class="media">
+                  {% endif %}
+                      <div class="media-left">
+                        <a href="#">
+                          <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" style="max-width: 3em;" />
+                        </a>
+                      </div>
+                      <div class="media-body">
+                        <h5>{{ version.revision.user.name }}</h5>
+                {% else %}
+                      <br />
+                {% endifchanged %}
+                      <small>
+                        {% if version.old == None %}
+                          Created
+                        {% else %}
+                          Changed {% include 'RIGS/version_changes.html' %} in
+                        {% endif %}
+                          
 
-                    {% include 'RIGS/object_button.html' with object=version.new %}
-                  </small>
-                  </div>
-                </div>
-              </div>
-          {% endif %}
-      {% endfor %}
-
+                        {% include 'RIGS/object_button.html' with object=version.new %}
+                      </small>
+            {% endif %}
+        {% endfor %}
+        </div>
+      </div>
+    </div>
   {% endif %}
 {% endblock %}
