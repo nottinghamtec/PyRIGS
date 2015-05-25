@@ -1,5 +1,6 @@
 {% load static %}
 
+{% block js %}
 <script src="{% static "js/tooltip.js" %}"></script>
 <script src="{% static "js/popover.js" %}"></script>
 <script src="{% static "js/moment.min.js" %}"></script>
@@ -32,6 +33,7 @@
          
 
 })
+{% endblock %}
 
 </script>
     <div class="list-group">
@@ -39,9 +41,8 @@
           <h4 class="list-group-item-heading" style="margin:0;">Recent Changes</h4>
       </div>
       
-      <div id="activity" style="overflow:scroll; height:500px">
-      </div> 
+      <div id="activity" style="overflow-y: scroll; height: 500px">&nbsp;</div> 
       
-      <div class="list-group-item" style="background-color: #eee;"></div>
+      <div class="list-group-item" style="background-color: #eee;">&nbsp;</div>
     </div>
 
