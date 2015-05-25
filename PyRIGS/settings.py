@@ -174,7 +174,7 @@ else:
 
 LANGUAGE_CODE = 'en-gb'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 FORMAT_MODULE_PATH = 'PyRIGS.formats'
 
