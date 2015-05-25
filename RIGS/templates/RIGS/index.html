@@ -1,17 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}RIGS{% endblock %}
 
-{% block js %}
-    <script>
-        $(function () {
-            $( "#activity" ).load( "{% url 'activity_feed' %}", function() {
-              // Loaded
-            });
-        });
-
-    </script>
-{% endblock %}
-
 {% block content %}
     <div class="col-sm-12">
         <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
