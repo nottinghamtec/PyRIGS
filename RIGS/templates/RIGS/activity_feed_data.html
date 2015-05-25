@@ -20,7 +20,7 @@
                   {% endif %}
                       <div class="media-left">
                         <a href="#">
-                          <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" style="max-width: 3em;" />
+                          <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" />
                         </a>
                       </div>
                       <div class="media-body">
@@ -37,7 +37,7 @@
                         {% include 'RIGS/object_button.html' with object=version.new %}
                       </small>
                       </p>
-                      
+
         {% endfor %}
         </div>
       </div>
