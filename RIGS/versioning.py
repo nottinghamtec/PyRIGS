@@ -8,6 +8,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 
 # Versioning
 import reversion
@@ -112,8 +113,8 @@ def get_previous_version(version):
     versions = reversion.get_for_object_reference(version.content_type.model_class(), thisId)
 
     try:
-        previousVersions = versions.filter(pk__lt=thisVersionId).latest(field_name='pk') # this is very slow :(
-    except:
+        previousVersions = versions.filter(revision_id__lt=version.revision_id).latest(field_name='revision__date_created')
+    except ObjectDoesNotExist:
         return False
 
     return previousVersions
