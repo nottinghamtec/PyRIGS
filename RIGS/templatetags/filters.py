@@ -10,6 +10,10 @@ def multiply(value, arg):
     return value*arg
 
 @register.filter
+def to_class_name(value):
+    return value.__class__.__name__
+    
+@register.filter
 def nice_errors(form, non_field_msg='General form errors'):
     nice_errors = ErrorDict()
     if isinstance(form, forms.BaseForm):

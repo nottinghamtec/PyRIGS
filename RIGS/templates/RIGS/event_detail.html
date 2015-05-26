@@ -227,8 +227,10 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
-                by {{ object.last_edited_by.name }}.
+            <div>
+                <a href="{% url 'event_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
+                </a>
             </div>
         </div>
         {% endif %}
@@ -240,7 +242,9 @@
     {% block footer %}
         <div class="row">
             <div class="col-sm-10 align-left">
-                Lasted edited at {{ object.last_edited_at|date:"SHORT_DATE_FORMAT" }} by {{ object.last_edited_by.name }}
+                <a href="{% url 'event_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
+                </a>
             </div>
             <div class="col-sm-2">
                 <div class="pull-right">

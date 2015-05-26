@@ -33,7 +33,7 @@
                 </td>
                 <td>
                     <h4>
-                        <a href="{% url 'event_detail' event.pk %}">{{ event.name }}</a>
+                        <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' event.pk %}" {% endif %}>{{ event.name }}</a>
                         {% if event.venue %}
                             <small>at {{ event.venue }}</small>
                         {% endif %}
@@ -80,12 +80,12 @@
                     {% endif %}
                 </td>
                 <td class="text-right">
-                    {% if event.mic or not event.is_rig %}
+                    {% if event.mic %}
                         {{ event.mic.initials }}
                         <div>
                             <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
                         </div>
-                    {% else %}
+                    {% elif event.is_rig %}
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
                     {% endif %}
                 </td>

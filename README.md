@@ -1,5 +1,5 @@
 # TEC PA & Lighting - PyRIGS #
-Welcome to TEC PA & Lightings PyRIGS program. This is a reiplmentation of the exisiting Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
+Welcome to TEC PA & Lightings PyRIGS program. This is a reimplementation of the existing Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
 
 The purpose of this project is to make the system more compatible and easier to understand such that should future changes be needed they can be made without having to understand the intricacies of Rails.
 
@@ -16,7 +16,7 @@ Most of the documents here assume a basic knowledge of how Python and Django wor
 ### Editing ###
 It is recommended that you use the PyCharm IDE by JetBrains. Whilst other editors are available, this is the best for integration with Django as it can automatically manage all the pesky admin commands that frequently need running, as well as nice integration with git.
 
-For the more experienced developer/somebody who doesn't want a full IDE and wants it to open in less than the age of the universe, I can strongly recommend [Sublime Text](http://www.sublimetext.com/). It has a bit of a steaper learning curve, and won't manage anything Django/git related out of the box, but once you get the hang of it is by far the fastest and most powerful editor I have used (for any type of project).
+For the more experienced developer/somebody who doesn't want a full IDE and wants it to open in less than the age of the universe, I can strongly recommend [Sublime Text](http://www.sublimetext.com/). It has a bit of a steeper learning curve, and won't manage anything Django/git related out of the box, but once you get the hang of it is by far the fastest and most powerful editor I have used (for any type of project).
 
 Please contact TJP for details on how to acquire these.
 

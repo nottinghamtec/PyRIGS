@@ -78,6 +78,9 @@ class Person(models.Model, RevisionMixin):
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
+    def get_absolute_url(self):
+        return reverse_lazy('person_detail', kwargs={'pk': self.pk})
+
     class Meta:
         permissions = (
             ('view_person', 'Can view Persons'),
@@ -113,6 +116,9 @@ class Organisation(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
@@ -175,6 +181,9 @@ class Venue(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
