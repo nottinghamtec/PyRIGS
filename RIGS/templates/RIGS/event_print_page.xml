@@ -15,15 +15,9 @@
 </para>
 
 <keepInFrame maxHeight="30">
-<<<<<<< HEAD
-<para style="style.event_description">
-{{ object.description|default_if_none:""|linebreaksbr }}
-    </para>
-=======
     <para style="style.event_description">
     {{ object.description|default_if_none:""|linebreaksbr }}
         </para>
->>>>>>> revision-view
 </keepInFrame>
 
 {% if invoice %}
