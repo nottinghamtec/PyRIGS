@@ -18,6 +18,10 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     phone = forms.CharField(required=False, max_length=13)
     captcha = ReCaptchaField()
 
+    class Meta:
+        model = models.Profile
+        fields = ('first_name','last_name','initials','phone')
+
     def clean_initials(self):
         """
         Validate that the supplied initials are unique.

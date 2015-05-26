@@ -1,0 +1,49 @@
+{% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base.html" %}
+
+{% load static %}
+{% load paginator from filters %}
+{% load to_class_name from filters %}
+
+{% block content %}
+  {% if request.is_ajax %}
+    <div class="list-group-item">
+      <div class="media">
+        {% for version in object_list %}
+
+                {% if not version.withPrevious %}
+                  {% if not forloop.first %}
+                      </div> {#/.media-body#}
+                    </div> {#/.media#}
+                  </div>
+                  <div class="list-group-item">
+                    <div class="media">
+                  {% endif %}
+                      <div class="media-left">
+                        <a href="#">
+                          <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" />
+                        </a>
+                      </div>
+                      <div class="media-body">
+                        <h5>{{ version.revision.user.name }}
+                          <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created}}"></span></small></span>
+                        </h5>
+
+                {% endif %}
+                      <p>
+                      <small>
+                        {% if version.old == None %}
+                          Created
+                        {% else %}
+                          Changed {% include 'RIGS/version_changes.html' %} in
+                        {% endif %}
+                          
+                        {% include 'RIGS/object_button.html' with object=version.new %}
+                      </small>
+                      </p>
+
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
