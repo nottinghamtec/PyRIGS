@@ -217,6 +217,10 @@ class ActivityFeed(generic.ListView):
         return versions
 
     def get_context_data(self, **kwargs):
+        maxTimeDelta = []
+
+        maxTimeDelta.append({ 'maxAge':datetime.timedelta(days=1), 'group':datetime.timedelta(hours=1)})
+        maxTimeDelta.append({ 'maxAge':None, 'group':datetime.timedelta(days=1)})
 
         # Call the base implementation first to get a context
         context = super(ActivityFeed, self).get_context_data(**kwargs)
@@ -226,6 +230,19 @@ class ActivityFeed(generic.ListView):
         for thisVersion in context['object_list']:
             thisItem = get_changes_for_version(thisVersion, None)
             if thisItem['item_changes'] or thisItem['field_changes'] or thisItem['old'] == None:
+                thisItem['withPrevious'] = False
+                if len(items)>=1:
+                    timeAgo = datetime.datetime.now(thisItem['revision'].date_created.tzinfo) - thisItem['revision'].date_created
+                    timeDiff = items[-1]['revision'].date_created - thisItem['revision'].date_created
+                    timeTogether = False
+                    for params in maxTimeDelta:
+                        if params['maxAge'] is None or timeAgo <= params['maxAge']:
+                            timeTogether = timeDiff < params['group']
+                            break
+ 
+                    sameUser = thisItem['revision'].user == items[-1]['revision'].user
+                    thisItem['withPrevious'] = timeTogether & sameUser
+
                 items.append(thisItem)
 
         context ['object_list'] = items
