@@ -25,13 +25,6 @@
       //     }, 10000);
         moment().twitter();
 
-        $('.date').each(function (index, dateElem) {
-            var $dateElem = $(dateElem);
-            var formatted = moment($dateElem.attr('data-date'),"DD/MM/YYYY HH:mm").twitterLong();
-            $dateElem.text(formatted);
-           });
-         
-
 })
   $(document).ready(function() {
     $(function () {
@@ -43,6 +36,11 @@
 
           $('#activity [data-toggle="popover"]').popover();
 
+          $('.date').each(function (index, dateElem) {
+            var $dateElem = $(dateElem);
+            var formatted = moment($dateElem.attr('data-date'),"DD/MM/YYYY HH:mm").twitterLong();
+            $dateElem.text(formatted);
+          });
 
         });
     });
