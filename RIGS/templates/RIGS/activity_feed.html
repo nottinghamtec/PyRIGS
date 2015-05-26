@@ -35,8 +35,15 @@
 })
   $(document).ready(function() {
     $(function () {
+        $( "#activity" ).hide();
         $( "#activity" ).load( "{% url 'activity_feed' %}", function() {
-          $('#activity [data-toggle="popover"]').popover()
+          $('#activity_loading').slideUp('slow',function(){
+              $('#activity').slideDown('slow');
+          });
+
+          $('#activity [data-toggle="popover"]').popover();
+
+
         });
     });
   });
@@ -48,10 +55,12 @@
         <h4 class="panel-title">Recent Changes</h4>
       </div>
       
-      <div id="activity" class="list-group">
-        <div class="list-group-item loading-animation">
+      <div class="list-group">
+        <div id="activity_loading" class="list-group-item loading-animation">
           <div class="circle"></div>
           <div class="circle1"></div>
+        </div>
+        <div id="activity">
         </div>
       </div> 
       
