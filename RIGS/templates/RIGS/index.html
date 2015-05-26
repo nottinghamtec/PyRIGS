@@ -10,7 +10,7 @@
         </p>
     </div>
     <div class="row">
-    <div class="col-sm-6">
+    <div class="col-sm-{% if perms.RIGS.view_event %}6{% else %}12{% endif %}">
         
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -19,7 +19,7 @@
             <div class="list-group">
                     <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
                     <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
-                    <a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>
+                    {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>{% endif %}
 
                     <div class="list-group-item default"></div>
 
@@ -68,9 +68,11 @@
             </div>
         </div>
     </div>
+    {% if perms.RIGS.view_event %}
     <div class="col-sm-6" >
         {% include 'RIGS/activity_feed.html' %}    
         
     </div>
+    {% endif %}
 </div>
 {% endblock %}
