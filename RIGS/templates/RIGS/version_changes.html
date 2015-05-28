@@ -2,8 +2,8 @@
 
 	<button title="Changes to {{ change.field.verbose_name }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
 
-    	{% if change.new %}<div class="alert alert-success">{{change.new}}</div>{% endif %}
-    	{% if change.old %}<div class="alert alert-danger">{{change.old}}</div>{% endif %}
+    	{% if change.new %}<div class="alert alert-success">{{change.new|linebreaksbr}}</div>{% endif %}
+    	{% if change.old %}<div class="alert alert-danger">{{change.old|linebreaksbr}}</div>{% endif %}
     	
         '>{{ change.field.verbose_name }}</button>
 
@@ -14,8 +14,8 @@
         {% for change in itemChange.changes %}
             <h4>{{ change.field.verbose_name }}</h4>
 
-            {% if change.new %}<div class="alert alert-success">{{change.new}}</div>{% endif %}
-            {% if change.old %}<div class="alert alert-danger">{{change.old}}</div>{% endif %}
+            {% if change.new %}<div class="alert alert-success">{{change.new|linebreaksbr}}</div>{% endif %}
+            {% if change.old %}<div class="alert alert-danger">{{change.old|linebreaksbr}}</div>{% endif %}
 
         {% endfor %}
         
