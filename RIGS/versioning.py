@@ -16,6 +16,7 @@ import simplejson
 from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import ForeignKey, IntegerField
 
 from RIGS import models, forms
 import datetime
@@ -35,8 +36,21 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
     class FieldCompare(object):
         def __init__(self, field=None, old=None, new=None):
             self.field = field
-            self.old = old
-            self.new = new
+            self._old = old
+            self._new = new
+
+        def display_value(self, value):
+            if isinstance(self.field, IntegerField) and len(self.field.choices) > 0:
+                return [x[1] for x in self.field.choices if x[0] == value][0]
+            return value
+
+        @property
+        def old(self):
+            return self.display_value(self._old)
+
+        @property
+        def new(self):
+            return self.display_value(self._new)        
 
     changes = []
 
