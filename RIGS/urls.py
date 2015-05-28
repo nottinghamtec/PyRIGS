@@ -69,7 +69,7 @@ urlpatterns = patterns('',
                        # Rigboard
                        url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
                        url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
-                       url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
+                       url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True,pattern_name='event_archive')),
                        url(r'^rigboard/activity/$',
                            permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
                            name='activity_table'),
@@ -149,8 +149,8 @@ urlpatterns = patterns('',
                        url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
 
                        # Legacy URL's
-                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(pattern_name='event_detail')),
-                       url(r'^bookings/$', RedirectView.as_view(pattern_name='rigboard')),
-                       url(r'^bookings/past/$', RedirectView.as_view(pattern_name='event_archive')),
+                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(permanent=True,pattern_name='event_detail')),
+                       url(r'^bookings/$', RedirectView.as_view(permanent=True,pattern_name='rigboard')),
+                       url(r'^bookings/past/$', RedirectView.as_view(permanent=True,pattern_name='event_archive')),
 )
 
