@@ -269,7 +269,7 @@ class Event(models.Model, RevisionMixin):
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected by')
+    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Calculated values
     """
