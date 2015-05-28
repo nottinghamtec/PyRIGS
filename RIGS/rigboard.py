@@ -90,20 +90,24 @@ class EventPrint(generic.View):
         object = get_object_or_404(models.Event, pk=pk)
         template = get_template('RIGS/event_print.xml')
         copies = ('TEC', 'Client')
-        context = RequestContext(request, {
-            'object': object,
-            'fonts': {
-                'opensans': {
-                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-                }
-            },
-        })
 
         merger = PdfFileMerger()
 
         for copy in copies:
-            context['copy'] = copy
+
+            context = RequestContext(request, { # this should be outside the loop, but bug in 1.8.2 prevents this
+                'object': object,
+                'fonts': {
+                    'opensans': {
+                        'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
+                        'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                    }
+                },
+                'copy':copy
+            })
+
+            # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
+
             rml = template.render(context)
             buffer = StringIO.StringIO()
 
