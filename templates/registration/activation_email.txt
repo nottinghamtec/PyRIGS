@@ -1,4 +1,4 @@
-{% load url %}
+
 Welcome {{ user }},
 
 Thank you for registering on {{ site }}
