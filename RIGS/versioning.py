@@ -102,7 +102,7 @@ def get_versions_for_model(models):
     
     versions = reversion.models.Version.objects.filter(
         content_type__in = content_types,
-    ).select_related("revision","revision.version_set").order_by("-pk")
+    ).select_related("revision").order_by("-pk")
 
     return versions
 
