@@ -126,6 +126,7 @@ class EventPrint(generic.View):
 
 
 class EventDuplicate(generic.RedirectView):
+    permanent = False;
     def get_redirect_url(self, *args, **kwargs):
         new = get_object_or_404(models.Event, pk=kwargs['pk'])
         new.pk = None
