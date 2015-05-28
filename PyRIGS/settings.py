@@ -79,13 +79,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-    'legacy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'alfie.codedinternet.com',
-        'NAME': 'tec_rigs',
-        'USER': 'tec_rigs',
-        'PASSWORD': 'xMNb(b+Giu]&',
     }
 }
 
