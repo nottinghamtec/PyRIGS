@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse_lazy
 from decimal import Decimal
 
 # Create your models here.
+@python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
@@ -36,6 +37,9 @@ class Profile(AbstractUser):
     @property
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
+
+    def __str__(self):
+        return self.name
 
 class RevisionMixin(object):
     @property
