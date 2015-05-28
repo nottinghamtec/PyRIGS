@@ -70,11 +70,6 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-try:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-except ImportError:
-    pass
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
