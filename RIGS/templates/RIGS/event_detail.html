@@ -109,7 +109,15 @@
 
                     {% if event.is_rig %}
                         <dt>Event MIC</dt>
-                        <dd>{{ event.mic.name }}</dd>
+                        <dd>
+                            {% if perms.RIGS.view_profile %}
+                                <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                                    {{ event.mic.name }}
+                                </a>
+                            {% else %}
+                                {{ event.mic.name }}
+                            {% endif %}
+                        </dd>
                     {% endif %}
 
                     <dt>Status</dt>
@@ -119,18 +127,18 @@
 
                     {% if event.is_rig %}
                         <dt>Crew Meet</dt>
-                        <dd>{{ event.meet_at|date:"d M Y H:i"|default:"" }}</dd>
+                        <dd>{{ event.meet_at|date:"D d M Y H:i"|default:"" }}</dd>
                         <dd>{{ event.meet_info|default:"" }}</dd>
 
                         <dt>Access From</dt>
-                        <dd>{{ event.access_at|date:"d M Y H:i"|default:"" }}</dd>
+                        <dd>{{ event.access_at|date:"D d M Y H:i"|default:"" }}</dd>
                     {% endif %}
 
                     <dt>Event Starts</dt>
-                    <dd>{{ event.start_date|date:"d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
+                    <dd>{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
 
                     <dt>Event Ends</dt>
-                    <dd>{{ event.end_date|date:"d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
+                    <dd>{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
 
                     <dd>&nbsp;</dd>
 

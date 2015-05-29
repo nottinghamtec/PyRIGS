@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse_lazy
 from decimal import Decimal
 
 # Create your models here.
+@python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
@@ -36,6 +37,18 @@ class Profile(AbstractUser):
     @property
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
+
+    @property
+    def latest_events(self):
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        permissions = (
+            ('view_profile', 'Can view Profile'),
+        )
 
 class RevisionMixin(object):
     @property
@@ -265,7 +278,7 @@ class Event(models.Model, RevisionMixin):
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected by')
+    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Calculated values
     """
