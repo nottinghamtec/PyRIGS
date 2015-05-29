@@ -25,9 +25,9 @@
                         ">
                 <td class="hidden-xs">{{ event.pk }}</td>
                 <td>
-                    <div><strong>{{ event.start_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                    <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
-                        <div><strong>{{ event.end_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                        <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
                     {% endif %}
                     <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
@@ -83,7 +83,13 @@
                     {% if event.mic %}
                         {{ event.mic.initials }}
                         <div>
-                            <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                            {% if perms.RIGS.view_profile %}
+                                <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                                </a>
+                            {% else %}
+                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                            {% endif %}
                         </div>
                     {% elif event.is_rig %}
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
