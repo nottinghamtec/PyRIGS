@@ -297,7 +297,7 @@ class Event(models.Model, RevisionMixin):
         #total = 0.0
         #for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
         #    total += item.sum
-        total = EventItem.objects.filter(event=self).aggregate(sum_total=models.Sum('cost',field="quantity * cost"))['sum_total']
+        total = EventItem.objects.filter(event=self).aggregate(sum_total=models.Sum(models.F('cost')*models.F('quantity')))['sum_total']
         if total:
             return total
         return Decimal("0.00")
