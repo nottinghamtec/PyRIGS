@@ -172,12 +172,14 @@
 <script>
     jQuery(document).ready(function () {
         jQuery(document).on('click', '.modal-href', function (e) {
-            e.preventDefault()
-            modaltarget = jQuery(this).data('target')
-            modalobject = "";
-            jQuery('#modal').load(jQuery(this).attr('href'), function (e) {
-                jQuery('#modal').modal();
-            });
+            $link = jQuery(this);
+            // Anti modal inception
+            if($link.parents('#modal').length == 0) {
+                e.preventDefault();
+                jQuery('#modal').load($link.attr('href'), function (e) {
+                    jQuery('#modal').modal();
+                });
+            }
         });
 
 
