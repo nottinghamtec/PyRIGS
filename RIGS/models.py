@@ -38,8 +38,17 @@ class Profile(AbstractUser):
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
 
+    @property
+    def latest_events(self):
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
     def __str__(self):
         return self.name
+
+    class Meta:
+        permissions = (
+            ('view_profile', 'Can view Profile'),
+        )
 
 class RevisionMixin(object):
     @property
