@@ -110,7 +110,7 @@
                     {% if event.is_rig %}
                         <dt>Event MIC</dt>
                         <dd>
-                            {% if perms.RIGS.view_profile %}
+                            {% if event.mic and perms.RIGS.view_profile %}
                                 <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
                                     {{ event.mic.name }}
                                 </a>

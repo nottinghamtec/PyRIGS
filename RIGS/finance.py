@@ -115,6 +115,7 @@ class InvoiceEvent(generic.View):
 
 class PaymentCreate(generic.CreateView):
     model = models.Payment
+    fields = ['invoice','date','amount','method']
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()
