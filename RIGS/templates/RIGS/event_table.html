@@ -25,9 +25,9 @@
                         ">
                 <td class="hidden-xs">{{ event.pk }}</td>
                 <td>
-                    <div><strong>{{ event.start_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                    <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
-                        <div><strong>{{ event.end_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                        <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
                     {% endif %}
                     <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
