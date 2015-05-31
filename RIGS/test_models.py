@@ -21,7 +21,7 @@ class VatRateTestCase(TestCase):
 class EventTestCase(TestCase):
 	def setUp(self):
 		self.all_events = set(range(1, 18))
-		self.current_events = (1, 2, 3, 6, 7, 8, 10, 12, 14, 15, 16, 18)
+		self.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
 		self.not_current_events = set(self.all_events) - set(self.current_events)
 
 		self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
@@ -59,7 +59,7 @@ class EventTestCase(TestCase):
 
 	def test_rig_count(self):
 		# by my count this is 7
-		self.assertEqual(models.Event.objects.rig_count(), 7)
+		self.assertEqual(models.Event.objects.rig_count(), 8)
 
 	def test_current_events(self):
 		current_events = models.Event.objects.current_events()
