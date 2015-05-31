@@ -20,30 +20,34 @@ class VatRateTestCase(TestCase):
 
 class EventTestCase(TestCase):
 	def setUp(self):
+		self.all_events = set(range(1, 18))
+		self.current_events = (1, 2, 3, 6, 7, 8, 10, 12, 14, 15, 16, 18)
+		self.not_current_events = set(self.all_events) - set(self.current_events)
+
 		self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
 		self.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
 
-		# produce 7 normal events
+		# produce 7 normal events - 5 current
 		models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6), description="start future no end") 
 		models.Event.objects.create(name="TE E2", start_date=date.today(), description="start today no end")
-		models.Event.objects.create(name="TE E3", start_date=date.today(), end_date=date.today(), description="start today with end")
+		models.Event.objects.create(name="TE E3", start_date=date.today(), end_date=date.today(), description="start today with end today")
 		models.Event.objects.create(name="TE E4", start_date='2014-03-20', description="start past no end")
-		models.Event.objects.create(name="TE E5", start_date='2014-03-20', end_date='2014-03-21', description="start past with end")
+		models.Event.objects.create(name="TE E5", start_date='2014-03-20', end_date='2014-03-21', description="start past with end past")
 		models.Event.objects.create(name="TE E6", start_date=date.today()-timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start past, end future")
 		models.Event.objects.create(name="TE E7", start_date=date.today()+timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start + end in future")
 
-		# 2 cancelled
+		# 2 cancelled - 1 current
 		models.Event.objects.create(name="TE E8", start_date=date.today()+timedelta(days=2), end_date=date.today()+timedelta(days=2), status=models.Event.CANCELLED, description="cancelled in future")
 		models.Event.objects.create(name="TE E9", start_date=date.today()-timedelta(days=1), end_date=date.today()+timedelta(days=2), status=models.Event.CANCELLED, description="cancelled and started")
 
-		# 5 dry hire
+		# 5 dry hire - 3 current
 		models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True, description="dryhire today")
 		models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True, checked_in_by=self.profile, description="dryhire today, checked in")
-		models.Event.objects.create(name="TE E12", start_date=date.today()-timedelta(days=1), dry_hire=True, description="dryhire past")
+		models.Event.objects.create(name="TE E12", start_date=date.today()-timedelta(days=1), dry_hire=True, checked_in_by=None, description="dryhire past")
 		models.Event.objects.create(name="TE E13", start_date=date.today()-timedelta(days=1), dry_hire=True, checked_in_by=self.profile, description="dryhire past checked in")
 		models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True, status=models.Event.CANCELLED, description="dryhire today cancelled")
 
-		# 4 non rig
+		# 4 non rig - 3 current
 		models.Event.objects.create(name="TE E15", start_date=date.today(), is_rig=False, description="non rig today")
 		models.Event.objects.create(name="TE E16", start_date=date.today()+timedelta(days=1), is_rig=False, description="non rig tomorrow")
 		models.Event.objects.create(name="TE E17", start_date=date.today()-timedelta(days=1), is_rig=False, description="non rig yesterday")
@@ -58,12 +62,10 @@ class EventTestCase(TestCase):
 		self.assertEqual(models.Event.objects.rig_count(), 7)
 
 	def test_current_events(self):
-		# by my count 7 + 4 + 1
 		current_events = models.Event.objects.current_events()
-		# for event in current_events:
-		# 	print event
-		self.assertEqual(len(current_events), 7+4+1)
-		self.assertIn(models.Event.objects.get(name="TE E12"), current_events)
+		self.assertEqual(len(current_events), len(self.current_events))
+		for eid in self.current_events:
+			self.assertIn(models.Event.objects.get(name="TE E%d"%eid), current_events)
 
 	def test_related_venue(self):
 		v1 = models.Venue.objects.create(name="TE V1")
