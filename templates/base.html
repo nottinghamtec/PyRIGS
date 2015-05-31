@@ -176,6 +176,8 @@
             // Anti modal inception
             if($link.parents('#modal').length == 0) {
                 e.preventDefault();
+                modaltarget = $link.data('target');
+                modalobject = "";
                 jQuery('#modal').load($link.attr('href'), function (e) {
                     jQuery('#modal').modal();
                 });
