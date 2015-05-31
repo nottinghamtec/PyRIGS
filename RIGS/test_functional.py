@@ -119,7 +119,7 @@ class UserRegistrationTest(LiveServerTestCase):
 
 class EventTest(LiveServerTestCase):
 	def setUp(self):
-		self.profile = models.Profile(username="EventTest", first_name="Event", last_name="Test", initials="ETU")
+		self.profile = models.Profile(username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
 		self.profile.set_password("EventTestPassword")
 		self.profile.save()
 
@@ -127,7 +127,7 @@ class EventTest(LiveServerTestCase):
 		os.environ['RECAPTCHA_TESTING'] = 'True'
 
 	def tearDown(self):
-		# self.browser.quit()
+		self.browser.quit()
 		os.environ['RECAPTCHA_TESTING'] = 'False'
 
 	def authenticate(self, n=None):
@@ -152,3 +152,55 @@ class EventTest(LiveServerTestCase):
 		self.authenticate('/rigboard/')
 
 		# Completes and comes back to rigboard
+		# Clicks add new
+		self.browser.find_element_by_partial_link_text("New").click()
+		self.assertEqual(self.live_server_url + '/event/create/', self.browser.current_url)
+		self.browser.get(self.live_server_url + '/rigboard/')
+
+	def testRigCreate(self):
+		# Requests address
+		self.browser.get(self.live_server_url + '/event/create/')
+		# Gets redirected to login and back
+		self.authenticate('/event/create/')
+
+		# Check has slided up correctly - third save button hidden
+		save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+		self.assertFalse(save.is_displayed())
+
+		# Click Rig button
+
+		# Slider expands and save button visible
+
+		# Create new person
+
+		# See new person selected
+
+		# Change mind and add another
+
+		# Was right the first time, change it back
+
+		# Create organisation
+
+		# See it is selected
+
+		# Create veneue
+
+		# See it selected
+
+		# Set start date/time
+
+		# Set end date/time
+
+		# Add item
+
+		# See new item appear
+
+		# Attempt to save - missing title
+
+		# See error and all data preserved
+
+		# Set title
+
+		# Save again
+
+		# See redirected to success page
