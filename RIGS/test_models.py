@@ -43,8 +43,8 @@ class EventTestCase(TestCase):
 		# 5 dry hire - 3 current
 		models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True, description="dryhire today")
 		models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True, checked_in_by=self.profile, description="dryhire today, checked in")
-		models.Event.objects.create(name="TE E12", start_date=date.today()-timedelta(days=1), dry_hire=True, checked_in_by=None, description="dryhire past")
-		models.Event.objects.create(name="TE E13", start_date=date.today()-timedelta(days=1), dry_hire=True, checked_in_by=self.profile, description="dryhire past checked in")
+		models.Event.objects.create(name="TE E12", start_date=date.today()-timedelta(days=1), dry_hire=True, status=models.Event.BOOKED, description="dryhire past")
+		models.Event.objects.create(name="TE E13", start_date=date.today()-timedelta(days=2), dry_hire=True, checked_in_by=self.profile, description="dryhire past checked in")
 		models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True, status=models.Event.CANCELLED, description="dryhire today cancelled")
 
 		# 4 non rig - 3 current
@@ -66,6 +66,9 @@ class EventTestCase(TestCase):
 		self.assertEqual(len(current_events), len(self.current_events))
 		for eid in self.current_events:
 			self.assertIn(models.Event.objects.get(name="TE E%d"%eid), current_events)
+
+		for eid in self.not_current_events:
+			self.assertNotIn(models.Event.objects.get(name="TE E%d"%eid), current_events)
 
 	def test_related_venue(self):
 		v1 = models.Venue.objects.create(name="TE V1")
