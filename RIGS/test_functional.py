@@ -2,6 +2,7 @@ from django.test import LiveServerTestCase
 from django.core import mail
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from RIGS import models
 import re
 import os
 
@@ -115,3 +116,39 @@ class UserRegistrationTest(LiveServerTestCase):
 		self.assertIn('Hi John', udd)
 
 		# All is well
+
+class EventTest(LiveServerTestCase):
+	def setUp(self):
+		self.profile = models.Profile(username="EventTest", first_name="Event", last_name="Test", initials="ETU")
+		self.profile.set_password("EventTestPassword")
+		self.profile.save()
+
+		self.browser = webdriver.Firefox()
+		os.environ['RECAPTCHA_TESTING'] = 'True'
+
+	def tearDown(self):
+		# self.browser.quit()
+		os.environ['RECAPTCHA_TESTING'] = 'False'
+
+	def authenticate(self, n=None):
+		self.assertIn(self.live_server_url + '/user/login/', self.browser.current_url)
+		if n:
+			self.assertIn('?next=%s'%n, self.browser.current_url)
+		username = self.browser.find_element_by_id('id_username')
+		password = self.browser.find_element_by_id('id_password')
+		submit = self.browser.find_element_by_css_selector('input[type=submit]')
+
+		username.send_keys("EventTest")
+		password.send_keys("EventTestPassword")
+		self.browser.execute_script("return jQuery('#g-recaptcha-response').val('PASSED')")
+		submit.click()
+
+		self.assertEqual(self.live_server_url + n, self.browser.current_url)
+
+	def testRigboardButtons(self):
+		# Requests address
+		self.browser.get(self.live_server_url + '/rigboard/')
+		# Gets redirected to login
+		self.authenticate('/rigboard/')
+
+		# Completes and comes back to rigboard
