@@ -3,19 +3,23 @@ from django.core import mail
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import re
+import os
 
 class UserRegistrationTest(LiveServerTestCase):
 	def setUp(self):
 		self.browser = webdriver.Firefox()
+		os.environ['RECAPTCHA_TESTING'] = 'True'
 
 	def tearDown(self):
 		self.browser.quit()
+		os.environ['RECAPTCHA_TESTING'] = 'False'
 
 	def test_registration(self):
 		# Navigate to the registration page
 		self.browser.get(self.live_server_url + '/user/register/')
+		self.browser.implicitly_wait(3)
 		title_text = self.browser.find_element_by_tag_name('h3').text
-		self.assertIn("User Registration", title_text)
+		self.assertIn("User Registration", tilte_text)
 		
 		# Check the form invites correctly
 		username = self.browser.find_element_by_id('id_username')
@@ -37,6 +41,7 @@ class UserRegistrationTest(LiveServerTestCase):
 		self.assertEqual(initials.get_attribute('placeholder'), 'Initials')
 		phone = self.browser.find_element_by_id('id_phone')
 		self.assertEqual(phone.get_attribute('placeholder'), 'Phone')
+		captcha = self.browser.find_element_by_id('g-recaptcha-response')
 		
 		# Fill the form out incorrectly
 		username.send_keys('TestUsername')
@@ -47,6 +52,7 @@ class UserRegistrationTest(LiveServerTestCase):
 		last_name.send_keys('Smith')
 		initials.send_keys('JS')
 		phone.send_keys('0123456789')
+		captcha.send_keys('PASSED')
 
 		# Submit incorrect form
 		submit = self.browser.find_element_by_xpath("//input[@type='submit']")
@@ -54,6 +60,7 @@ class UserRegistrationTest(LiveServerTestCase):
 		# Restablish error fields
 		password1 = self.browser.find_element_by_id('id_password1')
 		password2 = self.browser.find_element_by_id('id_password2')
+		captcha = self.browser.find_element_by_id('g-recaptcha-response')
 
 		# Read what the error is
 		alert = self.browser.find_element_by_css_selector('div.alert-danger').text
@@ -66,6 +73,7 @@ class UserRegistrationTest(LiveServerTestCase):
 		# Correct error
 		password1.send_keys('correcthorsebatterystaple')
 		password2.send_keys('correcthorsebatterystaple')
+		captcha.send_keys('PASSED')
 
 		# Submit again
 		password2.send_keys(Keys.ENTER)
@@ -98,10 +106,12 @@ class UserRegistrationTest(LiveServerTestCase):
 		password = self.browser.find_element_by_id('id_password')
 		self.assertEqual(password.get_attribute('placeholder'), 'Password')
 		self.assertEqual(password.get_attribute('type'), 'password')
+		captcha = self.browser.find_element_by_id('g-recaptcha-response')
 
 		username.send_keys('TestUsername')
 		password.send_keys('correcthorsebatterystaple')
 		password.send_keys(Keys.ENTER)
+		captcha.send_keys('PASSED')
 
 		# Check we are logged in
 		udd = self.browser.find_element_by_id('userdropdown')
