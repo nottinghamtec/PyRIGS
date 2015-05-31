@@ -24,8 +24,8 @@
             <tbody>
             {% for object in object_list %}
                 <tr class="{% if object.void %}danger{% elif object.balance == 0 %}success{% endif %}">
-                <td>{{ object.pk }}</td>
-                    <td>{{ object.event }}</td>
+                    <td>{{ object.pk }}</td>
+                    <td><a href="{% url 'event_detail' object.event.pk %}" target="_blank">N{{ object.event.pk|stringformat:"05d" }}</a>: {{ object.event.name }}</td>
                     <td>{{ object.invoice_date }}</td>
                     <td>{{ object.balance|floatformat:2 }}</td>
                     <td class="text-right">

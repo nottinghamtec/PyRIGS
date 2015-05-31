@@ -133,11 +133,3 @@ $("#item-table tbody").sortable({
 
     }
 });
-
-$('.autocomplete-update').on("autocompleteselect", function(event, ui) {
-    update_url = ui['item']['update'];
-    target = $('#' + event['target'].dataset.target + "-update");
-    console.log(update_url);
-    console.log(target);
-    target.attr('href', update_url);
-});

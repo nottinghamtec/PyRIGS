@@ -25,15 +25,15 @@
                         ">
                 <td class="hidden-xs">{{ event.pk }}</td>
                 <td>
-                    <div><strong>{{ event.start_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                    <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
-                        <div><strong>{{ event.end_date|date:"SHORT_DATE_FORMAT" }}</strong></div>
+                        <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
                     {% endif %}
                     <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
                 <td>
                     <h4>
-                        <a href="{% url 'event_detail' event.pk %}">{{ event.name }}</a>
+                        <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' event.pk %}" {% endif %}>{{ event.name }}</a>
                         {% if event.venue %}
                             <small>at {{ event.venue }}</small>
                         {% endif %}
@@ -62,30 +62,36 @@
                                 <dt>Crew meet</dt>
                                 <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
                             {% endif %}
-                            {% if event.start_time %}
+                            {% if event.has_start_time %}
                                 <dt>Event starts</dt>
                                 <dd>
                                     {{ event.start_time|date:"H:i" }}<br/>
                                     {{ event.start_date|date:"(Y-m-d)" }}<br/>
                                 </dd>
                             {% endif %}
-                            {% if event.end_time and event.start_time != event.end_time %}
+                            {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
                                 <dt>Event ends</dt>
                                 <dd>
                                     {{ event.end_time|date:"H:i" }}<br/>
                                     {{ event.end_date|date:"(Y-m-d)" }}
                                 </dd>
-                            {% endif %}
+                            {% endif %}{% endif %}
                         </dl>
                     {% endif %}
                 </td>
                 <td class="text-right">
-                    {% if event.mic or not event.is_rig %}
+                    {% if event.mic %}
                         {{ event.mic.initials }}
                         <div>
-                            <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                            {% if perms.RIGS.view_profile %}
+                                <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                                </a>
+                            {% else %}
+                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                            {% endif %}
                         </div>
-                    {% else %}
+                    {% elif event.is_rig %}
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
                     {% endif %}
                 </td>

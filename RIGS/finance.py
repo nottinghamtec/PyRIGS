@@ -1,10 +1,16 @@
+import cStringIO as StringIO
+
 from django.core.urlresolvers import reverse_lazy
 from django.db import connection
 from django.http import Http404, HttpResponseRedirect
 from django.views import generic
+from django.template import RequestContext
+from django.template.loader import get_template
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 import datetime
+from z3c.rml import rml2pdf
 
 from RIGS import models
 
@@ -33,6 +39,34 @@ class InvoiceIndex(generic.ListView):
 class InvoiceDetail(generic.DetailView):
     model = models.Invoice
 
+class InvoicePrint(generic.View):
+    def get(self, request, pk):
+        invoice = get_object_or_404(models.Invoice, pk=pk)
+        object = invoice.event
+        template = get_template('RIGS/event_print.xml')
+        copies = ('TEC', 'Client')
+        context = RequestContext(request, {
+            'object': object,
+            'fonts': {
+                'opensans': {
+                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
+                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                }
+            },
+            'invoice':invoice,
+        })
+
+        rml = template.render(context)
+        buffer = StringIO.StringIO()
+
+        buffer = rml2pdf.parseString(rml)
+
+        pdfData = buffer.read()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, object.name)
+        response.write(pdfData)
+        return response
 
 class InvoiceVoid(generic.View):
     def get(self, *args, **kwargs):
@@ -81,6 +115,7 @@ class InvoiceEvent(generic.View):
 
 class PaymentCreate(generic.CreateView):
     model = models.Payment
+    fields = ['invoice','date','amount','method']
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()

@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 import simplejson
 from django.contrib import messages
+import datetime
+import operator
+from registration.views import RegistrationView
 
 from RIGS import models, forms
 
@@ -29,8 +32,7 @@ def login(request, **kwargs):
     else:
         from django.contrib.auth.views import login
 
-        return login(request)
-
+        return login(request, authentication_form=forms.LoginForm)
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
@@ -66,11 +68,14 @@ class PersonDetail(generic.DetailView):
 
 class PersonCreate(generic.CreateView):
     model = models.Person
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('person_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('person_detail', kwargs={
                 'pk': self.object.pk,
@@ -80,11 +85,14 @@ class PersonCreate(generic.CreateView):
 
 class PersonUpdate(generic.UpdateView):
     model = models.Person
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('person_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('person_detail', kwargs={
                 'pk': self.object.pk,
@@ -114,11 +122,14 @@ class OrganisationDetail(generic.DetailView):
 
 class OrganisationCreate(generic.CreateView):
     model = models.Organisation
+    fields = ['name','phone','email','address','notes','union_account']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('organisation_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('organisation_detail', kwargs={
                 'pk': self.object.pk,
@@ -128,11 +139,14 @@ class OrganisationCreate(generic.CreateView):
 
 class OrganisationUpdate(generic.UpdateView):
     model = models.Organisation
+    fields = ['name','phone','email','address','notes','union_account']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('organisation_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('organisation_detail', kwargs={
                 'pk': self.object.pk,
@@ -162,11 +176,14 @@ class VenueDetail(generic.DetailView):
 
 class VenueCreate(generic.CreateView):
     model = models.Venue
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('venue_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('venue_detail', kwargs={
                 'pk': self.object.pk,
@@ -176,11 +193,14 @@ class VenueCreate(generic.CreateView):
 
 class VenueUpdate(generic.UpdateView):
     model = models.Venue
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('venue_update',kwargs={'pk':self.object.pk}))
             messages.info(self.request, "modalobject="+serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='"+update_url+"'")
         else:
             url =  reverse_lazy('venue_detail', kwargs={
                 'pk': self.object.pk,
@@ -194,6 +214,7 @@ class SecureAPIRequest(generic.View):
         'person': models.Person,
         'organisation': models.Organisation,
         'profile': models.Profile,
+        'event': models.Event,
     }
 
     perms = {
@@ -201,6 +222,7 @@ class SecureAPIRequest(generic.View):
         'person': 'RIGS.view_person',
         'organisation': 'RIGS.view_organisation',
         'profile': None,
+        'event': 'RIGS.view_event',
     }
 
     '''
@@ -238,27 +260,102 @@ class SecureAPIRequest(generic.View):
         # Supply data for autocomplete ajax request in json form
         term = request.GET.get('term', None)
         if term:
-            if fields is None:
+            if fields is None: # Default to just name
                 fields = ['name']
+            
+            # Build a list of Q objects for use later
+            queries = []
+            for part in term.split(" "):
+                qs = []
+                for field in fields:
+                    q = Q(**{field + "__icontains": part})
+                    qs.append(q)
+                queries.append(reduce(operator.or_, qs))
+
+
+            # Build the data response list
+            results = []
+            query = reduce(operator.and_, queries)
+            objects = self.models[model].objects.filter(query)
+            for o in objects:
+                data = {
+                    'pk': o.pk,
+                    'value': o.pk,
+                    'label': o.name,
+                }
+                try: # See if there is a valid update URL
+                    data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
+                except NoReverseMatch:
+                    pass
+                results.append(data)
+
+            # return a data response
+            json = simplejson.dumps(results)
+            return HttpResponse(json, content_type="application/json")  # Always json
+
+        start = request.GET.get('start', None)
+        end = request.GET.get('end', None)
+
+        if model == "event" and start and end:
+            # Probably a calendar request
+            start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%SZ" )
+            end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%SZ" )
             all_objects = self.models[model].objects
             results = []
-            for field in fields:
-                filter = field + "__icontains"
-                objects = all_objects.filter(**{filter: term})
-                for o in objects:
-                    data = {
-                        'pk': o.pk,
-                        'value': o.pk,
-                        'label': o.name,
+            filter = Q(start_date__lte=end_datetime) & Q(start_date__gte=start_datetime)
+            objects = all_objects.filter(filter).select_related('person', 'organisation', 'venue', 'mic').order_by('-start_date')
+            for item in objects:
+                data = {
+                    'pk': item.pk,
+                    'title': item.name
+                }
+                
+                data['is_rig'] = item.is_rig
+                data['status'] = str(item.get_status_display())
+
+                if item.start_date:
+                    data['start_date'] = item.start_date.strftime('%Y-%m-%d')
+
+                if item.has_start_time:
+                    data['start_time'] = item.start_time.strftime('%H:%M:%SZ')
+                
+                if item.end_date:
+                    data['end_date'] = item.end_date.strftime('%Y-%m-%d')
+
+                if item.has_end_time:
+                    data['end_time'] = item.end_time.strftime('%H:%M:%SZ')
+
+                if item.meet_at:
+                    data['meet_at'] = item.meet_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+                
+                if item.access_at:
+                    data['access_at'] = item.access_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+                
+                if item.venue:
+                    data['venue'] = item.venue.name
+
+                if item.person:
+                    data['person'] = item.person.name
+
+                if item.organisation:
+                    data['organisation'] = item.organisation.name
+
+                if item.mic:
+                    data['mic'] = {
+                        'name':item.mic.get_full_name(),
+                        'initials':item.mic.initials
                     }
 
-                    try: # See if there is an update url or don't bother with it otherwise
-                        data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
-                    except NoReverseMatch:
-                        pass
+                if item.description:
+                    data['description'] = item.description
 
-                    results.append(data)
-            json = simplejson.dumps(results[:20])
+                if item.notes:
+                    data['notes'] = item.notes
+
+                data['url'] = str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
+
+                results.append(data)
+            json = simplejson.dumps(results)
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
@@ -288,3 +385,11 @@ class ProfileUpdateSelf(generic.UpdateView):
     def get_success_url(self):
         url =  reverse_lazy('profile_detail')
         return url
+
+class ResetApiKey(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.request.user.api_key = self.request.user.make_api_key()
+        
+        self.request.user.save()
+
+        return reverse_lazy('profile_detail')

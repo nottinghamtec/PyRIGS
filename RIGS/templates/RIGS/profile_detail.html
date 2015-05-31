@@ -1,48 +1,104 @@
-{% extends 'base.html' %}
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 
 {% block title %}RIGS Profile {{object.pk}}{% endblock %}
 
 {% block content %}
-<div class="col-sm-10 col-sm-offset-1">
-	<div class="col-sm-10">
-		<h3>{{object.name}}</h3>
-	</div>
-	{% if object.pk == user.pk %}
-	<div class="col-sm-2">
-		<div class="pull-right">
-			<a href="{% url 'profile_update_self' %}" class="btn btn-primary">
-				Edit <span class="glyphicon glyphicon-pencil"></span>
-			</a>
+<div class="row">
+	<div class="col-md-10 col-md-offset-1">
+		
+		<div class="col-sm-6">
+			<h3>{{object.name}}</h3>
 		</div>
+		{% if not request.is_ajax %}
+			{% if object.pk == user.pk %}
+			<div class="col-sm-6 text-right">
+			    <div class="btn-group btn-page">
+			        <a href="{% url 'profile_update_self' %}" class="btn btn-default">
+						Edit Profile <span class="glyphicon glyphicon-pencil"></span>
+					</a>
+					<a href="{% url 'password_change' %}" class="btn btn-default">
+						Change Password <span class="glyphicon glyphicon-lock"></span>
+					</a>
+			    </div>
+			</div>
+			{% endif %}
+		{% endif %}
+		<div class="col-sm-8	">
+			<dl class="dl-horizontal">
+				<dt>First Name</dt>
+				<dd>{{object.first_name}}</dd>
+
+				<dt>Last Name</dt>
+				<dd>{{object.last_name}}</dd>
+
+				<dt>Email</dt>
+				<dd>{{object.email}}</dd>
+
+				<dt>Last Login</dt>
+				<dd>{{object.last_login|date:"d/m/Y H:i"}}</dd>
+
+				<dt>Date Joined</dt>
+				<dd>{{object.date_joined|date:"d/m/Y H:i"}}</dd>
+
+				<dt>Initials</dt>
+				<dd>{{object.initials}}</dd>
+
+				<dt>Phone</dt>
+				<dd>{{object.phone}}</dd>
+			</dl>
+			{% if not request.is_ajax %}
+			{% if object.pk == user.pk %}
+			
+			<div class="pull-right">
+				<a href="{% url 'reset_api_key' %}" class="btn btn-default">
+					{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
+					<span class="glyphicon glyphicon-repeat"></span>
+				</a>
+			</div>
+		
+			<h4>Personal iCal Details</h4>
+
+			<dl class="dl-horizontal">
+				<dt>API Key</dt>
+				<dd>
+					{% if user.api_key %}
+						{{user.api_key}}
+					{% else %}
+						No API Key Generated
+					{% endif %}
+				</dd>
+
+				<dt>Calendar URL</dt>
+				<dd>
+					{% if user.api_key %}
+						<pre>http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}</pre>
+						<small><a href="http://www.google.com/calendar/render?cid=http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}">Click here</a> to add to google calendar.<br/>
+						To sync from google calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
+					{% else %}
+						<pre>No API Key Generated</pre>
+					{% endif %}
+					
+				</dd>
+			</dl>
+			{% endif %}
+			{% endif %}
+		</div>
+		
+		<div class="col-sm-3">
+			<div class="center-block">
+				<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />
+		</div>
+
 	</div>
-	{% endif %}
-	<div class="col-sm-6">
-		<dl class="dl-horizontal">
-			<dt>First Name</dt>
-			<dd>{{object.first_name}}</dd>
 
-			<dt>Last Name</dt>
-			<dd>{{object.last_name}}</dd>
-
-			<dt>Email</dt>
-			<dd>{{object.email}}</dd>
-
-			<dt>Last Login</dt>
-			<dd>{{object.last_login}}</dd>
-
-			<dt>Date Joined</dt>
-			<dd>{{object.date_joined}}</dd>
-
-			<dt>Initials</dt>
-			<dd>{{object.initials}}</dd>
-
-			<dt>Phone</dt>
-			<dd>{{object.phone}}</dd>
-		</dl>
+	<div class="row">
+	    <div class="col-sm-12">
+	        <h4>Events</h4>
+	        {% with object.latest_events as events %}
+	            {% include 'RIGS/event_table.html' %}
+	        {% endwith %}
+	    </div>
 	</div>
-	<div class="col-sm-3 col-sm-offset-2">
-		<div class="center-block">
-			<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />
 	</div>
 </div>
 {% endblock %}
