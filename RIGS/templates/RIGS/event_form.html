@@ -6,7 +6,13 @@
     {{ object.pk }}{% endif %}{% else %}New Event{% endif %}{% endblock %}
 
 {% block css %}
-    <link href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static "js/bootstrap-select.js" %}"></script>
+    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -62,6 +68,43 @@
                     }
                 })
             {% endif %}
+
+            function supportsDate() {
+                //return false; //for development
+                var input = document.createElement('input');
+                input.setAttribute('type','date');
+                var notADateValue = 'not-a-date';
+                input.setAttribute('value', notADateValue); 
+                return !(input.value === notADateValue);
+            }
+            if(supportsDate()){
+                //Good, we'll use the browser implementation
+            }else{
+                //Rubbish browser - do JQuery backup
+                $('<link>')
+                  .appendTo('head')
+                  .attr({type : 'text/css', rel : 'stylesheet'})
+                  .attr('href', '{% static "css/bootstrap-datetimepicker.min.css" %}');
+                $.when(
+                    $.getScript( "{% static "js/moment.min.js" %}" ),
+                    $.getScript( "{% static "js/bootstrap-datetimepicker.min.js" %}" ),
+                    $.Deferred(function( deferred ){
+                        $( deferred.resolve );
+                    })
+                ).done(function(){
+                    $('input[type=date]').attr('type','text').datetimepicker({
+                        format: 'YYYY-MM-DD',
+                    });
+                    $('input[type=time]').attr('type','text').datetimepicker({
+                        format: 'HH:mm',
+                    });
+                    $('input[type=datetime-local]').attr('type','text').datetimepicker({
+                        format: 'YYYY-MM-DD[T]HH:mm',
+                        sideBySide: true,
+                    });
+                });
+
+            }
         })
 
         $(document).ready(function () {
@@ -123,15 +166,12 @@
 
                     <div class="col-sm-8">
                         <div class="row">
-                            <input type="hidden" id="{{ form.person.id_for_label }}" name="{{ form.person.name }}"
-                                   value="{{ form.person.value|default_if_none:"" }}"/>
-
                             <div class="col-sm-9 col-md-7 col-lg-8">
-                                <input type="text" id="{{ form.person.id_for_label }}-input"
-                                       class="form-control autocomplete-json autocomplete-update"
-                                       value="{{ person|default_if_none:"" }}"
-                                       data-sourceurl="{% url 'api_secure' model='person' %}"
-                                       data-target="{{ form.person.id_for_label }}"/>
+                                <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
+                                    {% if person %}
+                                        <option value="{{form.person.value}}" selected="selected" data-update_url="{% url 'person_update' form.person.value %}">{{ person }}</option>
+                                    {% endif %}
+                                </select>
                             </div>
                             <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                 <div class="btn-group">
@@ -139,7 +179,7 @@
                                        data-target="#{{ form.person.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </a>
-                                    <a href="{% if form.person.value %}{% url 'person_update' form.person.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.person.id_for_label }}-update">
+                                    <a href="{% if form.person.value %}{% url 'person_update' form.person.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.person.id_for_label }}-update" data-target="#{{ form.person.id_for_label }}">
                                         <span class="glyphicon glyphicon-pencil"></span>
                                     </a>
                                 </div>
@@ -153,16 +193,12 @@
 
                     <div class="col-sm-8">
                         <div class="row">
-                            <input type="hidden" id="{{ form.organisation.id_for_label }}"
-                                   name="{{ form.organisation.name }}"
-                                   value="{{ form.organisation.value|default_if_none:"" }}"/>
-
                             <div class="col-sm-9 col-md-7 col-lg-8">
-                                <input type="text" id="{{ form.organisation.id_for_label }}-input"
-                                       class="form-control autocomplete-json autocomplete-update"
-                                       value="{{ organisation|default_if_none:"" }}"
-                                       data-sourceurl="{% url 'api_secure' model='organisation' %}"
-                                       data-target="{{ form.organisation.id_for_label }}"/>
+                                <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}">
+                                    {% if organisation %}
+                                        <option value="{{form.organisation.value}}" selected="selected" data-update_url="{% url 'organisation_update' form.organisation.value %}">{{ organisation }}</option>
+                                    {% endif %}
+                                </select>
                             </div>
                             <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                 <div class="btn-group">
@@ -170,7 +206,7 @@
                                        data-target="#{{ form.organisation.id_for_label }}">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </a>
-                                    <a href="{% if form.organisation.value %}{% url 'organisation_update' form.organisation.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.organisation.id_for_label }}-update">
+                                    <a href="{% if form.organisation.value %}{% url 'organisation_update' form.organisation.value %}{% endif %}" class="btn btn-default modal-href" id="{{ form.organisation.id_for_label }}-update" data-target="#{{ form.organisation.id_for_label }}">
                                         <span class="glyphicon glyphicon-pencil"></span>
                                     </a>
                                 </div>
@@ -216,15 +252,12 @@
 
                         <div class="col-sm-8">
                             <div class="row">
-                                <input type="hidden" id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}"
-                                       value="{{ form.venue.value|default_if_none:"" }}"/>
-
                                 <div class="col-sm-9 col-md-7 col-lg-8">
-                                    <input type="text" id="{{ form.venue.id_for_label }}-input"
-                                           class="form-control autocomplete-json autocomplete-update"
-                                           value="{{ venue|default_if_none:"" }}"
-                                           data-sourceurl="{% url 'api_secure' model='venue' %}"
-                                           data-target="{{ form.venue.id_for_label }}"/>
+                                    <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                    {% if venue %}
+                                        <option value="{{form.venue.value}}" selected="selected" data-update_url="{% url 'venue_update' form.venue.value %}">{{ venue }}</option>
+                                    {% endif %}
+                                    </select>
                                 </div>
                                 <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                     <div class="btn-group">
@@ -232,7 +265,7 @@
                                            data-target="#{{ form.venue.id_for_label }}">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </a>
-                                        <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.venue.id_for_label }}-update">
+                                        <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.venue.id_for_label }}-update" data-target="#{{ form.venue.id_for_label }}">
                                             <span class="glyphicon glyphicon-pencil"></span>
                                         </a>
                                     </div>
@@ -325,14 +358,11 @@
                                    class="col-sm-4 control-label">{{ form.mic.label }}</label>
 
                             <div class="col-sm-8">
-                                <input type="hidden" id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}"
-                                       value="{{ form.mic.value|default_if_none:"" }}"/>
-
-                                <input type="text" id="{{ form.mic.id_for_label }}-input"
-                                       class="form-control autocomplete-json"
-                                       data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials"
-                                       data-target="{{ form.mic.id_for_label }}"
-                                       value="{{ mic.name|default_if_none:"" }}"/>
+                                <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    {% if mic %}
+                                        <option value="{{form.mic.value}}" selected="selected" >{{ mic.name }}</option>
+                                    {% endif %}
+                                </select>
                             </div>
                         </div>
 
@@ -342,15 +372,11 @@
                                        class="col-sm-4 control-label">{{ form.checked_in_by.label }}</label>
 
                                 <div class="col-sm-8">
-                                    <input type="hidden" id="{{ form.checked_in_by.id_for_label }}"
-                                           name="{{ form.checked_in_by.name }}"
-                                           value="{{ form.checked_in_by.value|default_if_none:"" }}"/>
-
-                                    <input type="text" id="{{ form.checked_in_by.id_for_label }}-input"
-                                           class="form-control autocomplete-json"
-                                           data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials"
-                                           data-target="{{ form.checked_in_by.id_for_label }}"
-                                           value="{{ checked_in_by.name|default_if_none:"" }}"/>
+                                     <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                        {% if checked_in_by %}
+                                            <option value="{{form.checked_in_by.value}}" selected="selected" >{{ checked_in_by.name }}</option>
+                                        {% endif %}
+                                    </select>
                                 </div>
                             </div>
                         {% endif %}
@@ -363,19 +389,28 @@
                                 {% render_field form.collector class+="form-control" %}
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="{{ form.purchase_order.id_for_label }}"
+                                   class="col-sm-4 control-label">{{ form.purchase_order.label }}</label>
+
+                            <div class="col-sm-8">
+                                {% render_field form.purchase_order class+="form-control" %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 text-right">
-            <div class="btn-group btn-page">
-                <button type="submit" class="btn btn-default" title="Save"><span
-                        class="glyphicon glyphicon-floppy-disk"></span>
-                </button>
-            </div>
-        </div>
     </div>
     <!-- /.col-sm-12 .col-md-6 -->
+    <div class="col-sm-12 text-right">
+        <div class="btn-group btn-page">
+            <button type="submit" class="btn btn-default" title="Save"><span
+                    class="glyphicon glyphicon-floppy-disk"></span>
+            </button>
+        </div>
+    </div>
+
 
     {# Notes and item shit #}
     <div class="col-sm-12">
@@ -389,6 +424,13 @@
                 </div>
                 {% include "RIGS/item_table.html" %}
             </div>
+        </div>
+    </div>
+    <div class="col-sm-12 text-right form-hws form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
+        <div class="btn-group btn-page">
+            <button type="submit" class="btn btn-default" title="Save"><span
+                    class="glyphicon glyphicon-floppy-disk"></span>
+            </button>
         </div>
     </div>
     </form>

@@ -1,32 +1,41 @@
-{% extends 'base.html' %}
-{% block title %}Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}
-{% endif %}{% endblock %}
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
 
 {% block content %}
+<div class="row">
+    {% if not request.is_ajax %}
     <div class="col-sm-12">
         <div class="col-sm-8">
-            <h1>Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}</h1>
+            <h1>
+                {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
+                | {{ object.name }}
+            </h1>
         </div>
-        <div class="col-sm-4 text-right">
+    </div>
+        <div class="col-sm-12 text-right">
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span></a>
+                        class="glyphicon glyphicon-edit"></span> <span
+                            class="hidden-xs">Edit</span></a>
                 {% if event.is_rig %}
-                    <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                            class="glyphicon glyphicon-print"></span></a>
+                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
+                            class="glyphicon glyphicon-print"></span> <span
+                            class="hidden-xs">Print</span></a>
                 {% endif %}
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span></a>
+                        class="glyphicon glyphicon-duplicate"></span> <span
+                            class="hidden-xs">Duplicate</span></a>
                 {% if event.is_rig %}
                     {% if perms.RIGS.add_invoice %}
                         <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span></a>
+                                class="glyphicon glyphicon-gbp"></span> <span
+                            class="hidden-xs">Invoice</span></a>
                     {% endif %}
                 {% endif %}
             </div>
         </div>
-    </div>
-
+    
+    {% endif %}
     {% if object.is_rig %}
         {# only need contact details for a rig #}
         <div class="col-sm-12 col-md-6 col-lg-5">
@@ -46,7 +55,7 @@
                         <dt>Email</dt>
                         <dd>
                             <a href="mailto:{{object.person.email}}" target="_blank">
-                                {{ object.person.email }}
+                                <span class="overflow-ellipsis">{{ object.person.email }}</span>
                             </a>
                         </dd>
 
@@ -86,7 +95,7 @@
     {% endif %}
     <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
         <div class="panel panel-info">
-            <div class="panel-heading">{{ object.name }}</div>
+            <div class="panel-heading">Event Info</div>
             <div class="panel-body">
                 <dl class="dl-horizontal">
                     <dt>Event Venue</dt>
@@ -100,7 +109,15 @@
 
                     {% if event.is_rig %}
                         <dt>Event MIC</dt>
-                        <dd>{{ event.mic.name }}</dd>
+                        <dd>
+                            {% if event.mic and perms.RIGS.view_profile %}
+                                <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                                    {{ event.mic.name }}
+                                </a>
+                            {% else %}
+                                {{ event.mic.name }}
+                            {% endif %}
+                        </dd>
                     {% endif %}
 
                     <dt>Status</dt>
@@ -110,18 +127,18 @@
 
                     {% if event.is_rig %}
                         <dt>Crew Meet</dt>
-                        <dd>{{ event.meet_at|date:"d M Y H:i"|default:"" }}</dd>
+                        <dd>{{ event.meet_at|date:"D d M Y H:i"|default:"" }}</dd>
                         <dd>{{ event.meet_info|default:"" }}</dd>
 
                         <dt>Access From</dt>
-                        <dd>{{ event.access_at|date:"d M Y H:i"|default:"" }}</dd>
+                        <dd>{{ event.access_at|date:"D d M Y H:i"|default:"" }}</dd>
                     {% endif %}
 
                     <dt>Event Starts</dt>
-                    <dd>{{ event.start_date|date:"d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
+                    <dd>{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
 
                     <dt>Event Ends</dt>
-                    <dd>{{ event.end_date|date:"d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
+                    <dd>{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
 
                     <dd>&nbsp;</dd>
 
@@ -150,28 +167,39 @@
                         <dt>Collected By</dt>
                         <dd>{{ object.collector }}</dd>
                     {% endif %}
+
+                    {% if event.is_rig %}
+                        <dt>PO</dt>
+                        <dd>{{ object.purchase_order }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>
     </div>
+    {% if not request.is_ajax %}
     <div class="col-sm-12 text-right">
         <div class="btn-group btn-page">
             <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-edit"></span></a>
+                    class="glyphicon glyphicon-edit"></span> <span
+                        class="hidden-xs">Edit</span></a>
             {% if event.is_rig %}
-                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span></a>
+                <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
+                        class="glyphicon glyphicon-print"></span> <span
+                        class="hidden-xs">Print</span></a>
             {% endif %}
             <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                    class="glyphicon glyphicon-duplicate"></span></a>
+                    class="glyphicon glyphicon-duplicate"></span> <span
+                        class="hidden-xs">Duplicate</span></a>
             {% if event.is_rig %}
                 {% if perms.RIGS.add_invoice %}
                     <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                            class="glyphicon glyphicon-gbp"></span></a>
+                            class="glyphicon glyphicon-gbp"></span> <span
+                        class="hidden-xs">Invoice</span></a>
                 {% endif %}
             {% endif %}
         </div>
     </div>
+    {% endif %}
     {% if event.is_rig %}
         <div class="col-sm-12">
             <div class="panel panel-default">
@@ -185,22 +213,53 @@
                 </div>
             </div>
         </div>
+        {% if not request.is_ajax %}
         <div class="col-sm-12 text-right">
             <div class="btn-group btn-page">
                 <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span></a>
-                <a href="{% url 'event_print' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span></a>
+                        class="glyphicon glyphicon-edit"></span> <span
+                            class="hidden-xs">Edit</span></a>
+                {% if event.is_rig %}
+                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
+                            class="glyphicon glyphicon-print"></span> <span
+                            class="hidden-xs">Print</span></a>
+                {% endif %}
                 <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span></a>
-                {% if perms.RIGS.add_invoice %}
-                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                            class="glyphicon glyphicon-gbp"></span></a>
+                        class="glyphicon glyphicon-duplicate"></span> <span
+                            class="hidden-xs">Duplicate</span></a>
+                {% if event.is_rig %}
+                    {% if perms.RIGS.add_invoice %}
+                        <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
+                                class="glyphicon glyphicon-gbp"></span> <span
+                            class="hidden-xs">Invoice</span></a>
+                    {% endif %}
                 {% endif %}
             </div>
-            <div>Last edited at {{ object.last_edited_at|date:"SHORT_DATETIME_FORMAT" }}
-                by {{ object.last_edited_by.name }}.
+            <div>
+                <a href="{% url 'event_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
+                </a>
             </div>
         </div>
+        {% endif %}
     {% endif %}
+</div>
 {% endblock %}
+
+{% if request.is_ajax %}
+    {% block footer %}
+        <div class="row">
+            <div class="col-sm-10 align-left">
+                <a href="{% url 'event_history' object.pk %}" title="View Revision History">
+                    Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
+                </a>
+            </div>
+            <div class="col-sm-2">
+                <div class="pull-right">
+                    <a href="{% url 'event_detail' object.pk %}" class="btn btn-primary">Open Event Page <span
+                            class="glyphicon glyphicon-eye"></span></a>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

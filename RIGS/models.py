@@ -7,25 +7,48 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
 import reversion
+import string
+import random
+from django.core.urlresolvers import reverse_lazy
 
 from decimal import Decimal
 
 # Create your models here.
+@python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
+    api_key = models.CharField(max_length=40,blank=True,editable=False, null=True)
+
+    @classmethod
+    def make_api_key(cls):
+        size=20
+        chars=string.ascii_letters + string.digits
+        new_api_key = ''.join(random.choice(chars) for x in range(size))
+        return new_api_key;
 
     @property
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=identicon&s=500"
+            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
 
+    @property
+    def latest_events(self):
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        permissions = (
+            ('view_profile', 'Can view Profile'),
+        )
 
 class RevisionMixin(object):
     @property
@@ -68,6 +91,9 @@ class Person(models.Model, RevisionMixin):
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
+    def get_absolute_url(self):
+        return reverse_lazy('person_detail', kwargs={'pk': self.pk})
+
     class Meta:
         permissions = (
             ('view_person', 'Can view Persons'),
@@ -103,6 +129,9 @@ class Organisation(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
@@ -165,6 +194,9 @@ class Venue(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
@@ -245,8 +277,8 @@ class Event(models.Model, RevisionMixin):
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
-    purchase_order = models.CharField(max_length=255, blank=True, null=True)
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected By')
+    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
+    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Calculated values
     """
@@ -265,7 +297,9 @@ class Event(models.Model, RevisionMixin):
         #total = 0.0
         #for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
         #    total += item.sum
-        total = EventItem.objects.filter(event=self).aggregate(sum_total=models.Sum('cost',field="quantity * cost"))['sum_total']
+        total = EventItem.objects.filter(event=self).aggregate(
+            sum_total=models.Sum(models.F('cost')*models.F('quantity'), output_field=models.DecimalField(max_digits=10, decimal_places=2))
+        )['sum_total']
         if total:
             return total
         return Decimal("0.00")
@@ -293,7 +327,18 @@ class Event(models.Model, RevisionMixin):
     def confirmed(self):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
 
+    @property
+    def has_start_time(self):
+        return self.start_time is not None
+
+    @property
+    def has_end_time(self):
+        return self.end_time is not None
+
     objects = EventManager()
+
+    def get_absolute_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return str(self.pk) + ": " + self.name

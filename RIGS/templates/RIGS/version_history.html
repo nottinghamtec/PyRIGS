@@ -1,0 +1,63 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load to_class_name from filters %}
+{% load paginator from filters %}
+{% load static %}
+
+{% block title %}{{object|to_class_name}} {{ object.pk|stringformat:"05d" }} - Revision History{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script src="{% static "js/popover.js" %}"></script>
+    <script>
+    	$(function () {
+            $('[data-toggle="popover"]').popover().click(function(){
+                    if($(this).attr('href')){
+                      window.location.href = $(this).attr('href');
+                    }
+                  });		
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3><a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.pk|stringformat:"05d" }}</a> - Revision History</h3>
+            </div>
+            <div class="text-right col-sm-12">{% paginator %}</div>
+        </div>
+        <div class="table-responsive">
+        	<table class="table table-striped">
+                <thead>
+                <tr>
+                    <td>Date</td>
+                    <td>Version ID</td>
+                    <td>User</td>
+                    <td>Changes</td>
+                </tr>
+                </thead>
+                <tbody>
+                	{% for version in object_list %}
+                        {% if version.item_changes or version.field_changes or version.old == None %}
+                            <tr>
+                           		<td>{{ version.revision.date_created }}</td>
+                                <td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                                <td>{{ version.revision.user.name }}</td>
+                                <td>
+                                    {% if version.old == None %}
+                                        Object Created
+                                    {% else %}
+                                        {% include 'RIGS/version_changes.html' %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+        			{% endfor %}
+
+                </tbody>
+            </table>
+         </div>
+    <div class="align-right">{% paginator %}</div>
+</div>
+{% endblock %}

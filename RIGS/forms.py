@@ -3,7 +3,9 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail 
+from captcha.fields import ReCaptchaField
 import simplejson
 
 from RIGS import models
@@ -14,6 +16,11 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
     phone = forms.CharField(required=False, max_length=13)
+    captcha = ReCaptchaField()
+
+    class Meta:
+        model = models.Profile
+        fields = ('first_name','last_name','initials','phone')
 
     def clean_initials(self):
         """
@@ -22,6 +29,13 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
+
+# Login form
+class LoginForm(AuthenticationForm):
+    captcha = ReCaptchaField(label='Captcha')
+
+class PasswordReset(PasswordResetForm):
+    captcha = ReCaptchaField(label='Captcha')
 
 # Events Shit
 class EventForm(forms.ModelForm):
@@ -58,7 +72,7 @@ class EventForm(forms.ModelForm):
         self.fields['end_date'].widget.format = '%Y-%m-%d'
 
         self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
-        self.fields['access_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
+        self.fields['meet_at'].widget.format = '%Y-%m-%dT%H:%M:%S'
 
     def init_items(self):
         self.items = self.process_items_json()
@@ -116,4 +130,4 @@ class EventForm(forms.ModelForm):
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status', 
-                  'collector',]
+                  'collector','purchase_order']

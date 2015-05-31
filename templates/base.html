@@ -1,5 +1,5 @@
 {% load static from staticfiles %}
-{% load url from future %}
+
 
 <!DOCTYPE html>
 <html
@@ -11,10 +11,16 @@
 
     <meta name="viewport" content="initial-scale=1">
 
+    <link rel="icon" type="image/png" href="{% static "imgs/pyrigs-avatar.png" %}">
+    <link rel="apple-touch-icon" href="{% static "imgs/pyrigs-avatar.png" %}">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet' type='text/css'>
+
+
     <link rel="stylesheet" type="text/css" href="{% static "css/screen.css" %}">
     {% block css %}
     {% endblock %}
 
+    <script src="//code.jquery.com/jquery-latest.min.js"></script>
     {% block preload_js %}
     {% endblock %}
 
@@ -36,23 +42,33 @@
         </div>
         <div class="navbar-collapse">
             <ul class="nav navbar-nav">
+                {% if user.is_authenticated %}
                 <li><a href="/">Home</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rigboard<b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li><a href="{% url 'rigboard' %}">Rigboard</a></li>
-                        <li><a href="{% url 'event_archive' %}">Archive</a></li>
+                        <li><a href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a></li>
+                        <li><a href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a></li>
+                        <li><a href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a></li>
+                        {% if perms.RIGS.view_event %}
+                            <li><a href="{% url 'activity_table' %}"><span class="glyphicon glyphicon-random"></span> Recent Changes</a></li>
+                        {% endif %}
+                        {% if perms.RIGS.add_event %}
+                            <li><a href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a></li>
+                        {% endif %}   
+                             
                     </ul>
                 </li>
+                {% endif %}
                 {% if perms.RIGS.view_invoice %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invoices<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'invoice_list' %}">Active</a></li>
+                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Active</a></li>
                             {% if perms.RIGS.add_invoice %}
-                                <li><a href="{% url 'invoice_waiting' %}">Waiting</a></li>
+                                <li><a href="{% url 'invoice_waiting' %}"><span class="glyphicon glyphicon-briefcase"></span> Waiting</a></li>
                             {% endif %}
-                            <li><a href="{% url 'invoice_archive' %}">Archive</a></li>
+                            <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a></li>
                         </ul>
                     </li>
                 {% endif %}
@@ -65,6 +81,7 @@
                 {% if perms.RIGS.view_venue %}
                     <li><a href="{% url 'venue_list' %}">Venues</a></li>
                 {% endif %}
+                
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
@@ -97,7 +114,7 @@
                     {% else %}
                         <a href="{% url "login" %}?next={{ request.path }}">
                             <span class="icon-user"></span>
-                            Hi guest
+                            Login
                         </a>
                     {% endif %}
                 </li>
@@ -133,9 +150,8 @@
     </div>
 </div>
 
-<div class="modal fade" id="modal"></div>
+<div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
-<script src="//code.jquery.com/jquery-latest.min.js"></script>
 <script>
     Date.prototype.getISOString = function () {
         var yyyy = this.getFullYear().toString();
@@ -152,22 +168,32 @@
 </script>
 <script src="{% static "js/dropdown.js" %}"></script>
 <script src="{% static "js/modal.js" %}"></script>
+<script src="{% static "js/konami.js" %}"></script>
 <script>
     jQuery(document).ready(function () {
         jQuery(document).on('click', '.modal-href', function (e) {
-            e.preventDefault()
-            modaltarget = jQuery(this).data('target')
-            modalobject = "";
-            jQuery('#modal').load(jQuery(this).attr('href'), function (e) {
-                jQuery('#modal').modal();
-            });
-            jQuery('#modal').on('hide.bs.modal', function (e) {
-                if (modaltarget != "" && modalobject != "") {
-                    jQuery(modaltarget).val(modalobject[0]['pk']);
-                    jQuery(modaltarget + '-input').val(modalobject[0]['fields']['name']);
-                }
-            })
+            $link = jQuery(this);
+            // Anti modal inception
+            if($link.parents('#modal').length == 0) {
+                e.preventDefault();
+                modaltarget = $link.data('target');
+                modalobject = "";
+                jQuery('#modal').load($link.attr('href'), function (e) {
+                    jQuery('#modal').modal();
+                });
+            }
         });
+
+
+        var easter_egg = new Konami();
+        easter_egg.code = function() { 
+            var s = document.createElement('script');
+            s.type='text/javascript';
+            document.body.appendChild(s);
+            s.src='{% static "js/asteroids.min.js"%}';
+            ga('send', 'event', 'easter_egg', 'activated');
+        }
+        easter_egg.load();
     });
 </script>
 {% block js %}

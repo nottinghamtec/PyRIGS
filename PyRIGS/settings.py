@@ -12,20 +12,26 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
+SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
-INTERNAL_IPS = ['127.0.0.1', '10.20.30.20']
+INTERNAL_IPS = ['127.0.0.1']
+
+ADMINS = (
+    ('Tom Price', 'tomtom5152@gmail.com')
+)
 
 
 # Application definition
@@ -42,6 +48,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'registration',
     'reversion',
+    'captcha',
     'widget_tweaks',
 )
 
@@ -63,23 +70,63 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-try:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-except ImportError:
-    pass
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+if not DEBUG:
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config()
+
+# Logging 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
+                       'pathname=%(pathname)s lineno=%(lineno)s ' +
+                       'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
     },
-    # 'legacy': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'HOST': 'alfie.codedinternet.com',
-    #     'NAME': 'tec_rigs',
-    #     'USER': 'tec_rigs',
-    #     'PASSWORD': 'xMNb(b+Giu]&',
-    # }
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+             # But the emails are plain text by default - HTML is nicer
+            'include_html': True,
+        },
+    },
+    'loggers': {
+         # Again, default Django configuration to email unhandled exceptions
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # Might as well log any errors anywhere else in Django
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    }
 }
 
 # User system
@@ -91,15 +138,22 @@ LOGOUT_URL = '/user/logout'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
+# reCAPTCHA settings
+RECAPTCHA_PUBLIC_KEY = '6Le16gUTAAAAAO5f-6te_x0NjWmF65_h7saBI6Cg'
+RECAPTCHA_PRIVATE_KEY = '6Le16gUTAAAAAByo-ZxRRX3RKyoBngf7ms3dnoEW'
+NOCAPTCHA = True
+
 # Email
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'server.techost.co.uk'
+    EMAIL_HOST = 'mail.nottinghamtec.co.uk'
     EMAIL_PORT = 465
-    EMAIL_HOST_USER = 'tec'
-    EMAIL_HOST_PASSWORD = 's7m4R3X'
-    DEFAULT_FROM_EMAIL = 'rigs@nottinghamtec.co.uk'
+    EMAIL_HOST_USER = 'pyrigs@nottinghamtec.co.uk'
+    EMAIL_HOST_PASSWORD = 'N_dF9T&dD(Th'
+    EMAIL_USE_TLS = False
+    EMAIL_USE_SSL = True
+    DEFAULT_FROM_EMAIL = 'pyrigs@nottinghamtec.co.uk'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -108,7 +162,9 @@ else:
 
 LANGUAGE_CODE = 'en-gb'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
+
+FORMAT_MODULE_PATH = 'PyRIGS.formats'
 
 USE_I18N = True
 
@@ -132,7 +188,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
-
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_DIRS = (
@@ -145,4 +201,4 @@ TEMPLATE_DIRS = (
 
 USE_GRAVATAR=True
 
-TERMS_OF_HIRE_URL = "http://dev.nottinghamtec.co.uk/wp-content/uploads/2014/11/terms.pdf"
+TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
