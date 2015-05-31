@@ -207,14 +207,10 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
-                status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
