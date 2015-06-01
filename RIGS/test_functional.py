@@ -127,7 +127,7 @@ class EventTest(LiveServerTestCase):
 		os.environ['RECAPTCHA_TESTING'] = 'True'
 
 	def tearDown(self):
-		# self.browser.quit()
+		self.browser.quit()
 		os.environ['RECAPTCHA_TESTING'] = 'False'
 
 	def authenticate(self, n=None):
@@ -232,8 +232,8 @@ class EventTest(LiveServerTestCase):
 		self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
 		name = modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]')
 		self.assertEqual(person1.name, name.get_attribute('value'))
-		name.send_keys(Keys.HOME)
-		name.send_keys('Rig ')
+		name.clear()
+		name.send_keys('Rig ' + person1.name)
 		name.send_keys(Keys.ENTER)
 		self.browser.implicitly_wait(3)
 		self.assertFalse(modal.is_displayed())
