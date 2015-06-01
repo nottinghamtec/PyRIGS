@@ -190,15 +190,38 @@ class EventTest(LiveServerTestCase):
 		self.browser.implicitly_wait(3)
 
 		# See new person selected
-		self.assertEqual("Test Person 1", form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
-		# and backend
 		person1 = models.Person.objects.get(name="Test Person 1")
+		self.assertEqual(person1.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
+		# and backend
 		option = form.find_element_by_xpath('//select[@id="id_person"]//option[@selected="selected"]')
 		self.assertEqual(person1.pk, int(option.get_attribute("value")))
 
 		# Change mind and add another
+		add_person_button.click()
+
+		self.browser.implicitly_wait(3)
+		self.assertTrue(modal.is_displayed())
+		self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
+
+		modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 2")
+		modal.find_element_by_xpath('//div[@id="modal"]//input[@type="submit"]').click()
+		self.browser.implicitly_wait(3)
+
+		person2 = models.Person.objects.get(name="Test Person 2")
+		self.assertEqual(person2.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
+		# Have to do this explcitly to force the wait for it to update
+		option = form.find_element_by_xpath('//select[@id="id_person"]//option[@selected="selected"]')
+		self.assertEqual(person2.pk, int(option.get_attribute("value")))
 
 		# Was right the first time, change it back
+		person_select = form.find_element_by_xpath('//button[@data-id="id_person"]')
+		person_select.send_keys(person1.name)
+		person_dropped = form.find_element_by_xpath('//ul[contains(@class, "inner selectpicker")]//span[contains(text(), "%s")]'%person1.name)
+		person_dropped.click()
+
+		self.assertEqual(person1.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
+		option = form.find_element_by_xpath('//select[@id="id_person"]//option[@selected="selected"]')
+		self.assertEqual(person1.pk, int(option.get_attribute("value")))
 
 		# Create organisation
 
