@@ -127,7 +127,7 @@ class EventTest(LiveServerTestCase):
 		os.environ['RECAPTCHA_TESTING'] = 'True'
 
 	def tearDown(self):
-		self.browser.quit()
+		# self.browser.quit()
 		os.environ['RECAPTCHA_TESTING'] = 'False'
 
 	def authenticate(self, n=None):
@@ -168,12 +168,33 @@ class EventTest(LiveServerTestCase):
 		self.assertFalse(save.is_displayed())
 
 		# Click Rig button
+		self.browser.find_element_by_xpath('//button[.="Rig"]').click()
 
 		# Slider expands and save button visible
+		self.assertTrue(save.is_displayed())
+		form = self.browser.find_element_by_tag_name('form')
 
 		# Create new person
+		add_person_button = self.browser.find_element_by_xpath('//a[@data-target="#id_person" and contains(@href, "add")]')
+		add_person_button.click()
+
+		# See modal has opened
+		modal = self.browser.find_element_by_id('modal')
+		self.browser.implicitly_wait(3)
+		self.assertTrue(modal.is_displayed())
+		self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
+
+		# Fill person form out and submit
+		modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 1")
+		modal.find_element_by_xpath('//div[@id="modal"]//input[@type="submit"]').click()
+		self.browser.implicitly_wait(3)
 
 		# See new person selected
+		self.assertEqual("Test Person 1", form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
+		# and backend
+		person1 = models.Person.objects.get(name="Test Person 1")
+		option = form.find_element_by_xpath('//select[@id="id_person"]//option[@selected="selected"]')
+		self.assertEqual(person1.pk, int(option.get_attribute("value")))
 
 		# Change mind and add another
 
