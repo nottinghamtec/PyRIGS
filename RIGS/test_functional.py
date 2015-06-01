@@ -188,6 +188,7 @@ class EventTest(LiveServerTestCase):
 		modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 1")
 		modal.find_element_by_xpath('//div[@id="modal"]//input[@type="submit"]').click()
 		self.browser.implicitly_wait(3)
+		self.assertFalse(modal.is_displayed())
 
 		# See new person selected
 		person1 = models.Person.objects.get(name="Test Person 1")
@@ -206,6 +207,7 @@ class EventTest(LiveServerTestCase):
 		modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 2")
 		modal.find_element_by_xpath('//div[@id="modal"]//input[@type="submit"]').click()
 		self.browser.implicitly_wait(3)
+		self.assertFalse(modal.is_displayed())
 
 		person2 = models.Person.objects.get(name="Test Person 2")
 		self.assertEqual(person2.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
@@ -222,6 +224,21 @@ class EventTest(LiveServerTestCase):
 		self.assertEqual(person1.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
 		option = form.find_element_by_xpath('//select[@id="id_person"]//option[@selected="selected"]')
 		self.assertEqual(person1.pk, int(option.get_attribute("value")))
+
+		# Edit Person 1 to have a better name
+		form.find_element_by_xpath('//a[@data-target="#id_person" and contains(@href, "%s/edit/")]'%person1.pk).click()
+		self.browser.implicitly_wait(3)
+		self.assertTrue(modal.is_displayed())
+		self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
+		name = modal.find_element_by_xpath('//div[@id="modal"]//input[@id="id_name"]')
+		self.assertEqual(person1.name, name.get_attribute('value'))
+		name.send_keys(Keys.HOME)
+		name.send_keys('Rig ')
+		name.send_keys(Keys.ENTER)
+		self.browser.implicitly_wait(3)
+		self.assertFalse(modal.is_displayed())
+		person1 = models.Person.objects.get(pk=person1.pk)
+		self.assertEqual(person1.name, form.find_element_by_xpath('//button[@data-id="id_person"]/span').text)
 
 		# Create organisation
 
