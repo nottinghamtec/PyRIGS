@@ -276,16 +276,60 @@ class EventTest(LiveServerTestCase):
             '//button[@data-id="id_person"]/span').text)
 
         # Create organisation
-
+        add_button = self.browser.find_element_by_xpath(
+            '//a[@data-target="#id_organisation" and contains(@href, "add")]')
+        add_button.click()
+        modal = self.browser.find_element_by_id('modal')
+        self.browser.implicitly_wait(3)
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Organisation", modal.find_element_by_tag_name('h3').text)
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Organisation")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+        
         # See it is selected
+        self.browser.implicitly_wait(3)
+        self.assertFalse(modal.is_displayed())
+        obj = models.Organisation.objects.get(name="Test Organisation")
+        self.assertEqual(obj.name, form.find_element_by_xpath(
+            '//button[@data-id="id_organisation"]/span').text)
+        # and backend
+        option = form.find_element_by_xpath(
+            '//select[@id="id_organisation"]//option[@selected="selected"]')
+        self.assertEqual(obj.pk, int(option.get_attribute("value")))
 
         # Create veneue
-
-        # See it selected
+        add_button = self.browser.find_element_by_xpath(
+            '//a[@data-target="#id_venue" and contains(@href, "add")]')
+        add_button.click()
+        modal = self.browser.find_element_by_id('modal')
+        self.browser.implicitly_wait(3)
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Venue", modal.find_element_by_tag_name('h3').text)
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Venue")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+        
+        # See it is selected
+        self.browser.implicitly_wait(3)
+        self.assertFalse(modal.is_displayed())
+        obj = models.Venue.objects.get(name="Test Venue")
+        self.assertEqual(obj.name, form.find_element_by_xpath(
+            '//button[@data-id="id_venue"]/span').text)
+        # and backend
+        option = form.find_element_by_xpath(
+            '//select[@id="id_venue"]//option[@selected="selected"]')
+        self.assertEqual(obj.pk, int(option.get_attribute("value")))
 
         # Set start date/time
+        form.find_element_by_id('id_start_date').send_keys('3015-05-25')
+        form.find_element_by_id('id_start_time').send_keys('06:59')
 
         # Set end date/time
+        form.find_element_by_id('id_end_date').send_keys('4000-06-27')
+        form.find_element_by_id('id_end_time').send_keys('07:00')
 
         # Add item
 
