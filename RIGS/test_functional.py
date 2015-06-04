@@ -396,6 +396,8 @@ class EventTest(LiveServerTestCase):
         e = self.browser.find_element_by_id('id_name')
         e.send_keys('Test Event Name')
         e.send_keys(Keys.ENTER)
+        self.browser.implicitly_wait(3)
 
         # See redirected to success page
-        self.assertIn("N00001 | Test Event Name", self.browser.find_element_by_xpath('//h1').text)
+        event = models.Event.objects.get(name='Test Event Name')
+        self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
