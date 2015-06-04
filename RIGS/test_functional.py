@@ -401,3 +401,35 @@ class EventTest(LiveServerTestCase):
         # See redirected to success page
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
+
+    def testEventDetail(self):
+        person = models.Person(name="Event Detail Person", email="eventdetail@person.tests.rigs", phone="123 123").save()
+        organisation = models.Organisation(name="Event Detail Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456").save()
+        venue = models.Venue(name="Event Detail Venue").save()
+        event = models.Event(
+            name="Detail Test",
+            description="This is an event to test the detail view",
+            notes="It is going to be aweful",
+            person=person,
+            organisation=organisation,
+            start_date='2015-06-04'
+        )
+        event.save()
+        item1 = models.EventItem(
+            event=event,
+            name="Detail Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=event,
+            name="Detail Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
+
+
+        self.browser.get(self.live_server_url + '/event/%d'%event.pk)
