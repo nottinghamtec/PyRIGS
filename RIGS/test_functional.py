@@ -7,6 +7,8 @@ from selenium.common.exceptions import StaleElementReferenceException
 from RIGS import models
 import re
 import os
+from django.db import transaction
+import reversion
 import json
 
 
@@ -402,34 +404,49 @@ class EventTest(LiveServerTestCase):
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
 
-    def testEventDetail(self):
-        person = models.Person(name="Event Detail Person", email="eventdetail@person.tests.rigs", phone="123 123").save()
-        organisation = models.Organisation(name="Event Detail Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456").save()
-        venue = models.Venue(name="Event Detail Venue").save()
-        event = models.Event(
-            name="Detail Test",
-            description="This is an event to test the detail view",
-            notes="It is going to be aweful",
-            person=person,
-            organisation=organisation,
-            start_date='2015-06-04'
-        )
+    def _testEventDetail(self):
+        with transaction.atomic(), reversion.create_revision():
+            person = models.Person(name="Event Detail Person", email="eventdetail@person.tests.rigs", phone="123 123")
+            person.save()
+        with transaction.atomic(), reversion.create_revision():
+            organisation = models.Organisation(name="Event Detail Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456").save()
+        with transaction.atomic(), reversion.create_revision():
+            venue = models.Venue(name="Event Detail Venue").save()
+        with transaction.atomic(), reversion.create_revision():
+            event = models.Event(
+                name="Detail Test",
+                description="This is an event to test the detail view",
+                notes="It is going to be aweful",
+                person=person,
+                organisation=organisation,
+                start_date='2015-06-04'
+            )
         event.save()
-        item1 = models.EventItem(
-            event=event,
-            name="Detail Item 1",
-            cost="10.00",
-            quantity="1",
-            order=1
-        ).save()
-        item2 = models.EventItem(
-            event=event,
-            name="Detail Item 2",
-            description="Foo",
-            cost="9.72",
-            quantity="3",
-            order=2,
-        ).save()
+        with transaction.atomic(), reversion.create_revision():
+            item1 = models.EventItem(
+                event=event,
+                name="Detail Item 1",
+                cost="10.00",
+                quantity="1",
+                order=1
+            ).save()
+            item2 = models.EventItem(
+                event=event,
+                name="Detail Item 2",
+                description="Foo",
+                cost="9.72",
+                quantity="3",
+                order=2,
+            ).save()
 
 
         self.browser.get(self.live_server_url + '/event/%d'%event.pk)
+        self.authenticate('/event/%d/'%event.pk)
+        self.assertIn("N%05d | %s"%(event.pk, event.name), self.browser.find_element_by_xpath('//h1').text)
+
+        personPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
+        self.assertEqual(person.name, personPanel.find_element_by_xpath('//dt[text()="Person"]/following-sibling::dd[1]').text)
+        self.assertEqual(person.email, personPanel.find_element_by_xpath('//dt[text()="Email"]/following-sibling::dd[1]').text)
+        self.assertEqual(person.phone, personPanel.find_element_by_xpath('//dt[text()="Phone Number"]/following-sibling::dd[1]').text)
+
+        organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
