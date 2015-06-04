@@ -332,6 +332,18 @@ class EventTest(LiveServerTestCase):
         form.find_element_by_id('id_end_time').send_keys('07:00')
 
         # Add item
+        form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
+        self.browser.implicitly_wait(3)
+        modal = self.browser.find_element_by_id("itemModal")
+        modal.find_element_by_id("item_name").send_keys("Test Item 1")
+        modal.find_element_by_id("item_description").send_keys("This is an item description\nthat for reasons unkown spans two lines")
+        e = modal.find_element_by_id("item_quantity")
+        e.click()
+        e.send_keys(Keys.UP)
+        e.send_keys(Keys.UP)
+        e = modal.find_element_by_id("item_cost")
+        e.send_keys("23.95")
+        e.send_keys(Keys.ENTER) # enter submit
 
         # See new item appear
 
