@@ -362,9 +362,24 @@ class EventTest(LiveServerTestCase):
         self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
         self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
 
+        # Check totals
+        self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
+        self.assertIn("TBD%", self.browser.find_element_by_id('vat-rate').text)
+        self.assertEqual("0.00", self.browser.find_element_by_id('vat').text)
+        self.assertEqual("47.90", self.browser.find_element_by_id('total').text)
+
         # Attempt to save - missing title
+        save.click()
 
         # See error and all data preserved
+        error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
+        self.assertTrue(error.is_displayed())
+        # Should only have one error message
+        self.assertEqual("Name", error.find_element_by_xpath('//dt[1]').text)
+        self.assertEqual("This field is required.", error.find_element_by_xpath('//dd[1]/ul/li').text)
+        # don't need error so close it
+        error.find_element_by_xpath('//button[@class="close"]').click()
+        self.assertFalse(error.is_displayed())
 
         # Set title
 
