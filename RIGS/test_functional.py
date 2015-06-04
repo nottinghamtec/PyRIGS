@@ -3,6 +3,7 @@ from django.test import LiveServerTestCase
 from django.core import mail
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import StaleElementReferenceException
 from RIGS import models
 import re
 import os
@@ -371,18 +372,30 @@ class EventTest(LiveServerTestCase):
         # Attempt to save - missing title
         save.click()
 
-        # See error and all data preserved
+        # See error
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         # Should only have one error message
         self.assertEqual("Name", error.find_element_by_xpath('//dt[1]').text)
         self.assertEqual("This field is required.", error.find_element_by_xpath('//dd[1]/ul/li').text)
         # don't need error so close it
-        error.find_element_by_xpath('//button[@class="close"]').click()
-        self.assertFalse(error.is_displayed())
+        error.find_element_by_xpath('//div[contains(@class, "alert-danger")]//button[@class="close"]').click()
+        try:
+            self.assertFalse(error.is_displayed())
+        except StaleElementReferenceException:
+            pass
+        except:
+            self.assertFail("Element does not appear to have been deleted")
+
+        # Check at least some data is preserved. Some = all will be there
+        option = self.browser.find_element_by_xpath(
+            '//select[@id="id_person"]//option[@selected="selected"]')
+        self.assertEqual(person1.pk, int(option.get_attribute("value")))
 
         # Set title
-
-        # Save again
+        e = self.browser.find_element_by_id('id_name')
+        e.send_keys('Test Event Name')
+        e.send_keys(Keys.ENTER)
 
         # See redirected to success page
+        self.assertIn("N00001 | Test Event Name", self.browser.find_element_by_xpath('//h1').text)
