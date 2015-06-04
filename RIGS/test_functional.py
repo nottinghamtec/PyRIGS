@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.test import LiveServerTestCase
 from django.core import mail
 from selenium import webdriver
@@ -5,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from RIGS import models
 import re
 import os
+import json
 
 
 class UserRegistrationTest(LiveServerTestCase):
@@ -345,7 +347,20 @@ class EventTest(LiveServerTestCase):
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
 
-        # See new item appear
+        # Confirm item has been saved to json field
+        objectitems = self.browser.execute_script("return objectitems;")
+        self.assertEqual(1, len(objectitems))
+        testitem = objectitems["-1"]['fields'] # as we are deliberately creating this we know the ID
+        self.assertEqual("Test Item 1", testitem['name'])
+        self.assertEqual("2", testitem['quantity']) # test a couple of "worse case" fields
+
+        # See new item appear in table
+        row = self.browser.find_element_by_id('item--1') # ID number is known, see above
+        self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
+        self.assertIn("This is an item description", row.find_element_by_xpath('//div[@class="item-description"]').text)
+        self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
+        self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
+        self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
 
         # Attempt to save - missing title
 
