@@ -221,8 +221,8 @@ class SecureAPIRequest(generic.View):
         'venue': 'RIGS.view_venue',
         'person': 'RIGS.view_person',
         'organisation': 'RIGS.view_organisation',
-        'profile': None,
-        'event': 'RIGS.view_event',
+        'profile': 'RIGS.view_profile',
+        'event': None,
     }
 
     '''
@@ -331,27 +331,6 @@ class SecureAPIRequest(generic.View):
                 if item.access_at:
                     data['access_at'] = item.access_at.strftime('%Y-%m-%dT%H:%M:%SZ')
                 
-                if item.venue:
-                    data['venue'] = item.venue.name
-
-                if item.person:
-                    data['person'] = item.person.name
-
-                if item.organisation:
-                    data['organisation'] = item.organisation.name
-
-                if item.mic:
-                    data['mic'] = {
-                        'name':item.mic.get_full_name(),
-                        'initials':item.mic.initials
-                    }
-
-                if item.description:
-                    data['description'] = item.description
-
-                if item.notes:
-                    data['notes'] = item.notes
-
                 data['url'] = str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
 
                 results.append(data)
