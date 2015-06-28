@@ -2,8 +2,25 @@
 
 	<button title="Changes to {{ change.field.verbose_name }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='
 
-    	{% if change.new %}<div class="alert alert-success {% if change.long %}overflow-ellipsis{% endif %}">{{change.new|linebreaksbr}}</div>{% endif %}
-    	{% if change.old %}<div class="alert alert-danger {% if change.long %}overflow-ellipsis{% endif %}">{{change.old|linebreaksbr}}</div>{% endif %}
+    	{% if change.new %}
+            <div class="alert alert-success {% if change.long %}overflow-ellipsis{% endif %}">
+                {% if change.linebreaks %}
+                    {{change.new|linebreaksbr}}
+                {% else %}
+                    {{change.new}}
+                {% endif %}
+            </div>
+        {% endif %}
+
+    	{% if change.old %}
+            <div class="alert alert-danger {% if change.long %}overflow-ellipsis{% endif %}">
+                {% if change.linebreaks %}
+                    {{change.old|linebreaksbr}}
+                {% else %}
+                    {{change.old}}
+                {% endif %}
+            </div>
+        {% endif %}
     	
         '>{{ change.field.verbose_name }}</button>
 
