@@ -145,8 +145,8 @@ urlpatterns = patterns('',
                        url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()), name="ics_calendar"),
 
                        # API
-                       url(r'^api/(?P<model>\w+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
-                       url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
+                       url(r'^api/(?P<model>\w+)/$', login_required(views.SecureAPIRequest.as_view()), name="api_secure"),
+                       url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', login_required(views.SecureAPIRequest.as_view()), name="api_secure"),
 
                        # Legacy URL's
                        url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(permanent=True,pattern_name='event_detail')),
