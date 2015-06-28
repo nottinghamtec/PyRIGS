@@ -101,16 +101,16 @@ class UserRegistrationTest(LiveServerTestCase):
         email = mail.outbox[0]
         self.assertIn('activation required', email.subject)
         urls = re.findall(
-            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.message)
-        self.assertEqual(len(urls), 2)
+            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
+        self.assertEqual(len(urls), 1)
 
         mail.outbox = []  # empty this for later
 
         # Follow link
-        self.browser.get(urls[1])  # go to the second link
+        self.browser.get(urls[0])  # go to the first link
 
         # Complete registration
-        title_text = self.browser.find_element_by_tag_name('h2')
+        title_text = self.browser.find_element_by_tag_name('h2').text
         self.assertIn('Complete', title_text)
 
         # Test login
@@ -123,12 +123,12 @@ class UserRegistrationTest(LiveServerTestCase):
 
         username.send_keys('TestUsername')
         password.send_keys('correcthorsebatterystaple')
-        password.send_keys(Keys.ENTER)
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
+        password.send_keys(Keys.ENTER)
 
         # Check we are logged in
-        udd = self.browser.find_element_by_id('userdropdown')
+        udd = self.browser.find_element_by_class_name('navbar').text
         self.assertIn('Hi John', udd)
 
         # All is well
