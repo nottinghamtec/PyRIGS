@@ -53,14 +53,21 @@ class Profile(AbstractUser):
 class RevisionMixin(object):
     @property
     def last_edited_at(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.date_created
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.date_created
+        else:
+            return None
 
     @property
     def last_edited_by(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.user
-
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.user
+        else:
+            return None
 
 @reversion.register
 @python_2_unicode_compatible
@@ -75,8 +82,9 @@ class Person(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
@@ -114,8 +122,9 @@ class Organisation(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
@@ -207,14 +216,10 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
-                status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
