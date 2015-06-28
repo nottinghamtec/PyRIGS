@@ -53,14 +53,21 @@ class Profile(AbstractUser):
 class RevisionMixin(object):
     @property
     def last_edited_at(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.date_created
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.date_created
+        else:
+            return None
 
     @property
     def last_edited_by(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.user
-
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.user
+        else:
+            return None
 
 @reversion.register
 @python_2_unicode_compatible
@@ -75,8 +82,9 @@ class Person(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
@@ -114,8 +122,9 @@ class Organisation(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
