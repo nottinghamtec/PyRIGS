@@ -412,7 +412,7 @@ class EventTest(LiveServerTestCase):
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
 
-    def _testEventDetail(self):
+    def testEventDetail(self):
         with transaction.atomic(), reversion.create_revision():
             person = models.Person(name="Event Detail Person", email="eventdetail@person.tests.rigs", phone="123 123")
             person.save()
