@@ -4,6 +4,7 @@ from django.core import mail
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.support.ui import WebDriverWait
 from RIGS import models
 import re
 import os
@@ -186,7 +187,12 @@ class EventTest(LiveServerTestCase):
         # Gets redirected to login and back
         self.authenticate('/event/create/')
 
-        # Check has slided up correctly - third save button hidden
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
+
+        wait.until(animation_is_finished())
+
+        # Check has slided up correctly - second save button hidden
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
         self.assertFalse(save.is_displayed())
@@ -205,7 +211,7 @@ class EventTest(LiveServerTestCase):
 
         # See modal has opened
         modal = self.browser.find_element_by_id('modal')
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
         self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
 
@@ -214,7 +220,7 @@ class EventTest(LiveServerTestCase):
             '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 1")
         modal.find_element_by_xpath(
             '//div[@id="modal"]//input[@type="submit"]').click()
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertFalse(modal.is_displayed())
 
         # See new person selected
@@ -229,7 +235,7 @@ class EventTest(LiveServerTestCase):
         # Change mind and add another
         add_person_button.click()
 
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
         self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
 
@@ -237,7 +243,7 @@ class EventTest(LiveServerTestCase):
             '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 2")
         modal.find_element_by_xpath(
             '//div[@id="modal"]//input[@type="submit"]').click()
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertFalse(modal.is_displayed())
 
         person2 = models.Person.objects.get(name="Test Person 2")
@@ -265,7 +271,7 @@ class EventTest(LiveServerTestCase):
         # Edit Person 1 to have a better name
         form.find_element_by_xpath(
             '//a[@data-target="#id_person" and contains(@href, "%s/edit/")]' % person1.pk).click()
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
         self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
         name = modal.find_element_by_xpath(
@@ -274,7 +280,9 @@ class EventTest(LiveServerTestCase):
         name.clear()
         name.send_keys('Rig ' + person1.name)
         name.send_keys(Keys.ENTER)
-        self.browser.implicitly_wait(3)
+
+        wait.until(animation_is_finished())
+
         self.assertFalse(modal.is_displayed())
         person1 = models.Person.objects.get(pk=person1.pk)
         self.assertEqual(person1.name, form.find_element_by_xpath(
@@ -285,7 +293,7 @@ class EventTest(LiveServerTestCase):
             '//a[@data-target="#id_organisation" and contains(@href, "add")]')
         add_button.click()
         modal = self.browser.find_element_by_id('modal')
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
         self.assertIn("Add Organisation", modal.find_element_by_tag_name('h3').text)
         modal.find_element_by_xpath(
@@ -294,7 +302,7 @@ class EventTest(LiveServerTestCase):
             '//div[@id="modal"]//input[@type="submit"]').click()
         
         # See it is selected
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertFalse(modal.is_displayed())
         obj = models.Organisation.objects.get(name="Test Organisation")
         self.assertEqual(obj.name, form.find_element_by_xpath(
@@ -309,7 +317,7 @@ class EventTest(LiveServerTestCase):
             '//a[@data-target="#id_venue" and contains(@href, "add")]')
         add_button.click()
         modal = self.browser.find_element_by_id('modal')
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
         self.assertIn("Add Venue", modal.find_element_by_tag_name('h3').text)
         modal.find_element_by_xpath(
@@ -318,7 +326,7 @@ class EventTest(LiveServerTestCase):
             '//div[@id="modal"]//input[@type="submit"]').click()
         
         # See it is selected
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         self.assertFalse(modal.is_displayed())
         obj = models.Venue.objects.get(name="Test Venue")
         self.assertEqual(obj.name, form.find_element_by_xpath(
@@ -338,7 +346,7 @@ class EventTest(LiveServerTestCase):
 
         # Add item
         form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
-        self.browser.implicitly_wait(3)
+        wait.until(animation_is_finished())
         modal = self.browser.find_element_by_id("itemModal")
         modal.find_element_by_id("item_name").send_keys("Test Item 1")
         modal.find_element_by_id("item_description").send_keys("This is an item description\nthat for reasons unkown spans two lines")
@@ -450,3 +458,14 @@ class EventTest(LiveServerTestCase):
         self.assertEqual(person.phone, personPanel.find_element_by_xpath('//dt[text()="Phone Number"]/following-sibling::dd[1]').text)
 
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
+
+
+class animation_is_finished(object):
+    """ Checks if animation is done """
+    def __init__(self):
+        pass
+
+    def __call__(self, driver):
+        numberAnimating = driver.execute_script('return $(":animated").length')
+        finished = numberAnimating == 0
+        return finished
