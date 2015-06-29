@@ -355,7 +355,7 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return str(self.pk) + ": " + self.name
+        return unicode(self.pk) + ": " + self.name
 
     class Meta:
         permissions = (
