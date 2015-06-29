@@ -10,6 +10,7 @@ import reversion
 import string
 import random
 from django.core.urlresolvers import reverse_lazy
+from django.core.exceptions import ValidationError
 
 from decimal import Decimal
 
@@ -347,6 +348,20 @@ class Event(models.Model, RevisionMixin):
 
     def __str__(self):
         return str(self.pk) + ": " + self.name
+
+    def clean(self):
+        if self.end_date and self.start_date > self.end_date:
+            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+
+        startEndSameDay = not self.end_date or self.end_date == self.start_date
+        hasStartAndEnd = self.has_start_time and self.has_end_time
+        if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
+            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')            
+
+    def save(self, *args, **kwargs):
+        """Call :meth:`full_clean` before saving."""
+        self.full_clean()
+        super(Event, self).save(*args, **kwargs)
 
     class Meta:
         permissions = (
