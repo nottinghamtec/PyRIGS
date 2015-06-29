@@ -38,7 +38,7 @@
 
           $('.date').each(function (index, dateElem) {
             var $dateElem = $(dateElem);
-            var formatted = moment($dateElem.attr('data-date'),"DD/MM/YYYY HH:mm").twitterLong();
+            var formatted = moment($dateElem.attr('data-date')).twitterLong();
             $dateElem.text(formatted);
           });
 
