@@ -300,10 +300,9 @@ class SecureAPIRequest(generic.View):
             # Probably a calendar request
             start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%SZ" )
             end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%SZ" )
-            all_objects = self.models[model].objects
+            objects = self.models[model].objects.events_in_bounds(start_datetime,end_datetime)
+
             results = []
-            filter = Q(start_date__lte=end_datetime) & Q(start_date__gte=start_datetime)
-            objects = all_objects.filter(filter).select_related('person', 'organisation', 'venue', 'mic').order_by('-start_date')
             for item in objects:
                 data = {
                     'pk': item.pk,
