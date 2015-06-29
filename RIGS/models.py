@@ -9,6 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 import reversion
 import string
 import random
+from collections import Counter
 from django.core.urlresolvers import reverse_lazy
 
 from decimal import Decimal
@@ -91,9 +92,13 @@ class Person(models.Model, RevisionMixin):
     def organisations(self):
         o = []
         for e in Event.objects.filter(person=self).select_related('organisation'):
-            if e.organisation and e.organisation not in o:
+            if e.organisation:
                 o.append(e.organisation)
-        return o
+
+        #Count up occurances and put them in descending order
+        c = Counter(o)
+        stats = c.most_common()
+        return stats
 
     @property
     def latest_events(self):
@@ -131,9 +136,13 @@ class Organisation(models.Model, RevisionMixin):
     def persons(self):
         p = []
         for e in Event.objects.filter(organisation=self).select_related('person'):
-            if e.person and e.person not in p:
+            if e.person:
                 p.append(e.person)
-        return p
+        
+        #Count up occurances and put them in descending order
+        c = Counter(p)
+        stats = c.most_common()
+        return stats
 
     @property
     def latest_events(self):
