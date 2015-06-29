@@ -302,9 +302,6 @@ class SecureAPIRequest(generic.View):
             start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%S" )
             end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%S" )
 
-            tz = pytz.timezone(settings.TIME_ZONE)
-            start_datetime = tz.localize(start_datetime)
-
             objects = self.models[model].objects.events_in_bounds(start_datetime,end_datetime)
 
             results = []
