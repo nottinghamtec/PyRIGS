@@ -221,8 +221,8 @@ class SecureAPIRequest(generic.View):
         'venue': 'RIGS.view_venue',
         'person': 'RIGS.view_person',
         'organisation': 'RIGS.view_organisation',
-        'profile': None,
-        'event': 'RIGS.view_event',
+        'profile': 'RIGS.view_profile',
+        'event': None,
     }
 
     '''
@@ -300,10 +300,9 @@ class SecureAPIRequest(generic.View):
             # Probably a calendar request
             start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%SZ" )
             end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%SZ" )
-            all_objects = self.models[model].objects
+            objects = self.models[model].objects.events_in_bounds(start_datetime,end_datetime)
+
             results = []
-            filter = Q(start_date__lte=end_datetime) & Q(start_date__gte=start_datetime)
-            objects = all_objects.filter(filter).select_related('person', 'organisation', 'venue', 'mic').order_by('-start_date')
             for item in objects:
                 data = {
                     'pk': item.pk,
@@ -331,27 +330,6 @@ class SecureAPIRequest(generic.View):
                 if item.access_at:
                     data['access_at'] = item.access_at.strftime('%Y-%m-%dT%H:%M:%SZ')
                 
-                if item.venue:
-                    data['venue'] = item.venue.name
-
-                if item.person:
-                    data['person'] = item.person.name
-
-                if item.organisation:
-                    data['organisation'] = item.organisation.name
-
-                if item.mic:
-                    data['mic'] = {
-                        'name':item.mic.get_full_name(),
-                        'initials':item.mic.initials
-                    }
-
-                if item.description:
-                    data['description'] = item.description
-
-                if item.notes:
-                    data['notes'] = item.notes
-
                 data['url'] = str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
 
                 results.append(data)

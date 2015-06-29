@@ -16,7 +16,7 @@ import simplejson
 from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import ForeignKey, IntegerField, EmailField
+from django.db.models import ForeignKey, IntegerField, EmailField, TextField
 
 from RIGS import models, forms
 import datetime
@@ -56,7 +56,13 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
         def long(self):
             if isinstance(self.field, EmailField):
                 return True
-            return False     
+            return False   
+
+        @property
+        def linebreaks(self):
+            if isinstance(self.field, TextField):
+                return True
+            return False
 
     changes = []
 

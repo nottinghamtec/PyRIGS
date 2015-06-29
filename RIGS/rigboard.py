@@ -171,9 +171,9 @@ class EventArchive(generic.ArchiveIndexView):
                 filter = Q(start_date__gte=start)
 
         if filter:
-            qs = self.model.objects.filter(filter)
+            qs = self.model.objects.filter(filter).order_by('-start_date')
         else:
-            qs = self.model.objects.all()
+            qs = self.model.objects.all().order_by('-start_date')
 
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')
