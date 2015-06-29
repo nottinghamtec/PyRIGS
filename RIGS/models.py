@@ -382,7 +382,7 @@ class Event(models.Model, RevisionMixin):
         startDateTime = tz.localize(startDateTime)
         datetime_list.append(startDateTime) # then add it to the list
 
-        earliest = min(datetime_list) #find the earliest datetime in the list
+        earliest = min(datetime_list).astimezone(tz) #find the earliest datetime in the list
 
         # if we faked it & it's the earliest, better own up
         if startTimeFaked and earliest==startDateTime:
@@ -393,7 +393,7 @@ class Event(models.Model, RevisionMixin):
     @property
     def latest_time(self):
         """Returns the end of the event - this function could return either a tzaware datetime, or a naiive date object"""
-
+        tz = pytz.timezone(settings.TIME_ZONE)
         endDate = self.end_date
         if endDate is None:
             endDate = self.start_date
