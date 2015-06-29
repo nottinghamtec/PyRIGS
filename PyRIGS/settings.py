@@ -70,22 +70,10 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-try:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-except ImportError:
-    pass
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-    'legacy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'alfie.codedinternet.com',
-        'NAME': 'tec_rigs',
-        'USER': 'tec_rigs',
-        'PASSWORD': 'xMNb(b+Giu]&',
     }
 }
 
@@ -174,7 +162,9 @@ else:
 
 LANGUAGE_CODE = 'en-gb'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
+
+FORMAT_MODULE_PATH = 'PyRIGS.formats'
 
 USE_I18N = True
 
@@ -198,7 +188,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
-
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_DIRS = (
