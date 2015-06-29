@@ -229,7 +229,14 @@ class EventManager(models.Manager):
             (models.Q(start_date__gte=start.date(), start_date__lte=end.date())) |  # Start date in bounds
             (models.Q(end_date__gte=start.date(), end_date__lte=end.date())) |  # End date in bounds
             (models.Q(access_at__gte=start, access_at__lte=end)) |  # Access at in bounds
-            (models.Q(meet_at__gte=start, meet_at__lte=end))  # Meet at in bounds
+            (models.Q(meet_at__gte=start, meet_at__lte=end)) | # Meet at in bounds
+
+            (models.Q(start_date__lte=start, end_date__gte=end)) | # Start before, end after
+            (models.Q(access_at__lte=start, start_date__gte=end)) | # Access before, start after
+            (models.Q(access_at__lte=start, end_date__gte=end)) | # Access before, end after
+            (models.Q(meet_at__lte=start, start_date__gte=end)) | # Meet before, start after
+            (models.Q(meet_at__lte=start, end_date__gte=end)) # Meet before, end after
+
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
 
