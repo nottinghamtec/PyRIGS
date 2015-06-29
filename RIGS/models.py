@@ -1,5 +1,5 @@
 import hashlib
-import datetime
+import datetime, pytz
 
 from django.db import models, connection
 from django.contrib.auth.models import AbstractUser
@@ -339,6 +339,40 @@ class Event(models.Model, RevisionMixin):
     @property
     def has_end_time(self):
         return self.end_time is not None
+
+    @property
+    def earliest_time(self):
+        """Finds the earliest time defined in the event - this function could return either a tzaware datetime, or a naiive date object"""
+
+        #Put all the datetimes in a list
+        datetime_list = []
+
+        if self.access_at:
+            datetime_list.append(self.access_at)
+
+        if self.meet_at:
+            datetime_list.append(self.meet_at)
+
+        # If there is no start time defined, pretend it's midnight
+        startTimeFaked = False
+        if self.has_start_time:
+            startDateTime = datetime.datetime.combine(self.start_date,self.start_time)
+        else:
+            startDateTime = datetime.datetime.combine(self.start_date,datetime.time(00,00))
+            startTimeFaked = True
+
+        #timezoneIssues - apply the default timezone to the naiive datetime
+        tz = pytz.timezone(settings.TIME_ZONE)
+        startDateTime = tz.localize(startDateTime)
+        datetime_list.append(startDateTime) # then add it to the list
+
+        earliest = min(datetime_list) #find the earliest datetime in the list
+
+        # if we faked it & it's the earliest, better own up
+        if startTimeFaked and earliest==startDateTime:
+            return self.start_date
+        
+        return earliest
 
     objects = EventManager()
 
