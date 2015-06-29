@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse_lazy
 from decimal import Decimal
 
 # Create your models here.
+@python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
@@ -37,17 +38,36 @@ class Profile(AbstractUser):
     def name(self):
         return self.get_full_name() + ' "' + self.initials + '"'
 
+    @property
+    def latest_events(self):
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        permissions = (
+            ('view_profile', 'Can view Profile'),
+        )
+
 class RevisionMixin(object):
     @property
     def last_edited_at(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.date_created
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.date_created
+        else:
+            return None
 
     @property
     def last_edited_by(self):
-        version = reversion.get_for_object(self)[0]
-        return version.revision.user
-
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return version.revision.user
+        else:
+            return None
 
 @reversion.register
 @python_2_unicode_compatible
@@ -62,8 +82,9 @@ class Person(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
@@ -77,6 +98,9 @@ class Person(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('person_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
@@ -98,8 +122,9 @@ class Organisation(models.Model, RevisionMixin):
 
     def __str__(self):
         string = self.name
-        if len(self.notes) > 0:
-            string += "*"
+        if self.notes is not None:
+            if  len(self.notes) > 0:
+                string += "*"
         return string
 
     @property
@@ -113,6 +138,9 @@ class Organisation(models.Model, RevisionMixin):
     @property
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    def get_absolute_url(self):
+        return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
 
     class Meta:
         permissions = (
@@ -176,6 +204,9 @@ class Venue(models.Model, RevisionMixin):
     def latest_events(self):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
+    def get_absolute_url(self):
+        return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
+
     class Meta:
         permissions = (
             ('view_venue', 'Can view Venues'),
@@ -185,14 +216,10 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
-                status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
@@ -256,7 +283,7 @@ class Event(models.Model, RevisionMixin):
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='Collected by')
+    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Calculated values
     """
@@ -275,7 +302,9 @@ class Event(models.Model, RevisionMixin):
         #total = 0.0
         #for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
         #    total += item.sum
-        total = EventItem.objects.filter(event=self).aggregate(sum_total=models.Sum('cost',field="quantity * cost"))['sum_total']
+        total = EventItem.objects.filter(event=self).aggregate(
+            sum_total=models.Sum(models.F('cost')*models.F('quantity'), output_field=models.DecimalField(max_digits=10, decimal_places=2))
+        )['sum_total']
         if total:
             return total
         return Decimal("0.00")

@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
-from RIGS import views, rigboard, finance, ical, forms
+from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import permission_required_with_403
@@ -10,7 +10,7 @@ urlpatterns = patterns('',
                        # Examples:
                        # url(r'^$', 'PyRIGS.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
-                       url('^$', views.Index.as_view(), name='index'),
+                       url('^$', login_required(views.Index.as_view()), name='index'),
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
@@ -25,6 +25,9 @@ urlpatterns = patterns('',
                        url(r'^people/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_person')(views.PersonDetail.as_view()),
                            name='person_detail'),
+                       url(r'^people/(?P<pk>\d+)/history/$',
+                           permission_required_with_403('RIGS.view_person')(versioning.VersionHistory.as_view()),
+                           name='person_history', kwargs={'model': models.Person}),
                        url(r'^people/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_person')(views.PersonUpdate.as_view()),
                            name='person_update'),
@@ -39,6 +42,9 @@ urlpatterns = patterns('',
                        url(r'^organisations/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_organisation')(views.OrganisationDetail.as_view()),
                            name='organisation_detail'),
+                       url(r'^organisations/(?P<pk>\d+)/history/$',
+                           permission_required_with_403('RIGS.view_organisation')(versioning.VersionHistory.as_view()),
+                           name='organisation_history', kwargs={'model': models.Organisation}),
                        url(r'^organisations/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_organisation')(views.OrganisationUpdate.as_view()),
                            name='organisation_update'),
@@ -53,6 +59,9 @@ urlpatterns = patterns('',
                        url(r'^venues/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_venue')(views.VenueDetail.as_view()),
                            name='venue_detail'),
+                       url(r'^venues/(?P<pk>\d+)/history/$',
+                           permission_required_with_403('RIGS.view_venue')(versioning.VersionHistory.as_view()),
+                           name='venue_history', kwargs={'model': models.Venue}),
                        url(r'^venues/(?P<pk>\d+)/edit/$',
                            permission_required_with_403('RIGS.change_venue')(views.VenueUpdate.as_view()),
                            name='venue_update'),
@@ -60,7 +69,13 @@ urlpatterns = patterns('',
                        # Rigboard
                        url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
                        url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
-                       url(r'^rigboard/archive/$', RedirectView.as_view(pattern_name='event_archive')),
+                       url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True,pattern_name='event_archive')),
+                       url(r'^rigboard/activity/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
+                           name='activity_table'),
+                       url(r'^rigboard/activity/feed/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
+                           name='activity_feed'),
 
                        url(r'^event/(?P<pk>\d+)/$',
                            permission_required_with_403('RIGS.view_event')(rigboard.EventDetail.as_view()),
@@ -80,6 +95,11 @@ urlpatterns = patterns('',
                        url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()),
                            name='event_archive'),
 
+                       url(r'^event/(?P<pk>\d+)/history/$',
+                           permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
+                           name='event_history', kwargs={'model': models.Event}),
+
+                       
 
                        # Finance
                        url(r'^invoice/$',
@@ -129,8 +149,8 @@ urlpatterns = patterns('',
                        url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', (views.SecureAPIRequest.as_view()), name="api_secure"),
 
                        # Legacy URL's
-                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(pattern_name='event_detail')),
-                       url(r'^bookings/$', RedirectView.as_view(pattern_name='rigboard')),
-                       url(r'^bookings/past/$', RedirectView.as_view(pattern_name='event_archive')),
+                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(permanent=True,pattern_name='event_detail')),
+                       url(r'^bookings/$', RedirectView.as_view(permanent=True,pattern_name='rigboard')),
+                       url(r'^bookings/past/$', RedirectView.as_view(permanent=True,pattern_name='event_archive')),
 )
 

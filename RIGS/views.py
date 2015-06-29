@@ -10,6 +10,7 @@ import simplejson
 from django.contrib import messages
 import datetime
 import operator
+from registration.views import RegistrationView
 
 from RIGS import models, forms
 
@@ -32,7 +33,6 @@ def login(request, **kwargs):
         from django.contrib.auth.views import login
 
         return login(request, authentication_form=forms.LoginForm)
-
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
@@ -68,6 +68,7 @@ class PersonDetail(generic.DetailView):
 
 class PersonCreate(generic.CreateView):
     model = models.Person
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -84,6 +85,7 @@ class PersonCreate(generic.CreateView):
 
 class PersonUpdate(generic.UpdateView):
     model = models.Person
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -120,6 +122,7 @@ class OrganisationDetail(generic.DetailView):
 
 class OrganisationCreate(generic.CreateView):
     model = models.Organisation
+    fields = ['name','phone','email','address','notes','union_account']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -136,6 +139,7 @@ class OrganisationCreate(generic.CreateView):
 
 class OrganisationUpdate(generic.UpdateView):
     model = models.Organisation
+    fields = ['name','phone','email','address','notes','union_account']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -172,6 +176,7 @@ class VenueDetail(generic.DetailView):
 
 class VenueCreate(generic.CreateView):
     model = models.Venue
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -188,6 +193,7 @@ class VenueCreate(generic.CreateView):
 
 class VenueUpdate(generic.UpdateView):
     model = models.Venue
+    fields = ['name','phone','email','address','notes']
 
     def get_success_url(self):
         if self.request.is_ajax():

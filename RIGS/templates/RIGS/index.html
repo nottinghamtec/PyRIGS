@@ -3,44 +3,76 @@
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Rig Information Gathering System</h2>
+        <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
     </div>
-    <div class="col-sm-6">
-        <div class="well">
-            {% if user.is_authenticated %}
-                <h3>Welcome back {{ user.get_full_name }}.<br />
-                <small>Your rigboard initials are {{ user.initials }}</small></h3>
-            {% endif %}
-            <h3>There are currently {{ rig_count }} rigs coming up.</h3>
-            <a class="btn btn-default" href="{% url 'rigboard' %}">View Rigboard</a>
-            <a class="btn btn-default" href="{% url 'event_create' %}">
-                New Event <span class="glyphicon glyphicon-plus"></span>
-            </a>
-        </div>
+    <div class="col-sm-12">
+        <p><h4 class="list-group-item-heading" style="margin:0;">Welcome back {{ user.get_full_name }}, there are {{ rig_count }} rigs coming up.</h4>
+        </p>
     </div>
-    <div class="col-sm-6">
-        <div class="well">
-            <div>
-                <h4><a href="{% url 'person_list' %}">People</a></h4>
-                <form class="form-inline" role="form" action="{% url 'person_list' %}" method="GET">
-                    <input type="search" name="q" class="form-control" placeholder="Search People" />
-                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
-                </form>
+    <div class="row">
+    <div class="col-sm-{% if perms.RIGS.view_event %}6{% else %}12{% endif %}">
+        
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                 <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
-            <div>
-                <h4><a href="{% url 'organisation_list' %}">Organisations</a></h4>
-                <form class="form-inline" role="form" action="{% url 'organisation_list' %}" method="GET">
-                    <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
-                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
-                </form>
-            </div>
-            <div>
-                <h4><a href="{% url 'venue_list' %}">Venues</a></h4>
-                <form class="form-inline" role="form" action="{% url 'venue_list' %}" method="GET">
-                    <input type="search" name="q" class="form-control" placeholder="Search Venues" />
-                    <button type="submit" class="form-control"><span class="glyphicon glyphicon-search"></span></button>
-                </form>
+            <div class="list-group">
+                    <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
+                    <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
+                    {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>{% endif %}
+
+                    <div class="list-group-item default"></div>
+
+                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/forum" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Forum</a>
+                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Wiki</a>
+                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
+                
             </div>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">Search Rigboard</h4>
+            </div>
+            <div class="list-group">
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'person_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search People" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'organisation_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'venue_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Venues" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+    {% if perms.RIGS.view_event %}
+    <div class="col-sm-6" >
+        {% include 'RIGS/activity_feed.html' %}    
+        
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
