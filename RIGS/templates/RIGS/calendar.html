@@ -45,44 +45,33 @@
                         url: '/api/event',
                         dataType: 'json',
                         data: {
-                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]"),
-                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]")
+                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss"),
+                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss")
                         },
                         success: function(doc) {
                             var events = [];
-                            var colours = 
+                            colours = {'Provisional': '#f0ad4e',
+                                'Confirmed': '#5cb85c' ,
+                                'Booked': '#5cb85c' ,
+                                'Cancelled': 'grey' ,
+                                'non-rig': '#5bc0de'
+                            };
                             $(doc).each(function() {
-                                thisEvent = [];
-                                colours = {'Provisional': '#f0ad4e',
-                                    'Confirmed': '#5cb85c' ,
-                                    'Booked': '#5cb85c' ,
-                                    'Cancelled': 'grey' ,
-                                    'non-rig': '#5bc0de'
-                                };
-
-                                thisEvent['start'] = $(this).attr('start_date');
-                                if ($(this).attr('start_time')) {
-                                    thisEvent['start'] += 'T' + $(this).attr('start_time');
-
-                                }
-
-                                if ($(this).attr('end_date')) {
-                                    thisEvent['end'] = $(this).attr('end_date');
-                                    if ($(this).attr('end_time')) {
-                                        thisEvent['end'] += 'T' + $(this).attr('end_time');
-                                    }
-                                }
-                                thisEvent['className'] = 'modal-href';
-
-                                thisEvent['title'] = $(this).attr('title');
                                 
+
+                                thisEvent = {
+                                    'start': $(this).attr('earliest'),
+                                    'end': $(this).attr('latest'),
+                                    'className': 'modal-href',
+                                    'title': $(this).attr('title'),
+                                    'url': $(this).attr('url')
+                                }
+                               
                                 if($(this).attr('is_rig')==true || $(this).attr('status') == "Cancelled"){
                                     thisEvent['color'] = colours[$(this).attr('status')];
                                 }else{
                                     thisEvent['color'] = colours['non-rig'];
                                 }
-
-                                thisEvent['url'] = $(this).attr('url');
                                 
                                 events.push(thisEvent);
                             });

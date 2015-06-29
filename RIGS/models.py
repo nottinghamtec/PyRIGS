@@ -383,6 +383,25 @@ class Event(models.Model, RevisionMixin):
         
         return earliest
 
+    @property
+    def latest_time(self):
+        """Returns the end of the event - this function could return either a tzaware datetime, or a naiive date object"""
+
+        endDate = self.end_date
+        if endDate is None:
+            endDate = self.start_date
+
+        if self.has_end_time:
+            endDateTime = datetime.datetime.combine(endDate,self.end_time)
+            tz = pytz.timezone(settings.TIME_ZONE)
+            endDateTime = tz.localize(endDateTime)
+
+            return endDateTime
+
+        else:
+            return endDate
+
+        
     objects = EventManager()
 
     def get_absolute_url(self):
