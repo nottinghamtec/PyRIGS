@@ -14,7 +14,7 @@
 <b>{{object.start_date|date:"D jS N Y"}}</b>
 </para>
 
-<keepInFrame maxHeight="30">
+<keepInFrame>
     <para style="style.event_description">
     {{ object.description|default_if_none:""|linebreaksbr }}
         </para>
