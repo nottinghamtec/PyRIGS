@@ -51,38 +51,10 @@ class CalendarICS(ICalFeed):
         return title
 
     def item_start_datetime(self, item):
-        #set start date to the earliest defined time for the event
-        if item.meet_at:
-            startDateTime = item.meet_at
-        elif item.access_at:
-            startDateTime = item.access_at
-        elif item.has_start_time:
-            startDateTime = datetime.datetime.combine(item.start_date,item.start_time)
-            tz = pytz.timezone(settings.TIME_ZONE)
-            startDateTime = tz.normalize(tz.localize(startDateTime)).astimezone(pytz.timezone(self.timezone))
-        else:
-            startDateTime = item.start_date
-
-        return startDateTime
+        return item.earliest_time
 
     def item_end_datetime(self, item):
-        # Assume end is same as start
-        endDateTime = item.start_date
-
-        # If end date defined then use it
-        if item.end_date:
-            endDateTime = item.end_date
-        
-        if item.has_start_time and item.has_end_time: # don't allow an event with specific end but no specific start
-            endDateTime = datetime.datetime.combine(endDateTime,item.end_time)
-            tz = pytz.timezone(settings.TIME_ZONE)
-            endDateTime = tz.normalize(tz.localize(endDateTime)).astimezone(pytz.timezone(self.timezone))
-        elif item.has_end_time: # if there's a start time specified then an end time should also be specified
-            endDateTime = datetime.datetime.combine(endDateTime+datetime.timedelta(days=1),datetime.time(00, 00))
-        #elif item.end_time: # end time but no start time - this is weird - don't think ICS will like it so ignoring
-             # do nothing
-
-        return endDateTime
+        return item.latest_time
 
     def item_location(self,item):
         return item.venue
@@ -90,6 +62,8 @@ class CalendarICS(ICalFeed):
     def item_description(self, item):
         # Create a nice information-rich description
         # note: only making use of information available to "non-keyholders"
+
+        tz = pytz.timezone(self.timezone)
 
         desc = 'Rig ID = '+str(item.pk)+'\n'
         desc += 'Event = ' + item.name + '\n'
@@ -102,9 +76,9 @@ class CalendarICS(ICalFeed):
         
         desc += '\n'
         if item.meet_at:
-            desc += 'Crew Meet = ' + (item.meet_at.strftime('%Y-%m-%d %H:%M') if item.meet_at else '---') + '\n'
+            desc += 'Crew Meet = ' + (item.meet_at.astimezone(tz).strftime('%Y-%m-%d %H:%M') if item.meet_at else '---') + '\n'
         if item.access_at:
-            desc += 'Access At = ' + item.access_at.strftime('%Y-%m-%d %H:%M') + '\n'
+            desc += 'Access At = ' + (item.access_at.astimezone(tz).strftime('%Y-%m-%d %H:%M') if item.access_at else '---') + '\n'
         if item.start_date:
             desc += 'Event Start = ' + item.start_date.strftime('%Y-%m-%d') + ((' '+item.start_time.strftime('%H:%M')) if item.has_start_time else '') + '\n'
         if item.end_date:
@@ -113,8 +87,8 @@ class CalendarICS(ICalFeed):
         desc += '\n'
         if item.description:
             desc += 'Event Description:\n'+item.description+'\n\n'
-        if item.notes:
-            desc += 'Notes:\n'+item.notes+'\n\n'
+        # if item.notes:  // Need to add proper keyholder checks before this gets put back
+        #     desc += 'Notes:\n'+item.notes+'\n\n'  
 
         base_url = "http://rigs.nottinghamtec.co.uk"
         desc += 'URL = '+base_url+str(item.get_absolute_url())
