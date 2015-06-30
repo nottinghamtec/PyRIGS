@@ -8,9 +8,13 @@
         	$('#urlParamForm').change(function(){
 	        	url = "?";
 	        	$('#urlParamForm *').filter(':input').each(function(index, value){
+				    defaultVal = $(value).data('default');
 				    param = $(value).val();
 				    val = $(value).prop('checked');
-				    url = url+param+"="+val+"&";
+
+				    if(val != defaultVal){
+					    url = url+param+"="+val+"&";
+					}
 				});
 	        	ics_url = $('#cal-url').data('url') + url.substring(0, url.length - 1);
 				$('#cal-url').text(ics_url);
@@ -97,22 +101,22 @@
 						<form class="form-inline" id="urlParamForm">
 							<div class="form-group">
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="rig" checked> Rigs
+								  <input type="checkbox" value="rig" data-default="true" checked> Rigs
 								</label>
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="non-rig" checked> Non-Rigs
+								  <input type="checkbox" value="non-rig" data-default="true" checked> Non-Rigs
 								</label>
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="dry-hire" checked> Dry-Hires
+								  <input type="checkbox" value="dry-hire" data-default="true" checked> Dry-Hires
 								</label>
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="cancelled"> Cancelled
+								  <input type="checkbox" value="cancelled" data-default="false" > Cancelled
 								</label>
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="provisional" checked> Provisional
+								  <input type="checkbox" value="provisional" data-default="true" checked> Provisional
 								</label>
 								<label class="checkbox-inline">
-								  <input type="checkbox" value="confirmed" checked> Confirmed/Booked
+								  <input type="checkbox" value="confirmed" data-default="true" checked> Confirmed/Booked
 								</label>
 							</div>
 						</form>
