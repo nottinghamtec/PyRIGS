@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import LiveServerTestCase
+from django.test.client import Client
 from django.core import mail
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -8,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from RIGS import models
 import re
 import os
+from datetime import date, timedelta
 from django.db import transaction
 import reversion
 import json
@@ -459,6 +461,195 @@ class EventTest(LiveServerTestCase):
 
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
 
+class IcalTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.all_events = set(range(1, 18))
+        self.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
+        self.not_current_events = set(self.all_events) - set(self.current_events)
+
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
+        self.profile = models.Profile(
+            username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
+        self.profile.set_password("EventTestPassword")
+        self.profile.save()
+
+        # produce 7 normal events - 5 current - 1 last week - 1 two years ago - 2 provisional - 2 confirmed - 3 booked
+        models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end") 
+        models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL, start_date=date.today(), description="start today no end")
+        models.Event.objects.create(name="TE E3", status=models.Event.CONFIRMED, start_date=date.today(), end_date=date.today(), description="start today with end today")
+        models.Event.objects.create(name="TE E4", status=models.Event.CONFIRMED, start_date=date.today()-timedelta(weeks=104), description="start past 2 years no end")
+        models.Event.objects.create(name="TE E5", status=models.Event.BOOKED, start_date=date.today()-timedelta(days=7), end_date='2014-03-21', description="start past 1 week with end past")
+        models.Event.objects.create(name="TE E6", status=models.Event.BOOKED, start_date=date.today()-timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start past, end future")
+        models.Event.objects.create(name="TE E7", status=models.Event.BOOKED, start_date=date.today()+timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start + end in future")
+
+        # 2 cancelled - 1 current
+        models.Event.objects.create(name="TE E8", start_date=date.today()+timedelta(days=2), end_date=date.today()+timedelta(days=2), status=models.Event.CANCELLED, description="cancelled in future")
+        models.Event.objects.create(name="TE E9", start_date=date.today()-timedelta(days=1), end_date=date.today()+timedelta(days=2), status=models.Event.CANCELLED, description="cancelled and started")
+
+        # 5 dry hire - 3 current - 1 cancelled
+        models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True, description="dryhire today")
+        models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True, checked_in_by=self.profile, description="dryhire today, checked in")
+        models.Event.objects.create(name="TE E12", start_date=date.today()-timedelta(days=1), dry_hire=True, status=models.Event.BOOKED, description="dryhire past")
+        models.Event.objects.create(name="TE E13", start_date=date.today()-timedelta(days=2), dry_hire=True, checked_in_by=self.profile, description="dryhire past checked in")
+        models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True, status=models.Event.CANCELLED, description="dryhire today cancelled")
+
+        # 4 non rig - 3 current
+        models.Event.objects.create(name="TE E15", start_date=date.today(), is_rig=False, description="non rig today")
+        models.Event.objects.create(name="TE E16", start_date=date.today()+timedelta(days=1), is_rig=False, description="non rig tomorrow")
+        models.Event.objects.create(name="TE E17", start_date=date.today()-timedelta(days=1), is_rig=False, description="non rig yesterday")
+        models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED, description="non rig today cancelled")
+
+        self.browser = webdriver.Firefox()
+        os.environ['RECAPTCHA_TESTING'] = 'True'
+
+    def tearDown(self):
+        self.browser.quit()
+        os.environ['RECAPTCHA_TESTING'] = 'False'
+
+    def authenticate(self, n=None):
+        self.assertIn(
+            self.live_server_url + '/user/login/', self.browser.current_url)
+        if n:
+            self.assertIn('?next=%s' % n, self.browser.current_url)
+        username = self.browser.find_element_by_id('id_username')
+        password = self.browser.find_element_by_id('id_password')
+        submit = self.browser.find_element_by_css_selector(
+            'input[type=submit]')
+
+        username.send_keys("EventTest")
+        password.send_keys("EventTestPassword")
+        self.browser.execute_script(
+            "return jQuery('#g-recaptcha-response').val('PASSED')")
+        submit.click()
+
+        self.assertEqual(self.live_server_url + n, self.browser.current_url)
+
+    def testApiKeyGeneration(self):
+        # Requests address
+        self.browser.get(self.live_server_url + '/user/')
+        # Gets redirected to login
+        self.authenticate('/user/')
+
+        # Completes and comes back to /user/
+        # Checks that no api key is displayed
+        self.assertEqual("No API Key Generated", self.browser.find_element_by_xpath("//div[@id='content']/div/div/div[3]/dl[2]/dd").text)
+        self.assertEqual("No API Key Generated", self.browser.find_element_by_css_selector("pre").text)
+        
+        # Now creates an API key, and check a URL is displayed one
+        self.browser.find_element_by_link_text("Generate API Key").click()
+        self.assertIn("rigs.ics", self.browser.find_element_by_id("cal-url").text)
+        self.assertNotIn("?", self.browser.find_element_by_id("cal-url").text)
+        
+        # Lets change everything so it's not the default value
+        self.browser.find_element_by_xpath("//input[@value='rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='non-rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='dry-hire']").click()
+        self.browser.find_element_by_xpath("//input[@value='cancelled']").click()
+        self.browser.find_element_by_xpath("//input[@value='provisional']").click()
+        self.browser.find_element_by_xpath("//input[@value='confirmed']").click()
+
+        # and then check the url is correct
+        self.assertIn("rigs.ics?rig=false&non-rig=false&dry-hire=false&cancelled=true&provisional=false&confirmed=false", self.browser.find_element_by_id("cal-url").text)
+
+        # Awesome - all seems to work
+
+    def testICSFiles(self):
+        # Requests address
+        self.browser.get(self.live_server_url + '/user/')
+        # Gets redirected to login
+        self.authenticate('/user/')
+
+        # Now creates an API key, and check a URL is displayed one
+        self.browser.find_element_by_link_text("Generate API Key").click()
+
+
+        
+        c = Client()
+        
+        # Default settings - should have all non-cancelled events
+        # Get the ical file (can't do this in selanium because reasons)
+        icalUrl = self.browser.find_element_by_id("cal-url").text
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        #Check has entire file
+        self.assertIn("BEGIN:VCALENDAR", response.content)
+        self.assertIn("END:VCALENDAR", response.content)
+
+        expectedIn= [1,2,3,5,6,7,10,11,12,13,15,16,17]
+        for test in range(1,18):
+            if test in expectedIn:
+                self.assertIn("TE E"+str(test)+" ", response.content)
+            else:
+                self.assertNotIn("TE E"+str(test)+" ", response.content)
+
+
+        # Only dry hires
+        self.browser.find_element_by_xpath("//input[@value='rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='non-rig']").click()
+
+        icalUrl = self.browser.find_element_by_id("cal-url").text
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn= [10,11,12,13]
+        for test in range(1,18):
+            if test in expectedIn:
+                self.assertIn("TE E"+str(test)+" ", response.content)
+            else:
+                self.assertNotIn("TE E"+str(test)+" ", response.content)
+
+
+        # Only provisional rigs
+        self.browser.find_element_by_xpath("//input[@value='rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='dry-hire']").click()
+        self.browser.find_element_by_xpath("//input[@value='confirmed']").click()
+
+        icalUrl = self.browser.find_element_by_id("cal-url").text
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn= [1,2]
+        for test in range(1,18):
+            if test in expectedIn:
+                self.assertIn("TE E"+str(test)+" ", response.content)
+            else:
+                self.assertNotIn("TE E"+str(test)+" ", response.content)
+
+        # Only cancelled non-rigs
+        self.browser.find_element_by_xpath("//input[@value='rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='non-rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='provisional']").click()
+        self.browser.find_element_by_xpath("//input[@value='cancelled']").click()
+
+        icalUrl = self.browser.find_element_by_id("cal-url").text
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn= [18]
+        for test in range(1,18):
+            if test in expectedIn:
+                self.assertIn("TE E"+str(test)+" ", response.content)
+            else:
+                self.assertNotIn("TE E"+str(test)+" ", response.content)
+
+        # Nothing selected
+        self.browser.find_element_by_xpath("//input[@value='non-rig']").click()
+        self.browser.find_element_by_xpath("//input[@value='cancelled']").click()
+
+        icalUrl = self.browser.find_element_by_id("cal-url").text
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn= []
+        for test in range(1,18):
+            if test in expectedIn:
+                self.assertIn("TE E"+str(test)+" ", response.content)
+            else:
+                self.assertNotIn("TE E"+str(test)+" ", response.content)
+        
+        # Wow - that was a lot of tests
 
 class animation_is_finished(object):
     """ Checks if animation is done """
