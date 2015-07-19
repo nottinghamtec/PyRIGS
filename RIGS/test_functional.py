@@ -143,6 +143,8 @@ class EventTest(LiveServerTestCase):
         self.profile.set_password("EventTestPassword")
         self.profile.save()
 
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
+        
         self.browser = webdriver.Firefox()
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
@@ -375,9 +377,9 @@ class EventTest(LiveServerTestCase):
 
         # Check totals
         self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
-        self.assertIn("TBD%", self.browser.find_element_by_id('vat-rate').text)
-        self.assertEqual("0.00", self.browser.find_element_by_id('vat').text)
-        self.assertEqual("47.90", self.browser.find_element_by_id('total').text)
+        self.assertIn("(TBC)", self.browser.find_element_by_id('vat-rate').text)
+        self.assertEqual("9.58", self.browser.find_element_by_id('vat').text)
+        self.assertEqual("57.48", self.browser.find_element_by_id('total').text)
 
         # Attempt to save - missing title
         save.click()

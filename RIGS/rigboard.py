@@ -47,7 +47,6 @@ class EventCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
         context['edit'] = True
-        context['new'] = True
         context['currentVAT'] = models.VatRate.objects.current_rate()
 
         form = context['form']

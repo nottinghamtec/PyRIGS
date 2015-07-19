@@ -29,7 +29,7 @@
 				<td colspan="2">£ <span id="sumtotal">{{object.sum_total|default:0|floatformat:2}}</span></td>
 			</tr>
 			<tr>
-				{% if new %}
+				{% if not object.pk %}
 					<td id="vat-rate" data-rate="{{currentVAT.rate}}">VAT @
 						{{currentVAT.as_percent|floatformat}}% (TBC)</td>
 				{% else %}
