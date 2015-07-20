@@ -14,7 +14,7 @@
 <b>{{object.start_date|date:"D jS N Y"}}</b>
 </para>
 
-<keepInFrame maxHeight="30">
+<keepInFrame>
     <para style="style.event_description">
     {{ object.description|default_if_none:""|linebreaksbr }}
         </para>
@@ -268,7 +268,7 @@
 
         <para style="blockPara">
         <b>
-            Conditions of hire available on request or on the TEC PA &amp; Lighting website. E&amp;OE
+            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
         </b>
         </para>
 
@@ -295,7 +295,7 @@
 
         <para style="blockPara">
         <b>
-            Conditions of hire available on request or on the TEC PA &amp; Lighting website. E&amp;OE
+            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
         </b>
         </para>
 
