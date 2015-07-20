@@ -144,16 +144,16 @@ class EventTestCase(TestCase):
 		events = models.Event.objects.all()
 
 		# Check person's organisations
-		self.assertIn(o1, p1.organisations)
-		self.assertIn(o2, p1.organisations)
-		self.assertIn(o1, p2.organisations)
-		self.assertNotIn(o2, p2.organisations)
+		self.assertIn((o1,2), p1.organisations)
+		self.assertIn((o2,1), p1.organisations)
+		self.assertIn((o1,2), p2.organisations)
+		self.assertEqual(len(p2.organisations), 1)
 
 		# Check organisation's persons
-		self.assertIn(p1, o1.persons)
-		self.assertIn(p2, o1.persons)
-		self.assertIn(p1, o2.persons)		
-		self.assertNotIn(p2, o2.persons)
+		self.assertIn((p1,2), o1.persons)
+		self.assertIn((p2,2), o1.persons)
+		self.assertIn((p1,1), o2.persons)		
+		self.assertEqual(len(o2.persons),1)
 
 	def test_cancelled_property(self):
 		event = models.Event.objects.all()[0]
