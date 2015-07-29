@@ -104,7 +104,8 @@ class EventPrint(generic.View):
                         'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
                     }
                 },
-                'copy':copy
+                'copy':copy,
+                'current_user':request.user,
             })
 
             # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
