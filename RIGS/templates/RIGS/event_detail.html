@@ -5,12 +5,10 @@
 <div class="row">
     {% if not request.is_ajax %}
     <div class="col-sm-12">
-        <div class="col-sm-8">
             <h1>
                 {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
-                | {{ object.name }}
+                | {{ object.name }} {% if event.dry_hire %}<span class="badge">Dry Hire</span>{% endif %}
             </h1>
-        </div>
     </div>
         <div class="col-sm-12 text-right">
             <div class="btn-group btn-page">

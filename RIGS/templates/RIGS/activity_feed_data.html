@@ -27,7 +27,7 @@
                       </div>
                       <div class="media-body">
                         <h5>{{ version.revision.user.name }}
-                          <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created}}"></span></small></span>
+                          <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created|date:"c"}}"></span></small></span>
                         </h5>
 
                 {% endif %}

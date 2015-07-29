@@ -125,7 +125,10 @@ class EventPrint(generic.View):
         merger.write(merged)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, object.name)
+
+        escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
+
+        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
 
@@ -172,9 +175,9 @@ class EventArchive(generic.ArchiveIndexView):
                 filter = Q(start_date__gte=start)
 
         if filter:
-            qs = self.model.objects.filter(filter)
+            qs = self.model.objects.filter(filter).order_by('-start_date')
         else:
-            qs = self.model.objects.all()
+            qs = self.model.objects.all().order_by('-start_date')
 
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')
