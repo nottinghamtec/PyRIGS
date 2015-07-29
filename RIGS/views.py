@@ -6,9 +6,10 @@ from django.views import generic
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core import serializers
+from django.conf import settings
 import simplejson
 from django.contrib import messages
-import datetime
+import datetime, pytz
 import operator
 from registration.views import RegistrationView
 
@@ -298,39 +299,22 @@ class SecureAPIRequest(generic.View):
 
         if model == "event" and start and end:
             # Probably a calendar request
-            start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%SZ" )
-            end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%SZ" )
+            start_datetime = datetime.datetime.strptime( start, "%Y-%m-%dT%H:%M:%S" )
+            end_datetime = datetime.datetime.strptime( end, "%Y-%m-%dT%H:%M:%S" )
+
             objects = self.models[model].objects.events_in_bounds(start_datetime,end_datetime)
 
             results = []
             for item in objects:
                 data = {
                     'pk': item.pk,
-                    'title': item.name
+                    'title': item.name,
+                    'is_rig': item.is_rig,
+                    'status': str(item.get_status_display()),
+                    'earliest': item.earliest_time.isoformat(),
+                    'latest': item.latest_time.isoformat(),
+                    'url': str(item.get_absolute_url())
                 }
-                
-                data['is_rig'] = item.is_rig
-                data['status'] = str(item.get_status_display())
-
-                if item.start_date:
-                    data['start_date'] = item.start_date.strftime('%Y-%m-%d')
-
-                if item.has_start_time:
-                    data['start_time'] = item.start_time.strftime('%H:%M:%SZ')
-                
-                if item.end_date:
-                    data['end_date'] = item.end_date.strftime('%Y-%m-%d')
-
-                if item.has_end_time:
-                    data['end_time'] = item.end_time.strftime('%H:%M:%SZ')
-
-                if item.meet_at:
-                    data['meet_at'] = item.meet_at.strftime('%Y-%m-%dT%H:%M:%SZ')
-                
-                if item.access_at:
-                    data['access_at'] = item.access_at.strftime('%Y-%m-%dT%H:%M:%SZ')
-                
-                data['url'] = str(reverse_lazy('event_detail',kwargs={'pk':item.pk}))
 
                 results.append(data)
             json = simplejson.dumps(results)
