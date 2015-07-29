@@ -596,7 +596,7 @@ class IcalTest(LiveServerTestCase):
         models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL, start_date=date.today(), description="start today no end")
         models.Event.objects.create(name="TE E3", status=models.Event.CONFIRMED, start_date=date.today(), end_date=date.today(), description="start today with end today")
         models.Event.objects.create(name="TE E4", status=models.Event.CONFIRMED, start_date=date.today()-timedelta(weeks=104), description="start past 2 years no end")
-        models.Event.objects.create(name="TE E5", status=models.Event.BOOKED, start_date=date.today()-timedelta(days=7), end_date='2014-03-21', description="start past 1 week with end past")
+        models.Event.objects.create(name="TE E5", status=models.Event.BOOKED, start_date=date.today()-timedelta(days=7), end_date=date.today()-timedelta(days=1), description="start past 1 week with end past")
         models.Event.objects.create(name="TE E6", status=models.Event.BOOKED, start_date=date.today()-timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start past, end future")
         models.Event.objects.create(name="TE E7", status=models.Event.BOOKED, start_date=date.today()+timedelta(days=2), end_date=date.today()+timedelta(days=2), description="start + end in future")
 
