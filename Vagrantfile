@@ -76,6 +76,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision 'foreman',
             type: 'shell',
             path: 'config/vagrant/foreman_setup.sh',
+            run: 'always',
             args: [
               settings['virtualenv']['envname'],
               settings['django']['settings_module'],
