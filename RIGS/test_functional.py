@@ -145,6 +145,8 @@ class EventTest(LiveServerTestCase):
         self.profile.set_password("EventTestPassword")
         self.profile.save()
 
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
+        
         self.browser = webdriver.Firefox()
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
@@ -377,9 +379,9 @@ class EventTest(LiveServerTestCase):
 
         # Check totals
         self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
-        self.assertIn("TBD%", self.browser.find_element_by_id('vat-rate').text)
-        self.assertEqual("0.00", self.browser.find_element_by_id('vat').text)
-        self.assertEqual("47.90", self.browser.find_element_by_id('total').text)
+        self.assertIn("(TBC)", self.browser.find_element_by_id('vat-rate').text)
+        self.assertEqual("9.58", self.browser.find_element_by_id('vat').text)
+        self.assertEqual("57.48", self.browser.find_element_by_id('total').text)
 
         # Attempt to save - missing title
         save.click()
@@ -413,6 +415,121 @@ class EventTest(LiveServerTestCase):
         # See redirected to success page
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
+
+    def testDateValidation(self):
+        self.browser.get(self.live_server_url + '/event/create/')
+        # Gets redirected to login and back
+        self.authenticate('/event/create/')
+
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
+
+        wait.until(animation_is_finished())
+
+        # Click Rig button
+        self.browser.find_element_by_xpath('//button[.="Rig"]').click()
+
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+
+        # Set title
+        e = self.browser.find_element_by_id('id_name')
+        e.send_keys('Test Event Name')
+
+        # Both dates, no times, end before start
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        form.find_element_by_id('id_end_date').clear()
+        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+
+        # Attempt to save - should fail
+        save.click()
+        error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
+        self.assertTrue(error.is_displayed())
+        self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
+
+
+        # Same date, end time before start time
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        form.find_element_by_id('id_end_date').clear()
+        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+
+        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys('06:59')
+
+        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys('06:00')
+
+        # Attempt to save - should fail
+        save.click()
+        error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
+        self.assertTrue(error.is_displayed())
+        self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
+
+
+        # Same date, end time before start time
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        form.find_element_by_id('id_end_date').clear()
+        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+
+        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys('06:59')
+
+        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys('06:00')
+
+
+        # No end date, end time before start time
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        form.find_element_by_id('id_end_date').clear()
+
+        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys('06:59')
+
+        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys('06:00')
+
+        # Attempt to save - should fail
+        save.click()
+        error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
+        self.assertTrue(error.is_displayed())
+        self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
+
+
+        # 2 dates, end after start
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        form.find_element_by_id('id_end_date').clear()
+        form.find_element_by_id('id_end_date').send_keys('3015-04-26')
+
+        form.find_element_by_id('id_start_time').clear()
+        
+        form.find_element_by_id('id_end_time').clear()
+        
+        # Attempt to save - should succeed
+        save.click()
+        
+        # See redirected to success page
+        event = models.Event.objects.get(name='Test Event Name')
+        self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
+
+
 
     def testEventDetail(self):
         with transaction.atomic(), reversion.create_revision():

@@ -9,7 +9,9 @@ from django.utils.encoding import python_2_unicode_compatible
 import reversion
 import string
 import random
+from collections import Counter
 from django.core.urlresolvers import reverse_lazy
+from django.core.exceptions import ValidationError
 
 from decimal import Decimal
 
@@ -91,9 +93,13 @@ class Person(models.Model, RevisionMixin):
     def organisations(self):
         o = []
         for e in Event.objects.filter(person=self).select_related('organisation'):
-            if e.organisation and e.organisation not in o:
+            if e.organisation:
                 o.append(e.organisation)
-        return o
+
+        #Count up occurances and put them in descending order
+        c = Counter(o)
+        stats = c.most_common()
+        return stats
 
     @property
     def latest_events(self):
@@ -131,9 +137,13 @@ class Organisation(models.Model, RevisionMixin):
     def persons(self):
         p = []
         for e in Event.objects.filter(organisation=self).select_related('person'):
-            if e.person and e.person not in p:
+            if e.person:
                 p.append(e.person)
-        return p
+        
+        #Count up occurances and put them in descending order
+        c = Counter(p)
+        stats = c.most_common()
+        return stats
 
     @property
     def latest_events(self):
@@ -415,7 +425,21 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return str(self.pk) + ": " + self.name
+        return unicode(self.pk) + ": " + self.name
+
+    def clean(self):
+        if self.end_date and self.start_date > self.end_date:
+            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+
+        startEndSameDay = not self.end_date or self.end_date == self.start_date
+        hasStartAndEnd = self.has_start_time and self.has_end_time
+        if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
+            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')            
+
+    def save(self, *args, **kwargs):
+        """Call :meth:`full_clean` before saving."""
+        self.full_clean()
+        super(Event, self).save(*args, **kwargs)
 
     class Meta:
         permissions = (

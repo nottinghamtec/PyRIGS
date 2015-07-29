@@ -47,6 +47,7 @@ class EventCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
         context['edit'] = True
+        context['currentVAT'] = models.VatRate.objects.current_rate()
 
         form = context['form']
         if re.search('"-\d+"', form['items_json'].value()):
@@ -124,7 +125,10 @@ class EventPrint(generic.View):
         merger.write(merged)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, object.name)
+
+        escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
+
+        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
 

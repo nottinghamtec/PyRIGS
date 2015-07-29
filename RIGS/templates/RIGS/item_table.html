@@ -29,8 +29,13 @@
 				<td colspan="2">£ <span id="sumtotal">{{object.sum_total|default:0|floatformat:2}}</span></td>
 			</tr>
 			<tr>
-				<td id="vat-rate" data-rate="{{object.vat_rate.rate}}">VAT @
-					{{object.vat_rate.as_percent|floatformat|default:"TBD"}}%</td>
+				{% if not object.pk %}
+					<td id="vat-rate" data-rate="{{currentVAT.rate}}">VAT @
+						{{currentVAT.as_percent|floatformat}}% (TBC)</td>
+				{% else %}
+					<td id="vat-rate" data-rate="{{object.vat_rate.rate}}">VAT @
+						{{object.vat_rate.as_percent|floatformat|default:"TBD"}}%</td>
+				{% endif %}
 				<td colspan="2">£ <span id="vat">{{object.vat|default:0|floatformat:2}}</span></td>
 			</tr>
 			<tr>

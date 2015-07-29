@@ -177,7 +177,7 @@ class VenueDetail(generic.DetailView):
 
 class VenueCreate(generic.CreateView):
     model = models.Venue
-    fields = ['name','phone','email','address','notes']
+    fields = ['name','phone','email','address','notes','three_phase_available']
 
     def get_success_url(self):
         if self.request.is_ajax():
@@ -194,7 +194,7 @@ class VenueCreate(generic.CreateView):
 
 class VenueUpdate(generic.UpdateView):
     model = models.Venue
-    fields = ['name','phone','email','address','notes']
+    fields = ['name','phone','email','address','notes','three_phase_available']
 
     def get_success_url(self):
         if self.request.is_ajax():
