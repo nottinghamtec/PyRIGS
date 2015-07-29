@@ -14,6 +14,7 @@ from z3c.rml import rml2pdf
 
 from RIGS import models
 
+import re
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
@@ -63,8 +64,10 @@ class InvoicePrint(generic.View):
 
         pdfData = buffer.read()
 
+        escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
+
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, object.name)
+        response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, escapedEventName)
         response.write(pdfData)
         return response
 
