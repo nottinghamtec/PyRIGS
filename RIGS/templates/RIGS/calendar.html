@@ -17,7 +17,6 @@
         $(document).ready(function() {
 
             $('#calendar').fullCalendar({
-                //defaultDate: '2015-02-12',
                 editable: false,
                 eventLimit: true, // allow "more" link when too many events
                 firstDay: 1,
@@ -37,75 +36,156 @@
                         // options apply to basicDay and agendaDay views
                     }
                 },
-                buttonText:{
-                    today:    'Today',
-                    month:    'Month',
-                    week:     'Week',
-                    day:      'Day'
-                },
-                header:{
-                    left:   'title',
-                    center: '',
-                    right:  'today prev,next month,agendaWeek,agendaDay'
-                },
+                header:false,
+
                 events: function(start_moment, end_moment, timezone, callback) {
                     
                     $.ajax({
                         url: '/api/event',
                         dataType: 'json',
                         data: {
-                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]"),
-                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss[Z]")
+                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss"),
+                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss")
                         },
                         success: function(doc) {
                             var events = [];
-                            var colours = 
+                            colours = {'Provisional': '#f0ad4e',
+                                'Confirmed': '#5cb85c' ,
+                                'Booked': '#5cb85c' ,
+                                'Cancelled': 'grey' ,
+                                'non-rig': '#5bc0de'
+                            };
                             $(doc).each(function() {
-                                thisEvent = [];
-                                colours = {'Provisional': 'orange',
-                                    'Confirmed': 'green' ,
-                                    'Booked': 'green' ,
-                                    'Cancelled': 'grey' 
-                                };
-
-                                thisEvent['start'] = $(this).attr('start_date');
-                                if ($(this).attr('start_time')) {
-                                    thisEvent['start'] += 'T' + $(this).attr('start_time');
-
-                                }
-
-                                if ($(this).attr('end_date')) {
-                                    thisEvent['end'] = $(this).attr('end_date');
-                                    if ($(this).attr('end_time')) {
-                                        thisEvent['end'] += 'T' + $(this).attr('end_time');
-                                    }
-                                }
-                                thisEvent['className'] = 'modal-href';
-
-                                thisEvent['title'] = $(this).attr('title');
                                 
-                                thisEvent['color'] = colours[$(this).attr('status')];
 
-                                thisEvent['url'] = $(this).attr('url');
+                                thisEvent = {
+                                    'start': $(this).attr('earliest'),
+                                    'end': $(this).attr('latest'),
+                                    'className': 'modal-href',
+                                    'title': $(this).attr('title'),
+                                    'url': $(this).attr('url')
+                                }
+                               
+                                if($(this).attr('is_rig')==true || $(this).attr('status') == "Cancelled"){
+                                    thisEvent['color'] = colours[$(this).attr('status')];
+                                }else{
+                                    thisEvent['color'] = colours['non-rig'];
+                                }
                                 
                                 events.push(thisEvent);
                             });
                             callback(events);
                         }
                     });
+                },
+
+                viewRender: function(view, element){
+                    // Set the title of the view
+                    $('#calendar-header').text(view.title);
+
+                    // Enable/Disable "Today" button as required
+                    if(moment().isBetween(view.intervalStart, view.intervalEnd)){
+                        //Today is within the current view
+                        $('#today-button').prop('disabled', true);
+                    }else{
+                        $('#today-button').prop('disabled', false);
+                    }
+
+                    // Set active view select button
+                    switch(view.name){
+                        case 'month':
+                            $('#month-button').addClass('active');
+                            $('#week-button').removeClass('active');
+                            $('#day-button').removeClass('active');
+                            break;
+
+                        case 'agendaWeek':
+                            $('#month-button').removeClass('active');
+                            $('#week-button').addClass('active');
+                            $('#day-button').removeClass('active');
+                            break;
+
+                        case 'agendaDay':
+                            $('#month-button').removeClass('active');
+                            $('#week-button').removeClass('active');
+                            $('#day-button').addClass('active');
+                            break;
+                    }
+
                 }
             });
-           
+          
+            // set some button listeners
+
+            $('#next-button').click(function(){ $('#calendar').fullCalendar('next') });
+            $('#prev-button').click(function(){ $('#calendar').fullCalendar('prev') });
+            $('#today-button').click(function(){ $('#calendar').fullCalendar('today') });
+
+            $('#month-button').click(function(){ $('#calendar').fullCalendar('changeView','month') });
+            $('#week-button').click(function(){ $('#calendar').fullCalendar('changeView','agendaWeek') });
+            $('#day-button').click(function(){ $('#calendar').fullCalendar('changeView','agendaDay') });
+
+            $('#go-to-date-input').change(function(){
+                if( moment($('#go-to-date-input').val()).isValid() ){
+                    $('#go-to-date-button').prop('disabled', false);
+                }else{
+                    $('#go-to-date-button').prop('disabled', true);
+                }
+
+            });
+
+            $('#go-to-date-button').click(function(){
+                day = moment($('#go-to-date-input').val()) ;
+                if(day.isValid()){
+                    $('#calendar').fullCalendar( 'gotoDate', day);
+                }else{
+                    alert('Invalid Date');
+                }
+            });
+
         });
 
     </script>
 {% endblock %}
 
 {% block content %}
+
     <div class="row">
-        <div style="col-sm-12">
-            <div id='calendar'>
+        
+        <div class="col-sm-12">
+            <div class="pull-left">
+                <span id="calendar-header" class="h2"></span>
+            </div>
+
+            <div class="form-inline pull-right btn-page">
+                <div class="input-group">
+                  <input type="date" class="form-control" id="go-to-date-input" placeholder="Go to date...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" id="go-to-date-button" type="button" disabled>Go!</button>
+                  </span>
+                </div>
+
+                <div class="btn-group">
+                  <button type="button" class="btn btn-primary" id="today-button">Today</button>
+                </div>
+
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default" id="prev-button"><span class="glyphicon glyphicon-chevron-left"></span></button>
+                  <button type="button" class="btn btn-default" id="next-button"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                </div>
+
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default" id="month-button">Month</button>
+                  <button type="button" class="btn btn-default" id="week-button">Week</button>
+                  <button type="button" class="btn btn-default" id="day-button">Day</button>
+                </div>
+              
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div id='calendar'>
+            </div>
+        </div>
 {% endblock %}

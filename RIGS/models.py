@@ -1,5 +1,5 @@
 import hashlib
-import datetime
+import datetime, pytz
 
 from django.db import models, connection
 from django.contrib.auth.models import AbstractUser
@@ -239,7 +239,14 @@ class EventManager(models.Manager):
             (models.Q(start_date__gte=start.date(), start_date__lte=end.date())) |  # Start date in bounds
             (models.Q(end_date__gte=start.date(), end_date__lte=end.date())) |  # End date in bounds
             (models.Q(access_at__gte=start, access_at__lte=end)) |  # Access at in bounds
-            (models.Q(meet_at__gte=start, meet_at__lte=end))  # Meet at in bounds
+            (models.Q(meet_at__gte=start, meet_at__lte=end)) | # Meet at in bounds
+
+            (models.Q(start_date__lte=start, end_date__gte=end)) | # Start before, end after
+            (models.Q(access_at__lte=start, start_date__gte=end)) | # Access before, start after
+            (models.Q(access_at__lte=start, end_date__gte=end)) | # Access before, end after
+            (models.Q(meet_at__lte=start, start_date__gte=end)) | # Meet before, start after
+            (models.Q(meet_at__lte=start, end_date__gte=end)) # Meet before, end after
+
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
 
@@ -359,6 +366,59 @@ class Event(models.Model, RevisionMixin):
     def has_end_time(self):
         return self.end_time is not None
 
+    @property
+    def earliest_time(self):
+        """Finds the earliest time defined in the event - this function could return either a tzaware datetime, or a naiive date object"""
+
+        #Put all the datetimes in a list
+        datetime_list = []
+
+        if self.access_at:
+            datetime_list.append(self.access_at)
+
+        if self.meet_at:
+            datetime_list.append(self.meet_at)
+
+        # If there is no start time defined, pretend it's midnight
+        startTimeFaked = False
+        if self.has_start_time:
+            startDateTime = datetime.datetime.combine(self.start_date,self.start_time)
+        else:
+            startDateTime = datetime.datetime.combine(self.start_date,datetime.time(00,00))
+            startTimeFaked = True
+
+        #timezoneIssues - apply the default timezone to the naiive datetime
+        tz = pytz.timezone(settings.TIME_ZONE)
+        startDateTime = tz.localize(startDateTime)
+        datetime_list.append(startDateTime) # then add it to the list
+
+        earliest = min(datetime_list).astimezone(tz) #find the earliest datetime in the list
+
+        # if we faked it & it's the earliest, better own up
+        if startTimeFaked and earliest==startDateTime:
+            return self.start_date
+        
+        return earliest
+
+    @property
+    def latest_time(self):
+        """Returns the end of the event - this function could return either a tzaware datetime, or a naiive date object"""
+        tz = pytz.timezone(settings.TIME_ZONE)
+        endDate = self.end_date
+        if endDate is None:
+            endDate = self.start_date
+
+        if self.has_end_time:
+            endDateTime = datetime.datetime.combine(endDate,self.end_time)
+            tz = pytz.timezone(settings.TIME_ZONE)
+            endDateTime = tz.localize(endDateTime)
+
+            return endDateTime
+
+        else:
+            return endDate
+
+        
     objects = EventManager()
 
     def get_absolute_url(self):
