@@ -6,6 +6,8 @@
 {% block content %}
     <div class="col-sm-12">
         <h2>Invoices</h2>
+        {% block search %}
+        {% endblock %}
         {% if is_paginated %}
             <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
                 {% paginator %}

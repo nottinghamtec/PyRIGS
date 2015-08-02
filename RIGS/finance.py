@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 import datetime
 from z3c.rml import rml2pdf
+from django.db.models import Q
 
 from RIGS import models
 
@@ -87,6 +88,36 @@ class InvoiceVoid(generic.View):
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
     paginate_by = 25
+    template_name="RIGS/invoice_archive.html"
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+        
+        filter = Q(event__name__icontains=q)
+
+        #try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+            filter = filter | Q(event__pk=val)
+        except:
+            #not an integer
+            pass
+
+        try:
+            if q[0] == "N":
+                val = int(q[1:])
+                filter = Q(event__pk=val) #If string is Nxxxxx then filter by event number
+            elif q[0] == "#":
+                val = int(q[1:])
+                filter = Q(pk=val) #If string is #xxxxx then filter by invoice number
+
+        except:
+            pass
+            
+        object_list = self.model.objects.filter(filter)
+
+        return object_list
 
 
 class InvoiceWaiting(generic.ListView):
