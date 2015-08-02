@@ -162,6 +162,14 @@ class EventArchive(generic.ArchiveIndexView):
     date_field = "start_date"
     paginate_by = 25
 
+    def get_context_data(self, **kwargs):
+        # get super context
+        context = super(EventArchive, self).get_context_data(**kwargs)
+
+        context['start'] = self.request.GET.get('start', None)
+        context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
+        return context
+
     def get_queryset(self):
         start = self.request.GET.get('start', None)
         end = self.request.GET.get('end', datetime.date.today())
@@ -181,8 +189,29 @@ class EventArchive(generic.ArchiveIndexView):
             else:
                 filter = Q(start_date__gte=start)
 
-        if filter:
-            qs = self.model.objects.filter(filter).order_by('-start_date')
+
+        q = self.request.GET.get('q', "")
+
+        qfilter = Q(pk__gte=0)
+        if q is not "":
+            qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
+
+            #try and parse an int
+            try:
+                val = int(q)
+                qfilter = qfilter | Q(pk=val)
+            except: #not an integer
+                pass
+
+            try:
+                if q[0] == "N":
+                    val = int(q[1:])
+                    qfilter = Q(pk=val) #If string is N###### then do a simple PK filter
+            except:
+                pass
+
+        if filter or qfilter:
+            qs = self.model.objects.filter(filter & qfilter).order_by('-start_date')
         else:
             qs = self.model.objects.all().order_by('-start_date')
 
