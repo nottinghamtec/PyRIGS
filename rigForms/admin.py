@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from forms import models
+from rigForms import models
 
 import reversion
 

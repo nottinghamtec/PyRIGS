@@ -1,5 +1,5 @@
 from django.test import TestCase
-from forms import models
+from rigForms import models
 
 class FormModelsTestCase(TestCase):
 	def setUp(self):
