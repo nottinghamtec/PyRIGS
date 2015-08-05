@@ -18,6 +18,8 @@ urlpatterns = patterns('',
     url('^user/', include('registration.backends.default.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
+
+    url(r'^forms/', include('rigForms.urls')),
 )
 
 if settings.DEBUG:

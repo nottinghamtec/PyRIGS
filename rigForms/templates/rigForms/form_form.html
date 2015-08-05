@@ -1,0 +1,59 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block title %}An event checklist{% endblock %}
+
+{% block content %}
+    <div ng-controller="FormController">
+        <form sf-schema="schema" sf-form="form" sf-model="model" ng-submit="onSubmit(myForm)"></form>
+    </div>
+
+{% endblock %}
+
+{% if request.is_ajax %}
+    {% block footer %}
+       An AJAX request footer
+    {% endblock %}
+{% endif %}
+
+
+{% block js %}
+
+    <script type="text/javascript" src="{% static "js/angular-schema-form/angular.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "js/angular-schema-form/angular-sanitize.js"%}"></script>
+    <script type="text/javascript" src="{% static "js/angular-schema-form/tv4.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "js/angular-schema-form/ObjectPath.js"%}"></script>
+    <script type="text/javascript" src="{% static "js/angular-schema-form/schema-form.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "js/angular-schema-form/bootstrap-decorator.min.js"%}"></script>
+
+    <script>
+        $(document).ready(function () {
+            angular.module('myModule', ['schemaForm']).controller('FormController', function($scope) {
+                {% autoescape off %} {# otherwise quotes get replaced with HTML entities #}
+                    $scope.schema = {{ object.schema.schema }};
+
+                    $scope.form = {{ object.schema.layout }};
+
+                    $scope.model = {{ object.data }};
+                {% endautoescape %}
+
+                    $scope.onSubmit = function(form) {
+                        // First we broadcast an event so all fields validate themselves
+                        $scope.$broadcast('schemaFormValidate');
+
+                        // Then we check if the form is valid
+                        if (form.valid) {
+                          // ... do whatever you need to do with your data.
+                              console.log()
+                        }
+
+                    }
+            });
+
+              angular.bootstrap(document, ['myModule']);
+        });
+    </script>
+
+{% endblock %}

@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 import reversion
 
+import datetime
+
 from RIGS.models import RevisionMixin
 
 
@@ -45,3 +47,9 @@ class Form(models.Model, RevisionMixin):
 	schema = models.ForeignKey('Schema', related_name='forms', blank=False)
 
 	data = models.TextField(blank=False, null=False, default="{}")
+
+	class Meta:
+		permissions = (
+			('create_form', 'Can complete a form'),
+		)
+		

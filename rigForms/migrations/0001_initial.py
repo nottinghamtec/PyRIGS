@@ -49,11 +49,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schema',
             name='schema_type',
-            field=models.ForeignKey(related_name='schemas', to='forms.Type'),
+            field=models.ForeignKey(related_name='schemas', to='rigForms.Type'),
         ),
         migrations.AddField(
             model_name='form',
             name='schema',
-            field=models.ForeignKey(related_name='forms', to='forms.Schema'),
+            field=models.ForeignKey(related_name='forms', to='rigForms.Schema'),
         ),
     ]
