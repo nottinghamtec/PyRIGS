@@ -37,7 +37,7 @@ class Schema(models.Model, RevisionMixin):
         get_latest_by = 'start_at'
 
     def __str__(self):
-        return self.comment + " " + str(self.start_at) + " @ "  + "%"
+        return self.comment + " " + str(self.start_at)
 
 @reversion.register
 class Form(models.Model, RevisionMixin):
