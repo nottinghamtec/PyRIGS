@@ -51,5 +51,6 @@ class Form(models.Model, RevisionMixin):
 	class Meta:
 		permissions = (
 			('create_form', 'Can complete a form'),
+            ('update_form', 'Can change a form'),
 		)
 		

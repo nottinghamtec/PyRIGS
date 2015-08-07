@@ -7,7 +7,9 @@
 
 {% block content %}
     <div ng-controller="FormController">
-        <form sf-schema="schema" sf-form="form" sf-model="model" ng-submit="onSubmit(myForm)"></form>
+        <form name="theForm" sf-schema="schema" sf-form="form" sf-model="model" ng-submit="onSubmit(theForm)">
+
+        </form>
     </div>
 
 {% endblock %}
@@ -44,9 +46,18 @@
                         $scope.$broadcast('schemaFormValidate');
 
                         // Then we check if the form is valid
-                        if (form.valid) {
-                          // ... do whatever you need to do with your data.
-                              console.log()
+                        if (form.$valid) {
+
+                            //Submit the data in JSON form
+                            var form = $('<form action="" method="post">' + "{% csrf_token %}" +
+                              '<input style="display:none" type="text" name="data" value="" />' +
+                              '</form>');
+
+                            $('input[name="data"]', form).val(JSON.stringify($scope.model));
+                            
+                            $('body').append(form);
+
+                            form.submit();
                         }
 
                     }
