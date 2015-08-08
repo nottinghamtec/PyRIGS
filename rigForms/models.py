@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 import reversion
+
+import json
+import jsonschema
 
 import datetime
 
@@ -23,23 +27,44 @@ class SchemaManager(models.Manager):
 @reversion.register
 @python_2_unicode_compatible
 class Schema(models.Model, RevisionMixin):
-    schema_type = models.ForeignKey('Type', related_name='schemas', blank=False)
+	schema_type = models.ForeignKey('Type', related_name='schemas', blank=False)
 
-    start_at = models.DateTimeField()
+	start_at = models.DateTimeField()
     
-    schema = models.TextField(blank=False, null=False, default="{}")
-    layout = models.TextField(blank=False, null=False, default="[]")
+	schema = models.TextField(blank=False, null=False, default="{}")
+	layout = models.TextField(blank=False, null=False, default="[]")
 
-    comment = models.CharField(max_length=255)
+	comment = models.CharField(max_length=255)
 
-    objects = SchemaManager()
+	objects = SchemaManager()
 
-    class Meta:
-        ordering = ['-start_at']
-        get_latest_by = 'start_at'
+	def clean(self):
+		# raise ValidationError('Invalid JSON received') 
+		try: 
+			jsonData = json.loads(self.schema)
+		except ValueError:
+			raise ValidationError('Invalid JSON in schema')
+		except:
+			raise
 
-    def __str__(self):
-        return self.schema_type.name + "|" + self.comment + " " + str(self.start_at)
+		try: 
+			jsonData = json.loads('{"data":'+self.layout+"}")
+		except ValueError:
+			raise ValidationError('Invalid JSON in layout')
+		except:
+			raise
+
+	def save(self, *args, **kwargs):
+		"""Call :meth:`full_clean` before saving."""
+		self.full_clean()
+		super(Schema, self).save(*args, **kwargs)
+
+	class Meta:
+		ordering = ['-start_at']
+		get_latest_by = 'start_at'
+
+	def __str__(self):
+		return self.schema_type.name + "|" + self.comment + " " + str(self.start_at)
 
 @reversion.register
 class Form(models.Model, RevisionMixin):
@@ -47,6 +72,28 @@ class Form(models.Model, RevisionMixin):
 	schema = models.ForeignKey('Schema', related_name='forms', blank=False)
 
 	data = models.TextField(blank=False, null=False, default="{}")
+
+	def clean(self):
+		try: 
+			jsonData = json.loads(self.data)
+		except ValueError:
+			raise ValidationError('Invalid JSON received from browser')
+
+		try:
+			schemaValue = json.loads(self.schema.schema)
+			jsonschema.validate(jsonData,schemaValue) #This will raise ValidationError if data doesn't match schema
+		except ObjectDoesNotExist:
+			pass #halfway through creation this can cause issues
+		except ValueError:
+			raise ValidationError('Invalid JSON in schema, cannot validate')
+		except jsonschema.ValidationError: #raise a django exception
+			raise ValidationError('Data is not valid, cannot save')
+
+
+	def save(self, *args, **kwargs):
+		"""Call :meth:`full_clean` before saving."""
+		self.full_clean()
+		super(Form, self).save(*args, **kwargs)
 
 	class Meta:
 		permissions = (
