@@ -19,6 +19,9 @@ class Migration(migrations.Migration):
                 ('data', models.TextField(default=b'{}')),
                 ('event', models.ForeignKey(related_name='forms', to='RIGS.Event')),
             ],
+            options={
+                'permissions': (('create_form', 'Can complete a form'), ('update_form', 'Can change a form'), ('view_form', 'Can view forms')),
+            },
             bases=(models.Model, RIGS.models.RevisionMixin),
         ),
         migrations.CreateModel(
