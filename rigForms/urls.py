@@ -9,5 +9,7 @@ urlpatterns = patterns('',
                name='create_form'),
            url(r'^(?P<pk>\d+)/$', permission_required_with_403('rigForms.update_form')(views.FormUpdate.as_view()),
                name='update_form'),
+           url(r'^for-event/(?P<event_pk>\d+)/$', permission_required_with_403('rigForms.view_form')(views.FormList.as_view()),
+               name='form_list'),
 )
 

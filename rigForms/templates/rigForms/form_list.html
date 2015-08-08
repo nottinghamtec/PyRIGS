@@ -1,0 +1,51 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block title %}List of Forms{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <h2>Forms for "<a href="{% url 'event_detail' event.pk %}">N{{event.pk|stringformat:"05d"}} | {{event.name}}</a>"</h2>
+    </div>
+    <div class="col-sm-12 text-right">
+        <div class="btn-group btn-page">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-plus"></span> Add Form <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                {% for type in formTypes %}
+                    <li><a href="{% url 'create_form' event_pk=event.pk type_pk=type.pk %}">{{type.name}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <table class="table table-responsive table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Form Type</th>
+                <th>Last Edited</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>{{ object.pk }}</td>
+                    <td>{{ object.schema.schema_type.name }}</td>
+                    <td>{{ object.last_edited_by }} at {{ object.last_edited_at }}</td>
+                    <td class="text-right">
+                        <a href="{% url 'update_form' object.pk %}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+{% endblock %}

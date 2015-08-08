@@ -39,7 +39,7 @@ class Schema(models.Model, RevisionMixin):
         get_latest_by = 'start_at'
 
     def __str__(self):
-        return self.comment + " " + str(self.start_at)
+        return self.schema_type.name + "|" + self.comment + " " + str(self.start_at)
 
 @reversion.register
 class Form(models.Model, RevisionMixin):
@@ -52,5 +52,6 @@ class Form(models.Model, RevisionMixin):
 		permissions = (
 			('create_form', 'Can complete a form'),
             ('update_form', 'Can change a form'),
+            ('view_form', 'Can view forms'),
 		)
 		

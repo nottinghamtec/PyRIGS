@@ -5,6 +5,7 @@ from rigForms import models
 from django.shortcuts import get_object_or_404
 from django.http.response import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
+from django.db.models import Q
 
 import RIGS
 
@@ -57,3 +58,23 @@ class FormUpdate(generic.UpdateView):
 		return reverse_lazy('update_form', kwargs={
                 'pk': self.object.pk,
             })
+
+class FormList(generic.ListView):
+	model = models.Form
+
+	def get_queryset(self):
+		event = get_object_or_404(RIGS.models.Event,pk=self.kwargs["event_pk"])
+		object_list = self.model.objects.filter(Q(event=event))
+
+		return object_list
+
+	def get_context_data(self):
+		context = super(FormList, self).get_context_data()
+		context['event'] = get_object_or_404(RIGS.models.Event,pk=self.kwargs["event_pk"])
+
+		context['formTypes'] = models.Type.objects.filter(Q(active=True))
+
+		return context
+
+
+
