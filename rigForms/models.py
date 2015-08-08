@@ -28,7 +28,7 @@ class Schema(models.Model, RevisionMixin):
     start_at = models.DateTimeField()
     
     schema = models.TextField(blank=False, null=False, default="{}")
-    layout = models.TextField(blank=False, null=False, default="{}")
+    layout = models.TextField(blank=False, null=False, default="[]")
 
     comment = models.CharField(max_length=255)
 
