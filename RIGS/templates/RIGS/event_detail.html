@@ -29,6 +29,14 @@
                                 class="glyphicon glyphicon-gbp"></span> <span
                             class="hidden-xs">Invoice</span></a>
                     {% endif %}
+                    {% url 'form_list' event_pk=event.pk as forms_url %}
+                    {% if forms_url %}
+                        {% if perms.rigForms.view_form %}
+                            <a href="{% url 'form_list' event.pk %}" class="btn btn-default" title="Rig Forms"><span
+                                class="glyphicon glyphicon-check"></span> <span
+                            class="hidden-xs">Forms</span></a>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -194,6 +202,14 @@
                             class="glyphicon glyphicon-gbp"></span> <span
                         class="hidden-xs">Invoice</span></a>
                 {% endif %}
+                {% url 'form_list' event_pk=event.pk as forms_url %}
+                {% if forms_url %}
+                    {% if perms.rigForms.view_form %}
+                        <a href="{% url 'form_list' event.pk %}" class="btn btn-default" title="Rig Forms"><span
+                            class="glyphicon glyphicon-check"></span> <span
+                        class="hidden-xs">Forms</span></a>
+                    {% endif %}
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -230,6 +246,14 @@
                         <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
                                 class="glyphicon glyphicon-gbp"></span> <span
                             class="hidden-xs">Invoice</span></a>
+                    {% endif %}
+                    {% url 'form_list' event_pk=event.pk as forms_url %}
+                    {% if forms_url %}
+                        {% if perms.rigForms.view_form %}
+                            <a href="{% url 'form_list' event.pk %}" class="btn btn-default" title="Rig Forms"><span
+                                class="glyphicon glyphicon-check"></span> <span
+                            class="hidden-xs">Forms</span></a>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </div>
