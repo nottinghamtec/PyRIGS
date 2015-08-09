@@ -11,6 +11,7 @@ django-toolbelt==0.0.1
 django-widget-tweaks==1.3
 gunicorn==19.3.0
 icalendar==3.9.0
+jsonschema==2.5.1
 lxml==3.4.4
 Pillow==2.8.1
 psycopg2==2.6
@@ -31,3 +32,4 @@ z3c.rml==2.8.1
 zope.event==4.0.3
 zope.interface==4.1.2
 zope.schema==4.4.2
+
