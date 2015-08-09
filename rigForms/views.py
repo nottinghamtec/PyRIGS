@@ -141,7 +141,6 @@ class FormPrint(generic.TemplateView):
 		}
 		return template.render(context)
 
-
 	def _render_boolean(self, field, value, current_indent):
 		template = get_template('rigForms/print/render-boolean.xml')
 		context = {
@@ -175,7 +174,6 @@ class FormPrint(generic.TemplateView):
 			result += "<h1>Not ordereddict:" + str(key) + str(field) + "<br/><br/></h1>"
 
 		return result
-
 
 	def _render_field(self, parentField, parentValue, current_indent):
 		result = ""
@@ -213,7 +211,8 @@ class FormPrint(generic.TemplateView):
 					'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
 				}
 			},
-			'formData':formData
+			'formData':formData,
+			'form':form
 		})
 
 		rml = template.render(context)
@@ -229,5 +228,3 @@ class FormPrint(generic.TemplateView):
 		response['Content-Disposition'] = "filename=Form.pdf"
 		response.write(pdfData)
 		return response
-
-

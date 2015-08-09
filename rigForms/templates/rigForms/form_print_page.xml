@@ -1,17 +1,14 @@
 <setNextFrame name="main"/>
 <nextFrame/>
 
+<h1><b>{{ form.schema.schema_type.name }}</b><small></small></h1>
+        <spacer length="10"/>
 
-    {% autoescape off %}
 
-
-
+{% autoescape off %}
 
 {{ formData }}
 
-
 {% endautoescape %}
-
-
 
 <namedString id="lastPage"><pageNumber/></namedString>
