@@ -11,5 +11,6 @@ urlpatterns = patterns('',
                name='update_form'),
            url(r'^for-event/(?P<event_pk>\d+)/$', permission_required_with_403('rigForms.view_form')(views.FormList.as_view()),
                name='form_list'),
+           url(r'^(?P<pk>\d+)/print/$', permission_required_with_403('rigForms.view_form')(views.FormPrint.as_view()), name='form_print'),
 )
 

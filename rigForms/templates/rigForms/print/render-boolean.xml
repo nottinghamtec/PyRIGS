@@ -1,0 +1,15 @@
+{# "field" context should have "title", "description"}
+<blockTable colWidths="{{currentIndent}},25,100%" alignment="left" style="checkboxTable">
+<tr>
+	<td></td>
+    <td>
+    	{% if value %}
+    		<img src="rigForms/static/images/form-print/checked_checkbox.jpg" width="20" height="20"/>
+    	{% else %}
+	    	<img src="rigForms/static/images/form-print/unchecked_checkbox.jpg" width="20" height="20"/>
+    	{% endif %}
+	</td>
+    <td><h4>{{field.title}}</h4>
+    <para>{{field.description}}</para></td>
+</tr>
+</blockTable>

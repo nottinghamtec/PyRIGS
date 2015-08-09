@@ -1,0 +1,12 @@
+{# "field" context should have "title", "description" and "value"}
+<blockTable colWidths="{{currentIndent}},100,100%" alignment="left" style="stringTable">
+<tr>
+	<td></td>
+    <td>
+        <h4>{{field.title}}</h4>
+        <para>{{field.description}}</para>
+    </td>
+    <td>
+    <para>{{value}}</para></td>
+</tr>
+</blockTable>

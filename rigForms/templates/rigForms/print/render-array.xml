@@ -1,0 +1,16 @@
+{# "field" context should have "title", "description" and "value" #}
+{# "children" context should be a string of inner XML #}
+<blockTable colWidths="{{currentIndent}},100%" alignment="left" style="objectTable">
+<tr>
+	<td></td>
+    <td><h1>{{field.title}}</h1></td>
+</tr>
+</blockTable>
+
+{% autoescape off %}
+
+{% for child in children %}
+	{{ child }}
+{% endfor %}
+
+{% endautoescape %}
