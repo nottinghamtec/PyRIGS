@@ -38,9 +38,14 @@
                     <td>{{ object.schema.schema_type.name }}</td>
                     <td>{{ object.last_edited_by }} at {{ object.last_edited_at }}</td>
                     <td class="text-right">
-                        <a href="{% url 'update_form' object.pk %}" class="btn btn-default">
-                            <span class="glyphicon glyphicon-pencil"></span>
-                        </a>
+                        <div class="btn-group">
+                            <a href="{% url 'update_form' object.pk %}" class="btn btn-default">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <a href="{% url 'form_print' object.pk %}" target="_blank" class="btn btn-default">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </a>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}
