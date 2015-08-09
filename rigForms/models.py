@@ -81,13 +81,13 @@ class Form(models.Model, RevisionMixin):
 
 		try:
 			schemaValue = json.loads(self.schema.schema)
-			jsonschema.validate(jsonData,schemaValue) #This will raise ValidationError if data doesn't match schema
+			jsonschema.validate(jsonData,schemaValue) #This will raise jsonschema.ValidationError if data doesn't match schema
 		except ObjectDoesNotExist:
 			pass #halfway through creation this can cause issues
 		except ValueError:
 			raise ValidationError('Invalid JSON in schema, cannot validate')
-		except jsonschema.ValidationError: #raise a django exception
-			raise ValidationError('Data is not valid, cannot save')
+		except jsonschema.ValidationError as e: #raise a django exception
+			raise ValidationError('Data is not valid, cannot save: '+e.message)
 
 
 	def save(self, *args, **kwargs):
