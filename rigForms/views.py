@@ -59,7 +59,7 @@ class FormCreate(generic.CreateView):
 		return HttpResponseRedirect(self.get_success_url())
 
 	def get_success_url(self):
-		return reverse_lazy('update_form', kwargs={
+		return reverse_lazy('form_detail', kwargs={
                 'pk': self.object.pk,
             })
 
@@ -84,7 +84,7 @@ class FormUpdate(generic.UpdateView):
 	fields = ['data']
 
 	def get_success_url(self):
-		return reverse_lazy('update_form', kwargs={
+		return reverse_lazy('form_detail', kwargs={
                 'pk': self.object.pk,
             })
 

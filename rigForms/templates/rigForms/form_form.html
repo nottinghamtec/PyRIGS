@@ -1,24 +1,39 @@
-{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% extends "base.html" %}
 {% load widget_tweaks %}
 {% load static %}
 
-
-{% block title %}An event checklist{% endblock %}
+{% block title %}"{{object.schema.schema_type.name}}" for "N{{object.event.pk|stringformat:"05d"}} | {{object.event.name}}"{% endblock %}
 
 {% block content %}
     <div class="col-sm-12">
         <h2>"{{object.schema.schema_type.name}}" for "<a href="{% url 'event_detail' object.event.pk %}">N{{object.event.pk|stringformat:"05d"}} | {{object.event.name}}</a>"</h2>
 
-        <a href="{% url 'form_list' object.event.pk %}" class="btn btn-default" title="Rig Forms"><span class="glyphicon glyphicon-chevron-left"></span> <span class="hidden-xs">Other forms for N{{object.event.pk|stringformat:"05d"}}</span></a>
-
-        <hr/>
+        
 
     </div>
-    {% include 'form_errors.html' %}
-
     <div ng-controller="FormController" class="col-sm-12">
 
         <form name="theForm" ng-submit="onSubmit(theForm)">
+
+            <div class="col-sm-12">
+                <a href="{% url 'form_list' object.event.pk %}" class="btn btn-default" title="Rig Forms"><span class="glyphicon glyphicon-chevron-left"></span> Other forms for N{{object.event.pk|stringformat:"05d"}}</a>
+
+                <div class="btn-group btn-page pull-right">
+                    {% if not edit %}
+                        <a href="{% url 'update_form' object.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> <span class="hidden-xs">Edit</span></a>
+                        <a href="{% url 'form_print' object.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-print"></span> <span class="hidden-xs">Print</span></a>
+                    {% endif %}
+                    {% if edit %}
+                        <button type="submit" class="btn btn-default" title="Save"><span
+                            class="glyphicon glyphicon-floppy-disk"></span> <span class="hidden-xs">Save</button>
+                    {% endif %}
+
+                </div>
+                <hr/>
+            </div>
+
+
+            {% include 'form_errors.html' %}
 
             <div sf-schema="schema" sf-form="form" sf-model="model" 
             sf-options=" { formDefaults: { startEmpty: true,
@@ -28,19 +43,14 @@
             } }"></div>
 
             {% if edit %}
-                <input class="btn btn-primary" type="submit" value="Save">
+            <div class="btn-group btn-page pull-right">
+                <button type="submit" class="btn btn-default" title="Save"><span class="glyphicon glyphicon-floppy-disk"></span> <span class="hidden-xs">Save</button>
+            </div>
             {% endif %}
         </form>
     </div>
 
 {% endblock %}
-
-{% if request.is_ajax %}
-    {% block footer %}
-       An AJAX request footer
-    {% endblock %}
-{% endif %}
-
 
 {% block js %}
 
@@ -51,8 +61,6 @@
     <script type="text/javascript" src="{% static "js/angular-schema-form/schema-form.min.js"%}"></script>
     <script type="text/javascript" src="{% static "js/angular-schema-form/bootstrap-decorator.min.js"%}"></script>
     <link rel="stylesheet" type="text/css" href="{% static "js/angular-schema-form/bootstrap.vertical-tabs.min.css"%}"/>
-
-
 
     <script>
         $(document).ready(function () {
