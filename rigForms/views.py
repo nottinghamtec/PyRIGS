@@ -91,27 +91,6 @@ class FormList(generic.ListView):
 class FormPrint(generic.TemplateView):
 	indentBy = 20
 
-	def _render_object(self, field, value, current_indent):
-		# Render all the child form bits first
-		children = self._render_field(field["properties"], value, current_indent + self.indentBy)
-		
-		template = get_template('rigForms/print/render-object.xml')
-		context = {
-			'field': field,
-			'children': children,
-			'currentIndent':current_indent
-		}
-		return template.render(context)
-
-	def _render_string(self, field, value, current_indent):
-		template = get_template('rigForms/print/render-string.xml')
-		context = {
-			'field': field,
-			'currentIndent':current_indent,
-			'value':value
-		}
-		return template.render(context)
-
 	def _render_array(self, field, value, current_indent):
 		# Render all the child form bits first
 		children=[]
@@ -133,6 +112,27 @@ class FormPrint(generic.TemplateView):
 			'field': field,
 			'children': children,
 			'currentIndent':current_indent
+		}
+		return template.render(context)
+
+	def _render_object(self, field, value, current_indent):
+		# Render all the child form bits first
+		children = self._render_field(field["properties"], value, current_indent + self.indentBy)
+		
+		template = get_template('rigForms/print/render-object.xml')
+		context = {
+			'field': field,
+			'children': children,
+			'currentIndent':current_indent
+		}
+		return template.render(context)
+
+	def _render_string(self, field, value, current_indent):
+		template = get_template('rigForms/print/render-string.xml')
+		context = {
+			'field': field,
+			'currentIndent':current_indent,
+			'value':value
 		}
 		return template.render(context)
 
