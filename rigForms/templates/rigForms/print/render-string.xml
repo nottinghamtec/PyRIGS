@@ -1,4 +1,3 @@
-{# "field" context should have "title", "description" and "value"}
 <blockTable colWidths="{{currentIndent}},100,100%" alignment="left" style="stringTable">
 <tr>
 	<td></td>
@@ -7,6 +6,6 @@
         <para>{{field.description}}</para>
     </td>
     <td>
-    <para>{{value}}</para></td>
+    <para>{{value|default_if_none:""}}</para></td>
 </tr>
 </blockTable>
