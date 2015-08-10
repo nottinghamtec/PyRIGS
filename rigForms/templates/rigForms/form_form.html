@@ -21,10 +21,11 @@
         <form name="theForm" ng-submit="onSubmit(theForm)">
 
             <div sf-schema="schema" sf-form="form" sf-model="model" 
+            sf-options=" { formDefaults: { startEmpty: true,
             {% if not edit %}
-                sf-options="{ formDefaults: { readonly: true } }"
+                readonly: true,
             {% endif %}
-            ></div>
+            } }"></div>
 
             {% if edit %}
                 <input class="btn btn-primary" type="submit" value="Save">
