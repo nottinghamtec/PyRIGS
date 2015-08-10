@@ -89,11 +89,12 @@ class FormList(generic.ListView):
 		return context
 
 class FormPrint(generic.TemplateView):
+	indentBy = 20
+
 	def _render_object(self, field, value, current_indent):
 		# Render all the child form bits first
-		current_indent += 20
-		children = self._render_field(field["properties"], value, current_indent)
-		current_indent -= 20
+		children = self._render_field(field["properties"], value, current_indent + self.indentBy)
+		
 		template = get_template('rigForms/print/render-object.xml')
 		context = {
 			'field': field,
@@ -113,25 +114,19 @@ class FormPrint(generic.TemplateView):
 
 	def _render_array(self, field, value, current_indent):
 		# Render all the child form bits first
-		current_indent += 20
 		children=[]
 
 		try:
 			numberOfChildren = len(value)
 		
 			for key,item in enumerate(value):
+				# Append the item number onto the item title
 				thisField = copy.deepcopy(field["items"])
-				try:
-					thisField["title"] = thisField["title"] + " " + str(key+1)
-				except KeyError:
-					pass
+				thisField["title"] = thisField.get("title","Item") + " " + str(key+1)
 
-				children.append(self._render_field_item(thisField,item,current_indent))
-
+				children.append(self._render_field_item(thisField,item,current_indent+self.indentBy))
 		except TypeError:
 			numberOfChildren = 0
-
-		current_indent -= 20
 
 		template = get_template('rigForms/print/render-array.xml')
 		context = {
@@ -151,40 +146,34 @@ class FormPrint(generic.TemplateView):
 		return template.render(context)
 
 	def _render_field_item(self, field, value, current_indent):
+		renderFunctions = {
+			"object": self._render_object,
+			"string": self._render_string,
+			"number": self._render_string,
+			"integer": self._render_string,
+			"array": self._render_array,
+			"boolean": self._render_boolean,
+
+			#error values:
+			"unknown": lambda: "<h4>(Field type unknown: " + str(key) + ": " + str(field) + ")</h4>",
+			"notype": lambda: "<h4>(No field type: " + str(key) + ": " + str(field) + ")</h4>",
+			"notOD": lambda: "<h4>(Not an OrderedDict: " + str(key) + ": " + str(field) + ")</h4>",
+		}
+
 		result = ""
 		if type(field) is OrderedDict:
-			
-			if "type" in field:
-				if field["type"] == "object":
-					rendered = self._render_object(field,value,current_indent)
-				elif field["type"] == "string":
-					rendered = self._render_string(field,value,current_indent)
-				elif field["type"] == "array":
-					rendered = self._render_array(field,value,current_indent)
-				elif field["type"] == "boolean":
-					rendered = self._render_boolean(field,value,current_indent)
-				else:
-					rendered = "<h1>an unknown field</h1>"
-					# self._render_field(field,value,current_indent)
-			else:
-				rendered = "<h1>No type:" + str(key) + str(field) + "<br/><br/></h1>"
-			
-			result += rendered
+			fieldType = field.get("type","notype")
+			func = renderFunctions.get(fieldType, renderFunctions["unknown"])
+			result += func(field, value, current_indent)
 		else:
-			result += "<h1>Not ordereddict:" + str(key) + str(field) + "<br/><br/></h1>"
+			result += renderFunctions["notOD"]()
 
 		return result
 
 	def _render_field(self, parentField, parentValue, current_indent):
 		result = ""
 		for (key,field) in parentField.items():
-			try:
-				value = parentValue[str(key)]
-			except KeyError:
-				value = None
-			except TypeError:
-				value = None
-
+			value = parentValue.get(key,None)
 			result += self._render_field_item(field, value, current_indent)
 			
 		return result
