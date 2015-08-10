@@ -9,6 +9,13 @@
 
 {% for child in children %}
 	{{ child }}
+{% empty %}
+	<blockTable colWidths="{{currentIndent}},100%" alignment="left" style="objectTable">
+	<tr>
+		<td></td>
+	    <td><para>(No items recorded)</para></td>
+	</tr>
+	</blockTable>
 {% endfor %}
 
 {% endautoescape %}
