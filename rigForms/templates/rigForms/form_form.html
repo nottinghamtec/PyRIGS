@@ -17,7 +17,18 @@
     {% include 'form_errors.html' %}
 
     <div ng-controller="FormController" class="col-sm-12">
-        <form name="theForm" sf-schema="schema" sf-form="form" sf-model="model" ng-submit="onSubmit(theForm)">
+
+        <form name="theForm" ng-submit="onSubmit(theForm)">
+
+            <div sf-schema="schema" sf-form="form" sf-model="model" 
+            {% if not edit %}
+                sf-options="{ formDefaults: { readonly: true } }"
+            {% endif %}
+            ></div>
+
+            {% if edit %}
+                <input class="btn btn-primary" type="submit" value="Save">
+            {% endif %}
         </form>
     </div>
 

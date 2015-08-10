@@ -47,6 +47,7 @@ class FormCreate(generic.CreateView):
 			"event": self.event,
 			"data": "{}"
 		}
+		context["edit"] = True
 
 		return context
 
@@ -62,6 +63,22 @@ class FormCreate(generic.CreateView):
                 'pk': self.object.pk,
             })
 
+class FormDetail(generic.DetailView):
+	model = models.Form
+	template_name = 'rigForms/form_form.html'
+
+	def get_success_url(self):
+		return reverse_lazy('update_form', kwargs={
+                'pk': self.object.pk,
+            })
+
+	def get_context_data(self, **kwargs):
+		context = super(FormDetail, self).get_context_data()
+		
+		context["edit"] = False
+
+		return context
+
 class FormUpdate(generic.UpdateView):
 	model = models.Form
 	fields = ['data']
@@ -70,6 +87,13 @@ class FormUpdate(generic.UpdateView):
 		return reverse_lazy('update_form', kwargs={
                 'pk': self.object.pk,
             })
+
+	def get_context_data(self, **kwargs):
+		context = super(FormUpdate, self).get_context_data()
+		
+		context["edit"] = True
+
+		return context
 
 class FormList(generic.ListView):
 	model = models.Form
@@ -173,7 +197,10 @@ class FormPrint(generic.TemplateView):
 	def _render_field(self, parentField, parentValue, current_indent):
 		result = ""
 		for (key,field) in parentField.items():
-			value = parentValue.get(key,None)
+			try:
+				value = parentValue.get(key,None)
+			except AttributeError: # if parentValue is None
+				value = None
 			result += self._render_field_item(field, value, current_indent)
 			
 		return result
