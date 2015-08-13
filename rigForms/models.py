@@ -9,6 +9,7 @@ import jsonschema
 import datetime
 
 from RIGS.models import RevisionMixin
+from RIGS import versioning
 
 from django.template import Context,Template
 
@@ -68,6 +69,7 @@ class Schema(models.Model, RevisionMixin):
 		return self.schema_type.name + "|" + self.comment + " " + str(self.start_at)
 
 @reversion.register
+@versioning.register
 class Form(models.Model, RevisionMixin):
 	event = models.ForeignKey('RIGS.Event', related_name='forms', blank=False)
 	schema = models.ForeignKey('Schema', related_name='forms', blank=False)
