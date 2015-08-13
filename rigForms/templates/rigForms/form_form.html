@@ -66,9 +66,9 @@
         $(document).ready(function () {
             angular.module('myModule', ['schemaForm']).controller('FormController', function($scope) {
                 {% autoescape off %} {# otherwise quotes get replaced with HTML entities #}
-                    $scope.schema = {{ object.schema.schema }};
+                    $scope.schema = {{ object.renderedSchema }};
 
-                    $scope.form = {{ object.schema.layout }};
+                    $scope.form = {{ object.renderedLayout }};
                     
                     {% comment %}
                     //This is useful for development, allowing the schema & layout to reside in the file system (you need to make the relevant files in the templates directory). Commented out for production

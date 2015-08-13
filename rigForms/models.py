@@ -10,6 +10,7 @@ import datetime
 
 from RIGS.models import RevisionMixin
 
+from django.template import Context,Template
 
 @reversion.register
 class Type(models.Model, RevisionMixin):
@@ -73,6 +74,28 @@ class Form(models.Model, RevisionMixin):
 
 	data = models.TextField(blank=False, null=False, default="{}")
 
+	@property
+	def renderedSchema(self):
+		template = Template(self.schema.schema)
+
+		context = Context({
+			"event": self.event, # allow stuff to be auto-filled
+			"SfCurrentIndex": "{{ $index +1 }}" # Convenience for schemaform array index
+			})
+
+		return template.render(context)
+
+	@property
+	def renderedLayout(self):
+		template = Template(self.schema.layout)
+
+		context = Context({
+			"event": self.event, # allow stuff to be auto-filled
+			"SfCurrentIndex": "{{ $index +1 }}" # Convenience for schemaform array index
+			})
+
+		return template.render(context)
+
 	def clean(self):
 		try: 
 			jsonData = json.loads(self.data)
@@ -88,7 +111,6 @@ class Form(models.Model, RevisionMixin):
 			raise ValidationError('Invalid JSON in schema, cannot validate')
 		except jsonschema.ValidationError as e: #raise a django exception
 			raise ValidationError('Data is not valid, cannot save: '+e.message)
-
 
 	def save(self, *args, **kwargs):
 		"""Call :meth:`full_clean` before saving."""

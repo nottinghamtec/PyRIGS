@@ -30,31 +30,29 @@ class FormCreate(generic.CreateView):
 	Expects kwarg "type_pk" to contain PK of required type
 	"""
 	def dispatch(self, *args, **kwargs):
+
 		schemaType = get_object_or_404(models.Type, pk=kwargs['type_pk'])
 		currentSchema = models.Schema.objects.current_schema(schemaType)
 
-		self.schema = currentSchema
+		event = get_object_or_404(RIGS.models.Event, pk=kwargs['event_pk'])
 
-		self.event = get_object_or_404(RIGS.models.Event, pk=kwargs['event_pk'])
+		self.initial_object = models.Form(event=event, schema=currentSchema)
 
 		return super(FormCreate, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(FormCreate, self).get_context_data()
 		
-		context["object"] = {
-			"schema": self.schema,
-			"event": self.event,
-			"data": "{}"
-		}
+		context["object"] = self.initial_object
 		context["edit"] = True
 
 		return context
 
 	def form_valid(self, form):
-		self.object = form.save(commit=False)
-		self.object.event = self.event
-		self.object.schema = self.schema
+		self.object = self.initial_object
+
+		self.object.data = form.save(commit=False).data
+
 		self.object.save()
 		return HttpResponseRedirect(self.get_success_url())
 
