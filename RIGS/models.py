@@ -13,6 +13,8 @@ from collections import Counter
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ValidationError
 
+import versioning
+
 from decimal import Decimal
 
 # Create your models here.
@@ -84,6 +86,7 @@ class RevisionMixin(object):
             return None
 
 @reversion.register
+@versioning.register
 @python_2_unicode_compatible
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
@@ -127,6 +130,7 @@ class Person(models.Model, RevisionMixin):
 
 
 @reversion.register
+@versioning.register
 @python_2_unicode_compatible
 class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
@@ -206,6 +210,7 @@ class VatRate(models.Model, RevisionMixin):
 
 
 @reversion.register
+@versioning.register
 @python_2_unicode_compatible
 class Venue(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
@@ -278,6 +283,7 @@ class EventManager(models.Manager):
 
 
 @reversion.register(follow=['items'])
+@versioning.register
 @python_2_unicode_compatible
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
@@ -458,7 +464,7 @@ class Event(models.Model, RevisionMixin):
             ('view_event', 'Can view Events'),
         )
 
-
+@versioning.set_related
 class EventItem(models.Model):
     event = models.ForeignKey('Event', related_name='items', blank=True)
     name = models.CharField(max_length=255)
