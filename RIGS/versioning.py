@@ -50,6 +50,12 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
             return False
 
         @property
+        def json(self):
+            if "JSON" in self.field.description:
+                return True
+            return False
+
+        @property
         def linebreaks(self):
             if isinstance(self.field, TextField):
                 return True

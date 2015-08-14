@@ -14,6 +14,9 @@ from RIGS import versioning
 from django.template import Context,Template
 from django.core.urlresolvers import reverse_lazy
 
+class JSONField(models.TextField):
+	description = "String representing a JSON Schema"
+
 @reversion.register
 class Type(models.Model, RevisionMixin):
     name = models.CharField(max_length=255, blank=False, null=False)
@@ -34,8 +37,8 @@ class Schema(models.Model, RevisionMixin):
 
 	start_at = models.DateTimeField()
     
-	schema = models.TextField(blank=False, null=False, default="{}")
-	layout = models.TextField(blank=False, null=False, default="[]")
+	schema = JSONField(blank=False, null=False, default="{}")
+	layout = JSONField(blank=False, null=False, default="[]")
 
 	comment = models.CharField(max_length=255)
 
@@ -76,7 +79,7 @@ class Form(models.Model, RevisionMixin):
 	event = models.ForeignKey('RIGS.Event', related_name='forms', blank=False)
 	schema = models.ForeignKey('Schema', related_name='forms', blank=False)
 
-	data = models.TextField(blank=False, null=False, default="{}")
+	data = JSONField(blank=False, null=False, default="{}")
 
 	@property
 	def renderedSchema(self):
