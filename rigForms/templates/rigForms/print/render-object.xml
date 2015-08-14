@@ -1,7 +1,8 @@
 <blockTable colWidths="{{currentIndent}},100%" alignment="left" style="objectTable">
 <tr>
 	<td></td>
-    <td><h1>{{field.title}}</h1></td>
+    <td><h1>{{field.title}}</h1>
+	<para>{{field.description}}</para></td>
 </tr>
 </blockTable>
 
