@@ -98,7 +98,7 @@ class Person(models.Model, RevisionMixin):
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        string = self.name
+        string = "Person | {}".format(self.name)
         if self.notes is not None:
             if  len(self.notes) > 0:
                 string += "*"
@@ -143,7 +143,7 @@ class Organisation(models.Model, RevisionMixin):
     union_account = models.BooleanField(default=False)
 
     def __str__(self):
-        string = self.name
+        string = "Organisation | {}".format(self.name)
         if self.notes is not None:
             if  len(self.notes) > 0:
                 string += "*"
@@ -222,7 +222,7 @@ class Venue(models.Model, RevisionMixin):
     address = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        string = self.name
+        string = "Venue | {}".format(self.name)
         if self.notes and len(self.notes) > 0:
             string += "*"
         return string
@@ -443,7 +443,17 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return unicode(self.pk) + ": " + self.name
+        string = ""
+        if self.is_rig and self.dry_hire:
+            string += "Dry Hire"
+        elif self.is_rig:
+            string += "Rig"
+        else:
+            string += "Non-rig"
+
+        string += " | {}".format(self.name)
+
+        return string
 
     def clean(self):
         if self.end_date and self.start_date > self.end_date:
