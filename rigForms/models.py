@@ -12,6 +12,7 @@ from RIGS.models import RevisionMixin
 from RIGS import versioning
 
 from django.template import Context,Template
+from django.core.urlresolvers import reverse_lazy
 
 @reversion.register
 class Type(models.Model, RevisionMixin):
@@ -70,6 +71,7 @@ class Schema(models.Model, RevisionMixin):
 
 @reversion.register
 @versioning.register
+@python_2_unicode_compatible
 class Form(models.Model, RevisionMixin):
 	event = models.ForeignKey('RIGS.Event', related_name='forms', blank=False)
 	schema = models.ForeignKey('Schema', related_name='forms', blank=False)
@@ -98,6 +100,9 @@ class Form(models.Model, RevisionMixin):
 
 		return template.render(context)
 
+	def get_absolute_url(self):
+		return reverse_lazy('form_detail', kwargs={'pk': self.pk})
+
 	def clean(self):
 		try: 
 			jsonData = json.loads(self.data)
@@ -118,6 +123,10 @@ class Form(models.Model, RevisionMixin):
 		"""Call :meth:`full_clean` before saving."""
 		self.full_clean()
 		super(Form, self).save(*args, **kwargs)
+
+	def __str__(self):
+		string = "Form | '{}' (for {})".format(self.schema.schema_type.name, self.event)
+		return string
 
 	class Meta:
 		permissions = (
