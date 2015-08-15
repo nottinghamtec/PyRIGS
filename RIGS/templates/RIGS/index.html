@@ -36,6 +36,16 @@
             </div>
             <div class="list-group">
                 <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'event_archive' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Events" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-group-item">
                     <form class="form" role="form" action="{% url 'person_list' %}" method="GET">
                         <div class="input-group">
                             <input type="search" name="q" class="form-control" placeholder="Search People" />
