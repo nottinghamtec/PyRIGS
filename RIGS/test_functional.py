@@ -416,6 +416,83 @@ class EventTest(LiveServerTestCase):
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
 
+    def testEventDuplicate(self):
+        testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end") 
+
+        item1 = models.EventItem(
+                event=testEvent,
+                name="Test Item 1",
+                cost="10.00",
+                quantity="1",
+                order=1
+            ).save()
+        item2 = models.EventItem(
+                event=testEvent,
+                name="Test Item 2",
+                description="Foo",
+                cost="9.72",
+                quantity="3",
+                order=2,
+            ).save()
+
+        self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk) + '/duplicate/')
+        self.authenticate('/event/' + str(testEvent.pk) + '/duplicate/')
+
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
+
+        save = self.browser.find_element_by_xpath(
+            '(//button[@type="submit"])[3]')
+        form = self.browser.find_element_by_tag_name('form')
+
+
+        # Check the items are visible
+        table = self.browser.find_element_by_id('item-table') # ID number is known, see above
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+
+        # Add item
+        form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
+        wait.until(animation_is_finished())
+        modal = self.browser.find_element_by_id("itemModal")
+        modal.find_element_by_id("item_name").send_keys("Test Item 3")
+        modal.find_element_by_id("item_description").send_keys("This is an item description\nthat for reasons unkown spans two lines")
+        e = modal.find_element_by_id("item_quantity")
+        e.click()
+        e.send_keys(Keys.UP)
+        e.send_keys(Keys.UP)
+        e = modal.find_element_by_id("item_cost")
+        e.send_keys("23.95")
+        e.send_keys(Keys.ENTER) # enter submit
+
+        # Attempt to save
+        save.click()
+
+        self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+
+        # Check the new items are visible
+        table = self.browser.find_element_by_id('item-table') # ID number is known, see above
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+        self.assertIn("Test Item 3", table.text)
+
+        infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+
+
+
+        self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk)) #Go back to the old event
+        
+        #Check that based-on hasn't crept into the old event
+        infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertNotIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
+
+        # Check the items are as they were
+        table = self.browser.find_element_by_id('item-table') # ID number is known, see above
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+        self.assertNotIn("Test Item 3", table.text)
+
     def testDateValidation(self):
         self.browser.get(self.live_server_url + '/event/create/')
         # Gets redirected to login and back
