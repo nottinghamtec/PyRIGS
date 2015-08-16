@@ -18,6 +18,7 @@ from PyPDF2 import PdfFileMerger, PdfFileReader
 from RIGS import models, forms
 import datetime
 import re
+import copy
 
 __author__ = 'ghost'
 
@@ -85,6 +86,23 @@ class EventUpdate(generic.UpdateView):
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
+class EventDuplicate(EventUpdate):
+    def get_object(self, queryset=None):
+        old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
+        new = copy.copy(old) # Make a copy of the object in memory
+        new.based_on = old # Make the new event based on the old event
+
+        if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
+            new.pk = None # This means a new event will be created on save, and all items will be re-created
+
+        messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
+
+        return new
+
+    def get_context_data(self, **kwargs):
+        context = super(EventDuplicate, self).get_context_data(**kwargs)
+        context["duplicate"] = True
+        return context
 
 class EventPrint(generic.View):
     def get(self, request, pk):
@@ -131,24 +149,6 @@ class EventPrint(generic.View):
         response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
-
-
-class EventDuplicate(generic.RedirectView):
-    permanent = False;
-    def get_redirect_url(self, *args, **kwargs):
-        new = get_object_or_404(models.Event, pk=kwargs['pk'])
-        new.pk = None
-        new.based_on = models.Event.objects.get(pk=kwargs['pk'])
-        new.save()
-
-        old = get_object_or_404(models.Event, pk=kwargs['pk'])
-        for item in old.items.all():
-            item.pk = None
-            item.event = new
-            item.save()
-
-        return reverse_lazy('event_update', kwargs={'pk': new.pk})
-
 
 class EventArchive(generic.ArchiveIndexView):
     model = models.Event
