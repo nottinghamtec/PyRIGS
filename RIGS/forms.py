@@ -89,10 +89,10 @@ class EventForm(forms.ModelForm):
         return items
 
     def _get_or_initialise_item(self, pk, data, event):
-        if (pk < 0):
+        try:
+            item = models.EventItem.objects.get(pk=pk,event=event)
+        except models.EventItem.DoesNotExist:
             item = models.EventItem()
-        else:
-            item = models.EventItem.objects.get(pk=pk)
 
         item.name = data['name']
         item.description = data['description']
