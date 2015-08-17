@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'RIGS',
+    'telegram_interface',
 
     'debug_toolbar',
     'registration',
