@@ -19,6 +19,7 @@
     <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
+    <script src="{% static "js/tooltip.js" %}"></script>
 
     <script src="{% static "js/autocompleter.js" %}"></script>
 
@@ -110,6 +111,9 @@
         $(document).ready(function () {
             setupItemTable($("#{{ form.items_json.id_for_label }}").val());
         });
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        })
     </script>
 {% endblock %}
 
@@ -160,7 +164,7 @@
         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
             <div class="panel-heading">Contact Details</div>
             <div class="panel-body">
-                <div class="form-group">
+                <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
                     <label for="{{ form.person.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.person.label }}</label>
 
@@ -187,14 +191,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" data-toggle="tooltip" title="The client organisation, leave blank if client is an individual">
                     <label for="{{ form.organisation.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.organisation.label }}</label>
 
                     <div class="col-sm-8">
                         <div class="row">
                             <div class="col-sm-9 col-md-7 col-lg-8">
-                                <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}">
+                                <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" >
                                     {% if organisation %}
                                         <option value="{{form.organisation.value}}" selected="selected" data-update_url="{% url 'organisation_update' form.organisation.value %}">{{ organisation }}</option>
                                     {% endif %}
@@ -219,7 +223,7 @@
         <div class="panel panel-default form-hws form-non_rig">
             <div class="panel-heading">Event Description</div>
             <div class="panel-body">
-                <div class="form-group">
+                <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
                     <label for="{{ form.description.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.description.label }}</label>
 
@@ -238,7 +242,7 @@
             <div class="panel-heading">Event Details</div>
             <div class="panel-body">
                 <div id="form-hws">
-                    <div class="form-group">
+                    <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
                         <label for="{{ form.name.id_for_label }}"
                                class="col-sm-4 control-label">{{ form.name.label }}</label>
 
@@ -246,7 +250,7 @@
                             {% render_field form.name class+="form-control" %}
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" data-toggle="tooltip" title="The venue for the rig, leave blank if unknown (e.g. for a dry hire)">
                         <label for="{{ form.venue.id_for_label }}"
                                class="col-sm-4 control-label">{{ form.venue.label }}</label>
 
@@ -279,10 +283,10 @@
 
                         <div class="col-sm-8">
                             <div class="row">
-                                <div class="col-sm-12 col-md-7">
+                                <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="Start date for event, required">
                                     {% render_field form.start_date type="date" class+="form-control" %}
                                 </div>
-                                <div class="col-sm-12 col-md-5">
+                                <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="Start time of event, can be left blank">
                                     {% render_field form.start_time type="time" class+="form-control" %}
                                 </div>
                             </div>
@@ -294,10 +298,10 @@
 
                         <div class="col-sm-8">
                             <div class="row">
-                                <div class="col-sm-12 col-md-7">
+                                <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
                                     {% render_field form.end_date type="date" class+="form-control" %}
                                 </div>
-                                <div class="col-sm-12 col-md-5">
+                                <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="End time of event, leave blank if unknown">
                                     {% render_field form.end_time type="time" class+="form-control" %}
                                 </div>
                             </div>
@@ -315,7 +319,7 @@
 
                     {# Rig only information #}
                     <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
-                        <div class="form-group">
+                        <div class="form-group" data-toggle="tooltip" title="The date/time at which TEC have access to the venue">
                             <label for="{{ form.access_at.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.access_at.label }}</label>
 
@@ -323,7 +327,7 @@
                                 {% render_field form.access_at type="datetime-local" class+="form-control" %}
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" data-toggle="tooltip" title="The date/time at which crew should meet for this event">
                             <label for="{{ form.meet_at.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.meet_at.label }}</label>
 
@@ -334,7 +338,7 @@
                         <div class="form-group">
                             <div class="col-sm-offset-4 col-sm-8">
                                 <div class="checkbox">
-                                    <label>
+                                    <label data-toggle="tooltip" title="Mark this event as a dry-hire, so it needs to be checked in at the end">
                                         {% render_field form.dry_hire %}{{ form.dry_hire.label }}
                                     </label>
                                 </div>
@@ -343,7 +347,7 @@
                     </div>
 
                     {# Status is needed on all events types and it looks good here in the form #}
-                    <div class="form-group">
+                    <div class="form-group" data-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
                         <label for="{{ form.status.id_for_label }}"
                                class="col-sm-4 control-label">{{ form.status.label }}</label>
 
@@ -353,7 +357,7 @@
                     </div>
                     
                     <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
-                        <div class="form-group">
+                        <div class="form-group" data-toggle="tooltip" title="The Member in Charge of this event">
                             <label for="{{ form.mic.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.mic.label }}</label>
 
@@ -367,7 +371,7 @@
                         </div>
 
                         {% if object.dry_hire %}
-                            <div class="form-group">
+                            <div class="form-group" data-toggle="tooltip" title="The person who checked-in this dry hire">
                                 <label for="{{ form.checked_in_by.id_for_label }}"
                                        class="col-sm-4 control-label">{{ form.checked_in_by.label }}</label>
 
@@ -381,7 +385,7 @@
                             </div>
                         {% endif %}
 
-                        <div class="form-group">
+                        <div class="form-group" data-toggle="tooltip" title="The student ID of the client who collected the dry-hire">
                             <label for="{{ form.collector.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.collector.label }}</label>
 
@@ -389,7 +393,7 @@
                                 {% render_field form.collector class+="form-control" %}
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" data-toggle="tooltip" title="The purchase order number (for external clients)">
                             <label for="{{ form.purchase_order.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.purchase_order.label }}</label>
 
@@ -417,7 +421,7 @@
         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
             <div class="panel-body">
                 <div class="col-sm-12">
-                    <div class="form-group">
+                    <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
                         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
                         {% render_field form.notes class+="form-control" %}
                     </div>
