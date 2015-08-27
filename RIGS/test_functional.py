@@ -134,6 +134,15 @@ class UserRegistrationTest(LiveServerTestCase):
         udd = self.browser.find_element_by_class_name('navbar').text
         self.assertIn('Hi John', udd)
 
+        # Check all the data actually got saved
+        profileObject = models.Profile.objects.all()[0]
+        self.assertEqual(profileObject.username, 'TestUsername')
+        self.assertEqual(profileObject.first_name, 'John')
+        self.assertEqual(profileObject.last_name, 'Smith')
+        self.assertEqual(profileObject.initials, 'JS')
+        self.assertEqual(profileObject.phone, '0123456789')
+        self.assertEqual(profileObject.email, 'test@example.com')
+
         # All is well
 
 
