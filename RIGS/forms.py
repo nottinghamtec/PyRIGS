@@ -12,7 +12,6 @@ from RIGS import models
 
 #Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
-    username = forms.CharField(required=True, max_length=30)
     first_name = forms.CharField(required=False, max_length=50)
     last_name = forms.CharField(required=False, max_length=50)
     initials = forms.CharField(required=True, max_length=5)
