@@ -56,11 +56,14 @@
                                 'non-rig': '#5bc0de'
                             };
                             $(doc).each(function() {
-                                
+                                end = $(this).attr('latest')
+                                if(end.indexOf("T") < 0){ //If latest does not contain a time
+                                   end = moment(end).add(1, 'days') //End date is non-inclusive, so add a day
+                                }
 
                                 thisEvent = {
                                     'start': $(this).attr('earliest'),
-                                    'end': $(this).attr('latest'),
+                                    'end': end,
                                     'className': 'modal-href',
                                     'title': $(this).attr('title'),
                                     'url': $(this).attr('url')

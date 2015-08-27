@@ -97,6 +97,9 @@ class CalendarICS(ICalFeed):
         return item.earliest_time
 
     def item_end_datetime(self, item):
+        if type(item.latest_time) is datetime.date: # Ical end_datetime is non-inclusive, so add a day
+            return item.latest_time + datetime.timedelta(days=1)
+
         return item.latest_time
 
     def item_location(self,item):
