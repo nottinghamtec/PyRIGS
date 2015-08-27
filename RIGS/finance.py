@@ -55,6 +55,7 @@ class InvoicePrint(generic.View):
                 }
             },
             'invoice':invoice,
+            'current_user':request.user,
         })
 
         rml = template.render(context)

@@ -71,6 +71,15 @@ class RevisionMixin(object):
         else:
             return None
 
+    @property
+    def current_version_id(self):
+        versions = reversion.get_for_object(self)
+        if versions:
+            version = reversion.get_for_object(self)[0]
+            return "V{0} | R{1}".format(version.pk,version.revision.pk)
+        else:
+            return None
+
 @reversion.register
 @python_2_unicode_compatible
 class Person(models.Model, RevisionMixin):
