@@ -87,8 +87,13 @@ class EventForm(forms.ModelForm):
         try:
             item = models.EventItem.objects.get(pk=pk,event=event)
         except models.EventItem.DoesNotExist:
+            # This occurs for one of two reasons
+            # 1) The event has been duplicated, so the item PKs belong to another event
+            # 2) The items are brand new, with negative PK values
+            # In either case, we want to create the items
             item = models.EventItem()
 
+        # Take the data from the form and update the item object
         item.name = data['name']
         item.description = data['description']
         item.quantity = data['quantity']
