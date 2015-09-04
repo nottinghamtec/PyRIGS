@@ -123,7 +123,9 @@
     <div class="col-sm-12">
             <div class="col-sm-8">
                 <h2>
-                    {% if object.pk %}
+                    {% if duplicate %}
+                        Duplicate of Event N{{ object.pk|stringformat:"05d" }}
+                    {% elif object.pk %}
                         Event N{{ object.pk|stringformat:"05d" }}
                     {% else %}
                         New Event
