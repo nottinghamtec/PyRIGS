@@ -71,6 +71,7 @@ class UserRegistrationTest(LiveServerTestCase):
         # Submit incorrect form
         submit = self.browser.find_element_by_xpath("//input[@type='submit']")
         submit.click()
+        self.browser.implicitly_wait(3)
         # Restablish error fields
         password1 = self.browser.find_element_by_id('id_password1')
         password2 = self.browser.find_element_by_id('id_password2')
@@ -92,6 +93,7 @@ class UserRegistrationTest(LiveServerTestCase):
 
         # Submit again
         password2.send_keys(Keys.ENTER)
+        self.browser.implicitly_wait(3)
 
         # Check we have a success message
         alert = self.browser.find_element_by_css_selector(
@@ -129,6 +131,7 @@ class UserRegistrationTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         password.send_keys(Keys.ENTER)
+        self.browser.implicitly_wait(3)
 
         # Check we are logged in
         udd = self.browser.find_element_by_class_name('navbar').text
@@ -168,6 +171,7 @@ class EventTest(LiveServerTestCase):
             self.live_server_url + '/user/login/', self.browser.current_url)
         if n:
             self.assertIn('?next=%s' % n, self.browser.current_url)
+        self.browser.implicitly_wait(3)
         username = self.browser.find_element_by_id('id_username')
         password = self.browser.find_element_by_id('id_password')
         submit = self.browser.find_element_by_css_selector(
@@ -178,6 +182,7 @@ class EventTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
+        self.browser.implicitly_wait(3)
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
 
@@ -370,6 +375,7 @@ class EventTest(LiveServerTestCase):
         e = modal.find_element_by_id("item_cost")
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
+        self.browser.implicitly_wait(3)
 
         # Confirm item has been saved to json field
         objectitems = self.browser.execute_script("return objectitems;")
@@ -473,9 +479,11 @@ class EventTest(LiveServerTestCase):
         e = modal.find_element_by_id("item_cost")
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
+        self.browser.implicitly_wait(3)
 
         # Attempt to save
         save.click()
+        self.browser.implicitly_wait(3)
 
         self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
 
@@ -531,6 +539,7 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
+        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -553,6 +562,7 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
+        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -590,6 +600,7 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
+        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -610,6 +621,7 @@ class EventTest(LiveServerTestCase):
         
         # Attempt to save - should succeed
         save.click()
+        self.browser.implicitly_wait(3)
         
         # See redirected to success page
         event = models.Event.objects.get(name='Test Event Name')
@@ -725,6 +737,7 @@ class IcalTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
+        self.browser.implicitly_wait(3)
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
 
