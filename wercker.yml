@@ -84,6 +84,12 @@ build:
         code: |
           pip install coverage
 
+    # Collect static files so the manifest storage knows where to look
+    - script:
+        name: collect static
+        code: |
+          python manage.py collectstatic --noinput
+
     # Run python tests
     - script:
         name: run tests
