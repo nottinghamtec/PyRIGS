@@ -19,6 +19,7 @@ class UserRegistrationTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3) # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -28,7 +29,6 @@ class UserRegistrationTest(LiveServerTestCase):
     def test_registration(self):
         # Navigate to the registration page
         self.browser.get(self.live_server_url + '/user/register/')
-        # self.browser.implicitly_wait(3)
         title_text = self.browser.find_element_by_tag_name('h3').text
         self.assertIn("User Registration", title_text)
 
@@ -71,7 +71,7 @@ class UserRegistrationTest(LiveServerTestCase):
         # Submit incorrect form
         submit = self.browser.find_element_by_xpath("//input[@type='submit']")
         submit.click()
-        self.browser.implicitly_wait(3)
+
         # Restablish error fields
         password1 = self.browser.find_element_by_id('id_password1')
         password2 = self.browser.find_element_by_id('id_password2')
@@ -93,7 +93,6 @@ class UserRegistrationTest(LiveServerTestCase):
 
         # Submit again
         password2.send_keys(Keys.ENTER)
-        self.browser.implicitly_wait(3)
 
         # Check we have a success message
         alert = self.browser.find_element_by_css_selector(
@@ -131,7 +130,6 @@ class UserRegistrationTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         password.send_keys(Keys.ENTER)
-        self.browser.implicitly_wait(3)
 
         # Check we are logged in
         udd = self.browser.find_element_by_class_name('navbar').text
@@ -160,6 +158,7 @@ class EventTest(LiveServerTestCase):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
         
         self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3) # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -171,7 +170,6 @@ class EventTest(LiveServerTestCase):
             self.live_server_url + '/user/login/', self.browser.current_url)
         if n:
             self.assertIn('?next=%s' % n, self.browser.current_url)
-        self.browser.implicitly_wait(3)
         username = self.browser.find_element_by_id('id_username')
         password = self.browser.find_element_by_id('id_password')
         submit = self.browser.find_element_by_css_selector(
@@ -182,7 +180,6 @@ class EventTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
-        self.browser.implicitly_wait(3)
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
 
@@ -206,7 +203,6 @@ class EventTest(LiveServerTestCase):
         self.authenticate('/event/create/')
 
         wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
-        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
 
         wait.until(animation_is_finished())
 
@@ -375,7 +371,6 @@ class EventTest(LiveServerTestCase):
         e = modal.find_element_by_id("item_cost")
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
-        self.browser.implicitly_wait(3)
 
         # Confirm item has been saved to json field
         objectitems = self.browser.execute_script("return objectitems;")
@@ -425,7 +420,6 @@ class EventTest(LiveServerTestCase):
         e = self.browser.find_element_by_id('id_name')
         e.send_keys('Test Event Name')
         e.send_keys(Keys.ENTER)
-        self.browser.implicitly_wait(3)
 
         # See redirected to success page
         event = models.Event.objects.get(name='Test Event Name')
@@ -454,7 +448,6 @@ class EventTest(LiveServerTestCase):
         self.authenticate('/event/' + str(testEvent.pk) + '/duplicate/')
 
         wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
-        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
 
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
@@ -479,11 +472,9 @@ class EventTest(LiveServerTestCase):
         e = modal.find_element_by_id("item_cost")
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
-        self.browser.implicitly_wait(3)
 
         # Attempt to save
         save.click()
-        self.browser.implicitly_wait(3)
 
         self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
 
@@ -516,7 +507,6 @@ class EventTest(LiveServerTestCase):
         self.authenticate('/event/create/')
 
         wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
-        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
 
         wait.until(animation_is_finished())
 
@@ -539,7 +529,6 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
-        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -562,7 +551,6 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
-        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -600,7 +588,6 @@ class EventTest(LiveServerTestCase):
 
         # Attempt to save - should fail
         save.click()
-        self.browser.implicitly_wait(3)
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -621,7 +608,6 @@ class EventTest(LiveServerTestCase):
         
         # Attempt to save - should succeed
         save.click()
-        self.browser.implicitly_wait(3)
         
         # See redirected to success page
         event = models.Event.objects.get(name='Test Event Name')
@@ -716,6 +702,7 @@ class IcalTest(LiveServerTestCase):
         models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED, description="non rig today cancelled")
 
         self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3) # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -737,7 +724,6 @@ class IcalTest(LiveServerTestCase):
         self.browser.execute_script(
             "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
-        self.browser.implicitly_wait(3)
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
 
