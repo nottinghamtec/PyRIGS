@@ -1,4 +1,6 @@
 # TEC PA & Lighting - PyRIGS #
+[![wercker status](https://app.wercker.com/status/b26100ecccdfb46a9a9056553daac5b7/m/master "wercker status")](https://app.wercker.com/project/bykey/b26100ecccdfb46a9a9056553daac5b7)
+
 Welcome to TEC PA & Lightings PyRIGS program. This is a reimplementation of the existing Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
 
 The purpose of this project is to make the system more compatible and easier to understand such that should future changes be needed they can be made without having to understand the intricacies of Rails.
