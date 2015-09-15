@@ -32,3 +32,40 @@ class AbstractAsset(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Asset(models.Model):
+    CATEGORY_GENERAL = 1
+    CATEGORY_CASE = 2
+    CATEGORY_COMMS = 3
+    CATEGORY_DECKING = 4
+    CATEGORY_OFFICE = 5
+    CATEGORY_SOUND = 10
+    CATEGORY_LIGHTING = 20
+    CATEGORY_VIDEO = 30
+    CATEGORY_RIGGING = 40
+    CATEGORY_TRUSS = 41
+    CATEGORY_LADDERS = 42
+    CATEGORY_POWER = 50
+    CATEGORY_DISTRO = 51
+
+    CATEGORY_CHOICES = (
+        (CATEGORY_SOUND, 'Sound'),
+        (CATEGORY_LIGHTING, 'Lighting'),
+        ('Other', (
+            (CATEGORY_GENERAL, 'General'),
+            (CATEGORY_CASE, 'Case'),
+            (CATEGORY_COMMS, 'Comms'),
+            (CATEGORY_DECKING, 'Decking'),
+            (CATEGORY_OFFICE, 'Office'),
+        )),
+
+    )
+
+    name = models.CharField(max_length=255)
+    serial_number = models.CharField(max_length=255)
+    date_acquired = models.DateField(null=True, blank=True)
+    date_sold = models.DateField(null=True, blank=True)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    replacement_price = models.DecimalField(max_digits=10, decimal_places=2)
+
