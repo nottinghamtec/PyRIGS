@@ -57,14 +57,14 @@
                 $('#is_rig-selector button').on('click', function () {
                     $('.form-non_rig').slideDown();
                     if ($(this).data('is_rig') == 1) {
-                        $('#{{form.is_rig.auto_id}}').attr('checked', true);
+                        $('#{{form.is_rig.auto_id}}').prop('checked', true);
                         if ($('.form-non_rig').is(':hidden')) {
                             $('.form-is_rig').show();
                         } else {
                             $('.form-is_rig').slideDown();
                         }
                     } else {
-                        $('#{{form.is_rig.auto_id}}').attr('checked', false);
+                        $('#{{form.is_rig.auto_id}}').prop('checked', false);
                         $('.form-is_rig').slideUp();
                     }
                 })
