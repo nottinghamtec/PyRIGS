@@ -613,7 +613,38 @@ class EventTest(LiveServerTestCase):
         event = models.Event.objects.get(name='Test Event Name')
         self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
 
+    def testRigNonRig(self):
+        self.browser.get(self.live_server_url + '/event/create/')
+        # Gets redirected to login and back
+        self.authenticate('/event/create/')
 
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
+
+        wait.until(animation_is_finished())
+
+        # Click Non-Rig button
+        self.browser.find_element_by_xpath('//button[.="Non-Rig"]').click()
+
+        # Click Rig button
+        self.browser.find_element_by_xpath('//button[.="Rig"]').click()
+
+        form = self.browser.find_element_by_tag_name('form')
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
+
+        # Set title
+        e = self.browser.find_element_by_id('id_name')
+        e.send_keys('Test Event Name')
+
+        # Set an arbitrary date
+        form.find_element_by_id('id_start_date').clear()
+        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+
+        # Save the rig
+        save.click()
+        detail_panel = self.browser.find_element_by_xpath("//div[@id='content']/div/div[6]/div/div")
+        self.assertTrue(detail_panel.is_displayed())
+        self.assertIn("Event Detail", detail_panel.text)
 
     def testEventDetail(self):
         with transaction.atomic(), reversion.create_revision():
