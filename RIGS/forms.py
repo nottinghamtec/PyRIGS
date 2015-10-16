@@ -3,7 +3,7 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail 
 from captcha.fields import ReCaptchaField
 import simplejson
@@ -32,6 +32,17 @@ class LoginForm(AuthenticationForm):
 
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
+
+class ProfileCreationForm(UserCreationForm):
+
+    class Meta(UserCreationForm.Meta):
+        model = models.Profile
+
+
+class ProfileChangeForm(UserChangeForm):
+
+    class Meta(UserChangeForm.Meta):
+        model = models.Profile
 
 # Events Shit
 class EventForm(forms.ModelForm):
