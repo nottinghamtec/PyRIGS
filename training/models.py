@@ -17,25 +17,28 @@ class TrainingItem(models.Model):
     item_number = models.PositiveSmallIntegerField()
     item_name = models.CharField(max_length=100)
     training_records = models.ManyToManyField(settings.AUTH_USER_MODEL,
-                                              through_fields='finance.TrainingRecord')
+                                              through='TrainingRecord', through_fields=('training_item', 'trainee'))
 
 
 @reversion.register
 class TrainingRecord(models.Model):
+    trainee = models.ForeignKey(settings.AUTH_USER_MODEL)
+    training_item = models.ForeignKey(TrainingItem)
+
     started_date = models.DateField(blank=True, null=True)
-    started_user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    started_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_started')
     started_notes = models.TextField(blank=True, null=True)
     completed_date = models.DateField(blank=True, null=True)
-    completed_user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    completed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_completed')
     completed_notes = models.TextField(blank=True, null=True)
     assessed_date = models.DateField(blank=True, null=True)
-    assessed_user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    assessed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_assessed')
     assessed_notes = models.TextField(blank=True, null=True)
 
 
 @reversion.register
 class TrainingLevelRecord(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    trainee = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     technical_assistant = models.DateField(blank=True, null=True)
 
