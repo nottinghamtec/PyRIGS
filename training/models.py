@@ -35,6 +35,9 @@ class TrainingRecord(models.Model):
     assessed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_assessed')
     assessed_notes = models.TextField(blank=True, null=True)
 
+    class Meta:
+        unique_together = ('trainee', 'training_item')
+
 
 @reversion.register
 class TrainingLevelRecord(models.Model):
