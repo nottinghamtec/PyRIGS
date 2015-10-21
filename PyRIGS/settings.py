@@ -74,6 +74,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+    # Legacy training database
+    'training': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': 'localhost',
+        'NAME': 'tec_training',
+        'USER': 'pyrigs',
+        'PASSWORD': 'pyrigs',
     }
 }
 
