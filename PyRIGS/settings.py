@@ -51,9 +51,11 @@ INSTALLED_APPS = (
     'reversion',
     'captcha',
     'widget_tweaks',
+    'raven.contrib.django.raven_compat',
 )
 
 MIDDLEWARE_CLASSES = (
+    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -138,6 +140,15 @@ LOGGING = {
     }
 }
 
+import raven
+
+RAVEN_CONFIG = {
+    'dsn': os.environ.get('RAVEN_DSN'),
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    # 'release': raven.fetch_git_sha(os.path.dirname(os.path.dirname(__file__))),
+}
+
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
 
@@ -148,21 +159,21 @@ LOGOUT_URL = '/user/logout'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = '6Le16gUTAAAAAO5f-6te_x0NjWmF65_h7saBI6Cg'
-RECAPTCHA_PRIVATE_KEY = '6Le16gUTAAAAAByo-ZxRRX3RKyoBngf7ms3dnoEW'
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', None)
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', None)
 NOCAPTCHA = True
 
 # Email
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'mail.nottinghamtec.co.uk'
-    EMAIL_PORT = 465
-    EMAIL_HOST_USER = 'pyrigs@nottinghamtec.co.uk'
-    EMAIL_HOST_PASSWORD = 'N_dF9T&dD(Th'
-    EMAIL_USE_TLS = False
-    EMAIL_USE_SSL = True
-    DEFAULT_FROM_EMAIL = 'pyrigs@nottinghamtec.co.uk'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = bool(int(os.environ.get('EMAIL_USE_TLS', 0)))
+    EMAIL_USE_SSL = bool(int(os.environ.get('EMAIL_USE_SSL', 0)))
+    DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

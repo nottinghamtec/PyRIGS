@@ -6,5 +6,6 @@
     <div class="text-center">
         <h1>500: Server error</h1>
         <img src="{% static 'imgs/500.jpg' %}"/>
+        <p>If you need assistance, you may reference this error as <strong>{{ request.sentry.id }}</strong>.</p>
     </div>
 {% endblock %}
