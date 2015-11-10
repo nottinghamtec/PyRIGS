@@ -22,6 +22,7 @@
     {% endblock %}
 
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.ravenjs.com/1.3.0/jquery,native/raven.min.js"></script>
     <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% block preload_js %}
     {% endblock %}
