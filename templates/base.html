@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load raven %}
 
 
 <!DOCTYPE html>
@@ -21,6 +22,7 @@
     {% endblock %}
 
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% block preload_js %}
     {% endblock %}
 
