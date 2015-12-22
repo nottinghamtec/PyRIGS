@@ -38,7 +38,10 @@ class Profile(AbstractUser):
 
     @property
     def name(self):
-        return self.get_full_name() + ' "' + self.initials + '"'
+        name = self.get_full_name()
+        if self.initials:
+            name += ' "{}"'.format(self.initials)
+        return name
 
     @property
     def latest_events(self):
