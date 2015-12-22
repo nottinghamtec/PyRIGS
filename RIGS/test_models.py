@@ -7,9 +7,9 @@ from decimal import *
 class ProfileTestCase(TestCase):
     def test_str(self):
         profile = models.Profile(first_name='Test', last_name='Case')
-        self.assertEqual(profile.name, 'Test Case')
+        self.assertEqual(str(profile), 'Test Case')
         profile.initials = 'TC'
-        self.assertEqual(profile.name, 'Test Case "TC"')
+        self.assertEqual(str(profile), 'Test Case "TC"')
 
 
 class VatRateTestCase(TestCase):
