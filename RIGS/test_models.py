@@ -4,6 +4,14 @@ from datetime import date, timedelta
 from decimal import *
 
 
+class ProfileTestCase(TestCase):
+    def test_str(self):
+        profile = models.Profile(first_name='Test', last_name='Case')
+        self.assertEqual(profile.name, 'Test Case')
+        profile.initials = 'TC'
+        self.assertEqual(profile.name, 'Test Case "TC"')
+
+
 class VatRateTestCase(TestCase):
     def setUp(self):
         models.VatRate.objects.create(start_at='2014-03-01', rate=0.20, comment='test1')
