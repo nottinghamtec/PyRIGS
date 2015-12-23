@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils.encoding import python_2_unicode_compatible
 import reversion
 
+
 # Create your models here.
 
 
@@ -32,18 +33,33 @@ class TrainingItem(models.Model):
 @python_2_unicode_compatible
 @reversion.register
 class TrainingRecord(models.Model):
-    trainee = models.ForeignKey(settings.AUTH_USER_MODEL)
+    trainee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords')
     training_item = models.ForeignKey(TrainingItem)
 
     started_date = models.DateField(blank=True, null=True)
-    started_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_started', blank=True, null=True)
+    started_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_started', blank=True,
+                                        null=True)
     started_notes = models.TextField(blank=True, null=True)
     completed_date = models.DateField(blank=True, null=True)
-    completed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_completed', blank=True, null=True)
+    completed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_completed',
+                                          blank=True, null=True)
     completed_notes = models.TextField(blank=True, null=True)
     assessed_date = models.DateField(blank=True, null=True)
-    assessed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_assessed', blank=True, null=True)
+    assessed_trainer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='trainingrecords_assessed', blank=True,
+                                         null=True)
     assessed_notes = models.TextField(blank=True, null=True)
+
+    @property
+    def started(self):
+        return self.started_date and self.started_trainer
+
+    @property
+    def complete(self):
+        return self.completed_date and self.completed_trainer
+
+    @property
+    def assessed(self):
+        return self.assessed_date and self.assessed_trainer
 
     def __str__(self):
         return "{0} - {1}".format(self.trainee, self.training_item)

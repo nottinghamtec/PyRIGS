@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load training_extras %}
+
+{% block title %}{{ profile }} Training{% endblock %}
+
+{% block content %}
+    <h2>Training Profile for {{ profile }}</h2>
+
+    {% for category in categories %}
+        <div class="row">
+            <div class="col-xs-12">
+                <h3>{{ category }}</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                        <td>Item</td>
+                        <td>Started</td>
+                        <td>Complete</td>
+                        <td>Assessed</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in category.trainingitem_set.all %}
+                            {% with record=item|item_record:request.user %}
+                                <tr class="
+                                    {% if record.assessed %}
+                                    success
+                                    {% elif record.complete %}
+                                    info
+                                    {% elif record.started %}
+                                    warning
+                                    {% else %}
+                                    danger
+                                    {% endif %}
+                                ">
+                                <td>{{ record.training_item }}</td>
+                                <td>
+                                    {{ record.started_date|default_if_none:"No" }} <em>{{ record.started_trainer|default_if_none:"" }}</em>
+                                    {% if record.started_notes %}
+                                        <pre>{{ record.started_notes }}</pre>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ record.completed_date|default_if_none:"No" }} <em>{{ record.completed_trainer|default_if_none:"" }}</em>
+                                    {% if record.completed_notes %}
+                                        <pre>{{ record.completed_notes }}</pre>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ record.assessed_date|default_if_none:"No" }} <em>{{ record.assessed_trainer|default_if_none:"" }}</em>
+                                    {% if record.assessed_notes %}
+                                        <pre>{{ record.assessed_notes }}</pre>
+                                    {% endif %}
+                                </td>
+                                </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
