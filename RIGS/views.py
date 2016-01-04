@@ -33,7 +33,7 @@ def login(request, **kwargs):
     else:
         from django.contrib.auth.views import login
 
-        return login(request, authentication_form=forms.LoginForm)
+        return login(request)
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
