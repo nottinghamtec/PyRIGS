@@ -1,0 +1,20 @@
+{% load training_extras %}
+
+<h3>{{ category }}</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <td>Item</td>
+        <td>Started</td>
+        <td>Complete</td>
+        <td>Assessed</td>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in category.trainingitem_set.all %}
+        {% with record=item|item_record:request.user %}
+            {% include "training/trainingitem_detail_row.html" %}
+        {% endwith %}
+    {% endfor %}
+    </tbody>
+</table>

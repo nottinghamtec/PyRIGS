@@ -1,0 +1,31 @@
+<tr class="
+        {% if record.assessed %}
+        success
+        {% elif record.complete %}
+        info
+        {% elif record.started %}
+        warning
+        {% else %}
+        danger
+        {% endif %}
+    ">
+    <td>{{ record.training_item }}</td>
+    <td>
+        {{ record.started_date|default_if_none:"No" }} <em>{{ record.started_trainer|default_if_none:"" }}</em>
+        {% if record.started_notes %}
+            <pre>{{ record.started_notes }}</pre>
+        {% endif %}
+    </td>
+    <td>
+        {{ record.completed_date|default_if_none:"No" }} <em>{{ record.completed_trainer|default_if_none:"" }}</em>
+        {% if record.completed_notes %}
+            <pre>{{ record.completed_notes }}</pre>
+        {% endif %}
+    </td>
+    <td>
+        {{ record.assessed_date|default_if_none:"No" }} <em>{{ record.assessed_trainer|default_if_none:"" }}</em>
+        {% if record.assessed_notes %}
+            <pre>{{ record.assessed_notes }}</pre>
+        {% endif %}
+    </td>
+</tr>
