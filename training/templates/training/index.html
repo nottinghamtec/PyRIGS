@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Training Database{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12 col-md-4">
+            <h2>Training Database</h2>
+        </div>
+        <div class="col-sm-12 col-md-8 align-right">
+            {# @todo: Add nav buttons and other useful things in here #}
+        </div>
+    </div>
+
+    <h3>My Training</h3>
+    {% include "training/profile_detail_table.html" %}
+{% endblock %}

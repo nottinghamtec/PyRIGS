@@ -17,3 +17,13 @@ class UserTrainingRecordView(generic.DetailView):
         context = super(UserTrainingRecordView, self).get_context_data(**kwargs)
         context['categories'] = models.TrainingCategory.objects.all()
         return context
+
+
+class SelfUserTrainingRecordView(UserTrainingRecordView):
+    template_name = 'training/index.html'
+
+    def get_queryset(self):
+        pk = self.request.user.id
+        self.kwargs['pk'] = pk
+
+        return self.model.objects.filter(pk=pk)
