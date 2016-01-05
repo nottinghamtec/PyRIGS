@@ -5,5 +5,6 @@ from training import views
 
 urlpatterns = patterns('',
     url(r'^$', views.SelfUserTrainingRecordView.as_view()),
-    url(r'user/(?P<pk>\d+)/$', views.UserTrainingRecordView.as_view())
+    url(r'user/(?P<pk>\d+)/$', views.UserTrainingRecordView.as_view()),
+    url(r'item/', views.TrainingCategoryItemListView.as_view()),
 )

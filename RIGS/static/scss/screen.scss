@@ -137,3 +137,20 @@ textarea {
       };
   }
 }
+
+.toc-nav {
+  width: auto;
+  display: inline-block;
+
+  &.affix {
+    top: $navbar-height;
+  }
+}
+
+.anchor {
+  display: block;
+  position: relative;
+  top: -$navbar-height - 10px;
+  visibility: hidden;
+}
+

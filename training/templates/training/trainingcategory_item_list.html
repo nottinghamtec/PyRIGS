@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Training Items{% endblock %}
+
+{% block content %}
+    <h2>Training Items</h2>
+
+    <div class="row toc-wrapper">
+        <div class="col-xs-12 hidden-md hidden-lg">
+            <ul class="nav nav-pills">
+                {% for category in object_list %}
+                    <li role="presentation"><a href="#{{ category.category_name|slugify }}">{{ category }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-xs-12 col-lg-9" id="fish">
+            {% for category in object_list %}
+                <div style="margin-bottom: 50em;">
+                    <a class="anchor" id="{{ category.category_name|slugify }}"></a>
+                    <h3>{{ category }}</h3>
+                    &nbsp;
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-3 visible-md visible-lg">
+            <div class="toc-nav">
+                <h3>Available Categories</h3>
+                <ul class="nav nav-pills nav-stacked">
+                    {% for category in object_list %}
+                        <li role="presentation"><a href="#{{ category.category_name|slugify }}">{{ category }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/affix.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.toc-nav').affix({
+                offset: {
+                    top: ($('.toc-wrapper').offset().top - $('.navbar').height())
+                }
+            });
+        });
+    </script>
+{% endblock %}

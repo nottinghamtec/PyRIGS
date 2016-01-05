@@ -27,3 +27,8 @@ class SelfUserTrainingRecordView(UserTrainingRecordView):
         self.kwargs['pk'] = pk
 
         return self.model.objects.filter(pk=pk)
+
+
+class TrainingCategoryItemListView(generic.ListView):
+    model = models.TrainingCategory
+    template_name = 'training/trainingcategory_item_list.html'
