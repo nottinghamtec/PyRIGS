@@ -337,6 +337,4 @@
     {% include "RIGS/event_print_signature.xml" %}
     </keepTogether>
 {% endif %}
-<namedString id="lastPage">
-<pageNumber/>
-</namedString>
+<namedString id="lastPage"><pageNumber/></namedString>
