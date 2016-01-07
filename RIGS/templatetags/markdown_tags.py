@@ -22,8 +22,8 @@ def markdown_filter(text, format='html'):
 
         # <code> should become <pre>
         for c in soup('code'):
-            c.name = 'pre'
-            c.parent.replaceWithChildren()
+            c.name = 'font'
+            c['face'] = "Courier"
 
         # blockquotes don't exist but we can still do something to show
         for bq in soup('blockquote'):
