@@ -1,3 +1,5 @@
+{% load markdown_tags %}
+
 <div class="table-responsive">
     <table class="table">
         <thead>
@@ -51,7 +53,7 @@
                     {% endif %}
                     {% if not event.cancelled and event.description %}
                         <div>
-                            {{ event.description|linebreaksbr }}
+                            {{ event.description|markdown }}
                         </div>
                     {% endif %}
                 </td>

@@ -1,5 +1,6 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
 {% load widget_tweaks %}
+{% load markdown_tags %}
 
 {% block title %}Organisation | {{ object.name }}{% endblock %}
 
@@ -35,7 +36,7 @@
                         <dd>{{ object.address|linebreaksbr }}</dd>
 
                         <dt>Notes</dt>
-                        <dd>{{ object.notes|linebreaksbr }}</dd>
+                        <dd>{{ object.notes|markdown }}</dd>
 
                         <dt>Union Account</dt>
                         <dd>{{ object.union_account|yesno|capfirst }}</dd>

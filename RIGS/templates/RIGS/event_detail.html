@@ -1,4 +1,5 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% load markdown_tags %}
 {% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
 
 {% block content %}
@@ -141,7 +142,7 @@
                     <dd>&nbsp;</dd>
 
                     <dt>Event Description</dt>
-                    <dd>{{ event.description|linebreaksbr }}</dd>
+                    <dd>{{ event.description|markdown }}</dd>
 
                     <dd>&nbsp;</dd>
 
@@ -205,7 +206,7 @@
                 <div class="panel-body">
                     <div class="well well-sm">
                         <h4>Notes</h4>
-                        {{ event.notes|linebreaksbr }}
+                        {{ event.notes|markdown }}
                     </div>
                     {% include 'RIGS/item_table.html' %}
                 </div>
