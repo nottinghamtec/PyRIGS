@@ -189,7 +189,7 @@
             <para>{{ item.name }}
                 {% if item.description %}
                     </para>
-                    <indent left="0.5cm">
+                    <indent left="0.6cm">
                         {{ item.description|markdown:"rml" }}
                     </indent>
                     <para>

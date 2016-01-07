@@ -32,16 +32,15 @@ def markdown_filter(text, format='html'):
 
         for list in soup.findAll(['ul','ol']):
             list['style'] = list.name
-            for li in list.findAll('li'):
-                p = soup.new_tag('p')
-                p.string = li.text
-                li.string = ''
-                li.append(p)
-            indent = soup.new_tag('indent')
-            indent['left'] = '1.2cm'
+            for li in list.findAll('li', recursive=False):
+                text = li.find(text=True)
+                text.wrap(soup.new_tag('p'))
 
-            content = list.replace_with(indent)
-            indent.append(content)
+            if list.parent.name != 'li':
+                indent = soup.new_tag('indent')
+                indent['left'] = '0.6cm'
+
+                list.wrap(indent)
 
         # Paragraphs have a different tag
         for p in soup('p'):
