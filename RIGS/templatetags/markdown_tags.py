@@ -30,6 +30,20 @@ def markdown_filter(text, format='html'):
             bq.name = 'pre'
             bq.string = bq.text
 
+        for ul in soup('ul'):
+            ul['value'] = 'square'
+            ul['bulletFontSize'] = '8'
+            for li in ul.findAll('li'):
+                p = soup.new_tag('p')
+                p.string = li.text
+                li.string = ''
+                li.append(p)
+            indent = soup.new_tag('indent')
+            indent['left'] = '1.2cm'
+
+            content = ul.replace_with(indent)
+            indent.append(content)
+
         # Paragraphs have a different tag
         for p in soup('p'):
             p.name = 'para'
