@@ -106,7 +106,7 @@ $('body').on('submit', '#item-form', function (e) {
     // update the table
     $row = $('#item-' + pk);
     $row.find('.name').html(escapeHtml(fields.name));
-    $row.find('.description').html(nl2br(escapeHtml(fields.description)));
+    $row.find('.description').html(marked(fields.description));
     $row.find('.cost').html(parseFloat(fields.cost).toFixed(2));
     $row.find('.quantity').html(fields.quantity);
 
