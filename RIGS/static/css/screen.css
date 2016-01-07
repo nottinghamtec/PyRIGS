@@ -9205,6 +9205,31 @@ textarea {
   }
 }
 /* line 142, ../scss/screen.scss */
+.markdown h1 {
+  font-size: 27px;
+}
+/* line 145, ../scss/screen.scss */
+.markdown h2 {
+  font-size: 24px;
+}
+/* line 148, ../scss/screen.scss */
+.markdown h3 {
+  font-size: 20.4px;
+}
+/* line 151, ../scss/screen.scss */
+.markdown h4 {
+  font-size: 16.2px;
+}
+/* line 154, ../scss/screen.scss */
+.markdown h5 {
+  font-size: 13.3px;
+}
+/* line 158, ../scss/screen.scss */
 .markdown img {
   max-width: 100%;
+}
+
+/* line 166, ../scss/screen.scss */
+#rigboard .markdown img {
+  max-width: 30rem;
 }

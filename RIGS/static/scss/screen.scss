@@ -139,7 +139,32 @@ textarea {
 }
 
 .markdown {
+  h1 {
+    font-size: $font-size-h1 * 0.75;
+  }
+  h2 {
+    font-size: $font-size-h2 * 0.8;
+  }
+  h3 {
+    font-size: $font-size-h3 * 0.85;
+  }
+  h4 {
+    font-size: $font-size-h4 * 0.9;
+  }
+  h5 {
+    font-size: $font-size-h5 * 0.95;
+  }
+
   img {
     max-width: 100%;
+  }
+}
+
+#rigboard {
+
+  .markdown {
+    img {
+      max-width: 30rem;
+    }
   }
 }
