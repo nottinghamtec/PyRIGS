@@ -1,3 +1,5 @@
+{% load markdown_tags %}
+
 <setNextFrame name="main"/>
 <nextFrame/>
 
@@ -15,9 +17,7 @@
 </para>
 
 <keepInFrame>
-    <para style="style.event_description">
-    {{ object.description|default_if_none:""|linebreaksbr }}
-        </para>
+    {{ object.description|default_if_none:""|markdown:'rml' }}
 </keepInFrame>
 
 {% if invoice %}
@@ -173,9 +173,9 @@
             <para>{{ item.name }}
                 {% if item.description %}
                     </para>
-                    <para style="item_description">
-                    <em>{{ item.description|linebreaksbr }}</em>
-                    </para>
+                    <indent left="1cm">
+                        {{ item.description|markdown:"rml" }}
+                    </indent>
                     <para>
                 {% endif %}
             </para>
