@@ -177,8 +177,6 @@ class EventTest(LiveServerTestCase):
 
         username.send_keys("EventTest")
         password.send_keys("EventTestPassword")
-        self.browser.execute_script(
-            "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
@@ -752,8 +750,6 @@ class IcalTest(LiveServerTestCase):
 
         username.send_keys("EventTest")
         password.send_keys("EventTestPassword")
-        self.browser.execute_script(
-            "return jQuery('#g-recaptcha-response').val('PASSED')")
         submit.click()
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
