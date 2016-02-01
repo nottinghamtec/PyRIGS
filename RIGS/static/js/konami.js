@@ -39,7 +39,7 @@ var Konami = function (callback) {
 					return false;
 				}
 			}, this);
-			this.iphone.load(link);
+			/*this.iphone.load(link);*/
 		},
 		code: function (link) {
 			window.location = link
