@@ -14,7 +14,27 @@
     <script src="{% static "js/moment.min.js" %}"></script>
     <script src="{% static "js/fullcalendar.js" %}"></script>
     <script>
+
+        function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+            });
+            return vars;
+        }
+
         $(document).ready(function() {
+
+            viewToUrl = {
+                'agendaWeek':'week',
+                'agendaDay':'day',
+                'month':'month'
+            }
+            viewFromUrl = {
+                'week':'agendaWeek',
+                'day':'agendaDay',
+                'month':'month'
+            }
 
             $('#calendar').fullCalendar({
                 editable: false,
@@ -114,8 +134,11 @@
                             $('#day-button').addClass('active');
                             break;
                     }
-
+                    history.replaceState(null,null,'{% url 'web_calendar' %}'+viewToUrl[view.name]+'/'+view.intervalStart.format('YYYY-MM-DD')+'/');
                 }
+
+
+
             });
           
             // set some button listeners
@@ -146,6 +169,18 @@
                 }
             });
 
+            
+            // Go to the initial settings, if they're valid
+            view = viewFromUrl['{{view}}'];
+            $('#calendar').fullCalendar( 'changeView', view);
+
+            day = moment('{{date}}');
+            if(day.isValid()){
+                $('#calendar').fullCalendar( 'gotoDate', day);
+            }else{
+                console.log('Supplied date is invalid - using default')
+            }
+            
         });
 
     </script>
