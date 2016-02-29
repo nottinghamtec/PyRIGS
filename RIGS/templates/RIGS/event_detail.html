@@ -233,13 +233,17 @@
                     {% endif %}
                 {% endif %}
             </div>
+        </div>
+        {% endif %}
+    {% endif %}
+    {% if not request.is_ajax %}
+        <div class="col-sm-12 text-right">
             <div>
                 <a href="{% url 'event_history' object.pk %}" title="View Revision History">
                     Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
                 </a>
             </div>
         </div>
-        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
