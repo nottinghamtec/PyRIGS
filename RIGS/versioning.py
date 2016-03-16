@@ -67,8 +67,8 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
 
         @property
         def diff(self):
-            oldText = str(self.display_value(self._old)) or ""
-            newText = str(self.display_value(self._new)) or ""
+            oldText = unicode(self.display_value(self._old)) or ""
+            newText = unicode(self.display_value(self._new)) or ""
             dmp = diff_match_patch()
             diffs = dmp.diff_main(oldText, newText)
             dmp.diff_cleanupSemantic(diffs)
