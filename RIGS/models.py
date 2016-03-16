@@ -301,7 +301,7 @@ class Event(models.Model, RevisionMixin):
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
     dry_hire = models.BooleanField(default=False)
     is_rig = models.BooleanField(default=True)
-    based_on = models.ForeignKey('Event', related_name='future_events', blank=True, null=True)
+    based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True, null=True)
 
     # Timing
     start_date = models.DateField()

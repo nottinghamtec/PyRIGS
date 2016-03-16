@@ -420,8 +420,9 @@ class EventTest(LiveServerTestCase):
         e.send_keys(Keys.ENTER)
 
         # See redirected to success page
+        successTitle = self.browser.find_element_by_xpath('//h1').text
         event = models.Event.objects.get(name='Test Event Name')
-        self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
+        self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
 
     def testEventDuplicate(self):
         testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end") 
@@ -608,9 +609,10 @@ class EventTest(LiveServerTestCase):
         save.click()
         
         # See redirected to success page
+        successTitle = self.browser.find_element_by_xpath('//h1').text
         event = models.Event.objects.get(name='Test Event Name')
-        self.assertIn("N0000%d | Test Event Name"%event.pk, self.browser.find_element_by_xpath('//h1').text)
-
+        self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
+        
     def testRigNonRig(self):
         self.browser.get(self.live_server_url + '/event/create/')
         # Gets redirected to login and back
