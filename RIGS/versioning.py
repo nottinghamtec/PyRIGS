@@ -17,7 +17,6 @@ from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType # Used to lookup the content_type
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import ForeignKey, IntegerField, EmailField, TextField
-from diff_match_patch import diff_match_patch
 
 from RIGS import models, forms
 import datetime
@@ -64,25 +63,6 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
             if isinstance(self.field, TextField):
                 return True
             return False
-
-        @property
-        def diff(self):
-            oldText = str(self.display_value(self._old)) or ""
-            newText = str(self.display_value(self._new)) or ""
-            dmp = diff_match_patch()
-            diffs = dmp.diff_main(oldText, newText)
-            dmp.diff_cleanupSemantic(diffs)
-
-            outputDiffs = []
-
-            for (op, data) in diffs:
-              if op == dmp.DIFF_INSERT:
-                outputDiffs.append({'type':'insert', 'text':data})
-              elif op == dmp.DIFF_DELETE:
-                outputDiffs.append({'type':'delete', 'text':data})
-              elif op == dmp.DIFF_EQUAL:
-                outputDiffs.append({'type':'equal', 'text':data})
-            return outputDiffs
 
     changes = []
 
