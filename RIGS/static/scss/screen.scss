@@ -75,6 +75,16 @@ textarea {
   }
 }
 
+del {
+  background-color: #f2dede;
+  border-radius: 3px;
+}
+
+ins {
+  background-color: #dff0d8;
+  border-radius: 3px;
+}
+
 .loading-animation {
   position: relative;
   margin: 30px auto 0;
