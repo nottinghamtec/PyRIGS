@@ -14,14 +14,16 @@
 
     <link rel="icon" type="image/png" href="{% static "imgs/pyrigs-avatar.png" %}">
     <link rel="apple-touch-icon" href="{% static "imgs/pyrigs-avatar.png" %}">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet'
+          type='text/css'>
 
 
     <link rel="stylesheet" type="text/css" href="{% static "css/screen.css" %}">
     {% block css %}
     {% endblock %}
 
-    <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.8.3.min.js"
+            integrity="sha256-YcbK69I5IXQftf/mYD8WY0/KmEDCv1asggHpJk1trM8=" crossorigin="anonymous"></script>
     <script src="https://cdn.ravenjs.com/1.3.0/jquery,native/raven.min.js"></script>
     <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% block preload_js %}
@@ -46,32 +48,40 @@
         <div class="navbar-collapse">
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                <li><a href="/">Home</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rigboard<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a></li>
-                        <li><a href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a></li>
-                        <li><a href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a></li>
-                        {% if perms.RIGS.view_event %}
-                            <li><a href="{% url 'activity_table' %}"><span class="glyphicon glyphicon-random"></span> Recent Changes</a></li>
-                        {% endif %}
-                        {% if perms.RIGS.add_event %}
-                            <li><a href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a></li>
-                        {% endif %}   
-                             
-                    </ul>
-                </li>
+                    <li><a href="/">Home</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rigboard<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span>
+                                Rigboard</a></li>
+                            <li><a href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span>
+                                Archive</a></li>
+                            <li><a href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span>
+                                Calendar</a></li>
+                            {% if perms.RIGS.view_event %}
+                                <li><a href="{% url 'activity_table' %}"><span
+                                        class="glyphicon glyphicon-random"></span> Recent Changes</a></li>
+                            {% endif %}
+                            {% if perms.RIGS.add_event %}
+                                <li><a href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span>
+                                    New Event</a></li>
+                            {% endif %}
+
+                        </ul>
+                    </li>
                 {% endif %}
                 {% if perms.RIGS.view_invoice %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invoices<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Active</a></li>
+                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Active</a>
+                            </li>
                             {% if perms.RIGS.add_invoice %}
-                                <li><a href="{% url 'invoice_waiting' %}"><span class="glyphicon glyphicon-briefcase"></span> Waiting</a></li>
+                                <li><a href="{% url 'invoice_waiting' %}"><span
+                                        class="glyphicon glyphicon-briefcase"></span> Waiting</a></li>
                             {% endif %}
-                            <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a></li>
+                            <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span>
+                                Archive</a></li>
                         </ul>
                     </li>
                 {% endif %}
@@ -84,7 +94,7 @@
                 {% if perms.RIGS.view_venue %}
                     <li><a href="{% url 'venue_list' %}">Venues</a></li>
                 {% endif %}
-                
+
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
@@ -177,7 +187,7 @@
         jQuery(document).on('click', '.modal-href', function (e) {
             $link = jQuery(this);
             // Anti modal inception
-            if($link.parents('#modal').length == 0) {
+            if ($link.parents('#modal').length == 0) {
                 e.preventDefault();
                 modaltarget = $link.data('target');
                 modalobject = "";
@@ -189,11 +199,11 @@
 
 
         var easter_egg = new Konami();
-        easter_egg.code = function() { 
+        easter_egg.code = function () {
             var s = document.createElement('script');
-            s.type='text/javascript';
+            s.type = 'text/javascript';
             document.body.appendChild(s);
-            s.src='{% static "js/asteroids.min.js"%}';
+            s.src = '{% static "js/asteroids.min.js"%}';
             ga('send', 'event', 'easter_egg', 'activated');
         }
         easter_egg.load();
