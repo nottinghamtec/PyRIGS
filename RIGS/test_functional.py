@@ -159,6 +159,7 @@ class EventTest(LiveServerTestCase):
         
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3) # Set implicit wait session wide
+        self.browser.maximize_window()
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
