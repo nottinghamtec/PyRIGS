@@ -218,6 +218,7 @@ class EventTest(LiveServerTestCase):
         form = self.browser.find_element_by_tag_name('form')
 
         # Create new person
+        wait.until(animation_is_finished())
         add_person_button = self.browser.find_element_by_xpath(
             '//a[@data-target="#id_person" and contains(@href, "add")]')
         add_person_button.click()
@@ -246,6 +247,7 @@ class EventTest(LiveServerTestCase):
         self.assertEqual(person1.pk, int(option.get_attribute("value")))
 
         # Change mind and add another
+        wait.until(animation_is_finished())
         add_person_button.click()
 
         wait.until(animation_is_finished())
@@ -302,6 +304,7 @@ class EventTest(LiveServerTestCase):
             '//button[@data-id="id_person"]/span').text)
 
         # Create organisation
+        wait.until(animation_is_finished())
         add_button = self.browser.find_element_by_xpath(
             '//a[@data-target="#id_organisation" and contains(@href, "add")]')
         add_button.click()
