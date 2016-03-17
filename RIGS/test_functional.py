@@ -326,12 +326,12 @@ class EventTest(LiveServerTestCase):
         self.assertEqual(obj.pk, int(option.get_attribute("value")))
 
         # Create venue
-        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
-
         wait.until(animation_is_finished())
         add_button = self.browser.find_element_by_xpath(
             '//a[@data-target="#id_venue" and contains(@href, "add")]')
+        wait.until(animation_is_finished())
         add_button.click()
+        wait.until(animation_is_finished())
         modal = self.browser.find_element_by_id('modal')
         wait.until(animation_is_finished())
         self.assertTrue(modal.is_displayed())
