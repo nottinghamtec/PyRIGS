@@ -324,7 +324,10 @@ class EventTest(LiveServerTestCase):
             '//select[@id="id_organisation"]//option[@selected="selected"]')
         self.assertEqual(obj.pk, int(option.get_attribute("value")))
 
-        # Create veneue
+        # Create venue
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+
+        wait.until(animation_is_finished())
         add_button = self.browser.find_element_by_xpath(
             '//a[@data-target="#id_venue" and contains(@href, "add")]')
         add_button.click()
