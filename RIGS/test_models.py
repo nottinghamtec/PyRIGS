@@ -1,6 +1,8 @@
+import pytz
+from django.conf import settings
 from django.test import TestCase
 from RIGS import models
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, time
 from decimal import *
 
 
@@ -200,6 +202,46 @@ class EventTestCase(TestCase):
         self.assertTrue(event.confirmed)
         event.status = models.Event.PROVISIONAL
         event.save()
+
+    def test_earliest_time(self):
+        event = models.Event(name="TE ET", start_date=date(2016, 01, 01))
+
+        # Just a start date
+        self.assertEqual(event.earliest_time, date(2016, 01, 01))
+
+        # With start time
+        event.start_time = time(9, 00)
+        self.assertEqual(event.earliest_time, self.create_datetime(2016, 1, 1, 9, 00))
+
+        # With access time
+        event.access_at = self.create_datetime(2015, 12, 03, 9, 57)
+        self.assertEqual(event.earliest_time, event.access_at)
+
+        # With meet time
+        event.meet_at = self.create_datetime(2015, 12, 03, 9, 55)
+        self.assertEqual(event.earliest_time, event.meet_at)
+
+        # Check order isn't important
+        event.start_date = date(2015, 12, 03)
+        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 03, 9, 00))
+
+    def test_latest_time(self):
+        event = models.Event(name="TE LT", start_date=date(2016, 01, 01))
+
+        # Just start date
+        self.assertEqual(event.latest_time, event.start_date)
+
+        # Just end date
+        event.end_date = date(2016, 1, 2)
+        self.assertEqual(event.latest_time, event.end_date)
+
+        # With end time
+        event.end_time = time(23, 00)
+        self.assertEqual(event.latest_time, self.create_datetime(2016, 1, 2, 23, 00))
+
+    def create_datetime(self, year, month, day, hour, min):
+        tz = pytz.timezone(settings.TIME_ZONE)
+        return tz.localize(datetime(year, month, day, hour, min))
 
 
 class EventItemTestCase(TestCase):
