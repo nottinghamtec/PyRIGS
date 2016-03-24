@@ -12,7 +12,11 @@
     {% else %}
     {% if change.old %}
         <del {% if change.long %}class="overflow-ellipsis"{% endif %}>
-            {{change.old}}
+            {% if change.linebreaks %}
+                {{change.old|linebreaksbr}}
+            {% else %}
+                {{change.old}}
+            {% endif %}
         </del>
     {% endif %}
     {% if change.new and change.old %}
@@ -20,7 +24,11 @@
     {% endif %}
     {% if change.new %}
         <ins {% if change.long %}class="overflow-ellipsis"{% endif %}>
-            {{change.new}}
+            {% if change.linebreaks %}
+                {{change.new|linebreaksbr}}
+            {% else %}
+                {{change.new}}
+            {% endif %}
         </ins>
     {% endif %}
 {% endif %}
