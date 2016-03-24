@@ -1,6 +1,8 @@
+import pytz
+from django.conf import settings
 from django.test import TestCase
 from RIGS import models
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, time
 from decimal import *
 
 
@@ -200,6 +202,72 @@ class EventTestCase(TestCase):
         self.assertTrue(event.confirmed)
         event.status = models.Event.PROVISIONAL
         event.save()
+
+    def test_earliest_time(self):
+        event = models.Event(name="TE ET", start_date=date(2016, 01, 01))
+
+        # Just a start date
+        self.assertEqual(event.earliest_time, date(2016, 01, 01))
+
+        # With start time
+        event.start_time = time(9, 00)
+        self.assertEqual(event.earliest_time, self.create_datetime(2016, 1, 1, 9, 00))
+
+        # With access time
+        event.access_at = self.create_datetime(2015, 12, 03, 9, 57)
+        self.assertEqual(event.earliest_time, event.access_at)
+
+        # With meet time
+        event.meet_at = self.create_datetime(2015, 12, 03, 9, 55)
+        self.assertEqual(event.earliest_time, event.meet_at)
+
+        # Check order isn't important
+        event.start_date = date(2015, 12, 03)
+        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 03, 9, 00))
+
+    def test_latest_time(self):
+        event = models.Event(name="TE LT", start_date=date(2016, 01, 01))
+
+        # Just start date
+        self.assertEqual(event.latest_time, event.start_date)
+
+        # Just end date
+        event.end_date = date(2016, 1, 2)
+        self.assertEqual(event.latest_time, event.end_date)
+
+        # With end time
+        event.end_time = time(23, 00)
+        self.assertEqual(event.latest_time, self.create_datetime(2016, 1, 2, 23, 00))
+
+    def test_in_bounds(self):
+        manager = models.Event.objects
+        events = [
+            manager.create(name="TE IB0", start_date='2016-01-02'),  # yes no
+            manager.create(name="TE IB1", start_date='2015-12-31', end_date='2016-01-04'),
+
+            # basic checks
+            manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
+            manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
+            manager.create(name='TE IB4', start_date='2016-01-04', access_at='2016-01-03'),
+            manager.create(name='TE IB5', start_date='2016-01-04', meet_at='2016-01-02'),
+
+            # negative check
+            manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),
+        ]
+
+        in_bounds = manager.events_in_bounds(datetime(2016, 1, 2), datetime(2016, 1, 3))
+        self.assertIn(events[0], in_bounds)
+        self.assertIn(events[1], in_bounds)
+        self.assertIn(events[2], in_bounds)
+        self.assertIn(events[3], in_bounds)
+        self.assertIn(events[4], in_bounds)
+        self.assertIn(events[5], in_bounds)
+
+        self.assertNotIn(events[6], in_bounds)
+
+    def create_datetime(self, year, month, day, hour, min):
+        tz = pytz.timezone(settings.TIME_ZONE)
+        return tz.localize(datetime(year, month, day, hour, min))
 
 
 class EventItemTestCase(TestCase):
