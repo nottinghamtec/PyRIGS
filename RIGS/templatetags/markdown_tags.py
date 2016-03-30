@@ -20,7 +20,7 @@ def markdown_filter(text, format='html'):
         for img in soup('img'):
             img.parent.extract()
 
-        # <code> should become <pre>
+        # <code> should become <font>
         for c in soup('code'):
             c.name = 'font'
             c['face'] = "Courier"
