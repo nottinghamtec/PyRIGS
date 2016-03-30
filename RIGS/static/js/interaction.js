@@ -1,3 +1,7 @@
+marked.setOptions({
+    breaks: true,
+})
+
 function setupItemTable(items_json) {
     objectitems = JSON.parse(items_json)
     $.each(objectitems, function (key, val) {
