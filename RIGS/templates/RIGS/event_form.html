@@ -19,7 +19,6 @@
     <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
-    <script src="{% static "js/tooltip.js" %}"></script>
 
     <script src="{% static "js/autocompleter.js" %}"></script>
 
@@ -225,7 +224,7 @@
         <div class="panel panel-default form-hws form-non_rig">
             <div class="panel-heading">Event Description</div>
             <div class="panel-body">
-                <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
+                <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork. MD enabled.">
                     <label for="{{ form.description.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.description.label }}</label>
 
@@ -423,7 +422,7 @@
         <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
             <div class="panel-body">
                 <div class="col-sm-12">
-                    <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
+                    <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork. MD enabled.">
                         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
                         {% render_field form.notes class+="form-control" %}
                     </div>
