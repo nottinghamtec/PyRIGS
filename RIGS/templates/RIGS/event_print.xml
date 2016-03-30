@@ -83,8 +83,8 @@
                    bulletFontSize="10" />
 
         <listStyle name="ul"
-                   start="square"
-                   bulletFontSize="8" />
+                   start="bulletchar"
+                   bulletFontSize="10"/>
     </stylesheet>
 
     <template > {# Note: page is 595x842 points (1 point=1/72in) #}
