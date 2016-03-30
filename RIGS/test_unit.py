@@ -210,3 +210,7 @@ which you wish to be displayed literally, ex.: \`foo\`, \*bar\*, etc.
     def test_nonetype(self):
         html = markdown_filter(None)
         self.assertIsNone(html)
+
+    def test_linebreaks(self):
+        html = markdown_filter(self.markdown)
+        self.assertIn("Itemized lists<br />\nlook like", html)
