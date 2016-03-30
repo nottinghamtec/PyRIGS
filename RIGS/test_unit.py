@@ -206,3 +206,7 @@ which you wish to be displayed literally, ex.: \`foo\`, \*bar\*, etc.
         # By the time we have a PDF it should be larger than the original by some margin
         # RML hard fails if something doesn't work
         self.assertGreater(len(response.content), len(self.markdown))
+
+    def test_nonetype(self):
+        html = markdown_filter(None)
+        self.assertIsNone(html)
