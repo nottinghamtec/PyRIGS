@@ -9,6 +9,9 @@ register = template.Library()
 
 @register.filter(name="markdown")
 def markdown_filter(text, format='html'):
+    # markdown library can't handle text=None
+    if text is None:
+        return text
     html = markdown.markdown(text)
     if format == 'html':
         return mark_safe('<div class="markdown">' + html + '</div>')
