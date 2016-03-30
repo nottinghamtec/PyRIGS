@@ -6,17 +6,11 @@
     <form action="{% url 'login' %}" method="post" role="form">{% csrf_token %}
         <div class="form-group">
             <label for="id_username">{{ form.username.label }}</label>
-            {% render_field form.username class+="form-control" placeholder=form.username.label %}
+            {% render_field form.username class+="form-control" placeholder=form.username.label autofocus="" %}
         </div>
         <div class="form-group">
             <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
             {% render_field form.password class+="form-control" placeholder=form.password.label %}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.captcha.id_for_label }}">{{ form.captcha.label }}</label>
-            <div class="text-center">
-                {{ form.captcha }}
-            </div>
         </div>
         <a href="{% url 'registration_register' %}" class="btn">Register</a>
         <a href="{% url 'password_reset' %}" class="btn">Forgotten Password</a>

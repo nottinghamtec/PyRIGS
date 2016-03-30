@@ -69,6 +69,8 @@ urlpatterns = patterns('',
                        # Rigboard
                        url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
                        url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
                        url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True,pattern_name='event_archive')),
                        url(r'^rigboard/activity/$',
                            permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),

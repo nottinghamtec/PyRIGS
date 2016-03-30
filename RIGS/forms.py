@@ -4,19 +4,20 @@ from django.utils import formats
 from django.conf import settings
 from django.core import serializers
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
-from registration.forms import RegistrationFormUniqueEmail 
+from registration.forms import RegistrationFormUniqueEmail
 from captcha.fields import ReCaptchaField
 import simplejson
 
 from RIGS import models
 
-#Registration
+
+# Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     captcha = ReCaptchaField()
 
     class Meta:
         model = models.Profile
-        fields = ('username','email','first_name','last_name','initials','phone')
+        fields = ('username', 'email', 'first_name', 'last_name', 'initials', 'phone')
 
     def clean_initials(self):
         """
@@ -26,23 +27,21 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
 
-# Login form
-class LoginForm(AuthenticationForm):
-    captcha = ReCaptchaField(label='Captcha')
 
+# Login form
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
 
-class ProfileCreationForm(UserCreationForm):
 
+class ProfileCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = models.Profile
 
 
 class ProfileChangeForm(UserChangeForm):
-
     class Meta(UserChangeForm.Meta):
         model = models.Profile
+
 
 # Events Shit
 class EventForm(forms.ModelForm):
@@ -96,7 +95,7 @@ class EventForm(forms.ModelForm):
 
     def _get_or_initialise_item(self, pk, data, event):
         try:
-            item = models.EventItem.objects.get(pk=pk,event=event)
+            item = models.EventItem.objects.get(pk=pk, event=event)
         except models.EventItem.DoesNotExist:
             # This occurs for one of two reasons
             # 1) The event has been duplicated, so the item PKs belong to another event
@@ -134,12 +133,11 @@ class EventForm(forms.ModelForm):
             for key in items:
                 items[key].save()
 
-
         return m
 
     class Meta:
         model = models.Event
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
-                  'person', 'organisation', 'dry_hire', 'checked_in_by', 'status', 
-                  'collector','purchase_order']
+                  'person', 'organisation', 'dry_hire', 'checked_in_by', 'status',
+                  'collector', 'purchase_order']

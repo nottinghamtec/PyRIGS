@@ -152,7 +152,7 @@
                             <a href="{% url 'event_detail' pk=object.based_on.pk %}">
                                 {% if object.based_on.is_rig %}N{{ object.based_on.pk|stringformat:"05d" }}{% else %}
                                     {{ object.based_on.pk }}{% endif %}
-                                {{ object.base_on.name }} by {{ object.based_on.mic.name }}
+                                {{ object.base_on.name }} {% if object.based_on.mic %}by {{ object.based_on.mic.name }}{% endif %}
                             </a>
                         {% endif %}
                     </dd>
@@ -234,13 +234,17 @@
                     {% endif %}
                 {% endif %}
             </div>
+        </div>
+        {% endif %}
+    {% endif %}
+    {% if not request.is_ajax %}
+        <div class="col-sm-12 text-right">
             <div>
                 <a href="{% url 'event_history' object.pk %}" title="View Revision History">
                     Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
                 </a>
             </div>
         </div>
-        {% endif %}
     {% endif %}
 </div>
 {% endblock %}

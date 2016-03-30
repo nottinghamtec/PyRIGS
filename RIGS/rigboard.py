@@ -37,6 +37,12 @@ class RigboardIndex(generic.TemplateView):
 class WebCalendar(generic.TemplateView):
     template_name = 'RIGS/calendar.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(WebCalendar, self).get_context_data(**kwargs)
+        context['view'] = kwargs.get('view','')
+        context['date'] = kwargs.get('date','')
+        return context
+
 class EventDetail(generic.DetailView):
     model = models.Event
 
