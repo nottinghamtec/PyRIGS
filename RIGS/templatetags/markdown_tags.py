@@ -12,7 +12,7 @@ def markdown_filter(text, format='html'):
     # markdown library can't handle text=None
     if text is None:
         return text
-    html = markdown.markdown(text)
+    html = markdown.markdown(text, extensions=['markdown.extensions.nl2br'])
     if format == 'html':
         return mark_safe('<div class="markdown">' + html + '</div>')
     elif format == 'rml':
