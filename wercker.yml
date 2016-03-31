@@ -10,10 +10,10 @@ box: heroku/python
 # You can also use services such as databases. Read more on our dev center:
 # http://devcenter.wercker.com/docs/services/index.html
 services:
-#    - id: postgres
-#      env:
-#        POSTGRES_PASSWORD: pyrigstesting
-#        POSTGRES_USER: pyrigs
+    - id: postgres
+      env:
+        POSTGRES_PASSWORD: pyrigstesting
+        POSTGRES_USER: pyrigs
     # http://devcenter.wercker.com/docs/services/postgresql.html
 
     # - mongodb
@@ -69,11 +69,11 @@ build:
           echo "pip version $(pip --version) running"
 
     # Django uses this to connect to the database
-#    - script:
-#        name: set environment
-#        code: |
-#          export DEBUG=0
-#          export DATABASE_URL="postgres://pyrigs:pyrigstesting@$POSTGRES_PORT_5432_TCP_ADDR:$POSTGRES_PORT_5432_TCP_PORT$POSTGRES_NAME"
+    - script:
+        name: set environment
+        code: |
+          export DEBUG=0
+          export DATABASE_URL="postgres://pyrigs:pyrigstesting@$POSTGRES_PORT_5432_TCP_ADDR:$POSTGRES_PORT_5432_TCP_PORT$POSTGRES_NAME"
 
     # A step that executes `pip install` command.
     - pip-install

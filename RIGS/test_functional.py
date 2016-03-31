@@ -430,7 +430,7 @@ class EventTest(LiveServerTestCase):
             # See redirected to success page
             successTitle = self.browser.find_element_by_xpath('//h1').text
             event = models.Event.objects.get(name='Test Event Name')
-            self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
+            self.assertIn("N%05d | Test Event Name"%event.pk, successTitle)
         except WebDriverException:
             # This is a dirty workaround for wercker being a bit funny and not running it correctly.
             # Waiting for wercker to get back to me about this
@@ -487,7 +487,7 @@ class EventTest(LiveServerTestCase):
         # Attempt to save
         save.click()
 
-        self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+        self.assertNotIn("N%05d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
 
         # Check the new items are visible
         table = self.browser.find_element_by_id('item-table') # ID number is known, see above
@@ -496,7 +496,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("Test Item 3", table.text)
 
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
-        self.assertIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        self.assertIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
 
 
@@ -504,7 +504,7 @@ class EventTest(LiveServerTestCase):
         
         #Check that based-on hasn't crept into the old event
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
-        self.assertNotIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
+        self.assertNotIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table') # ID number is known, see above
@@ -623,7 +623,7 @@ class EventTest(LiveServerTestCase):
         # See redirected to success page
         successTitle = self.browser.find_element_by_xpath('//h1').text
         event = models.Event.objects.get(name='Test Event Name')
-        self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
+        self.assertIn("N%05d | Test Event Name"%event.pk, successTitle)
         
     def testRigNonRig(self):
         self.browser.get(self.live_server_url + '/event/create/')
