@@ -8,11 +8,13 @@
 {% block css %}
     <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
     <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 {% endblock %}
 
 {% block preload_js %}
     <script src="{% static "js/bootstrap-select.js" %}"></script>
     <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
+    <script src="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 {% endblock %}
 
 {% block js %}
@@ -40,6 +42,15 @@
         }
 
         $(document).ready(function () {
+
+            $(".md-enabled").each(function(index){
+                editor = new SimpleMDE({ 
+                    element: $(".md-enabled")[index],
+                    toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
+                    status: false,
+                });
+            });
+
             {% if not object.pk and not form.errors %}
 
                 $('.form-hws').slideUp(function () {
@@ -225,11 +236,8 @@
             <div class="panel-heading">Event Description</div>
             <div class="panel-body">
                 <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork. MD enabled.">
-                    <label for="{{ form.description.id_for_label }}"
-                           class="col-sm-4 control-label">{{ form.description.label }}</label>
-
-                    <div class="col-sm-8">
-                        {% render_field form.description class+="form-control" %}
+                    <div class="col-sm-12">
+                        {% render_field form.description class+="form-control md-enabled" %}
                     </div>
                 </div>
             </div>
@@ -424,7 +432,7 @@
                 <div class="col-sm-12">
                     <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork. MD enabled.">
                         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
-                        {% render_field form.notes class+="form-control" %}
+                        {% render_field form.notes class+="form-control md-enabled" %}
                     </div>
                 </div>
                 {% include "RIGS/item_table.html" %}
