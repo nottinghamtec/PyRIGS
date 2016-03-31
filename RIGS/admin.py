@@ -2,15 +2,15 @@ from django.contrib import admin
 from RIGS import models, forms
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
-import reversion
+from reversion.admin import VersionAdmin
 
 # Register your models here.
-admin.site.register(models.Person, reversion.VersionAdmin)
-admin.site.register(models.Organisation, reversion.VersionAdmin)
-admin.site.register(models.VatRate, reversion.VersionAdmin)
-admin.site.register(models.Venue, reversion.VersionAdmin)
-admin.site.register(models.Event, reversion.VersionAdmin)
-admin.site.register(models.EventItem, reversion.VersionAdmin)
+admin.site.register(models.Person, VersionAdmin)
+admin.site.register(models.Organisation, VersionAdmin)
+admin.site.register(models.VatRate, VersionAdmin)
+admin.site.register(models.Venue, VersionAdmin)
+admin.site.register(models.Event, VersionAdmin)
+admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice)
 admin.site.register(models.Payment)
 

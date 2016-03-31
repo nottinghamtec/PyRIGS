@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
-import reversion
+from reversion import revisions as reversion
 import string
 import random
 from collections import Counter
