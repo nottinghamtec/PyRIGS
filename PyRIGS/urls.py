@@ -6,19 +6,19 @@ from registration.backends.default.views import RegistrationView
 import RIGS
 from RIGS import regbackend
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
     # url(r'^$', 'PyRIGS.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^', include('RIGS.urls')),
-    url('^user/register/$', RegistrationView.as_view(form_class=RIGS.forms.ProfileRegistrationFormUniqueEmail), 
+    url('^user/register/$', RegistrationView.as_view(form_class=RIGS.forms.ProfileRegistrationFormUniqueEmail),
         name="registration_register"),
     url('^user/', include('django.contrib.auth.urls')),
     url('^user/', include('registration.backends.default.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-)
+]
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
