@@ -144,8 +144,8 @@ RAVEN_CONFIG = {
 AUTH_USER_MODEL = 'RIGS.Profile'
 
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/user/login'
-LOGOUT_URL = '/user/logout'
+LOGIN_URL = '/user/login/'
+LOGOUT_URL = '/user/logout/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
