@@ -11,7 +11,7 @@ import re
 import os
 from datetime import date, timedelta
 from django.db import transaction
-import reversion
+from reversion import revisions as reversion
 import json
 
 
