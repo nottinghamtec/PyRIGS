@@ -43,12 +43,14 @@
 
         $(document).ready(function () {
 
-            $(".md-enabled").each(function(index){
-                editor = new SimpleMDE({ 
-                    element: $(".md-enabled")[index],
-                    toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
-                    status: false,
-                });
+            setupMDE('#id_description');
+            setupMDE('#id_notes');
+            setupMDE('#item_description');
+
+            $('#itemModal').on('shown.bs.modal', function (e) {
+                $('#item_description').data('mde_editor').value(
+                    $('#item_description').val()
+                    );
             });
 
             {% if not object.pk and not form.errors %}
