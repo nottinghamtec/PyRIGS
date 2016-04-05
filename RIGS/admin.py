@@ -62,7 +62,8 @@ class AssociateAdmin(reversion.VersionAdmin):
                     for event in events:
                         masterObject.event_set.add(event)
                     obj.delete() 
-                
+                reversion.set_comment('Merging Objects')
+
             self.message_user(request, "Objects successfully merged.")
             return
         else: # Present the confirmation screen
