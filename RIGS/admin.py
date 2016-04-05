@@ -9,6 +9,7 @@ from django.template.response import TemplateResponse
 from django.contrib import messages 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 
 # Register your models here.
 admin.site.register(models.VatRate, reversion.VersionAdmin)
@@ -44,8 +45,13 @@ class AssociateAdmin(reversion.VersionAdmin):
 
     actions = ['merge']
 
+    def get_queryset(self, request):
+        return super(AssociateAdmin, self).get_queryset(request).annotate(event_count = Count('event'))
+
     def number_of_events(self,obj):
         return obj.latest_events.count()
+
+    number_of_events.admin_order_field = 'event_count'
 
     def merge(self, request, queryset):
         if request.POST.get('post'): # Has the user confirmed which is the master record?
