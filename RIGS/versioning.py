@@ -92,9 +92,16 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
         if name in excluded_keys:
             continue # if we're excluding this field, skip over it
 
-        oldValue = getattr(oldObj, name, None)
-        newValue = getattr(newObj, name, None)
+        try:
+            oldValue = getattr(oldObj, name, None)
+        except ObjectDoesNotExist:
+            oldValue = None
 
+        try:
+            newValue = getattr(newObj, name, None)
+        except ObjectDoesNotExist:
+            newValue = None
+            
         try:
             bothBlank = (not oldValue) and (not newValue)
             if oldValue != newValue and not bothBlank:
