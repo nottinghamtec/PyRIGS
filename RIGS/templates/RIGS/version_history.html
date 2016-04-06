@@ -35,6 +35,7 @@
                     <td>Version ID</td>
                     <td>User</td>
                     <td>Changes</td>
+                    <td>Comment</td>
                 </tr>
                 </thead>
                 <tbody>
@@ -50,6 +51,9 @@
                                     {% else %}
                                         {% include 'RIGS/version_changes.html' %}
                                     {% endif %}
+                                </td>
+                                <td>
+                                    {{ version.revision.comment }}
                                 </td>
                             </tr>
                         {% endif %}
