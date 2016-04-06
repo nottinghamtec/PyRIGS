@@ -119,17 +119,19 @@ def compare_event_items(old, new):
     # Build some dicts of what we have
     item_dict = {}  # build a list of items, key is the item_pk
     for version in old_item_versions:  # put all the old versions in a list
-        compare = ItemCompare(old=version.object_version.object)
-        item_dict[version.object_id] = compare
+        if version.object_version.object.event.id == old.object_id:
+            compare = ItemCompare(old=version.object_version.object)
+            item_dict[version.object_id] = compare
 
     for version in new_item_versions:  # go through the new versions
-        try:
-            compare = item_dict[version.object_id]  # see if there's a matching old version
-            compare.new = version.object_version.object  # then add the new version to the dictionary
-        except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
-            compare = ItemCompare(new=version.object_version.object)
+        if version.object_version.object.event.id == new.object_id:
+            try:
+                compare = item_dict[version.object_id]  # see if there's a matching old version
+                compare.new = version.object_version.object  # then add the new version to the dictionary
+            except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
+                compare = ItemCompare(new=version.object_version.object)
 
-        item_dict[version.object_id] = compare  # update the dictionary with the changes
+            item_dict[version.object_id] = compare  # update the dictionary with the changes
 
     changes = []
     for (_, compare) in item_dict.items():
