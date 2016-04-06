@@ -1,27 +1,18 @@
 import logging
-from django.views import generic
-from django.core.urlresolvers import reverse_lazy
-from django.shortcuts import get_object_or_404
-from django.template import RequestContext
-from django.template.loader import get_template
-from django.conf import settings
-from django.http import HttpResponse
-from django.db.models import Q
-from django.contrib import messages
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
+from django.views import generic
 
 # Versioning
 import reversion
-import simplejson
 from reversion.models import Version
 from django.contrib.contenttypes.models import ContentType  # Used to lookup the content_type
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import ForeignKey, IntegerField, EmailField, TextField
+from django.db.models import IntegerField, EmailField, TextField
 from diff_match_patch import diff_match_patch
 
-from RIGS import models, forms
+from RIGS import models
 import datetime
-import re
 
 logger = logging.getLogger('tec.pyrigs')
 
