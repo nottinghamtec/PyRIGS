@@ -72,7 +72,7 @@
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
                                   {% if version.old == None %}
-                                    {{object|to_class_name}} Created
+                                    {{version.new|to_class_name}} Created
                                   {% else %}
                                     {% include 'RIGS/version_changes.html' %}
                                   {% endif %}                        </td>
