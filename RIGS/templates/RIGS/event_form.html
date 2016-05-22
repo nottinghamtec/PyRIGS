@@ -29,9 +29,9 @@
         }
 
         function setTime02Hours() {
-            var id_start = "{{ form.start_date.id_for_label }}"
-            var id_end_date = "{{ form.end_date.id_for_label }}"
-            var id_end_time = "{{ form.end_time.id_for_label }}"
+            var id_start = "{{ form.start_date.id_for_label }}";
+            var id_end_date = "{{ form.end_date.id_for_label }}";
+            var id_end_time = "{{ form.end_time.id_for_label }}";
             if ($('#'+id_start).val() == $('#'+id_end_date).val()) {
                 var end_date = new Date($('#'+id_end_date).val());
                 end_date.setDate(end_date.getDate() + 1);
@@ -63,11 +63,12 @@
                         } else {
                             $('.form-is_rig').slideDown();
                         }
+                        $('.form-hws').css('overflow', 'visible');
                     } else {
                         $('#{{form.is_rig.auto_id}}').prop('checked', false);
                         $('.form-is_rig').slideUp();
                     }
-                })
+                });
             {% endif %}
 
             function supportsDate() {
@@ -106,7 +107,7 @@
                 });
 
             }
-        })
+        });
 
         $(document).ready(function () {
             setupItemTable($("#{{ form.items_json.id_for_label }}").val());
@@ -150,10 +151,12 @@
         <div class="col-md-12 well">
             <div class="form-group" id="is_rig-selector">
                 <div class="col-sm-12">
-					<span class="col-sm-6">
+					<span class="col-sm-6" data-toggle="tooltip"
+                          title="Anything that involves TEC kit, crew, or otherwise us providing a service to anyone.">
 						<button type="button" class="btn btn-primary col-xs-12" data-is_rig="1">Rig</button>
 					</span>
-					<span class="col-sm-6">
+					<span class="col-sm-6" data-toggle="tooltip"
+                          title="Things that aren't service-based, like training, meetings and site visits.">
 						<button type="button" class="btn btn-info col-xs-12" data-is_rig="0">Non-Rig</button>
 					</span>
                 </div>
