@@ -1,24 +1,23 @@
-import os
 import cStringIO as StringIO
-from io import BytesIO
+import copy
+import datetime
+import re
 import urllib2
+from io import BytesIO
 
-from django.views import generic
+from PyPDF2 import PdfFileMerger, PdfFileReader
+from django.conf import settings
+from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
-from django.conf import settings
-from django.http import HttpResponse
-from django.db.models import Q
-from django.contrib import messages
+from django.views import generic
 from z3c.rml import rml2pdf
-from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from RIGS import models, forms
-import datetime
-import re
-import copy
 
 __author__ = 'ghost'
 
@@ -180,19 +179,15 @@ class EventArchive(generic.ArchiveIndexView):
                                  "Muppet! Check the dates, it has been fixed for you.")
             start, end = end, start  # Stop the impending fail
 
-        filter = False
+        filter = Q()
         if end != "":
-            filter = Q(start_date__lte=end)
+            filter &= Q(start_date__lte=end)
         if start:
-            if filter:
-                filter = filter & Q(start_date__gte=start)
-            else:
-                filter = Q(start_date__gte=start)
+            filter &= Q(start_date__gte=start)
 
 
         q = self.request.GET.get('q', "")
 
-        qfilter = Q(pk__gte=0)
         if q is not "":
             qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
 
@@ -210,10 +205,9 @@ class EventArchive(generic.ArchiveIndexView):
             except:
                 pass
 
-        if filter or qfilter:
-            qs = self.model.objects.filter(filter & qfilter).order_by('-start_date')
-        else:
-            qs = self.model.objects.all().order_by('-start_date')
+            filter &= qfilter
+
+        qs = self.model.objects.filter(filter).order_by('-start_date')
 
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')
