@@ -103,6 +103,14 @@ class InvoiceWaiting(generic.ListView):
     paginate_by = 25
     template_name = 'RIGS/event_invoice.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceWaiting, self).get_context_data(**kwargs)
+        total = 0
+        for obj in context['object_list']:
+            total += obj.sum_total
+        context['total'] = total
+        return context
+
     def get_queryset(self):
         # @todo find a way to select items
         events = self.model.objects.filter(is_rig=True, end_date__lt=datetime.date.today(),
