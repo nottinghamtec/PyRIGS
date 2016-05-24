@@ -19,16 +19,24 @@ class InvoiceIndex(generic.ListView):
     model = models.Invoice
     template_name = 'RIGS/invoice_list.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceIndex, self).get_context_data(**kwargs)
+        total = 0
+        for i in context['object_list']:
+            total += i.balance
+        context['total'] = total
+        return context
+
     def get_queryset(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
         sql = "SELECT * FROM " \
               "(SELECT " \
-              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
+              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
               "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
-              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
+              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
               "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
               "AS sub " \
-              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
+              "WHERE (cost - payments) <> 0.0 AND void = '0'" \
               "ORDER BY invoice_date"
 
         query = self.model.objects.raw(sql)
