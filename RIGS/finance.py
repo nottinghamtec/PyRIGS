@@ -1,32 +1,39 @@
 import cStringIO as StringIO
+import datetime
+import re
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
-from django.db import connection
 from django.http import Http404, HttpResponseRedirect
-from django.views import generic
-from django.template import RequestContext
-from django.template.loader import get_template
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.contrib import messages
-import datetime
+from django.template import RequestContext
+from django.template.loader import get_template
+from django.views import generic
 from z3c.rml import rml2pdf
 
 from RIGS import models
 
-import re
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
     template_name = 'RIGS/invoice_list.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceIndex, self).get_context_data(**kwargs)
+        total = 0
+        for i in context['object_list']:
+            total += i.balance
+        context['total'] = total
+        return context
+
     def get_queryset(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
         sql = "SELECT * FROM " \
               "(SELECT " \
-              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
+              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
               "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
-              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" as p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
+              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
               "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
               "AS sub " \
               "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
@@ -39,6 +46,7 @@ class InvoiceIndex(generic.ListView):
 
 class InvoiceDetail(generic.DetailView):
     model = models.Invoice
+
 
 class InvoicePrint(generic.View):
     def get(self, request, pk):
@@ -54,8 +62,8 @@ class InvoicePrint(generic.View):
                     'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
                 }
             },
-            'invoice':invoice,
-            'current_user':request.user,
+            'invoice': invoice,
+            'current_user': request.user,
         })
 
         rml = template.render(context)
@@ -71,6 +79,7 @@ class InvoicePrint(generic.View):
         response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, escapedEventName)
         response.write(pdfData)
         return response
+
 
 class InvoiceVoid(generic.View):
     def get(self, *args, **kwargs):
@@ -94,14 +103,27 @@ class InvoiceWaiting(generic.ListView):
     paginate_by = 25
     template_name = 'RIGS/event_invoice.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceWaiting, self).get_context_data(**kwargs)
+        total = 0
+        for obj in self.get_objects():
+            total += obj.sum_total
+        context['total'] = total
+        return context
+
     def get_queryset(self):
+        return self.get_objects()
+
+    def get_objects(self):
         # @todo find a way to select items
         events = self.model.objects.filter(is_rig=True, end_date__lt=datetime.date.today(),
                                            invoice__isnull=True) \
             .order_by('start_date') \
             .select_related('person',
                             'organisation',
-                            'venue', 'mic')
+                            'venue', 'mic') \
+            .prefetch_related('items')
+
         return events
 
 
@@ -119,7 +141,7 @@ class InvoiceEvent(generic.View):
 
 class PaymentCreate(generic.CreateView):
     model = models.Payment
-    fields = ['invoice','date','amount','method']
+    fields = ['invoice', 'date', 'amount', 'method']
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()

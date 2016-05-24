@@ -5,7 +5,7 @@
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Events for Invoice</h2>
+        <h2>Events for Invoice (£ {{ total|floatformat:2 }})</h2>
         {% if is_paginated %}
             <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
                 {% paginator %}
@@ -26,16 +26,18 @@
             <tbody>
             {% for object in object_list %}
                 <tr class="
-                        {% if event.cancelled %}
-							active
-						{% elif event.confirmed and event.mic or not event.is_rig %}
-						{# interpreated as (booked and mic) or is non rig #}
-							success
-						{% elif event.mic %}
-							warning
-						{% else %}
-							danger
-						{% endif %}
+                        {% if object.cancelled %}
+                            active text-muted
+                        {% elif not object.is_rig %}
+                            info
+                        {% elif object.confirmed and object.mic %}
+                        {# interpreated as (booked and mic) #}
+                            success
+                        {% elif object.mic %}
+                            warning
+                        {% else %}
+                            danger
+                        {% endif %}
                         ">
                     <td class="hidden-xs"><a href="{% url 'event_detail' object.pk %}" target="_blank">N{{ object.pk|stringformat:"05d" }}</a></td>
                     <td>{{ object.end_date }}</td>
