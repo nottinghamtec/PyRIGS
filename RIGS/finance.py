@@ -36,7 +36,7 @@ class InvoiceIndex(generic.ListView):
               "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
               "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
               "AS sub " \
-              "WHERE (cost - payments) <> 0.0 AND void = '0'" \
+              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
               "ORDER BY invoice_date"
 
         query = self.model.objects.raw(sql)
@@ -106,19 +106,24 @@ class InvoiceWaiting(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)
         total = 0
-        for obj in context['object_list']:
+        for obj in self.get_objects():
             total += obj.sum_total
         context['total'] = total
         return context
 
     def get_queryset(self):
+        return self.get_objects()
+
+    def get_objects(self):
         # @todo find a way to select items
         events = self.model.objects.filter(is_rig=True, end_date__lt=datetime.date.today(),
                                            invoice__isnull=True) \
             .order_by('start_date') \
             .select_related('person',
                             'organisation',
-                            'venue', 'mic')
+                            'venue', 'mic') \
+            .prefetch_related('items')
+
         return events
 
 
