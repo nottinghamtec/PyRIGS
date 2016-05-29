@@ -33,9 +33,14 @@
                     </td>
                     <td>{% if object.organisation %}
                             {{ object.event.organisation.name }}
+                            <br>
+                            <span class="text-muted">{{ object.organisation.union_account|yesno:'Internal,External' }}</span>
                         {% else %}
                             {{ object.event.person.name }}
-                        {% endif %}</td>
+                            <br>
+                            <span class="text-muted">External</span>
+                        {% endif %}
+                    </td>
                     <td>{{ object.event.start_date }}</td>
                     <td>{{ object.invoice_date }}</td>
                     <td>{{ object.balance|floatformat:2 }}</td>

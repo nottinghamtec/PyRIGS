@@ -57,9 +57,14 @@
                     <td>
                         {% if object.organisation %}
                             {{ object.organisation.name }}
+                            <br>
+                            <span class="text-muted">{{ object.organisation.union_account|yesno:'Internal,External' }}</span>
                         {% else %}
                             {{ object.person.name }}
+                            <br>
+                            <span class="text-muted">External</span>
                         {% endif %}
+
                     </td>
                     <td>{{ object.sum_total|floatformat:2 }}</td>
                     <td class="text-center">
