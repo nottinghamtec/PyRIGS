@@ -74,7 +74,7 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invoices<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Active</a>
+                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Outstanding</a>
                             </li>
                             {% if perms.RIGS.add_invoice %}
                                 <li><a href="{% url 'invoice_waiting' %}"><span

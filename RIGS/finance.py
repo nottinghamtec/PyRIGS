@@ -17,7 +17,7 @@ from RIGS import models
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
-    template_name = 'RIGS/invoice_list.html'
+    template_name = 'RIGS/invoice_list_active.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceIndex, self).get_context_data(**kwargs)
@@ -95,6 +95,7 @@ class InvoiceVoid(generic.View):
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
+    template_name = 'RIGS/invoice_list_archive.html'
     paginate_by = 25
 
 

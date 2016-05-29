@@ -5,7 +5,8 @@
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Invoices {% if total %}(£ {{ total|floatformat:2 }}){% endif %}</h2>
+        <h2>{% block heading %}Invoices{% endblock %}</h2>
+        {% block description %}{% endblock %}
         {% if is_paginated %}
             <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
                 {% paginator %}
