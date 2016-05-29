@@ -25,6 +25,7 @@ class InvoiceIndex(generic.ListView):
         for i in context['object_list']:
             total += i.balance
         context['total'] = total
+        context['count'] = len(list(context['object_list']))
         return context
 
     def get_queryset(self):
