@@ -1,7 +1,17 @@
 {% extends 'base.html' %}
 {% load paginator from filters %}
+{% load static %}
 
 {% block title %}Events for Invoice{% endblock %}
+
+{% block js %}
+<script src="{% static "js/tooltip.js" %}"></script>
+<script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+{% endblock %}
 
 {% block content %}
     <div class="col-sm-12">
@@ -16,8 +26,8 @@
             <thead>
             <tr>
                 <th class="hiddenx-xs">#</th>
-                <th>Date</th>
-                <th>Event</th>
+                <th>Start Date</th>
+                <th>Event Name</th>
                 <th>Client</th>
                 <th>Cost</th>
                 <th class="hidden-xs">MIC</th>
@@ -40,8 +50,9 @@
                             danger
                         {% endif %}
                         ">
-                    <td class="hidden-xs"><a href="{% url 'event_detail' object.pk %}" target="_blank">N{{ object.pk|stringformat:"05d" }}</a></td>
-                    <td>{{ object.end_date }}</td>
+                    <td class="hidden-xs"><a href="{% url 'event_detail' object.pk %}" target="_blank">N{{ object.pk|stringformat:"05d" }}</a><br>
+                        <span class="text-muted">{{ object.get_status_display }}</span></td>
+                    <td>{{ object.start_date }}</td>
                     <td>{{ object.name }}</td>
                     <td>
                         {% if object.organisation %}
@@ -52,11 +63,15 @@
                     </td>
                     <td>{{ object.sum_total|floatformat:2 }}</td>
                     <td class="text-center">
-                        {{ object.mic.initials }}<br/>
-                        <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
+                        {% if object.mic %}
+                            {{ object.mic.initials }}<br>
+                            <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
+                        {% else %}
+                            <span class="glyphicon glyphicon-exclamation-sign"></span>
+                        {% endif %}
                     </td>
                     <td class="text-right">
-                        <a href="{% url 'invoice_event' object.pk %}" target="_blank" class="btn btn-default">
+                        <a href="{% url 'invoice_event' object.pk %}" target="_blank" class="btn btn-default" data-toggle="tooltip" title="'Invoice' this event - click this when paperwork has been sent to treasury">
                             <span class="glyphicon glyphicon-gbp"></span>
                         </a>
                     </td>

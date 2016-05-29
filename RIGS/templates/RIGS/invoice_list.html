@@ -17,6 +17,8 @@
             <tr>
                 <th>#</th>
                 <th>Event</th>
+                <th>Client</th>
+                <th>Event Date</th>
                 <th>Invoice Date</th>
                 <th>Balance</th>
                 <th></th>
@@ -26,7 +28,15 @@
             {% for object in object_list %}
                 <tr class="{% if object.void %}danger{% elif object.balance == 0 %}success{% endif %}">
                     <td>{{ object.pk }}</td>
-                    <td><a href="{% url 'event_detail' object.event.pk %}" target="_blank">N{{ object.event.pk|stringformat:"05d" }}</a>: {{ object.event.name }}</td>
+                    <td><a href="{% url 'event_detail' object.event.pk %}" target="_blank">N{{ object.event.pk|stringformat:"05d" }}</a>: {{ object.event.name }} <br>
+                        <span class="text-muted">{{ object.event.get_status_display }}</span></td>
+                    </td>
+                    <td>{% if object.organisation %}
+                            {{ object.event.organisation.name }}
+                        {% else %}
+                            {{ object.event.person.name }}
+                        {% endif %}</td>
+                    <td>{{ object.event.start_date }}</td>
                     <td>{{ object.invoice_date }}</td>
                     <td>{{ object.balance|floatformat:2 }}</td>
                     <td class="text-right">
