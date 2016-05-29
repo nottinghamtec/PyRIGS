@@ -15,12 +15,10 @@
                     <span class="glyphicon glyphicon-ban-circle"></span> <span
                             class="hidden-xs">Void</span>
                 </a>
-                {% if not object.event.organisation.union_account %}
-                    <a href="{% url 'invoice_print' object.pk %}" target="_blank" class="btn btn-default"><span
-                                class="glyphicon glyphicon-print"></span> <span
-                                class="hidden-xs">Print</span></a>
-                    </div>
-                {% endif %}
+                <a href="{% url 'invoice_print' object.pk %}" target="_blank" class="btn btn-default"><span
+                            class="glyphicon glyphicon-print"></span> <span
+                            class="hidden-xs">Print</span></a>
+                </div>
             </div>
         </div>
 
