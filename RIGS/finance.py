@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.views import generic
+from django.db.models import Q
 from z3c.rml import rml2pdf
 
 from RIGS import models
@@ -118,9 +119,13 @@ class InvoiceWaiting(generic.ListView):
 
     def get_objects(self):
         # @todo find a way to select items
-        events = self.model.objects.filter(is_rig=True, end_date__lt=datetime.date.today(),
-                                           invoice__isnull=True) \
-            .order_by('start_date') \
+        events = self.model.objects.filter(
+            (
+                Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
+                Q(end_date__lte=datetime.date.today()) # Has end date, finishes before
+            ) & Q(invoice__isnull=True) # Has not already been invoiced
+            
+            ).order_by('start_date') \
             .select_related('person',
                             'organisation',
                             'venue', 'mic') \
