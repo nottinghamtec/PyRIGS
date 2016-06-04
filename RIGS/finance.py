@@ -124,6 +124,7 @@ class InvoiceWaiting(generic.ListView):
                 Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
                 Q(end_date__lte=datetime.date.today()) # Has end date, finishes before
             ) & Q(invoice__isnull=True) # Has not already been invoiced
+            & Q(is_rig=True) # Is a rig (not non-rig)
             
             ).order_by('start_date') \
             .select_related('person',
