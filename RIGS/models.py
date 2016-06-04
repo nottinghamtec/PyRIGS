@@ -1,31 +1,32 @@
+import datetime
 import hashlib
-import datetime, pytz
-
-from django.db import models, connection
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
-from django.utils.functional import cached_property
-from django.utils.encoding import python_2_unicode_compatible
-import reversion
-import string
+import pytz
 import random
+import string
 from collections import Counter
-from django.core.urlresolvers import reverse_lazy
-from django.core.exceptions import ValidationError
-
 from decimal import Decimal
+
+import reversion
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse_lazy
+from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
+
 
 # Create your models here.
 @python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
-    api_key = models.CharField(max_length=40,blank=True,editable=False, null=True)
+    api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
 
     @classmethod
     def make_api_key(cls):
-        size=20
-        chars=string.ascii_letters + string.digits
+        size = 20
+        chars = string.ascii_letters + string.digits
         new_api_key = ''.join(random.choice(chars) for x in range(size))
         return new_api_key;
 
@@ -55,6 +56,7 @@ class Profile(AbstractUser):
             ('view_profile', 'Can view Profile'),
         )
 
+
 class RevisionMixin(object):
     @property
     def last_edited_at(self):
@@ -79,9 +81,10 @@ class RevisionMixin(object):
         versions = reversion.get_for_object(self)
         if versions:
             version = reversion.get_for_object(self)[0]
-            return "V{0} | R{1}".format(version.pk,version.revision.pk)
+            return "V{0} | R{1}".format(version.pk, version.revision.pk)
         else:
             return None
+
 
 @reversion.register
 @python_2_unicode_compatible
@@ -97,7 +100,7 @@ class Person(models.Model, RevisionMixin):
     def __str__(self):
         string = self.name
         if self.notes is not None:
-            if  len(self.notes) > 0:
+            if len(self.notes) > 0:
                 string += "*"
         return string
 
@@ -108,7 +111,7 @@ class Person(models.Model, RevisionMixin):
             if e.organisation:
                 o.append(e.organisation)
 
-        #Count up occurances and put them in descending order
+        # Count up occurances and put them in descending order
         c = Counter(o)
         stats = c.most_common()
         return stats
@@ -141,7 +144,7 @@ class Organisation(models.Model, RevisionMixin):
     def __str__(self):
         string = self.name
         if self.notes is not None:
-            if  len(self.notes) > 0:
+            if len(self.notes) > 0:
                 string += "*"
         return string
 
@@ -151,8 +154,8 @@ class Organisation(models.Model, RevisionMixin):
         for e in Event.objects.filter(organisation=self).select_related('person'):
             if e.person:
                 p.append(e.person)
-        
-        #Count up occurances and put them in descending order
+
+        # Count up occurances and put them in descending order
         c = Counter(p)
         stats = c.most_common()
         return stats
@@ -238,12 +241,18 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
+                status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
+                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
+                                                                                                 'organisation',
+                                                                                                 'venue', 'mic')
         return events
 
     def events_in_bounds(self, start, end):
@@ -251,15 +260,17 @@ class EventManager(models.Manager):
             (models.Q(start_date__gte=start.date(), start_date__lte=end.date())) |  # Start date in bounds
             (models.Q(end_date__gte=start.date(), end_date__lte=end.date())) |  # End date in bounds
             (models.Q(access_at__gte=start, access_at__lte=end)) |  # Access at in bounds
-            (models.Q(meet_at__gte=start, meet_at__lte=end)) | # Meet at in bounds
+            (models.Q(meet_at__gte=start, meet_at__lte=end)) |  # Meet at in bounds
 
-            (models.Q(start_date__lte=start, end_date__gte=end)) | # Start before, end after
-            (models.Q(access_at__lte=start, start_date__gte=end)) | # Access before, start after
-            (models.Q(access_at__lte=start, end_date__gte=end)) | # Access before, end after
-            (models.Q(meet_at__lte=start, start_date__gte=end)) | # Meet before, start after
-            (models.Q(meet_at__lte=start, end_date__gte=end)) # Meet before, end after
+            (models.Q(start_date__lte=start, end_date__gte=end)) |  # Start before, end after
+            (models.Q(access_at__lte=start, start_date__gte=end)) |  # Access before, start after
+            (models.Q(access_at__lte=start, end_date__gte=end)) |  # Access before, end after
+            (models.Q(meet_at__lte=start, start_date__gte=end)) |  # Meet before, start after
+            (models.Q(meet_at__lte=start, end_date__gte=end))  # Meet before, end after
 
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
+                                                                                                 'organisation',
+                                                                                                 'venue', 'mic')
         return events
 
     def rig_count(self):
@@ -301,7 +312,8 @@ class Event(models.Model, RevisionMixin):
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
     dry_hire = models.BooleanField(default=False)
     is_rig = models.BooleanField(default=True)
-    based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True, null=True)
+    based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True,
+                                 null=True)
 
     # Timing
     start_date = models.DateField()
@@ -327,6 +339,7 @@ class Event(models.Model, RevisionMixin):
     """
     EX Vat
     """
+
     @property
     def sum_total(self):
         # Manual querying is required for efficiency whilst maintaining floating point arithmetic
@@ -334,14 +347,15 @@ class Event(models.Model, RevisionMixin):
         #    sql = "SELECT SUM(quantity * cost) AS sum_total FROM \"RIGS_eventitem\" WHERE event_id=%i" % self.id
         # else:
         #    sql = "SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id
-        #total = self.items.raw(sql)[0]
-        #if total.sum_total:
+        # total = self.items.raw(sql)[0]
+        # if total.sum_total:
         #    return total.sum_total
-        #total = 0.0
-        #for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
+        # total = 0.0
+        # for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
         #    total += item.sum
         total = EventItem.objects.filter(event=self).aggregate(
-            sum_total=models.Sum(models.F('cost')*models.F('quantity'), output_field=models.DecimalField(max_digits=10, decimal_places=2))
+            sum_total=models.Sum(models.F('cost') * models.F('quantity'),
+                                 output_field=models.DecimalField(max_digits=10, decimal_places=2))
         )['sum_total']
         if total:
             return total
@@ -358,6 +372,7 @@ class Event(models.Model, RevisionMixin):
     """
     Inc VAT
     """
+
     @property
     def total(self):
         return self.sum_total + self.vat
@@ -382,7 +397,7 @@ class Event(models.Model, RevisionMixin):
     def earliest_time(self):
         """Finds the earliest time defined in the event - this function could return either a tzaware datetime, or a naiive date object"""
 
-        #Put all the datetimes in a list
+        # Put all the datetimes in a list
         datetime_list = []
 
         if self.access_at:
@@ -394,22 +409,22 @@ class Event(models.Model, RevisionMixin):
         # If there is no start time defined, pretend it's midnight
         startTimeFaked = False
         if self.has_start_time:
-            startDateTime = datetime.datetime.combine(self.start_date,self.start_time)
+            startDateTime = datetime.datetime.combine(self.start_date, self.start_time)
         else:
-            startDateTime = datetime.datetime.combine(self.start_date,datetime.time(00,00))
+            startDateTime = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
             startTimeFaked = True
 
-        #timezoneIssues - apply the default timezone to the naiive datetime
+        # timezoneIssues - apply the default timezone to the naiive datetime
         tz = pytz.timezone(settings.TIME_ZONE)
         startDateTime = tz.localize(startDateTime)
-        datetime_list.append(startDateTime) # then add it to the list
+        datetime_list.append(startDateTime)  # then add it to the list
 
-        earliest = min(datetime_list).astimezone(tz) #find the earliest datetime in the list
+        earliest = min(datetime_list).astimezone(tz)  # find the earliest datetime in the list
 
         # if we faked it & it's the earliest, better own up
-        if startTimeFaked and earliest==startDateTime:
+        if startTimeFaked and earliest == startDateTime:
             return self.start_date
-        
+
         return earliest
 
     @property
@@ -421,7 +436,7 @@ class Event(models.Model, RevisionMixin):
             endDate = self.start_date
 
         if self.has_end_time:
-            endDateTime = datetime.datetime.combine(endDate,self.end_time)
+            endDateTime = datetime.datetime.combine(endDate, self.end_time)
             tz = pytz.timezone(settings.TIME_ZONE)
             endDateTime = tz.localize(endDateTime)
 
@@ -430,7 +445,6 @@ class Event(models.Model, RevisionMixin):
         else:
             return endDate
 
-        
     objects = EventManager()
 
     def get_absolute_url(self):
@@ -446,7 +460,7 @@ class Event(models.Model, RevisionMixin):
         startEndSameDay = not self.end_date or self.end_date == self.start_date
         hasStartAndEnd = self.has_start_time and self.has_end_time
         if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
-            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')            
+            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
 
     def save(self, *args, **kwargs):
         """Call :meth:`full_clean` before saving."""
@@ -503,15 +517,6 @@ class Invoice(models.Model):
 
     @property
     def payment_total(self):
-        # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        #if connection.vendor == 'postgresql':
-        #    sql = "SELECT SUM(amount) AS total FROM \"RIGS_payment\" WHERE invoice_id=%i" % self.id
-        #else:
-        #    sql = "SELECT id, SUM(amount) AS total FROM RIGS_payment WHERE invoice_id=%i" % self.id
-        #total = self.payment_set.raw(sql)[0]
-        #if total.total:
-        #    return total.total
-        #return 0.0
         total = self.payment_set.aggregate(total=models.Sum('amount'))['total']
         if total:
             return total
