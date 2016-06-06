@@ -15,7 +15,7 @@
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Events for Invoice ({{object_list|length}} Events, £ {{ total|floatformat:2 }})</h2>
+        <h2>Events for Invoice ({{count}} Events, £ {{ total|floatformat:2 }})</h2>
         <p>These events have happened, but paperwork has not yet been sent to treasury</p>
         {% if is_paginated %}
             <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">

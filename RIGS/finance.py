@@ -112,6 +112,7 @@ class InvoiceWaiting(generic.ListView):
         for obj in self.get_objects():
             total += obj.sum_total
         context['total'] = total
+        context['count'] = len(self.get_objects())
         return context
 
     def get_queryset(self):
