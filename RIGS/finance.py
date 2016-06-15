@@ -94,6 +94,25 @@ class InvoiceVoid(generic.View):
             return HttpResponseRedirect(reverse_lazy('invoice_list'))
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': object.pk}))
 
+class InvoiceDelete(generic.DeleteView):
+    model = models.Invoice
+
+    def get(self, request, pk):
+        obj = self.get_object()
+        if obj.payment_set.all().count() > 0:
+            messages.info(self.request, 'To delete an invoice, delete the payments first.')
+            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+        return super(InvoiceDelete, self).get(pk)
+
+    def post(self, request, pk):
+        obj = self.get_object()
+        if obj.payment_set.all().count() > 0:
+            messages.info(self.request, 'To delete an invoice, delete the payments first.')
+            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+        return super(InvoiceDelete, self).post(pk)
+
+    def get_success_url(self):
+        return self.request.POST.get('next')
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
