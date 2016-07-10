@@ -144,6 +144,7 @@ class InvoiceEvent(generic.View):
 
         if created:
             invoice.invoice_date = datetime.date.today()
+            messages.success(self.request, 'Invoice created successfully')
 
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': invoice.pk}))
 

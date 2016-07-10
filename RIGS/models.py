@@ -526,6 +526,10 @@ class Invoice(models.Model):
     def balance(self):
         return self.sum_total - self.payment_total
 
+    @property
+    def is_closed(self):
+        return self.balance == 0 or self.void
+
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
 

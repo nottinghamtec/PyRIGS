@@ -38,7 +38,7 @@
                 </div>
             </div>
             <div class="col-sm-6">
-                <div class="panel panel-{% if object.void %}danger{% else %}info{% endif %}">
+                <div class="panel panel-{% if object.void %}danger{% elif object.is_closed %}success{% else %}info{% endif %}">
                     <div class="panel-heading">Event Details</div>
                     <div class="panel-body">
                         <dl class="dl-horizontal">
