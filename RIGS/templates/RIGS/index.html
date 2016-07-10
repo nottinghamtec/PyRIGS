@@ -75,6 +75,19 @@
                         </div>
                     </form>
                 </div>
+                {% if perms.RIGS.view_invoice %}
+                <div class="list-group-item">
+                    <form class="form" role="form" action="{% url 'invoice_archive' %}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Search Invoices" />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
             </div>
         </div>
     </div>
