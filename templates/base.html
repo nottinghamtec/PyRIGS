@@ -76,9 +76,9 @@
                         <ul class="dropdown-menu">
                             {% if perms.RIGS.add_invoice %}
                                 <li><a href="{% url 'invoice_waiting' %}"><span
-                                        class="glyphicon glyphicon-briefcase"></span> Waiting</a></li>
+                                        class="glyphicon glyphicon-briefcase text-danger"></span> Waiting</a></li>
                             {% endif %}
-                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Outstanding</a>
+                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp text-warning"></span> Outstanding</a>
                             </li>
                             <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span>
                                 Archive</a></li>
