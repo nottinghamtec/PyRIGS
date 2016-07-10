@@ -71,7 +71,7 @@
 				<dd>{{object.initials}}</dd>
 
 				<dt>Phone</dt>
-				<dd>{{object.phone}}</dd>
+				<dd><a href="tel:{{ object.phone }}">{{object.phone}}</a></dd>
 			</dl>
 			{% if not request.is_ajax %}
 			{% if object.pk == user.pk %}
