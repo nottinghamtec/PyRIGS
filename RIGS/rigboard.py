@@ -156,10 +156,10 @@ class EventPrint(generic.View):
         response.write(merged.getvalue())
         return response
 
-class EventArchive(generic.ArchiveIndexView):
+class EventArchive(generic.ListView):
     model = models.Event
-    date_field = "start_date"
     paginate_by = 25
+    template_name = "RIGS/event_archive.html"
 
     def get_context_data(self, **kwargs):
         # get super context
