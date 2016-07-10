@@ -13,6 +13,8 @@ urlpatterns = patterns('',
                        url('^$', login_required(views.Index.as_view()), name='index'),
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
+                       url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
+
                        url('^user/login/$', 'RIGS.views.login', name='login'),
                        url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form':forms.PasswordReset}),
 
