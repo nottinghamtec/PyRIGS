@@ -25,9 +25,17 @@
                             class="hidden-xs">Duplicate</span></a>
                 {% if event.is_rig %}
                     {% if perms.RIGS.add_invoice %}
-                        <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span> <span
-                            class="hidden-xs">Invoice</span></a>
+                        <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
+                        {% if event.invoice and event.invoice.is_closed %}
+                            btn-success
+                        {% elif event.invoice %}
+                            btn-warning
+                        {% else %}
+                            btn-danger
+                        {% endif %}
+                        " title="Invoice Rig"><span
+                                class="glyphicon glyphicon-gbp"></span> 
+                                <span class="hidden-xs">Invoice</span></a>
                     {% endif %}
                 {% endif %}
             </div>
@@ -190,9 +198,17 @@
                         class="hidden-xs">Duplicate</span></a>
             {% if event.is_rig %}
                 {% if perms.RIGS.add_invoice %}
-                    <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                            class="glyphicon glyphicon-gbp"></span> <span
-                        class="hidden-xs">Invoice</span></a>
+                    <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
+                    {% if event.invoice and event.invoice.is_closed %}
+                        btn-success
+                    {% elif event.invoice %}
+                        btn-warning
+                    {% else %}
+                        btn-danger
+                    {% endif %}
+                    " title="Invoice Rig"><span
+                            class="glyphicon glyphicon-gbp"></span> 
+                            <span class="hidden-xs">Invoice</span></a>
                 {% endif %}
             {% endif %}
         </div>
@@ -227,9 +243,17 @@
                             class="hidden-xs">Duplicate</span></a>
                 {% if event.is_rig %}
                     {% if perms.RIGS.add_invoice %}
-                        <a href="{% url 'invoice_event' event.pk %}" class="btn btn-default" title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span> <span
-                            class="hidden-xs">Invoice</span></a>
+                        <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
+                        {% if event.invoice and event.invoice.is_closed %}
+                            btn-success
+                        {% elif event.invoice %}
+                            btn-warning
+                        {% else %}
+                            btn-danger
+                        {% endif %}
+                        " title="Invoice Rig"><span
+                                class="glyphicon glyphicon-gbp"></span> 
+                                <span class="hidden-xs">Invoice</span></a>
                     {% endif %}
                 {% endif %}
             </div>

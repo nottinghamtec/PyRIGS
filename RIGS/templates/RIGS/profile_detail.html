@@ -71,7 +71,7 @@
 				<dd>{{object.initials}}</dd>
 
 				<dt>Phone</dt>
-				<dd>{{object.phone}}</dd>
+				<dd><a href="tel:{{ object.phone }}">{{object.phone}}</a></dd>
 			</dl>
 			{% if not request.is_ajax %}
 			{% if object.pk == user.pk %}
@@ -126,7 +126,7 @@
 				<dd>
 					{% if user.api_key %}
 						<pre id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></pre>
-						<small><a id="gcal-link" data-url="http://www.google.com/calendar/render?cid=http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}" href="">Click here</a> to add to google calendar.<br/>
+						<small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
 						To sync from google calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
 					{% else %}
 						<pre>No API Key Generated</pre>

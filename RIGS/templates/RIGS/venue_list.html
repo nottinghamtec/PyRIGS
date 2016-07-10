@@ -45,7 +45,7 @@
                         <td>{{ object.pk }}</td>
                         <td>{{ object.name }}</td>
                         <td>{{ object.email }}</td>
-                        <td>{{ object.phone }}</td>
+                        <td><a href="tel:{{ object.phone }}">{{ object.phone }}</a></td>
                         <td>{{ object.notes|yesno|capfirst }}</td>
                         <td>
                             <a href="{% url 'venue_detail' object.pk %}" class="btn btn-default modal-href">

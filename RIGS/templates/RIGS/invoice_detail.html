@@ -38,8 +38,11 @@
                 </div>
             </div>
             <div class="col-sm-6">
-                <div class="panel panel-{% if object.void %}danger{% else %}info{% endif %}">
-                    <div class="panel-heading">Event Details</div>
+                <div class="panel panel-{% if object.is_closed %}success{% else %}warning{% endif %}">
+                    <div class="panel-heading">Event Details<span class="pull-right">
+                        {% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(OUTSTANDING){% endif %}
+                        </span>
+                    </div>
                     <div class="panel-body">
                         <dl class="dl-horizontal">
                             <dt>Event Number</dt>
@@ -109,6 +112,11 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            <tr>
+                                <td class="text-right"><strong>Balance:</strong></td>
+                                <td>{{ object.balance|floatformat:2 }}</td>
+                                <td></td>
+                                <td></td>
                             </tbody>
                         </table>
                     </div>
