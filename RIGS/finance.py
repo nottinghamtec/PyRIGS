@@ -100,7 +100,6 @@ class InvoiceArchive(generic.ListView):
     model = models.Invoice
     template_name = 'RIGS/invoice_list_archive.html'
     paginate_by = 25
-    template_name="RIGS/invoice_archive.html"
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
