@@ -16,7 +16,7 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Invoice #</th>
                     <th>Event</th>
                     <th>Client</th>
                     <th>Event Date</th>
@@ -27,8 +27,9 @@
                 </thead>
                 <tbody>
                 {% for object in object_list %}
-                    <tr class="{% if object.void %}danger{% elif object.balance == 0 %}success{% endif %}">
-                        <td>{{ object.pk }}</td>
+                    <tr>
+                        <td class="{% if object.is_closed %}success{% else %}warning{% endif %}">{{ object.pk }}<br>
+                        <span class="text-muted">{% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(O/S){% endif %}</span></td>
                         <td class="
                             {% if object.event.cancelled %}
                                 active text-muted
@@ -43,8 +44,7 @@
                                 danger
                             {% endif %}
                             "><a href="{% url 'event_detail' object.event.pk %}">N{{ object.event.pk|stringformat:"05d" }}</a>: {{ object.event.name }} <br>
-                            <span class="text-muted">{{ object.event.get_status_display }}
-                            {% if not object.event.mic %}(No MIC){% endif %}
+                            <span class="text-muted">{{ object.event.get_status_display }}{% if not object.event.mic %}, No MIC{% endif %}
                             </span></td>
                         </td>
                         <td>{% if object.event.organisation %}
