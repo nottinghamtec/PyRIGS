@@ -66,7 +66,7 @@ class PersonList(generic.ListView):
             
         object_list = self.model.objects.filter(filter)
         
-        orderBy = self.request.GET.get('orderBy', None)
+        orderBy = self.request.GET.get('orderBy', 'name')
         if orderBy is not None:
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -129,7 +129,7 @@ class OrganisationList(generic.ListView):
             
         object_list = self.model.objects.filter(filter)
 
-        orderBy = self.request.GET.get('orderBy', "")
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -192,7 +192,7 @@ class VenueList(generic.ListView):
             
         object_list = self.model.objects.filter(filter)
 
-        orderBy = self.request.GET.get('orderBy', "")
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list
