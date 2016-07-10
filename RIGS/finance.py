@@ -126,7 +126,7 @@ class InvoiceArchive(generic.ListView):
         except:
             pass
             
-        object_list = self.model.objects.filter(filter)
+        object_list = self.model.objects.filter(filter).order_by('-invoice_date')
 
         return object_list
 
