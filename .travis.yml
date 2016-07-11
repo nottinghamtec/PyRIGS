@@ -8,7 +8,7 @@ before_install:
 
 install:
   - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install coveralls codeclimate-test-reporter
 
 before_script:
   - python manage.py collectstatic --noinput
@@ -18,3 +18,4 @@ script:
 
 after_success:
   - coveralls
+  - codeclimate-test-reporter
