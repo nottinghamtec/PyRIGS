@@ -8,6 +8,7 @@
     "DEBUG": {
       "required": true
     },
+    "STAGING": 1,
     "EMAIL_FROM": {
       "required": true
     },
