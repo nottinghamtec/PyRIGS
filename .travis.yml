@@ -14,7 +14,7 @@ before_script:
   - python manage.py collectstatic --noinput
 
 script:
-  - coverage run --include=PyRIGS/*.*,RIGS/*.* --omit=*/migrations/* manage.py test RIGS
+  - coverage run manage.py test RIGS
 
 after_success:
   - coveralls
