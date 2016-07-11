@@ -34,8 +34,10 @@ class Command(BaseCommand):
         self.setupPeople()
         self.setupOrganisations()
         self.setupVenues()
+        self.setupGenericProfiles()
         self.setupGroups()
-        self.setupProfiles()
+        
+        self.setupUsefulProfiles()
 
     def setupPeople(self):
         names = ["Regulus Black","Sirius Black","Lavender Brown","Cho Chang","Vincent Crabbe Sr","Vincent Crabbe","Bartemius Crouch Jr","Fleur Delacour","Cedric Diggory","Alberforth Dumbledore","Albus Dumbledore","Dudley Dursley","Petunia Dursley","Vernon Dursley","Argus Filch","Seamus Finnigan","Nicolas Flamel","Cornelius Fudge","Goyle Sr.","Gregory Goyle","Hermione Granger","Rubeus Hagrid","Igor Karkaroff","Viktor Krum","Bellatrix Lestrange","Alice Longbottom","Frank Longbottom","Neville Longbottom","Luna Lovegood","Xenophilius Lovegood","Remus Lupin","Draco Malfoy","Lucius Malfoy","Narcissa Malfoy","Olympe Maxime","Minerva McGonagall","Mad-Eye Moody","Peter Pettigrew","Harry Potter","James Potter","Lily Potter","Quirinus Quirrell","Tom Riddle Sr.","Mary Riddle","Lord Voldemort","Rita Skeeter","Severus Snape","Nymphadora Tonks","Dolores Janes Umbridge","Arthur Weasley","Bill Weasley","Charlie Weasley","Fred Weasley","George Weasley","Ginny Weasley","Molly Weasley","Percy Weasley","Ron Weasley","Dobby","Fluffy","Hedwig","Moaning Myrtle","Aragog","Grawp"]
@@ -113,7 +115,7 @@ class Command(BaseCommand):
         for permId in financePerms:
             self.finance_group.permissions.add(Permission.objects.get(codename=permId))
 
-    def setupProfiles(self):
+    def setupGenericProfiles(self):
         names = ["Clara Oswin Oswald","Rory Williams","Amy Pond","River Song","Martha Jones","Donna Noble","Jack Harkness","Mickey Smith","Rose Tyler"]
         for i, name in enumerate(names):
             newProfile = models.Profile.objects.create(username=name.replace(" ",""), first_name=name.split(" ")[0], last_name=name.split(" ")[-1],
@@ -124,3 +126,26 @@ class Command(BaseCommand):
 
             newProfile.save()
             self.profiles.append(newProfile)
+
+    def setupUsefulProfiles(self):
+        superUser = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User", initials="SU", 
+                                                email="superuser@example.com", is_superuser=True, is_active=True, is_staff=True)
+        superUser.set_password('superuser')
+        superUser.save()
+
+        financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User", initials="FU", 
+                                                email="financeuser@example.com", is_active=True)
+        financeUser.groups.add(self.finance_group)
+        financeUser.set_password('finance')
+        financeUser.save()
+
+        keyholderUser = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User", initials="KU", 
+                                                email="keyholderuser@example.com", is_active=True)
+        keyholderUser.groups.add(self.keyholder_group)
+        keyholderUser.set_password('keyholder')
+        keyholderUser.save()
+
+        basicUser = models.Profile.objects.create(username="basic", first_name="Basic", last_name="User", initials="BU", 
+                                                email="basicuser@example.com", is_active=True)
+        basicUser.set_password('basic')
+        basicUser.save()
