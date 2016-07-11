@@ -8,7 +8,7 @@ before_install:
 
 install:
   - pip install -r requirements.txt
-  - pip install coverage
+  - pip install coveralls
 
 before_script:
   - python manage.py collectstatic --noinput
@@ -16,6 +16,5 @@ before_script:
 script:
   - coverage run manage.py test RIGS
 
-after_script:
-  - coverage report -m --include=PyRIGS/*.*,RIGS/*.* --omit=*/migrations/* | tee coverage.txt
-  - coverage html --include=PyRIGS/*.*,RIGS/*.* --omit=*/migrations/*
+after_success:
+  - coveralls
