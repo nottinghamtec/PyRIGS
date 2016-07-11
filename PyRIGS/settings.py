@@ -21,9 +21,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') else '
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
+STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
+
+if STAGING:
+    ALLOWED_HOSTS.append('.herokuapp.com')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
@@ -216,5 +221,3 @@ TEMPLATE_DIRS = (
 USE_GRAVATAR=True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
-
-#Dummy commit to test pull request
