@@ -216,3 +216,5 @@ TEMPLATE_DIRS = (
 USE_GRAVATAR=True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
+
+#Dummy commit to test pull request
