@@ -155,3 +155,57 @@ class TestAdminMergeObjects(TestCase):
             if event.organisation == self.organisations[3]:  # The one we left in place
                 continue
             self.assertEqual(updatedEvent.organisation, self.organisations[1])
+
+class TestInvoiceDelete(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True, is_active=True, is_staff=True)
+        
+        cls.events = {
+            1: models.Event.objects.create(name="TE E1", start_date=date.today()),
+            2: models.Event.objects.create(name="TE E2", start_date=date.today())
+        }
+
+        cls.invoices = {
+            1: models.Invoice.objects.create(event=cls.events[1]),
+            2: models.Invoice.objects.create(event=cls.events[2])
+        }
+
+        cls.payments = {
+            1: models.Payment.objects.create(invoice=cls.invoices[1], date=date.today(), amount=12.34, method=models.Payment.CASH)
+        }
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_invoice_delete_allowed(self):
+        request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[2].pk})
+        
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, "Are you sure")
+
+        # Check the invoice still exists
+        self.assertTrue(models.Invoice.objects.get(pk=self.invoices[2].pk))
+
+        # Actually delete it
+        response = self.client.post(request_url, follow=True)
+
+        # Check the invoice is deleted
+        self.assertRaises(ObjectDoesNotExist, models.Invoice.objects.get, pk=self.invoices[2].pk)
+
+    def test_invoice_delete_not_allowed(self):
+        request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[1].pk})
+        
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, "To delete an invoice, delete the payments first.")
+
+        # Check the invoice still exists
+        self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
+
+        # Try to actually delete it
+        response = self.client.post(request_url, follow=True)
+
+        # Check this didn't work
+        self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))

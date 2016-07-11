@@ -1,5 +1,6 @@
 # TEC PA & Lighting - PyRIGS #
-[![wercker status](https://app.wercker.com/status/2dbe0517c3d83859c985ffc5a55a2802/m/master "wercker status")](https://app.wercker.com/project/bykey/2dbe0517c3d83859c985ffc5a55a2802)
+[![Build Status](https://travis-ci.org/nottinghamtec/PyRIGS.svg?branch=develop)](https://travis-ci.org/nottinghamtec/PyRIGS)
+[![Coverage Status](https://coveralls.io/repos/github/nottinghamtec/PyRIGS/badge.svg?branch=develop)](https://coveralls.io/github/nottinghamtec/PyRIGS?branch=develop)
 
 Welcome to TEC PA & Lightings PyRIGS program. This is a reimplementation of the existing Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
 
