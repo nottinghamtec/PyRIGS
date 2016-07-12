@@ -2,7 +2,7 @@
   "name": "PyRIGS",
   "description": "",
   "scripts": {
-    "postdeploy": "python manage.py migrate"
+    "postdeploy": "python manage.py migrate && python manage.py generateSampleData"
   },
   "env": {
     "DEBUG": {
