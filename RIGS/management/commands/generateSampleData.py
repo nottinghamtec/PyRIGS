@@ -231,6 +231,11 @@ class Command(BaseCommand):
                     newItem = models.EventItem.objects.create(event=newEvent, order=j, **itemData)
                     newItem.save()
 
+                while newEvent.sum_total < 0:
+                    itemData = itemOptions[random.randint(0,len(itemOptions)-1)]
+                    newItem = models.EventItem.objects.create(event=newEvent, order=j, **itemData)
+                    newItem.save()
+
             with reversion.create_revision():
                 reversion.set_user(random.choice(self.profiles))
                 if newEvent.start_date < datetime.date.today(): # think about adding an invoice
