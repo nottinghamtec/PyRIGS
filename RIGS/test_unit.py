@@ -5,6 +5,8 @@ from datetime import date
 from RIGS import models
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.core.management import call_command
+from django.test.utils import override_settings
 
 class TestAdminMergeObjects(TestCase):
     @classmethod
@@ -209,3 +211,14 @@ class TestInvoiceDelete(TestCase):
 
         # Check this didn't work
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
+
+class TestSampleDataGenerator(TestCase):
+    @override_settings(DEBUG=True)
+    def test_generate_sample_data(self):
+        
+        # Run the management command and check there are no exceptions
+        call_command('generateSampleData')
+
+        # Check there are lots of events
+        self.assertTrue(models.Event.objects.all().count() < 100)
+
