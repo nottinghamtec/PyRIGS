@@ -147,6 +147,7 @@ class Command(BaseCommand):
         financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User", initials="FU", 
                                                 email="financeuser@example.com", is_active=True)
         financeUser.groups.add(self.finance_group)
+        financeUser.groups.add(self.keyholder_group)
         financeUser.set_password('finance')
         financeUser.save()
 
