@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
+import os
+import re
+from datetime import date, timedelta
+
+import reversion
+from django.core import mail
+from django.db import transaction
 from django.test import LiveServerTestCase
 from django.test.client import Client
-from django.core import mail
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+
 from RIGS import models
-import re
-import os
-from datetime import date, timedelta
-from django.db import transaction
-import reversion
-import json
 
 
 class UserRegistrationTest(LiveServerTestCase):
@@ -103,7 +104,7 @@ class UserRegistrationTest(LiveServerTestCase):
         # Check Email
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-        self.assertIn('activation required', email.subject)
+        self.assertIn('John Smith "JS" activation required', email.subject)
         urls = re.findall(
             'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
         self.assertEqual(len(urls), 1)
