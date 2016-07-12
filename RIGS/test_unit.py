@@ -220,5 +220,5 @@ class TestSampleDataGenerator(TestCase):
         call_command('generateSampleData')
 
         # Check there are lots of events
-        self.assertTrue(models.Event.objects.all().count() < 100)
+        self.assertTrue(models.Event.objects.all().count() > 100)
 
