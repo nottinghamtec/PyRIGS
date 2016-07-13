@@ -58,7 +58,7 @@ def api_key_required(function):
 
         try:
             user_object = models.Profile.objects.get(pk=userid)
-        except Profile.DoesNotExist:
+        except models.Profile.DoesNotExist:
             return error_resp
 
         if user_object.api_key != key:

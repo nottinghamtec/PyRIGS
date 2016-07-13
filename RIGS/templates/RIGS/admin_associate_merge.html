@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <p>The following objects will be merged. Please select the 'master' record which you would like to keep. Other records will have associated events moved to the 'master' copy, and then will be deleted.</p>
+
+    <table>
+    {% for form in forms %}
+        {% if forloop.first %}
+            <tr>
+                <th></th>
+                <th> ID </th>
+                {% for field in form %}
+                    <th>{{ field.label }}</th>
+                {% endfor %}
+            </tr>
+        {% endif %}     
+        
+        <tr>
+            <td><input type="radio" name="master" value="{{form.instance.pk|unlocalize}}"></td>
+            <td>{{form.instance.pk}}</td>
+            {% for field in form %}
+                <td> {{ field.value }} </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+
+    <div>
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+    {% endfor %}
+    <input type="hidden" name="action" value="merge" />
+    <input type="hidden" name="post" value="yes" />
+    <input type="submit" value="Merge them" />
+    </div>
+</form>
+{% endblock %}

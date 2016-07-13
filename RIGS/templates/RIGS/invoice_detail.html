@@ -11,6 +11,10 @@
 
             <div class="col-sm-4 text-right">
                 <div class="btn-group btn-page">
+                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Void Invoice">
+                    <span class="glyphicon glyphicon-remove"></span> <span
+                            class="hidden-xs">Delete</span>
+                </a>
                 <a href="{% url 'invoice_void' object.pk %}" class="btn btn-default" title="Void Invoice">
                     <span class="glyphicon glyphicon-ban-circle"></span> <span
                             class="hidden-xs">Void</span>
@@ -38,8 +42,11 @@
                 </div>
             </div>
             <div class="col-sm-6">
-                <div class="panel panel-{% if object.void %}danger{% else %}info{% endif %}">
-                    <div class="panel-heading">Event Details</div>
+                <div class="panel panel-{% if object.is_closed %}success{% else %}warning{% endif %}">
+                    <div class="panel-heading">Event Details<span class="pull-right">
+                        {% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(OUTSTANDING){% endif %}
+                        </span>
+                    </div>
                     <div class="panel-body">
                         <dl class="dl-horizontal">
                             <dt>Event Number</dt>
@@ -109,6 +116,11 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            <tr>
+                                <td class="text-right"><strong>Balance:</strong></td>
+                                <td>{{ object.balance|floatformat:2 }}</td>
+                                <td></td>
+                                <td></td>
                             </tbody>
                         </table>
                     </div>

@@ -14,7 +14,7 @@
 
     <link rel="icon" type="image/png" href="{% static "imgs/pyrigs-avatar.png" %}">
     <link rel="apple-touch-icon" href="{% static "imgs/pyrigs-avatar.png" %}">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet'
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet'
           type='text/css'>
 
 
@@ -74,12 +74,12 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invoices<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp"></span> Active</a>
-                            </li>
                             {% if perms.RIGS.add_invoice %}
                                 <li><a href="{% url 'invoice_waiting' %}"><span
-                                        class="glyphicon glyphicon-briefcase"></span> Waiting</a></li>
+                                        class="glyphicon glyphicon-briefcase text-danger"></span> Waiting</a></li>
                             {% endif %}
+                            <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp text-warning"></span> Outstanding</a>
+                            </li>
                             <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span>
                                 Archive</a></li>
                         </ul>
