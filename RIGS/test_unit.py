@@ -1,12 +1,13 @@
-from django.core.urlresolvers import reverse
-from django.test import TestCase
 from datetime import date
 
-from RIGS import models
 from django.core.exceptions import ObjectDoesNotExist
-
 from django.core.management import call_command
+from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.test.utils import override_settings
+
+from RIGS import models
+
 
 class TestAdminMergeObjects(TestCase):
     @classmethod
@@ -162,7 +163,7 @@ class TestInvoiceDelete(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True, is_active=True, is_staff=True)
-        
+
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today()),
             2: models.Event.objects.create(name="TE E2", start_date=date.today())
@@ -184,7 +185,7 @@ class TestInvoiceDelete(TestCase):
 
     def test_invoice_delete_allowed(self):
         request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[2].pk})
-        
+
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "Are you sure")
 
@@ -199,7 +200,7 @@ class TestInvoiceDelete(TestCase):
 
     def test_invoice_delete_not_allowed(self):
         request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[1].pk})
-        
+
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "To delete an invoice, delete the payments first.")
 
@@ -215,10 +216,13 @@ class TestInvoiceDelete(TestCase):
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
-        
         # Run the management command and check there are no exceptions
         call_command('generateSampleData')
 
         # Check there are lots of events
         self.assertTrue(models.Event.objects.all().count() > 100)
 
+    def test_production_exception(self):
+        from django.core.management.base import CommandError
+
+        self.assertRaisesRegexp(CommandError, ".*production", call_command, 'generateSampleData')
