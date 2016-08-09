@@ -8,6 +8,6 @@
     "bootstrap-sass": "^3.3.7",
     "bootstrap-select": "^1.10.0",
     "ajax-bootstrap-select": "^1.3.1",
-    "jQuery UI Sortable": "jquery-ui-sortable#*"
+    "jquery-ui": "^1.12.0"
   }
 }

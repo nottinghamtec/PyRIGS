@@ -32,7 +32,7 @@ module.exports = function (defaults) {
   app.import('bower_components/bootstrap-select/dist/js/bootstrap-select.js');
   app.import('bower_components/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js');
 
-  app.import('bower_components/jQuery UI Sortable/jquery-ui-sortable.js');
+  app.import('bower_components/jquery-ui/jquery-ui.js');
 
   return app.toTree();
 };
