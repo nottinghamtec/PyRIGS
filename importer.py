@@ -14,10 +14,10 @@ from RIGS import models
 import reversion
 import datetime
 import uuid
-from multiprocessing import Process
 
 # Slight fix for needing to restablish the connection
 connection.close()
+
 
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
@@ -110,7 +110,8 @@ def import_organisations(delete=False):
             notes = row[5]
 
         object, created = models.Organisation.objects.get_or_create(pk=row[0], name=row[1], phone=row[2],
-                                                                    address=row[3],
+                                                                    address=row[
+                                                                        3],
                                                                     union_account=row[4], notes=notes)
         if created:
             print("Created: " + object.__str__())
@@ -325,12 +326,14 @@ def import_invoices(delete=False):
             payment.save()
             print(payment)
 
-        if invoice.invoice_date < (datetime.date.today() - datetime.timedelta(days=365)) and invoice.balance:
+        if invoice.invoice_date < (
+                datetime.date.today() - datetime.timedelta(days=365)) and invoice.balance:
             p2 = models.Payment(amount=invoice.balance)
             p2.invoice = invoice
             p2.method = payment.ADJUSTMENT
             p2.date = datetime.date.today()
             p2.save()
+
 
 @transaction.atomic
 def main():
@@ -340,7 +343,7 @@ def main():
     # processs.append(Process(target=import_organisations, args=(True,)))
     # processs.append(Process(target=import_vat_rates, args=(True,)))
     # processs.append(Process(target=import_venues, args=(True,)))
-    
+
     #  # Start all processs
     # [x.start() for x in processs]
     # # Wait for all processs to finish
@@ -351,22 +354,34 @@ def main():
     import_organisations(True)
     import_vat_rates(True)
     import_venues(True)
-    
+
     import_rigs(True)
     import_eventitem(True)
     import_invoices(True)
 
     # Do this before doing non rigs else it gets ugly
-    sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % ('event', 'event')
+    sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (
+        'event', 'event')
     cursor = connections['default'].cursor()
     cursor.execute(sql)
     import_nonrigs(False)
 
-    sequences = ['profile', 'person', 'organisation', 'vatrate', 'venue', 'event', 'eventitem', 'invoice', 'payment']
+    sequences = [
+        'profile',
+        'person',
+        'organisation',
+        'vatrate',
+        'venue',
+        'event',
+        'eventitem',
+        'invoice',
+        'payment']
     for seq in sequences:
-        sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (seq, seq)
+        sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (
+            seq, seq)
         cursor = connections['default'].cursor()
         cursor.execute(sql)
+
 
 if __name__ == "__main__":
     main()

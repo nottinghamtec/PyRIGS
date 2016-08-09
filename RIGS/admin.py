@@ -1,16 +1,16 @@
-from django.contrib import admin
-from RIGS import models, forms
-from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import ugettext_lazy as _
 import reversion
-
-from django.contrib.admin import helpers
-from django.template.response import TemplateResponse
+from django.contrib import admin
 from django.contrib import messages
-from django.db import transaction
+from django.contrib.admin import helpers
+from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Count
 from django.forms import ModelForm
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
+
+from RIGS import models, forms
 
 # Register your models here.
 admin.site.register(models.VatRate, reversion.VersionAdmin)
@@ -50,7 +50,8 @@ class AssociateAdmin(reversion.VersionAdmin):
     merge_fields = ['name']
 
     def get_queryset(self, request):
-        return super(AssociateAdmin, self).get_queryset(request).annotate(event_count=Count('event'))
+        return super(AssociateAdmin, self).get_queryset(
+            request).annotate(event_count=Count('event'))
 
     def number_of_events(self, obj):
         return obj.latest_events.count()
@@ -58,12 +59,16 @@ class AssociateAdmin(reversion.VersionAdmin):
     number_of_events.admin_order_field = 'event_count'
 
     def merge(self, request, queryset):
-        if request.POST.get('post'):  # Has the user confirmed which is the master record?
+        if request.POST.get(
+            'post'):  # Has the user confirmed which is the master record?
             try:
                 masterObjectPk = request.POST.get('master')
                 masterObject = queryset.get(pk=masterObjectPk)
             except ObjectDoesNotExist:
-                self.message_user(request, "An error occured. Did you select a 'master' record?", level=messages.ERROR)
+                self.message_user(
+                    request,
+                    "An error occured. Did you select a 'master' record?",
+                    level=messages.ERROR)
                 return
 
             with transaction.atomic(), reversion.create_revision():
@@ -79,6 +84,7 @@ class AssociateAdmin(reversion.VersionAdmin):
         else:  # Present the confirmation screen
 
             class TempForm(ModelForm):
+
                 class Meta:
                     model = queryset.model
                     fields = self.merge_fields
@@ -106,10 +112,22 @@ class PersonAdmin(AssociateAdmin):
 @admin.register(models.Venue)
 class VenueAdmin(AssociateAdmin):
     list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
-    merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
+    merge_fields = [
+        'name',
+        'phone',
+        'email',
+        'address',
+        'notes',
+        'three_phase_available']
 
 
 @admin.register(models.Organisation)
 class OrganisationAdmin(AssociateAdmin):
     list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
-    merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
+    merge_fields = [
+        'name',
+        'phone',
+        'email',
+        'address',
+        'notes',
+        'union_account']

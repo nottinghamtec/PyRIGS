@@ -5,17 +5,17 @@
 {% block title %}Events for Invoice{% endblock %}
 
 {% block js %}
-<script src="{% static "js/tooltip.js" %}"></script>
-<script>
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-</script>
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>Events for Invoice ({{count}} Events, £ {{ total|floatformat:2 }})</h2>
+        <h2>Events for Invoice ({{ count }} Events, £ {{ total|floatformat:2 }})</h2>
         <p>These events have happened, but paperwork has not yet been sent to treasury</p>
         {% if is_paginated %}
             <div class="col-md-6 col-md-offset-6 col-sm-12 text-right">
@@ -77,7 +77,8 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'invoice_event' object.pk %}" class="btn btn-default" data-toggle="tooltip" title="'Invoice' this event - click this when paperwork has been sent to treasury">
+                            <a href="{% url 'invoice_event' object.pk %}" class="btn btn-default" data-toggle="tooltip"
+                               title="'Invoice' this event - click this when paperwork has been sent to treasury">
                                 <span class="glyphicon glyphicon-gbp"></span>
                             </a>
                         </td>

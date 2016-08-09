@@ -4,13 +4,13 @@ import re
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.views import generic
-from django.db.models import Q
 from z3c.rml import rml2pdf
 
 from RIGS import models
@@ -30,7 +30,8 @@ class InvoiceIndex(generic.ListView):
         return context
 
     def get_queryset(self):
-        # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
+        # Manual query is the only way I have found to do this efficiently. Not
+        # ideal but needs must
         sql = "SELECT * FROM " \
               "(SELECT " \
               "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
@@ -78,7 +79,8 @@ class InvoicePrint(generic.View):
         escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, escapedEventName)
+        response[
+            'Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, escapedEventName)
         response.write(pdfData)
         return response
 
@@ -92,7 +94,9 @@ class InvoiceVoid(generic.View):
 
         if object.void:
             return HttpResponseRedirect(reverse_lazy('invoice_list'))
-        return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': object.pk}))
+        return HttpResponseRedirect(reverse_lazy(
+            'invoice_detail', kwargs={'pk': object.pk}))
+
 
 class InvoiceDelete(generic.DeleteView):
     model = models.Invoice
@@ -100,19 +104,26 @@ class InvoiceDelete(generic.DeleteView):
     def get(self, request, pk):
         obj = self.get_object()
         if obj.payment_set.all().count() > 0:
-            messages.info(self.request, 'To delete an invoice, delete the payments first.')
-            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+            messages.info(
+                self.request,
+                'To delete an invoice, delete the payments first.')
+            return HttpResponseRedirect(reverse_lazy(
+                'invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).get(pk)
 
     def post(self, request, pk):
         obj = self.get_object()
         if obj.payment_set.all().count() > 0:
-            messages.info(self.request, 'To delete an invoice, delete the payments first.')
-            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+            messages.info(
+                self.request,
+                'To delete an invoice, delete the payments first.')
+            return HttpResponseRedirect(reverse_lazy(
+                'invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).post(pk)
 
     def get_success_url(self):
         return self.request.POST.get('next')
+
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
@@ -141,12 +152,14 @@ class InvoiceWaiting(generic.ListView):
         # @todo find a way to select items
         events = self.model.objects.filter(
             (
-                Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
-                Q(end_date__lte=datetime.date.today()) # Has end date, finishes before
-            ) & Q(invoice__isnull=True) # Has not already been invoiced
-            & Q(is_rig=True) # Is a rig (not non-rig)
-            
-            ).order_by('start_date') \
+                # Starts before with no end
+                Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |
+                # Has end date, finishes before
+                Q(end_date__lte=datetime.date.today())
+            ) & Q(invoice__isnull=True)  # Has not already been invoiced
+            & Q(is_rig=True)  # Is a rig (not non-rig)
+
+        ).order_by('start_date') \
             .select_related('person',
                             'organisation',
                             'venue', 'mic') \
@@ -165,7 +178,8 @@ class InvoiceEvent(generic.View):
             invoice.invoice_date = datetime.date.today()
             messages.success(self.request, 'Invoice created successfully')
 
-        return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': invoice.pk}))
+        return HttpResponseRedirect(reverse_lazy(
+            'invoice_detail', kwargs={'pk': invoice.pk}))
 
 
 class PaymentCreate(generic.CreateView):
@@ -174,8 +188,10 @@ class PaymentCreate(generic.CreateView):
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()
-        invoicepk = self.request.GET.get('invoice', self.request.POST.get('invoice', None))
-        if invoicepk == None:
+        invoicepk = self.request.GET.get(
+            'invoice', self.request.POST.get(
+                'invoice', None))
+        if invoicepk is None:
             raise Http404()
         invoice = get_object_or_404(models.Invoice, pk=invoicepk)
         initial.update({'invoice': invoice})

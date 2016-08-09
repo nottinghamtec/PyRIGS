@@ -1,24 +1,23 @@
-import os
 import cStringIO as StringIO
-from io import BytesIO
+import copy
+import datetime
+import re
 import urllib2
+from io import BytesIO
 
-from django.views import generic
+from PyPDF2 import PdfFileMerger, PdfFileReader
+from django.conf import settings
+from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
-from django.conf import settings
-from django.http import HttpResponse
-from django.db.models import Q
-from django.contrib import messages
+from django.views import generic
 from z3c.rml import rml2pdf
-from PyPDF2 import PdfFileMerger, PdfFileReader
 
 from RIGS import models, forms
-import datetime
-import re
-import copy
 
 __author__ = 'ghost'
 
@@ -34,14 +33,16 @@ class RigboardIndex(generic.TemplateView):
         context['events'] = models.Event.objects.current_events()
         return context
 
+
 class WebCalendar(generic.TemplateView):
     template_name = 'RIGS/calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super(WebCalendar, self).get_context_data(**kwargs)
-        context['view'] = kwargs.get('view','')
-        context['date'] = kwargs.get('date','')
+        context['view'] = kwargs.get('view', '')
+        context['date'] = kwargs.get('date', '')
         return context
+
 
 class EventDetail(generic.DetailView):
     model = models.Event
@@ -58,10 +59,12 @@ class EventCreate(generic.CreateView):
 
         form = context['form']
         if re.search('"-\d+"', form['items_json'].value()):
-            messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
-        
+            messages.info(
+                self.request,
+                "Your item changes have been saved. Please fix the errors and save the event.")
 
-        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+        # Get some other objects to include in the form. Used when there are
+        # errors but also nice and quick.
         for field, model in form.related_models.iteritems():
             value = form[field].value()
             if value is not None and value != '':
@@ -82,7 +85,8 @@ class EventUpdate(generic.UpdateView):
 
         form = context['form']
 
-        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+        # Get some other objects to include in the form. Used when there are
+        # errors but also nice and quick.
         for field, model in form.related_models.iteritems():
             value = form[field].value()
             if value is not None and value != '':
@@ -92,16 +96,21 @@ class EventUpdate(generic.UpdateView):
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
+
 class EventDuplicate(EventUpdate):
     def get_object(self, queryset=None):
-        old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
-        new = copy.copy(old) # Make a copy of the object in memory
-        new.based_on = old # Make the new event based on the old event
+        # Get the object (the event you're duplicating)
+        old = super(EventDuplicate, self).get_object(queryset)
+        new = copy.copy(old)  # Make a copy of the object in memory
+        new.based_on = old  # Make the new event based on the old event
 
-        if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
-            new.pk = None # This means a new event will be created on save, and all items will be re-created
+        if self.request.method in (
+            'POST', 'PUT'):  # This only happens on save (otherwise items won't display in editor)
+            new.pk = None  # This means a new event will be created on save, and all items will be re-created
 
-        messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
+        messages.info(
+            self.request,
+            'Event data duplicated but not yet saved. Click save to complete operation.')
 
         return new
 
@@ -109,6 +118,7 @@ class EventDuplicate(EventUpdate):
         context = super(EventDuplicate, self).get_context_data(**kwargs)
         context["duplicate"] = True
         return context
+
 
 class EventPrint(generic.View):
     def get(self, request, pk):
@@ -119,8 +129,7 @@ class EventPrint(generic.View):
         merger = PdfFileMerger()
 
         for copy in copies:
-
-            context = RequestContext(request, { # this should be outside the loop, but bug in 1.8.2 prevents this
+            context = RequestContext(request, {  # this should be outside the loop, but bug in 1.8.2 prevents this
                 'object': object,
                 'fonts': {
                     'opensans': {
@@ -128,11 +137,12 @@ class EventPrint(generic.View):
                         'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
                     }
                 },
-                'copy':copy,
-                'current_user':request.user,
+                'copy': copy,
+                'current_user': request.user,
             })
 
-            # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
+            # context['copy'] = copy # this is the way to do it once we upgrade
+            # to Django 1.8.3
 
             rml = template.render(context)
             buffer = StringIO.StringIO()
@@ -153,9 +163,11 @@ class EventPrint(generic.View):
 
         escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
 
-        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
+        response[
+            'Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
+
 
 class EventArchive(generic.ArchiveIndexView):
     model = models.Event
@@ -190,6 +202,9 @@ class EventArchive(generic.ArchiveIndexView):
         qs.select_related('person', 'organisation', 'venue', 'mic')
 
         if len(qs) == 0:
-            messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
+            messages.add_message(
+                self.request,
+                messages.WARNING,
+                "No events have been found matching those criteria.")
 
         return qs

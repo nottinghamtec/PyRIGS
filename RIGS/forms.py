@@ -1,12 +1,12 @@
 __author__ = 'Ghost'
-from django import forms
-from django.utils import formats
-from django.conf import settings
-from django.core import serializers
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
-from registration.forms import RegistrationFormUniqueEmail
-from captcha.fields import ReCaptchaField
 import simplejson
+from captcha.fields import ReCaptchaField
+from django import forms
+from django.conf import settings
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordResetForm
+from django.core import serializers
+from django.utils import formats
+from registration.forms import RegistrationFormUniqueEmail
 
 from RIGS import models
 
@@ -17,14 +17,22 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
 
     class Meta:
         model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials', 'phone')
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'initials',
+            'phone')
 
     def clean_initials(self):
         """
         Validate that the supplied initials are unique.
         """
-        if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
-            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
+        if models.Profile.objects.filter(
+            initials__iexact=self.cleaned_data['initials']):
+            raise forms.ValidationError(
+                "These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
 
 
@@ -45,9 +53,14 @@ class ProfileChangeForm(UserChangeForm):
 
 # Events Shit
 class EventForm(forms.ModelForm):
-    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
-    meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
-    access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
+    datetime_input_formats = formats.get_format_lazy(
+        "DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
+    meet_at = forms.DateTimeField(
+        input_formats=datetime_input_formats,
+        required=False)
+    access_at = forms.DateTimeField(
+        input_formats=datetime_input_formats,
+        required=False)
 
     items_json = forms.CharField()
 
@@ -89,7 +102,8 @@ class EventForm(forms.ModelForm):
         items = {}
         for key in data:
             pk = int(key)
-            items[pk] = self._get_or_initialise_item(pk, data[key]['fields'], event)
+            items[pk] = self._get_or_initialise_item(
+                pk, data[key]['fields'], event)
 
         return items
 

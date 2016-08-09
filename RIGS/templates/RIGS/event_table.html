@@ -27,7 +27,7 @@
                 <td>
                     <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
-                        <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
+                        <div><strong>{{ event.end_date|date:"D d/m/Y" }}</strong></div>
                     {% endif %}
                     <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
@@ -69,13 +69,14 @@
                                     {{ event.start_date|date:"(Y-m-d)" }}<br/>
                                 </dd>
                             {% endif %}
-                            {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
-                                <dt>Event ends</dt>
-                                <dd>
-                                    {{ event.end_time|date:"H:i" }}<br/>
-                                    {{ event.end_date|date:"(Y-m-d)" }}
-                                </dd>
-                            {% endif %}{% endif %}
+                            {% if event.has_end_time %}
+                                {% if event.start_date != event.end_date or event.start_time != event.end_time %}
+                                    <dt>Event ends</dt>
+                                    <dd>
+                                        {{ event.end_time|date:"H:i" }}<br/>
+                                        {{ event.end_date|date:"(Y-m-d)" }}
+                                    </dd>
+                                {% endif %}{% endif %}
                         </dl>
                     {% endif %}
                 </td>

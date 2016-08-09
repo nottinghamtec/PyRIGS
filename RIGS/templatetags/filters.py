@@ -1,18 +1,21 @@
-from django import template
 from django import forms
+from django import template
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorDict
 
 register = template.Library()
 
+
 @register.filter
 def multiply(value, arg):
-    return value*arg
+    return value * arg
+
 
 @register.filter
 def to_class_name(value):
     return value.__class__.__name__
-    
+
+
 @register.filter
 def nice_errors(form, non_field_msg='General form errors'):
     nice_errors = ErrorDict()
@@ -24,6 +27,7 @@ def nice_errors(form, non_field_msg='General form errors'):
                 key = form.fields[field].label
             nice_errors[key] = errors
     return nice_errors
+
 
 def paginator(context, adjacent_pages=3):
     """
@@ -41,7 +45,7 @@ def paginator(context, adjacent_pages=3):
     endPage = page.number + adjacent_pages + 1
     if endPage >= paginator.num_pages - 1: endPage = paginator.num_pages + 1
     page_numbers = [n for n in range(startPage, endPage) \
-            if n > 0 and n <= paginator.num_pages]
+                    if n > 0 and n <= paginator.num_pages]
 
     dict = {
         'request': context['request'],
@@ -57,27 +61,29 @@ def paginator(context, adjacent_pages=3):
         'has_next': page.has_next(),
         'has_previous': page.has_previous(),
     }
-    
+
     if page.has_next():
         dict['next'] = page.next_page_number()
     if page.has_previous():
         dict['previous'] = page.previous_page_number()
 
     return dict
+
+
 register.inclusion_tag('pagination.html', takes_context=True)(paginator)
+
 
 @register.simple_tag
 def url_replace(request, field, value):
-
     dict_ = request.GET.copy()
 
     dict_[field] = value
 
     return dict_.urlencode()
 
+
 @register.simple_tag
 def orderby(request, field, attr):
-
     dict_ = request.GET.copy()
 
     if dict_.__contains__(field) and dict_[field] == attr:

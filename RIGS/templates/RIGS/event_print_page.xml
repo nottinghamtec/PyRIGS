@@ -3,21 +3,25 @@
 
 {% if invoice %}
 
-<blockTable style="invoiceLayout" colWidths="330,165">
-<tr>
+    <blockTable style="invoiceLayout" colWidths="330,165">
+    <tr>
     <td>
-        {% endif %}
+{% endif %}
 
-<h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'<small></small></h1>
+<h1>
+    <b>N{{ object.pk|stringformat:"05d" }}:</b>
+    '{{ object.name }}'
+    <small></small>
+</h1>
 
 <para style="style.event_description">
-<b>{{object.start_date|date:"D jS N Y"}}</b>
+    <b>{{ object.start_date|date:"D jS N Y" }}</b>
 </para>
 
 <keepInFrame>
     <para style="style.event_description">
-    {{ object.description|default_if_none:""|linebreaksbr }}
-        </para>
+        {{ object.description|default_if_none:""|linebreaksbr }}
+    </para>
 </keepInFrame>
 
 {% if invoice %}
@@ -28,19 +32,25 @@
         <spacer length="10"/>
         <blockTable style="eventDetails" colWidths="100,175">
             <tr>
-                <td><para style="invoice_titles">Invoice Number</para></td>
+                <td>
+                    <para style="invoice_titles">Invoice Number</para>
+                </td>
                 <td>
                     <para style="invoice_numbers">{{ invoice.pk|stringformat:"05d" }}</para>
                 </td>
             </tr>
             <tr>
-                <td><para style="invoice_titles">Invoice Date</para></td>
+                <td>
+                    <para style="invoice_titles">Invoice Date</para>
+                </td>
                 <td>
                     <para style="invoice_numbers">{{ invoice.invoice_date|date:"d/m/Y" }}</para>
                 </td>
             </tr>
             <tr>
-                <td><para style="invoice_titles">PO Number</para></td>
+                <td>
+                    <para style="invoice_titles">PO Number</para>
+                </td>
                 <td>
                     <para style="invoice_numbers">{{ object.purchase_order|default_if_none:"" }}</para>
                 </td>
@@ -48,94 +58,100 @@
 
         </blockTable>
     </td>
-</tr>
-</blockTable>
+    </tr>
+    </blockTable>
 
 
 {% endif %}
 
 <spacer length="15"/>
 <blockTable style="eventSpecifics" colWidths="165,165,165">
-    <tr>
-        <td leftPadding="0">
-                <h2>Hirer</h2>
-                <h3>{{ object.person.name }}</h3>
-                <h3>{{ object.organisation.name|default_if_none:"" }}</h3>
-                {% if invoice %}
-                    <keepInFrame>
-                        {% if object.organisation.address %}
-                            <para style="specific_description">{{ object.organisation.address|default_if_none:""|linebreaksbr }}</para>
-                        {% elif object.person.address %}
-                            <para style="specific_description">{{ object.person.address|default_if_none:""|linebreaksbr }}</para>
-                        {% endif %}
-                    </keepInFrame>
-                {% endif %}
-                <keepInFrame>
-                    {% if object.person.phone %}
-                        <para style="specific_description">{{ object.person.phone }}</para>
-                    {% elif object.organisation.phone %}
-                        <para style="specific_description">{{ object.organisation.phone }}</para>
-                    {% endif %}
-                </keepInFrame>
-                <keepInFrame>
-                    {% if invoice %}
-                        {% if object.organisation.email %}
-                            <para style="specific_description">{{ object.organisation.email }}</para>
-                        {% elif object.person.email %}
-                            <para style="specific_description">{{ object.person.email }}</para>
-                        {% endif %}
-                    {% else %}
-                        {% if object.person.email %}
-                            <para style="specific_description">{{ object.person.email }}</para>
-                        {% elif object.organisation.email %}
-                            <para style="specific_description">{{ object.organisation.email }}</para>
-                        {% endif %}
-                    {% endif %}
-                </keepInFrame>
-        </td>
-        <td>
-            <h2>Venue</h2>
-            <h3>{{ object.venue.name }}</h3>
-            {% if not invoice %}
+<tr>
+    <td leftPadding="0">
+        <h2>Hirer</h2>
+        <h3>{{ object.person.name }}</h3>
+        <h3>{{ object.organisation.name|default_if_none:"" }}</h3>
+        {% if invoice %}
             <keepInFrame>
-            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksbr }}</para>
+                {% if object.organisation.address %}
+                    <para style="specific_description">{{ object.organisation.address|default_if_none:""|linebreaksbr }}</para>
+                {% elif object.person.address %}
+                    <para style="specific_description">{{ object.person.address|default_if_none:""|linebreaksbr }}</para>
+                {% endif %}
             </keepInFrame>
+        {% endif %}
+        <keepInFrame>
+            {% if object.person.phone %}
+                <para style="specific_description">{{ object.person.phone }}</para>
+            {% elif object.organisation.phone %}
+                <para style="specific_description">{{ object.organisation.phone }}</para>
             {% endif %}
-        </td>
-        <td rightPadding="0">
-            
-                <h2>Timings</h2>
-                <blockTable style="eventDetails" colWidths="55,75">
+        </keepInFrame>
+        <keepInFrame>
+            {% if invoice %}
+                {% if object.organisation.email %}
+                    <para style="specific_description">{{ object.organisation.email }}</para>
+                {% elif object.person.email %}
+                    <para style="specific_description">{{ object.person.email }}</para>
+                {% endif %}
+            {% else %}
+                {% if object.person.email %}
+                    <para style="specific_description">{{ object.person.email }}</para>
+                {% elif object.organisation.email %}
+                    <para style="specific_description">{{ object.organisation.email }}</para>
+                {% endif %}
+            {% endif %}
+        </keepInFrame>
+    </td>
+    <td>
+        <h2>Venue</h2>
+        <h3>{{ object.venue.name }}</h3>
+        {% if not invoice %}
+            <keepInFrame>
+                <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksbr }}</para>
+            </keepInFrame>
+        {% endif %}
+    </td>
+    <td rightPadding="0">
+
+        <h2>Timings</h2>
+        <blockTable style="eventDetails" colWidths="55,75">
+            <tr>
+                <td leftPadding="0" topPadding="0">
+                    <h3>Start</h3>
+                </td>
+                <td>
+                    <para style="times">{{ object.start_time|time:"H:i" }}
+                        {{ object.start_date|date:"d/m/Y" }}
+                    </para>
+                </td>
+            </tr>
+            <tr>
+                <td leftPadding="0">
+                    <h3>End</h3>
+                </td>
+                <td>
+                    <para style="times">{{ object.end_time|default_if_none:""|time:"H:i" }}
+                        {{ object.end_date|date:"d/m/Y" }}
+                    </para>
+                </td>
+            </tr>
+            {% if object.access_at and not invoice %}
                 <tr>
-                    <td leftPadding="0" topPadding="0"><h3>Start</h3></td>
-                    <td>
-                        <para style="times">{{ object.start_time|time:"H:i" }}
-                            {{ object.start_date|date:"d/m/Y" }}
-                        </para>
+                    <td leftPadding="0">
+                        <h3>Access</h3>
                     </td>
-                </tr>
-                <tr>
-                    <td leftPadding="0"><h3>End</h3></td>
-                    <td>
-                        <para style="times">{{ object.end_time|default_if_none:""|time:"H:i" }}
-                            {{ object.end_date|date:"d/m/Y" }}
-                        </para>
-                    </td>
-                </tr>
-                {% if object.access_at and not invoice%}
-                <tr>
-                    <td leftPadding="0"><h3>Access</h3></td>
                     <td>
                         <para style="times">{{ object.access_at|time:"H:i" }}
                             {{ object.access_at|date:"d/m/Y" }}
                         </para>
                     </td>
                 </tr>
-                {% endif %}
-                </blockTable>
-        </td>
+            {% endif %}
+        </blockTable>
+    </td>
 
-    </tr>
+</tr>
 </blockTable>
 
 <spacer length="15"/>
@@ -174,11 +190,11 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                    <em>{{ item.description|linebreaksbr }}</em>
+                        <em>{{ item.description|linebreaksbr }}</em>
                     </para>
                     <para>
                 {% endif %}
-            </para>
+                </para>
         </td>
         <td>£ {{ item.cost|floatformat:2 }}</td>
         <td>{{ item.quantity }}</td>
@@ -187,7 +203,7 @@
 {% endfor %}
 </blockTable>
 <keepTogether>
-    <blockTable style="totalTable" colWidths="300,115,80">
+<blockTable style="totalTable" colWidths="300,115,80">
     <tr>
         <td>{% if not invoice %}VAT Registration Number: 170734807{% endif %}</td>
         <td>Total (ex. VAT)</td>
@@ -196,9 +212,9 @@
     <tr>
         <td>
             {% if not invoice %}
-            <para>
-                <b>The full hire fee is payable at least 10 days before the event.</b>
-            </para>
+                <para>
+                    <b>The full hire fee is payable at least 10 days before the event.</b>
+                </para>
             {% endif %}
         </td>
         <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
@@ -206,7 +222,7 @@
     </tr>
     <tr>
         <td>
-             
+
             <para>
                 {% if invoice %}
                     VAT Registration Number: 170734807
@@ -214,7 +230,7 @@
                     <b>This contract is not an invoice.</b>
                 {% endif %}
             </para>
-            
+
         </td>
         <td>
             <para>
@@ -227,92 +243,100 @@
             </para>
         </td>
     </tr>
-    </blockTable>
+</blockTable>
 </keepTogether>
 {% if not invoice %}
     <keepTogether>
     <blockTable style="infoTable">
-    <tr>
-        <td>
-            <para>Bookings will
-                <b>not</b>
-                be confirmed until payment is received and the contract is signed.
-            </para>
-        </td>
-    </tr>
-    <tr>
-        <td>24 Hour Emergency Contacts: 07825 065681 and 07825 065678</td>
-    </tr>
+        <tr>
+            <td>
+                <para>Bookings will
+                    <b>not</b>
+                    be confirmed until payment is received and the contract is signed.
+                </para>
+            </td>
+        </tr>
+        <tr>
+            <td>24 Hour Emergency Contacts: 07825 065681 and 07825 065678</td>
+        </tr>
     </blockTable>
     </keepTogether>
     <spacer length="15"/>
     <keepTogether>
 
     <para style="blockPara">
-    <b>To be signed on booking:</b>
+        <b>To be signed on booking:</b>
     </para>
     {% if object.organisation.union_account %}
         <para style="blockPara">
-        <i>
-            I agree that am authorised to sign this invoice. I agree that I am the President/Treasurer of the hirer, or
-            that I have provided written permission from either the President or Treasurer of the hirer stating that I can
-            sign for this invoice.
-        </i>
+            <i>
+                I agree that am authorised to sign this invoice. I agree that I am the President/Treasurer of the hirer,
+                or
+                that I have provided written permission from either the President or Treasurer of the hirer stating that
+                I can
+                sign for this invoice.
+            </i>
         </para>
         <para style="blockPara">
-        <i>
-            I have read, understood and fully accepted the current conditions of hire. I agree to return any dry hire
-            items to TEC PA &amp; Lighting in the same condition at the end of the hire period.
-        </i>
-        </para>
-
-        <para style="blockPara">
-        <b>
-            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
-        </b>
+            <i>
+                I have read, understood and fully accepted the current conditions of hire. I agree to return any dry
+                hire
+                items to TEC PA &amp; Lighting in the same condition at the end of the hire period.
+            </i>
         </para>
 
         <para style="blockPara">
-        Please return this form directly to TEC PA &amp; Lighting and not the Students' Union Finance Department.
+            <b>
+                Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
+            </b>
+        </para>
+
+        <para style="blockPara">
+            Please return this form directly to TEC PA &amp; Lighting and not the Students' Union Finance Department.
         </para>
 
         <blockTable style="signatureTable" colWidths="70,100,325">
-        <tr>
-            <td>Account Code</td>
-            <td></td>
-            <td></td>
-        </tr>
+            <tr>
+                <td>Account Code</td>
+                <td></td>
+                <td></td>
+            </tr>
         </blockTable>
 
     {% else %}
         <para style="blockPara">
-        <i>
-            I, the hirer, have read, understand and fully accept the current conditions of hire. This document forms a
-            binding contract between TEC PA &amp; Lighting and the hirer, the aforementioned conditions of hire forming
-            an integral part of it.
-        </i>
+            <i>
+                I, the hirer, have read, understand and fully accept the current conditions of hire. This document forms
+                a
+                binding contract between TEC PA &amp; Lighting and the hirer, the aforementioned conditions of hire
+                forming
+                an integral part of it.
+            </i>
         </para>
 
         <para style="blockPara">
-        <b>
-            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
-        </b>
+            <b>
+                Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
+            </b>
         </para>
 
         {% include "RIGS/event_print_signature.xml" %}
         <spacer length="10"/>
         <para style="blockPara">
-        <b>To be signed on the day of the event/hire:</b>
+            <b>To be signed on the day of the event/hire:</b>
         </para>
         <para style="blockPara">
-        <i>
-            I, the hirer, have received the goods/services as requested and in good order. I agree to return any dry hire
-            items to TEC PA &amp; Lighting in a similar condition at the end of the hire period.
-        </i>
+            <i>
+                I, the hirer, have received the goods/services as requested and in good order. I agree to return any dry
+                hire
+                items to TEC PA &amp; Lighting in a similar condition at the end of the hire period.
+            </i>
         </para>
     {% endif %}
 
     {% include "RIGS/event_print_signature.xml" %}
     </keepTogether>
-    {% endif %}
-<namedString id="lastPage"><pageNumber/></namedString>
+{% endif %}
+<namedString id="lastPage">
+<pageNumber/>
+</namedString>
