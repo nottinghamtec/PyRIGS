@@ -4,6 +4,8 @@ db.sqlite3
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+/dist
+/tmp
 
 # C extensions
 *.so
@@ -25,6 +27,10 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Dependancies
+/node_modules
+/bower_components
 
 # Continer extras
 .vagrant
@@ -106,3 +112,11 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log
