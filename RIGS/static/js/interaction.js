@@ -1,9 +1,30 @@
+// Return a helper with preserved width of cells
+var fixHelper = function (e, ui) {
+  ui.children().each(function () {
+    $(this).width($(this).width());
+  });
+  return ui;
+};
+
 function setupItemTable(items_json) {
-    objectitems = JSON.parse(items_json)
+  objectitems = JSON.parse(items_json);
     $.each(objectitems, function (key, val) {
         objectitems[key] = JSON.parse(val);
-    })
+    });
     newitem = -1;
+
+  $("#item-table tbody").sortable({
+    helper: fixHelper,
+    update: function (e, ui) {
+      info = $(this).sortable("toArray");
+      itemorder = [];
+      $.each(info, function (key, value) {
+        pk = $('#' + value).data('pk');
+        objectitems[pk].fields.order = key;
+      });
+
+    }
+  });
 }
 
 function nl2br (str, is_xhtml) {
@@ -33,7 +54,7 @@ function updatePrices() {
 }
 
 $('#item-table').on('click', '.item-delete', function () {
-    delete objectitems[$(this).data('pk')]
+  delete objectitems[$(this).data('pk')];
     $('#item-' + $(this).data('pk')).remove();
     updatePrices();
 });
@@ -73,8 +94,8 @@ $('body').on('submit', '#item-form', function (e) {
     var fields;
     if (pk == newitem--) {
         // Create the new data structure and add it on.
-        fields = new Object();
-        fields['name'] = $('#item_name').val()
+      fields = {};
+      fields['name'] = $('#item_name').val();
         fields['description'] = $('#item_description').val();
         fields['cost'] = $('#item_cost').val();
         fields['quantity'] = $('#item_quantity').val();
@@ -86,7 +107,7 @@ $('body').on('submit', '#item-form', function (e) {
 
         fields['order'] = order;
 
-        objectitems[pk] = new Object();
+      objectitems[pk] = {};
         objectitems[pk]['fields'] = fields;
 
         // Add the new table
@@ -96,7 +117,7 @@ $('body').on('submit', '#item-form', function (e) {
         // Existing item
         // update data structure
         fields = objectitems[pk].fields;
-        fields.name = $('#item_name').val()
+      fields.name = $('#item_name').val();
         fields.description = $('#item_description').val();
         fields.cost = $('#item_cost').val();
         fields.quantity = $('#item_quantity').val();
@@ -115,25 +136,4 @@ $('body').on('submit', '#item-form', function (e) {
 
 $('body').on('submit', '.itemised_form', function (e) {
     $('#id_items_json').val(JSON.stringify(objectitems));
-});
-
-// Return a helper with preserved width of cells
-var fixHelper = function (e, ui) {
-    ui.children().each(function () {
-        $(this).width($(this).width());
-    });
-    return ui;
-};
-
-$("#item-table tbody").sortable({
-    helper: fixHelper,
-    update: function (e, ui) {
-        info = $(this).sortable("toArray");
-        itemorder = new Array();
-        $.each(info, function (key, value) {
-            pk = $('#' + value).data('pk');
-            objectitems[pk].fields.order = key;
-        });
-
-    }
 });

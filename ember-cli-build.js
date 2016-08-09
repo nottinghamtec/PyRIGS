@@ -27,8 +27,12 @@ module.exports = function (defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
+  app.import('bower_components/ember/ember-template-compiler.js');
+
   app.import('bower_components/bootstrap-select/dist/js/bootstrap-select.js');
   app.import('bower_components/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js');
+
+  app.import('bower_components/jQuery UI Sortable/jquery-ui-sortable.js');
 
   return app.toTree();
 };

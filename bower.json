@@ -7,6 +7,7 @@
     "js-cookie": "^2.1.2",
     "bootstrap-sass": "^3.3.7",
     "bootstrap-select": "^1.10.0",
-    "ajax-bootstrap-select": "^1.3.1"
+    "ajax-bootstrap-select": "^1.3.1",
+    "jQuery UI Sortable": "jquery-ui-sortable#*"
   }
 }
