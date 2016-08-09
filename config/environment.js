@@ -2,7 +2,7 @@
 
 module.exports = function (environment) {
   var ENV = {
-    modulePrefix: 'py-rigs',
+    modulePrefix: 'pyrigs',
     environment: environment,
     rootURL: '/',
     locationType: 'auto',
