@@ -4,18 +4,18 @@
         {% if diff.type == "insert" %}
             <ins>{{ diff.text|linebreaksbr }}</ins>
         {% elif diff.type == "delete" %}
-            <del>{{diff.text|linebreaksbr}}</del>
+            <del>{{ diff.text|linebreaksbr }}</del>
         {% else %}
-            <span>{{diff.text|linebreaksbr}}</span>
+            <span>{{ diff.text|linebreaksbr }}</span>
         {% endif %}
     {% endfor %}
-    {% else %}
+{% else %}
     {% if change.old %}
         <del {% if change.long %}class="overflow-ellipsis"{% endif %}>
             {% if change.linebreaks %}
-                {{change.old|linebreaksbr}}
+                {{ change.old|linebreaksbr }}
             {% else %}
-                {{change.old}}
+                {{ change.old }}
             {% endif %}
         </del>
     {% endif %}
@@ -25,9 +25,9 @@
     {% if change.new %}
         <ins {% if change.long %}class="overflow-ellipsis"{% endif %}>
             {% if change.linebreaks %}
-                {{change.new|linebreaksbr}}
+                {{ change.new|linebreaksbr }}
             {% else %}
-                {{change.new}}
+                {{ change.new }}
             {% endif %}
         </ins>
     {% endif %}

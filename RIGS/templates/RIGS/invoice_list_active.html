@@ -1,13 +1,13 @@
 {% extends 'RIGS/invoice_list.html' %}
 
 {% block title %}
-Outstanding Invoices
+    Outstanding Invoices
 {% endblock %}
 
 {% block heading %}
-Outstanding Invoices ({{ count }} Events, £ {{ total|floatformat:2 }})
+    Outstanding Invoices ({{ count }} Events, £ {{ total|floatformat:2 }})
 {% endblock %}
 
 {% block description %}
-<p>Paperwork for these events has been sent to treasury, but the full balance has not yet appeared on a ledger</p>
+    <p>Paperwork for these events has been sent to treasury, but the full balance has not yet appeared on a ledger</p>
 {% endblock %}

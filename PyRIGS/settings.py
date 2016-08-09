@@ -10,36 +10,41 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
+SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
+    'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
-STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+STAGING = bool(int(os.environ.get('STAGING'))
+               ) if os.environ.get('STAGING') else False
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
+ALLOWED_HOSTS = [
+    'pyrigs.nottinghamtec.co.uk',
+    'rigs.nottinghamtec.co.uk',
+    'pyrigs.herokuapp.com']
 
 if STAGING:
     ALLOWED_HOSTS.append('.herokuapp.com')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True # Redirect all http requests to https
+    SECURE_SSL_REDIRECT = True  # Redirect all http requests to https
 
 INTERNAL_IPS = ['127.0.0.1']
 
 ADMINS = (
     ('Tom Price', 'tomtom5152@gmail.com')
 )
-
 
 # Application definition
 
@@ -77,7 +82,6 @@ ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 DATABASES = {
@@ -89,9 +93,10 @@ DATABASES = {
 
 if not DEBUG:
     import dj_database_url
+
     DATABASES['default'] = dj_database_url.config()
 
-# Logging 
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -119,12 +124,12 @@ LOGGING = {
         'mail_admins': {
             'class': 'django.utils.log.AdminEmailHandler',
             'level': 'ERROR',
-             # But the emails are plain text by default - HTML is nicer
+            # But the emails are plain text by default - HTML is nicer
             'include_html': True,
         },
     },
     'loggers': {
-         # Again, default Django configuration to email unhandled exceptions
+        # Again, default Django configuration to email unhandled exceptions
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
@@ -146,6 +151,7 @@ RAVEN_CONFIG = {
     # If you are using git, you can also automatically configure the
     # release based on the git info.
     # 'release': raven.fetch_git_sha(os.path.dirname(os.path.dirname(__file__))),
+    'debug': DEBUG,
 }
 
 # User system
@@ -191,7 +197,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M','%Y-%m-%dT%H:%M:%S')
+DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -204,7 +210,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages",
 )
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
@@ -215,9 +220,9 @@ STATIC_DIRS = (
 )
 
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR,  'templates'),
+    os.path.join(BASE_DIR, 'templates'),
 )
 
-USE_GRAVATAR=True
+USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"

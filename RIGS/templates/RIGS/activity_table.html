@@ -10,39 +10,39 @@
     <script src="{% static "js/popover.js" %}"></script>
     <script src="{% static "js/moment.min.js" %}"></script>
     <script>
-    	$(function () {
-		  $('[data-toggle="popover"]').popover().click(function(){
-        if($(this).attr('href')){
-          window.location.href = $(this).attr('href');
-        }
-      });
+        $(function () {
+            $('[data-toggle="popover"]').popover().click(function () {
+                if ($(this).attr('href')) {
+                    window.location.href = $(this).attr('href');
+                }
+            });
 
-          // This keeps timeago values correct, but uses an insane amount of resources
-          // $(function () {
-          //     setInterval(function() {
-          //         $('.date').each(function (index, dateElem) {
-          //           var $dateElem = $(dateElem);
-          //           var formatted = moment($dateElem.attr('data-date')).fromNow();
-          //           $dateElem.text(formatted);
-          //          })
-          //        });
-          //     }, 10000);
+            // This keeps timeago values correct, but uses an insane amount of resources
+            // $(function () {
+            //     setInterval(function() {
+            //         $('.date').each(function (index, dateElem) {
+            //           var $dateElem = $(dateElem);
+            //           var formatted = moment($dateElem.attr('data-date')).fromNow();
+            //           $dateElem.text(formatted);
+            //          })
+            //        });
+            //     }, 10000);
 
 
             $('.date').each(function (index, dateElem) {
                 var $dateElem = $(dateElem);
                 var formatted = moment($dateElem.attr('data-date')).fromNow();
                 $dateElem.text(formatted);
-               });
-             
+            });
 
-		})
+
+        })
 
     </script>
 {% endblock %}
 
 {% block content %}
-<div class="col-sm-12">
+    <div class="col-sm-12">
         <div class="row">
             <div class="col-sm-12">
                 <h3>Rigboard Activity Stream</h3>
@@ -51,7 +51,7 @@
         </div>
         <div class="table-responsive">
 
-        	<table class="table table-striped">
+            <table class="table table-striped">
                 <thead>
                 <tr>
                     <td>Date</td>
@@ -63,23 +63,25 @@
                 </tr>
                 </thead>
                 <tbody>
-                	{% for version in object_list %}
-                        
-                            <tr>
-                                <td>{{ version.revision.date_created }}</td>
-                                <td><a href="{{ version.new.get_absolute_url }}">{{version.new|to_class_name}} {{ version.new.pk|stringformat:"05d" }}</a></td>
-                           		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
-                                <td>{{ version.revision.user.name }}</td>
-                                <td>
-                                  {% if version.old == None %}
-                                    {{version.new|to_class_name}} Created
-                                  {% else %}
-                                    {% include 'RIGS/version_changes.html' %}
-                                  {% endif %}                        </td>
-                                  <td>{{ version.revision.comment }}</td>
-                            </tr>
-                        
-        			{% endfor %}
+                {% for version in object_list %}
+
+                    <tr>
+                        <td>{{ version.revision.date_created }}</td>
+                        <td>
+                            <a href="{{ version.new.get_absolute_url }}">{{ version.new|to_class_name }} {{ version.new.pk|stringformat:"05d" }}</a>
+                        </td>
+                        <td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                        <td>{{ version.revision.user.name }}</td>
+                        <td>
+                            {% if version.old == None %}
+                                {{ version.new|to_class_name }} Created
+                            {% else %}
+                                {% include 'RIGS/version_changes.html' %}
+                            {% endif %}                        </td>
+                        <td>{{ version.revision.comment }}</td>
+                    </tr>
+
+                {% endfor %}
 
                 </tbody>
             </table>

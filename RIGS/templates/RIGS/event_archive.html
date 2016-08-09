@@ -11,14 +11,17 @@
             <form class="form-inline">
                 <div class="form-group">
                     <label for="start">Start</label>
-                    <input type="date" name="start" id="start" value="{{ request.GET.start }}" placeholder="Start" class="form-control" />
+                    <input type="date" name="start" id="start" value="{{ request.GET.start }}" placeholder="Start"
+                           class="form-control"/>
                 </div>
                 <div class="form-group">
                     <label for="end">End</label>
-                    <input type="date" name="end" id="end" value="{% if request.GET.end %}{{ request.GET.end }}{% else %}{% now "Y-m-d" %}{% endif %}" placeholder="End" class="form-control" />
+                    <input type="date" name="end" id="end"
+                           value="{% if request.GET.end %}{{ request.GET.end }}{% else %}{% now "Y-m-d" %}{% endif %}"
+                           placeholder="End" class="form-control"/>
                 </div>
                 <div class="form-group">
-                    <input type="submit" class="btn btn-primary" />
+                    <input type="submit" class="btn btn-primary"/>
                 </div>
             </form>
         </div>

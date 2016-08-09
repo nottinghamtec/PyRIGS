@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+
 import RIGS.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('RIGS', '0003_auto_20141031_0219'),
     ]

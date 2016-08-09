@@ -1,11 +1,11 @@
 import datetime
 import hashlib
-import pytz
 import random
 import string
 from collections import Counter
 from decimal import Decimal
 
+import pytz
 import reversion
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -19,22 +19,31 @@ from django.utils.functional import cached_property
 # Create your models here.
 @python_2_unicode_compatible
 class Profile(AbstractUser):
-    initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
+    initials = models.CharField(
+        max_length=5,
+        unique=True,
+        null=True,
+        blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
-    api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    api_key = models.CharField(
+        max_length=40,
+        blank=True,
+        editable=False,
+        null=True)
 
     @classmethod
     def make_api_key(cls):
         size = 20
         chars = string.ascii_letters + string.digits
         new_api_key = ''.join(random.choice(chars) for x in range(size))
-        return new_api_key;
+        return new_api_key
 
     @property
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
+            url = "https://www.gravatar.com/avatar/" + \
+                  hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
@@ -46,7 +55,8 @@ class Profile(AbstractUser):
 
     @property
     def latest_events(self):
-        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_mic.order_by(
+            '-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def __str__(self):
         return self.name
@@ -107,7 +117,8 @@ class Person(models.Model, RevisionMixin):
     @property
     def organisations(self):
         o = []
-        for e in Event.objects.filter(person=self).select_related('organisation'):
+        for e in Event.objects.filter(
+            person=self).select_related('organisation'):
             if e.organisation:
                 o.append(e.organisation)
 
@@ -118,7 +129,8 @@ class Person(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_set.order_by(
+            '-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
         return reverse_lazy('person_detail', kwargs={'pk': self.pk})
@@ -151,7 +163,8 @@ class Organisation(models.Model, RevisionMixin):
     @property
     def persons(self):
         p = []
-        for e in Event.objects.filter(organisation=self).select_related('person'):
+        for e in Event.objects.filter(
+            organisation=self).select_related('person'):
             if e.person:
                 p.append(e.person)
 
@@ -162,7 +175,8 @@ class Organisation(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_set.order_by(
+            '-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
         return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
@@ -205,7 +219,8 @@ class VatRate(models.Model, RevisionMixin):
         get_latest_by = 'start_at'
 
     def __str__(self):
-        return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
+        return self.comment + " " + \
+               str(self.start_at) + " @ " + str(self.as_percent) + "%"
 
 
 @reversion.register
@@ -227,7 +242,8 @@ class Venue(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_set.order_by(
+            '-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
         return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
@@ -249,7 +265,10 @@ class EventManager(models.Manager):
                 status=Event.CANCELLED)) |  # Active dry hire
             (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
-            models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
+            # Canceled but not started
+            models.Q(
+                status=Event.CANCELLED,
+                start_date__gte=datetime.date.today())
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
                                                                                                  'organisation',
                                                                                                  'venue', 'mic')
@@ -257,16 +276,24 @@ class EventManager(models.Manager):
 
     def events_in_bounds(self, start, end):
         events = self.filter(
-            (models.Q(start_date__gte=start.date(), start_date__lte=end.date())) |  # Start date in bounds
-            (models.Q(end_date__gte=start.date(), end_date__lte=end.date())) |  # End date in bounds
-            (models.Q(access_at__gte=start, access_at__lte=end)) |  # Access at in bounds
+            # Start date in bounds
+            (models.Q(start_date__gte=start.date(), start_date__lte=end.date())) |
+            # End date in bounds
+            (models.Q(end_date__gte=start.date(), end_date__lte=end.date())) |
+            # Access at in bounds
+            (models.Q(access_at__gte=start, access_at__lte=end)) |
             (models.Q(meet_at__gte=start, meet_at__lte=end)) |  # Meet at in bounds
 
-            (models.Q(start_date__lte=start, end_date__gte=end)) |  # Start before, end after
-            (models.Q(access_at__lte=start, start_date__gte=end)) |  # Access before, start after
-            (models.Q(access_at__lte=start, end_date__gte=end)) |  # Access before, end after
-            (models.Q(meet_at__lte=start, start_date__gte=end)) |  # Meet before, start after
-            (models.Q(meet_at__lte=start, end_date__gte=end))  # Meet before, end after
+            # Start before, end after
+            (models.Q(start_date__lte=start, end_date__gte=end)) |
+            # Access before, start after
+            (models.Q(access_at__lte=start, start_date__gte=end)) |
+            # Access before, end after
+            (models.Q(access_at__lte=start, end_date__gte=end)) |
+            # Meet before, start after
+            (models.Q(meet_at__lte=start, start_date__gte=end)) |
+            # Meet before, end after
+            (models.Q(meet_at__lte=start, end_date__gte=end))
 
         ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
                                                                                                  'organisation',
@@ -309,7 +336,9 @@ class Event(models.Model, RevisionMixin):
     venue = models.ForeignKey('Venue', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
+    status = models.IntegerField(
+        choices=EVENT_STATUS_CHOICES,
+        default=PROVISIONAL)
     dry_hire = models.BooleanField(default=False)
     is_rig = models.BooleanField(default=True)
     based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True,
@@ -325,15 +354,27 @@ class Event(models.Model, RevisionMixin):
     meet_info = models.CharField(max_length=255, blank=True, null=True)
 
     # Crew management
-    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True)
+    checked_in_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='event_checked_in',
+        blank=True,
+        null=True)
     mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
                             verbose_name="MIC")
 
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
-    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
+    purchase_order = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='PO')
+    collector = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='collected by')
 
     # Calculated values
     """
@@ -409,9 +450,11 @@ class Event(models.Model, RevisionMixin):
         # If there is no start time defined, pretend it's midnight
         startTimeFaked = False
         if self.has_start_time:
-            startDateTime = datetime.datetime.combine(self.start_date, self.start_time)
+            startDateTime = datetime.datetime.combine(
+                self.start_date, self.start_time)
         else:
-            startDateTime = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
+            startDateTime = datetime.datetime.combine(
+                self.start_date, datetime.time(00, 00))
             startTimeFaked = True
 
         # timezoneIssues - apply the default timezone to the naiive datetime
@@ -419,7 +462,8 @@ class Event(models.Model, RevisionMixin):
         startDateTime = tz.localize(startDateTime)
         datetime_list.append(startDateTime)  # then add it to the list
 
-        earliest = min(datetime_list).astimezone(tz)  # find the earliest datetime in the list
+        # find the earliest datetime in the list
+        earliest = min(datetime_list).astimezone(tz)
 
         # if we faked it & it's the earliest, better own up
         if startTimeFaked and earliest == startDateTime:
@@ -455,12 +499,14 @@ class Event(models.Model, RevisionMixin):
 
     def clean(self):
         if self.end_date and self.start_date > self.end_date:
-            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+            raise ValidationError(
+                'Unless you\'ve invented time travel, the event can\'t finish before it has started.')
 
         startEndSameDay = not self.end_date or self.end_date == self.start_date
         hasStartAndEnd = self.has_start_time and self.has_end_time
         if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
-            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+            raise ValidationError(
+                'Unless you\'ve invented time travel, the event can\'t finish before it has started.')
 
     def save(self, *args, **kwargs):
         """Call :meth:`full_clean` before saving."""
@@ -489,7 +535,8 @@ class EventItem(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return str(self.event.pk) + "." + str(self.order) + ": " + self.event.name + " | " + self.name
+        return str(self.event.pk) + "." + str(self.order) + \
+               ": " + self.event.name + " | " + self.name
 
 
 class EventCrew(models.Model):
@@ -557,8 +604,15 @@ class Payment(models.Model):
 
     invoice = models.ForeignKey('Invoice')
     date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
-    method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text='Please use ex. VAT')
+    method = models.CharField(
+        max_length=2,
+        choices=METHODS,
+        null=True,
+        blank=True)
 
     def __str__(self):
         return "%s: %d" % (self.get_method_display(), self.amount)

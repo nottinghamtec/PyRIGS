@@ -1,37 +1,39 @@
+import datetime
 import logging
 
+import reversion
+from diff_match_patch import diff_match_patch
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import IntegerField, EmailField, TextField
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
-# Versioning
-import reversion
-from reversion.models import Version
-from django.contrib.contenttypes.models import ContentType  # Used to lookup the content_type
-from django.db.models import IntegerField, EmailField, TextField
-from diff_match_patch import diff_match_patch
-
 from RIGS import models
-import datetime
 
 logger = logging.getLogger('tec.pyrigs')
 
 
 def model_compare(oldObj, newObj, excluded_keys=[]):
-    # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
+    # recieves two objects of the same model, and compares them. Returns an
+    # array of FieldCompare objects
     try:
-        theFields = oldObj._meta.fields  # This becomes deprecated in Django 1.8!!!!!!!!!!!!! (but an alternative becomes available)
+        # This becomes deprecated in Django 1.8!!!!!!!!!!!!! (but an
+        # alternative becomes available)
+        theFields = oldObj._meta.fields
     except AttributeError:
         theFields = newObj._meta.fields
 
     class FieldCompare(object):
+
         def __init__(self, field=None, old=None, new=None):
             self.field = field
             self._old = old
             self._new = new
 
         def display_value(self, value):
-            if isinstance(self.field, IntegerField) and len(self.field.choices) > 0:
+            if isinstance(self.field, IntegerField) and len(
+                self.field.choices) > 0:
                 return [x[1] for x in self.field.choices if x[0] == value][0]
             return value
 
@@ -104,13 +106,15 @@ def model_compare(oldObj, newObj, excluded_keys=[]):
 
 
 def compare_event_items(old, new):
-    # Recieves two event version objects and compares their items, returns an array of ItemCompare objects
+    # Recieves two event version objects and compares their items, returns an
+    # array of ItemCompare objects
 
     item_type = ContentType.objects.get_for_model(models.EventItem)
     old_item_versions = old.revision.version_set.filter(content_type=item_type)
     new_item_versions = new.revision.version_set.filter(content_type=item_type)
 
     class ItemCompare(object):
+
         def __init__(self, old=None, new=None, changes=None):
             self.old = old
             self.new = new
@@ -126,18 +130,25 @@ def compare_event_items(old, new):
     for version in new_item_versions:  # go through the new versions
         if version.field_dict["event"] == new.object_id_int:
             try:
-                compare = item_dict[version.object_id]  # see if there's a matching old version
-                compare.new = version.object_version.object  # then add the new version to the dictionary
+                # see if there's a matching old version
+                compare = item_dict[version.object_id]
+                # then add the new version to the dictionary
+                compare.new = version.object_version.object
             except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
                 compare = ItemCompare(new=version.object_version.object)
 
-            item_dict[version.object_id] = compare  # update the dictionary with the changes
+            # update the dictionary with the changes
+            item_dict[version.object_id] = compare
 
     changes = []
     for (_, compare) in item_dict.items():
-        compare.changes = model_compare(compare.old, compare.new, ['id', 'event', 'order'])  # see what's changed
+        compare.changes = model_compare(
+            compare.old, compare.new, [
+                'id', 'event', 'order'])  # see what's changed
         if len(compare.changes) >= 1:
-            changes.append(compare)  # transfer into a sequential array to make it easier to deal with later
+            # transfer into a sequential array to make it easier to deal with
+            # later
+            changes.append(compare)
 
     return changes
 
@@ -158,7 +169,8 @@ def get_previous_version(version):
     thisId = version.object_id
     thisVersionId = version.pk
 
-    versions = reversion.get_for_object_reference(version.content_type.model_class(), thisId)
+    versions = reversion.get_for_object_reference(
+        version.content_type.model_class(), thisId)
 
     try:
         previousVersions = versions.filter(revision_id__lt=version.revision_id).latest(
@@ -173,7 +185,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
     # Pass in a previous version if you already know it (for efficiancy)
     # if not provided then it will be looked up in the database
 
-    if oldVersion == None:
+    if oldVersion is None:
         oldVersion = get_previous_version(newVersion)
 
     modelClass = newVersion.content_type.model_class()
@@ -192,7 +204,8 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
     if oldVersion:
         compare['old'] = oldVersion.object_version.object
-        compare['field_changes'] = model_compare(compare['old'], compare['new'])
+        compare['field_changes'] = model_compare(
+            compare['old'], compare['new'])
         compare['item_changes'] = compare_event_items(oldVersion, newVersion)
 
     return compare
@@ -207,7 +220,8 @@ class VersionHistory(generic.ListView):
         thisModel = self.kwargs['model']
 
         # thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
-        versions = reversion.get_for_object_reference(thisModel, self.kwargs['pk'])
+        versions = reversion.get_for_object_reference(
+            thisModel, self.kwargs['pk'])
 
         return versions
 
@@ -225,7 +239,8 @@ class VersionHistory(generic.ListView):
             if versionNo >= len(versions) - 1:
                 thisItem = get_changes_for_version(thisVersion, None)
             else:
-                thisItem = get_changes_for_version(thisVersion, versions[versionNo + 1])
+                thisItem = get_changes_for_version(
+                    thisVersion, versions[versionNo + 1])
 
             items.append(thisItem)
 
@@ -241,7 +256,8 @@ class ActivityTable(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation])
+        versions = get_versions_for_model(
+            [models.Event, models.Venue, models.Person, models.Organisation])
         return versions
 
     def get_context_data(self, **kwargs):
@@ -265,14 +281,17 @@ class ActivityFeed(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation])
+        versions = get_versions_for_model(
+            [models.Event, models.Venue, models.Person, models.Organisation])
         return versions
 
     def get_context_data(self, **kwargs):
         maxTimeDelta = []
 
-        maxTimeDelta.append({'maxAge': datetime.timedelta(days=1), 'group': datetime.timedelta(hours=1)})
-        maxTimeDelta.append({'maxAge': None, 'group': datetime.timedelta(days=1)})
+        maxTimeDelta.append({'maxAge': datetime.timedelta(
+            days=1), 'group': datetime.timedelta(hours=1)})
+        maxTimeDelta.append(
+            {'maxAge': None, 'group': datetime.timedelta(days=1)})
 
         # Call the base implementation first to get a context
         context = super(ActivityFeed, self).get_context_data(**kwargs)
@@ -281,19 +300,23 @@ class ActivityFeed(generic.ListView):
 
         for thisVersion in context['object_list']:
             thisItem = get_changes_for_version(thisVersion, None)
-            if thisItem['item_changes'] or thisItem['field_changes'] or thisItem['old'] == None:
+            if thisItem['item_changes'] or thisItem[
+                'field_changes'] or thisItem['old'] is None:
                 thisItem['withPrevious'] = False
                 if len(items) >= 1:
                     timeAgo = datetime.datetime.now(thisItem['revision'].date_created.tzinfo) - thisItem[
                         'revision'].date_created
-                    timeDiff = items[-1]['revision'].date_created - thisItem['revision'].date_created
+                    timeDiff = items[-1]['revision'].date_created - \
+                               thisItem['revision'].date_created
                     timeTogether = False
                     for params in maxTimeDelta:
-                        if params['maxAge'] is None or timeAgo <= params['maxAge']:
+                        if params['maxAge'] is None or timeAgo <= params[
+                            'maxAge']:
                             timeTogether = timeDiff < params['group']
                             break
 
-                    sameUser = thisItem['revision'].user == items[-1]['revision'].user
+                    sameUser = thisItem[
+                                   'revision'].user == items[-1]['revision'].user
                     thisItem['withPrevious'] = timeTogether & sameUser
 
                 items.append(thisItem)
