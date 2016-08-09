@@ -1,7 +1,7 @@
 {
-  "name": "py-rigs",
+  "name": "pyrigs",
   "version": "0.0.0",
-  "description": "Small description for py-rigs goes here",
+  "description": "Small description for pyrigs goes here",
   "private": true,
   "directories": {
     "doc": "doc",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "ember build",
-    "start": "ember server",
+    "start": "ember serve --out",
     "test": "ember test"
   },
   "repository": "",
@@ -24,6 +24,7 @@
     "ember-cli": "2.7.0",
     "ember-cli-app-version": "^1.0.0",
     "ember-cli-babel": "^5.1.6",
+    "ember-cli-bootstrap-sassy": "0.5.3",
     "ember-cli-dependency-checker": "^1.2.0",
     "ember-cli-htmlbars": "^1.0.3",
     "ember-cli-htmlbars-inline-precompile": "^0.3.1",
@@ -31,6 +32,7 @@
     "ember-cli-jshint": "^1.0.0",
     "ember-cli-qunit": "^2.0.0",
     "ember-cli-release": "^0.2.9",
+    "ember-cli-sass": "^5.5.1",
     "ember-cli-sri": "^2.1.0",
     "ember-cli-test-loader": "^1.1.0",
     "ember-cli-uglify": "^1.2.0",
