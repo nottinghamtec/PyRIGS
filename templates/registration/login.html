@@ -2,6 +2,14 @@
 
 {% block title %}Login{% endblock %}
 
+{% block extra-head %}
+	{% if next %}
+	<link rel="alternate" type="application/json+oembed"
+	  href="{{next}}oembed"
+	  title="RIGS Event Embed" />
+	{% endif %}
+{% endblock %}
+
 {% block content %}
 {% include 'registration/loginform.html' %}
 {% endblock %}

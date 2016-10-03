@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
+import simplejson
 
 from RIGS import models, forms
 import datetime
@@ -45,6 +46,20 @@ class WebCalendar(generic.TemplateView):
 
 class EventDetail(generic.DetailView):
     model = models.Event
+
+class EventOembed(generic.View):
+    model = models.Event
+
+    def get(self, request, pk=None):
+        
+        object = get_object_or_404(self.model, pk=pk)
+        data = {
+            'html': 'this is some html',
+            'version': '1.0',
+            'type': 'rich',
+        }
+        json = simplejson.dumps(data)
+        return HttpResponse(json, content_type="application/json")
 
 
 class EventCreate(generic.CreateView):
