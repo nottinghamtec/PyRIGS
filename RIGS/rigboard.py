@@ -53,8 +53,12 @@ class EventOembed(generic.View):
     def get(self, request, pk=None):
         
         object = get_object_or_404(self.model, pk=pk)
+
+        base_url = "https://rigs.nottinghamtec.co.uk"
+        full_url = base_url+str(object.get_absolute_url())
+
         data = {
-            'html': 'this is some html',
+            'html': '<iframe src="{0}" frameborder="0" width="100%" height="300"></iframe>'.format(full_url),
             'version': '1.0',
             'type': 'rich',
         }
