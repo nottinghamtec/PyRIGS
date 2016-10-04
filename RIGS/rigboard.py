@@ -62,7 +62,8 @@ class EventOembed(generic.View):
             'version': '1.0',
             'type': 'rich',
         }
-        json = simplejson.dumps(data)
+        # need to do this: @xframe_options_exempt
+        json = simplejson.JSONEncoderForHTML(data)
         return HttpResponse(json, content_type="application/json")
 
 
