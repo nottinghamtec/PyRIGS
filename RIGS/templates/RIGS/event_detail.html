@@ -4,7 +4,7 @@
 {% block extra-head %}
     
     <link rel="alternate" type="application/json+oembed"
-      href="{{event.get_absolute_url}}oembed"
+      href="{{request.scheme}}://{{request.META.HTTP_HOST}}{{event.get_absolute_url}}oembed"
       title="RIGS Event Embed" />
     
 {% endblock %}
