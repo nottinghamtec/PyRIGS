@@ -77,15 +77,17 @@
                 {% endif %}
 
                 <p>
-                    <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
-                    {% if event.end_date and event.end_date != event.start_date %}
-                        <strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>
+                    <strong>{{ object.start_date|date:"D d/m/Y" }}</strong>
+                    {% if object.end_date and object.end_date != object.start_date %}
+                        <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
                     {% endif %}
-                <span class="text-muted">({{ event.get_status_display }})</span>
+                <span class="text-muted">({{ object.get_status_display }})</span>
                 </p>
-                <p>
-                    {{ event.description|linebreaksbr }}
-                </p>
+                {% if object.description %}
+                    <p>
+                        {{ object.description|linebreaksbr }}
+                    </p>
+                {% endif %}
             </div>
             <div class="col-sm-12 col-md-6" style="margin-top:30px;">
                 {% if not object.cancelled %}
