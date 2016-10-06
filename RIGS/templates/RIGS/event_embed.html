@@ -18,20 +18,19 @@
         </div>
 
         <div class="col-sm-12">
-           
-            <h3>
-                <span class="pull-right">
+           <span class="pull-right">
 
                 {% if object.mic %}
-                    {{ object.mic.initials }}
-                    <div>
+                    <div class="text-center">
+                            {{ object.mic.initials }}<br/>
                             <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
                     </div>
-
                 {% elif object.is_rig %}
                     <span class="glyphicon glyphicon-exclamation-sign"></span>
                 {% endif %}
                 </span>
+            <h3>
+                
                     
                     <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' object.pk %}" target="_top"{% endif %}>
                         {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
@@ -63,38 +62,50 @@
                 {% endif %}
 
             
-                <dl class="dl-horizontal">
+                <table class="table">
                     {% if object.mic %}
-                        <dt>MIC</dt>
-                        <dd>{{object.mic.name}}</dd>
+                    <tr>
+                        <th>MIC</th>
+                        <td>{{object.mic.name}}</td>
+                    </tr>
                     {% endif %}
                     {% if object.description %}
-                        <dt>Description</dt>
-                        <dd>{{ object.description|linebreaksbr }}</dd>
+                    <tr>
+                        <th>Description</th>
+                        <td>{{ object.description|linebreaksbr }}</td>
+                    </tr>
                     {% endif %}
                     {% if object.meet_at %}
-                        <dt>Crew meet</dt>
-                        <dd>{{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}</dd>
+                    <tr>
+                        <th>Crew meet</th>
+                        <td>{{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}</td>
+                    </tr>
                     {% endif %}
                     {% if object.access_at %}
-                        <dt>Access at</dt>
-                        <dd>{{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}</dd>
+                    <tr>
+                        <th>Access at</th>
+                        <td>{{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}</td>
+                    </tr>
                     {% endif %}
                     {% if object.has_start_time %}
-                        <dt>Event starts</dt>
-                        <dd>
+                    <tr>
+                        <th>Event starts</th>
+                        <td>
                             {{ object.start_time|date:"H:i" }}
                             {{ object.start_date|date:"(Y-m-d)" }}<br/>
-                        </dd>
+                        </td>
+                    </tr>
                     {% endif %}
                     {% if object.has_end_time%}{% if object.start_date != object.end_date or object.start_time != object.end_time %}
-                        <dt>Event ends</dt>
-                        <dd>
+                    <tr>
+                        <th>Event ends</th>
+                        <td>
                             {{ object.end_time|date:"H:i" }}
                             {{ object.end_date|date:"(Y-m-d)" }}
-                        </dd>
+                        </td>
+                    </tr>
                     {% endif %}{% endif %}
-                </dl>
+                </table>
             </div>
         </div>
     </div>
