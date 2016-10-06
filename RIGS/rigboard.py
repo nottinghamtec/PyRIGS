@@ -54,7 +54,7 @@ class EventOembed(generic.View):
 
     def get(self, request, pk=None):
 
-        base_url = "https://rigs.nottinghamtec.co.uk"
+        base_url = request.scheme + '://' + request.META['HTTP_HOST']
         full_url = base_url+reverse('event_embed', args=[pk])
 
         data = {
