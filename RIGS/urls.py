@@ -15,7 +15,7 @@ urlpatterns = patterns('',
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
-                       url('^user/login/embed/$', 'RIGS.views.login_embed', name='login_embed'),
+                       url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
                        url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form':forms.PasswordReset}),
 
                        # People
