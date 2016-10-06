@@ -35,6 +35,15 @@ def login(request, **kwargs):
 
         return login(request)
 
+def login_embed(request, **kwargs):
+    if request.user.is_authenticated():
+        next = request.REQUEST.get('next', '/')
+        return HttpResponseRedirect(request.REQUEST.get('next', '/'))
+    else:
+        from django.contrib.auth.views import login
+
+        return login(request, template_name="registration/login_embed.html")
+
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
 May optionally also include some javascript in a success message to cause a load of

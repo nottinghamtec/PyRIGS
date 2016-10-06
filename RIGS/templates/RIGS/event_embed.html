@@ -1,44 +1,12 @@
+{% extends 'base_embed.html' %}
 {% load static from staticfiles %}
-{% load raven %}
 
+{% block content %}
 
-<!DOCTYPE html>
-<html
-        dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
-        xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
-        lang="{% firstof LANGUAGE_CODE 'en' %}">
-<head>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700,300,400' rel='stylesheet'
-          type='text/css'>
-
-
-    <link rel="stylesheet" type="text/css" href="{% static "css/screen.css" %}">
-
-    <script src="https://code.jquery.com/jquery-1.8.3.min.js"
-            integrity="sha256-YcbK69I5IXQftf/mYD8WY0/KmEDCv1asggHpJk1trM8=" crossorigin="anonymous"></script>
-    <script src="https://cdn.ravenjs.com/1.3.0/jquery,native/raven.min.js"></script>
-    <script>Raven.config('{% sentry_public_dsn %}').install()</script>
-
-    <style>
-        body, html{
-            padding:0;
-            height:100%;
-        }
-        .embed_container{
-            border:5px solid #e9e9e9;
-            height:100%;
-            width:100%;
-        }
-    </style>
-</head>
-
-<body>
-{% include "analytics.html" %}
-
-<div class="embed_container" style="border: 5px solid #e9e9e9;">
-    <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-12 col-md-6">
+
+        <div class="col-sm-12">
+            <img src="{% static "imgs/pyrigs-avatar.png" %}" style="position:relative; height:50px; float:left; left:-15px; "> </img>
                             <h2>
                                 <small>
                 <span class="pull-right">
@@ -54,7 +22,7 @@
                 {% endif %}
                 </span>
             </small>
-                    <img src="{% static "imgs/pyrigs-avatar.png" %}" style="height:30px; float:left; padding-right:10px;"> </img>
+                    
                     <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' object.pk %}" target="_top"{% endif %}>
                         {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
                     | {{ object.name }} </a>
@@ -79,7 +47,7 @@
                 <p>
                     <strong>{{ object.start_date|date:"D d/m/Y" }}</strong>
                     {% if object.end_date and object.end_date != object.start_date %}
-                        <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
+                        &ndash; <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
                     {% endif %}
                 <span class="text-muted">({{ object.get_status_display }})</span>
                 </p>
@@ -88,8 +56,7 @@
                         {{ object.description|linebreaksbr }}
                     </p>
                 {% endif %}
-            </div>
-            <div class="col-sm-12 col-md-6" style="margin-top:30px;">
+            
                 {% if not object.cancelled %}
                         <dl class="dl-horizontal">
                             {% if object.meet_at %}
@@ -115,10 +82,5 @@
             </div>
         </div>
     </div>
-    </div>
-</div>
 
-{% block js %}
 {% endblock %}
-</body>
-</html>
