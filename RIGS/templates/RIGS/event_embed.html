@@ -3,12 +3,23 @@
 
 {% block content %}
 
+    <style>
+        .source{
+            background: url({% static "imgs/pyrigs-avatar.png" %}) no-repeat;
+            background-size: 16px 16px;
+            padding-left: 20px;
+        }
+
+    </style>
+
     <div class="row">
+        <div class="col-sm-12">
+            <span class="source"> R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></span> 
+        </div>
 
         <div class="col-sm-12">
-            <img src="{% static "imgs/pyrigs-avatar.png" %}" style="position:relative; height:50px; float:left; left:-15px; "> </img>
-                            <h2>
-                                <small>
+           
+            <h3>
                 <span class="pull-right">
 
                 {% if object.mic %}
@@ -21,7 +32,6 @@
                     <span class="glyphicon glyphicon-exclamation-sign"></span>
                 {% endif %}
                 </span>
-            </small>
                     
                     <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' object.pk %}" target="_top"{% endif %}>
                         {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
@@ -32,7 +42,15 @@
 
 
 
-                </h2>
+                </h3>
+
+                <p>
+                    <strong>{{ object.start_date|date:"D d/m/Y" }}</strong>
+                    {% if object.end_date and object.end_date != object.start_date %}
+                        &ndash; <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
+                    {% endif %}
+                <span class="text-muted">({{ object.get_status_display }})</span>
+                </p>
 
                 {% if object.is_rig %}
                     <h5>
@@ -44,41 +62,39 @@
                     </h5>
                 {% endif %}
 
-                <p>
-                    <strong>{{ object.start_date|date:"D d/m/Y" }}</strong>
-                    {% if object.end_date and object.end_date != object.start_date %}
-                        &ndash; <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
-                    {% endif %}
-                <span class="text-muted">({{ object.get_status_display }})</span>
-                </p>
-                {% if object.description %}
-                    <p>
-                        {{ object.description|linebreaksbr }}
-                    </p>
-                {% endif %}
             
-                {% if not object.cancelled %}
-                        <dl class="dl-horizontal">
-                            {% if object.meet_at %}
-                                <dt>Crew meet</dt>
-                                <dd>{{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}</dd>
-                            {% endif %}
-                            {% if object.has_start_time %}
-                                <dt>Event starts</dt>
-                                <dd>
-                                    {{ object.start_time|date:"H:i" }}
-                                    {{ object.start_date|date:"(Y-m-d)" }}<br/>
-                                </dd>
-                            {% endif %}
-                            {% if object.has_end_time%}{% if object.start_date != object.end_date or object.start_time != object.end_time %}
-                                <dt>Event ends</dt>
-                                <dd>
-                                    {{ object.end_time|date:"H:i" }}
-                                    {{ object.end_date|date:"(Y-m-d)" }}
-                                </dd>
-                            {% endif %}{% endif %}
-                        </dl>
+                <dl class="dl-horizontal">
+                    {% if object.mic %}
+                        <dt>MIC</dt>
+                        <dd>{{object.mic.name}}</dd>
                     {% endif %}
+                    {% if object.description %}
+                        <dt>Description</dt>
+                        <dd>{{ object.description|linebreaksbr }}</dd>
+                    {% endif %}
+                    {% if object.meet_at %}
+                        <dt>Crew meet</dt>
+                        <dd>{{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}</dd>
+                    {% endif %}
+                    {% if object.access_at %}
+                        <dt>Access at</dt>
+                        <dd>{{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}</dd>
+                    {% endif %}
+                    {% if object.has_start_time %}
+                        <dt>Event starts</dt>
+                        <dd>
+                            {{ object.start_time|date:"H:i" }}
+                            {{ object.start_date|date:"(Y-m-d)" }}<br/>
+                        </dd>
+                    {% endif %}
+                    {% if object.has_end_time%}{% if object.start_date != object.end_date or object.start_time != object.end_time %}
+                        <dt>Event ends</dt>
+                        <dd>
+                            {{ object.end_time|date:"H:i" }}
+                            {{ object.end_date|date:"(Y-m-d)" }}
+                        </dd>
+                    {% endif %}{% endif %}
+                </dl>
             </div>
         </div>
     </div>
