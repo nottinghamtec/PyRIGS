@@ -13,7 +13,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib import messages
-from django.views.decorators.clickjacking import xframe_options_exempt
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
@@ -68,11 +67,6 @@ class EventOembed(generic.View):
 
 class EventEmbed(EventDetail):
     template_name = 'RIGS/event_embed.html'
-
-    @xframe_options_exempt
-    def get(self, request, *args, **kwargs):
-        return super(EventEmbed, self).get(request, *args, **kwargs)
-
 
 class EventCreate(generic.CreateView):
     model = models.Event
