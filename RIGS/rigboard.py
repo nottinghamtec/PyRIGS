@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib import messages
@@ -52,11 +53,9 @@ class EventOembed(generic.View):
     model = models.Event
 
     def get(self, request, pk=None):
-        
-        object = get_object_or_404(self.model, pk=pk)
 
         base_url = "https://rigs.nottinghamtec.co.uk"
-        full_url = base_url+str(object.get_absolute_url())
+        full_url = base_url+reverse('event_embed', args=[pk])
 
         data = {
             'html': '<iframe src="{0}" frameborder="0" width="100%" height="300"></iframe>'.format(full_url),
