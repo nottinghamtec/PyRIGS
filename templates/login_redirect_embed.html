@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}Login Required{% endblock %}
+
+{% block js %}
+	<script>
+	document.location = "{{login_url}}"
+	</script>
+{% endblock %}
+
+{% block extra-head %}
+	{% if oembed_url %}
+	<link rel="alternate" type="application/json+oembed"
+	  href="{{oembed_url}}"
+	  title="RIGS Event Embed" />
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>Login is required for this page</h2>
+        <a href="{{login_url}}" class="btn btn-primary">Login</a>
+    </div>
+{% endblock %}

@@ -80,7 +80,7 @@ urlpatterns = patterns('',
                            name='activity_feed'),
 
                        url(r'^event/(?P<pk>\d+)/$',
-                           permission_required_with_403('RIGS.view_event')(rigboard.EventDetail.as_view()),
+                           permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(rigboard.EventDetail.as_view()),
                            name='event_detail'),
                        url(r'^event/(?P<pk>\d+)/oembed/$',
                            rigboard.EventOembed.as_view(),
