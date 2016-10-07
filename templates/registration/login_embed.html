@@ -1,4 +1,5 @@
 {% extends 'base_embed.html' %}
+{% load widget_tweaks %}
 
 {% block title %}Login{% endblock %}
 
@@ -6,6 +7,24 @@
 <div style="text-align:center;">
 <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
 </div>
-{% include 'registration/loginform.html' %}
+
+
+{% include 'form_errors.html' %}
+<div class="col-sm-6 col-sm-offset-3 col-lg-4 col-lg-offset-4">
+
+    <form action="" method="post" role="form" target="_self">{% csrf_token %}
+        <div class="form-group">
+            <label for="id_username">{{ form.username.label }}</label>
+            {% render_field form.username class+="form-control" placeholder=form.username.label %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {% render_field form.password class+="form-control" placeholder=form.password.label %}
+        </div>
+
+        <input type="submit" value="Login" class="btn btn-primary"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+</div>
 
 {% endblock %}
