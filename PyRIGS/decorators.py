@@ -4,12 +4,17 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
+from RIGS import models
+
+
 def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
     """
     Decorator for views that checks that the user passes the given test.
-    
     Anonymous users will be redirected to login_url, while users that fail
     the test will be given a 403 error.
+    If embed_view is set, then a JS redirect will be used, and a application/json+oembed
+    meta tag set with the url of oembed_view
+    (oembed_view will be passed the kwargs from the main function)
     """
     if not login_url:
         from django.conf import settings
@@ -24,7 +29,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                     extra_context = {}
                     extra_context['oembed_url'] = request.scheme + '://' + request.META['HTTP_HOST'] + reverse(oembed_view, kwargs=kwargs)
                     extra_context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
-                    resp = render_to_response('login_redirect_embed.html', extra_context, context_instance=RequestContext(request))
+                    resp = render_to_response('login_redirect.html', extra_context, context_instance=RequestContext(request))
                     return resp
                 else:
                     return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
@@ -37,6 +42,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
         return _checklogin
     return _dec
 
+
 def permission_required_with_403(perm, login_url=None, oembed_view=None):
     """
     Decorator for views that checks whether a user has a particular permission
@@ -44,7 +50,6 @@ def permission_required_with_403(perm, login_url=None, oembed_view=None):
     """
     return user_passes_test_with_403(lambda u: u.has_perm(perm), login_url=login_url, oembed_view=oembed_view)
 
-from RIGS import models
 
 def api_key_required(function):
     """
