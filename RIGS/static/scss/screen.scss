@@ -162,6 +162,7 @@ html.embedded{
     min-height:100%;
     width:100%;
   }
+  
   .source{
     background: url('/static/imgs/pyrigs-avatar.png') no-repeat;
     background-size: 16px 16px;
@@ -170,10 +171,12 @@ html.embedded{
 
   h3{
     margin-top:10px;
-    margin-bottom:10px;
+    margin-bottom:5px;
   }
+
   p{
-    margin:2px 0;
+    margin-bottom:2px;
+    font-size: 11px;
   }
 
   .event-mic-photo{
