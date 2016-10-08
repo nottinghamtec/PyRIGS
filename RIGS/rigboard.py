@@ -48,25 +48,29 @@ class WebCalendar(generic.TemplateView):
 class EventDetail(generic.DetailView):
     model = models.Event
 
+
 class EventOembed(generic.View):
     model = models.Event
 
     def get(self, request, pk=None):
 
-        base_url = request.scheme + '://' + request.META['HTTP_HOST']
-        full_url = base_url+reverse('event_embed', args=[pk])
+        embed_url = reverse('event_embed', args=[pk])
+
+        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
         data = {
             'html': '<iframe src="{0}" frameborder="0" width="100%" height="300"></iframe>'.format(full_url),
             'version': '1.0',
             'type': 'rich',
         }
-        # need to do this: @xframe_options_exempt
+
         json = simplejson.JSONEncoderForHTML().encode(data)
         return HttpResponse(json, content_type="application/json")
 
+
 class EventEmbed(EventDetail):
     template_name = 'RIGS/event_embed.html'
+
 
 class EventCreate(generic.CreateView):
     model = models.Event
