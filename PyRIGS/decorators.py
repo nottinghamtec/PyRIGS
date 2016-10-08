@@ -10,7 +10,7 @@ def allow_embed():
     def headers_wrapper(fun):
         def wrapped_function(*args, **kwargs):
             response = fun(*args, **kwargs)
-            response['X-Frame-Options'] = "ALLOW-FROM https://forum.nottinghamtec.co.uk/"
+            response['X-Frame-Options'] = "ALLOW"
             return response
         return wrapped_function
     return headers_wrapper
