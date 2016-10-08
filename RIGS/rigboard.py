@@ -58,7 +58,7 @@ class EventOembed(generic.View):
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
         data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="300"></iframe>'.format(full_url),
+            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
             'version': '1.0',
             'type': 'rich',
         }
