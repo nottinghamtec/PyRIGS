@@ -27,7 +27,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
             elif not request.user.is_authenticated():
                 if oembed_view is not None:
                     extra_context = {}
-                    extra_context['oembed_url'] = request.scheme + '://' + request.META['HTTP_HOST'] + reverse(oembed_view, kwargs=kwargs)
+                    extra_context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
                     extra_context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
                     resp = render_to_response('login_redirect.html', extra_context, context_instance=RequestContext(request))
                     return resp

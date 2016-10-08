@@ -30,69 +30,72 @@
         </h3>
 
         <p>
-            <strong>{{ object.start_date|date:"D d/m/Y" }}</strong>
-            {% if object.end_date and object.end_date != object.start_date %}
-            &ndash; <strong>{{ object.end_date|date:"D d/m/Y"  }}</strong>
+            {{ object.start_date|date:"D d/m/Y" }}
+            {% if object.has_start_time %}
+                {{ object.start_time|date:"H:i" }}
             {% endif %}
-            <span class="text-muted">({{ object.get_status_display }})</span>
+            {% if object.end_date or object.has_end_time %}
+                &ndash;
+            {% endif %}
+            {% if object.end_date and object.end_date != object.start_date %}
+                 {{ object.end_date|date:"D d/m/Y"  }}
+            {% endif %}
+            {% if object.has_end_time %}
+                {{ object.end_time|date:"H:i" }}
+            {% endif %}
         </p>
 
-        {% if object.is_rig %}
-            <h5>
-                {{ object.person.name }}
-                {% if object.organisation %}
-                for {{ object.organisation.name }}
+        <div class="row">
+            <div class="col-sm-6">
+                <p>
+                    <strong>Status:</strong>
+                    {{ object.get_status_display }}
+                </p>
+                <p>
+                    {% if object.is_rig %}
+                        <strong>Client:</strong> {{ object.person.name }}
+                        {% if object.organisation %}
+                        for {{ object.organisation.name }}
+                        {% endif %}
+                        {% if object.dry_hire %}</a><span class="badge">Dry Hire</span>{% endif %}
+                    {% else %}
+                        <strong>Non-Rig</strong>
+                    {% endif %}
+                </p>
+                <p>
+                    <strong>MIC:</strong>
+                    {% if object.mic %}
+                        {{object.mic.name}}
+                    {% else %}
+                        None
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-sm-6">
+                
+                {% if object.meet_at %}
+                    <p>
+                        <strong>Crew meet:</strong>
+                        {{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}
+                    </p>
                 {% endif %}
-                {% if object.dry_hire %}</a><span class="badge">Dry Hire</span>{% endif %}
-            </h5>
+                {% if object.access_at %}
+                    <p>
+                        <strong>Access at:</strong>
+                        {{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}
+                    </p>
+                {% endif %}
+                <p>
+                    <strong>Last updated:</strong>
+                    {{ object.last_edited_at }} by "{{ object.last_edited_by.initials }}"
+                </p>
+            </div>
+        </div>
+        {% if object.description %}
+            <strong>Description: </strong>
+            {{ object.description|linebreaksbr }}
         {% endif %}
-
-
-        <table class="table">
-            {% if object.mic %}
-                <tr>
-                    <th>MIC</th>
-                    <td>{{object.mic.name}}</td>
-                </tr>
-            {% endif %}
-            {% if object.description %}
-                <tr>
-                    <th>Description</th>
-                    <td>{{ object.description|linebreaksbr }}</td>
-                </tr>
-            {% endif %}
-            {% if object.meet_at %}
-                <tr>
-                    <th>Crew meet</th>
-                    <td>{{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}</td>
-                </tr>
-            {% endif %}
-            {% if object.access_at %}
-                <tr>
-                    <th>Access at</th>
-                    <td>{{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}</td>
-                </tr>
-            {% endif %}
-            {% if object.has_start_time %}
-                <tr>
-                    <th>Event starts</th>
-                    <td>
-                        {{ object.start_time|date:"H:i" }}
-                        {{ object.start_date|date:"(Y-m-d)" }}<br/>
-                    </td>
-                </tr>
-            {% endif %}
-            {% if object.has_end_time%}
-                {% if object.start_date != object.end_date or object.start_time != object.end_time %}
-                    <tr>
-                        <th>Event ends</th>
-                        <td>
-                            {{ object.end_time|date:"H:i" }}
-                            {{ object.end_date|date:"(Y-m-d)" }}
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endif %}
+            
         </table>
     </div>
 </div>
