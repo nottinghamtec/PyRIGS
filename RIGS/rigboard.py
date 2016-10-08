@@ -54,8 +54,7 @@ class EventOembed(generic.View):
 
     def get(self, request, pk=None):
 
-        embed_url = reverse('event_embed', args=[pk])
-
+        embed_url = reverse('event_embed', args=[pk])    
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
         data = {
@@ -84,7 +83,7 @@ class EventCreate(generic.CreateView):
         form = context['form']
         if re.search('"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
-        
+
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
         for field, model in form.related_models.iteritems():

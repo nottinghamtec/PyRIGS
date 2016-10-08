@@ -213,6 +213,83 @@ class TestInvoiceDelete(TestCase):
         # Check this didn't work
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
 
+
+class TestEmbeddedViews(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True, is_active=True, is_staff=True)
+
+        cls.events = {
+            1: models.Event.objects.create(name="TE E1", start_date=date.today()),
+            2: models.Event.objects.create(name="TE E2", start_date=date.today())
+        }
+
+        cls.invoices = {
+            1: models.Invoice.objects.create(event=cls.events[1]),
+            2: models.Invoice.objects.create(event=cls.events[2])
+        }
+
+        cls.payments = {
+            1: models.Payment.objects.create(invoice=cls.invoices[1], date=date.today(), amount=12.34, method=models.Payment.CASH)
+        }
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+
+    def testLoginRedirect(self):
+        request_url = reverse('event_embed', kwargs={'pk': 1})
+        expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
+
+        # Request the page and check it redirects
+        response = self.client.get(request_url, follow=True)
+        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
+
+        # Now login
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+        # And check that it no longer redirects
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(len(response.redirect_chain), 0)
+
+    def testXFrameHeaders(self):
+        event_url = reverse('event_embed', kwargs={'pk': 1})
+        login_url = reverse('login_embed')
+
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+        response = self.client.get(event_url, follow=True)
+        with self.assertRaises(KeyError):
+            response._headers["X-Frame-Options"]
+
+        response = self.client.get(login_url, follow=True)
+        with self.assertRaises(KeyError):
+            response._headers["X-Frame-Options"]
+
+    def testOEmbed(self):
+        event_url = reverse('event_detail', kwargs={'pk': 1})
+        event_embed_url = reverse('event_embed', kwargs={'pk': 1})
+        oembed_url = reverse('event_oembed', kwargs={'pk': 1})
+
+        alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
+        alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
+
+        # Test the meta tag is in place
+        response = self.client.get(event_url, follow=True, HTTP_HOST='example.com')
+        self.assertContains(response, '<link rel="alternate" type="application/json+oembed"')
+        self.assertContains(response, oembed_url)
+
+        # Test that the JSON exists
+        response = self.client.get(oembed_url, follow=True, HTTP_HOST='example.com')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, event_embed_url)
+
+        # Should also work for non-existant events
+        response = self.client.get(alt_oembed_url, follow=True, HTTP_HOST='example.com')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, alt_event_embed_url)
+
+
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
