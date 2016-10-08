@@ -4,17 +4,6 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-def allow_embed():
-    # using django.views.decorators.clickjacking.xframe_options_exempt removes the header
-    # Safari has differnet defaults to other browsers, so we have to set it explicitly
-    def headers_wrapper(fun):
-        def wrapped_function(*args, **kwargs):
-            response = fun(*args, **kwargs)
-            response['X-Frame-Options'] = "ALLOW"
-            return response
-        return wrapped_function
-    return headers_wrapper
-
 def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
     """
     Decorator for views that checks that the user passes the given test.
