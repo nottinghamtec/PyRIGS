@@ -2,7 +2,6 @@ from django.conf.urls import patterns, include, url
 from django.contrib.auth.decorators import login_required
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
-from django.views.decorators.clickjacking import xframe_options_exempt
 
 from PyRIGS.decorators import permission_required_with_403
 from PyRIGS.decorators import api_key_required
@@ -16,7 +15,7 @@ urlpatterns = patterns('',
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
-                       url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
+                       url('^user/login/embed/$', allow_embed()(views.login_embed), name='login_embed'),
                        url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form':forms.PasswordReset}),
 
                        # People
@@ -86,7 +85,7 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(rigboard.EventDetail.as_view()),
                            name='event_detail'),
                        url(r'^event/(?P<pk>\d+)/embed/$',
-                           xframe_options_exempt(permission_required_with_403('RIGS.view_event', login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
+                           allow_embed()(permission_required_with_403('RIGS.view_event', login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
                            name='event_embed'),
                        url(r'^event/(?P<pk>\d+)/oembed_json/$',
                            rigboard.EventOembed.as_view(),
