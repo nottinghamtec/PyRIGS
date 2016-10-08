@@ -12,9 +12,11 @@
             <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
             {% render_field form.password class+="form-control" placeholder=form.password.label %}
         </div>
-        <a href="{% url 'registration_register' %}" class="btn">Register</a>
-        <a href="{% url 'password_reset' %}" class="btn">Forgotten Password</a>
-        <input type="submit" value="Login" class="btn btn-primary"/>
-        <input type="hidden" name="next" value="{{ next }}"/>
+        <div class="text-right">
+            <a href="{% url 'registration_register' %}" class="btn">Register</a>
+            <a href="{% url 'password_reset' %}" class="btn">Forgotten Password</a>
+            <input type="submit" value="Login" class="btn btn-primary"/>
+            <input type="hidden" name="next" value="{{ next }}"/>
+        </div>
     </form>
 </div>

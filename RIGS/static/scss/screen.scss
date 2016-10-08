@@ -147,3 +147,25 @@ ins {
       };
   }
 }
+
+html.embedded{
+  min-height:100%;
+
+  body{
+    min-height:100%;
+    padding:0;
+  }
+
+  .embed_container{
+    border:5px solid #e9e9e9;
+    padding-top:12px;
+    min-height:100%;
+    width:100%;
+  }
+  .source{
+    background: url('/static/imgs/pyrigs-avatar.png') no-repeat;
+    background-size: 16px 16px;
+    padding-left: 20px;
+  }
+
+}

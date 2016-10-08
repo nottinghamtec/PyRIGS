@@ -2,14 +2,9 @@
 
 {% block title %}Login{% endblock %}
 
-{% block extra-head %}
-	{% if next %}
-	<link rel="alternate" type="application/json+oembed"
-	  href="{{request.scheme}}://{{request.META.HTTP_HOST}}{{next}}oembed"
-	  title="RIGS Event Embed" />
-	{% endif %}
-{% endblock %}
-
 {% block content %}
+<div class="text-center">
+	<h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
+</div>
 {% include 'registration/loginform.html' %}
 {% endblock %}
