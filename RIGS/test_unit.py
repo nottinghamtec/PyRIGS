@@ -252,6 +252,11 @@ class TestEmbeddedViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertEqual(len(response.redirect_chain), 0)
 
+    def testLoginCookieWarning(self):
+        login_url = reverse('login_embed')
+        response = self.client.post(login_url, follow=True)
+        self.assertContains(response, "Cookies do not seem to be enabled")
+
     def testXFrameHeaders(self):
         event_url = reverse('event_embed', kwargs={'pk': 1})
         login_url = reverse('login_embed')
