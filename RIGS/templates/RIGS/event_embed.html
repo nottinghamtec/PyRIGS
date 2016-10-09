@@ -11,8 +11,8 @@
     <div class="col-sm-12">
        <span class="pull-right">
             {% if object.mic %}
-                <div class="text-center img-rounded">
-                    <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
+                <div class="text-center">
+                    <img src="{{ object.mic.profile_picture }}" class="event-mic-photo img-rounded"/>
                 </div>
             {% elif object.is_rig %}
                 <span class="glyphicon glyphicon-exclamation-sign"></span>
