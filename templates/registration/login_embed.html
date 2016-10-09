@@ -3,18 +3,6 @@
 
 {% block title %}Login{% endblock %}
 
-{% block js %}
-    <script>
-        $(document).ready(function(){
-            console.log("Cookies Enabled: " + navigator.cookieEnabled)
-            if(!navigator.cookieEnabled){
-                $('#loginForm').prop("target", "_blank");
-                $('#cookieWarning').removeClass('hidden');
-            }   
-        });
-    </script>
-{% endblock %}
-
 {% block content %}
 <div class="text-center">
 <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
@@ -36,9 +24,6 @@
             {% render_field form.password class+="form-control" placeholder=form.password.label %}
         </div>
         <div class="text-right">
-            <span id="cookieWarning" class="text-warning hidden">
-              Login will happen in new tab (cookies blocked)
-            </span>
             <input type="submit" value="Login" class="btn btn-primary"/>
         </div>
         <input type="hidden" name="next" value="{{ next }}"/>
