@@ -54,7 +54,7 @@ class EventOembed(generic.View):
 
     def get(self, request, pk=None):
 
-        embed_url = reverse('event_embed', args=[pk])    
+        embed_url = reverse('event_embed', args=[pk])
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
         data = {
@@ -121,6 +121,7 @@ class EventDuplicate(EventUpdate):
         old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
         new = copy.copy(old) # Make a copy of the object in memory
         new.based_on = old # Make the new event based on the old event
+        new.purchase_order = None
 
         if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
             new.pk = None # This means a new event will be created on save, and all items will be re-created
