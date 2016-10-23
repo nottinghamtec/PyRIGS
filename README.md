@@ -85,6 +85,7 @@ Then load the sample data using the command:
 python manage.py generateSampleData
 ```
 4 user accounts are created for convenience:
+
 |Username |Password |
 |---------|---------|
 |superuser|superuser|
