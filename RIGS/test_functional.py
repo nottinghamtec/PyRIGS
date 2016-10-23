@@ -471,6 +471,9 @@ class EventTest(LiveServerTestCase):
         self.assertIn("Test Item 1", table.text)
         self.assertIn("Test Item 2", table.text)
 
+        # Check the info message is visible
+        self.assertIn("Event data duplicated but not yet saved",self.browser.find_element_by_id('content').text)
+
         # Add item
         form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
         wait.until(animation_is_finished())
@@ -489,6 +492,7 @@ class EventTest(LiveServerTestCase):
         save.click()
 
         self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+        self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text) # Check info message not visible
 
         # Check the new items are visible
         table = self.browser.find_element_by_id('item-table') # ID number is known, see above

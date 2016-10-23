@@ -125,8 +125,8 @@ class EventDuplicate(EventUpdate):
 
         if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
             new.pk = None # This means a new event will be created on save, and all items will be re-created
-
-        messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
+        else:
+            messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
 
         return new
 
