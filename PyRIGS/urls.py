@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url('^user/', include('registration.backends.default.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
+    url('', include('social.apps.django_app.urls', namespace='social'))
 )
 
 if settings.DEBUG:
