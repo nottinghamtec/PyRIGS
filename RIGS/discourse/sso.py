@@ -15,7 +15,7 @@ class DiscourseSSO:
             payload.encode(),
             sha256
         ).hexdigest()
-        print(type(computed_sig), type(sig))
+
         return hmac.compare_digest(unicode(computed_sig), sig)
 
     def get_nonce(self, payload):

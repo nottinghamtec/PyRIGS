@@ -10,6 +10,8 @@
 
 
 <div class="panel-group">
+  {% url "social:complete" "discourse" as completeUrl %}
+  {% if not request.GET.next == completeUrl %}
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -28,6 +30,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">

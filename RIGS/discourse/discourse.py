@@ -73,8 +73,11 @@ class DiscourseAuth(BaseAuth):
     def auth_complete(self, *args, **kwargs):
         """Completes login process, must return user instance."""
 
-        if not self.sso.validate(self.data['sso'], self.data['sig']):
-            raise Exception("Someone wants to hack us!")
+        try:
+            if not self.sso.validate(self.data['sso'], self.data['sig']):
+                raise Exception("Someone wants to hack us!")
+        except KeyError:
+            raise Exception("SSO Error, please try again")
 
         nonce = self.sso.get_nonce(self.data['sso'])
         nonce_obj = self.get_nonce(nonce)
