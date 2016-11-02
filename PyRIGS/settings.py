@@ -79,57 +79,20 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# Environ
-# DISCOURSE_HOST='http://localhost:4000'
-# DISCOURSE_SSO_SECRET='ABCDEFGHIJKLMNOP'
-
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/rigboard'
-SOCIAL_AUTH_LOGIN_URL = '/'
-
 SOCIAL_AUTH_PIPELINE = (
-    # Get the information we can about the user and return it in a simple
-    # format to create the user instance later. On some cases the details are
-    # already part of the auth response from the provider, but sometimes this
-    # could hit a provider API.
-    'social.pipeline.social_auth.social_details',
-
-    # Get the social uid from whichever service we're authing thru. The uid is
-    # the unique identifier of the given user in the provider.
-    'social.pipeline.social_auth.social_uid',
-
-    # Verifies that the current auth process is valid within the current
-    # project, this is were emails and domains whitelists are applied (if
-    # defined).
-    'social.pipeline.social_auth.auth_allowed',
-
-    # Checks if the current social-account is already associated in the site.
-    'social.pipeline.social_auth.social_user',
-
-    # Make up a username for this person, appends a random string at the end if
-    # there's any collision.
-    # 'social.pipeline.user.get_username',
-
-    # Send a validation email to the user to verify its email address.
-    # Disabled by default.
-    # 'social.pipeline.mail.mail_validation',
-
-    # Associates the current social details with another user account with
-    # a similar email address. Disabled by default.
-    'social.pipeline.social_auth.associate_by_email',
-
-    # Create a user account if we haven't found one yet.
-    #'social.pipeline.user.create_user',
-
-    # Create the record that associated the social account with this user.
-    #'social.pipeline.social_auth.associate_user',
-
-    # Populate the extra_data field in the social record with the values
-    # specified by settings (and the default ones like access_token, etc).
-    'social.pipeline.social_auth.load_extra_data',
-
-    # Update the user record with any changed info from the auth service.
-    'social.pipeline.user.user_details',
+    'social.pipeline.social_auth.social_details',  # Load remote details
+    'social.pipeline.social_auth.social_uid',  # Load remote ID
+    'social.pipeline.social_auth.auth_allowed',  # Check not blacklisted
+    'social.pipeline.social_auth.social_user',  # If already associated, login
+    'RIGS.discourse.pipeline.new_connection',  # Choose a user account, much UI
+    'social.pipeline.social_auth.associate_user',  # Associate the social auth with the user
+    'social.pipeline.user.user_details',  # Save any details that changed
 )
+
+DISCOURSE_HOST=os.environ.get('DISCOURSE_HOST') if os.environ.get('DISCOURSE_HOST') else 'http://localhost:4000'
+DISCOURSE_SSO_SECRET=os.environ.get('DISCOURSE_SSO_SECRET') if os.environ.get('DISCOURSE_SSO_SECRET') else 'ABCDEFGHIJKLMNOP'
+
+REGISTRATION_OPEN = False  # Disable built-in django registration - must register using forum
 
 ROOT_URLCONF = 'PyRIGS.urls'
 

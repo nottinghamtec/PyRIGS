@@ -382,3 +382,12 @@ class ResetApiKey(generic.RedirectView):
         self.request.user.save()
 
         return reverse_lazy('profile_detail')
+
+class UnlinkForum(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        for link in self.request.user.social_auth.all():
+            link.delete()
+        
+        self.request.user.save()
+
+        return reverse_lazy('profile_detail')

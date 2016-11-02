@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
+from RIGS.discourse import views as discourseViews
 from django.views.generic import RedirectView
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -15,6 +16,7 @@ urlpatterns = patterns('',
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
+                       url('^user/associate/$', discourseViews.Associate.as_view(), name='associate'),
                        url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
                        url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form': forms.PasswordReset}),
 
@@ -153,6 +155,7 @@ urlpatterns = patterns('',
                        url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
                            name='profile_update_self'),
                        url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)), name='reset_api_key'),
+                       url(r'^user/unlink_forum$', login_required(views.UnlinkForum.as_view(permanent=False)), name='unlink_forum'),
 
                        # ICS Calendar - API key authentication
                        url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()), name="ics_calendar"),

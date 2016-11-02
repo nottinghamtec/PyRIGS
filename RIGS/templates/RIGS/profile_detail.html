@@ -133,6 +133,20 @@
 					{% endif %}
 				</dd>
 			</dl>
+
+			<h4>Linked to {{object.social_auth.count}} Forum Account(s)</h4>
+
+			{% if object.social_auth.count > 0 %}
+
+		    	<a href="{% url 'unlink_forum' %}" class="btn btn-danger">
+					Unlink Forum Account(s) <span class="glyphicon glyphicon-pencil"></span>
+				</a>
+			{% else %}
+				<a href="{% url "social:begin" "discourse" %}" class="btn btn-success">
+					Link Forum Account <span class="glyphicon glyphicon-pencil"></span>
+				</a>
+			{% endif %}
+
 			{% endif %}
 			{% endif %}
 		</div>

@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
-import os
 from social.backends.base import BaseAuth
-from social.exceptions import AuthException
+from django.conf import settings
 
 from .sso import DiscourseSSO
 
@@ -20,8 +19,8 @@ class DiscourseAssociation(object):
 class DiscourseAuth(BaseAuth):
     """Discourse authentication backend"""
     name = 'discourse'
-    secret = os.environ['DISCOURSE_SSO_SECRET']
-    host = os.environ['DISCOURSE_HOST']
+    secret = settings.DISCOURSE_SSO_SECRET
+    host = settings.DISCOURSE_HOST
 
     EXTRA_DATA = [
         ('username', 'username'),
