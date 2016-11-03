@@ -2,6 +2,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import render_to_response
 from django.core.exceptions import ValidationError
+from django.conf import settings
+
+import json
+import requests
 
 from social.pipeline.partial import partial
 
@@ -60,3 +64,25 @@ def new_connection(backend, details, response, user=None, is_new=False, social=N
         context['form'] = form
 
     return render_to_response('RIGS/social-associate.html', context)
+
+
+def update_avatar(backend, details, response, user=None, social=None, *args, **kwargs):
+    host = settings.DISCOURSE_HOST
+    api_key = settings.DISCOURSE_API_KEY
+    api_user = settings.DISCOURSE_API_USER
+    if social is not None:
+        url = "{}/users/{}.json".format(host, details['username'])
+        params = {
+            'api_key': api_key,
+            'api_username': api_user
+        }
+        resp = requests.get(url=url, params=params)
+        extraData = json.loads(resp.text)
+
+        avatar_template = extraData['user']['avatar_template']
+
+        if avatar_template and user.avatar_template != avatar_template:
+            user.avatar_template = avatar_template
+            user.save()
+
+    return

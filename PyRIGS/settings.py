@@ -86,11 +86,16 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_user',  # If already associated, login
     'RIGS.discourse.pipeline.new_connection',  # Choose a user account, much UI
     'social.pipeline.social_auth.associate_user',  # Associate the social auth with the user
+    'social.pipeline.social_auth.load_extra_data',  # Save all the social info we have on this user
+    'RIGS.discourse.pipeline.update_avatar',  # Load the avatar URL from the API, and save to user model
     'social.pipeline.user.user_details',  # Save any details that changed
 )
 
-DISCOURSE_HOST=os.environ.get('DISCOURSE_HOST') if os.environ.get('DISCOURSE_HOST') else 'http://localhost:4000'
-DISCOURSE_SSO_SECRET=os.environ.get('DISCOURSE_SSO_SECRET') if os.environ.get('DISCOURSE_SSO_SECRET') else 'ABCDEFGHIJKLMNOP'
+DISCOURSE_HOST = os.environ.get('DISCOURSE_HOST') if os.environ.get('DISCOURSE_HOST') else 'http://localhost:4000'
+DISCOURSE_SSO_SECRET = os.environ.get('DISCOURSE_SSO_SECRET') if os.environ.get('DISCOURSE_SSO_SECRET') else 'ABCDEFGHIJKLMNOP'
+
+DISCOURSE_API_KEY = os.environ.get('DISCOURSE_API_KEY') if os.environ.get('DISCOURSE_HOST') else None
+DISCOURSE_API_USER = os.environ.get('DISCOURSE_API_USER') if os.environ.get('DISCOURSE_HOST') else 'system'
 
 REGISTRATION_OPEN = False  # Disable built-in django registration - must register using forum
 
