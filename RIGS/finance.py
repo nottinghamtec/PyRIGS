@@ -122,7 +122,7 @@ class InvoiceArchive(generic.ListView):
 
 class InvoiceWaiting(generic.ListView):
     model = models.Event
-    # paginate_by = 25
+    paginate_by = 25
     template_name = 'RIGS/event_invoice.html'
 
     def get_context_data(self, **kwargs):
