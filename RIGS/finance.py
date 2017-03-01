@@ -1,6 +1,7 @@
 import cStringIO as StringIO
 import datetime
 import re
+from decimal import Decimal
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
@@ -31,12 +32,13 @@ class InvoiceIndex(generic.ListView):
 
     def get_queryset(self):
         query = self.model.objects.annotate(
-            cost=Sum(F('event__items__cost') * F('event__items__quantity'), output_field=FloatField()),
-            payment_count=Count('payment'),
-            payments=Sum('payment__amount'),
+            _sum_total=Sum(F('event__items__cost') * F('event__items__quantity'), output_field=FloatField()),
+            _payment_count=Count('payment'),
+            _payment_total=Sum('payment__amount'),
         ).filter(
-            Q(cost__gt=0.0, payment_count=0) | Q(cost__lt=Value('payments'), cost__gt=Value('payments'))
-        ).select_related('event', 'event__organisation', 'event__person', 'event__venue')
+            Q(_sum_total__gt=0.0, _payment_count=0) |
+            Q(_sum_total__lt=Value('_payment_total'), _sum_total__gt=Value('_payment_total'))
+        ).select_related('event', 'event__organisation', 'event__person', 'event__venue', 'event__mic')
 
         return query
 

@@ -1,11 +1,11 @@
 import datetime
 import hashlib
-import pytz
 import random
 import string
 from collections import Counter
 from decimal import Decimal
 
+import pytz
 import reversion
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -509,6 +509,8 @@ class Invoice(models.Model):
 
     @property
     def sum_total(self):
+        if getattr(self, '_sum_total', None):
+            return Decimal(getattr(self, '_sum_total'))
         return self.event.sum_total
 
     @property
@@ -517,6 +519,10 @@ class Invoice(models.Model):
 
     @property
     def payment_total(self):
+        if hasattr(self, '_payment_total') and hasattr(self, '_payment_count'):
+            if getattr(self, '_payment_count') == 0:
+                return Decimal(0.00)
+            return Decimal(getattr(self, '_payment_total', 0.00))
         total = self.payment_set.aggregate(total=models.Sum('amount'))['total']
         if total:
             return total
