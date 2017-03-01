@@ -4,13 +4,13 @@ import re
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Count, Sum, F, FloatField, Q, Value
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.views import generic
-from django.db.models import Q
 from z3c.rml import rml2pdf
 
 from RIGS import models
@@ -30,18 +30,13 @@ class InvoiceIndex(generic.ListView):
         return context
 
     def get_queryset(self):
-        # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
-        sql = "SELECT * FROM " \
-              "(SELECT " \
-              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
-              "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
-              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
-              "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
-              "AS sub " \
-              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
-              "ORDER BY invoice_date"
-
-        query = self.model.objects.raw(sql)
+        query = self.model.objects.annotate(
+            cost=Sum(F('event__items__cost') * F('event__items__quantity'), output_field=FloatField()),
+            payment_count=Count('payment'),
+            payments=Sum('payment__amount'),
+        ).filter(
+            Q(cost__gt=0.0, payment_count=0) | Q(cost__lt=Value('payments'), cost__gt=Value('payments'))
+        ).select_related('event', 'event__organisation', 'event__person', 'event__venue')
 
         return query
 
@@ -94,6 +89,7 @@ class InvoiceVoid(generic.View):
             return HttpResponseRedirect(reverse_lazy('invoice_list'))
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': object.pk}))
 
+
 class InvoiceDelete(generic.DeleteView):
     model = models.Invoice
 
@@ -113,6 +109,7 @@ class InvoiceDelete(generic.DeleteView):
 
     def get_success_url(self):
         return self.request.POST.get('next')
+
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
@@ -142,11 +139,11 @@ class InvoiceWaiting(generic.ListView):
         events = self.model.objects.filter(
             (
                 Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
-                Q(end_date__lte=datetime.date.today()) # Has end date, finishes before
-            ) & Q(invoice__isnull=True) # Has not already been invoiced
-            & Q(is_rig=True) # Is a rig (not non-rig)
-            
-            ).order_by('start_date') \
+                Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
+            ) & Q(invoice__isnull=True)  # Has not already been invoiced
+            & Q(is_rig=True)  # Is a rig (not non-rig)
+
+        ).order_by('start_date') \
             .select_related('person',
                             'organisation',
                             'venue', 'mic') \
