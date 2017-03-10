@@ -61,6 +61,7 @@ class EventOembed(generic.View):
             'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
             'version': '1.0',
             'type': 'rich',
+            'height': '250'
         }
 
         json = simplejson.JSONEncoderForHTML().encode(data)
