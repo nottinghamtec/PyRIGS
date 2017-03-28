@@ -78,7 +78,7 @@ class InvoicePrint(generic.View):
         escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d | %s.pdf" % (invoice.pk, escapedEventName)
+        response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (invoice.pk, invoice.event.pk, escapedEventName)
         response.write(pdfData)
         return response
 
