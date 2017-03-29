@@ -1,5 +1,6 @@
 import pytz
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from RIGS import models
 from datetime import date, timedelta, datetime, time
@@ -327,3 +328,53 @@ class EventPricingTestCase(TestCase):
     def test_grand_total(self):
         self.assertEqual(self.e1.total, Decimal('84.48'))
         self.assertEqual(self.e2.total, Decimal('419.32'))
+
+
+class EventAuthorisationTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.person = models.Person.objects.create(name='Authorisation Test Person')
+        cls.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+        cls.event = models.Event.objects.create(name="AuthorisationTestCase", person=cls.person,
+                                                start_date=date.today())
+        # Add some items
+        models.EventItem.objects.create(event=cls.event, name="Authorisation test item", quantity=2, cost=123.45,
+                                        order=1)
+
+    def test_validation(self):
+        auth = models.EventAuthorisation(event=self.event, email="authroisation@model.test.case", name="Test Auth")
+
+        auth.amount = self.event.total - 1
+        self.assertRaises(ValidationError, auth.clean)
+        auth.amount = self.event.total
+
+        # Test for externals first
+        self.assertRaises(ValidationError, auth.clean)
+        self.event.organisation = self.organisation
+        self.assertRaises(ValidationError, auth.clean)
+        auth.po = "TEST123"
+        self.assertIsNone(auth.clean())
+
+        auth.po = None
+        self.organisation.union_account = True
+        self.assertRaises(ValidationError, auth.clean)
+        auth.uni_id = "1234567"
+        self.assertRaises(ValidationError, auth.clean)
+        auth.account_code = "TST AUTH 12345"
+        self.assertIsNone(auth.clean())
+
+    def test_event_property(self):
+        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                         name="Test Auth 1", amount=self.event.total - 1)
+        self.assertFalse(self.event.authorised)
+        auth1.amount = self.event.total
+        auth1.save()
+        self.assertTrue(self.event.authorised)
+
+        auth2 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                         name="Test Auth 2", amount=self.event.total - 1)
+        self.assertEqual(auth2.pk, self.event.authroisations.latest('created_at').pk)
+        self.assertFalse(self.event.authorised)
+        auth2.amount = self.event.total + 1
+        auth2.save()
+        self.assertTrue(self.event.authorised)
