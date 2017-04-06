@@ -141,3 +141,37 @@ class EventForm(forms.ModelForm):
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status',
                   'collector', 'purchase_order']
+
+
+class BaseClientEventAuthorisationForm(forms.ModelForm):
+    tos = forms.BooleanField(required=True, label="Terms of hire")
+    name = forms.CharField(label="Your Name")
+
+    def clean(self):
+        if self.cleaned_data.get('amount') != self.instance.event.total:
+            self.add_error('amount', 'The amount authorised must equal the total for the event.')
+        return super(BaseClientEventAuthorisationForm, self).clean()
+
+    class Meta:
+        abstract = True
+
+
+class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
+    def __init__(self, **kwargs):
+        super(InternalClientEventAuthorisationForm, self).__init__(**kwargs)
+        self.fields['uni_id'].required = True
+        self.fields['account_code'].required = True
+
+    class Meta:
+        model = models.EventAuthorisation
+        fields = ('tos', 'name', 'amount', 'uni_id', 'account_code')
+
+
+class ExternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
+    def __init__(self, **kwargs):
+        super(ExternalClientEventAuthorisationForm, self).__init__(**kwargs)
+        self.fields['po'].required = True
+
+    class Meta:
+        model = models.EventAuthorisation
+        fields = ('tos', 'name', 'amount', 'po')

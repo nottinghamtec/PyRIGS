@@ -16,7 +16,8 @@ urlpatterns = patterns('',
 
                        url('^user/login/$', 'RIGS.views.login', name='login'),
                        url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
-                       url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form': forms.PasswordReset}),
+                       url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset',
+                           {'password_reset_form': forms.PasswordReset}),
 
                        # People
                        url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
@@ -70,9 +71,12 @@ urlpatterns = patterns('',
 
                        # Rigboard
                        url(r'^rigboard/$', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
-                       url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
-                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
-                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$', login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+                       url(r'^rigboard/calendar/$', login_required()(rigboard.WebCalendar.as_view()),
+                           name='web_calendar'),
+                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
+                           login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+                       url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
+                           login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
                        url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
                        url(r'^rigboard/activity/$',
                            permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
@@ -82,10 +86,12 @@ urlpatterns = patterns('',
                            name='activity_feed'),
 
                        url(r'^event/(?P<pk>\d+)/$',
-                           permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(rigboard.EventDetail.as_view()),
+                           permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(
+                               rigboard.EventDetail.as_view()),
                            name='event_detail'),
                        url(r'^event/(?P<pk>\d+)/embed/$',
-                           xframe_options_exempt(login_required(login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
+                           xframe_options_exempt(
+                               login_required(login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
                            name='event_embed'),
                        url(r'^event/(?P<pk>\d+)/oembed_json/$',
                            rigboard.EventOembed.as_view(),
@@ -109,7 +115,8 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
                            name='event_history', kwargs={'model': models.Event}),
 
-
+                       url(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
+                           name='event_authorise'),
 
                        # Finance
                        url(r'^invoice/$',
@@ -152,17 +159,22 @@ urlpatterns = patterns('',
                            name='profile_detail'),
                        url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
                            name='profile_update_self'),
-                       url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)), name='reset_api_key'),
+                       url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)),
+                           name='reset_api_key'),
 
                        # ICS Calendar - API key authentication
-                       url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()), name="ics_calendar"),
+                       url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
+                           name="ics_calendar"),
 
                        # API
-                       url(r'^api/(?P<model>\w+)/$', login_required(views.SecureAPIRequest.as_view()), name="api_secure"),
-                       url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', login_required(views.SecureAPIRequest.as_view()), name="api_secure"),
+                       url(r'^api/(?P<model>\w+)/$', login_required(views.SecureAPIRequest.as_view()),
+                           name="api_secure"),
+                       url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', login_required(views.SecureAPIRequest.as_view()),
+                           name="api_secure"),
 
                        # Legacy URL's
-                       url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(permanent=True, pattern_name='event_detail')),
+                       url(r'^rig/show/(?P<pk>\d+)/$',
+                           RedirectView.as_view(permanent=True, pattern_name='event_detail')),
                        url(r'^bookings/$', RedirectView.as_view(permanent=True, pattern_name='rigboard')),
                        url(r'^bookings/past/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
                        )

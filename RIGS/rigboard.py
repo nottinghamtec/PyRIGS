@@ -10,7 +10,9 @@ from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core import signing
 from django.http import HttpResponse
+from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.contrib import messages
 from z3c.rml import rml2pdf
@@ -36,14 +38,16 @@ class RigboardIndex(generic.TemplateView):
         context['events'] = models.Event.objects.current_events()
         return context
 
+
 class WebCalendar(generic.TemplateView):
     template_name = 'RIGS/calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super(WebCalendar, self).get_context_data(**kwargs)
-        context['view'] = kwargs.get('view','')
-        context['date'] = kwargs.get('date','')
+        context['view'] = kwargs.get('view', '')
+        context['date'] = kwargs.get('date', '')
         return context
+
 
 class EventDetail(generic.DetailView):
     model = models.Event
@@ -53,7 +57,6 @@ class EventOembed(generic.View):
     model = models.Event
 
     def get(self, request, pk=None):
-
         embed_url = reverse('event_embed', args=[pk])
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
@@ -84,7 +87,6 @@ class EventCreate(generic.CreateView):
         form = context['form']
         if re.search('"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
-
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
         for field, model in form.related_models.iteritems():
@@ -117,15 +119,17 @@ class EventUpdate(generic.UpdateView):
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
+
 class EventDuplicate(EventUpdate):
     def get_object(self, queryset=None):
-        old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
-        new = copy.copy(old) # Make a copy of the object in memory
-        new.based_on = old # Make the new event based on the old event
+        old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
+        new = copy.copy(old)  # Make a copy of the object in memory
+        new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None
 
-        if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
-            new.pk = None # This means a new event will be created on save, and all items will be re-created
+        if self.request.method in (
+                'POST', 'PUT'):  # This only happens on save (otherwise items won't display in editor)
+            new.pk = None  # This means a new event will be created on save, and all items will be re-created
         else:
             messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
 
@@ -136,6 +140,7 @@ class EventDuplicate(EventUpdate):
         context["duplicate"] = True
         return context
 
+
 class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
@@ -145,8 +150,7 @@ class EventPrint(generic.View):
         merger = PdfFileMerger()
 
         for copy in copies:
-
-            context = RequestContext(request, { # this should be outside the loop, but bug in 1.8.2 prevents this
+            context = RequestContext(request, {  # this should be outside the loop, but bug in 1.8.2 prevents this
                 'object': object,
                 'fonts': {
                     'opensans': {
@@ -154,8 +158,8 @@ class EventPrint(generic.View):
                         'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
                     }
                 },
-                'copy':copy,
-                'current_user':request.user,
+                'copy': copy,
+                'current_user': request.user,
             })
 
             # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
@@ -182,6 +186,7 @@ class EventPrint(generic.View):
         response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
+
 
 class EventArchive(generic.ArchiveIndexView):
     model = models.Event
@@ -219,3 +224,68 @@ class EventArchive(generic.ArchiveIndexView):
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
 
         return qs
+
+
+class EventAuthorise(generic.UpdateView):
+    template_name = 'RIGS/eventauthorisation_form.html'
+    success_template = 'RIGS/eventauthorisation_success.html'
+
+    def form_valid(self, form):
+        # TODO: send email confirmation
+        self.template_name = self.success_template
+        messages.add_message(self.request, messages.SUCCESS,
+                             'Success! Your event has been authorised. You will also receive email confirmation.')
+        return self.render_to_response(self.get_context_data())
+
+    @property
+    def event(self):
+        return models.Event.objects.select_related('organisation', 'person', 'venue').get(pk=self.kwargs['pk'])
+
+    def get_object(self, queryset=None):
+        return self.event.authorisation
+
+    def get_form_class(self):
+        if self.event.organisation is not None and self.event.organisation.union_account:
+            return forms.InternalClientEventAuthorisationForm
+        else:
+            return forms.ExternalClientEventAuthorisationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EventAuthorise, self).get_context_data(**kwargs)
+        context['event'] = self.event
+
+        if self.get_form_class() is forms.InternalClientEventAuthorisationForm:
+            context['internal'] = True
+        else:
+            context['internal'] = False
+
+        context['tos_url'] = settings.TERMS_OF_HIRE_URL
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.get_object() is not None and self.get_object().pk is not None:
+            if self.event.authorised:
+                messages.add_message(self.request, messages.WARNING,
+                                     "This event has already been authorised. Please confirm you wish to reauthorise")
+            else:
+                messages.add_message(self.request, messages.WARNING,
+                                     "This event has already been authorised, but the amount has changed." +
+                                     "Please check the amount and reauthorise.")
+        return super(EventAuthorise, self).get(request, *args, **kwargs)
+
+    def get_form(self, **kwargs):
+        form = super(EventAuthorise, self).get_form(**kwargs)
+        form.instance.event = self.event
+        form.instance.email = self.request.email
+        return form
+
+    def dispatch(self, request, *args, **kwargs):
+        # Verify our signature matches up and all is well with the integrity of the URL
+        try:
+            data = signing.loads(kwargs.get('hmac'))
+            assert int(kwargs.get('pk')) == int(data.get('pk'))
+            request.email = data['email']
+        except (signing.BadSignature, AssertionError, KeyError):
+            raise SuspiciousOperation(
+                "The security integrity of that URL is invalid. Please contact your event MIC to obtain a new URL")
+        return super(EventAuthorise, self).dispatch(request, *args, **kwargs)

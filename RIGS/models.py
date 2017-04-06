@@ -387,7 +387,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def authorised(self):
-        return self.authroisations.latest('created_at').amount >= self.total
+        return self.authorisation.amount == self.total
 
     @property
     def has_start_time(self):
@@ -505,28 +505,15 @@ class EventCrew(models.Model):
     notes = models.TextField(blank=True, null=True)
 
 
+@reversion.register
 class EventAuthorisation(models.Model):
-    event = models.ForeignKey('Event', related_name='authroisations')
+    event = models.OneToOneField('Event', related_name='authorisation')
     email = models.EmailField()
     name = models.CharField(max_length=255)
     uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
     account_code = models.CharField(max_length=50, blank=True, null=True)
     po = models.CharField(max_length=255, blank=True, null=True, verbose_name="purchase order")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def clean(self):
-        if self.amount != self.event.total:
-            raise ValidationError("The amount authorised must equal the total for the event")
-        if self.event.organisation and self.event.organisation.union_account:
-            # Is a union account, requires username and account number
-            if self.uni_id is None or self.uni_id == "" or self.account_code is None or self.account_code == "":
-                raise ValidationError("Internal clients require a University ID number and an account code")
-        else:
-            # Is an external client, only requires PO
-            if self.po is None or self.po == "":
-                raise ValidationError("External clients require a Purchase Order number")
-        return super(EventAuthorisation, self).clean()
 
 
 @python_2_unicode_compatible
