@@ -145,33 +145,26 @@ class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
         template = get_template('RIGS/event_print.xml')
-        copies = ('TEC', 'Client')
 
         merger = PdfFileMerger()
 
-        for copy in copies:
-            context = RequestContext(request, {  # this should be outside the loop, but bug in 1.8.2 prevents this
-                'object': object,
-                'fonts': {
-                    'opensans': {
-                        'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                        'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-                    }
-                },
-                'copy': copy,
-                'current_user': request.user,
-            })
+        context = RequestContext(request, {  # this should be outside the loop, but bug in 1.8.2 prevents this
+            'object': object,
+            'fonts': {
+                'opensans': {
+                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
+                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                }
+            },
+            'quote': True,
+            'current_user': request.user,
+        })
 
-            # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
+        rml = template.render(context)
 
-            rml = template.render(context)
-            buffer = StringIO.StringIO()
-
-            buffer = rml2pdf.parseString(rml)
-
-            merger.append(PdfFileReader(buffer))
-
-            buffer.close()
+        buffer = rml2pdf.parseString(rml)
+        merger.append(PdfFileReader(buffer))
+        buffer.close()
 
         terms = urllib2.urlopen(settings.TERMS_OF_HIRE_URL)
         merger.append(StringIO.StringIO(terms.read()))
