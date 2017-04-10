@@ -34,14 +34,6 @@
                         <para style="head_numbers">{{ invoice.invoice_date|date:"d/m/Y" }}</para>
                     </td>
                 </tr>
-                {% if object.purchase_order %}
-                    <tr>
-                        <td><para style="head_titles">PO Number</para></td>
-                        <td>
-                            <para style="head_numbers">{{ object.purchase_order|default_if_none:"" }}</para>
-                        </td>
-                    </tr>
-                {% endif %}
             </blockTable>
 
         {% elif quote %}

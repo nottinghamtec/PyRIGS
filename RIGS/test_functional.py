@@ -443,7 +443,7 @@ class EventTest(LiveServerTestCase):
     def testEventDuplicate(self):
         testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                 start_date=date.today() + timedelta(days=6),
-                                                description="start future no end", purchase_order="TESTPO")
+                                                description="start future no end")
 
         item1 = models.EventItem(
             event=testEvent,
@@ -509,8 +509,6 @@ class EventTest(LiveServerTestCase):
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
         self.assertIn("N0000%d" % testEvent.pk,
                       infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
-        # Check the PO hasn't carried through
-        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk))  # Go back to the old event
 
@@ -518,8 +516,6 @@ class EventTest(LiveServerTestCase):
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
         self.assertNotIn("N0000%d" % testEvent.pk,
                          infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
-        # Check the PO remains on the old event
-        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above

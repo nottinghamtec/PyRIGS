@@ -125,7 +125,6 @@ class EventDuplicate(EventUpdate):
         old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
-        new.purchase_order = None
 
         if self.request.method in (
                 'POST', 'PUT'):  # This only happens on save (otherwise items won't display in editor)
