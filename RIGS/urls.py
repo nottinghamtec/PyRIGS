@@ -115,6 +115,11 @@ urlpatterns = patterns('',
                            permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
                            name='event_history', kwargs={'model': models.Event}),
 
+                       url(r'^event/(?P<pk>\d+)/auth/$',
+                           permission_required_with_403('RIGS.change_event')(
+                               rigboard.EventAuthorisationRequest.as_view()
+                           ),
+                           name='event_authorise_request'),
                        url(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
                            name='event_authorise'),
 

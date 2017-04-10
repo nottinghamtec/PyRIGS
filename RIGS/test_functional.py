@@ -1042,3 +1042,33 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertEqual(mail.outbox[0].to, ['authemail@function.test'])
         self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
 
+
+class TECEventAuthorisationTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = models.Profile.objects.create(
+            name='Test TEC User',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )
+
+    def setUp(self):
+        venue = models.Venue.objects.create(name='Authorisation Test Venue')
+        client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
+        organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)
+        self.event = models.Event.objects.create(
+            name='Authorisation Test',
+            start_date=date.today(),
+            venue=venue,
+            person=client,
+            organisation=organisation,
+        )
+        self.url = reverse('event_authorise_request', kwargs={'pk': self.event.pk})
+
+    def test_request_send(self):
+        self.client.force_login(self.profile)
+        response = self.client.post(self.url)
+        self.assertContains(response, 'This field is required.')
+
+        response = self.client.post(self.url, {'email': 'client@functional.test'})
+        self.assertEqual(response.status_code, 301)

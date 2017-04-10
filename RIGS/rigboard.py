@@ -1,11 +1,8 @@
-import os
 import cStringIO as StringIO
 from io import BytesIO
 import urllib2
 
-import reversion
 from django.core.mail import EmailMessage
-from django.db import transaction
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -293,3 +290,46 @@ class EventAuthorise(generic.UpdateView):
             raise SuspiciousOperation(
                 "The security integrity of that URL is invalid. Please contact your event MIC to obtain a new URL")
         return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
+
+
+class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
+    model = models.Event
+    form_class = forms.EventAuthorisationRequestForm
+    template_name = 'RIGS/eventauthorisation_request.html'
+
+    @property
+    def object(self):
+        return self.get_object()
+
+    def get_success_url(self):
+        if self.request.is_ajax():
+            url = reverse_lazy('closemodal')
+            messages.info(self.request, "$('.event-authorise-request').addClass('btn-success')")
+        else:
+            url = reverse_lazy('event_detail', kwargs={
+                'pk': self.object.pk,
+            })
+            messages.add_message(self.request, messages.SUCCESS, "Authorisation request successfully sent.")
+        return url
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+
+        context = {
+            'object': self.object,
+            'request': self.request,
+            'hmac': signing.dumps({
+                'pk': self.object.pk,
+                'email': email
+            }),
+        }
+
+        msg = EmailMessage(
+            "N%05d | %s - Event Authorisation Request".format(self.object.pk, self.object.name),
+            get_template("RIGS/eventauthorisation_client_request.txt").render(context),
+            to=[email],
+        )
+
+        msg.send()
+
+        return super(EventAuthorisationRequest, self).form_valid(form)

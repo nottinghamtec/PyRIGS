@@ -175,3 +175,7 @@ class ExternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
     class Meta:
         model = models.EventAuthorisation
         fields = ('tos', 'name', 'amount', 'po')
+
+
+class EventAuthorisationRequestForm(forms.Form):
+    email = forms.EmailField(required=True, label='Authoriser Email')
