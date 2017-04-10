@@ -1070,5 +1070,11 @@ class TECEventAuthorisationTest(TestCase):
         response = self.client.post(self.url)
         self.assertContains(response, 'This field is required.')
 
+        mail.outbox = []
+
         response = self.client.post(self.url, {'email': 'client@functional.test'})
         self.assertEqual(response.status_code, 301)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[1]
+        self.assertIn(email.to, 'client@functional.test')
+        self.assertIn(email.body, '/event/%d/'.format(self.event.pk))
