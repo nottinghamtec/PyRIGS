@@ -341,40 +341,10 @@ class EventAuthorisationTestCase(TestCase):
         models.EventItem.objects.create(event=cls.event, name="Authorisation test item", quantity=2, cost=123.45,
                                         order=1)
 
-    def test_validation(self):
-        auth = models.EventAuthorisation(event=self.event, email="authroisation@model.test.case", name="Test Auth")
-
-        auth.amount = self.event.total - 1
-        self.assertRaises(ValidationError, auth.clean)
-        auth.amount = self.event.total
-
-        # Test for externals first
-        self.assertRaises(ValidationError, auth.clean)
-        self.event.organisation = self.organisation
-        self.assertRaises(ValidationError, auth.clean)
-        auth.po = "TEST123"
-        self.assertIsNone(auth.clean())
-
-        auth.po = None
-        self.organisation.union_account = True
-        self.assertRaises(ValidationError, auth.clean)
-        auth.uni_id = "1234567"
-        self.assertRaises(ValidationError, auth.clean)
-        auth.account_code = "TST AUTH 12345"
-        self.assertIsNone(auth.clean())
-
     def test_event_property(self):
         auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
                                                          name="Test Auth 1", amount=self.event.total - 1)
         self.assertFalse(self.event.authorised)
         auth1.amount = self.event.total
         auth1.save()
-        self.assertTrue(self.event.authorised)
-
-        auth2 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
-                                                         name="Test Auth 2", amount=self.event.total - 1)
-        self.assertEqual(auth2.pk, self.event.authroisations.latest('created_at').pk)
-        self.assertFalse(self.event.authorised)
-        auth2.amount = self.event.total + 1
-        auth2.save()
         self.assertTrue(self.event.authorised)

@@ -231,6 +231,7 @@ class EventAuthorise(generic.UpdateView):
     success_template = 'RIGS/eventauthorisation_success.html'
 
     def form_valid(self, form):
+        self.object = form.save()
         # TODO: send email confirmation
         self.template_name = self.success_template
         messages.add_message(self.request, messages.SUCCESS,
@@ -242,7 +243,7 @@ class EventAuthorise(generic.UpdateView):
         return models.Event.objects.select_related('organisation', 'person', 'venue').get(pk=self.kwargs['pk'])
 
     def get_object(self, queryset=None):
-        return self.event.authorisation
+        return getattr(self.event, 'authorisation', None)
 
     def get_form_class(self):
         if self.event.organisation is not None and self.event.organisation.union_account:
