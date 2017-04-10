@@ -1,5 +1,15 @@
 {% extends 'base_client.html' %}
 {% load widget_tweaks %}
+{% load static %}
+
+{% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
+{% endblock %}
 
 {% block title %}
     {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %} | {{ event.name }}
