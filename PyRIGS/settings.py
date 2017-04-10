@@ -221,3 +221,4 @@ TEMPLATE_DIRS = (
 USE_GRAVATAR=True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
+AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'

@@ -4,6 +4,7 @@ import re
 from datetime import date, timedelta
 
 import reversion
+from django.conf import settings
 from django.core import mail, signing
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -1027,3 +1028,17 @@ class ClientEventAuthorisationTest(TestCase):
 
         response = self.client.get(self.url)
         self.assertContains(response, 'amount has changed')
+
+    def test_email_sent(self):
+        mail.outbox = []
+
+        data = self.auth_data
+        data['amount'] = self.event.total
+
+        response = self.client.post(self.url, data)
+        self.assertContains(response, "Your event has been authorised.")
+        self.assertEqual(len(mail.outbox), 2)
+
+        self.assertEqual(mail.outbox[0].to, ['authemail@function.test'])
+        self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
+
