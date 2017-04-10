@@ -1,4 +1,5 @@
 import pytz
+import reversion
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -331,14 +332,13 @@ class EventPricingTestCase(TestCase):
 
 
 class EventAuthorisationTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.person = models.Person.objects.create(name='Authorisation Test Person')
-        cls.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
-        cls.event = models.Event.objects.create(name="AuthorisationTestCase", person=cls.person,
+    def setUp(self):
+        self.person = models.Person.objects.create(name='Authorisation Test Person')
+        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
                                                 start_date=date.today())
         # Add some items
-        models.EventItem.objects.create(event=cls.event, name="Authorisation test item", quantity=2, cost=123.45,
+        models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,
                                         order=1)
 
     def test_event_property(self):
@@ -348,3 +348,9 @@ class EventAuthorisationTestCase(TestCase):
         auth1.amount = self.event.total
         auth1.save()
         self.assertTrue(self.event.authorised)
+
+    def test_last_edited(self):
+        with reversion.create_revision():
+            auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                        name="Test Auth", amount=self.event.total)
+        self.assertIsNotNone(auth.last_edited_at)

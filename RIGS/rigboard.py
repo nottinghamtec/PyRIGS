@@ -3,6 +3,9 @@ import cStringIO as StringIO
 from io import BytesIO
 import urllib2
 
+import reversion
+from django.core.mail import EmailMessage
+from django.db import transaction
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -232,7 +235,7 @@ class EventAuthorise(generic.UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        # TODO: send email confirmation
+
         self.template_name = self.success_template
         messages.add_message(self.request, messages.SUCCESS,
                              'Success! Your event has been authorised. You will also receive email confirmation.')

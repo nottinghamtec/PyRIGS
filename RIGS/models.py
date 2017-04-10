@@ -506,7 +506,7 @@ class EventCrew(models.Model):
 
 
 @reversion.register
-class EventAuthorisation(models.Model):
+class EventAuthorisation(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', related_name='authorisation')
     email = models.EmailField()
     name = models.CharField(max_length=255)
