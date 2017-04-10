@@ -5,6 +5,7 @@ from django.conf import settings
 from registration.backends.default.views import RegistrationView
 import RIGS
 from RIGS import regbackend
+import DiscourseAuth.urls
 
 urlpatterns = patterns('',
     # Examples:
@@ -18,6 +19,7 @@ urlpatterns = patterns('',
     url('^user/', include('registration.backends.default.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^discourse-auth/', include(DiscourseAuth.urls)),
 )
 
 if settings.DEBUG:

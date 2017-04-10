@@ -28,6 +28,22 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
+class SocialRegisterForm(ProfileRegistrationFormUniqueEmail):
+    def __init__(self, *args, **kwargs):
+        super(SocialRegisterForm, self).__init__(*args, **kwargs)
+        self.fields.pop('password1')
+        self.fields.pop('password2')
+
+        self.fields['email'].widget.attrs['readonly'] = True
+
+    def clean_email(self):
+        initial = getattr(self, 'initial', None)
+        if(initial['email'] != self.cleaned_data['email']):
+            raise ValidationError("You cannot change the email")
+
+        return initial['email']
+
+
 # Login form
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')

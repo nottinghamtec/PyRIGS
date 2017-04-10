@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Associate User" %}{% endblock %}
+
+{% block content %}
+<form method="post" action="">
+	{% csrf_token %}
+	<p>You are currently logged in to django as "{{ djangouser }}". If this isn't you please log out</p>
+	<p>If you would like to link Discourse account "{{ discourseuser }}" to your django account, click below. This will remove any existing links.</p>
+    <input type="submit" value="{% trans 'Link my accounts' %}" />
+</form>
+
+{% endblock %}

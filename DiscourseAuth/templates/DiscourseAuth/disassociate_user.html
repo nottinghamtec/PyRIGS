@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Associate User" %}{% endblock %}
+
+{% block content %}
+{% if haslink %}
+<form method="post" action="">
+	{% csrf_token %}
+	<p>Your account is currently linked to a Discourse account. To remove this link, click below. You will no longer be able to login using Discourse.</p>
+    <input type="submit" value="{% trans 'Un-Link my accounts' %}" />
+</form>
+{% else %}
+	<p>Your account is not currently linked to Discourse.</p>
+{% endif %}
+{% endblock %}
