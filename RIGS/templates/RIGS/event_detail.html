@@ -13,7 +13,7 @@
         <div class="col-sm-12 text-right">
             {% include 'RIGS/event_detail_buttons.html' %}
         </div>
-    
+
     {% endif %}
     {% if object.is_rig %}
         {# only need contact details for a rig #}
@@ -148,8 +148,33 @@
                     {% endif %}
 
                     {% if event.is_rig %}
-                        <dt>PO</dt>
-                        <dd>{{ object.purchase_order }}</dd>
+                        {% if object.purchase_order %}
+                            <dt>PO</dt>
+                            <dd>{{ object.purchase_order }}</dd>
+                        {% endif %}
+
+                        <dd>&nbsp;</dd>
+
+                        <dt>Authorised</dt>
+                        <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
+
+                        <dt>Authorised by</dt>
+                        <dd>
+                            {%  if object.authorised %}
+                                {{ object.authorisation.name }}
+                                (<a href="mailto:{{ object.authorisation.email }}">{{ object.authorisation.email }}</a>)
+                            {% endif %}
+                        </dd>
+
+                        <dt>Authorised at</dt>
+                        <dd>{{ object.authorisation.last_edited_at }}</dd>
+
+                        <dt>Authorised amount</dt>
+                        <dd>
+                            {% if object.authorised %}
+                                £ {{ object.authorisation.amount|floatformat:"2" }}
+                            {% endif %}
+                        </dd>
                     {% endif %}
                 </dl>
             </div>

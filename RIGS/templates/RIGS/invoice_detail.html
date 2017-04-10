@@ -76,8 +76,45 @@
                                 <dd>{{ object.checked_in_by.name }}</dd>
                             {% endif %}
 
-                            <dt>PO</dt>
-                            <dd>{{ object.event.purchase_order }}</dd>
+                            {% if object.event.purchase_order %}
+                                <dt>PO</dt>
+                                <dd>{{ object.event.purchase_order }}</dd>
+                            {% endif %}
+
+                            <dd>&nbsp;</dd>
+
+                            <dt>Authorised</dt>
+                            <dd>{{ object.event.authorised|yesno:"Yes,No" }}</dd>
+
+                            <dt>Authorised by</dt>
+                            <dd>
+                                {%  if object.event.authorised %}
+                                    {{ object.event.authorisation.name }}
+                                    (<a href="mailto:{{ object.event.authorisation.email }}">{{ object.event.authorisation.email }}</a>)
+                                {% endif %}
+                            </dd>
+
+                            {% if object.event.organisation.union_account %}
+                                {# internal #}
+                                <dt>Uni ID</dt>
+                                <dd>{{ object.event.authorisation.uni_id }}</dd>
+
+                                <dt>Account code</dt>
+                                <dd>{{ object.event.authorisation.account_code }}</dd>
+                            {% else %}
+                                <dt>PO</dt>
+                                <dd>{{ object.event.authorisation.po }}</dd>
+                            {% endif %}
+
+                            <dt>Authorised at</dt>
+                            <dd>{{ object.event.authorisation.last_edited_at }}</dd>
+
+                            <dt>Authorised amount</dt>
+                            <dd>
+                                {% if object.event.authorised %}
+                                    £ {{ object.event.authorisation.amount|floatformat:"2" }}
+                                {% endif %}
+                            </dd>
                         </dl>
                     </div>
                 </div>

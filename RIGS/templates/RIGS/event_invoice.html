@@ -54,7 +54,12 @@
                         <td><a href="{% url 'event_detail' object.pk %}">N{{ object.pk|stringformat:"05d" }}</a><br>
                             <span class="text-muted">{{ object.get_status_display }}</span></td>
                         <td>{{ object.start_date }}</td>
-                        <td>{{ object.name }}</td>
+                        <td>
+                            {{ object.name }}
+                            {% if object.is_rig and perms.RIGS.view_event and object.authorised %}
+                                <span class="glyphicon glyphicon-check"></span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if object.organisation %}
                                 {{ object.organisation.name }}
@@ -67,7 +72,11 @@
                             {% endif %}
 
                         </td>
-                        <td>{{ object.sum_total|floatformat:2 }}</td>
+                        <td>
+                            {{ object.sum_total|floatformat:2 }}
+                            <br />
+                            <span class="text-muted">{{ object.authorisation.po }}</span>
+                        </td>
                         <td class="text-center">
                             {% if object.mic %}
                                 {{ object.mic.initials }}<br>
