@@ -317,7 +317,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         }
 
         msg = EmailMessage(
-            "N%05d | %s - Event Authorisation Request".format(self.object.pk, self.object.name),
+            "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
             get_template("RIGS/eventauthorisation_client_request.txt").render(context),
             to=[email],
         )
