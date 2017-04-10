@@ -1042,11 +1042,15 @@ class ClientEventAuthorisationTest(TestCase):
 class TECEventAuthorisationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(
-            name='Test TEC User',
+        cls.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
             email='teccie@functional.test',
             is_superuser=True  # lazily grant all permissions
-        )
+        )[0]
+        cls.profile.set_password('eventauthtest123')
+        cls.profile.save()
 
     def setUp(self):
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
@@ -1062,15 +1066,15 @@ class TECEventAuthorisationTest(TestCase):
         self.url = reverse('event_authorise_request', kwargs={'pk': self.event.pk})
 
     def test_request_send(self):
-        self.client.force_login(self.profile)
+        self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))
         response = self.client.post(self.url)
         self.assertContains(response, 'This field is required.')
 
         mail.outbox = []
 
         response = self.client.post(self.url, {'email': 'client@functional.test'})
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 1)
-        email = mail.outbox[1]
-        self.assertIn(email.to, 'client@functional.test')
-        self.assertIn(email.body, '/event/%d/'.format(self.event.pk))
+        email = mail.outbox[0]
+        self.assertIn('client@functional.test', email.to)
+        self.assertIn('/event/%d/' % (self.event.pk), email.body)
