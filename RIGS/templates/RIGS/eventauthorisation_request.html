@@ -10,6 +10,16 @@
                 <h1>Send authorisation request email.</h1>
                 <p>Pressing send will email the address provided. Please triple check everything before continuing.</p>
             </div>
+
+            <div class="alert alert-info">
+                <dl class="dl-horizontal">
+                    <dt>Person Email</dt>
+                    <dd>{{ object.person.email }}</dd>
+
+                    <dt>Organisation Email</dt>
+                    <dd>{{ object.organisation.email }}</dd>
+                </dl>
+            </div>
         </div>
         <div class="col-sm-12 col-md-10 col-md-offset-1">
             <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal">{% csrf_token %}
