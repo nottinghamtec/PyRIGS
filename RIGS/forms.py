@@ -149,7 +149,7 @@ class BaseClientEventAuthorisationForm(forms.ModelForm):
 
     def clean(self):
         if self.cleaned_data.get('amount') != self.instance.event.total:
-            self.add_error('amount', 'The amount authorised must equal the total for the event.')
+            self.add_error('amount', 'The amount authorised must equal the total for the event (inc VAT).')
         return super(BaseClientEventAuthorisationForm, self).clean()
 
     class Meta:

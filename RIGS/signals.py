@@ -52,7 +52,8 @@ def send_eventauthorisation_success_email(instance):
     client_email = EmailMessage(
         subject,
         get_template("RIGS/eventauthorisation_client_success.txt").render(context),
-        to=[instance.email]
+        to=[instance.email],
+        reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
     )
 
     escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', instance.event.name)

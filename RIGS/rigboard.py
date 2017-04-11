@@ -147,7 +147,7 @@ class EventPrint(generic.View):
 
         merger = PdfFileMerger()
 
-        context = RequestContext(request, {  # this should be outside the loop, but bug in 1.8.2 prevents this
+        context = RequestContext(request, {
             'object': object,
             'fonts': {
                 'opensans': {
@@ -227,7 +227,8 @@ class EventAuthorise(generic.UpdateView):
 
         self.template_name = self.success_template
         messages.add_message(self.request, messages.SUCCESS,
-                             'Success! Your event has been authorised. You will also receive email confirmation.')
+                             'Success! Your event has been authorised. ' +
+                             'You will also receive email confirmation to %s.' % (self.object.email))
         return self.render_to_response(self.get_context_data())
 
     @property
@@ -259,10 +260,11 @@ class EventAuthorise(generic.UpdateView):
         if self.get_object() is not None and self.get_object().pk is not None:
             if self.event.authorised:
                 messages.add_message(self.request, messages.WARNING,
-                                     "This event has already been authorised. Please confirm you wish to reauthorise")
+                                     "This event has already been authorised. "
+                                     "Reauthorising is not necessary at this time.")
             else:
                 messages.add_message(self.request, messages.WARNING,
-                                     "This event has already been authorised, but the amount has changed." +
+                                     "This event has already been authorised, but the amount has changed. " +
                                      "Please check the amount and reauthorise.")
         return super(EventAuthorise, self).get(request, *args, **kwargs)
 
@@ -280,7 +282,7 @@ class EventAuthorise(generic.UpdateView):
             request.email = data['email']
         except (signing.BadSignature, AssertionError, KeyError):
             raise SuspiciousOperation(
-                "The security integrity of that URL is invalid. Please contact your event MIC to obtain a new URL")
+                "This URL is invalid. Please ask your TEC contact for a new URL")
         return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
 
 
@@ -320,6 +322,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
             get_template("RIGS/eventauthorisation_client_request.txt").render(context),
             to=[email],
+            reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
         )
 
         msg.send()

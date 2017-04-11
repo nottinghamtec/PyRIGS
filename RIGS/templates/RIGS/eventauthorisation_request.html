@@ -5,17 +5,23 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-sm-offset-1 col-sm-10">
+        <div class="col-sm-12">
+            <div class="alert alert-warning">
+                <h1>Send authorisation request email.</h1>
+                <p>Pressing send will email the address provided. Please triple check everything before continuing.</p>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-10 col-md-offset-1">
             <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal">{% csrf_token %}
 
                 <div class="row">
                     {% include 'form_errors.html' %}
 
                     <div class="form-group">
-                        <label class="col-sm-2 control-label"
+                        <label class="col-sm-3 control-label"
                                for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
 
-                        <div class="col-sm-10">
+                        <div class="col-sm-9">
                             {% render_field form.email type="email" class+="form-control" %}
                         </div>
                     </div>
