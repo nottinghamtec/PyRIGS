@@ -513,6 +513,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
     account_code = models.CharField(max_length=50, blank=True, null=True)
     po = models.CharField(max_length=255, blank=True, null=True, verbose_name="purchase order")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
+    sent_by = models.ForeignKey('RIGS.Profile')
 
 
 @python_2_unicode_compatible

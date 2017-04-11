@@ -272,6 +272,7 @@ class EventAuthorise(generic.UpdateView):
         form = super(EventAuthorise, self).get_form(**kwargs)
         form.instance.event = self.event
         form.instance.email = self.request.email
+        form.instance.sent_by = self.request.sent_by
         return form
 
     def dispatch(self, request, *args, **kwargs):
@@ -280,7 +281,8 @@ class EventAuthorise(generic.UpdateView):
             data = signing.loads(kwargs.get('hmac'))
             assert int(kwargs.get('pk')) == int(data.get('pk'))
             request.email = data['email']
-        except (signing.BadSignature, AssertionError, KeyError):
+            request.sent_by = models.Profile.objects.get(pk=data['sent_by'])
+        except (signing.BadSignature, AssertionError, KeyError, models.Profile.DoesNotExist):
             raise SuspiciousOperation(
                 "This URL is invalid. Please ask your TEC contact for a new URL")
         return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
@@ -314,7 +316,8 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             'request': self.request,
             'hmac': signing.dumps({
                 'pk': self.object.pk,
-                'email': email
+                'email': email,
+                'sent_by': self.request.user.pk,
             }),
         }
 

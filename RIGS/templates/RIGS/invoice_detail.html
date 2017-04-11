@@ -110,6 +110,9 @@
                                     £ {{ object.event.authorisation.amount|floatformat:"2" }}
                                 {% endif %}
                             </dd>
+
+                            <dt>Authorsation request sent by</dt>
+                            <dd>{{ object.authorisation.sent_by }}</dd>
                         </dl>
                     </div>
                 </div>

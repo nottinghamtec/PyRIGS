@@ -952,6 +952,13 @@ class ClientEventAuthorisationTest(TestCase):
     }
 
     def setUp(self):
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
         client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
         organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)
@@ -962,7 +969,8 @@ class ClientEventAuthorisationTest(TestCase):
             person=client,
             organisation=organisation,
         )
-        self.hmac = signing.dumps({'pk': self.event.pk, 'email': 'authemail@function.test'})
+        self.hmac = signing.dumps({'pk': self.event.pk, 'email': 'authemail@function.test',
+                                                      'sent_by': self.profile.pk})
         self.url = reverse('event_authorise', kwargs={'pk': self.event.pk, 'hmac': self.hmac})
 
     def test_requires_valid_hmac(self):
@@ -1015,7 +1023,7 @@ class ClientEventAuthorisationTest(TestCase):
 
     def test_duplicate_warning(self):
         auth = models.EventAuthorisation.objects.create(event=self.event, name='Test ABC', email='dupe@functional.test',
-                                                        po='ABC12345', amount=self.event.total)
+                                                        po='ABC12345', amount=self.event.total, sent_by=self.profile)
         response = self.client.get(self.url)
         self.assertContains(response, 'This event has already been authorised.')
 
