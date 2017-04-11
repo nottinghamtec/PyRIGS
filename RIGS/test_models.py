@@ -333,6 +333,13 @@ class EventPricingTestCase(TestCase):
 
 class EventAuthorisationTestCase(TestCase):
     def setUp(self):
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
         self.person = models.Person.objects.create(name='Authorisation Test Person')
         self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
         self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
@@ -343,7 +350,8 @@ class EventAuthorisationTestCase(TestCase):
 
     def test_event_property(self):
         auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
-                                                         name="Test Auth 1", amount=self.event.total - 1)
+                                                         name="Test Auth 1", amount=self.event.total - 1,
+                                                         sent_by=self.profile)
         self.assertFalse(self.event.authorised)
         auth1.amount = self.event.total
         auth1.save()
@@ -352,5 +360,5 @@ class EventAuthorisationTestCase(TestCase):
     def test_last_edited(self):
         with reversion.create_revision():
             auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
-                                                        name="Test Auth", amount=self.event.total)
+                                                        name="Test Auth", amount=self.event.total, sent_by=self.profile)
         self.assertIsNotNone(auth.last_edited_at)
