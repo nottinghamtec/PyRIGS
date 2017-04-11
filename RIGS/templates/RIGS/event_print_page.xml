@@ -51,7 +51,7 @@
 
         {% elif receipt %}
 
-            <para style="page-head">RECEIPT</para>
+            <para style="page-head">CONFIRMATION</para>
 
         {% endif %}
     </td>
@@ -199,7 +199,7 @@
     </tr>
     <tr>
         <td>
-            {% if not invoice %}
+            {% if quote %}
             <para>
                 <b>The full hire fee is payable at least 10 days before the event.</b>
             </para>
@@ -225,7 +225,7 @@
 </keepTogether>
 <keepTogether>
     <blockTable style="infoTable">
-    {% if not invoice %}
+    {% if quote %}
         <tr>
             <td>
                 <para>Bookings will
