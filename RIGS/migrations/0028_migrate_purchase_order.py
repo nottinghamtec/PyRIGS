@@ -25,7 +25,8 @@ def POs_forward(apps, schema_editor):
 
         EventAuthorisation.objects.using(db_alias).create(event=event, name='LEGACY',
                                                           email='treasurer@nottinghamtec.co.uk',
-                                                          amount=total)
+                                                          amount=total,
+                                                          po=event.purchase_order)
 
 
 def POs_reverse(apps, schema_editor):
