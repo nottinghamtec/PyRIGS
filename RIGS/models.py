@@ -366,7 +366,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def vat(self):
-        return self.sum_total * self.vat_rate.rate
+        return Decimal(self.sum_total * self.vat_rate.rate).quantize(Decimal('.01'))
 
     """
     Inc VAT
@@ -374,7 +374,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def total(self):
-        return self.sum_total + self.vat
+        return Decimal(self.sum_total + self.vat).quantize(Decimal('.01'))
 
     @property
     def cancelled(self):
