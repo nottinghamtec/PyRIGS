@@ -70,6 +70,39 @@
                     </div>
                 </div>
             {% endif %}
+
+            {% if event.is_rig %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">Client Authorisation</div>
+                    <div class="panel-body">
+                        <dl class="dl-horizontal">
+                            <dt>Authorised</dt>
+                            <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
+
+                            <dt>Authorised by</dt>
+                            <dd>
+                                {%  if object.authorisation %}
+                                    {{ object.authorisation.name }}
+                                    (<a href="mailto:{{ object.authorisation.email }}">{{ object.authorisation.email }}</a>)
+                                {% endif %}
+                            </dd>
+
+                            <dt>Authorised at</dt>
+                            <dd>{{ object.authorisation.last_edited_at }}</dd>
+
+                            <dt>Authorised amount</dt>
+                            <dd>
+                                {% if object.authorisation %}
+                                    £ {{ object.authorisation.amount|floatformat:"2" }}
+                                {% endif %}
+                            </dd>
+
+                            <dt>Requested by</dt>
+                            <dd>{{ object.authorisation.sent_by }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
     <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
@@ -150,29 +183,17 @@
                     {% if event.is_rig %}
                         <dd>&nbsp;</dd>
 
-                        <dt>Authorised</dt>
-                        <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
+                        <dt>Authorisation Request</dt>
+                        <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
 
-                        <dt>Authorised by</dt>
-                        <dd>
-                            {%  if object.authorised %}
-                                {{ object.authorisation.name }}
-                                (<a href="mailto:{{ object.authorisation.email }}">{{ object.authorisation.email }}</a>)
-                            {% endif %}
-                        </dd>
+                        <dt>By</dt>
+                        <dd>{{ object.auth_request_by }}</dd>
 
-                        <dt>Authorised at</dt>
-                        <dd>{{ object.authorisation.last_edited_at }}</dd>
+                        <dt>At</dt>
+                        <dd>{{ object.auth_request_at|date:"D d M Y H:i"|default:"" }}</dd>
 
-                        <dt>Authorised amount</dt>
-                        <dd>
-                            {% if object.authorised %}
-                                £ {{ object.authorisation.amount|floatformat:"2" }}
-                            {% endif %}
-                        </dd>
-
-                        <dt>Authorsation request sent by</dt>
-                        <dd>{{ object.authorisation.sent_by }}</dd>
+                        <dt>To</dt>
+                        <dd>{{ object.auth_request_to }}</dd>
                     {% endif %}
                 </dl>
             </div>

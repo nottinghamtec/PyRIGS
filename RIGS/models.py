@@ -334,6 +334,11 @@ class Event(models.Model, RevisionMixin):
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
+    # Authorisation request details
+    auth_request_by = models.ForeignKey('Profile', null=True, blank=True)
+    auth_request_at = models.DateTimeField(null=True, blank=True)
+    auth_request_to = models.EmailField(null=True, blank=True)
+
     # Calculated values
     """
     EX Vat

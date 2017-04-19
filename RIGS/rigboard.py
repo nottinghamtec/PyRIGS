@@ -300,7 +300,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
     def get_success_url(self):
         if self.request.is_ajax():
             url = reverse_lazy('closemodal')
-            messages.info(self.request, "$('.event-authorise-request').addClass('btn-success')")
+            messages.info(self.request, "location.reload()")
         else:
             url = reverse_lazy('event_detail', kwargs={
                 'pk': self.object.pk,
@@ -310,6 +310,11 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
+        event = self.object
+        event.auth_request_by = self.request.user
+        event.auth_request_at = datetime.datetime.now()
+        event.auth_request_to = email
+        event.save()
 
         context = {
             'object': self.object,

@@ -1086,3 +1086,9 @@ class TECEventAuthorisationTest(TestCase):
         email = mail.outbox[0]
         self.assertIn('client@functional.test', email.to)
         self.assertIn('/event/%d/' % (self.event.pk), email.body)
+
+        # Check sent by details are populated
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.auth_request_by, self.profile)
+        self.assertEqual(self.event.auth_request_to, 'client@functional.test')
+        self.assertIsNotNone(self.event.auth_request_at)

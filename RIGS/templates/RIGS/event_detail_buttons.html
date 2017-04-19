@@ -11,10 +11,18 @@
             class="glyphicon glyphicon-duplicate"></span> <span
             class="hidden-xs">Duplicate</span></a>
     {% if event.is_rig %}
-        <a class="btn btn-default item-add modal-href event-authorise-request"
-                href="{% url 'event_authorise_request' object.pk %}">
+        <a class="btn btn-default item-add modal-href event-authorise-request
+                {% if event.authorised %}
+                    btn-success
+                {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                    btn-warning
+                {% elif event.auth_request_to %}
+                    btn-info
+                {% endif %}
+                "
+           href="{% url 'event_authorise_request' object.pk %}">
             <span class="glyphicon glyphicon-send"></span>
-            Authorisation Request
+            <span class="hidden-xs">Authorisation Request</span>
         </a>
         {% if perms.RIGS.add_invoice %}
             <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
