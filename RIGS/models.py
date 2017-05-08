@@ -501,11 +501,29 @@ class EventCrew(models.Model):
     notes = models.TextField(blank=True, null=True)
 
 
+class InvoiceManager(models.Manager):
+    def outstanding(self):
+        return self.annotate(
+            _payment_total=models.Sum(models.F('payment__amount'))
+        ).annotate(
+            _sum_total=models.Sum(models.F('event__items__cost') * models.F('event__items__quantity'),
+                                  output_field=models.DecimalField(decimal_places=2))
+        # ).annotate(
+        #     _balance=models.ExpressionWrapper(models.F('_sum_total') - models.F('_payment_total'),
+        #                                       models.DecimalField(decimal_places=2))
+        # ).filter(
+        #     models.Q(_balance__isnull=True) |
+        #     ~models.Q(_sum_total=models.F('_payment_total'))
+        )
+
+
 @python_2_unicode_compatible
 class Invoice(models.Model):
     event = models.OneToOneField('Event')
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
+
+    objects = InvoiceManager()
 
     @property
     def sum_total(self):

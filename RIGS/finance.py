@@ -31,15 +31,8 @@ class InvoiceIndex(generic.ListView):
         return context
 
     def get_queryset(self):
-        query = self.model.objects.annotate(
-            _sum_total=Sum(F('event__items__cost') * F('event__items__quantity'), output_field=FloatField()),
-            _payment_count=Count('payment'),
-            _payment_total=Sum('payment__amount'),
-        ).filter(
-            Q(_sum_total__gt=0.0, _payment_count=0) |
-            Q(_sum_total__lt=Value('_payment_total'), _sum_total__gt=Value('_payment_total'))
-        ).select_related('event', 'event__organisation', 'event__person', 'event__venue', 'event__mic')
-
+        query = self.model.objects.outstanding().select_related('event', 'event__organisation', 'event__person',
+                                                                'event__venue', 'event__mic')
         return query
 
 
