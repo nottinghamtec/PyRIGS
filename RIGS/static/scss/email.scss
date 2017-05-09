@@ -1,0 +1,35 @@
+@import "bootstrap-compass";
+// Core variables and mixins
+@import "bootstrap/variables";
+@import "bootstrap-variables";
+@import "bootstrap/mixins";
+
+// Reset and dependencies
+@import "bootstrap/normalize";
+@import "bootstrap/print";
+@import "bootstrap/glyphicons";
+
+// Core CSS
+@import "bootstrap/scaffolding";
+@import "bootstrap/type";
+@import "bootstrap/code";
+@import "bootstrap/grid";
+@import "bootstrap/tables";
+@import "bootstrap/forms";
+@import "bootstrap/buttons";
+
+
+.client-header {
+  background-image: url("https://www.nottinghamtec.co.uk/imgs/wof2014-1.jpg");
+  background-color: #222;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  margin-bottom: 2em;
+
+  img {
+    height: 8em;
+    margin: 2em;
+  }
+}

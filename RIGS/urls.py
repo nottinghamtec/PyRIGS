@@ -155,6 +155,11 @@ urlpatterns = patterns('',
                                rigboard.EventAuthorisationRequest.as_view()
                            ),
                            name='event_authorise_request'),
+                       url(r'^event/(?P<pk>\d+)/auth/preview/$',
+                           permission_required_with_403('RIGS.change_event')(
+                               rigboard.EventAuthoriseRequestEmailPreview.as_view()
+                           ),
+                           name='event_authorise_preview'),
                        url(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
                            name='event_authorise'),
 

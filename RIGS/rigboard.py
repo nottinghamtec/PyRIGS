@@ -2,7 +2,8 @@ import cStringIO as StringIO
 from io import BytesIO
 import urllib2
 
-from django.core.mail import EmailMessage
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -18,6 +19,7 @@ from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
+import premailer
 
 from RIGS import models, forms
 import datetime
@@ -325,14 +327,44 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
                 'sent_by': self.request.user.pk,
             }),
         }
+        if email == event.person.email:
+            context['to_name'] = event.person.name
 
-        msg = EmailMessage(
+        msg = EmailMultiAlternatives(
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
             get_template("RIGS/eventauthorisation_client_request.txt").render(context),
             to=[email],
             reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
         )
+        css = staticfiles_storage.path('css/email.css')
+        html = premailer.Premailer(get_template("RIGS/eventauthorisation_client_request.html").render(context),
+                                   external_styles=css).transform()
+        msg.attach_alternative(html, 'text/html')
+
 
         msg.send()
 
         return super(EventAuthorisationRequest, self).form_valid(form)
+
+
+class EventAuthoriseRequestEmailPreview(generic.DetailView):
+    template_name = "RIGS/eventauthorisation_client_request.html"
+    model = models.Event
+
+    def render_to_response(self, context, **response_kwargs):
+        from django.contrib.staticfiles.storage import staticfiles_storage
+        css = staticfiles_storage.path('css/email.css')
+        response = super(EventAuthoriseRequestEmailPreview, self).render_to_response(context, **response_kwargs)
+        assert isinstance(response, HttpResponse)
+        response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super(EventAuthoriseRequestEmailPreview, self).get_context_data(**kwargs)
+        context['hmac'] = signing.dumps({
+            'pk': self.object.pk,
+            'email': self.request.GET.get('email', 'hello@world.test'),
+            'sent_by': self.request.user.pk,
+        })
+        context['to_name'] = self.request.GET.get('to_name', None)
+        return context
