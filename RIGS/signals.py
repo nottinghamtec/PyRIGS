@@ -6,8 +6,10 @@ from io import BytesIO
 import reversion
 from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import get_template
+from premailer import Premailer
 from z3c.rml import rml2pdf
 
 from RIGS import models
@@ -47,18 +49,26 @@ def send_eventauthorisation_success_email(instance):
         'object': instance,
     }
 
+    if instance.email == instance.event.person.email:
+        context['to_name'] = instance.event.person.name
+
     subject = "N%05d | %s - Event Authorised" % (instance.event.pk, instance.event.name)
 
-    client_email = EmailMessage(
+    client_email = EmailMultiAlternatives(
         subject,
         get_template("RIGS/eventauthorisation_client_success.txt").render(context),
         to=[instance.email],
         reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
     )
 
+    css = staticfiles_storage.path('css/email.css')
+    html = Premailer(get_template("RIGS/eventauthorisation_client_success.html").render(context),
+                               external_styles=css).transform()
+    client_email.attach_alternative(html, 'text/html')
+
     escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', instance.event.name)
 
-    client_email.attach('N%05d - %s - RECEIPT.pdf' % (instance.event.pk, escapedEventName),
+    client_email.attach('N%05d - %s - CONFIRMATION.pdf' % (instance.event.pk, escapedEventName),
                         merged.getvalue(),
                         'application/pdf'
                         )

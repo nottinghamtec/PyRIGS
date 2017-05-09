@@ -193,7 +193,7 @@
 <keepTogether>
     <blockTable style="totalTable" colWidths="300,115,80">
     <tr>
-        <td>{% if not invoice %}VAT Registration Number: 170734807{% endif %}</td>
+        <td>{% if quote %}VAT Registration Number: 170734807{% endif %}</td>
         <td>Total (ex. VAT)</td>
         <td>£ {{ object.sum_total|floatformat:2 }}</td>
     </tr>

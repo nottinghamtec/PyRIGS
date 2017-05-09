@@ -1,6 +1,6 @@
-Hi there,
+Hi {{ to_name|default:"there" }},
 
-Just to let you know your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for {{object.amount}} by {{object.name}} as of {{object.last_edited_at}}.
+Your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for {{object.amount}} by {{object.name}} as of {{object.last_edited_at}}.
 
 {% if object.event.organisation and object.event.organisation.union_account %}{# internal #}
 Your event is now fully booked and payment will be processed by the finance department automatically.
@@ -8,4 +8,4 @@ Your event is now fully booked and payment will be processed by the finance depa
 Your event is now fully booked and our finance department will be contact to arrange payment.
 {% endif %}
 
-The TEC Rig Information Gathering System
+TEC PA & Lighting

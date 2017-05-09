@@ -341,7 +341,6 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
 
-
         msg.send()
 
         return super(EventAuthorisationRequest, self).form_valid(form)
