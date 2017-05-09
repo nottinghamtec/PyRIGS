@@ -16,5 +16,8 @@
     "gulp-sourcemaps": "^2.6.0",
     "gulp-watch": "^4.3.11",
     "jquery": "^1.9.1"
+  },
+  "scripts": {
+    "build": "gulp build"
   }
 }

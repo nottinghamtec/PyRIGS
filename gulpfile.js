@@ -65,3 +65,7 @@ gulp.task('frontend', [
     // 'css',
     'js_lib'
 ]);
+
+gulp.task('build', [
+    "frontend"
+]);
