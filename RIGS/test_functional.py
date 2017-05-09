@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import time
 from datetime import date, timedelta
 
 import reversion
@@ -297,6 +298,7 @@ class EventTest(LiveServerTestCase):
             name.clear()
             name.send_keys('Rig ' + person1.name)
             name.send_keys(Keys.ENTER)
+            time.sleep(0.1)
 
             wait.until(animation_is_finished())
 
@@ -378,6 +380,7 @@ class EventTest(LiveServerTestCase):
             e = modal.find_element_by_id("item_cost")
             e.send_keys("23.95")
             e.send_keys(Keys.ENTER) # enter submit
+            wait.until(animation_is_finished())
 
             # Confirm item has been saved to json field
             objectitems = self.browser.execute_script("return objectitems;")
@@ -388,6 +391,7 @@ class EventTest(LiveServerTestCase):
 
             # See new item appear in table
             row = self.browser.find_element_by_id('item--1') # ID number is known, see above
+            self.assertIsNotNone(row.text)
             self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
             self.assertIn("This is an item description", row.find_element_by_xpath('//div[@class="item-description"]').text)
             self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
@@ -487,6 +491,7 @@ class EventTest(LiveServerTestCase):
         e = modal.find_element_by_id("item_cost")
         e.send_keys("23.95")
         e.send_keys(Keys.ENTER) # enter submit
+        wait.until(animation_is_finished())
 
         # Attempt to save
         save.click()
@@ -909,9 +914,9 @@ class animation_is_finished(object):
         pass
 
     def __call__(self, driver):
+        time.sleep(0.1)  # allow time for the animation to actually start
         numberAnimating = driver.execute_script('return $(":animated").length')
         finished = numberAnimating == 0
         if finished:
-            import time
             time.sleep(0.1)
         return finished
