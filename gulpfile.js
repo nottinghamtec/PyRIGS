@@ -44,8 +44,7 @@ gulp.task('watch', function () {
 // JS
 
 var JS_LIBS = [
-    './node_modules/jquery/dist/jquery.js',
-    './node_modules/tether/dist/js/tether.js',
+    './node_modules/jquery/jquery.js',
     './node_modules/bootstrap/dist/js/bootstrap.js'
 ];
 
@@ -63,6 +62,6 @@ gulp.task('js_lib', function () {
 
 // Frontend tasks
 gulp.task('frontend', [
-    'css',
+    // 'css',
     'js_lib'
 ]);
