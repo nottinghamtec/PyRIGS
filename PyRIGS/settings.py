@@ -31,6 +31,9 @@ ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyri
 if STAGING:
     ALLOWED_HOSTS.append('.herokuapp.com')
 
+if DEBUG:
+    ALLOWED_HOSTS.append('localhost')
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
     SECURE_SSL_REDIRECT = True # Redirect all http requests to https
