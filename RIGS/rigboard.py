@@ -16,12 +16,14 @@ from django.http import HttpResponse
 from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.contrib import messages
+from django.utils.decorators import method_decorator
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
 import premailer
 
 from RIGS import models, forms
+from PyRIGS import decorators
 import datetime
 import re
 import copy
@@ -289,11 +291,14 @@ class EventAuthorise(generic.UpdateView):
                 "This URL is invalid. Please ask your TEC contact for a new URL")
         return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
 
-
 class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
     model = models.Event
     form_class = forms.EventAuthorisationRequestForm
     template_name = 'RIGS/eventauthorisation_request.html'
+
+    @method_decorator(decorators.nottinghamtec_address_required)
+    def dispatch(self, *args, **kwargs):
+        return super(EventAuthorisationRequest, self).dispatch(*args, **kwargs)
 
     @property
     def object(self):
@@ -334,7 +339,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
             get_template("RIGS/eventauthorisation_client_request.txt").render(context),
             to=[email],
-            reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
+            reply_to=[self.request.user.email],
         )
         css = staticfiles_storage.path('css/email.css')
         html = premailer.Premailer(get_template("RIGS/eventauthorisation_client_request.html").render(context),

@@ -1054,7 +1054,7 @@ class TECEventAuthorisationTest(TestCase):
             first_name='Test',
             last_name='TEC User',
             username='eventauthtest',
-            email='teccie@functional.test',
+            email='teccie@nottinghamtec.co.uk',
             is_superuser=True  # lazily grant all permissions
         )[0]
         cls.profile.set_password('eventauthtest123')
@@ -1072,6 +1072,16 @@ class TECEventAuthorisationTest(TestCase):
             organisation=organisation,
         )
         self.url = reverse('event_authorise_request', kwargs={'pk': self.event.pk})
+
+    def test_email_check(self):
+        self.profile.email = 'teccie@someotherdomain.com'
+        self.profile.save()
+
+        self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))
+        
+        response = self.client.post(self.url)
+
+        self.assertContains(response, 'must have an @nottinghamtec.co.uk email address')
 
     def test_request_send(self):
         self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))

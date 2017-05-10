@@ -79,3 +79,17 @@ def api_key_required(function):
             return error_resp
         return function(request, *args, **kwargs)
     return wrap
+
+
+def nottinghamtec_address_required(function):
+    """
+    Checks that the current user has an email address ending @nottinghamtec.co.uk
+    """
+    def wrap(request, *args, **kwargs):
+        # Fail if current user's email address isn't @nottinghamtec.co.uk
+        if not request.user.email.endswith('@nottinghamtec.co.uk'):
+            error_resp = render_to_response('RIGS/eventauthorisation_request_error.html', context_instance=RequestContext(request))
+            return error_resp
+
+        return function(request, *args, **kwargs)
+    return wrap
