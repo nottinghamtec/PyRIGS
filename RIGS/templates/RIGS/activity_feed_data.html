@@ -40,6 +40,9 @@
                         {% endif %}
                           
                         {% include 'RIGS/object_button.html' with object=version.new %}
+                        {% if version.revision.comment %}
+                          ({{ version.revision.comment }})
+                        {% endif %}
                       </small>
                       </p>
 

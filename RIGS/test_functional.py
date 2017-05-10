@@ -1,18 +1,27 @@
 # -*- coding: utf-8 -*-
+import os
+import re
+from datetime import date, timedelta
+
+import reversion
+from django.core import mail
+from django.db import transaction
 from django.test import LiveServerTestCase
 from django.test.client import Client
-from django.core import mail
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+
 from RIGS import models
+
 import re
 import os
 from datetime import date, timedelta
 from django.db import transaction
 from reversion import revisions as reversion
 import json
+
 
 
 class UserRegistrationTest(LiveServerTestCase):
@@ -103,7 +112,7 @@ class UserRegistrationTest(LiveServerTestCase):
         # Check Email
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-        self.assertIn('activation required', email.subject)
+        self.assertIn('John Smith "JS" activation required', email.subject)
         urls = re.findall(
             'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
         self.assertEqual(len(urls), 1)
@@ -437,7 +446,7 @@ class EventTest(LiveServerTestCase):
             pass
 
     def testEventDuplicate(self):
-        testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end") 
+        testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end", purchase_order="TESTPO") 
 
         item1 = models.EventItem(
                 event=testEvent,
@@ -470,6 +479,9 @@ class EventTest(LiveServerTestCase):
         self.assertIn("Test Item 1", table.text)
         self.assertIn("Test Item 2", table.text)
 
+        # Check the info message is visible
+        self.assertIn("Event data duplicated but not yet saved",self.browser.find_element_by_id('content').text)
+
         # Add item
         form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
         wait.until(animation_is_finished())
@@ -487,7 +499,12 @@ class EventTest(LiveServerTestCase):
         # Attempt to save
         save.click()
 
+<<<<<<< HEAD
         self.assertNotIn("N%05d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+=======
+        self.assertNotIn("N0000%d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+        self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text) # Check info message not visible
+>>>>>>> 9b7c84cf0890788a08a3dec71e00cbe78748b1fb
 
         # Check the new items are visible
         table = self.browser.find_element_by_id('item-table') # ID number is known, see above
@@ -496,7 +513,13 @@ class EventTest(LiveServerTestCase):
         self.assertIn("Test Item 3", table.text)
 
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+<<<<<<< HEAD
         self.assertIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+=======
+        self.assertIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        # Check the PO hasn't carried through
+        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+>>>>>>> 9b7c84cf0890788a08a3dec71e00cbe78748b1fb
 
 
 
@@ -504,7 +527,13 @@ class EventTest(LiveServerTestCase):
         
         #Check that based-on hasn't crept into the old event
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+<<<<<<< HEAD
         self.assertNotIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
+=======
+        self.assertNotIn("N0000%d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
+        # Check the PO remains on the old event
+        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+>>>>>>> 9b7c84cf0890788a08a3dec71e00cbe78748b1fb
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table') # ID number is known, see above

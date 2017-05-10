@@ -1,1 +1,1 @@
-{{ user }} activation required
+{{ user|safe }} activation required

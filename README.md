@@ -1,5 +1,6 @@
 # TEC PA & Lighting - PyRIGS #
-[![wercker status](https://app.wercker.com/status/2dbe0517c3d83859c985ffc5a55a2802/m/master "wercker status")](https://app.wercker.com/project/bykey/2dbe0517c3d83859c985ffc5a55a2802)
+[![Build Status](https://travis-ci.org/nottinghamtec/PyRIGS.svg?branch=develop)](https://travis-ci.org/nottinghamtec/PyRIGS)
+[![Coverage Status](https://coveralls.io/repos/github/nottinghamtec/PyRIGS/badge.svg?branch=develop)](https://coveralls.io/github/nottinghamtec/PyRIGS?branch=develop)
 
 Welcome to TEC PA & Lightings PyRIGS program. This is a reimplementation of the existing Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
 
@@ -73,6 +74,24 @@ To run the server under normal conditions when you are already in the virtualenv
 python manage.py runserver
 ```
 Please refer to Django documentation for a full list of options available here.
+
+### Sample Data ###
+Sample data is available to aid local development and user acceptance testing. To load this data into your local database, first ensure the database is empty:
+```
+python manage.py flush
+```
+Then load the sample data using the command:
+```
+python manage.py generateSampleData
+```
+4 user accounts are created for convenience:
+
+|Username |Password |
+|---------|---------|
+|superuser|superuser|
+|finance  |finance  |
+|keyholder|keyholder|
+|basic    |basic    |
 
 ### Committing, pushing and testing ###
 Feel free to commit as you wish, on your own branch. On my branch (master for development) do not commit code that you either know doesn't work or don't know works. If you must commit this code, please make sure you say in the commit message that it isn't working, and if you can why it isn't working. If and only if you absolutely must push, then please don't leave it as the HEAD for too long, it's not much to ask but when you are done just make sure you haven't broken the HEAD for the next person.

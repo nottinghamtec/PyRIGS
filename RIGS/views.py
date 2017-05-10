@@ -12,6 +12,8 @@ from django.contrib import messages
 import datetime, pytz
 import operator
 from registration.views import RegistrationView
+from django.views.decorators.csrf import csrf_exempt
+
 
 from RIGS import models, forms
 
@@ -29,11 +31,36 @@ class Index(generic.TemplateView):
 def login(request, **kwargs):
     if request.user.is_authenticated():
         next = request.REQUEST.get('next', '/')
-        return HttpResponseRedirect(request.REQUEST.get('next', '/'))
+        return HttpResponseRedirect(next)
     else:
         from django.contrib.auth.views import login
 
         return login(request)
+
+
+# This view should be exempt from requiring CSRF token.
+# Then we can check for it and show a nice error
+# Don't worry, django.contrib.auth.views.login will
+# check for it before logging  the user in
+@csrf_exempt
+def login_embed(request, **kwargs):
+    print("Running LOGIN")
+    if request.user.is_authenticated():
+        next = request.REQUEST.get('next', '/')
+        return HttpResponseRedirect(next)
+    else:
+        from django.contrib.auth.views import login
+
+        if request.method == "POST":
+            csrf_cookie = request.COOKIES.get('csrftoken', None)
+
+            if csrf_cookie is None:
+                messages.warning(request, 'Cookies do not seem to be enabled. Try logging in using a new tab.')
+                request.method = 'GET'  # Render the page without trying to login
+
+        return login(request, template_name="registration/login_embed.html")
+
+
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).

@@ -9,11 +9,13 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib import messages
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
+import simplejson
 
 from RIGS import models, forms
 import datetime
@@ -47,6 +49,29 @@ class EventDetail(generic.DetailView):
     model = models.Event
 
 
+class EventOembed(generic.View):
+    model = models.Event
+
+    def get(self, request, pk=None):
+
+        embed_url = reverse('event_embed', args=[pk])
+        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
+
+        data = {
+            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
+            'version': '1.0',
+            'type': 'rich',
+            'height': '250'
+        }
+
+        json = simplejson.JSONEncoderForHTML().encode(data)
+        return HttpResponse(json, content_type="application/json")
+
+
+class EventEmbed(EventDetail):
+    template_name = 'RIGS/event_embed.html'
+
+
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
@@ -59,7 +84,7 @@ class EventCreate(generic.CreateView):
         form = context['form']
         if re.search('"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
-        
+
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
         for field, model in form.related_models.iteritems():
@@ -97,11 +122,12 @@ class EventDuplicate(EventUpdate):
         old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
         new = copy.copy(old) # Make a copy of the object in memory
         new.based_on = old # Make the new event based on the old event
+        new.purchase_order = None
 
         if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
             new.pk = None # This means a new event will be created on save, and all items will be re-created
-
-        messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
+        else:
+            messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
 
         return new
 

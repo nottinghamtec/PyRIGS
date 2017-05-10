@@ -35,6 +35,7 @@
                     <td>Version ID</td>
                     <td>User</td>
                     <td>Changes</td>
+                    <td>Comment</td>
                 </tr>
                 </thead>
                 <tbody>
@@ -46,10 +47,13 @@
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
                                     {% if version.old == None %}
-                                        Object Created
+                                        {{object|to_class_name}} Created
                                     {% else %}
                                         {% include 'RIGS/version_changes.html' %}
                                     {% endif %}
+                                </td>
+                                <td>
+                                    {{ version.revision.comment }}
                                 </td>
                             </tr>
                         {% endif %}

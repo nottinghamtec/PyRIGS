@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <table class="table">
         <thead>
-        <td class="hidden-xs">#</td>
+        <td>#</td>
         <td>Event Date</td>
         <td>Event Details</td>
         <td>Event Timings</td>
@@ -23,7 +23,7 @@
 							danger
 						{% endif %}
                         ">
-                <td class="hidden-xs">{{ event.pk }}</td>
+                <td>{{ event.pk }}</td>
                 <td>
                     <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
