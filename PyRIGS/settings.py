@@ -33,6 +33,7 @@ if STAGING:
 
 if DEBUG:
     ALLOWED_HOSTS.append('localhost')
+    ALLOWED_HOSTS.append('example.com')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
@@ -66,6 +67,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

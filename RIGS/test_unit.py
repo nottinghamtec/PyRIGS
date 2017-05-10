@@ -164,6 +164,8 @@ class TestInvoiceDelete(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True, is_active=True, is_staff=True)
 
+        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today()),
             2: models.Event.objects.create(name="TE E2", start_date=date.today())

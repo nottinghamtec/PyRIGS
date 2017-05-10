@@ -1,5 +1,5 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -26,15 +26,15 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                 return view_func(request, *args, **kwargs)
             elif not request.user.is_authenticated():
                 if oembed_view is not None:
-                    context = RequestContext(request)
+                    context = {}
                     context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
                     context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
-                    resp = render_to_response('login_redirect.html', context=context)
+                    resp = render(request, 'login_redirect.html', context=context)
                     return resp
                 else:
                     return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
             else:
-                resp = render_to_response('403.html', context=RequestContext(request))
+                resp = render(request, '403.html')
                 resp.status_code = 403
                 return resp
         _checklogin.__doc__ = view_func.__doc__
@@ -62,7 +62,7 @@ def api_key_required(function):
         userid = kwargs.get('api_pk')
         key = kwargs.get('api_key')
 
-        error_resp = render_to_response('403.html', context=RequestContext(request))
+        error_resp = render(request, '403.html')
         error_resp.status_code = 403
 
         if key is None:

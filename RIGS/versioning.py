@@ -199,7 +199,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
 
 class VersionHistory(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/version_history.html"
     paginate_by = 25
 
@@ -236,7 +236,7 @@ class VersionHistory(generic.ListView):
 
 
 class ActivityTable(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/activity_table.html"
     paginate_by = 25
 
@@ -260,7 +260,7 @@ class ActivityTable(generic.ListView):
 
 
 class ActivityFeed(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/activity_feed_data.html"
     paginate_by = 25
 
