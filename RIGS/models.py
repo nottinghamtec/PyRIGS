@@ -12,18 +12,11 @@ from reversion import revisions as reversion
 import string
 
 import random
-import string
 from collections import Counter
 from decimal import Decimal
 
-import reversion
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
-from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.functional import cached_property
 
 
 # Create your models here.

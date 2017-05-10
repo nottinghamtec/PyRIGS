@@ -12,11 +12,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from django.forms import ModelForm
 
+from reversion import revisions as reversion
+
 # Register your models here.
-admin.site.register(models.Person, VersionAdmin)
-admin.site.register(models.Organisation, VersionAdmin)
 admin.site.register(models.VatRate, VersionAdmin)
-admin.site.register(models.Venue, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice)
@@ -44,7 +43,7 @@ class ProfileAdmin(UserAdmin):
     add_form = forms.ProfileCreationForm
 
 
-class AssociateAdmin(reversion.VersionAdmin):
+class AssociateAdmin(VersionAdmin):
     list_display = ('id', 'name', 'number_of_events')
     search_fields = ['id', 'name']
     list_display_links = ['id', 'name']
