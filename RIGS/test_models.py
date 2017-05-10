@@ -275,14 +275,14 @@ class EventTestCase(TestCase):
             # basic checks
             manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
             manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
-            manager.create(name='TE IB4', start_date='2016-01-04', access_at='2016-01-03'),
-            manager.create(name='TE IB5', start_date='2016-01-04', meet_at='2016-01-02'),
+            manager.create(name='TE IB4', start_date='2016-01-04', access_at=self.create_datetime(2016, 01, 03, 00, 00)),
+            manager.create(name='TE IB5', start_date='2016-01-04', meet_at=self.create_datetime(2016, 01, 02, 00, 00)),
 
             # negative check
             manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),
         ]
 
-        in_bounds = manager.events_in_bounds(datetime(2016, 1, 2), datetime(2016, 1, 3))
+        in_bounds = manager.events_in_bounds(self.create_datetime(2016, 1, 2, 0, 0), self.create_datetime(2016, 1, 3, 0, 0))
         self.assertIn(events[0], in_bounds)
         self.assertIn(events[1], in_bounds)
         self.assertIn(events[2], in_bounds)

@@ -95,8 +95,7 @@ class AssociateAdmin(VersionAdmin):
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'forms': forms
             }
-            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context,
-                                    current_app=self.admin_site.name)
+            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context)
 
 
 @admin.register(models.Person)

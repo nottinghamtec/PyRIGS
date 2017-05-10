@@ -26,8 +26,6 @@ DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
 STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
 if STAGING:
@@ -221,7 +219,8 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
-            ]
+            ],
+            'debug': DEBUG
         },
     },
 ]
