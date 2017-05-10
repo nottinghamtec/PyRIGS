@@ -9,7 +9,7 @@ from django.db import transaction
 from django.test import LiveServerTestCase
 from django.test.client import Client
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -197,245 +197,240 @@ class EventTest(LiveServerTestCase):
         self.browser.get(self.live_server_url + '/rigboard/')
 
     def testRigCreate(self):
+        # Requests address
+        self.browser.get(self.live_server_url + '/event/create/')
+        # Gets redirected to login and back
+        self.authenticate('/event/create/')
+
+        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+
+        wait.until(animation_is_finished())
+
+        # Check has slided up correctly - second save button hidden
+        save = self.browser.find_element_by_xpath(
+            '(//button[@type="submit"])[3]')
+        self.assertFalse(save.is_displayed())
+
+        # Click Rig button
+        self.browser.find_element_by_xpath('//button[.="Rig"]').click()
+
+        # Slider expands and save button visible
+        self.assertTrue(save.is_displayed())
+        form = self.browser.find_element_by_tag_name('form')
+
+        # Create new person
+        wait.until(animation_is_finished())
+        add_person_button = self.browser.find_element_by_xpath(
+            '//a[@data-target="#id_person" and contains(@href, "add")]')
+        add_person_button.click()
+
+        # See modal has opened
+        modal = self.browser.find_element_by_id('modal')
+        wait.until(animation_is_finished())
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
+
+        # Fill person form out and submit
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 1")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+        wait.until(animation_is_finished())
+        self.assertFalse(modal.is_displayed())
+
+        # See new person selected
+        person1 = models.Person.objects.get(name="Test Person 1")
+        self.assertEqual(person1.name, form.find_element_by_xpath(
+            '//button[@data-id="id_person"]/span').text)
+        # and backend
+        option = form.find_element_by_xpath(
+            '//select[@id="id_person"]//option[@selected="selected"]')
+        self.assertEqual(person1.pk, int(option.get_attribute("value")))
+
+        # Change mind and add another
+        wait.until(animation_is_finished())
+        add_person_button.click()
+
+        wait.until(animation_is_finished())
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
+
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 2")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+        wait.until(animation_is_finished())
+        self.assertFalse(modal.is_displayed())
+
+        person2 = models.Person.objects.get(name="Test Person 2")
+        self.assertEqual(person2.name, form.find_element_by_xpath(
+            '//button[@data-id="id_person"]/span').text)
+        # Have to do this explcitly to force the wait for it to update
+        option = form.find_element_by_xpath(
+            '//select[@id="id_person"]//option[@selected="selected"]')
+        self.assertEqual(person2.pk, int(option.get_attribute("value")))
+
+        # Was right the first time, change it back
+        person_select = form.find_element_by_xpath(
+            '//button[@data-id="id_person"]')
+        person_select.send_keys(person1.name)
+        person_dropped = form.find_element_by_xpath(
+            '//ul[contains(@class, "inner selectpicker")]//span[contains(text(), "%s")]' % person1.name)
+        person_dropped.click()
+
+        self.assertEqual(person1.name, form.find_element_by_xpath(
+            '//button[@data-id="id_person"]/span').text)
+        option = form.find_element_by_xpath(
+            '//select[@id="id_person"]//option[@selected="selected"]')
+        self.assertEqual(person1.pk, int(option.get_attribute("value")))
+
+        # Edit Person 1 to have a better name
+        form.find_element_by_xpath(
+            '//a[@data-target="#id_person" and contains(@href, "%s/edit/")]' % person1.pk).click()
+        wait.until(animation_is_finished())
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
+        name = modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]')
+        self.assertEqual(person1.name, name.get_attribute('value'))
+        name.clear()
+        name.send_keys('Rig ' + person1.name)
+        name.send_keys(Keys.ENTER)
+
+        wait.until(animation_is_finished())
+
+        self.assertFalse(modal.is_displayed())
+        person1 = models.Person.objects.get(pk=person1.pk)
+        self.assertEqual(person1.name, form.find_element_by_xpath(
+            '//button[@data-id="id_person"]/span').text)
+
+        # Create organisation
+        wait.until(animation_is_finished())
+        add_button = self.browser.find_element_by_xpath(
+            '//a[@data-target="#id_organisation" and contains(@href, "add")]')
+        add_button.click()
+        modal = self.browser.find_element_by_id('modal')
+        wait.until(animation_is_finished())
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Organisation", modal.find_element_by_tag_name('h3').text)
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Organisation")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+
+        # See it is selected
+        wait.until(animation_is_finished())
+        self.assertFalse(modal.is_displayed())
+        obj = models.Organisation.objects.get(name="Test Organisation")
+        self.assertEqual(obj.name, form.find_element_by_xpath(
+            '//button[@data-id="id_organisation"]/span').text)
+        # and backend
+        option = form.find_element_by_xpath(
+            '//select[@id="id_organisation"]//option[@selected="selected"]')
+        self.assertEqual(obj.pk, int(option.get_attribute("value")))
+
+        # Create venue
+        wait.until(animation_is_finished())
+        add_button = self.browser.find_element_by_xpath(
+            '//a[@data-target="#id_venue" and contains(@href, "add")]')
+        wait.until(animation_is_finished())
+        add_button.click()
+        wait.until(animation_is_finished())
+        modal = self.browser.find_element_by_id('modal')
+        wait.until(animation_is_finished())
+        self.assertTrue(modal.is_displayed())
+        self.assertIn("Add Venue", modal.find_element_by_tag_name('h3').text)
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Venue")
+        modal.find_element_by_xpath(
+            '//div[@id="modal"]//input[@type="submit"]').click()
+
+        # See it is selected
+        wait.until(animation_is_finished())
+        self.assertFalse(modal.is_displayed())
+        obj = models.Venue.objects.get(name="Test Venue")
+        self.assertEqual(obj.name, form.find_element_by_xpath(
+            '//button[@data-id="id_venue"]/span').text)
+        # and backend
+        option = form.find_element_by_xpath(
+            '//select[@id="id_venue"]//option[@selected="selected"]')
+        self.assertEqual(obj.pk, int(option.get_attribute("value")))
+
+        # Set start date/time
+        form.find_element_by_id('id_start_date').send_keys('3015-05-25')
+        form.find_element_by_id('id_start_time').send_keys('06:59')
+
+        # Set end date/time
+        form.find_element_by_id('id_end_date').send_keys('4000-06-27')
+        form.find_element_by_id('id_end_time').send_keys('07:00')
+
+        # Add item
+        form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
+        wait.until(animation_is_finished())
+        modal = self.browser.find_element_by_id("itemModal")
+        modal.find_element_by_id("item_name").send_keys("Test Item 1")
+        modal.find_element_by_id("item_description").send_keys("This is an item description\nthat for reasons unkown spans two lines")
+        e = modal.find_element_by_id("item_quantity")
+        e.click()
+        e.send_keys(Keys.UP)
+        e.send_keys(Keys.UP)
+        e = modal.find_element_by_id("item_cost")
+        e.send_keys("23.95")
+        e.send_keys(Keys.ENTER) # enter submit
+
+        # Confirm item has been saved to json field
+        objectitems = self.browser.execute_script("return objectitems;")
+        self.assertEqual(1, len(objectitems))
+        testitem = objectitems["-1"]['fields'] # as we are deliberately creating this we know the ID
+        self.assertEqual("Test Item 1", testitem['name'])
+        self.assertEqual("2", testitem['quantity']) # test a couple of "worse case" fields
+
+        # See new item appear in table
+        row = self.browser.find_element_by_id('item--1') # ID number is known, see above
+        self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
+        self.assertIn("This is an item description", row.find_element_by_xpath('//div[@class="item-description"]').text)
+        self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
+        self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
+        self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
+
+        # Check totals
+        self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
+        self.assertIn("(TBC)", self.browser.find_element_by_id('vat-rate').text)
+        self.assertEqual("9.58", self.browser.find_element_by_id('vat').text)
+        self.assertEqual("57.48", self.browser.find_element_by_id('total').text)
+
+        # Attempt to save - missing title
+        save.click()
+
+        # See error
+        error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
+        self.assertTrue(error.is_displayed())
+        # Should only have one error message
+        self.assertEqual("Name", error.find_element_by_xpath('//dt[1]').text)
+        self.assertEqual("This field is required.", error.find_element_by_xpath('//dd[1]/ul/li').text)
+        # don't need error so close it
+        error.find_element_by_xpath('//div[contains(@class, "alert-danger")]//button[@class="close"]').click()
         try:
-            # Requests address
-            self.browser.get(self.live_server_url + '/event/create/')
-            # Gets redirected to login and back
-            self.authenticate('/event/create/')
-
-            wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
-
-            wait.until(animation_is_finished())
-
-            # Check has slided up correctly - second save button hidden
-            save = self.browser.find_element_by_xpath(
-                '(//button[@type="submit"])[3]')
-            self.assertFalse(save.is_displayed())
-
-            # Click Rig button
-            self.browser.find_element_by_xpath('//button[.="Rig"]').click()
-
-            # Slider expands and save button visible
-            self.assertTrue(save.is_displayed())
-            form = self.browser.find_element_by_tag_name('form')
-
-            # Create new person
-            wait.until(animation_is_finished())
-            add_person_button = self.browser.find_element_by_xpath(
-                '//a[@data-target="#id_person" and contains(@href, "add")]')
-            add_person_button.click()
-
-            # See modal has opened
-            modal = self.browser.find_element_by_id('modal')
-            wait.until(animation_is_finished())
-            self.assertTrue(modal.is_displayed())
-            self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
-
-            # Fill person form out and submit
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 1")
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@type="submit"]').click()
-            wait.until(animation_is_finished())
-            self.assertFalse(modal.is_displayed())
-
-            # See new person selected
-            person1 = models.Person.objects.get(name="Test Person 1")
-            self.assertEqual(person1.name, form.find_element_by_xpath(
-                '//button[@data-id="id_person"]/span').text)
-            # and backend
-            option = form.find_element_by_xpath(
-                '//select[@id="id_person"]//option[@selected="selected"]')
-            self.assertEqual(person1.pk, int(option.get_attribute("value")))
-
-            # Change mind and add another
-            wait.until(animation_is_finished())
-            add_person_button.click()
-
-            wait.until(animation_is_finished())
-            self.assertTrue(modal.is_displayed())
-            self.assertIn("Add Person", modal.find_element_by_tag_name('h3').text)
-
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Person 2")
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@type="submit"]').click()
-            wait.until(animation_is_finished())
-            self.assertFalse(modal.is_displayed())
-
-            person2 = models.Person.objects.get(name="Test Person 2")
-            self.assertEqual(person2.name, form.find_element_by_xpath(
-                '//button[@data-id="id_person"]/span').text)
-            # Have to do this explcitly to force the wait for it to update
-            option = form.find_element_by_xpath(
-                '//select[@id="id_person"]//option[@selected="selected"]')
-            self.assertEqual(person2.pk, int(option.get_attribute("value")))
-
-            # Was right the first time, change it back
-            person_select = form.find_element_by_xpath(
-                '//button[@data-id="id_person"]')
-            person_select.send_keys(person1.name)
-            person_dropped = form.find_element_by_xpath(
-                '//ul[contains(@class, "inner selectpicker")]//span[contains(text(), "%s")]' % person1.name)
-            person_dropped.click()
-
-            self.assertEqual(person1.name, form.find_element_by_xpath(
-                '//button[@data-id="id_person"]/span').text)
-            option = form.find_element_by_xpath(
-                '//select[@id="id_person"]//option[@selected="selected"]')
-            self.assertEqual(person1.pk, int(option.get_attribute("value")))
-
-            # Edit Person 1 to have a better name
-            form.find_element_by_xpath(
-                '//a[@data-target="#id_person" and contains(@href, "%s/edit/")]' % person1.pk).click()
-            wait.until(animation_is_finished())
-            self.assertTrue(modal.is_displayed())
-            self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
-            name = modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@id="id_name"]')
-            self.assertEqual(person1.name, name.get_attribute('value'))
-            name.clear()
-            name.send_keys('Rig ' + person1.name)
-            name.send_keys(Keys.ENTER)
-
-            wait.until(animation_is_finished())
-
-            self.assertFalse(modal.is_displayed())
-            person1 = models.Person.objects.get(pk=person1.pk)
-            self.assertEqual(person1.name, form.find_element_by_xpath(
-                '//button[@data-id="id_person"]/span').text)
-
-            # Create organisation
-            wait.until(animation_is_finished())
-            add_button = self.browser.find_element_by_xpath(
-                '//a[@data-target="#id_organisation" and contains(@href, "add")]')
-            add_button.click()
-            modal = self.browser.find_element_by_id('modal')
-            wait.until(animation_is_finished())
-            self.assertTrue(modal.is_displayed())
-            self.assertIn("Add Organisation", modal.find_element_by_tag_name('h3').text)
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Organisation")
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@type="submit"]').click()
-
-            # See it is selected
-            wait.until(animation_is_finished())
-            self.assertFalse(modal.is_displayed())
-            obj = models.Organisation.objects.get(name="Test Organisation")
-            self.assertEqual(obj.name, form.find_element_by_xpath(
-                '//button[@data-id="id_organisation"]/span').text)
-            # and backend
-            option = form.find_element_by_xpath(
-                '//select[@id="id_organisation"]//option[@selected="selected"]')
-            self.assertEqual(obj.pk, int(option.get_attribute("value")))
-
-            # Create venue
-            wait.until(animation_is_finished())
-            add_button = self.browser.find_element_by_xpath(
-                '//a[@data-target="#id_venue" and contains(@href, "add")]')
-            wait.until(animation_is_finished())
-            add_button.click()
-            wait.until(animation_is_finished())
-            modal = self.browser.find_element_by_id('modal')
-            wait.until(animation_is_finished())
-            self.assertTrue(modal.is_displayed())
-            self.assertIn("Add Venue", modal.find_element_by_tag_name('h3').text)
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Venue")
-            modal.find_element_by_xpath(
-                '//div[@id="modal"]//input[@type="submit"]').click()
-
-            # See it is selected
-            wait.until(animation_is_finished())
-            self.assertFalse(modal.is_displayed())
-            obj = models.Venue.objects.get(name="Test Venue")
-            self.assertEqual(obj.name, form.find_element_by_xpath(
-                '//button[@data-id="id_venue"]/span').text)
-            # and backend
-            option = form.find_element_by_xpath(
-                '//select[@id="id_venue"]//option[@selected="selected"]')
-            self.assertEqual(obj.pk, int(option.get_attribute("value")))
-
-            # Set start date/time
-            form.find_element_by_id('id_start_date').send_keys('3015-05-25')
-            form.find_element_by_id('id_start_time').send_keys('06:59')
-
-            # Set end date/time
-            form.find_element_by_id('id_end_date').send_keys('4000-06-27')
-            form.find_element_by_id('id_end_time').send_keys('07:00')
-
-            # Add item
-            form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
-            wait.until(animation_is_finished())
-            modal = self.browser.find_element_by_id("itemModal")
-            modal.find_element_by_id("item_name").send_keys("Test Item 1")
-            modal.find_element_by_id("item_description").send_keys("This is an item description\nthat for reasons unkown spans two lines")
-            e = modal.find_element_by_id("item_quantity")
-            e.click()
-            e.send_keys(Keys.UP)
-            e.send_keys(Keys.UP)
-            e = modal.find_element_by_id("item_cost")
-            e.send_keys("23.95")
-            e.send_keys(Keys.ENTER) # enter submit
-
-            # Confirm item has been saved to json field
-            objectitems = self.browser.execute_script("return objectitems;")
-            self.assertEqual(1, len(objectitems))
-            testitem = objectitems["-1"]['fields'] # as we are deliberately creating this we know the ID
-            self.assertEqual("Test Item 1", testitem['name'])
-            self.assertEqual("2", testitem['quantity']) # test a couple of "worse case" fields
-
-            # See new item appear in table
-            row = self.browser.find_element_by_id('item--1') # ID number is known, see above
-            self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
-            self.assertIn("This is an item description", row.find_element_by_xpath('//div[@class="item-description"]').text)
-            self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
-            self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
-            self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
-
-            # Check totals
-            self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
-            self.assertIn("(TBC)", self.browser.find_element_by_id('vat-rate').text)
-            self.assertEqual("9.58", self.browser.find_element_by_id('vat').text)
-            self.assertEqual("57.48", self.browser.find_element_by_id('total').text)
-
-            # Attempt to save - missing title
-            save.click()
-
-            # See error
-            error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
-            self.assertTrue(error.is_displayed())
-            # Should only have one error message
-            self.assertEqual("Name", error.find_element_by_xpath('//dt[1]').text)
-            self.assertEqual("This field is required.", error.find_element_by_xpath('//dd[1]/ul/li').text)
-            # don't need error so close it
-            error.find_element_by_xpath('//div[contains(@class, "alert-danger")]//button[@class="close"]').click()
-            try:
-                self.assertFalse(error.is_displayed())
-            except StaleElementReferenceException:
-                pass
-            except:
-                self.assertFail("Element does not appear to have been deleted")
-
-            # Check at least some data is preserved. Some = all will be there
-            option = self.browser.find_element_by_xpath(
-                '//select[@id="id_person"]//option[@selected="selected"]')
-            self.assertEqual(person1.pk, int(option.get_attribute("value")))
-
-            # Set title
-            e = self.browser.find_element_by_id('id_name')
-            e.send_keys('Test Event Name')
-            e.send_keys(Keys.ENTER)
-
-            # See redirected to success page
-            successTitle = self.browser.find_element_by_xpath('//h1').text
-            event = models.Event.objects.get(name='Test Event Name')
-            self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
-        except WebDriverException:
-            # This is a dirty workaround for wercker being a bit funny and not running it correctly.
-            # Waiting for wercker to get back to me about this
+            self.assertFalse(error.is_displayed())
+        except StaleElementReferenceException:
             pass
+        except:
+            self.assertFail("Element does not appear to have been deleted")
+
+        # Check at least some data is preserved. Some = all will be there
+        option = self.browser.find_element_by_xpath(
+            '//select[@id="id_person"]//option[@selected="selected"]')
+        self.assertEqual(person1.pk, int(option.get_attribute("value")))
+
+        # Set title
+        e = self.browser.find_element_by_id('id_name')
+        e.send_keys('Test Event Name')
+        e.send_keys(Keys.ENTER)
+
+        # See redirected to success page
+        successTitle = self.browser.find_element_by_xpath('//h1').text
+        event = models.Event.objects.get(name='Test Event Name')
+        self.assertIn("N0000%d | Test Event Name"%event.pk, successTitle)
 
     def testEventDuplicate(self):
         testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL, start_date=date.today() + timedelta(days=6), description="start future no end", purchase_order="TESTPO") 
