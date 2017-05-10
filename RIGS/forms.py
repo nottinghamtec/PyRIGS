@@ -3,6 +3,7 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail
 from captcha.fields import ReCaptchaField
@@ -26,6 +27,16 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
+
+    def clean_first_name(self):
+        if self.cleaned_data["first_name"].strip() == '':
+            raise ValidationError("First name is required.")
+        return self.cleaned_data["first_name"]
+
+    def clean_last_name(self):
+        if self.cleaned_data["last_name"].strip() == '':
+            raise ValidationError("Last name is required.")
+        return self.cleaned_data["last_name"]
 
 
 # Login form

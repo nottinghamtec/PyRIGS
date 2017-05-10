@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
 
 {% block title %}Login{% endblock %}
 
@@ -6,5 +7,43 @@
 <div class="text-center">
 	<h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
 </div>
-{% include 'registration/loginform.html' %}
+
+
+<div class="panel-group">
+  {% url "social:complete" "discourse" as completeUrl %}
+  {% if not request.GET.next == completeUrl %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        
+          Login with TEC Forum
+        
+      </h4>
+    </div>
+    <div id="forumLogin">
+      <div class="panel-body" style="text-align:center;">
+      	<a class="btn btn-default" href="{% url "social:begin" "discourse" %}?next={{request.GET.next}}">
+
+      		<h4>Login using</h4>
+        	<img src="{% static "imgs/forum-logo.gif" %}" width=200></img>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+          Login with RIGS Credentials
+      </h4>
+    </div>
+    <div class="panel-body">
+      <div class="panel-body">
+        {% include 'registration/loginform.html' %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}

@@ -22,6 +22,7 @@ class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    avatar_template = models.CharField(max_length=255, blank=True, editable=False, null=True)
 
     @classmethod
     def make_api_key(cls):
@@ -33,8 +34,13 @@ class Profile(AbstractUser):
     @property
     def profile_picture(self):
         url = ""
+        if settings.DISCOURSE_API_KEY is not None:
+            if self.avatar_template:
+                return settings.DISCOURSE_HOST+self.avatar_template.format(size=500)
+
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
             url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
+
         return url
 
     @property

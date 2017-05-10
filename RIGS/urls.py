@@ -153,6 +153,7 @@ urlpatterns = patterns('',
                        url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
                            name='profile_update_self'),
                        url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)), name='reset_api_key'),
+                       url(r'^user/unlink_forum$', login_required(views.UnlinkForum.as_view(permanent=False)), name='unlink_forum'),
 
                        # ICS Calendar - API key authentication
                        url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()), name="ics_calendar"),
