@@ -15,6 +15,9 @@ from z3c.rml import rml2pdf
 
 from RIGS import models
 
+from django import forms
+forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
+
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
