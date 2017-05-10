@@ -136,6 +136,7 @@ class EventDuplicate(EventUpdate):
         context["duplicate"] = True
         return context
 
+
 class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
@@ -144,9 +145,9 @@ class EventPrint(generic.View):
 
         merger = PdfFileMerger()
 
-        for copy in copies:
+        for thisCopy in copies:
 
-            context = RequestContext(request, { # this should be outside the loop, but bug in 1.8.2 prevents this
+            context = {  # this should be outside the loop, but bug in 1.8.2 prevents this
                 'object': object,
                 'fonts': {
                     'opensans': {
@@ -154,9 +155,9 @@ class EventPrint(generic.View):
                         'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
                     }
                 },
-                'copy':copy,
-                'current_user':request.user,
-            })
+                'copy': thisCopy,
+                'current_user': request.user,
+            }
 
             # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
 

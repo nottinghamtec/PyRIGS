@@ -55,8 +55,8 @@ class InvoicePrint(generic.View):
         invoice = get_object_or_404(models.Invoice, pk=pk)
         object = invoice.event
         template = get_template('RIGS/event_print.xml')
-        copies = ('TEC', 'Client')
-        context = RequestContext(request, {
+
+        context = {
             'object': object,
             'fonts': {
                 'opensans': {
@@ -66,7 +66,7 @@ class InvoicePrint(generic.View):
             },
             'invoice': invoice,
             'current_user': request.user,
-        })
+        }
 
         rml = template.render(context)
         buffer = StringIO.StringIO()
