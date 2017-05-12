@@ -1,4 +1,6 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+from django.contrib.auth.views import password_reset
+
 from django.contrib.auth.decorators import login_required
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
@@ -7,16 +9,16 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from PyRIGS.decorators import permission_required_with_403
 from PyRIGS.decorators import api_key_required
 
-urlpatterns = patterns('',
+urlpatterns = [
                        # Examples:
                        # url(r'^$', 'PyRIGS.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
                        url('^$', login_required(views.Index.as_view()), name='index'),
                        url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
-                       url('^user/login/$', 'RIGS.views.login', name='login'),
+                       url('^user/login/$', views.login, name='login'),
                        url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
-                       url(r'^user/password_reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form': forms.PasswordReset}),
+                       url(r'^user/password_reset/$', password_reset, {'password_reset_form': forms.PasswordReset}),
 
                        # People
                        url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
@@ -165,4 +167,4 @@ urlpatterns = patterns('',
                        url(r'^rig/show/(?P<pk>\d+)/$', RedirectView.as_view(permanent=True, pattern_name='event_detail')),
                        url(r'^bookings/$', RedirectView.as_view(permanent=True, pattern_name='rigboard')),
                        url(r'^bookings/past/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
-                       )
+                       ]

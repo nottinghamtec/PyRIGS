@@ -30,7 +30,7 @@ class Index(generic.TemplateView):
 
 def login(request, **kwargs):
     if request.user.is_authenticated():
-        next = request.REQUEST.get('next', '/')
+        next = request.GET.get('next', '/')
         return HttpResponseRedirect(next)
     else:
         from django.contrib.auth.views import login
@@ -44,9 +44,8 @@ def login(request, **kwargs):
 # check for it before logging  the user in
 @csrf_exempt
 def login_embed(request, **kwargs):
-    print("Running LOGIN")
     if request.user.is_authenticated():
-        next = request.REQUEST.get('next', '/')
+        next = request.GET.get('next', '/')
         return HttpResponseRedirect(next)
     else:
         from django.contrib.auth.views import login

@@ -10,6 +10,10 @@ import simplejson
 
 from RIGS import models
 
+# Override the django form defaults to use the HTML date/time/datetime UI elements
+forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
+forms.TimeField.widget = forms.DateInput(attrs={'type': 'time'})
+forms.DateTimeField.widget = forms.DateInput(attrs={'type': 'datetime-local'})
 
 # Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
@@ -45,7 +49,7 @@ class ProfileChangeForm(UserChangeForm):
 
 # Events Shit
 class EventForm(forms.ModelForm):
-    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
+    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
 
