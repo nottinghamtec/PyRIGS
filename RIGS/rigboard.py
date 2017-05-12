@@ -151,7 +151,7 @@ class EventPrint(generic.View):
 
         merger = PdfFileMerger()
 
-        context = RequestContext(request, {
+        context = {
             'object': object,
             'fonts': {
                 'opensans': {
@@ -161,7 +161,7 @@ class EventPrint(generic.View):
             },
             'quote': True,
             'current_user': request.user,
-        })
+        }
 
         rml = template.render(context)
 

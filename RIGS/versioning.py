@@ -158,7 +158,7 @@ def get_previous_version(version):
     thisId = version.object_id
     thisVersionId = version.pk
 
-    versions = reversion.get_for_object_reference(version.content_type.model_class(), thisId)
+    versions = reversion.revisions.get_for_object_reference(version.content_type.model_class(), thisId)
 
     try:
         previousVersions = versions.filter(revision_id__lt=version.revision_id).latest(
@@ -199,7 +199,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
 
 class VersionHistory(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/version_history.html"
     paginate_by = 25
 
@@ -207,7 +207,7 @@ class VersionHistory(generic.ListView):
         thisModel = self.kwargs['model']
 
         # thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
-        versions = reversion.get_for_object_reference(thisModel, self.kwargs['pk'])
+        versions = reversion.revisions.get_for_object_reference(thisModel, self.kwargs['pk'])
 
         return versions
 
@@ -236,7 +236,7 @@ class VersionHistory(generic.ListView):
 
 
 class ActivityTable(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/activity_table.html"
     paginate_by = 25
 
@@ -260,7 +260,7 @@ class ActivityTable(generic.ListView):
 
 
 class ActivityFeed(generic.ListView):
-    model = reversion.revisions.Version
+    model = Version
     template_name = "RIGS/activity_feed_data.html"
     paginate_by = 25
 

@@ -10,25 +10,30 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
+SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
+    'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
-STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
-TEMPLATE_DEBUG = True
+STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
 if STAGING:
     ALLOWED_HOSTS.append('.herokuapp.com')
+
+if DEBUG:
+    ALLOWED_HOSTS.append('localhost')
+    ALLOWED_HOSTS.append('example.com')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
@@ -39,7 +44,6 @@ INTERNAL_IPS = ['127.0.0.1']
 ADMINS = (
     ('Tom Price', 'tomtom5152@gmail.com')
 )
-
 
 # Application definition
 
@@ -63,6 +67,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,7 +82,6 @@ ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 DATABASES = {
@@ -89,6 +93,7 @@ DATABASES = {
 
 if not DEBUG:
     import dj_database_url
+
     DATABASES['default'] = dj_database_url.config()
 
 # Logging 
@@ -119,12 +124,12 @@ LOGGING = {
         'mail_admins': {
             'class': 'django.utils.log.AdminEmailHandler',
             'level': 'ERROR',
-             # But the emails are plain text by default - HTML is nicer
+            # But the emails are plain text by default - HTML is nicer
             'include_html': True,
         },
     },
     'loggers': {
-         # Again, default Django configuration to email unhandled exceptions
+        # Again, default Django configuration to email unhandled exceptions
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
@@ -152,8 +157,8 @@ RAVEN_CONFIG = {
 AUTH_USER_MODEL = 'RIGS.Profile'
 
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/user/login'
-LOGOUT_URL = '/user/logout'
+LOGIN_URL = '/user/login/'
+LOGOUT_URL = '/user/logout/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
@@ -167,7 +172,7 @@ EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.environ.get('EMAIL_HOST')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     EMAIL_USE_TLS = bool(int(os.environ.get('EMAIL_USE_TLS', 0)))
@@ -191,19 +196,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M','%Y-%m-%dT%H:%M:%S')
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.core.context_processors.request",
-    "django.contrib.messages.context_processors.messages",
-)
-
+DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
@@ -214,11 +207,30 @@ STATIC_DIRS = (
     os.path.join(BASE_DIR, 'static/')
 )
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR,  'templates'),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.template.context_processors.request",
+                "django.contrib.messages.context_processors.messages",
+            ],
+            'debug': DEBUG
+        },
+    },
+]
 
-USE_GRAVATAR=True
+USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
