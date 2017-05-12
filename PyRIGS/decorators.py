@@ -1,6 +1,5 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import render
-from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
@@ -88,7 +87,7 @@ def nottinghamtec_address_required(function):
     def wrap(request, *args, **kwargs):
         # Fail if current user's email address isn't @nottinghamtec.co.uk
         if not request.user.email.endswith('@nottinghamtec.co.uk'):
-            error_resp = render_to_response('RIGS/eventauthorisation_request_error.html', context_instance=RequestContext(request))
+            error_resp = render(request, 'RIGS/eventauthorisation_request_error.html')
             return error_resp
 
         return function(request, *args, **kwargs)

@@ -520,18 +520,12 @@ class EventTest(LiveServerTestCase):
 
         self.assertIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
-        # Check the PO hasn't carried through
-        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
-
         self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk)) #Go back to the old event
         
         #Check that based-on hasn't crept into the old event
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
 
         self.assertNotIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
-
-        # Check the PO remains on the old event
-        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -976,6 +970,7 @@ class ClientEventAuthorisationTest(TestCase):
             email='teccie@functional.test',
             is_superuser=True  # lazily grant all permissions
         )[0]
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
         client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
         organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)
@@ -1078,6 +1073,7 @@ class TECEventAuthorisationTest(TestCase):
         cls.profile.save()
 
     def setUp(self):
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
         client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
         organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)

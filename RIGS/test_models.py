@@ -360,6 +360,7 @@ class EventPricingTestCase(TestCase):
 
 class EventAuthorisationTestCase(TestCase):
     def setUp(self):
+        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
         self.profile = models.Profile.objects.get_or_create(
             first_name='Test',
             last_name='TEC User',
@@ -385,7 +386,7 @@ class EventAuthorisationTestCase(TestCase):
         self.assertTrue(self.event.authorised)
 
     def test_last_edited(self):
-        with reversion.create_revision():
+        with reversion.revisions.create_revision():
             auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
                                                         name="Test Auth", amount=self.event.total, sent_by=self.profile)
         self.assertIsNotNone(auth.last_edited_at)
