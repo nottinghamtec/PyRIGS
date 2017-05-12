@@ -95,4 +95,4 @@ def on_revision_commit(instances, **kwargs):
             send_eventauthorisation_success_email(instance)
 
 
-reversion.post_revision_commit.connect(on_revision_commit)
+reversion.revisions.post_revision_commit.connect(on_revision_commit)
