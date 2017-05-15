@@ -3,7 +3,6 @@ import os
 import re
 from datetime import date, timedelta
 
-import reversion
 from django.core import mail
 from django.db import transaction
 from django.test import LiveServerTestCase
@@ -15,20 +14,52 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from RIGS import models
 
-import re
-import os
-from datetime import date, timedelta
-from django.db import transaction
 from reversion import revisions as reversion
-import json
+
+import time
+import sys
+
+browsers = [{"platform": "macOS 10.12",
+             "browserName": "chrome",
+             "version": "latest"},
+            ]
 
 
+def on_platforms(platforms):
+    if os.environ.get("TRAVIS"):
+        def decorator(base_class):
+            module = sys.modules[base_class.__module__].__dict__
+            for i, platform in enumerate(platforms):
+                d = dict(base_class.__dict__)
+                d['desired_capabilities'] = platform
+                name = "%s_%s" % (base_class.__name__, i + 1)
+                module[name] = type(name, (base_class,), d)
+        return decorator
 
+
+def create_browser(test_name, desired_capabilities):
+    # return webdriver.Chrome()
+    if os.environ.get("TRAVIS"):
+        username = os.environ["SAUCE_USERNAME"]
+        access_key = os.environ["SAUCE_ACCESS_KEY"]
+        caps = {'browserName': desired_capabilities['browserName']}
+        caps['platform'] = desired_capabilities['platform']
+        caps['version'] = desired_capabilities['version']
+        caps["tunnel-identifier"] = os.environ["TRAVIS_JOB_NUMBER"]
+        caps["name"] = '#' + os.environ["TRAVIS_JOB_NUMBER"] + ": " + test_name
+        hub_url = "%s:%s@localhost:4445" % (username, access_key)
+        driver = webdriver.Remote(desired_capabilities=caps, command_executor="http://%s/wd/hub" % hub_url)
+        return driver
+    else:
+        return webdriver.Chrome()
+
+
+@on_platforms(browsers)
 class UserRegistrationTest(LiveServerTestCase):
 
     def setUp(self):
-        self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(3) # Set implicit wait session wide
+        self.browser = create_browser(self.id(), self.desired_capabilities)
+        self.browser.implicitly_wait(3)  # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -155,7 +186,7 @@ class UserRegistrationTest(LiveServerTestCase):
 
         # All is well
 
-
+@on_platforms(browsers)
 class EventTest(LiveServerTestCase):
 
     def setUp(self):
@@ -166,9 +197,9 @@ class EventTest(LiveServerTestCase):
 
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
         
-        self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(3) # Set implicit wait session wide
-        self.browser.maximize_window()
+        self.browser = create_browser(self.id(), self.desired_capabilities)
+        self.browser.implicitly_wait(10) # Set implicit wait session wide
+        # self.browser.maximize_window()
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -211,7 +242,7 @@ class EventTest(LiveServerTestCase):
             # Gets redirected to login and back
             self.authenticate('/event/create/')
 
-            wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+            wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
 
             wait.until(animation_is_finished())
 
@@ -366,11 +397,11 @@ class EventTest(LiveServerTestCase):
             self.assertEqual(obj.pk, int(option.get_attribute("value")))
 
             # Set start date/time
-            form.find_element_by_id('id_start_date').send_keys('3015-05-25')
+            form.find_element_by_id('id_start_date').send_keys('25/05/3015')
             form.find_element_by_id('id_start_time').send_keys('06:59')
 
             # Set end date/time
-            form.find_element_by_id('id_end_date').send_keys('4000-06-27')
+            form.find_element_by_id('id_end_date').send_keys('27/06/4000')
             form.find_element_by_id('id_end_time').send_keys('07:00')
 
             # Add item
@@ -467,7 +498,7 @@ class EventTest(LiveServerTestCase):
         self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk) + '/duplicate/')
         self.authenticate('/event/' + str(testEvent.pk) + '/duplicate/')
 
-        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
 
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
@@ -540,7 +571,7 @@ class EventTest(LiveServerTestCase):
         # Gets redirected to login and back
         self.authenticate('/event/create/')
 
-        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
 
         wait.until(animation_is_finished())
 
@@ -555,14 +586,13 @@ class EventTest(LiveServerTestCase):
         e.send_keys('Test Event Name')
 
         # Both dates, no times, end before start
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
 
-        form.find_element_by_id('id_end_date').clear()
-        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+        self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-23'")
 
         # Attempt to save - should fail
         save.click()
+
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
         self.assertTrue(error.is_displayed())
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
@@ -571,16 +601,14 @@ class EventTest(LiveServerTestCase):
         # Same date, end time before start time
         form = self.browser.find_element_by_tag_name('form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
 
-        form.find_element_by_id('id_end_date').clear()
-        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
+        self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-23'")
 
-        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_start_time').send_keys('06:59')
 
-        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_end_time').send_keys('06:00')
 
         # Attempt to save - should fail
@@ -593,31 +621,28 @@ class EventTest(LiveServerTestCase):
         # Same date, end time before start time
         form = self.browser.find_element_by_tag_name('form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
 
-        form.find_element_by_id('id_end_date').clear()
-        form.find_element_by_id('id_end_date').send_keys('3015-04-23')
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
+        self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-24'")
 
-        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_start_time').send_keys('06:59')
 
-        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_end_time').send_keys('06:00')
 
 
         # No end date, end time before start time
         form = self.browser.find_element_by_tag_name('form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+        
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
+        self.browser.execute_script("document.getElementById('id_end_date').value=''")
 
-        form.find_element_by_id('id_end_date').clear()
-
-        form.find_element_by_id('id_start_time').clear()
+        form.find_element_by_id('id_start_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_start_time').send_keys('06:59')
 
-        form.find_element_by_id('id_end_time').clear()
+        form.find_element_by_id('id_end_time').send_keys(Keys.DELETE)
         form.find_element_by_id('id_end_time').send_keys('06:00')
 
         # Attempt to save - should fail
@@ -630,15 +655,11 @@ class EventTest(LiveServerTestCase):
         # 2 dates, end after start
         form = self.browser.find_element_by_tag_name('form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
+        self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-26'")
 
-        form.find_element_by_id('id_end_date').clear()
-        form.find_element_by_id('id_end_date').send_keys('3015-04-26')
-
-        form.find_element_by_id('id_start_time').clear()
-        
-        form.find_element_by_id('id_end_time').clear()
+        self.browser.execute_script("document.getElementById('id_start_time').value=''")
+        self.browser.execute_script("document.getElementById('id_end_time').value=''")
         
         # Attempt to save - should succeed
         save.click()
@@ -653,7 +674,7 @@ class EventTest(LiveServerTestCase):
         # Gets redirected to login and back
         self.authenticate('/event/create/')
 
-        wait = WebDriverWait(self.browser, 10) #setup WebDriverWait to use later (to wait for animations)
+        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
         self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
 
         wait.until(animation_is_finished())
@@ -672,8 +693,7 @@ class EventTest(LiveServerTestCase):
         e.send_keys('Test Event Name')
 
         # Set an arbitrary date
-        form.find_element_by_id('id_start_date').clear()
-        form.find_element_by_id('id_start_date').send_keys('3015-04-24')
+        self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
 
         # Save the rig
         save.click()
@@ -728,6 +748,7 @@ class EventTest(LiveServerTestCase):
 
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
 
+@on_platforms(browsers)
 class IcalTest(LiveServerTestCase):
 
     def setUp(self):
@@ -767,7 +788,7 @@ class IcalTest(LiveServerTestCase):
         models.Event.objects.create(name="TE E17", start_date=date.today()-timedelta(days=1), is_rig=False, description="non rig yesterday")
         models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED, description="non rig today cancelled")
 
-        self.browser = webdriver.Firefox()
+        self.browser = create_browser(self.id(), self.desired_capabilities)
         self.browser.implicitly_wait(3) # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
@@ -926,6 +947,5 @@ class animation_is_finished(object):
         numberAnimating = driver.execute_script('return $(":animated").length')
         finished = numberAnimating == 0
         if finished:
-            import time
             time.sleep(0.1)
         return finished
