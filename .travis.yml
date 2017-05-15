@@ -1,20 +1,27 @@
+sudo: false
+dist: trusty
+
 language: python
 python:
   "2.7"
+cache: pip
 
-before_install:
-  - "export DISPLAY=:99.0"
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+addons:
+  sauce_connect:
+    username: davidtaylorhq
+    access_key: 
+      secure: "ibpjQ19LfjwfQruiJmX0j6NzyNwsS3PvRFdfXUYcfCEa9Eh20QQ/S8pOdFhRh70KIEuwN5oGuPqDkJPPTjkdY3/NCjuA7/NMTp14jAIX4XjpeNcsPFupp31vEy7KBuX4iAGpenrHJssFCwurpvrlWfwSOrk7bVZKaGUowVOXmyth1FSNQvr5c3YnlxmGvNzNBMMBDcJ3ixSlS9pBRLnHIJ1w3/f9Lx2uONkVMeGM6rVyuHholWvanIyNVYtO9JkXkoie6n1R3gNbXCyJdxSRn2OLppdryUaA0wUPJSu3hqEM3R5EsRDiFJszkJLTwSBG8x4k/dbqim7stjsu1qpUhCIG5mT6e+UI9auPi/5nlwlVmPhSq58qBP53vH3hs++02wjDlgvTGB1p4PqFblHhVaslaQ166bo9skGMZb0fXLlM1aCmmwFTpC5ofiPTSRTdJcljHG/d3JabKX03ME+nX2LFPIMnSLXgrjrfh2ppI6LFESiX3Z8jYUdsgTFeN3nQZ8U0kyb5X9Ay9YFnAaYD9OuxaqweTmqAJQj093GK38+79WMN2jnvEUzM1ZjI8Y4L/f3rHvhNIwYvZjQ+gJRhUqJh2Qruk7ke7uQ1oecxIqRHj8hIFEkuBcM3e86MkRiYQXXI9jOX3JrhI/jivAjFuw0flU2tjLNgM7tUYzjMyqk="
 
 install:
   - pip install -r requirements.txt
   - pip install coveralls codeclimate-test-reporter
 
 before_script:
+  - export PATH=$PATH:/usr/lib/chromium-browser/
   - python manage.py collectstatic --noinput
 
 script:
-  - coverage run manage.py test RIGS
+  - coverage run manage.py test --verbosity=2
 
 after_success:
   - coveralls
