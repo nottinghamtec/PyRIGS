@@ -26,15 +26,20 @@ browsers = [{"platform": "macOS 10.12",
 
 
 def on_platforms(platforms):
-    if os.environ.get("TRAVIS"):
-        def decorator(base_class):
-            module = sys.modules[base_class.__module__].__dict__
-            for i, platform in enumerate(platforms):
-                d = dict(base_class.__dict__)
-                d['desired_capabilities'] = platform
-                name = "%s_%s" % (base_class.__name__, i + 1)
-                module[name] = type(name, (base_class,), d)
-        return decorator
+    if not os.environ.get("TRAVIS"):
+        platforms = {'local'}
+
+    def decorator(base_class):
+        module = sys.modules[base_class.__module__].__dict__
+        for i, platform in enumerate(platforms):
+            d = dict(base_class.__dict__)
+            d['desired_capabilities'] = platform
+            name = "%s_%s" % (base_class.__name__, i + 1)
+            module[name] = type(name, (base_class,), d)
+    
+    return decorator
+
+
 
 
 def create_browser(test_name, desired_capabilities):
