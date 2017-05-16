@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-from datetime import date, timedelta
+import pytz
+from datetime import date, time, datetime, timedelta
 
 from django.core import mail
 from django.db import transaction
@@ -16,7 +17,8 @@ from RIGS import models
 
 from reversion import revisions as reversion
 
-import time
+from django.conf import settings
+
 import sys
 
 browsers = [{"platform": "macOS 10.12",
@@ -26,15 +28,20 @@ browsers = [{"platform": "macOS 10.12",
 
 
 def on_platforms(platforms):
-    if os.environ.get("TRAVIS"):
-        def decorator(base_class):
-            module = sys.modules[base_class.__module__].__dict__
-            for i, platform in enumerate(platforms):
-                d = dict(base_class.__dict__)
-                d['desired_capabilities'] = platform
-                name = "%s_%s" % (base_class.__name__, i + 1)
-                module[name] = type(name, (base_class,), d)
-        return decorator
+    if not os.environ.get("TRAVIS"):
+        platforms = {'local'}
+
+    def decorator(base_class):
+        module = sys.modules[base_class.__module__].__dict__
+        for i, platform in enumerate(platforms):
+            d = dict(base_class.__dict__)
+            d['desired_capabilities'] = platform
+            name = "%s_%s" % (base_class.__name__, i + 1)
+            module[name] = type(name, (base_class,), d)
+    
+    return decorator
+
+
 
 
 def create_browser(test_name, desired_capabilities):
@@ -748,6 +755,65 @@ class EventTest(LiveServerTestCase):
 
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
 
+    def testEventEdit(self):
+        person = models.Person(name="Event Edit Person", email="eventdetail@person.tests.rigs", phone="123 123").save()
+        organisation = models.Organisation(name="Event Edit Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456").save()
+        venue = models.Venue(name="Event Detail Venue").save()
+
+        eventData = {
+            'name': "Detail Test",
+            'description': "This is an event to test the detail view",
+            'notes': "It is going to be awful",
+            'person': person,
+            'organisation': organisation,
+            'venue': venue,
+            'mic': self.profile,
+            'start_date': date(2015, 06, 04),
+            'end_date': date(2015, 06, 05),
+            'start_time': time(10, 00),
+            'end_time': time(15, 00),
+            'meet_at': self.create_datetime(2015, 06, 04, 10, 00),
+            'access_at': self.create_datetime(2015, 06, 04, 10, 00),
+            'collector': 'A Person'
+        }
+
+        event = models.Event(**eventData)
+        event.save()
+
+        item1Data = {
+            'event': event,
+            'name': "Detail Item 1",
+            'cost': "10.00",
+            'quantity': "1",
+            'order': 1
+        }
+
+        models.EventItem(**item1Data).save()
+
+        self.browser.get(self.live_server_url + '/event/%d/edit/' % event.pk)
+        self.authenticate('/event/%d/edit/' % event.pk)
+
+        save = self.browser.find_element_by_xpath('(//button[@type="submit"])[1]')
+        save.click()
+
+        successTitle = self.browser.find_element_by_xpath('//h1').text
+        self.assertIn("N%05d | Detail Test" % event.pk, successTitle)
+
+        reloadedEvent = models.Event.objects.get(name='Detail Test')
+        reloadedItem = models.EventItem.objects.get(name='Detail Item 1')
+
+        # Check the event
+        for key, value in eventData.iteritems():
+            self.assertEqual(str(getattr(reloadedEvent, key)), str(value))
+
+        # Check the item
+        for key, value in item1Data.iteritems():
+            self.assertEqual(str(getattr(reloadedItem, key)), str(value))
+
+    def create_datetime(self, year, month, day, hour, min):
+        tz = pytz.timezone(settings.TIME_ZONE)
+        return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
+
 @on_platforms(browsers)
 class IcalTest(LiveServerTestCase):
 
@@ -947,5 +1013,6 @@ class animation_is_finished(object):
         numberAnimating = driver.execute_script('return $(":animated").length')
         finished = numberAnimating == 0
         if finished:
+            import time
             time.sleep(0.1)
         return finished
