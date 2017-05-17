@@ -71,6 +71,22 @@
 
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
+<div class="modal fade" id="loading-modal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Please wait</h2>
+            </div>
+            <div class="modal-body">
+                <div class="loading-animation">
+                    <div class="circle"></div>
+                    <div class="circle1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     Date.prototype.getISOString = function () {
         var yyyy = this.getFullYear().toString();

@@ -22,7 +22,9 @@
             </div>
         </div>
         <div class="col-sm-12 col-md-10 col-md-offset-1">
-            <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal">{% csrf_token %}
+            <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal"
+                  id="auth-request-form">
+                {% csrf_token %}
 
                 <div class="row">
                     {% include 'form_errors.html' %}
@@ -38,11 +40,20 @@
 
                     <div class="text-right col-sm-3 col-sm-offset-9">
                         <div class="form-group">
-                            <input type="submit" class="form-control btn btn-primary"/>
+                            <button type="submit" class="form-control btn btn-primary">
+                                <span class="glyphicon glyphicon-send"></span>
+                                Send
+                            </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+        $('#auth-request-form').on('submit', function () {
+            $('#auth-request-form button').attr('disabled', true);
+        });
+    </script>
 {% endblock %}

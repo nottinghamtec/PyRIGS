@@ -7,7 +7,14 @@
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
-        })
+        });
+
+        $('form').on('submit', function() {
+           $('#loading-modal').modal({
+               backdrop: 'static',
+               show: true
+           });
+        });
     </script>
 {% endblock %}
 
