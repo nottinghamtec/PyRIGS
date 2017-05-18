@@ -138,6 +138,11 @@ class EventDuplicate(EventUpdate):
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
 
+        # Remove all the authorisation information from the new event
+        new.auth_request_to = None
+        new.auth_request_by = None
+        new.auth_request_at = None
+
         if self.request.method in (
                 'POST', 'PUT'):  # This only happens on save (otherwise items won't display in editor)
             new.pk = None  # This means a new event will be created on save, and all items will be re-created
