@@ -1,9 +1,7 @@
 $button_color: #357ebf;
 
 body{
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0px;
-
 }
 
 .main-table{
@@ -36,6 +34,8 @@ body{
   width: 100%;
 
   .content {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    
     width: 100%;
     max-width: 600px;
     padding: 10px;
