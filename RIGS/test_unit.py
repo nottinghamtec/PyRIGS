@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from RIGS import models
-
+from reversion import revisions as reversion
 
 class TestAdminMergeObjects(TestCase):
     @classmethod
@@ -244,6 +244,52 @@ class TestPrintPaperwork(TestCase):
 
     def test_print_invoice_success(self):
         request_url = reverse('invoice_print', kwargs={'pk': self.invoices[1].pk})
+
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestVersioningViews(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True, is_active=True, is_staff=True)
+
+        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+
+        cls.events = {}
+
+        with reversion.create_revision():
+            reversion.set_user(cls.profile)
+            cls.events[1] = models.Event.objects.create(name="TE E1", start_date=date.today())
+
+        with reversion.create_revision():
+            reversion.set_user(cls.profile)
+            cls.events[2] = models.Event.objects.create(name="TE E2", start_date='2014-03-05')
+
+        with reversion.create_revision():
+            reversion.set_user(cls.profile)
+            cls.events[1].description = "A test description"
+            cls.events[1].save()
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_event_history_loads_successfully(self):
+        request_url = reverse('event_history', kwargs={'pk': self.events[1].pk})
+
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_activity_feed_loads_successfully(self):
+        request_url = reverse('activity_feed')
+
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_activity_table_loads_successfully(self):
+        request_url = reverse('activity_table')
 
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)

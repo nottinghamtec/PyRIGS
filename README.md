@@ -95,5 +95,18 @@ python manage.py generateSampleData
 |keyholder|keyholder|
 |basic    |basic    |
 
+### Testing ###
+Tests are contained in 3 files. `RIGS/test_models.py` contains tests for logic within the data models. `RIGS/test_unit.py` contains "Live server" tests, using raw web requests. `RIGS/test_integration.py` contains user interface tests which take control of a web browser. For automated Travis tests, we use [Sauce Labs](https://saucelabs.com). When debugging locally, ensure that you have the latest version of Google Chrome installed, then install [chromedriver](https://sites.google.com/a/chromium.org/chromedriver/) and ensure it is on the `PATH`.
+
+You can run the entire test suite, or you can run specific sections individually. For example, in order of specificity:
+
+```
+python manage.py test
+python manage.py test RIGS.test_models
+python manage.py test RIGS.test_models.EventTestCase
+python manage.py test RIGS.test_models.EventTestCase.test_current_events
+
+```
+
 ### Committing, pushing and testing ###
 Feel free to commit as you wish, on your own branch. On my branch (master for development) do not commit code that you either know doesn't work or don't know works. If you must commit this code, please make sure you say in the commit message that it isn't working, and if you can why it isn't working. If and only if you absolutely must push, then please don't leave it as the HEAD for too long, it's not much to ask but when you are done just make sure you haven't broken the HEAD for the next person.

@@ -12,8 +12,8 @@ from RIGS import models
 
 # Override the django form defaults to use the HTML date/time/datetime UI elements
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
-forms.TimeField.widget = forms.DateInput(attrs={'type': 'time'})
-forms.DateTimeField.widget = forms.DateInput(attrs={'type': 'datetime-local'})
+forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
+forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
 # Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
