@@ -495,7 +495,10 @@ class EventTest(LiveServerTestCase):
     def testEventDuplicate(self):
         testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                 start_date=date.today() + timedelta(days=6),
-                                                description="start future no end")
+                                                description="start future no end",
+                                                auth_request_by=self.profile,
+                                                auth_request_at=self.create_datetime(2015, 06, 04, 10, 00),
+                                                auth_request_to="some@email.address")
 
         item1 = models.EventItem(
             event=testEvent,
@@ -549,6 +552,13 @@ class EventTest(LiveServerTestCase):
         # Attempt to save
         save.click()
 
+        newEvent = models.Event.objects.latest('pk')
+
+        self.assertEqual(newEvent.auth_request_to, None)
+        self.assertEqual(newEvent.auth_request_by, None)
+        self.assertEqual(newEvent.auth_request_at, None)
+        
+        self.assertFalse(hasattr(newEvent, 'authorised'))
 
         self.assertNotIn("N%05d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
         self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text) # Check info message not visible
