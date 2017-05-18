@@ -85,8 +85,8 @@ def send_eventauthorisation_success_email(instance):
     )
 
     # Now we have both emails successfully generated, send them out
-    client_email.send()
-    mic_email.send()
+    client_email.send(fail_silently=True)
+    mic_email.send(fail_silently=True)
 
 
 def on_revision_commit(instances, **kwargs):
