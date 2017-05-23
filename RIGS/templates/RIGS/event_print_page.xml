@@ -249,13 +249,12 @@
 
     <tr>
         <td>
-            {% if object.authorised %}
-            <para>
-                Event authorised online by {{ object.authorisation.name }} ({{ object.authorisation.email }}) at
-                {{ object.authorisation.last_edited_at }}.
-            </para>
+            {% if object.internal and object.authorised %}
+                <para>
+                    Event authorised online by {{ object.authorisation.name }} ({{ object.authorisation.email }}) at
+                    {{ object.authorisation.last_edited_at }}.
+                </para>
 
-            {% if object.organisation.union_account %}
                 <blockTable colWidths="165,165,165">
                     <tr>
                         <td><para><b>University ID</b></para></td>
@@ -268,19 +267,18 @@
                         <td>£ {{ object.authorisation.amount|floatformat:2 }}</td>
                     </tr>
                 </blockTable>
-            {% else %}
+            {% elif not object.internal and object.purchase_order %}
                 <blockTable colWidths="247,248">
                     <tr>
+                        <td></td>
                         <td><para><b>Purchase Order</b></para></td>
-                        <td><para><b>Authorised Amount</b></para></td>
                     </tr>
                     <tr>
-                        <td>{{ object.authorisation.po }}</td>
-                        <td>£ {{ object.authorisation.amount|floatformat:2 }}</td>
+                        <td></td>
+                        <td>{{ object.purchase_order }}</td>
                     </tr>
                 </blockTable>
             {% endif %}
-        {% endif %}
         </td>
     </tr>
     </blockTable>

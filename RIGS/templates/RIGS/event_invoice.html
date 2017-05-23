@@ -61,21 +61,14 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if object.organisation %}
-                                {{ object.organisation.name }}
-                                <br>
-                                <span class="text-muted">{{ object.organisation.union_account|yesno:'Internal,External' }}</span>
-                            {% else %}
-                                {{ object.person.name }}
-                                <br>
-                                <span class="text-muted">External</span>
-                            {% endif %}
-
+                            {{ object.organisation.name }}
+                            <br>
+                            <span class="text-muted">{{ object.internal|yesno:'Internal,External' }}</span>
                         </td>
                         <td>
                             {{ object.sum_total|floatformat:2 }}
                             <br />
-                            <span class="text-muted">{{ object.authorisation.po }}</span>
+                            <span class="text-muted">{% if not object.internal %}{{ object.purchase_order }}{% endif %}</span>
                         </td>
                         <td class="text-center">
                             {% if object.mic %}
@@ -86,7 +79,10 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'invoice_event' object.pk %}" class="btn btn-default" data-toggle="tooltip" title="'Invoice' this event - click this when paperwork has been sent to treasury">
+                            <a href="{% url 'invoice_event' object.pk %}"
+                               class="btn btn-default"
+                               data-toggle="tooltip"
+                               title="'Invoice' this event - click this when paperwork has been sent to treasury">
                                 <span class="glyphicon glyphicon-gbp"></span>
                             </a>
                         </td>

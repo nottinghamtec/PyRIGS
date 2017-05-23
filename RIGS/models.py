@@ -329,6 +329,7 @@ class Event(models.Model, RevisionMixin):
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
+    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
     collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Authorisation request details
@@ -388,7 +389,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def authorised(self):
-        return self.authorisation.amount == self.total
+        return not self.internal and self.purchase_order or self.authorisation.amount == self.total
 
     @property
     def has_start_time(self):
@@ -449,6 +450,10 @@ class Event(models.Model, RevisionMixin):
 
         else:
             return endDate
+
+    @property
+    def internal(self):
+        return self.organisation and self.organisation.union_account
 
     objects = EventManager()
 
@@ -513,7 +518,6 @@ class EventAuthorisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
     account_code = models.CharField(max_length=50, blank=True, null=True)
-    po = models.CharField(max_length=255, blank=True, null=True, verbose_name="purchase order")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
     sent_by = models.ForeignKey('RIGS.Profile')
 

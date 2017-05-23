@@ -89,7 +89,7 @@
                                 {% endif %}
                             </dd>
 
-                            {% if object.event.organisation.union_account %}
+                            {% if object.event.internal %}
                                 {# internal #}
                                 <dt>Uni ID</dt>
                                 <dd>{{ object.event.authorisation.uni_id }}</dd>
@@ -98,7 +98,7 @@
                                 <dd>{{ object.event.authorisation.account_code }}</dd>
                             {% else %}
                                 <dt>PO</dt>
-                                <dd>{{ object.event.authorisation.po }}</dd>
+                                <dd>{{ object.event.purchase_order }}</dd>
                             {% endif %}
 
                             <dt>Authorised at</dt>

@@ -144,7 +144,7 @@ class EventForm(forms.ModelForm):
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status',
-                  'collector']
+                  'purchase_order', 'collector']
 
 
 class BaseClientEventAuthorisationForm(forms.ModelForm):
@@ -169,16 +169,6 @@ class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
     class Meta:
         model = models.EventAuthorisation
         fields = ('tos', 'name', 'amount', 'uni_id', 'account_code')
-
-
-class ExternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
-    def __init__(self, **kwargs):
-        super(ExternalClientEventAuthorisationForm, self).__init__(**kwargs)
-        self.fields['po'].required = True
-
-    class Meta:
-        model = models.EventAuthorisation
-        fields = ('tos', 'name', 'amount', 'po')
 
 
 class EventAuthorisationRequestForm(forms.Form):

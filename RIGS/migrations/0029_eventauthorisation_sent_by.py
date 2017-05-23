@@ -8,7 +8,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('RIGS', '0028_migrate_purchase_order'),
+        ('RIGS', '0027_eventauthorisation_event_singular'),
     ]
 
     operations = [

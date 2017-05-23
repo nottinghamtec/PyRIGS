@@ -11,29 +11,32 @@
             class="glyphicon glyphicon-duplicate"></span> <span
             class="hidden-xs">Duplicate</span></a>
     {% if event.is_rig %}
-        <a class="btn btn-default item-add modal-href event-authorise-request
-                {% if event.authorised %}
-                    btn-success
-                {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-                    btn-warning
-                {% elif event.auth_request_to %}
-                    btn-info
-                {% endif %}
-                "
-           href="{% url 'event_authorise_request' object.pk %}">
-            <span class="glyphicon glyphicon-send"></span>
-            <span class="hidden-xs">
-                {% if event.authorised %}
-                    Authorised
-                {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-                    Authorisation Issue
-                {% elif event.auth_request_to %}
-                    Awaiting Authorisation
-                {% else %}
-                    Request Authorisation
-                {% endif %}
-            </span>
-        </a>
+        {% if event.internal %}
+            <a class="btn btn-default item-add modal-href event-authorise-request
+                    {% if event.authorised %}
+                        btn-success
+                    {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                        btn-warning
+                    {% elif event.auth_request_to %}
+                        btn-info
+                    {% endif %}
+                    "
+               href="{% url 'event_authorise_request' object.pk %}">
+                <span class="glyphicon glyphicon-send"></span>
+                <span class="hidden-xs">
+                    {% if event.authorised %}
+                        Authorised
+                    {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                        Authorisation Issue
+                    {% elif event.auth_request_to %}
+                        Awaiting Authorisation
+                    {% else %}
+                        Request Authorisation
+                    {% endif %}
+                </span>
+            </a>
+        {% endif %}
+
         {% if perms.RIGS.add_invoice %}
             <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
                         {% if event.invoice and event.invoice.is_closed %}

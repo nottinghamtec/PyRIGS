@@ -19,7 +19,6 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255)),
                 ('uni_id', models.CharField(max_length=10, null=True, verbose_name=b'University ID', blank=True)),
                 ('account_code', models.CharField(max_length=50, null=True, blank=True)),
-                ('po', models.CharField(max_length=255, null=True, verbose_name=b'purchase order', blank=True)),
                 ('amount', models.DecimalField(verbose_name=b'authorisation amount', max_digits=10, decimal_places=2)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('event', models.ForeignKey(related_name='authroisations', to='RIGS.Event')),

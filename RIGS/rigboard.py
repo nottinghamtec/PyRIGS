@@ -137,6 +137,7 @@ class EventDuplicate(EventUpdate):
         old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
+        new.purchase_order = None
 
         # Remove all the authorisation information from the new event
         new.auth_request_to = None
@@ -256,19 +257,11 @@ class EventAuthorise(generic.UpdateView):
         return getattr(self.event, 'authorisation', None)
 
     def get_form_class(self):
-        if self.event.organisation is not None and self.event.organisation.union_account:
-            return forms.InternalClientEventAuthorisationForm
-        else:
-            return forms.ExternalClientEventAuthorisationForm
+        return forms.InternalClientEventAuthorisationForm
 
     def get_context_data(self, **kwargs):
         context = super(EventAuthorise, self).get_context_data(**kwargs)
         context['event'] = self.event
-
-        if self.get_form_class() is forms.InternalClientEventAuthorisationForm:
-            context['internal'] = True
-        else:
-            context['internal'] = False
 
         context['tos_url'] = settings.TERMS_OF_HIRE_URL
         return context
@@ -303,6 +296,7 @@ class EventAuthorise(generic.UpdateView):
             raise SuspiciousOperation(
                 "This URL is invalid. Please ask your TEC contact for a new URL")
         return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
+
 
 class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
     model = models.Event

@@ -49,13 +49,8 @@
 
                         <div class="col-sm-12 col-md-6">
                             <dl class="dl-horizontal">
-                                {% if internal %}
-                                    <dt>Account code</dt>
-                                    <dd>{{ object.account_code }}</dd>
-                                {% else %}
-                                    <dt>PO</dt>
-                                    <dd>{{ object.po }}</dd>
-                                {% endif %}
+                                <dt>Account code</dt>
+                                <dd>{{ object.account_code }}</dd>
 
                                 <dt>Authorised amount</dt>
                                 <dd>£ {{ object.amount|floatformat:2 }}</dd>

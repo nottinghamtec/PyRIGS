@@ -71,7 +71,7 @@
                 </div>
             {% endif %}
 
-            {% if event.is_rig %}
+            {% if event.is_rig and event.internal %}
                 <div class="panel panel-default">
                     <div class="panel-heading">Client Authorisation</div>
                     <div class="panel-body">
@@ -183,17 +183,23 @@
                     {% if event.is_rig %}
                         <dd>&nbsp;</dd>
 
-                        <dt>Authorisation Request</dt>
-                        <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
+                        {% if object.internal %}
+                            <dt>Authorisation Request</dt>
+                            <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
 
-                        <dt>By</dt>
-                        <dd>{{ object.auth_request_by }}</dd>
+                            <dt>By</dt>
+                            <dd>{{ object.auth_request_by }}</dd>
 
-                        <dt>At</dt>
-                        <dd>{{ object.auth_request_at|date:"D d M Y H:i"|default:"" }}</dd>
+                            <dt>At</dt>
+                            <dd>{{ object.auth_request_at|date:"D d M Y H:i"|default:"" }}</dd>
 
-                        <dt>To</dt>
-                        <dd>{{ object.auth_request_to }}</dd>
+                            <dt>To</dt>
+                            <dd>{{ object.auth_request_to }}</dd>
+
+                        {% else %}
+                            <dt>PO</dt>
+                            <dd>{{ object.purchase_order }}</dd>
+                        {% endif %}
                     {% endif %}
                 </dl>
             </div>

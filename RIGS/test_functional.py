@@ -496,6 +496,7 @@ class EventTest(LiveServerTestCase):
         testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                 start_date=date.today() + timedelta(days=6),
                                                 description="start future no end",
+                                                purchase_order='TESTPO',
                                                 auth_request_by=self.profile,
                                                 auth_request_at=self.create_datetime(2015, 06, 04, 10, 00),
                                                 auth_request_to="some@email.address")
@@ -570,6 +571,10 @@ class EventTest(LiveServerTestCase):
         self.assertIn("Test Item 3", table.text)
 
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertIn("N0000%d" % testEvent.pk,
+                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        # Check the PO hasn't carried through
+        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
 
         self.assertIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
@@ -578,6 +583,10 @@ class EventTest(LiveServerTestCase):
         
         #Check that based-on hasn't crept into the old event
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertNotIn("N0000%d" % testEvent.pk,
+                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        # Check the PO remains on the old event
+        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         self.assertNotIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
 
@@ -1108,7 +1117,7 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertContains(response, "Terms of Hire")
 
         response = self.client.post(self.url)
-        self.assertContains(response, "This field is required.", 4)
+        self.assertContains(response, "This field is required.", 5)
 
         data = self.auth_data
         data['amount'] = self.event.total + 1
@@ -1142,7 +1151,7 @@ class ClientEventAuthorisationTest(TestCase):
 
     def test_duplicate_warning(self):
         auth = models.EventAuthorisation.objects.create(event=self.event, name='Test ABC', email='dupe@functional.test',
-                                                        po='ABC12345', amount=self.event.total, sent_by=self.profile)
+                                                        amount=self.event.total, sent_by=self.profile)
         response = self.client.get(self.url)
         self.assertContains(response, 'This event has already been authorised.')
 

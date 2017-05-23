@@ -9,11 +9,11 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        $('form').on('submit', function() {
-           $('#loading-modal').modal({
-               backdrop: 'static',
-               show: true
-           });
+        $('form').on('submit', function () {
+            $('#loading-modal').modal({
+                backdrop: 'static',
+                show: true
+            });
         });
     </script>
 {% endblock %}
@@ -54,17 +54,15 @@
                         {% csrf_token %}
                         {% include 'form_errors.html' %}
                         <div class="row">
-                            {% if internal %}
-                                <div class="col-sm-12">
-                                    <p>
-                                        I agree that I am authorised to approve this event. I agree that I am the
-                                        <strong>President/Treasurer or account holder</strong> of the hirer, or that I
-                                        have the written permission of the
-                                        <strong>President/Treasurer or account holder</strong> of the hirer stating that
-                                        I can authorise this event.
-                                    </p>
-                                </div>
-                            {% endif %}
+                            <div class="col-sm-12">
+                                <p>
+                                    I agree that I am authorised to approve this event. I agree that I am the
+                                    <strong>President/Treasurer or account holder</strong> of the hirer, or that I
+                                    have the written permission of the
+                                    <strong>President/Treasurer or account holder</strong> of the hirer stating that
+                                    I can authorise this event.
+                                </p>
+                            </div>
 
                             <div class="col-sm-12 col-md-6">
                                 <div class="col-sm-12 form-group" data-toggle="tooltip"
@@ -77,38 +75,25 @@
                                     </div>
                                 </div>
 
-                                {% if internal %}
-                                    <div class="col-sm-12 form-group" data-toggle="tooltip"
-                                         title="Your Student ID or Staff username as the person authorising the event.">
-                                        <label for="{{ form.uni_id.id_for_label }}"
-                                               class="col-sm-4 control-label">{{ form.uni_id.label }}</label>
-                                        <div class="col-sm-8">
-                                            {% render_field form.uni_id class+="form-control" %}
-                                        </div>
+                                <div class="col-sm-12 form-group" data-toggle="tooltip"
+                                     title="Your Student ID or Staff username as the person authorising the event.">
+                                    <label for="{{ form.uni_id.id_for_label }}"
+                                           class="col-sm-4 control-label">{{ form.uni_id.label }}</label>
+                                    <div class="col-sm-8">
+                                        {% render_field form.uni_id class+="form-control" %}
                                     </div>
-                                {% endif %}
+                                </div>
                             </div>
 
                             <div class="col-sm-12 col-md-6">
-                                {% if internal %}
-                                    <div class="col-sm-12 form-group" data-toggle="tooltip"
-                                         title="The Students' Union account code you wish this event to be charged to.">
-                                        <label for="{{ form.account_code.id_for_label }}"
-                                               class="col-sm-4 control-label">{{ form.account_code.label }}</label>
-                                        <div class="col-sm-8">
-                                            {% render_field form.account_code class+="form-control" %}
-                                        </div>
+                                <div class="col-sm-12 form-group" data-toggle="tooltip"
+                                     title="The Students' Union account code you wish this event to be charged to.">
+                                    <label for="{{ form.account_code.id_for_label }}"
+                                           class="col-sm-4 control-label">{{ form.account_code.label }}</label>
+                                    <div class="col-sm-8">
+                                        {% render_field form.account_code class+="form-control" %}
                                     </div>
-                                {% else %}
-                                    <div class="col-sm-12 form-group" data-toggle="tooltip"
-                                         title="Your Purchase Order reference for this event.">
-                                        <label for="{{ form.po.id_for_label }}"
-                                               class="col-sm-4 control-label">{{ form.po.label }}</label>
-                                        <div class="col-sm-8">
-                                            {% render_field form.po class+="form-control" %}
-                                        </div>
-                                    </div>
-                                {% endif %}
+                                </div>
 
                                 <div class="col-sm-12 form-group" data-toggle="tooltip"
                                      title="The full amount chargable for this event as displayed above, including VAT.">
