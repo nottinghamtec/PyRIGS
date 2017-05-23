@@ -34,6 +34,13 @@
                         <para style="head_numbers">{{ invoice.invoice_date|date:"d/m/Y" }}</para>
                     </td>
                 </tr>
+
+            {% if not object.internal %}
+                <tr>
+                    <td><para style="head_titles">PO</para></td>
+                    <td><para style="head_numbers">{{ object.purchase_order }}</para></td>
+                </tr>
+            {% endif %}
             </blockTable>
 
         {% elif quote %}
@@ -210,19 +217,78 @@
     </tr>
     <tr>
         <td></td>
-        <td>
-            <para>
-                <b>Total</b>
-            </para>
-        </td>
-        <td>
-            <para>
-                <b>£ {{ object.total|floatformat:2 }}</b>
-            </para>
-        </td>
+        {% if invoice %}
+            <td>Total</td>
+            <td>£ {{ object.total|floatformat:2 }}</td>
+        {% else %}
+            <td>
+                <para>
+                    <b>Total</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>£ {{ object.total|floatformat:2 }}</b>
+                </para>
+            </td>
+        {% endif %}
     </tr>
     </blockTable>
 </keepTogether>
+
+{% if invoice %}
+    <spacer length="15"/>
+    <keepTogether>
+    <h2>Payments</h2>
+    <blockTable style="itemTable" colWidths="300,115,80">
+        <tr>
+            <td>
+                <para>
+                    <b>Method</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>Date</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>Amount</b>
+                </para>
+            </td>
+        </tr>
+        {% for payment in object.invoice.payment_set.all %}
+            <tr>
+                <td>{{ payment.get_method_display }}</td>
+                <td>{{ payment.date }}</td>
+                <td>£ {{ payment.amount|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+    </blockTable>
+    <blockTable style="totalTable" colWidths="300,115,80">
+        <tr>
+            <td></td>
+            <td>Payment Total</td>
+            <td>£ {{ object.invoice.payment_total|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <para>
+                    <b>Balance</b> (ex. VAT)
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>£ {{ object.invoice.balance|floatformat:2 }}</b>
+                </para>
+            </td>
+        </tr>
+    </blockTable>
+    </keepTogether>
+{% endif %}
+
 <keepTogether>
     <blockTable style="infoTable">
     {% if quote %}
@@ -265,17 +331,6 @@
                         <td>{{ object.authorisation.uni_id }}</td>
                         <td>{{ object.authorisation.account_code }}</td>
                         <td>£ {{ object.authorisation.amount|floatformat:2 }}</td>
-                    </tr>
-                </blockTable>
-            {% elif not object.internal and object.purchase_order %}
-                <blockTable colWidths="330,165">
-                    <tr>
-                        <td></td>
-                        <td><para><b>Purchase Order</b></para></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>{{ object.purchase_order }}</td>
                     </tr>
                 </blockTable>
             {% endif %}
