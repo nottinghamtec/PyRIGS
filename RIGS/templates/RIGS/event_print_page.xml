@@ -268,7 +268,7 @@
                     </tr>
                 </blockTable>
             {% elif not object.internal and object.purchase_order %}
-                <blockTable colWidths="247,248">
+                <blockTable colWidths="330,165">
                     <tr>
                         <td></td>
                         <td><para><b>Purchase Order</b></para></td>
