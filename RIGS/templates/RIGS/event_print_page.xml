@@ -207,16 +207,22 @@
     <tr>
         <td>
             {% if quote %}
-            <para>
-                <b>The full hire fee is payable at least 10 days before the event.</b>
-            </para>
+                <para>
+                    This quote is valid for 30 days unless otherwise arranged.
+                </para>
             {% endif %}
         </td>
         <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
         <td>£ {{ object.vat|floatformat:2 }}</td>
     </tr>
     <tr>
-        <td></td>
+        <td>
+            {% if quote %}
+                <para>
+                    <b>The full hire fee is payable at least 10 days before the event.</b>
+                </para>
+            {% endif %}
+        </td>
         {% if invoice %}
             <td>Total</td>
             <td>£ {{ object.total|floatformat:2 }}</td>
@@ -290,14 +296,22 @@
 {% endif %}
 
 <keepTogether>
-    <blockTable style="infoTable">
+    <blockTable style="infoTable">>
     {% if quote %}
+        <tr><td><spacer length="15" /></td></tr>
         <tr>
             <td>
-                <para>Bookings will
-                    <b>not</b>
-                    be confirmed until the event is authorised online.
-                </para>
+                {% if object.internal %}
+                    <para>Bookings will
+                        <b>not</b>
+                        be confirmed until the event is authorised online.
+                    </para>
+                {% else %}
+                    <para>Bookings will
+                        <b>not</b>
+                        be confirmed until we have received written confirmation and a Purchase Order.
+                    </para>
+                {% endif %}
             </td>
         </tr>
         <tr>
