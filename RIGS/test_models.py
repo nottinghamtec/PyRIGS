@@ -1,5 +1,7 @@
 import pytz
+import reversion
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from RIGS import models
 from datetime import date, timedelta, datetime, time
@@ -354,3 +356,37 @@ class EventPricingTestCase(TestCase):
     def test_grand_total(self):
         self.assertEqual(self.e1.total, Decimal('84.48'))
         self.assertEqual(self.e2.total, Decimal('419.32'))
+
+
+class EventAuthorisationTestCase(TestCase):
+    def setUp(self):
+        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
+        self.person = models.Person.objects.create(name='Authorisation Test Person')
+        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
+                                                start_date=date.today())
+        # Add some items
+        models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,
+                                        order=1)
+
+    def test_event_property(self):
+        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                         name="Test Auth 1", amount=self.event.total - 1,
+                                                         sent_by=self.profile)
+        self.assertFalse(self.event.authorised)
+        auth1.amount = self.event.total
+        auth1.save()
+        self.assertTrue(self.event.authorised)
+
+    def test_last_edited(self):
+        with reversion.revisions.create_revision():
+            auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                        name="Test Auth", amount=self.event.total, sent_by=self.profile)
+        self.assertIsNotNone(auth.last_edited_at)

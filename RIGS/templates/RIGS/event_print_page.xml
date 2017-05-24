@@ -1,58 +1,69 @@
 <setNextFrame name="main"/>
 <nextFrame/>
 
-{% if invoice %}
 
-<blockTable style="invoiceLayout" colWidths="330,165">
+<blockTable style="headLayout" colWidths="330,165">
 <tr>
     <td>
-        {% endif %}
+        <h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'<small></small></h1>
 
-<h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'<small></small></h1>
-
-<para style="style.event_description">
-<b>{{object.start_date|date:"D jS N Y"}}</b>
-</para>
-
-<keepInFrame>
-    <para style="style.event_description">
-    {{ object.description|default_if_none:""|linebreaksbr }}
+        <para style="style.event_description">
+        <b>{{object.start_date|date:"D jS N Y"}}</b>
         </para>
-</keepInFrame>
 
-{% if invoice %}
-
+        <keepInFrame>
+            <para style="style.event_description">
+            {{ object.description|default_if_none:""|linebreaksbr }}
+                </para>
+        </keepInFrame>
     </td>
     <td>
-        <para style="invoice-head">INVOICE</para>
-        <spacer length="10"/>
-        <blockTable style="eventDetails" colWidths="100,175">
-            <tr>
-                <td><para style="invoice_titles">Invoice Number</para></td>
-                <td>
-                    <para style="invoice_numbers">{{ invoice.pk|stringformat:"05d" }}</para>
-                </td>
-            </tr>
-            <tr>
-                <td><para style="invoice_titles">Invoice Date</para></td>
-                <td>
-                    <para style="invoice_numbers">{{ invoice.invoice_date|date:"d/m/Y" }}</para>
-                </td>
-            </tr>
-            <tr>
-                <td><para style="invoice_titles">PO Number</para></td>
-                <td>
-                    <para style="invoice_numbers">{{ object.purchase_order|default_if_none:"" }}</para>
-                </td>
-            </tr>
+        {% if invoice %}
+            <para style="page-head">INVOICE</para>
+            <spacer length="10"/>
+            <blockTable style="eventDetails" colWidths="100,175">
+                <tr>
+                    <td><para style="head_titles">Invoice Number</para></td>
+                    <td>
+                        <para style="head_numbers">{{ invoice.pk|stringformat:"05d" }}</para>
+                    </td>
+                </tr>
+                <tr>
+                    <td><para style="head_titles">Invoice Date</para></td>
+                    <td>
+                        <para style="head_numbers">{{ invoice.invoice_date|date:"d/m/Y" }}</para>
+                    </td>
+                </tr>
 
-        </blockTable>
+            {% if not object.internal %}
+                <tr>
+                    <td><para style="head_titles">PO</para></td>
+                    <td><para style="head_numbers">{{ object.purchase_order }}</para></td>
+                </tr>
+            {% endif %}
+            </blockTable>
+
+        {% elif quote %}
+
+            <para style="page-head">QUOTE</para>
+            <spacer length="10"/>
+            <blockTable style="eventDetails" colWidths="100,175">
+                <tr>
+                    <td><para style="head_titles">Quote Date</para></td>
+                    <td>
+                        <para style="head_numbers">{% now "d/m/Y" %}</para>
+                    </td>
+                </tr>
+            </blockTable>
+
+        {% elif receipt %}
+
+            <para style="page-head">CONFIRMATION</para>
+
+        {% endif %}
     </td>
 </tr>
 </blockTable>
-
-
-{% endif %}
 
 <spacer length="15"/>
 <blockTable style="eventSpecifics" colWidths="165,165,165">
@@ -189,16 +200,16 @@
 <keepTogether>
     <blockTable style="totalTable" colWidths="300,115,80">
     <tr>
-        <td>{% if not invoice %}VAT Registration Number: 170734807{% endif %}</td>
+        <td>{% if quote %}VAT Registration Number: 170734807{% endif %}</td>
         <td>Total (ex. VAT)</td>
         <td>£ {{ object.sum_total|floatformat:2 }}</td>
     </tr>
     <tr>
         <td>
-            {% if not invoice %}
-            <para>
-                <b>The full hire fee is payable at least 10 days before the event.</b>
-            </para>
+            {% if quote %}
+                <para>
+                    This quote is valid for 30 days unless otherwise arranged.
+                </para>
             {% endif %}
         </td>
         <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
@@ -206,113 +217,140 @@
     </tr>
     <tr>
         <td>
-             
-            <para>
-                {% if invoice %}
-                    VAT Registration Number: 170734807
+            {% if quote %}
+                <para>
+                    <b>The full hire fee is payable at least 10 days before the event.</b>
+                </para>
+            {% endif %}
+        </td>
+        {% if invoice %}
+            <td>Total</td>
+            <td>£ {{ object.total|floatformat:2 }}</td>
+        {% else %}
+            <td>
+                <para>
+                    <b>Total</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>£ {{ object.total|floatformat:2 }}</b>
+                </para>
+            </td>
+        {% endif %}
+    </tr>
+    </blockTable>
+</keepTogether>
+
+{% if invoice %}
+    <spacer length="15"/>
+    <keepTogether>
+    <h2>Payments</h2>
+    <blockTable style="itemTable" colWidths="300,115,80">
+        <tr>
+            <td>
+                <para>
+                    <b>Method</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>Date</b>
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>Amount</b>
+                </para>
+            </td>
+        </tr>
+        {% for payment in object.invoice.payment_set.all %}
+            <tr>
+                <td>{{ payment.get_method_display }}</td>
+                <td>{{ payment.date }}</td>
+                <td>£ {{ payment.amount|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+    </blockTable>
+    <blockTable style="totalTable" colWidths="300,115,80">
+        <tr>
+            <td></td>
+            <td>Payment Total</td>
+            <td>£ {{ object.invoice.payment_total|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <para>
+                    <b>Balance</b> (ex. VAT)
+                </para>
+            </td>
+            <td>
+                <para>
+                    <b>£ {{ object.invoice.balance|floatformat:2 }}</b>
+                </para>
+            </td>
+        </tr>
+    </blockTable>
+    </keepTogether>
+{% endif %}
+
+<keepTogether>
+    <blockTable style="infoTable">>
+    {% if quote %}
+        <tr><td><spacer length="15" /></td></tr>
+        <tr>
+            <td>
+                {% if object.internal %}
+                    <para>Bookings will
+                        <b>not</b>
+                        be confirmed until the event is authorised online.
+                    </para>
                 {% else %}
-                    <b>This contract is not an invoice.</b>
+                    <para>Bookings will
+                        <b>not</b>
+                        be confirmed until we have received written confirmation and a Purchase Order.
+                    </para>
                 {% endif %}
-            </para>
-            
-        </td>
+            </td>
+        </tr>
+        <tr>
+            <td>24 Hour Emergency Contacts: 07825 065681 and 07825 065678</td>
+        </tr>
+    {% else %}
+        <tr>
         <td>
-            <para>
-                <b>Total</b>
-            </para>
+            <para>VAT Registration Number: 170734807</para>
         </td>
+        </tr>
+    {% endif %}
+
+    <tr><td><spacer length="15" /></td></tr>
+
+    <tr>
         <td>
-            <para>
-                <b>£ {{ object.total|floatformat:2 }}</b>
-            </para>
+            {% if object.internal and object.authorised %}
+                <para>
+                    Event authorised online by {{ object.authorisation.name }} ({{ object.authorisation.email }}) at
+                    {{ object.authorisation.last_edited_at }}.
+                </para>
+
+                <blockTable colWidths="165,165,165">
+                    <tr>
+                        <td><para><b>University ID</b></para></td>
+                        <td><para><b>Account Code</b></para></td>
+                        <td><para><b>Authorised Amount</b></para></td>
+                    </tr>
+                    <tr>
+                        <td>{{ object.authorisation.uni_id }}</td>
+                        <td>{{ object.authorisation.account_code }}</td>
+                        <td>£ {{ object.authorisation.amount|floatformat:2 }}</td>
+                    </tr>
+                </blockTable>
+            {% endif %}
         </td>
     </tr>
     </blockTable>
 </keepTogether>
-{% if not invoice %}
-    <keepTogether>
-    <blockTable style="infoTable">
-    <tr>
-        <td>
-            <para>Bookings will
-                <b>not</b>
-                be confirmed until payment is received and the contract is signed.
-            </para>
-        </td>
-    </tr>
-    <tr>
-        <td>24 Hour Emergency Contacts: 07825 065681 and 07825 065678</td>
-    </tr>
-    </blockTable>
-    </keepTogether>
-    <spacer length="15"/>
-    <keepTogether>
 
-    <para style="blockPara">
-    <b>To be signed on booking:</b>
-    </para>
-    {% if object.organisation.union_account %}
-        <para style="blockPara">
-        <i>
-            I agree that am authorised to sign this invoice. I agree that I am the President/Treasurer of the hirer, or
-            that I have provided written permission from either the President or Treasurer of the hirer stating that I can
-            sign for this invoice.
-        </i>
-        </para>
-        <para style="blockPara">
-        <i>
-            I have read, understood and fully accepted the current conditions of hire. I agree to return any dry hire
-            items to TEC PA &amp; Lighting in the same condition at the end of the hire period.
-        </i>
-        </para>
-
-        <para style="blockPara">
-        <b>
-            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
-        </b>
-        </para>
-
-        <para style="blockPara">
-        Please return this form directly to TEC PA &amp; Lighting and not the Students' Union Finance Department.
-        </para>
-
-        <blockTable style="signatureTable" colWidths="70,100,325">
-        <tr>
-            <td>Account Code</td>
-            <td></td>
-            <td></td>
-        </tr>
-        </blockTable>
-
-    {% else %}
-        <para style="blockPara">
-        <i>
-            I, the hirer, have read, understand and fully accept the current conditions of hire. This document forms a
-            binding contract between TEC PA &amp; Lighting and the hirer, the aforementioned conditions of hire forming
-            an integral part of it.
-        </i>
-        </para>
-
-        <para style="blockPara">
-        <b>
-            Conditions of hire attached and available on the TEC PA &amp; Lighting website. E&amp;OE
-        </b>
-        </para>
-
-        {% include "RIGS/event_print_signature.xml" %}
-        <spacer length="10"/>
-        <para style="blockPara">
-        <b>To be signed on the day of the event/hire:</b>
-        </para>
-        <para style="blockPara">
-        <i>
-            I, the hirer, have received the goods/services as requested and in good order. I agree to return any dry hire
-            items to TEC PA &amp; Lighting in a similar condition at the end of the hire period.
-        </i>
-        </para>
-    {% endif %}
-
-    {% include "RIGS/event_print_signature.xml" %}
-    </keepTogether>
-    {% endif %}
 <namedString id="lastPage"><pageNumber/></namedString>

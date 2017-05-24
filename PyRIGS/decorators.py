@@ -1,6 +1,5 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import render
-from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
@@ -77,5 +76,19 @@ def api_key_required(function):
 
         if user_object.api_key != key:
             return error_resp
+        return function(request, *args, **kwargs)
+    return wrap
+
+
+def nottinghamtec_address_required(function):
+    """
+    Checks that the current user has an email address ending @nottinghamtec.co.uk
+    """
+    def wrap(request, *args, **kwargs):
+        # Fail if current user's email address isn't @nottinghamtec.co.uk
+        if not request.user.email.endswith('@nottinghamtec.co.uk'):
+            error_resp = render(request, 'RIGS/eventauthorisation_request_error.html')
+            return error_resp
+
         return function(request, *args, **kwargs)
     return wrap

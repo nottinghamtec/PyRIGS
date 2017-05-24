@@ -54,20 +54,22 @@
                         <td><a href="{% url 'event_detail' object.pk %}">N{{ object.pk|stringformat:"05d" }}</a><br>
                             <span class="text-muted">{{ object.get_status_display }}</span></td>
                         <td>{{ object.start_date }}</td>
-                        <td>{{ object.name }}</td>
                         <td>
-                            {% if object.organisation %}
-                                {{ object.organisation.name }}
-                                <br>
-                                <span class="text-muted">{{ object.organisation.union_account|yesno:'Internal,External' }}</span>
-                            {% else %}
-                                {{ object.person.name }}
-                                <br>
-                                <span class="text-muted">External</span>
+                            {{ object.name }}
+                            {% if object.is_rig and perms.RIGS.view_event and object.authorised %}
+                                <span class="glyphicon glyphicon-check"></span>
                             {% endif %}
-
                         </td>
-                        <td>{{ object.sum_total|floatformat:2 }}</td>
+                        <td>
+                            {{ object.organisation.name }}
+                            <br>
+                            <span class="text-muted">{{ object.internal|yesno:'Internal,External' }}</span>
+                        </td>
+                        <td>
+                            {{ object.sum_total|floatformat:2 }}
+                            <br />
+                            <span class="text-muted">{% if not object.internal %}{{ object.purchase_order }}{% endif %}</span>
+                        </td>
                         <td class="text-center">
                             {% if object.mic %}
                                 {{ object.mic.initials }}<br>
@@ -77,7 +79,10 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'invoice_event' object.pk %}" class="btn btn-default" data-toggle="tooltip" title="'Invoice' this event - click this when paperwork has been sent to treasury">
+                            <a href="{% url 'invoice_event' object.pk %}"
+                               class="btn btn-default"
+                               data-toggle="tooltip"
+                               title="'Invoice' this event - click this when paperwork has been sent to treasury">
                                 <span class="glyphicon glyphicon-gbp"></span>
                             </a>
                         </td>

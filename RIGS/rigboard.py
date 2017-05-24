@@ -1,8 +1,9 @@
-import os
 import cStringIO as StringIO
 from io import BytesIO
 import urllib2
 
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.views import generic
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -10,14 +11,19 @@ from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core import signing
 from django.http import HttpResponse
+from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.contrib import messages
+from django.utils.decorators import method_decorator
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
+import premailer
 
 from RIGS import models, forms
+from PyRIGS import decorators
 import datetime
 import re
 import copy
@@ -36,14 +42,16 @@ class RigboardIndex(generic.TemplateView):
         context['events'] = models.Event.objects.current_events()
         return context
 
+
 class WebCalendar(generic.TemplateView):
     template_name = 'RIGS/calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super(WebCalendar, self).get_context_data(**kwargs)
-        context['view'] = kwargs.get('view','')
-        context['date'] = kwargs.get('date','')
+        context['view'] = kwargs.get('view', '')
+        context['date'] = kwargs.get('date', '')
         return context
+
 
 class EventDetail(generic.DetailView):
     model = models.Event
@@ -53,7 +61,6 @@ class EventOembed(generic.View):
     model = models.Event
 
     def get(self, request, pk=None):
-
         embed_url = reverse('event_embed', args=[pk])
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
@@ -85,7 +92,6 @@ class EventCreate(generic.CreateView):
         if re.search('"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
-
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
         for field, model in form.related_models.iteritems():
             value = form[field].value()
@@ -112,20 +118,35 @@ class EventUpdate(generic.UpdateView):
             value = form[field].value()
             if value is not None and value != '':
                 context[field] = model.objects.get(pk=value)
+
+        # If this event has already been emailed to a client, show a warning
+        if self.object.auth_request_at is not None:
+            messages.info(self.request, 'This event has already been sent to the client for authorisation, any changes you make will be visible to them immediately.')
+
+        if hasattr(self.object, 'authorised'):
+            messages.warning(self.request, 'This event has already been authorised by client, any changes to price will require reauthorisation.')
+
         return context
 
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
+
 class EventDuplicate(EventUpdate):
     def get_object(self, queryset=None):
-        old = super(EventDuplicate, self).get_object(queryset) # Get the object (the event you're duplicating)
-        new = copy.copy(old) # Make a copy of the object in memory
-        new.based_on = old # Make the new event based on the old event
+        old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
+        new = copy.copy(old)  # Make a copy of the object in memory
+        new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None
 
-        if self.request.method in ('POST', 'PUT'): # This only happens on save (otherwise items won't display in editor)
-            new.pk = None # This means a new event will be created on save, and all items will be re-created
+        # Remove all the authorisation information from the new event
+        new.auth_request_to = None
+        new.auth_request_by = None
+        new.auth_request_at = None
+
+        if self.request.method in (
+                'POST', 'PUT'):  # This only happens on save (otherwise items won't display in editor)
+            new.pk = None  # This means a new event will be created on save, and all items will be re-created
         else:
             messages.info(self.request, 'Event data duplicated but not yet saved. Click save to complete operation.')
 
@@ -141,34 +162,26 @@ class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
         template = get_template('RIGS/event_print.xml')
-        copies = ('TEC', 'Client')
 
         merger = PdfFileMerger()
 
-        for thisCopy in copies:
+        context = {
+            'object': object,
+            'fonts': {
+                'opensans': {
+                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
+                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                }
+            },
+            'quote': True,
+            'current_user': request.user,
+        }
 
-            context = {  # this should be outside the loop, but bug in 1.8.2 prevents this
-                'object': object,
-                'fonts': {
-                    'opensans': {
-                        'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                        'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-                    }
-                },
-                'copy': thisCopy,
-                'current_user': request.user,
-            }
+        rml = template.render(context)
 
-            # context['copy'] = copy # this is the way to do it once we upgrade to Django 1.8.3
-
-            rml = template.render(context)
-            buffer = StringIO.StringIO()
-
-            buffer = rml2pdf.parseString(rml)
-
-            merger.append(PdfFileReader(buffer))
-
-            buffer.close()
+        buffer = rml2pdf.parseString(rml)
+        merger.append(PdfFileReader(buffer))
+        buffer.close()
 
         terms = urllib2.urlopen(settings.TERMS_OF_HIRE_URL)
         merger.append(StringIO.StringIO(terms.read()))
@@ -183,6 +196,7 @@ class EventPrint(generic.View):
         response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())
         return response
+
 
 class EventArchive(generic.ArchiveIndexView):
     model = models.Event
@@ -220,3 +234,148 @@ class EventArchive(generic.ArchiveIndexView):
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
 
         return qs
+
+
+class EventAuthorise(generic.UpdateView):
+    template_name = 'RIGS/eventauthorisation_form.html'
+    success_template = 'RIGS/eventauthorisation_success.html'
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        self.template_name = self.success_template
+        messages.add_message(self.request, messages.SUCCESS,
+                             'Success! Your event has been authorised. ' +
+                             'You will also receive email confirmation to %s.' % (self.object.email))
+        return self.render_to_response(self.get_context_data())
+
+    @property
+    def event(self):
+        return models.Event.objects.select_related('organisation', 'person', 'venue').get(pk=self.kwargs['pk'])
+
+    def get_object(self, queryset=None):
+        return getattr(self.event, 'authorisation', None)
+
+    def get_form_class(self):
+        return forms.InternalClientEventAuthorisationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EventAuthorise, self).get_context_data(**kwargs)
+        context['event'] = self.event
+
+        context['tos_url'] = settings.TERMS_OF_HIRE_URL
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.get_object() is not None and self.get_object().pk is not None:
+            if self.event.authorised:
+                messages.add_message(self.request, messages.WARNING,
+                                     "This event has already been authorised. "
+                                     "Reauthorising is not necessary at this time.")
+            else:
+                messages.add_message(self.request, messages.WARNING,
+                                     "This event has already been authorised, but the amount has changed. " +
+                                     "Please check the amount and reauthorise.")
+        return super(EventAuthorise, self).get(request, *args, **kwargs)
+
+    def get_form(self, **kwargs):
+        form = super(EventAuthorise, self).get_form(**kwargs)
+        form.instance.event = self.event
+        form.instance.email = self.request.email
+        form.instance.sent_by = self.request.sent_by
+        return form
+
+    def dispatch(self, request, *args, **kwargs):
+        # Verify our signature matches up and all is well with the integrity of the URL
+        try:
+            data = signing.loads(kwargs.get('hmac'))
+            assert int(kwargs.get('pk')) == int(data.get('pk'))
+            request.email = data['email']
+            request.sent_by = models.Profile.objects.get(pk=data['sent_by'])
+        except (signing.BadSignature, AssertionError, KeyError, models.Profile.DoesNotExist):
+            raise SuspiciousOperation(
+                "This URL is invalid. Please ask your TEC contact for a new URL")
+        return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
+
+
+class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
+    model = models.Event
+    form_class = forms.EventAuthorisationRequestForm
+    template_name = 'RIGS/eventauthorisation_request.html'
+
+    @method_decorator(decorators.nottinghamtec_address_required)
+    def dispatch(self, *args, **kwargs):
+        return super(EventAuthorisationRequest, self).dispatch(*args, **kwargs)
+
+    @property
+    def object(self):
+        return self.get_object()
+
+    def get_success_url(self):
+        if self.request.is_ajax():
+            url = reverse_lazy('closemodal')
+            messages.info(self.request, "location.reload()")
+        else:
+            url = reverse_lazy('event_detail', kwargs={
+                'pk': self.object.pk,
+            })
+            messages.add_message(self.request, messages.SUCCESS, "Authorisation request successfully sent.")
+        return url
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        event = self.object
+        event.auth_request_by = self.request.user
+        event.auth_request_at = datetime.datetime.now()
+        event.auth_request_to = email
+        event.save()
+
+        context = {
+            'object': self.object,
+            'request': self.request,
+            'hmac': signing.dumps({
+                'pk': self.object.pk,
+                'email': email,
+                'sent_by': self.request.user.pk,
+            }),
+        }
+        if email == event.person.email:
+            context['to_name'] = event.person.name
+
+        msg = EmailMultiAlternatives(
+            "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
+            get_template("RIGS/eventauthorisation_client_request.txt").render(context),
+            to=[email],
+            reply_to=[self.request.user.email],
+        )
+        css = staticfiles_storage.path('css/email.css')
+        html = premailer.Premailer(get_template("RIGS/eventauthorisation_client_request.html").render(context),
+                                   external_styles=css).transform()
+        msg.attach_alternative(html, 'text/html')
+
+        msg.send()
+
+        return super(EventAuthorisationRequest, self).form_valid(form)
+
+
+class EventAuthoriseRequestEmailPreview(generic.DetailView):
+    template_name = "RIGS/eventauthorisation_client_request.html"
+    model = models.Event
+
+    def render_to_response(self, context, **response_kwargs):
+        from django.contrib.staticfiles.storage import staticfiles_storage
+        css = staticfiles_storage.path('css/email.css')
+        response = super(EventAuthoriseRequestEmailPreview, self).render_to_response(context, **response_kwargs)
+        assert isinstance(response, HttpResponse)
+        response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super(EventAuthoriseRequestEmailPreview, self).get_context_data(**kwargs)
+        context['hmac'] = signing.dumps({
+            'pk': self.object.pk,
+            'email': self.request.GET.get('email', 'hello@world.test'),
+            'sent_by': self.request.user.pk,
+        })
+        context['to_name'] = self.request.GET.get('to_name', None)
+        return context

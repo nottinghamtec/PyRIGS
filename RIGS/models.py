@@ -332,6 +332,11 @@ class Event(models.Model, RevisionMixin):
     purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
     collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
+    # Authorisation request details
+    auth_request_by = models.ForeignKey('Profile', null=True, blank=True)
+    auth_request_at = models.DateTimeField(null=True, blank=True)
+    auth_request_to = models.EmailField(null=True, blank=True)
+
     # Calculated values
     """
     EX Vat
@@ -364,7 +369,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def vat(self):
-        return self.sum_total * self.vat_rate.rate
+        return Decimal(self.sum_total * self.vat_rate.rate).quantize(Decimal('.01'))
 
     """
     Inc VAT
@@ -372,7 +377,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def total(self):
-        return self.sum_total + self.vat
+        return Decimal(self.sum_total + self.vat).quantize(Decimal('.01'))
 
     @property
     def cancelled(self):
@@ -381,6 +386,10 @@ class Event(models.Model, RevisionMixin):
     @property
     def confirmed(self):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
+
+    @property
+    def authorised(self):
+        return not self.internal and self.purchase_order or self.authorisation.amount == self.total
 
     @property
     def has_start_time(self):
@@ -442,6 +451,10 @@ class Event(models.Model, RevisionMixin):
         else:
             return endDate
 
+    @property
+    def internal(self):
+        return self.organisation and self.organisation.union_account
+
     objects = EventManager()
 
     def get_absolute_url(self):
@@ -496,6 +509,17 @@ class EventCrew(models.Model):
     run = models.BooleanField(default=False)
     derig = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
+
+
+@reversion.register
+class EventAuthorisation(models.Model, RevisionMixin):
+    event = models.OneToOneField('Event', related_name='authorisation')
+    email = models.EmailField()
+    name = models.CharField(max_length=255)
+    uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
+    account_code = models.CharField(max_length=50, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
+    sent_by = models.ForeignKey('RIGS.Profile')
 
 
 @python_2_unicode_compatible
