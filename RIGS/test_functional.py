@@ -26,50 +26,14 @@ from django.conf import settings
 
 import sys
 
-browsers = [{"platform": "macOS 10.12",
-             "browserName": "chrome",
-             "version": "latest"},
-            ]
+def create_browser():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    return driver
 
-
-def on_platforms(platforms):
-    if not os.environ.get("TRAVIS"):
-        platforms = {'local'}
-
-    def decorator(base_class):
-        module = sys.modules[base_class.__module__].__dict__
-        for i, platform in enumerate(platforms):
-            d = dict(base_class.__dict__)
-            d['desired_capabilities'] = platform
-            name = "%s_%s" % (base_class.__name__, i + 1)
-            module[name] = type(name, (base_class,), d)
-    
-    return decorator
-
-
-
-
-def create_browser(test_name, desired_capabilities):
-    # return webdriver.Chrome()
-    if os.environ.get("TRAVIS"):
-        username = os.environ["SAUCE_USERNAME"]
-        access_key = os.environ["SAUCE_ACCESS_KEY"]
-        caps = {'browserName': desired_capabilities['browserName']}
-        caps['platform'] = desired_capabilities['platform']
-        caps['version'] = desired_capabilities['version']
-        caps["tunnel-identifier"] = os.environ["TRAVIS_JOB_NUMBER"]
-        caps["name"] = '#' + os.environ["TRAVIS_JOB_NUMBER"] + ": " + test_name
-        hub_url = "%s:%s@localhost:4445" % (username, access_key)
-        driver = webdriver.Remote(desired_capabilities=caps, command_executor="http://%s/wd/hub" % hub_url)
-        return driver
-    else:
-        return webdriver.Chrome()
-
-
-@on_platforms(browsers)
 class UserRegistrationTest(LiveServerTestCase):
     def setUp(self):
-        self.browser = create_browser(self.id(), self.desired_capabilities)
+        self.browser = create_browser()
 
         self.browser.implicitly_wait(3)  # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
@@ -198,7 +162,6 @@ class UserRegistrationTest(LiveServerTestCase):
 
         # All is well
 
-@on_platforms(browsers)
 class EventTest(LiveServerTestCase):
     def setUp(self):
         self.profile = models.Profile(
@@ -209,7 +172,7 @@ class EventTest(LiveServerTestCase):
 
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
         
-        self.browser = create_browser(self.id(), self.desired_capabilities)
+        self.browser = create_browser()
         self.browser.implicitly_wait(10) # Set implicit wait session wide
         # self.browser.maximize_window()
 
@@ -622,6 +585,7 @@ class EventTest(LiveServerTestCase):
         self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-23'")
 
         # Attempt to save - should fail
+        wait.until(animation_is_finished())
         save.click()
 
         error = self.browser.find_element_by_xpath('//div[contains(@class, "alert-danger")]')
@@ -726,6 +690,7 @@ class EventTest(LiveServerTestCase):
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
 
         # Save the rig
+        wait.until(animation_is_finished())
         save.click()
         detail_panel = self.browser.find_element_by_xpath("//div[@id='content']/div/div[6]/div/div")
         self.assertTrue(detail_panel.is_displayed())
@@ -841,7 +806,6 @@ class EventTest(LiveServerTestCase):
         tz = pytz.timezone(settings.TIME_ZONE)
         return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
 
-@on_platforms(browsers)
 class IcalTest(LiveServerTestCase):
     def setUp(self):
         self.all_events = set(range(1, 18))
@@ -904,7 +868,7 @@ class IcalTest(LiveServerTestCase):
                                     description="non rig today cancelled")
 
 
-        self.browser = create_browser(self.id(), self.desired_capabilities)
+        self.browser = create_browser()
         self.browser.implicitly_wait(3) # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
