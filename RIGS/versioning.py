@@ -241,7 +241,7 @@ class ActivityTable(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation])
+        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
         return versions
 
     def get_context_data(self, **kwargs):
@@ -265,7 +265,7 @@ class ActivityFeed(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation])
+        versions = get_versions_for_model([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
         return versions
 
     def get_context_data(self, **kwargs):
