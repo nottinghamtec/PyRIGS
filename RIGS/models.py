@@ -521,6 +521,13 @@ class EventAuthorisation(models.Model, RevisionMixin):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
     sent_by = models.ForeignKey('RIGS.Profile')
 
+    def get_absolute_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
+
+    @property
+    def activity_feed_string(self):
+        return unicode("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
+
 
 @python_2_unicode_compatible
 class Invoice(models.Model):
