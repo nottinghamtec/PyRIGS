@@ -14,7 +14,7 @@ premailer==3.0.1
 django-widget-tweaks==1.4.1
 gunicorn==19.7.1
 icalendar==3.11.4
-lxml==3.7.3
+lxml==3.8.0
 Markdown==2.6.8
 Pillow==4.1.1
 psycopg2==2.7.1
