@@ -3,7 +3,7 @@ import re
 import urllib2
 from io import BytesIO
 
-import reversion
+from django.db.models.signals import post_save
 from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -89,10 +89,9 @@ def send_eventauthorisation_success_email(instance):
     mic_email.send(fail_silently=True)
 
 
-def on_revision_commit(instances, **kwargs):
-    for instance in instances:
-        if isinstance(instance, models.EventAuthorisation):
-            send_eventauthorisation_success_email(instance)
+def on_revision_commit(sender, instance, created, **kwargs):
+    if created:
+        send_eventauthorisation_success_email(instance)
 
 
-reversion.revisions.post_revision_commit.connect(on_revision_commit)
+post_save.connect(on_revision_commit, sender=models.EventAuthorisation)
