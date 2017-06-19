@@ -119,17 +119,17 @@ def compare_event_items(old, new):
     # Build some dicts of what we have
     item_dict = {}  # build a list of items, key is the item_pk
     for version in old_item_versions:  # put all the old versions in a list
-        if version.field_dict["event"] == old.object_id_int:
-            compare = ItemCompare(old=version.object_version.object)
+        if version.field_dict["event_id"] == int(old.object_id):
+            compare = ItemCompare(old=version._object_version.object)
             item_dict[version.object_id] = compare
 
     for version in new_item_versions:  # go through the new versions
-        if version.field_dict["event"] == new.object_id_int:
+        if version.field_dict["event_id"] == int(new.object_id):
             try:
                 compare = item_dict[version.object_id]  # see if there's a matching old version
-                compare.new = version.object_version.object  # then add the new version to the dictionary
+                compare.new = version._object_version.object  # then add the new version to the dictionary
             except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
-                compare = ItemCompare(new=version.object_version.object)
+                compare = ItemCompare(new=version._object_version.object)
 
             item_dict[version.object_id] = compare  # update the dictionary with the changes
 
@@ -158,7 +158,7 @@ def get_previous_version(version):
     thisId = version.object_id
     thisVersionId = version.pk
 
-    versions = reversion.revisions.get_for_object_reference(version.content_type.model_class(), thisId)
+    versions = Version.objects.get_for_object_reference(version.content_type.model_class(), thisId).all()
 
     try:
         previousVersions = versions.filter(revision_id__lt=version.revision_id).latest(
@@ -180,7 +180,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
 
     compare = {
         'revision': newVersion.revision,
-        'new': newVersion.object_version.object,
+        'new': newVersion._object_version.object,
         'current': modelClass.objects.filter(pk=newVersion.pk).first(),
         'version': newVersion,
 
@@ -191,7 +191,7 @@ def get_changes_for_version(newVersion, oldVersion=None):
     }
 
     if oldVersion:
-        compare['old'] = oldVersion.object_version.object
+        compare['old'] = oldVersion._object_version.object
         compare['field_changes'] = model_compare(compare['old'], compare['new'])
         compare['item_changes'] = compare_event_items(oldVersion, newVersion)
 
@@ -207,7 +207,7 @@ class VersionHistory(generic.ListView):
         thisModel = self.kwargs['model']
 
         # thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
-        versions = reversion.revisions.get_for_object_reference(thisModel, self.kwargs['pk'])
+        versions = Version.objects.get_for_object_reference(thisModel, self.kwargs['pk']).all()
 
         return versions
 
