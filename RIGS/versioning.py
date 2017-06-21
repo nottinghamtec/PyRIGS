@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 import logging
 import datetime
@@ -51,8 +51,8 @@ class FieldComparison(object):
 
     @property
     def diff(self):
-        oldText = unicode(self.display_value(self._old)) or ""
-        newText = unicode(self.display_value(self._new)) or ""
+        oldText = str(self.display_value(self._old)) or ""
+        newText = str(self.display_value(self._new)) or ""
         dmp = diff_match_patch()
         diffs = dmp.diff_main(oldText, newText)
         dmp.diff_cleanupSemantic(diffs)
@@ -145,7 +145,7 @@ class ModelComparison(object):
                 item_dict[version.object_id] = compare  # update the dictionary with the changes
 
         changes = []
-        for (_, compare) in item_dict.items():
+        for (_, compare) in list(item_dict.items()):
             if compare.fields_changed:
                 changes.append(compare)
 

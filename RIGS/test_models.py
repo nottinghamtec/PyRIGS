@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 import pytz
 from reversion import revisions as reversion
@@ -119,7 +119,7 @@ class EventTestCase(TestCase):
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             if event.pk % 2:
                 event.venue = v1
                 e1.append(event)
@@ -131,7 +131,7 @@ class EventTestCase(TestCase):
         self.assertItemsEqual(e1, v1.latest_events)
         self.assertItemsEqual(e2, v2.latest_events)
 
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             event.venue = None
 
     def test_related_vatrate(self):
@@ -143,7 +143,7 @@ class EventTestCase(TestCase):
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             if event.pk % 2:
                 event.person = p1
                 e1.append(event)
@@ -155,7 +155,7 @@ class EventTestCase(TestCase):
         self.assertItemsEqual(e1, p1.latest_events)
         self.assertItemsEqual(e2, p2.latest_events)
 
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             event.person = None
 
     def test_related_organisation(self):
@@ -164,7 +164,7 @@ class EventTestCase(TestCase):
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             if event.pk % 2:
                 event.organisation = o1
                 e1.append(event)
@@ -176,7 +176,7 @@ class EventTestCase(TestCase):
         self.assertItemsEqual(e1, o1.latest_events)
         self.assertItemsEqual(e2, o2.latest_events)
 
-        for (key, event) in self.events.iteritems():
+        for (key, event) in self.events.items():
             event.organisation = None
 
     def test_organisation_person_join(self):
@@ -235,29 +235,29 @@ class EventTestCase(TestCase):
         event.save()
 
     def test_earliest_time(self):
-        event = models.Event(name="TE ET", start_date=date(2016, 01, 01))
+        event = models.Event(name="TE ET", start_date=date(2016, 0o1, 0o1))
 
         # Just a start date
-        self.assertEqual(event.earliest_time, date(2016, 01, 01))
+        self.assertEqual(event.earliest_time, date(2016, 0o1, 0o1))
 
         # With start time
         event.start_time = time(9, 00)
         self.assertEqual(event.earliest_time, self.create_datetime(2016, 1, 1, 9, 00))
 
         # With access time
-        event.access_at = self.create_datetime(2015, 12, 03, 9, 57)
+        event.access_at = self.create_datetime(2015, 12, 0o3, 9, 57)
         self.assertEqual(event.earliest_time, event.access_at)
 
         # With meet time
-        event.meet_at = self.create_datetime(2015, 12, 03, 9, 55)
+        event.meet_at = self.create_datetime(2015, 12, 0o3, 9, 55)
         self.assertEqual(event.earliest_time, event.meet_at)
 
         # Check order isn't important
-        event.start_date = date(2015, 12, 03)
-        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 03, 9, 00))
+        event.start_date = date(2015, 12, 0o3)
+        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 0o3, 9, 00))
 
     def test_latest_time(self):
-        event = models.Event(name="TE LT", start_date=date(2016, 01, 01))
+        event = models.Event(name="TE LT", start_date=date(2016, 0o1, 0o1))
 
         # Just start date
         self.assertEqual(event.latest_time, event.start_date)
@@ -279,8 +279,8 @@ class EventTestCase(TestCase):
             # basic checks
             manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
             manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
-            manager.create(name='TE IB4', start_date='2016-01-04', access_at=self.create_datetime(2016, 01, 03, 00, 00)),
-            manager.create(name='TE IB5', start_date='2016-01-04', meet_at=self.create_datetime(2016, 01, 02, 00, 00)),
+            manager.create(name='TE IB4', start_date='2016-01-04', access_at=self.create_datetime(2016, 0o1, 0o3, 00, 00)),
+            manager.create(name='TE IB5', start_date='2016-01-04', meet_at=self.create_datetime(2016, 0o1, 0o2, 00, 00)),
 
             # negative check
             manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),

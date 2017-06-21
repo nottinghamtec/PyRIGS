@@ -407,9 +407,9 @@ class EventTest(LiveServerTestCase):
             self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
             self.assertIn("This is an item description",
                           row.find_element_by_xpath('//div[@class="item-description"]').text)
-            self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
+            self.assertEqual('£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
             self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
-            self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
+            self.assertEqual('£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
 
             # Check totals
             self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
@@ -461,7 +461,7 @@ class EventTest(LiveServerTestCase):
                                                 description="start future no end",
                                                 purchase_order='TESTPO',
                                                 auth_request_by=self.profile,
-                                                auth_request_at=self.create_datetime(2015, 06, 04, 10, 00),
+                                                auth_request_at=self.create_datetime(2015, 0o6, 0o4, 10, 00),
                                                 auth_request_to="some@email.address")
 
         item1 = models.EventItem(
@@ -760,12 +760,12 @@ class EventTest(LiveServerTestCase):
             'organisation': organisation,
             'venue': venue,
             'mic': self.profile,
-            'start_date': date(2015, 06, 04),
-            'end_date': date(2015, 06, 05),
+            'start_date': date(2015, 0o6, 0o4),
+            'end_date': date(2015, 0o6, 0o5),
             'start_time': time(10, 00),
             'end_time': time(15, 00),
-            'meet_at': self.create_datetime(2015, 06, 04, 10, 00),
-            'access_at': self.create_datetime(2015, 06, 04, 10, 00),
+            'meet_at': self.create_datetime(2015, 0o6, 0o4, 10, 00),
+            'access_at': self.create_datetime(2015, 0o6, 0o4, 10, 00),
             'collector': 'A Person'
         }
 
@@ -795,11 +795,11 @@ class EventTest(LiveServerTestCase):
         reloadedItem = models.EventItem.objects.get(name='Detail Item 1')
 
         # Check the event
-        for key, value in eventData.iteritems():
+        for key, value in eventData.items():
             self.assertEqual(str(getattr(reloadedEvent, key)), str(value))
 
         # Check the item
-        for key, value in item1Data.iteritems():
+        for key, value in item1Data.items():
             self.assertEqual(str(getattr(reloadedItem, key)), str(value))
 
     def create_datetime(self, year, month, day, hour, min):

@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 from RIGS import models, forms
+from functools import reduce
 
 """
 Displays the current rig count along with a few other bits and pieces

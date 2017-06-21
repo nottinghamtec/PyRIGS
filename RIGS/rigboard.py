@@ -1,6 +1,6 @@
-import cStringIO as StringIO
+import io as StringIO
 from io import BytesIO
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -93,7 +93,7 @@ class EventCreate(generic.CreateView):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-        for field, model in form.related_models.iteritems():
+        for field, model in form.related_models.items():
             value = form[field].value()
             if value is not None and value != '':
                 context[field] = model.objects.get(pk=value)
@@ -114,7 +114,7 @@ class EventUpdate(generic.UpdateView):
         form = context['form']
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-        for field, model in form.related_models.iteritems():
+        for field, model in form.related_models.items():
             value = form[field].value()
             if value is not None and value != '':
                 context[field] = model.objects.get(pk=value)
@@ -183,7 +183,7 @@ class EventPrint(generic.View):
         merger.append(PdfFileReader(buffer))
         buffer.close()
 
-        terms = urllib2.urlopen(settings.TERMS_OF_HIRE_URL)
+        terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
         merger.append(StringIO.StringIO(terms.read()))
 
         merged = BytesIO()

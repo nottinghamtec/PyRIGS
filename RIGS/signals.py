@@ -1,6 +1,6 @@
-import cStringIO as StringIO
+import io as StringIO
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from io import BytesIO
 
 from django.db.models.signals import post_save
@@ -38,7 +38,7 @@ def send_eventauthorisation_success_email(instance):
     merger.append(PdfFileReader(buffer))
     buffer.close()
 
-    terms = urllib2.urlopen(settings.TERMS_OF_HIRE_URL)
+    terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
     merger.append(StringIO.StringIO(terms.read()))
 
     merged = BytesIO()

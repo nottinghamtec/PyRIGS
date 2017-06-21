@@ -1,4 +1,4 @@
-import cStringIO as StringIO
+import io as StringIO
 import datetime
 import re
 
