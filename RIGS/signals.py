@@ -1,4 +1,3 @@
-import io as StringIO
 import re
 import urllib.request, urllib.error, urllib.parse
 from io import BytesIO
@@ -39,7 +38,7 @@ def send_eventauthorisation_success_email(instance):
     buffer.close()
 
     terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
-    merger.append(StringIO.StringIO(terms.read()))
+    merger.append(BytesIO(terms.read()))
 
     merged = BytesIO()
     merger.write(merged)

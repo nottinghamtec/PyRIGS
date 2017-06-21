@@ -1,4 +1,3 @@
-import io as StringIO
 from io import BytesIO
 import urllib.request, urllib.error, urllib.parse
 
@@ -184,7 +183,7 @@ class EventPrint(generic.View):
         buffer.close()
 
         terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
-        merger.append(StringIO.StringIO(terms.read()))
+        merger.append(BytesIO(terms.read()))
 
         merged = BytesIO()
         merger.write(merged)

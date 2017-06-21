@@ -1,4 +1,3 @@
-import io as StringIO
 import datetime
 import re
 
@@ -72,7 +71,6 @@ class InvoicePrint(generic.View):
         }
 
         rml = template.render(context)
-        buffer = StringIO.StringIO()
 
         buffer = rml2pdf.parseString(rml)
 
