@@ -38,7 +38,7 @@ class Profile(AbstractUser):
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
+            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.encode('utf-8')).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
