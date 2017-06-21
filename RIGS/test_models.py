@@ -128,8 +128,8 @@ class EventTestCase(TestCase):
                 e2.append(event)
             event.save()
 
-        self.assertItemsEqual(e1, v1.latest_events)
-        self.assertItemsEqual(e2, v2.latest_events)
+        self.assertCountEqual(e1, v1.latest_events)
+        self.assertCountEqual(e2, v2.latest_events)
 
         for (key, event) in self.events.items():
             event.venue = None
@@ -152,8 +152,8 @@ class EventTestCase(TestCase):
                 e2.append(event)
             event.save()
 
-        self.assertItemsEqual(e1, p1.latest_events)
-        self.assertItemsEqual(e2, p2.latest_events)
+        self.assertCountEqual(e1, p1.latest_events)
+        self.assertCountEqual(e2, p2.latest_events)
 
         for (key, event) in self.events.items():
             event.person = None
@@ -173,8 +173,8 @@ class EventTestCase(TestCase):
                 e2.append(event)
             event.save()
 
-        self.assertItemsEqual(e1, o1.latest_events)
-        self.assertItemsEqual(e2, o2.latest_events)
+        self.assertCountEqual(e1, o1.latest_events)
+        self.assertCountEqual(e2, o2.latest_events)
 
         for (key, event) in self.events.items():
             event.organisation = None
