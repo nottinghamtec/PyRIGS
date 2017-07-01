@@ -16,7 +16,7 @@ gunicorn==19.7.1
 icalendar==3.11.4
 lxml==3.8.0
 Markdown==2.6.8
-Pillow==4.1.1
+Pillow==4.2.0
 psycopg2==2.7.1
 Pygments==2.2.0
 PyPDF2==1.26.0
