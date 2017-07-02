@@ -35,3 +35,6 @@ script:
 after_success:
   - coveralls
   - codeclimate-test-reporter
+
+notifications:
+  webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
