@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
 from reversion import revisions as reversion
+from reversion.models import Version
 import string
 
 import random
@@ -62,31 +63,30 @@ class Profile(AbstractUser):
 
 class RevisionMixin(object):
     @property
+    def current_version(self):
+        version = Version.objects.get_for_object(self).select_related('revision').first()
+        return version
+
+    @property
     def last_edited_at(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return version.revision.date_created
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return version.revision.date_created
 
     @property
     def last_edited_by(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return version.revision.user
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return version.revision.user
 
     @property
     def current_version_id(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return "V{0} | R{1}".format(version.pk, version.revision.pk)
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return "V{0} | R{1}".format(version.pk, version.revision.pk)
 
 
 @reversion.register

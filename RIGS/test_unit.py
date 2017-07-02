@@ -294,6 +294,39 @@ class TestVersioningViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
 
+    # Some edge cases that have caused server errors in the past
+    def test_deleted_event(self):
+        request_url = reverse('activity_feed')
+
+        self.events[2].delete()
+
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, "TE E2")
+        self.assertEqual(response.status_code, 200)
+
+    def test_deleted_relation(self):
+        request_url = reverse('activity_feed')
+
+        with reversion.create_revision():
+            person = models.Person.objects.create(name="Test Person")
+        with reversion.create_revision():
+            self.events[1].person = person
+            self.events[1].save()
+
+        # Check response contains person
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, "Test Person")
+        self.assertEqual(response.status_code, 200)
+
+        # Delete person
+        person.delete()
+
+        # Check response still contains person
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, "Test Person")
+        self.assertEqual(response.status_code, 200)
+
+
 
 class TestEmbeddedViews(TestCase):
     @classmethod
