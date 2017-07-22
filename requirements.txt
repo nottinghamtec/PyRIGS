@@ -17,7 +17,7 @@ icalendar==3.11.5
 lxml==3.8.0
 Markdown==2.6.8
 Pillow==4.2.1
-psycopg2==2.7.1
+psycopg2==2.7.2
 Pygments==2.2.0
 PyPDF2==1.26.0
 python-dateutil==2.6.1
