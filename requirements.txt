@@ -15,7 +15,7 @@ django-widget-tweaks==1.4.1
 gunicorn==19.7.1
 icalendar==3.11.6
 lxml==3.8.0
-Markdown==2.6.8
+Markdown==2.6.9
 Pillow==4.2.1
 psycopg2==2.7.3
 Pygments==2.2.0
@@ -24,7 +24,7 @@ python-dateutil==2.6.1
 pytz==2017.2
 raven==6.1.0
 reportlab==3.4.0
-selenium==3.4.3
+selenium==3.5.0
 simplejson==3.11.1
 six==1.10.0
 sqlparse==0.2.3
