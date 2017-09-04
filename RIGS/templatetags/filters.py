@@ -17,7 +17,7 @@ def to_class_name(value):
 def nice_errors(form, non_field_msg='General form errors'):
     nice_errors = ErrorDict()
     if isinstance(form, forms.BaseForm):
-        for field, errors in form.errors.items():
+        for field, errors in list(form.errors.items()):
             if field == NON_FIELD_ERRORS:
                 key = non_field_msg
             else:

@@ -38,7 +38,7 @@ class Profile(AbstractUser):
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
+            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.encode('utf-8')).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
@@ -461,7 +461,7 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return unicode(self.pk) + ": " + self.name
+        return str(self.pk) + ": " + self.name
 
     def clean(self):
         if self.end_date and self.start_date > self.end_date:
@@ -526,7 +526,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return unicode("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
+        return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
 @python_2_unicode_compatible

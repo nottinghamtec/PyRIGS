@@ -407,9 +407,9 @@ class EventTest(LiveServerTestCase):
             self.assertIn("Test Item 1", row.find_element_by_xpath('//span[@class="name"]').text)
             self.assertIn("This is an item description",
                           row.find_element_by_xpath('//div[@class="item-description"]').text)
-            self.assertEqual(u'£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
+            self.assertEqual('£ 23.95', row.find_element_by_xpath('//tr[@id="item--1"]/td[2]').text)
             self.assertEqual("2", row.find_element_by_xpath('//td[@class="quantity"]').text)
-            self.assertEqual(u'£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
+            self.assertEqual('£ 47.90', row.find_element_by_xpath('//tr[@id="item--1"]/td[4]').text)
 
             # Check totals
             self.assertEqual("47.90", self.browser.find_element_by_id('sumtotal').text)
@@ -461,7 +461,7 @@ class EventTest(LiveServerTestCase):
                                                 description="start future no end",
                                                 purchase_order='TESTPO',
                                                 auth_request_by=self.profile,
-                                                auth_request_at=self.create_datetime(2015, 06, 04, 10, 00),
+                                                auth_request_at=self.create_datetime(2015, 0o6, 0o4, 10, 00),
                                                 auth_request_to="some@email.address")
 
         item1 = models.EventItem(
@@ -760,12 +760,12 @@ class EventTest(LiveServerTestCase):
             'organisation': organisation,
             'venue': venue,
             'mic': self.profile,
-            'start_date': date(2015, 06, 04),
-            'end_date': date(2015, 06, 05),
+            'start_date': date(2015, 0o6, 0o4),
+            'end_date': date(2015, 0o6, 0o5),
             'start_time': time(10, 00),
             'end_time': time(15, 00),
-            'meet_at': self.create_datetime(2015, 06, 04, 10, 00),
-            'access_at': self.create_datetime(2015, 06, 04, 10, 00),
+            'meet_at': self.create_datetime(2015, 0o6, 0o4, 10, 00),
+            'access_at': self.create_datetime(2015, 0o6, 0o4, 10, 00),
             'collector': 'A Person'
         }
 
@@ -795,11 +795,11 @@ class EventTest(LiveServerTestCase):
         reloadedItem = models.EventItem.objects.get(name='Detail Item 1')
 
         # Check the event
-        for key, value in eventData.iteritems():
+        for key, value in eventData.items():
             self.assertEqual(str(getattr(reloadedEvent, key)), str(value))
 
         # Check the item
-        for key, value in item1Data.iteritems():
+        for key, value in item1Data.items():
             self.assertEqual(str(getattr(reloadedItem, key)), str(value))
 
     def create_datetime(self, year, month, day, hour, min):
@@ -941,16 +941,18 @@ class IcalTest(LiveServerTestCase):
         response = c.get(icalUrl)
         self.assertEqual(200, response.status_code)
 
+        # content = response.content.decode('utf-8')
+
         # Check has entire file
-        self.assertIn("BEGIN:VCALENDAR", response.content)
-        self.assertIn("END:VCALENDAR", response.content)
+        self.assertContains(response, "BEGIN:VCALENDAR")
+        self.assertContains(response, "END:VCALENDAR")
 
         expectedIn = [1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17]
         for test in range(1, 18):
             if test in expectedIn:
-                self.assertIn("TE E" + str(test) + " ", response.content)
+                self.assertContains(response, "TE E" + str(test) + " ")
             else:
-                self.assertNotIn("TE E" + str(test) + " ", response.content)
+                self.assertNotContains(response, "TE E" + str(test) + " ")
 
         # Only dry hires
         self.browser.find_element_by_xpath("//input[@value='rig']").click()
@@ -963,9 +965,9 @@ class IcalTest(LiveServerTestCase):
         expectedIn = [10, 11, 12, 13]
         for test in range(1, 18):
             if test in expectedIn:
-                self.assertIn("TE E" + str(test) + " ", response.content)
+                self.assertContains(response, "TE E" + str(test) + " ")
             else:
-                self.assertNotIn("TE E" + str(test) + " ", response.content)
+                self.assertNotContains(response, "TE E" + str(test) + " ")
 
         # Only provisional rigs
         self.browser.find_element_by_xpath("//input[@value='rig']").click()
@@ -979,9 +981,9 @@ class IcalTest(LiveServerTestCase):
         expectedIn = [1, 2]
         for test in range(1, 18):
             if test in expectedIn:
-                self.assertIn("TE E" + str(test) + " ", response.content)
+                self.assertContains(response, "TE E" + str(test) + " ")
             else:
-                self.assertNotIn("TE E" + str(test) + " ", response.content)
+                self.assertNotContains(response, "TE E" + str(test) + " ")
 
         # Only cancelled non-rigs
         self.browser.find_element_by_xpath("//input[@value='rig']").click()
@@ -996,9 +998,9 @@ class IcalTest(LiveServerTestCase):
         expectedIn = [18]
         for test in range(1, 18):
             if test in expectedIn:
-                self.assertIn("TE E" + str(test) + " ", response.content)
+                self.assertContains(response, "TE E" + str(test) + " ")
             else:
-                self.assertNotIn("TE E" + str(test) + " ", response.content)
+                self.assertNotContains(response, "TE E" + str(test) + " ")
 
         # Nothing selected
         self.browser.find_element_by_xpath("//input[@value='non-rig']").click()
@@ -1011,9 +1013,9 @@ class IcalTest(LiveServerTestCase):
         expectedIn = []
         for test in range(1, 18):
             if test in expectedIn:
-                self.assertIn("TE E" + str(test) + " ", response.content)
+                self.assertContains(response, "TE E" + str(test) + " ")
             else:
-                self.assertNotIn("TE E" + str(test) + " ", response.content)
+                self.assertNotContains(response, "TE E" + str(test) + " ")
 
                 # Wow - that was a lot of tests
 

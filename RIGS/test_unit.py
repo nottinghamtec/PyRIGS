@@ -53,19 +53,19 @@ class TestAdminMergeObjects(TestCase):
         change_url = reverse('admin:RIGS_venue_changelist')
         data = {
             'action': 'merge',
-            '_selected_action': [unicode(val.pk) for key, val in self.venues.iteritems()]
+            '_selected_action': [str(val.pk) for key, val in self.venues.items()]
 
         }
         response = self.client.post(change_url, data, follow=True)
 
         self.assertContains(response, "The following objects will be merged")
-        for key, venue in self.venues.iteritems():
+        for key, venue in self.venues.items():
             self.assertContains(response, venue.name)
 
     def test_merge_no_master(self):
         change_url = reverse('admin:RIGS_venue_changelist')
         data = {'action': 'merge',
-                '_selected_action': [unicode(val.pk) for key, val in self.venues.iteritems()],
+                '_selected_action': [str(val.pk) for key, val in self.venues.items()],
                 'post': 'yes',
                 }
         response = self.client.post(change_url, data, follow=True)
@@ -76,7 +76,7 @@ class TestAdminMergeObjects(TestCase):
         change_url = reverse('admin:RIGS_venue_changelist')
 
         data = {'action': 'merge',
-                '_selected_action': [unicode(self.venues[1].pk), unicode(self.venues[2].pk)],
+                '_selected_action': [str(self.venues[1].pk), str(self.venues[2].pk)],
                 'post': 'yes',
                 'master': self.venues[1].pk
                 }
@@ -95,7 +95,7 @@ class TestAdminMergeObjects(TestCase):
         self.assertEqual(models.Venue.objects.get(pk=self.venues[3].pk), self.venues[3])
 
         # Check the events have been moved to the master venue
-        for key, event in self.events.iteritems():
+        for key, event in self.events.items():
             updatedEvent = models.Event.objects.get(pk=event.pk)
             if event.venue == self.venues[3]:  # The one we left in place
                 continue
@@ -105,7 +105,7 @@ class TestAdminMergeObjects(TestCase):
         change_url = reverse('admin:RIGS_person_changelist')
 
         data = {'action': 'merge',
-                '_selected_action': [unicode(self.persons[1].pk), unicode(self.persons[2].pk)],
+                '_selected_action': [str(self.persons[1].pk), str(self.persons[2].pk)],
                 'post': 'yes',
                 'master': self.persons[1].pk
                 }
@@ -124,7 +124,7 @@ class TestAdminMergeObjects(TestCase):
         self.assertEqual(models.Person.objects.get(pk=self.persons[3].pk), self.persons[3])
 
         # Check the events have been moved to the master person
-        for key, event in self.events.iteritems():
+        for key, event in self.events.items():
             updatedEvent = models.Event.objects.get(pk=event.pk)
             if event.person == self.persons[3]:  # The one we left in place
                 continue
@@ -134,7 +134,7 @@ class TestAdminMergeObjects(TestCase):
         change_url = reverse('admin:RIGS_organisation_changelist')
 
         data = {'action': 'merge',
-                '_selected_action': [unicode(self.organisations[1].pk), unicode(self.organisations[2].pk)],
+                '_selected_action': [str(self.organisations[1].pk), str(self.organisations[2].pk)],
                 'post': 'yes',
                 'master': self.organisations[1].pk
                 }
@@ -153,7 +153,7 @@ class TestAdminMergeObjects(TestCase):
         self.assertEqual(models.Organisation.objects.get(pk=self.organisations[3].pk), self.organisations[3])
 
         # Check the events have been moved to the master organisation
-        for key, event in self.events.iteritems():
+        for key, event in self.events.items():
             updatedEvent = models.Event.objects.get(pk=event.pk)
             if event.organisation == self.organisations[3]:  # The one we left in place
                 continue
@@ -421,4 +421,4 @@ class TestSampleDataGenerator(TestCase):
     def test_production_exception(self):
         from django.core.management.base import CommandError
 
-        self.assertRaisesRegexp(CommandError, ".*production", call_command, 'generateSampleData')
+        self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleData')
