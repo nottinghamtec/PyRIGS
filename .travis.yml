@@ -30,6 +30,8 @@ before_script:
   - python manage.py collectstatic --noinput
 
 script:
+  - python manage.py check
+  - python manage.py makemigrations --check --dry-run
   - coverage run manage.py test --verbosity=2
 
 after_success:
