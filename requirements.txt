@@ -26,7 +26,7 @@ raven==6.1.0
 reportlab==3.4.0
 selenium==3.5.0
 simplejson==3.11.1
-six==1.10.0
+six==1.11.0
 sqlparse==0.2.3
 static3==0.7.0
 svg2rlg==0.3
