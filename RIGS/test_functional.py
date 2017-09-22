@@ -29,6 +29,7 @@ import sys
 
 def create_browser():
     options = webdriver.ChromeOptions()
+    options.add_argument("--window-size=1920,1080")
     if os.environ.get('CI', False):
         options.add_argument("--headless")
     driver = webdriver.Chrome(chrome_options=options)
