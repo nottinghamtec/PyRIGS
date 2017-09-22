@@ -1,5 +1,7 @@
 import re
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 from io import BytesIO
 
 from django.db.models.signals import post_save
@@ -62,7 +64,7 @@ def send_eventauthorisation_success_email(instance):
 
     css = staticfiles_storage.path('css/email.css')
     html = Premailer(get_template("RIGS/eventauthorisation_client_success.html").render(context),
-                               external_styles=css).transform()
+                     external_styles=css).transform()
     client_email.attach_alternative(html, 'text/html')
 
     escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', instance.event.name)

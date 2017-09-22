@@ -9,6 +9,7 @@ from django.test.utils import override_settings
 from RIGS import models
 from reversion import revisions as reversion
 
+
 class TestAdminMergeObjects(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -159,6 +160,7 @@ class TestAdminMergeObjects(TestCase):
                 continue
             self.assertEqual(updatedEvent.organisation, self.organisations[1])
 
+
 class TestInvoiceDelete(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -186,7 +188,7 @@ class TestInvoiceDelete(TestCase):
         self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
 
     def test_invoice_delete_allowed(self):
-        request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[2].pk})
+        request_url = reverse('invoice_delete', kwargs={'pk': self.invoices[2].pk})
 
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "Are you sure")
@@ -201,7 +203,7 @@ class TestInvoiceDelete(TestCase):
         self.assertRaises(ObjectDoesNotExist, models.Invoice.objects.get, pk=self.invoices[2].pk)
 
     def test_invoice_delete_not_allowed(self):
-        request_url = reverse('invoice_delete', kwargs={'pk':self.invoices[1].pk})
+        request_url = reverse('invoice_delete', kwargs={'pk': self.invoices[1].pk})
 
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "To delete an invoice, delete the payments first.")
@@ -325,7 +327,6 @@ class TestVersioningViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "Test Person")
         self.assertEqual(response.status_code, 200)
-
 
 
 class TestEmbeddedViews(TestCase):

@@ -1,4 +1,3 @@
-__author__ = 'Ghost'
 from django import forms
 from django.utils import formats
 from django.conf import settings
@@ -16,6 +15,8 @@ forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
 forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
 # Registration
+
+
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     captcha = ReCaptchaField()
 

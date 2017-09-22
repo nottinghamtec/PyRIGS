@@ -373,7 +373,7 @@ class EventAuthorisationTestCase(TestCase):
         self.person = models.Person.objects.create(name='Authorisation Test Person')
         self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
         self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
-                                                start_date=date.today())
+                                                 start_date=date.today())
         # Add some items
         models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,
                                         order=1)
@@ -390,7 +390,7 @@ class EventAuthorisationTestCase(TestCase):
     def test_last_edited(self):
         with reversion.create_revision():
             auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
-                                                        name="Test Auth", amount=self.event.total, sent_by=self.profile)
+                                                            name="Test Auth", amount=self.event.total, sent_by=self.profile)
         self.assertIsNotNone(auth.last_edited_at)
 
 
@@ -494,9 +494,9 @@ class RIGSVersionTestCase(TestCase):
         # Check the diff is correct
         self.assertEqual(currentVersion.changes.field_changes[0].diff,
                          [{'type': 'equal', 'text': "A"},
-                         {'type': 'delete', 'text': " new"},
-                         {'type': 'insert', 'text': "n old"},
-                         {'type': 'equal', 'text': " note on the event"}
+                          {'type': 'delete', 'text': " new"},
+                          {'type': 'insert', 'text': "n old"},
+                          {'type': 'equal', 'text': " note on the event"}
                           ])
 
     def test_choice_field(self):
@@ -554,7 +554,7 @@ class RIGSVersionTestCase(TestCase):
         # Check the diff
         self.assertEqual(currentVersion.changes.item_changes[0].field_changes[0].diff,
                          [{'type': 'delete', 'text': "TI I1"},
-                         {'type': 'insert', 'text': "New Name"},
+                          {'type': 'insert', 'text': "New Name"},
                           ])
 
         # Delete the item
@@ -575,4 +575,3 @@ class RIGSVersionTestCase(TestCase):
 
         self.assertEqual(diffs[0].old.name, "New Name")
         self.assertTrue(diffs[0].new is None)
-        

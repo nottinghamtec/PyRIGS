@@ -95,6 +95,7 @@ class InvoiceVoid(generic.View):
             return HttpResponseRedirect(reverse_lazy('invoice_list'))
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': object.pk}))
 
+
 class InvoiceDelete(generic.DeleteView):
     model = models.Invoice
 
@@ -114,6 +115,7 @@ class InvoiceDelete(generic.DeleteView):
 
     def get_success_url(self):
         return self.request.POST.get('next')
+
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
@@ -143,11 +145,11 @@ class InvoiceWaiting(generic.ListView):
         events = self.model.objects.filter(
             (
                 Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
-                Q(end_date__lte=datetime.date.today()) # Has end date, finishes before
-            ) & Q(invoice__isnull=True) # Has not already been invoiced
-            & Q(is_rig=True) # Is a rig (not non-rig)
-            
-            ).order_by('start_date') \
+                Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
+            ) & Q(invoice__isnull=True) &  # Has not already been invoiced
+            Q(is_rig=True)  # Is a rig (not non-rig)
+
+        ).order_by('start_date') \
             .select_related('person',
                             'organisation',
                             'venue', 'mic') \
@@ -176,7 +178,7 @@ class PaymentCreate(generic.CreateView):
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()
         invoicepk = self.request.GET.get('invoice', self.request.POST.get('invoice', None))
-        if invoicepk == None:
+        if invoicepk is None:
             raise Http404()
         invoice = get_object_or_404(models.Invoice, pk=invoicepk)
         initial.update({'invoice': invoice})

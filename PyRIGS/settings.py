@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import raven
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -37,7 +38,7 @@ if DEBUG:
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True # Redirect all http requests to https
+    SECURE_SSL_REDIRECT = True  # Redirect all http requests to https
 
 INTERNAL_IPS = ['127.0.0.1']
 
@@ -96,7 +97,7 @@ if not DEBUG:
 
     DATABASES['default'] = dj_database_url.config()
 
-# Logging 
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -143,8 +144,6 @@ LOGGING = {
         },
     }
 }
-
-import raven
 
 RAVEN_CONFIG = {
     'dsn': os.environ.get('RAVEN_DSN'),
