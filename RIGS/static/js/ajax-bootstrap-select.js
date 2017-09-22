@@ -3,16 +3,16 @@
  *
  * Extends existing [Bootstrap Select] implementations by adding the ability to search via AJAX requests as you type. Originally for CROSCON.
  *
- * @version 1.3.1
+ * @version 1.4.1
  * @author Adam Heim - https://github.com/truckingsim
  * @link https://github.com/truckingsim/Ajax-Bootstrap-Select
- * @copyright 2015 Adam Heim
+ * @copyright 2017 Adam Heim
  * @license Released under the MIT license.
  *
  * Contributors:
  *   Mark Carver - https://github.com/markcarver
  *
- * Last build: 2015-01-06 8:43:11 PM EST
+ * Last build: 2017-07-21 1:08:54 PM GMT-0400
  */
 !(function ($, window) {
 
@@ -186,10 +186,25 @@ var AjaxBootstrapSelect = function (element, options) {
     if (dataKeys.length) {
         // Object containing the data attribute options.
         var dataOptions = {};
+        var flattenedOptions = ['locale'];
         for (i = 0, l = dataKeys.length; i < l; i++) {
             var name = dataKeys[i].replace(/^abs([A-Z])/, matchToLowerCase).replace(/([A-Z])/g, '-$1').toLowerCase();
+            var keys = name.split('-');
+
+            // Certain options should be flattened to a single object
+            // and not fully expanded (such as Locale).
+            if (keys[0] && keys.length > 1 && flattenedOptions.indexOf(keys[0]) !== -1) {
+                var newKeys = [keys.shift()];
+                var property = '';
+                // Combine the remaining keys as a single property.
+                for (var ii = 0; ii < keys.length; ii++) {
+                    property += (ii === 0 ? keys[ii] : keys[ii].charAt(0).toUpperCase() + keys[ii].slice(1));
+                }
+                newKeys.push(property);
+                keys = newKeys;
+            }
             this.log(this.LOG_DEBUG, 'Processing data attribute "data-abs-' + name + '":', data[dataKeys[i]]);
-            expandObject(name.split('-'), data[dataKeys[i]], dataOptions);
+            expandObject(keys, data[dataKeys[i]], dataOptions);
         }
         this.options = $.extend(true, {}, this.options, dataOptions);
         this.log(this.LOG_DEBUG, 'Merged in the data attribute options: ', dataOptions, this.options);
@@ -313,6 +328,12 @@ AjaxBootstrapSelect.prototype.init = function () {
         // Don't process ignored keys.
         if (plugin.options.ignoredKeys[e.keyCode]) {
             plugin.log(plugin.LOG_DEBUG, 'Key ignored.');
+            return;
+        }
+		
+        // Don't process if below minimum query length
+        if (query.length < plugin.options.minLength) {
+            plugin.list.setStatus(plugin.t('statusTooShort'));
             return;
         }
 
@@ -573,8 +594,25 @@ var AjaxBootstrapSelectList = function (plugin) {
     this.title = null;
     this.selectedTextFormat = plugin.selectpicker.options.selectedTextFormat;
 
+    // Save initial options
+    var initial_options = [];
+    plugin.$element.find('option').each(function() {
+        var $option = $(this);
+        var value = $option.attr('value');
+        initial_options.push({
+            value: value,
+            text: $option.text(),
+            'class': $option.attr('class') || '',
+            data: $option.data() || {},
+            preserved: plugin.options.preserveSelected,
+            selected: !!$option.attr('selected')
+        });
+    });
+    this.cacheSet(/*query=*/'', initial_options);
+
     // Preserve selected options.
     if (plugin.options.preserveSelected) {
+        that.selected = initial_options;
         plugin.$element.on('change.abs.preserveSelected', function (e) {
             var $selected = plugin.$element.find(':selected');
             that.selected = [];
@@ -644,7 +682,7 @@ AjaxBootstrapSelectList.prototype.build = function (data) {
         }
 
         // Set various properties.
-        $option.val(item.value).text(item.text);
+        $option.val(item.value).text(item.text).attr('title', item.text);
         if (item['class'].length) {
             $option.attr('class', item['class']);
         }
@@ -732,7 +770,13 @@ AjaxBootstrapSelectList.prototype.refresh = function (triggerChange) {
     if (!this.plugin.$element.find('option').length && emptyTitle && emptyTitle.length) {
         this.setTitle(emptyTitle);
     }
-    else if (this.title) {
+    else if (
+        this.title ||
+        (
+            this.selectedTextFormat !== 'static' && 
+            this.selectedTextFormat !== this.plugin.selectpicker.options.selectedTextFormat
+        )
+    ) {
         this.restoreTitle();
     }
     this.plugin.selectpicker.refresh();
@@ -1224,6 +1268,14 @@ $.fn.ajaxSelectPicker.defaults = {
         }
     },
 
+	/**
+ 	 * @member $.fn.ajaxSelectPicker.defaults
+	 * @cfg {Number} minLength = 0
+	 * @markdown
+	 * Invoke a request for empty search values.
+	 */
+    minLength: 0,
+
     /**
      * @member $.fn.ajaxSelectPicker.defaults
      * @cfg {String} ajaxSearchUrl
@@ -1296,8 +1348,7 @@ $.fn.ajaxSelectPicker.defaults = {
      *     39: "right",
      *     38: "up",
      *     40: "down",
-     *     91: "meta",
-     *     229: "unknown"
+     *     91: "meta"
      * }
      * ```
      */
@@ -1311,8 +1362,7 @@ $.fn.ajaxSelectPicker.defaults = {
         39: "right",
         38: "up",
         40: "down",
-        91: "meta",
-        229: "unknown"
+        91: "meta"
     },
 
     /**
@@ -1406,7 +1456,7 @@ $.fn.ajaxSelectPicker.defaults = {
      * }
      * ```
      */
-    preprocessData: function(){},
+    preprocessData: function () { },
 
     /**
      * @member $.fn.ajaxSelectPicker.defaults
@@ -1434,7 +1484,7 @@ $.fn.ajaxSelectPicker.defaults = {
      * @markdown
      * Process the data returned after this plugin, but before the list is built.
      */
-    processData: function(){},
+    processData: function () { },
 
     /**
      * @member $.fn.ajaxSelectPicker.defaults
@@ -1547,7 +1597,15 @@ $.fn.ajaxSelectPicker.locale['en-US'] = {
      * @markdown
      * The text to use in the status container when a request is being initiated.
      */
-    statusSearching: 'Searching...'
+    statusSearching: 'Searching...',
+
+	/**
+     * @member $.fn.ajaxSelectPicker.locale
+     * @cfg {String} statusToShort = 'Please enter more characters'
+     * @markdown
+     * The text used in the status container when the request returns no results.
+     */
+    statusTooShort: 'Please enter more characters'
 };
 $.fn.ajaxSelectPicker.locale.en = $.fn.ajaxSelectPicker.locale['en-US'];
 
