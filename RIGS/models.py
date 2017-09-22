@@ -1,6 +1,7 @@
 import datetime
 import hashlib
-import datetime, pytz
+import datetime
+import pytz
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -32,7 +33,7 @@ class Profile(AbstractUser):
         size = 20
         chars = string.ascii_letters + string.digits
         new_api_key = ''.join(random.choice(chars) for x in range(size))
-        return new_api_key;
+        return new_api_key
 
     @property
     def profile_picture(self):

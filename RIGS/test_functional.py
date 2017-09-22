@@ -35,6 +35,7 @@ def create_browser():
     driver = webdriver.Chrome(chrome_options=options)
     return driver
 
+
 class UserRegistrationTest(LiveServerTestCase):
     def setUp(self):
         self.browser = create_browser()
@@ -166,6 +167,7 @@ class UserRegistrationTest(LiveServerTestCase):
 
         # All is well
 
+
 class EventTest(LiveServerTestCase):
     def setUp(self):
         self.profile = models.Profile(
@@ -173,11 +175,10 @@ class EventTest(LiveServerTestCase):
         self.profile.set_password("EventTestPassword")
         self.profile.save()
 
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
 
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05',rate=0.20,comment='test1')
-        
         self.browser = create_browser()
-        self.browser.implicitly_wait(10) # Set implicit wait session wide
+        self.browser.implicitly_wait(10)  # Set implicit wait session wide
         # self.browser.maximize_window()
 
         os.environ['RECAPTCHA_TESTING'] = 'True'
@@ -222,7 +223,7 @@ class EventTest(LiveServerTestCase):
             # Gets redirected to login and back
             self.authenticate('/event/create/')
 
-            wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
+            wait = WebDriverWait(self.browser, 3)  # setup WebDriverWait to use later (to wait for animations)
 
             wait.until(animation_is_finished())
 
@@ -436,7 +437,7 @@ class EventTest(LiveServerTestCase):
                 self.assertFalse(error.is_displayed())
             except StaleElementReferenceException:
                 pass
-            except:
+            except BaseException:
                 self.assertFail("Element does not appear to have been deleted")
 
             # Check at least some data is preserved. Some = all will be there
@@ -453,7 +454,7 @@ class EventTest(LiveServerTestCase):
             successTitle = self.browser.find_element_by_xpath('//h1').text
             event = models.Event.objects.get(name='Test Event Name')
 
-            self.assertIn("N%05d | Test Event Name"%event.pk, successTitle)
+            self.assertIn("N%05d | Test Event Name" % event.pk, successTitle)
         except WebDriverException:
             # This is a dirty workaround for wercker being a bit funny and not running it correctly.
             # Waiting for wercker to get back to me about this
@@ -487,8 +488,7 @@ class EventTest(LiveServerTestCase):
         self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk) + '/duplicate/')
         self.authenticate('/event/' + str(testEvent.pk) + '/duplicate/')
 
-
-        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
+        wait = WebDriverWait(self.browser, 3)  # setup WebDriverWait to use later (to wait for animations)
 
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
@@ -525,11 +525,11 @@ class EventTest(LiveServerTestCase):
         self.assertEqual(newEvent.auth_request_to, None)
         self.assertEqual(newEvent.auth_request_by, None)
         self.assertEqual(newEvent.auth_request_at, None)
-        
+
         self.assertFalse(hasattr(newEvent, 'authorised'))
 
-        self.assertNotIn("N%05d"%testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
-        self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text) # Check info message not visible
+        self.assertNotIn("N%05d" % testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
+        self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text)  # Check info message not visible
 
         # Check the new items are visible
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -543,19 +543,18 @@ class EventTest(LiveServerTestCase):
         # Check the PO hasn't carried through
         self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
+        self.assertIn("N%05d" % testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
-        self.assertIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk))  # Go back to the old event
 
-        self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk)) #Go back to the old event
-        
-        #Check that based-on hasn't crept into the old event
+        # Check that based-on hasn't crept into the old event
         infoPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
         self.assertNotIn("N0000%d" % testEvent.pk,
                          infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
         # Check the PO remains on the old event
         self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
-        self.assertNotIn("N%05d"%testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)        
+        self.assertNotIn("N%05d" % testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -568,8 +567,7 @@ class EventTest(LiveServerTestCase):
         # Gets redirected to login and back
         self.authenticate('/event/create/')
 
-
-        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
+        wait = WebDriverWait(self.browser, 3)  # setup WebDriverWait to use later (to wait for animations)
 
         wait.until(animation_is_finished())
 
@@ -631,7 +629,7 @@ class EventTest(LiveServerTestCase):
         # No end date, end time before start time
         form = self.browser.find_element_by_tag_name('form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
-        
+
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
         self.browser.execute_script("document.getElementById('id_end_date').value=''")
 
@@ -653,10 +651,9 @@ class EventTest(LiveServerTestCase):
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
         self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-26'")
 
-
         self.browser.execute_script("document.getElementById('id_start_time').value=''")
         self.browser.execute_script("document.getElementById('id_end_time').value=''")
-        
+
         # Attempt to save - should succeed
         save.click()
 
@@ -664,16 +661,15 @@ class EventTest(LiveServerTestCase):
         successTitle = self.browser.find_element_by_xpath('//h1').text
         event = models.Event.objects.get(name='Test Event Name')
 
-        self.assertIn("N%05d | Test Event Name"%event.pk, successTitle)
-        
+        self.assertIn("N%05d | Test Event Name" % event.pk, successTitle)
+
     def testRigNonRig(self):
         self.browser.get(self.live_server_url + '/event/create/')
         # Gets redirected to login and back
         self.authenticate('/event/create/')
 
-
-        wait = WebDriverWait(self.browser, 3) #setup WebDriverWait to use later (to wait for animations)
-        self.browser.implicitly_wait(3) #Set session-long wait (only works for non-existant DOM objects)
+        wait = WebDriverWait(self.browser, 3)  # setup WebDriverWait to use later (to wait for animations)
+        self.browser.implicitly_wait(3)  # Set session-long wait (only works for non-existant DOM objects)
 
         wait.until(animation_is_finished())
 
@@ -750,7 +746,6 @@ class EventTest(LiveServerTestCase):
 
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
 
-
     def testEventEdit(self):
         person = models.Person(name="Event Edit Person", email="eventdetail@person.tests.rigs", phone="123 123").save()
         organisation = models.Organisation(name="Event Edit Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456").save()
@@ -809,6 +804,7 @@ class EventTest(LiveServerTestCase):
     def create_datetime(self, year, month, day, hour, min):
         tz = pytz.timezone(settings.TIME_ZONE)
         return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
+
 
 class IcalTest(LiveServerTestCase):
     def setUp(self):
@@ -871,9 +867,8 @@ class IcalTest(LiveServerTestCase):
         models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED,
                                     description="non rig today cancelled")
 
-
         self.browser = create_browser()
-        self.browser.implicitly_wait(3) # Set implicit wait session wide
+        self.browser.implicitly_wait(3)  # Set implicit wait session wide
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
     def tearDown(self):
@@ -1068,7 +1063,7 @@ class ClientEventAuthorisationTest(TestCase):
             organisation=organisation,
         )
         self.hmac = signing.dumps({'pk': self.event.pk, 'email': 'authemail@function.test',
-                                                      'sent_by': self.profile.pk})
+                                   'sent_by': self.profile.pk})
         self.url = reverse('event_authorise', kwargs={'pk': self.event.pk, 'hmac': self.hmac})
 
     def test_requires_valid_hmac(self):
@@ -1177,7 +1172,7 @@ class TECEventAuthorisationTest(TestCase):
         self.profile.save()
 
         self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))
-        
+
         response = self.client.post(self.url)
 
         self.assertContains(response, 'must have an @nottinghamtec.co.uk email address')

@@ -19,6 +19,7 @@ from multiprocessing import Process
 # Slight fix for needing to restablish the connection
 connection.close()
 
+
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
         email += "@nottingham.ac.uk"
@@ -258,7 +259,7 @@ def import_nonrigs(delete=False):
     if (delete):
         try:
             models.Event.objects.filter(is_rig=False).delete()
-        except:
+        except BaseException:
             pass
     cursor = setup_cursor()
     if cursor is None:
@@ -286,7 +287,7 @@ def import_invoices(delete=False):
         try:
             models.Invoice.objects.all().delete()
             models.Payment.objects.all().delete()
-        except:
+        except BaseException:
             pass
     cursor = setup_cursor()
     if cursor is None:
@@ -332,6 +333,7 @@ def import_invoices(delete=False):
             p2.date = datetime.date.today()
             p2.save()
 
+
 @transaction.atomic
 def main():
     # processs = []
@@ -340,7 +342,7 @@ def main():
     # processs.append(Process(target=import_organisations, args=(True,)))
     # processs.append(Process(target=import_vat_rates, args=(True,)))
     # processs.append(Process(target=import_venues, args=(True,)))
-    
+
     #  # Start all processs
     # [x.start() for x in processs]
     # # Wait for all processs to finish
@@ -351,7 +353,7 @@ def main():
     import_organisations(True)
     import_vat_rates(True)
     import_venues(True)
-    
+
     import_rigs(True)
     import_eventitem(True)
     import_invoices(True)
@@ -367,6 +369,7 @@ def main():
         sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (seq, seq)
         cursor = connections['default'].cursor()
         cursor.execute(sql)
+
 
 if __name__ == "__main__":
     main()
