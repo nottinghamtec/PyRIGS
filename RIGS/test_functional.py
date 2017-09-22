@@ -26,9 +26,12 @@ from django.conf import settings
 
 import sys
 
+
 def create_browser():
-    driver = webdriver.Chrome()
-    driver.maximize_window()
+    options = webdriver.ChromeOptions()
+    if os.environ.get('CI', False):
+        options.add_argument("--headless")
+    driver = webdriver.Chrome(chrome_options=options)
     return driver
 
 class UserRegistrationTest(LiveServerTestCase):
