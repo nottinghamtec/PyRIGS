@@ -99,7 +99,7 @@ class CalendarICS(ICalFeed):
         return item.earliest_time
 
     def item_end_datetime(self, item):
-        if isinstance(item.latest_time, datetime.date):  # Ical end_datetime is non-inclusive, so add a day
+        if type(item.latest_time) == datetime.date:  # Ical end_datetime is non-inclusive, so add a day
             return item.latest_time + datetime.timedelta(days=1)
 
         return item.latest_time
@@ -137,7 +137,7 @@ class CalendarICS(ICalFeed):
         # if item.notes:  // Need to add proper keyholder checks before this gets put back
         #     desc += 'Notes:\n'+item.notes+'\n\n'
 
-        base_url = "http://rigs.nottinghamtec.co.uk"
+        base_url = "https://rigs.nottinghamtec.co.uk"
         desc += 'URL = ' + base_url + str(item.get_absolute_url())
 
         return desc
