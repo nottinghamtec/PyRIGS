@@ -834,7 +834,9 @@ class IcalTest(LiveServerTestCase):
                                     description="start past 1 week with end past")
         models.Event.objects.create(name="TE E6", status=models.Event.BOOKED,
                                     start_date=date.today() - timedelta(days=2),
-                                    end_date=date.today() + timedelta(days=2), description="start past, end future")
+                                    start_time=time(8, 00),
+                                    end_date=date.today() + timedelta(days=2),
+                                    end_time=time(23, 00), description="start past, end future")
         models.Event.objects.create(name="TE E7", status=models.Event.BOOKED,
                                     start_date=date.today() + timedelta(days=2),
                                     end_date=date.today() + timedelta(days=2), description="start + end in future")
@@ -924,6 +926,8 @@ class IcalTest(LiveServerTestCase):
         # Awesome - all seems to work
 
     def testICSFiles(self):
+        specialEvent = models.Event.objects.get(name="TE E6")
+
         # Requests address
         self.browser.get(self.live_server_url + '/user/')
         # Gets redirected to login
@@ -952,6 +956,10 @@ class IcalTest(LiveServerTestCase):
                 self.assertContains(response, "TE E" + str(test) + " ")
             else:
                 self.assertNotContains(response, "TE E" + str(test) + " ")
+
+        # Check that times have been included correctly
+        self.assertContains(response, specialEvent.start_date.strftime('%Y%m%d') + 'T' + specialEvent.start_time.strftime('%H%M%S'))
+        self.assertContains(response, specialEvent.end_date.strftime('%Y%m%d') + 'T' + specialEvent.end_time.strftime('%H%M%S'))
 
         # Only dry hires
         self.browser.find_element_by_xpath("//input[@value='rig']").click()
