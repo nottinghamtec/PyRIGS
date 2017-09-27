@@ -27,7 +27,7 @@ reportlab==3.4.0
 selenium==3.6.0
 simplejson==3.11.1
 six==1.11.0
-sqlparse==0.2.3
+sqlparse==0.2.4
 static3==0.7.0
 svg2rlg==0.3
 yolk==0.4.3
