@@ -21,7 +21,7 @@ psycopg2==2.7.3.2
 Pygments==2.2.0
 PyPDF2==1.26.0
 python-dateutil==2.6.1
-pytz==2017.2
+pytz==2017.3
 raven==6.3.0
 reportlab==3.4.0
 selenium==3.6.0
