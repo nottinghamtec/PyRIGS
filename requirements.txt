@@ -13,7 +13,7 @@ django-toolbelt==0.0.1
 premailer==3.1.1
 django-widget-tweaks==1.4.1
 gunicorn==19.7.1
-icalendar==3.11.7
+icalendar==3.12
 lxml==4.1.1
 Markdown==2.6.9
 Pillow==4.3.0
