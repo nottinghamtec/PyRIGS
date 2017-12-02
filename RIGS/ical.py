@@ -1,7 +1,7 @@
 from RIGS import models, forms
 from django_ical.views import ICalFeed
 from django.db.models import Q
-from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
+from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.utils import timezone
 from django.conf import settings
 

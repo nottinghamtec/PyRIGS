@@ -18,7 +18,7 @@ from collections import Counter
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 
 
 # Create your models here.

@@ -18,7 +18,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from RIGS import models
 
 from reversion import revisions as reversion
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core import mail, signing
 
 
