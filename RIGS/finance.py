@@ -2,7 +2,7 @@ import datetime
 import re
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
