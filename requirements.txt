@@ -24,7 +24,7 @@ python-dateutil==2.6.1
 pytz==2017.3
 raven==6.4.0
 reportlab==3.4.0
-selenium==3.8.0
+selenium==3.8.1
 simplejson==3.13.2
 six==1.11.0
 sqlparse==0.2.4
