@@ -7,7 +7,7 @@ Django==2.0.1
 django-debug-toolbar==1.9.1
 django-ical==1.4
 django-recaptcha==1.3.1
-django-registration-redux==2.0
+django-registration-redux==2.1
 django-reversion==2.0.12
 django-toolbelt==0.0.1
 premailer==3.1.1
