@@ -514,7 +514,7 @@ class EventCrew(models.Model):
 
 @reversion.register
 class EventAuthorisation(models.Model, RevisionMixin):
-    event = models.OneToOneField('Event', related_name='authorisation')
+    event = models.OneToOneField('Event', related_name='authorisation', on_delete=models.CASCADE)
     email = models.EmailField()
     name = models.CharField(max_length=255)
     uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
@@ -532,7 +532,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
 @python_2_unicode_compatible
 class Invoice(models.Model):
-    event = models.OneToOneField('Event')
+    event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
 
