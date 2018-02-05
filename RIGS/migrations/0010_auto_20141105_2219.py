@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('run', models.BooleanField(default=False)),
                 ('derig', models.BooleanField(default=False)),
                 ('notes', models.TextField(blank=True, null=True)),
-                ('event', models.ForeignKey(related_name='crew', to='RIGS.Event')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('event', models.ForeignKey(related_name='crew', to='RIGS.Event', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='eventitem',
             name='event',
-            field=models.ForeignKey(related_name='items', to='RIGS.Event'),
+            field=models.ForeignKey(related_name='items', to='RIGS.Event', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

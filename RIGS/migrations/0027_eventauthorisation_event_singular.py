@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='eventauthorisation',
             name='event',
-            field=models.OneToOneField(related_name='authorisation', to='RIGS.Event'),
+            field=models.OneToOneField(related_name='authorisation', to='RIGS.Event', on_delete=models.CASCADE),
         ),
     ]
