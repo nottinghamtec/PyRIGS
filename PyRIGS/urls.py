@@ -17,7 +17,7 @@ urlpatterns = [
     url('^user/', include('django.contrib.auth.urls')),
     url('^user/', include('registration.backends.default.urls')),
 
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:
