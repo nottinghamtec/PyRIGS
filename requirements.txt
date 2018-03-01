@@ -22,7 +22,7 @@ Pygments==2.2.0
 PyPDF2==1.26.0
 python-dateutil==2.6.1
 pytz==2018.3
-raven==6.5.0
+raven==6.6.0
 reportlab==3.4.0
 selenium==3.9.0
 simplejson==3.13.2
