@@ -340,8 +340,10 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
                 'sent_by': self.request.user.pk,
             }),
         }
-        if email == event.person.email:
+        if event.person is not None and email == event.person.email:
             context['to_name'] = event.person.name
+        elif event.organisation is not None and email == event.organisation.email:
+            context['to_name'] = event.organisation.name
 
         msg = EmailMultiAlternatives(
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
