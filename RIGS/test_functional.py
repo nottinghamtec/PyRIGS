@@ -32,6 +32,7 @@ def create_browser():
     options.add_argument("--window-size=1920,1080")
     if os.environ.get('CI', False):
         options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(chrome_options=options)
     return driver
 
