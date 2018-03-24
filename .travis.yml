@@ -4,10 +4,10 @@ python:
 cache: pip
 
 addons:
-  chrome: beta
+  chrome: stable
 
 install:
-  - wget http://chromedriver.storage.googleapis.com/2.32/chromedriver_linux64.zip
+  - wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - export PATH=$PATH:$(pwd)
   - chmod +x chromedriver
