@@ -138,7 +138,11 @@ class EventDuplicate(EventUpdate):
         old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
-        new.purchase_order = None
+        new.purchase_order = None # Remove old PO
+
+        # Clear checked in by if it's a dry hire
+        if new.dry_hire is True:
+            new.checked_in_by = None
 
         # Remove all the authorisation information from the new event
         new.auth_request_to = None
