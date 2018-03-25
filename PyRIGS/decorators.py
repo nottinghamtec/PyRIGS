@@ -23,7 +23,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
         def _checklogin(request, *args, **kwargs):
             if test_func(request.user):
                 return view_func(request, *args, **kwargs)
-            elif not request.user.is_authenticated():
+            elif not request.user.is_authenticated:
                 if oembed_view is not None:
                     context = {}
                     context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
