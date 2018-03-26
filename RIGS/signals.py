@@ -50,8 +50,10 @@ def send_eventauthorisation_success_email(instance):
         'object': instance,
     }
 
-    if instance.email == instance.event.person.email:
+    if instance.event.person is not None and instance.email == instance.event.person.email:
         context['to_name'] = instance.event.person.name
+    elif instance.event.organisation is not None and instance.email == instance.event.organisation.email:
+        context['to_name'] = instance.event.organisation.name
 
     subject = "N%05d | %s - Event Authorised" % (instance.event.pk, instance.event.name)
 
