@@ -20,7 +20,7 @@ Pillow==5.0.0
 psycopg2==2.7.4
 Pygments==2.2.0
 PyPDF2==1.26.0
-python-dateutil==2.7.1
+python-dateutil==2.7.2
 pytz==2018.3
 raven==6.6.0
 reportlab==3.4.0
