@@ -2,6 +2,7 @@ import re
 import urllib.request
 import urllib.error
 import urllib.parse
+import reversion
 from io import BytesIO
 
 from django.db.models.signals import post_save
@@ -91,6 +92,9 @@ def send_eventauthorisation_success_email(instance):
     client_email.send(fail_silently=True)
     mic_email.send(fail_silently=True)
 
+    with reversion.create_revision():
+        instance.event.status = models.Event.BOOKED
+        instance.event.save()
 
 def on_revision_commit(sender, instance, created, **kwargs):
     if created:
