@@ -92,9 +92,11 @@ def send_eventauthorisation_success_email(instance):
     client_email.send(fail_silently=True)
     mic_email.send(fail_silently=True)
 
+    # Set event to booked now that it's authorised
     with reversion.create_revision():
         instance.event.status = models.Event.BOOKED
         instance.event.save()
+
 
 def on_revision_commit(sender, instance, created, **kwargs):
     if created:
