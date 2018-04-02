@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
+from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -34,7 +34,7 @@ class Index(generic.TemplateView):
 
 
 def login(request, **kwargs):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         next = request.GET.get('next', '/')
         return HttpResponseRedirect(next)
     else:
@@ -49,7 +49,7 @@ def login(request, **kwargs):
 # check for it before logging  the user in
 @csrf_exempt
 def login_embed(request, **kwargs):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         next = request.GET.get('next', '/')
         return HttpResponseRedirect(next)
     else:

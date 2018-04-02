@@ -18,7 +18,7 @@ from collections import Counter
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 
 
 # Create your models here.
@@ -302,9 +302,9 @@ class Event(models.Model, RevisionMixin):
     )
 
     name = models.CharField(max_length=255)
-    person = models.ForeignKey('Person', null=True, blank=True)
-    organisation = models.ForeignKey('Organisation', blank=True, null=True)
-    venue = models.ForeignKey('Venue', blank=True, null=True)
+    person = models.ForeignKey('Person', null=True, blank=True, on_delete=models.CASCADE)
+    organisation = models.ForeignKey('Organisation', blank=True, null=True, on_delete=models.CASCADE)
+    venue = models.ForeignKey('Venue', blank=True, null=True, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
@@ -323,9 +323,9 @@ class Event(models.Model, RevisionMixin):
     meet_info = models.CharField(max_length=255, blank=True, null=True)
 
     # Crew management
-    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True)
+    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True, on_delete=models.CASCADE)
     mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
-                            verbose_name="MIC")
+                            verbose_name="MIC", on_delete=models.CASCADE)
 
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
@@ -334,7 +334,7 @@ class Event(models.Model, RevisionMixin):
     collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
 
     # Authorisation request details
-    auth_request_by = models.ForeignKey('Profile', null=True, blank=True)
+    auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(null=True, blank=True)
 
@@ -485,7 +485,7 @@ class Event(models.Model, RevisionMixin):
 
 
 class EventItem(models.Model):
-    event = models.ForeignKey('Event', related_name='items', blank=True)
+    event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     quantity = models.IntegerField()
@@ -504,8 +504,8 @@ class EventItem(models.Model):
 
 
 class EventCrew(models.Model):
-    event = models.ForeignKey('Event', related_name='crew')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rig = models.BooleanField(default=False)
     run = models.BooleanField(default=False)
     derig = models.BooleanField(default=False)
@@ -514,13 +514,13 @@ class EventCrew(models.Model):
 
 @reversion.register
 class EventAuthorisation(models.Model, RevisionMixin):
-    event = models.OneToOneField('Event', related_name='authorisation')
+    event = models.OneToOneField('Event', related_name='authorisation', on_delete=models.CASCADE)
     email = models.EmailField()
     name = models.CharField(max_length=255)
     uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
     account_code = models.CharField(max_length=50, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
-    sent_by = models.ForeignKey('RIGS.Profile')
+    sent_by = models.ForeignKey('RIGS.Profile', on_delete=models.CASCADE)
 
     def get_absolute_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
@@ -532,7 +532,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
 @python_2_unicode_compatible
 class Invoice(models.Model):
-    event = models.OneToOneField('Event')
+    event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
 
@@ -584,7 +584,7 @@ class Payment(models.Model):
         (ADJUSTMENT, 'TEC Adjustment'),
     )
 
-    invoice = models.ForeignKey('Invoice')
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE)
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
     method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)
