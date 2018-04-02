@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('account_code', models.CharField(max_length=50, null=True, blank=True)),
                 ('amount', models.DecimalField(verbose_name=b'authorisation amount', max_digits=10, decimal_places=2)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('event', models.ForeignKey(related_name='authroisations', to='RIGS.Event')),
+                ('event', models.ForeignKey(related_name='authroisations', to='RIGS.Event', on_delete=models.CASCADE)),
             ],
         ),
     ]

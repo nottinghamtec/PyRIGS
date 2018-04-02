@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse_lazy, reverse, NoReverseMatch
+from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
 from django.db.models import Q
 from django.shortcuts import get_object_or_404

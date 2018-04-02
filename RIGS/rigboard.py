@@ -6,12 +6,12 @@ import urllib.parse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.views import generic
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core import signing
 from django.http import HttpResponse
 from django.core.exceptions import SuspiciousOperation
