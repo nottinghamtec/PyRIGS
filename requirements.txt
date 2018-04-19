@@ -34,5 +34,5 @@ svg2rlg==0.3
 yolk==0.4.3
 z3c.rml==3.5.0
 zope.event==4.3.0
-zope.interface==4.4.3
+zope.interface==4.5.0
 zope.schema==4.5.0
