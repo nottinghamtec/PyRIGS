@@ -26,7 +26,7 @@ pytz==2018.4
 raven==6.7.0
 reportlab==3.4.0
 selenium==3.11.0
-simplejson==3.13.2
+simplejson==3.14.0
 six==1.11.0
 sqlparse==0.2.4
 static3==0.7.0
