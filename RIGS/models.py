@@ -530,6 +530,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
+@reversion.register(follow=['payment_set'])
 @python_2_unicode_compatible
 class Invoice(models.Model):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
