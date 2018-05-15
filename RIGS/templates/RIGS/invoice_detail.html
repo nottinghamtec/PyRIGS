@@ -6,20 +6,21 @@
     <div class="col-sm-12">
         <div class="row">
             <div class="col-sm-8">
-                <h2>Invoice {{ object.pk }} ({{ object.invoice_date|date:"d/m/Y"}})</h2>
+                <h2>Invoice {{ object.pk }} ({{ object.invoice_date|date:"d/m/Y" }})</h2>
             </div>
 
             <div class="col-sm-4 text-right">
                 <div class="btn-group btn-page">
-                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Delete Invoice">
-                    <span class="glyphicon glyphicon-remove"></span> <span
+                    <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Delete Invoice">
+                        <span class="glyphicon glyphicon-remove"></span> <span
                             class="hidden-xs">Delete</span>
-                </a>
-                <a href="{% url 'invoice_void' object.pk %}" class="btn btn-default" title="Void Invoice">
-                    <span class="glyphicon glyphicon-ban-circle"></span> <span
+                    </a>
+                    <a href="{% url 'invoice_void' object.pk %}" class="btn btn-default" title="Void Invoice">
+                        <span class="glyphicon glyphicon-ban-circle"></span> <span
                             class="hidden-xs">Void</span>
-                </a>
-                <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice" class="btn btn-default"><span
+                    </a>
+                    <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice"
+                       class="btn btn-default"><span
                             class="glyphicon glyphicon-print"></span> <span
                             class="hidden-xs">Print</span></a>
                 </div>
@@ -83,9 +84,11 @@
 
                             <dt>Authorised by</dt>
                             <dd>
-                                {%  if object.event.authorised %}
+                                {% if object.event.authorised %}
                                     {{ object.event.authorisation.name }}
-                                    (<a href="mailto:{{ object.event.authorisation.email }}">{{ object.event.authorisation.email }}</a>)
+                                    (
+                                    <a href="mailto:{{ object.event.authorisation.email }}">{{ object.event.authorisation.email }}</a>
+                                    )
                                 {% endif %}
                             </dd>
 
@@ -172,6 +175,13 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="col-sm-12 text-right">
+        <div>
+            <a href="{% url 'invoice_history' object.pk %}" title="View Revision History">
+                Last edited at {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
+            </a>
+        </div>
     </div>
 {% endblock %}

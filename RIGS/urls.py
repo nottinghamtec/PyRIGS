@@ -1,13 +1,12 @@
 from django.conf.urls import url
-from django.contrib.auth.views import password_reset
-
 from django.contrib.auth.decorators import login_required
-from RIGS import models, views, rigboard, finance, ical, versioning, forms
-from django.views.generic import RedirectView
+from django.contrib.auth.views import password_reset
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.generic import RedirectView
 
-from PyRIGS.decorators import permission_required_with_403
 from PyRIGS.decorators import api_key_required
+from PyRIGS.decorators import permission_required_with_403
+from RIGS import models, views, rigboard, finance, ical, versioning, forms
 
 urlpatterns = [
     # Examples:
@@ -144,6 +143,10 @@ urlpatterns = [
     url(r'^invoice/(?P<pk>\d+)/delete/$',
         permission_required_with_403('RIGS.change_invoice')(finance.InvoiceDelete.as_view()),
         name='invoice_delete'),
+    url(r'^invoice/(?P<pk>\d+)/history/$',
+        permission_required_with_403('RIGS.view_invoice')(versioning.VersionHistory.as_view()),
+        name='invoice_history', kwargs={'model': models.Invoice}),
+
     url(r'^payment/create/$',
         permission_required_with_403('RIGS.add_payment')(finance.PaymentCreate.as_view()),
         name='payment_create'),

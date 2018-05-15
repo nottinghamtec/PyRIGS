@@ -1,24 +1,21 @@
+from collections import Counter
+
 import datetime
 import hashlib
-import datetime
 import pytz
-
-from django.db import models
-from django.contrib.auth.models import AbstractUser
+import random
+import string
+from decimal import Decimal
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
-import string
-
-import random
-from collections import Counter
-from decimal import Decimal
-
-from django.core.exceptions import ValidationError
-from django.urls import reverse_lazy
 
 
 # Create your models here.
@@ -532,7 +529,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
 @reversion.register(follow=['payment_set'])
 @python_2_unicode_compatible
-class Invoice(models.Model):
+class Invoice(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
