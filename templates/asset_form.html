@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+
+{% block main %}
+
+    <h1>Asset {{ form_header|default:'Create' }}</h1>
+
+    <form method="post">
+        {{ form }}
+        {% csrf_token %}
+
+        <button type="submit">Submit</button>
+    </form>
+
+{% endblock %}

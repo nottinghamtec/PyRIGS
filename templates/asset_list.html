@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+        <h1>Asset List</h1>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Asset ID</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Quick Links</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in object_list %}
+{#                <li><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }} - {{ item.description }}</a></li>#}
+                <tr>
+                    <td><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>
+                        <a href="{% url 'asset_detail' item.asset_id %}"><i class="material-icons">visibility</i></a>
+                        <a href="{% url 'asset_update' item.asset_id %}"><i class="material-icons">edit</i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+{% endblock %}
