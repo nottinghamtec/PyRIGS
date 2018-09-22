@@ -16,7 +16,7 @@ git+git://github.com/jazzband/django-widget-tweaks.git@1.4.2
 gunicorn==19.9.0
 icalendar==4.0.2
 lxml==4.2.5
-Markdown==2.6.11
+Markdown==3.0
 Pillow==5.2.0
 psycopg2==2.7.5
 Pygments==2.2.0
