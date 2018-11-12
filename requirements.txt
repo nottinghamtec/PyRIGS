@@ -1,6 +1,6 @@
 beautifulsoup4==4.6.3
 contextlib2==0.5.5
-diff-match-patch==20121119
+diff-match-patch==20181111
 dj-database-url==0.5.0
 dj-static==0.0.6
 Django==2.1.3
