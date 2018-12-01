@@ -32,7 +32,7 @@ sqlparse==0.2.4
 static3==0.7.0
 svg2rlg==0.3
 yolk==0.4.3
-z3c.rml==3.6.0
+z3c.rml==3.6.1
 zope.event==4.4
 zope.interface==4.6.0
 zope.schema==4.9.3
