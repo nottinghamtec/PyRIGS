@@ -11,6 +11,7 @@
 @import "components/normalize";
 
 // components
+@import "components/mixins";
 @import "components/global";
 @import "components/badges";
 @import "components/icons-material-design";
@@ -40,10 +41,98 @@
 @import "components/datepicker";
 @import "components/timepicker";
 
+#full-div {
+  //width: 100vw;
+  height: 90vh;
+}
+
+
 .container {
   width: 80% !important;
 }
 
 .nav-wrapper {
   padding: 0 10%;
+}
+
+nav {
+  >div>ul>li>a {
+    color: #aaa;
+  }
+}
+
+.panel {
+  background-color: color('grey', 'lighten-5');
+  border: 1px solid $primary-color;
+  border-radius: 4px;
+}
+
+.panel-heading {
+  color: white;
+  background-color: $primary-color;
+  border-color: #bce8f1;
+
+  padding: 10px 15px;
+  border-bottom: 1px solid transparent;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.panel-body {
+  padding: 15px;
+
+  &.quick-actions {
+    >:last-child{
+      margin-bottom: 0 !important;
+    }
+    >:first-child {
+      margin-top: 0 !important;
+    }
+  }
+}
+
+dt {
+  font-weight: bold;
+}
+
+$dl-horizontal-breakpoint:    768px;
+$dl-horizontal-offset:        160px !default;
+
+.dl-horizontal {
+  dd {
+    @include clearfix; // Clear the floated `dt` if an empty `dd` is present
+  }
+
+  @media (min-width: $dl-horizontal-breakpoint) {
+    dt {
+      float: left;
+      width: ($dl-horizontal-offset - 20);
+      clear: left;
+      text-align: right;
+      @include text-overflow;
+    }
+    dd {
+      margin-left: $dl-horizontal-offset;
+    }
+  }
+}
+
+.button-group {
+  >button {
+    display: inline-block;
+  }
+}
+
+.no-pad {
+  padding: 0 !important;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.disabled_input {
+  color: rgba(0, 0, 0, 0.42);
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.42) !important;
+  cursor: default;
 }
