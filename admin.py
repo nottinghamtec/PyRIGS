@@ -1,26 +1,37 @@
 from django.contrib import admin
 from assets import models as assets
 
+
 @admin.register(assets.AssetCategory)
 class AssetCategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name']
+    ordering = ['id']
 
 
 @admin.register(assets.AssetStatus)
 class AssetStatusAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name']
+    ordering = ['id']
 
 
 @admin.register(assets.Supplier)
 class SupplierAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(assets.Collection)
-class CollectionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name']
+    ordering = ['id']
 
 
 @admin.register(assets.Asset)
 class AssetAdmin(admin.ModelAdmin):
+    list_display = ['id', 'asset_id', 'description', 'category', 'status']
+    list_filter = ['is_cable', 'category']
+    search_fields = ['id', 'asset_id', 'description']
+
+
+@admin.register(assets.Connector)
+class ConnectorAdmin(admin.ModelAdmin):
+    list_display = ['id', '__str__', 'current_rating', 'voltage_rating', 'num_pins']
+
+
+@admin.register(assets.Cable)
+class CableAdmin(admin.ModelAdmin):
     pass
