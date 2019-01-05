@@ -31,28 +31,27 @@ class Supplier(models.Model):
         return self.name
 
 
-class Collection(models.Model):
-    name = models.CharField(max_length=80)
+class BaseAsset(models.Model):
+    class Meta:
+        abstract = True
 
-    def __str__(self):
-        return self.name
-
-
-class Asset(models.Model):
-    asset_id = models.IntegerField(blank=True, null=True)
+    parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
+    asset_id = models.CharField(max_length=10)
     description = models.CharField(max_length=120)
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
-    serial_number = models.CharField(max_length=150, blank=True, null=True)
+    serial_number = models.CharField(max_length=150, blank=True)
     purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True)
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
-    purchase_price = models.IntegerField(blank=True, null=True)
-    salvage_value = models.IntegerField(blank=True, null=True)
-    comments = models.TextField(blank=True, null=True)
+    purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
+    salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
+    comments = models.TextField(blank=True)
     next_sched_maint = models.DateField(blank=True, null=True)
 
-    collection = models.ForeignKey(to=Collection, on_delete=models.CASCADE, blank=True, null=True)
+    # Cable assets
+    is_cable = models.BooleanField(default=False)
+    length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('asset_detail', kwargs={'pk': self.pk})
