@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
+{% block title %}List{% endblock %}
 
 {% block main %}
 
-        <h1>Asset List</h1>
+    <h1>Asset List</h1>
 
-        <table>
+    <form method="post" id="asset-filter-form" class="row">
+        {% csrf_token %}
+        <div class="input-field col s3">
+            <input type="text" name="asset_id">
+            <label for="asset_id">Asset ID</label>
+        </div>
+
+        <button type="submit" class="btn">Search</button>
+    </form>
+
+        <table class="striped">
             <thead>
             <tr>
                 <th>Asset ID</th>
@@ -14,21 +25,21 @@
                 <th>Quick Links</th>
             </tr>
             </thead>
-            <tbody>
-            {% for item in object_list %}
-{#                <li><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }} - {{ item.description }}</a></li>#}
-                <tr>
-                    <td><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.status }}</td>
-                    <td>
-                        <a href="{% url 'asset_detail' item.asset_id %}"><i class="material-icons">visibility</i></a>
-                        <a href="{% url 'asset_update' item.asset_id %}"><i class="material-icons">edit</i></a>
-                    </td>
-                </tr>
-            {% endfor %}
+            <tbody id="asset_table_body">
+                {% include 'asset_list_table_body.html' %}
             </tbody>
         </table>
 
+    {% include 'helpers/paginator.html' %}
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#asset-filter-form').on('submit', function(event){
+            event.preventDefault();
+            filterAssetTable();
+            return false;
+        });
+    </script>
 {% endblock %}
