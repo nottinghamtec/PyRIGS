@@ -60,13 +60,31 @@ class BaseAsset(models.Model):
         return str(self.asset_id) + ' - ' + self.description
 
 
-# Automatically updates Asset.asset_id to Asset.pk if none is given by the user
-@receiver(post_save, sender=Asset)
-def update_asset_id(sender, instance, **kwargs):
-    post_save.disconnect(update_asset_id, sender=sender)
+class Asset(BaseAsset):
+    pass
 
-    if not instance.asset_id:
-        instance.asset_id = instance.pk
-    instance.save()
 
-    post_save.connect(update_asset_id, sender=sender)
+class Connector(models.Model):
+    description = models.CharField(max_length=80)
+    current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text='Amps')
+    voltage_rating = models.IntegerField(help_text='Volts')
+    num_pins = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.description
+
+
+class Cable(BaseAsset):
+    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='plug', null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='socket', null=True)
+    length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True, help_text='m')
+    csa = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text='mm^2')
+    circuits = models.IntegerField(blank=True, null=True)
+    cores = models.IntegerField(blank=True, null=True)
+
+    def cable_resistance(self):
+        rho = 0.0000000168
+        return (rho * self.length) / (self.csa * 1000000)
+
+    def __str__(self):
+        return '{} - {}m - {}'.format(self.plug, self.length, self.socket)
