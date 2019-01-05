@@ -1,5 +1,9 @@
-from django.urls import path
-from assets import views
+from django.urls import path, include
+from rest_framework import routers
+from assets import views, api
+
+router = routers.DefaultRouter()
+router.register(r'api/assets', api.AssetViewSet)
 
 urlpatterns = [
     # path('', views.Index.as_view(), name='index'),
@@ -11,4 +15,7 @@ urlpatterns = [
     path('asset/delete/', views.asset_delete, name='ajax_asset_delete'),
     path('asset/filter/', views.asset_filter, name='ajax_asset_filter'),
     path('asset/update/', views.asset_update, name='ajax_asset_update'),
+
+    path('', include(router.urls)),
 ]
+
