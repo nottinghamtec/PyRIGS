@@ -15,7 +15,8 @@ class Command(BaseCommand):
         self.create_user_object('staff', True)
         self.create_user_object('basic')
 
-    def create_user_object(self, name, staff=False, superuser=False):
+    @staticmethod
+    def create_user_object(name, staff=False, superuser=False):
         user, created = User.objects.get_or_create(
             username=name, defaults={'email': '{}@{}.com'.format(name, name),
                                      'first_name': name.title(), 'last_name': 'User', 'is_superuser': superuser,
