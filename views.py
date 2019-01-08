@@ -131,3 +131,27 @@ def asset_filter(request):
             return render(request, template_name='asset_update_search_results.html', context=context)
         else:
             return render(request, template_name='asset_list_table_body.html', context=context)
+
+
+class SupplierList(generic.ListView):
+    model = models.Supplier
+    template_name = 'supplier_list.html'
+    paginate_by = 40
+    ordering = ['name']
+
+
+class SupplierDetail(generic.DetailView):
+    model = models.Supplier
+    template_name = 'supplier_detail.html'
+
+
+class SupplierCreate(generic.CreateView):
+    model = models.Supplier
+    form_class = forms.SupplierForm
+    template_name = 'supplier_update.html'
+
+
+class SupplierUpdate(generic.UpdateView):
+    model = models.Supplier
+    form_class = forms.SupplierForm
+    template_name = 'supplier_update.html'

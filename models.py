@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.urls import reverse
 
 
@@ -26,6 +24,9 @@ class AssetStatus(models.Model):
 
 class Supplier(models.Model):
     name = models.CharField(max_length=80)
+
+    def get_absolute_url(self):
+        return reverse('supplier_list')
 
     def __str__(self):
         return self.name

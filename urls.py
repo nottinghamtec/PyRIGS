@@ -16,6 +16,11 @@ urlpatterns = [
     path('asset/filter/', views.asset_filter, name='ajax_asset_filter'),
     path('asset/update/', views.asset_update, name='ajax_asset_update'),
 
+    path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
+    path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),
+    path('supplier/create', views.SupplierCreate.as_view(), name='supplier_create'),
+    path('supplier/<int:pk>/edit', views.SupplierUpdate.as_view(), name='supplier_update'),
+
     path('', include(router.urls)),
 ]
 
