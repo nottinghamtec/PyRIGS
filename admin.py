@@ -35,3 +35,8 @@ class ConnectorAdmin(admin.ModelAdmin):
 @admin.register(assets.Cable)
 class CableAdmin(admin.ModelAdmin):
     pass
+
+
+admin.AdminSite.site_header = 'PyAssets - TEC\'s Asset System'
+admin.AdminSite.site_title = 'PyAssets Admin'
+admin.AdminSite.index_title = 'System Administration'
