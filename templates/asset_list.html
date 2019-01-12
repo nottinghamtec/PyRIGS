@@ -7,28 +7,30 @@
 
     <form method="post" id="asset-filter-form" class="row">
         {% csrf_token %}
-        <div class="input-field col s3">
+        <div class="input-field col l11 s12">
             <input type="text" name="asset_id">
             <label for="asset_id">Asset ID</label>
         </div>
 
-        <button type="submit" class="btn">Search</button>
+        <div class="input-field col l1 offset-s4">
+            <button type="submit" class="btn">Search</button>
+        </div>
     </form>
 
-        <table class="striped">
-            <thead>
-            <tr>
-                <th>Asset ID</th>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Quick Links</th>
-            </tr>
-            </thead>
-            <tbody id="asset_table_body">
-                {% include 'asset_list_table_body.html' %}
-            </tbody>
-        </table>
+    <table class="striped">
+        <thead>
+        <tr>
+            <th>Asset ID</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Quick Links</th>
+        </tr>
+        </thead>
+        <tbody id="asset_table_body">
+        {% include 'asset_list_table_body.html' %}
+        </tbody>
+    </table>
 
     {% include 'helpers/paginator.html' %}
 
@@ -36,7 +38,7 @@
 
 {% block script %}
     <script>
-        $('#asset-filter-form').on('submit', function(event){
+        $('#asset-filter-form').on('submit', function (event) {
             event.preventDefault();
             filterAssetTable();
             return false;
