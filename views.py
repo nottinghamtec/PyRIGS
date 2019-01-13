@@ -65,6 +65,21 @@ class AssetEdit(LoginRequiredMixin, generic.TemplateView):
         return context
 
 
+class AssetDuplicate(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'asset_update.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssetDuplicate, self).get_context_data(**kwargs)
+        if self.kwargs:
+            context['object'] = get_object_or_404(models.Asset, pk=self.kwargs['pk'])
+            context['object'].pk = None
+        context['form'] = forms.AssetForm
+        # context['asset_names'] = models.Asset.objects.values_list('asset_id', 'description').order_by('-date_acquired')[]
+        context['duplicate'] = True
+
+        return context
+
+
 @login_required()
 def asset_update(request):
     context = dict()

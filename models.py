@@ -8,6 +8,7 @@ class AssetCategory(models.Model):
     class Meta:
         verbose_name = 'Asset Category'
         verbose_name_plural = 'Asset Categories'
+
     name = models.CharField(max_length=80)
 
     def __str__(self):
@@ -18,6 +19,7 @@ class AssetStatus(models.Model):
     class Meta:
         verbose_name = 'Asset Status'
         verbose_name_plural = 'Asset Statuses'
+
     name = models.CharField(max_length=80)
 
     def __str__(self):

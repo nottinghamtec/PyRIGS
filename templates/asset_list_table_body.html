@@ -8,6 +8,7 @@
         <td>
             <a href="{% url 'asset_detail' item.pk %}"><i class="material-icons">visibility</i></a>
             <a href="{% url 'asset_update' item.pk %}"><i class="material-icons">edit</i></a>
+            <a href="{% url 'asset_duplicate' item.pk %}"><i class="material-icons">content_copy</i></a>
         </td>
     </tr>
 {% endfor %}
