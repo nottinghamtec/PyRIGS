@@ -30,8 +30,10 @@
                     {% if edit %}
                         {#                    <input type="submit" class="btn" value="Save">#}
                         <button type="button" class="btn" onclick="updateAsset()">Save</button>
-                        <a class="waves-effect waves-light btn"
-                           href="{% url 'asset_duplicate' object.pk %}">Duplicate</a>
+                        {% if object.pk %}
+                            <a class="waves-effect waves-light btn"
+                               href="{% url 'asset_duplicate' object.pk %}">Duplicate</a>
+                        {% endif %}
                     {% elif duplicate %}
                         <button type="button" class="btn" onclick="updateAsset()">Create Duplicate</button>
                         <a href="{% url 'index' %}" class="btn">Cancel</a>
@@ -56,55 +58,54 @@
                     <dl class="dl-horizontal">
                         {% if edit or duplicate %}
                             <div class="row">
-                                <div class="input-field col s12">
-                                    {% if duplicate %}
-                                        {% render_field form.asset_id value=object.asset_id %}
-                                    {% elif object.asset_id %}
-                                        {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input' value=object.asset_id %}
-                                    {% else %}
-                                        {% render_field form.asset_id %}
-                                    {% endif %}
-                                    <label for="{{ form.asset_id.id_for_label }}" class="bold-text">Asset ID</label>
-                                </div>
-
-                                <div class="input-field col s12">
-                                    {% render_field form.description value=object.description %}
-                                    <label for="{{ form.description.id_for_label }}"
-                                           class="bold-text">Description</label>
-                                </div>
-
-                                <div class="input-field col s12">
-                                    <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
-                                            required>
-                                        {% for id, choice in form.category.field.choices %}
-                                            <option value="{{ id }}"
-                                                    {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <label for="{{ form.category.id_for_label }}" class="bold-text">Category</label>
-                                </div>
-
-                                <div class="input-field col s12">
-                                    <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
-                                        {% for id, choice in form.status.field.choices %}
-                                            <option value="{{ id }}"
-                                                    {% if object.status.id == id %}selected{% endif %}>{{ choice }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
-                                </div>
-
-                                <div class="input-field col s12">
-                                    {% render_field form.serial_number value=object.serial_number %}
-                                    <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
-                                </div>
-
-                                <div class="input-field col s12">
-                                    {% render_field form.comments|add_class:'materialize-textarea' %}
-                                    <label for="{{ form.comments.id_for_label }}">Comments</label>
-                                </div>
-
+                            <div class="input-field col s12">
+                                {% if duplicate %}
+                                    {% render_field form.asset_id value=object.asset_id %}
+                                {% elif object.asset_id %}
+                                    {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input' value=object.asset_id %}
+                                {% else %}
+                                    {% render_field form.asset_id %}
+                                {% endif %}
+                                <label for="{{ form.asset_id.id_for_label }}" class="bold-text">Asset ID</label>
                             </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.description value=object.description %}
+                                <label for="{{ form.description.id_for_label }}"
+                                       class="bold-text">Description</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
+                                        required>
+                                    {% for id, choice in form.category.field.choices %}
+                                        <option value="{{ id }}"
+                                                {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="{{ form.category.id_for_label }}" class="bold-text">Category</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+                                    {% for id, choice in form.status.field.choices %}
+                                        <option value="{{ id }}"
+                                                {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.serial_number value=object.serial_number %}
+                                <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.comments|add_class:'materialize-textarea' %}
+                                <label for="{{ form.comments.id_for_label }}">Comments</label>
+                            </div>
+
                         {% else %}
                             <dt>Asset ID</dt>
                             <dd>{{ object.asset_id }}</dd>
@@ -160,9 +161,15 @@
                                 </div>
 
                                 <div class="input-field col s12">
-                                    {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
+                                    {% if object.date_acquired %}
+                                        {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
+                                    {% else %}
+                                        <input type="text" name="date_acquired" value="{% now "DATE_FORMAT" %}"
+                                               class="datepicker" id="id_date_acquired">
+                                    {% endif %}
                                     <label for="{{ form.date_acquired.id_for_label }}" class="bold-text">Date
                                         Acquired</label>
+
                                 </div>
 
                                 <div class="input-field col s12">
