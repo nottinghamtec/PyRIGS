@@ -73,7 +73,8 @@
                             <div class="input-field col s12">
                                 <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
                                     {% for id, choice in form.status.field.choices %}
-                                        <option value="{{ id }}" {% if object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+                                        <option value="{{ id }}"
+                                                {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
                                     {% endfor %}
                                 </select>
                                 <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
@@ -143,7 +144,12 @@
                             </div>
 
                             <div class="input-field col s12">
-                                {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
+                                {% if object.date_acquired %}
+                                    {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
+                                {% else %}
+                                    <input type="text" name="date_acquired" value="{% now "DATE_FORMAT" %}"
+                                           class="datepicker" id="id_date_acquired">
+                                {% endif %}
                                 <label for="{{ form.date_acquired.id_for_label }}" class="bold-text">Date Acquired</label>
                             </div>
 
