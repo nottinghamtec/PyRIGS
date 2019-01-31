@@ -7,14 +7,16 @@
 {% block main %}
 
     <h4>
-        Asset
-        {% if object.id %}
-            | {{ object.asset_id }}
+        {% if edit and object %}
+            Edit Asset | {{ object.asset_id }}
         {% elif duplicate %}
-            Duplication of {{ object.asset_id }}
+            Duplication of Asset | {{ previous_asset_id }}
+        {% elif not object %}
+            Create Asset
         {% else %}
-            Create
+            Asset | {{ object.asset_id }}
         {% endif %}
+
     </h4>
     <div class="divider"></div>
 
@@ -27,22 +29,22 @@
         <div class="row">
             <div class="col s12">
                 <div class="button-group right">
-                    {% if edit %}
-                        {#                    <input type="submit" class="btn" value="Save">#}
+                    {% if edit and object %}
+                        <!--edit-->
                         <button type="button" class="btn" onclick="updateAsset()">Save</button>
-                        {% if object.pk %}
-                            <a class="waves-effect waves-light btn"
-                               href="{% url 'asset_duplicate' object.pk %}">Duplicate</a>
-                        {% endif %}
+                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
                     {% elif duplicate %}
+                        <!--duplicate-->
                         <button type="button" class="btn" onclick="updateAsset()">Create Duplicate</button>
-                        <a href="{% url 'index' %}" class="btn">Cancel</a>
+                        <a href="{% url 'asset_detail' previous_asset_pk %}" class="btn">Cancel</a>
+                    {% elif not object %}
+                        <!--create-->
+                        <button type="button" class="btn" onclick="updateAsset()">Save</button>
                     {% else %}
+                        <!--detail-->
                         <a href="{% url 'asset_update' object.pk %}" class="btn">Edit</a>
-                        <a class="waves-effect waves-light btn"
-                           href="{% url 'asset_duplicate' object.pk %}">Duplicate</a>
-                    {% endif %}
-                    {% if object and not duplicate %}
+                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
                         <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
                     {% endif %}
                 </div>
@@ -313,7 +315,7 @@
 
     <script>
         $(document).ready(function () {
-            {% if edit %}
+            {% if edit or duplicate %}
                 var comments_id = '#{{ form.comments.id_for_label }}';
                 $(comments_id).val('{{ object.comments|linebreaksn }}');
                 M.textareaAutoResize($(comments_id));
