@@ -10,7 +10,7 @@ django-recaptcha==2.0.2
 django-registration-redux==2.5
 django-reversion==3.0.3
 django-toolbelt==0.0.1
-premailer==3.2.0
+premailer==3.3.0
 #django-widget-tweaks==1.4.1
 git+git://github.com/jazzband/django-widget-tweaks.git@1.4.2
 gunicorn==19.9.0
