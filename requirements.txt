@@ -24,7 +24,7 @@ PyPDF2==1.26.0
 python-dateutil==2.8.0
 pytz==2018.9
 raven==6.10.0
-reportlab==3.5.16
+reportlab==3.5.17
 selenium==3.141.0
 simplejson==3.16.0
 six==1.12.0
