@@ -6,7 +6,7 @@ dj-static==0.0.6
 Django==2.2
 django-debug-toolbar==1.11
 django-ical==1.5
-django-recaptcha==2.0.2
+django-recaptcha==2.0.4
 django-registration-redux==2.6
 django-reversion==3.0.3
 django-toolbelt==0.0.1
