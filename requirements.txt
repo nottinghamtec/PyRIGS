@@ -8,7 +8,7 @@ django-debug-toolbar==1.11
 django-ical==1.5
 django-recaptcha==2.0.4
 django-registration-redux==2.6
-django-reversion==3.0.3
+django-reversion==3.0.4
 django-toolbelt==0.0.1
 premailer==3.4.1
 #django-widget-tweaks==1.4.1
