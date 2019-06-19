@@ -17,11 +17,11 @@
     <form id="loginForm" action="" method="post" role="form" target="_self">{% csrf_token %}
         <div class="form-group">
             <label for="id_username">{{ form.username.label }}</label>
-            {% render_field form.username class+="form-control" placeholder=form.username.label autofocus=False %}
+            {{ form.username }}
         </div>
         <div class="form-group">
             <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-            {% render_field form.password class+="form-control" placeholder=form.password.label autofocus=False %}
+            {{ form.password }}
         </div>
         <div class="text-right">
             <input type="submit" value="Login" class="btn btn-primary"/>
