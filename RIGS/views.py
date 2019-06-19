@@ -62,7 +62,7 @@ def login_embed(request, **kwargs):
                 messages.warning(request, 'Cookies do not seem to be enabled. Try logging in using a new tab.')
                 request.method = 'GET'  # Render the page without trying to login
 
-        return login(request, template_name="registration/login_embed.html")
+        return login(request, template_name="registration/login_embed.html", authentication_form=forms.EmbeddedAuthenticationForm) 
 
 
 """
