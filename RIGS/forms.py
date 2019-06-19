@@ -33,7 +33,12 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
-# Login form
+# Embedded Login form - remove the autofocus
+class EmbeddedAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.pop('autofocus', None)
+
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
 
