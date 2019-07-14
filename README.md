@@ -77,6 +77,13 @@ python manage.py runserver
 ```
 Please refer to Django documentation for a full list of options available here.
 
+### Development using docker
+
+```
+docker build . -t pyrigs
+docker run -it --rm -p=8000:8000 -v $(pwd):/app pyrigs
+```
+
 ### Sample Data ###
 Sample data is available to aid local development and user acceptance testing. To load this data into your local database, first ensure the database is empty:
 ```
