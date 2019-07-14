@@ -88,7 +88,7 @@ class EventRA(generic.base.RedirectView):
             'entry.708610078': f'N{event.pk:05}',
             'entry.905899507': event.name,
             'entry.139491562': event.venue.name if event.venue else '',
-            'entry.1689826056': event.start_date.strftime('%Y-%m-%d') + ((' ' + event.end_date.strftime('%Y-%m-%d')) if event.end_date else ''),
+            'entry.1689826056': event.start_date.strftime('%Y-%m-%d') + ((' - ' + event.end_date.strftime('%Y-%m-%d')) if event.end_date else ''),
             'entry.902421165': event.mic.name if event.mic else ''
         }
         return settings.RISK_ASSESSMENT_URL + "?" + urllib.parse.urlencode(params)
