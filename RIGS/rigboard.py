@@ -80,6 +80,20 @@ class EventEmbed(EventDetail):
     template_name = 'RIGS/event_embed.html'
 
 
+class EventRA(generic.base.RedirectView):
+    permanent = False
+    def get_redirect_url(self, *args, **kwargs):
+        event = get_object_or_404(models.Event, pk=kwargs['pk'])
+        params = {
+            'entry.708610078': f'N{event.pk:05}',
+            'entry.905899507': event.name,
+            'entry.139491562': event.venue.name if event.venue else '',
+            'entry.1689826056': event.start_date.strftime('%Y-%m-%d') + ((' ' + event.end_date.strftime('%Y-%m-%d')) if event.end_date else ''),
+            'entry.902421165': event.mic.name if event.mic else ''
+        }
+        return settings.RISK_ASSESSMENT_URL + "?" + urllib.parse.urlencode(params)
+
+
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm

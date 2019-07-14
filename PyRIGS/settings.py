@@ -233,3 +233,5 @@ USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
+RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
+    'RISK_ASSESSMENT_URL') else "http://example.com"
