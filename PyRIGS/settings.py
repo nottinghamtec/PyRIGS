@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import raven
+import secrets
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -235,3 +236,5 @@ TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
 RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
     'RISK_ASSESSMENT_URL') else "http://example.com"
+RISK_ASSESSMENT_SECRET = os.environ.get('RISK_ASSESSMENT_SECRET') if os.environ.get(
+    'RISK_ASSESSMENT_SECRET') else secrets.token_hex(15)
