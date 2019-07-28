@@ -27,6 +27,8 @@ class FieldComparison(object):
     def display_value(self, value):
         if isinstance(self.field, IntegerField) and len(self.field.choices) > 0:
             return [x[1] for x in self.field.choices if x[0] == value][0]
+        if self.field.name == "risk_assessment_edit_url"
+            return "completed" if value else ""
         return value
 
     @property
