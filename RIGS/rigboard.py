@@ -18,6 +18,7 @@ from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
@@ -84,6 +85,10 @@ class EventRA(generic.base.RedirectView):
     permanent = False
     def get_redirect_url(self, *args, **kwargs):
         event = get_object_or_404(models.Event, pk=kwargs['pk'])
+
+        if event.risk_assessment_edit_url:
+            return event.risk_assessment_edit_url
+
         params = {
             'entry.708610078': f'N{event.pk:05}',
             'entry.905899507': event.name,
@@ -400,3 +405,26 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LogRiskAssessment(generic.View):
+    http_method_names = ["post"]
+
+    def post(self, request, **kwargs):
+        data = request.POST
+        shared_secret = data.get("secret")
+        edit_url = data.get("editUrl")
+        rig_number = data.get("rigNum")
+        if shared_secret is None or edit_url is None or rig_number is None:
+            return HttpResponse(status=422)
+
+        if shared_secret != settings.RISK_ASSESSMENT_SECRET:
+            return HttpResponse(status=403)
+
+        rig_number = int(re.sub("[^0-9]", "", rig_number))
+
+        event = get_object_or_404(models.Event, pk=rig_number)
+        event.risk_assessment_edit_url = edit_url
+        event.save()
+
+        return HttpResponse(status=200)

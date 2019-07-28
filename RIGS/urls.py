@@ -188,6 +188,9 @@ urlpatterns = [
     url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', login_required(views.SecureAPIRequest.as_view()),
         name="api_secure"),
 
+    # Risk assessment API
+    url(r'^log_risk_assessment/$', rigboard.LogRiskAssessment.as_view(), name='log_risk_assessment'),
+
     # Legacy URL's
     url(r'^rig/show/(?P<pk>\d+)/$',
         RedirectView.as_view(permanent=True, pattern_name='event_detail')),
