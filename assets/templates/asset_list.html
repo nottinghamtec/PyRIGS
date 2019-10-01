@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}List{% endblock %}
+{% load paginator from filters %}
 
 {% block content %}
 
-    <h4>Asset List</h4>
+    <h2 class="text-center">Asset List</h2>
 
-    <form method="post" id="asset-filter-form" class="row">
-        {% csrf_token %}
-        <div class="input-field col l11 s12">
-            <input type="text" name="asset_id">
-            <label for="asset_id">Asset ID</label>
-        </div>
+    <div class="col-lg-6">
+        <form method="post" id="asset-filter-form">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="asset_id" placeholder="Asset ID" class="form-control">
+                <label for="asset_id" class="sr-only">Asset ID</label>
+                <span class="input-group-btn"><button type="submit" class="btn">Search</button></span>
+            </div>
+        </form>
+    </div>
 
-        <div class="input-field col l1 offset-s4">
-            <button type="submit" class="btn">Search</button>
-        </div>
-    </form>
-
-    <table class="striped">
+    <table class="table">
         <thead>
         <tr>
             <th>Asset ID</th>
@@ -32,7 +32,11 @@
         </tbody>
     </table>
 
-    {% include 'helpers/paginator.html' %}
+    {% if is_paginated %}
+            <div class="col-md-6 text-right">
+                {% paginator %}
+            </div>
+    {% endif %}
 
 {% endblock %}
 

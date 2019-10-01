@@ -6,9 +6,11 @@
         <td>{{ item.category }}</td>
         <td>{{ item.status }}</td>
         <td>
-            <a href="{% url 'asset_detail' item.pk %}"><i class="material-icons">visibility</i></a>
-            <a href="{% url 'asset_update' item.pk %}"><i class="material-icons">edit</i></a>
-            <a href="{% url 'asset_update' item.pk %}?duplicate=true"><i class="material-icons">content_copy</i></a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default" formaction="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</button>
+                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
+                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</button>
+            </div>
         </td>
     </tr>
 {% endfor %}
