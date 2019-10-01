@@ -4,14 +4,16 @@ diff-match-patch==20121119
 dj-database-url==0.5.0
 dj-static==0.0.6
 Django==2.0.13
+django-filter==2.0.0
+django-widget-tweaks==1.4.3
 django-debug-toolbar==1.9.1
 django-ical==1.4
 django-recaptcha==1.4.0
 django-registration-redux==2.4
 django-reversion==2.0.13
 django-toolbelt==0.0.1
+djangorestframework==3.9.0
 premailer==3.2.0
-#django-widget-tweaks==1.4.1
 git+git://github.com/jazzband/django-widget-tweaks.git@1.4.2
 gunicorn==19.8.1
 icalendar==4.0.1
@@ -32,6 +34,7 @@ sqlparse==0.2.4
 static3==0.7.0
 svg2rlg==0.3
 yolk==0.4.3
+whitenoise==4.1.2
 z3c.rml==3.5.0
 zope.event==4.3.0
 zope.interface==4.5.0
