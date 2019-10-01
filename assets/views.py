@@ -28,11 +28,6 @@ class PasswordChange(auth_views.PasswordChangeView):
     def get_success_url(self):
         return reverse_lazy('profile_detail', kwargs={'pk': self.request.user.id})
 
-
-class Index(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'index.html'
-
-
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'

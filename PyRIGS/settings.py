@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'RIGS',
-    'assets'
+    'assets',
 
     'debug_toolbar',
     'registration',

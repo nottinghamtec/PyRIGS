@@ -16,23 +16,7 @@ function filterAssetTable() {
     });
 }
 
-function updateAsset() {
-    $.ajax({
-        url : "/asset/update/", // the endpoint
-        type : "POST", // http method
-        data : {
-            form: $('#asset_update_form').serialize()
-        },
-        traditional: true,
 
-        success : function(data) {
-            // console.log(data);
-            window.location.href = data['url'];
-        },
-
-        error : function(xhr) {console.log(xhr.status + ": " + xhr.responseText)}
-    });
-}
 
 function formAssetSearch() {
         $.ajax({

@@ -4,7 +4,7 @@
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
 
 
-{% block main %}
+{% block content %}
 
     <h4>
         {% if edit and object %}
@@ -294,7 +294,26 @@
 
 {% endblock %}
 
-{% block script %}
+{% block js %}
+    <script>
+        function updateAsset() {
+            $.ajax({
+                url: "{% url 'ajax_asset_update' %}", // the endpoint
+                type: "POST", // http method
+                data: {
+                    form: $('#asset_update_form').serialize()
+                },
+                traditional: true,
+
+                success: function (data) {
+                    // console.log(data);
+                    window.location.href = data['url'];
+                },
+
+                error: function (xhr) { console.log(xhr.status + ": " + xhr.responseText) }
+            });
+        }
+    </script>
 
     {#    <script>#}
     {#        $('#asset_update_form').on('submit', function(event){#}
@@ -323,5 +342,4 @@
             M.updateTextFields();
         })
     </script>
-
 {% endblock %}
