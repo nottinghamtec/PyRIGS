@@ -17,8 +17,6 @@ class Command(BaseCommand):
 
         random.seed('Some object to see the random number generator')
 
-        call_command('createBaseUsers')
-
         self.create_categories()
         self.create_statuses()
         self.create_suppliers()
