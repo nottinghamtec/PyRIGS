@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_assets.html' %}
 {% load widget_tweaks %}
 {% load asset_templatetags %}
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
@@ -304,6 +304,9 @@
                     form: $('#asset_update_form').serialize()
                 },
                 traditional: true,
+                headers: {
+                    'X-CSRFToken': document.getElementById("asset_update_form").csrfmiddlewaretoken.value
+                },
 
                 success: function (data) {
                     // console.log(data);
@@ -328,7 +331,6 @@
         function clearParent() {
             $('#hidden_parent_id').val('');
             $('#parent_id').val('');
-            M.updateTextFields()
         }
     </script>
 
@@ -337,9 +339,7 @@
             {% if edit or duplicate %}
                 var comments_id = '#{{ form.comments.id_for_label }}';
                 $(comments_id).val('{{ object.comments|linebreaksn }}');
-                M.textareaAutoResize($(comments_id));
             {% endif %}
-            M.updateTextFields();
         })
     </script>
 {% endblock %}
