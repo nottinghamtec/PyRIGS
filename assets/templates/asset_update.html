@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load asset_templatetags %}
+{% block title %}Asset {{ object.asset_id }}{% endblock %}
+
+
+{% block main %}
+
+    <h4>
+        {% if edit and object %}
+            Edit Asset | {{ object.asset_id }}
+        {% elif duplicate %}
+            Duplication of Asset | {{ previous_asset_id }}
+        {% elif not object %}
+            Create Asset
+        {% else %}
+            Asset | {{ object.asset_id }}
+        {% endif %}
+
+    </h4>
+    <div class="divider"></div>
+
+    <br>
+
+    <form method="post" id="asset_update_form">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ object.id|default:0 }}">
+
+        <div class="row">
+            <div class="col s12">
+                <div class="button-group right">
+                    {% if edit and object %}
+                        <!--edit-->
+                        <button type="button" class="btn" onclick="updateAsset()">Save</button>
+                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
+                    {% elif duplicate %}
+                        <!--duplicate-->
+                        <button type="button" class="btn" onclick="updateAsset()">Create Duplicate</button>
+                        <a href="{% url 'asset_detail' previous_asset_pk %}" class="btn">Cancel</a>
+                    {% elif not object %}
+                        <!--create-->
+                        <button type="button" class="btn" onclick="updateAsset()">Save</button>
+                    {% else %}
+                        <!--detail-->
+                        <a href="{% url 'asset_update' object.pk %}" class="btn">Edit</a>
+                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="panel">
+                <div class="panel-heading">
+                    Asset Details
+                </div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        {% if edit or duplicate %}
+                            <div class="row">
+                            <div class="input-field col s12">
+                                {% if duplicate %}
+                                    {% render_field form.asset_id value=object.asset_id %}
+                                {% elif object.asset_id %}
+                                    {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input' value=object.asset_id %}
+                                {% else %}
+                                    {% render_field form.asset_id %}
+                                {% endif %}
+                                <label for="{{ form.asset_id.id_for_label }}" class="bold-text">Asset ID</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.description value=object.description %}
+                                <label for="{{ form.description.id_for_label }}"
+                                       class="bold-text">Description</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
+                                        required>
+                                    {% for id, choice in form.category.field.choices %}
+                                        <option value="{{ id }}"
+                                                {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="{{ form.category.id_for_label }}" class="bold-text">Category</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+                                    {% for id, choice in form.status.field.choices %}
+                                        <option value="{{ id }}"
+                                                {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.serial_number value=object.serial_number %}
+                                <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                {% render_field form.comments|add_class:'materialize-textarea' %}
+                                <label for="{{ form.comments.id_for_label }}">Comments</label>
+                            </div>
+
+                        {% else %}
+                            <dt>Asset ID</dt>
+                            <dd>{{ object.asset_id }}</dd>
+
+                            <dt>Description</dt>
+                            <dd>{{ object.description }}</dd>
+
+                            <dt>Category</dt>
+                            <dd>{{ object.category }}</dd>
+
+                            <dt>Status</dt>
+                            <dd>{{ object.status }}</dd>
+
+                            <dt>Serial Number</dt>
+                            <dd>{{ object.serial_number|default:'-' }}</dd>
+
+                            <dt>Comments</dt>
+                            <dd>{{ object.comments|default:'-'|linebreaksbr }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="panel">
+                <div class="panel-heading">
+                    Purchase Details
+                </div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        {% if edit or duplicate %}
+                            <div class="row">
+                                <div class="input-field col s12">
+                                    <select name="{{ form.purchased_from.name }}"
+                                            id="{{ form.purchased_from.id_for_label }}">
+                                        {% for id, choice in form.purchased_from.field.choices %}
+                                            <option value="{{ id }}"
+                                                    {% if object.purchased_from.id == id %}selected{% endif %}>{{ choice }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
+                                </div>
+
+                                <div class="input-field col s12">
+                                    {% render_field form.purchase_price value=object.purchase_price %}
+                                    <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
+                                </div>
+
+                                <div class="input-field col s12">
+                                    {% render_field form.salvage_value value=object.salvage_value %}
+                                    <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
+                                </div>
+
+                                <div class="input-field col s12">
+                                    {% if object.date_acquired %}
+                                        {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
+                                    {% else %}
+                                        <input type="text" name="date_acquired" value="{% now "DATE_FORMAT" %}"
+                                               class="datepicker" id="id_date_acquired">
+                                    {% endif %}
+                                    <label for="{{ form.date_acquired.id_for_label }}" class="bold-text">Date
+                                        Acquired</label>
+
+                                </div>
+
+                                <div class="input-field col s12">
+                                    {% render_field form.date_sold|add_class:'datepicker' value=object.date_sold|date %}
+                                    <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
+                                </div>
+                            </div>
+                        {% else %}
+                            <dt>Purchased From</dt>
+                            <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
+
+                            <dt>Purchase Price</dt>
+                            <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
+
+                            <dt>Salvage Value</dt>
+                            <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
+
+                            <dt>Date Acquired</dt>
+                            <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
+
+                            <dt>Date Sold</dt>
+                            <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        {% if object.is_cable %}
+            <div class="row">
+                <div class="panel">
+                    <div class="panel-heading">
+                        Cable Details
+                    </div>
+                    <div class="panel-body">
+                        <dl class="dl-horizontal">
+                            <dt>Length</dt>
+                            <dd>{{ object.length }}m</dd>
+
+                            <dt>Type</dt>
+                            <dd>TODO</dd>
+
+                            <dt>Required CSA</dt>
+                            <dd>TODO</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="panel">
+                <div class="panel-heading">
+                    Collection Details
+                </div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        {% if edit or duplicate %}
+                            <div class="row">
+
+                                <div class="input-field col s10">
+                                    <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id"
+                                           value="{{ object.parent.id }}">
+                                    <input type="text" id="parent_id" value="{{ object.parent|default:'' }}"
+                                           disabled="">
+                                    <label for="parent_id">Parent</label>
+                                </div>
+                                <div class="col s2">
+                                    <button type="button" class="btn btn-flat" onclick="clearParent()">
+                                        <i class="material-icons">clear</i>
+                                    </button>
+                                </div>
+                                <div class="input-field col s10">
+                                    <input type="text" id="parent_search">
+                                    <label for="parent_search">Search for asset</label>
+                                    {#                                {% render_field form.parent value=object.parent %}#}
+                                </div>
+                                <div class="col s2">
+                                    <button type="button" class="btn btn-flat" onclick="formAssetSearch()">
+                                        <i class="material-icons">search</i>
+                                    </button>
+                                    <br>
+                                </div>
+                                <div class="col s12" id="formAssetSearchResult">
+                                    <!--Placeholder for search results-->
+                                </div>
+                            </div>
+                        {% else %}
+                            <dt>Parent</dt>
+                            <dd>
+                                {% if object.parent %}
+                                    <a href="{% url 'asset_detail' object.parent.pk %}">
+                                        {{ object.parent.asset_id }} - {{ object.parent.description }}
+                                    </a>
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt>Children</dt>
+                            {% if object.asset_parent.all %}
+                                {% for child in object.asset_parent.all %}
+                                    <dd>
+                                        <a href="{% url 'asset_detail' child.pk %}">
+                                            {{ child.asset_id }} - {{ child.description }}
+                                        </a>
+                                    </dd>
+                                {% endfor %}
+                            {% else %}
+                                <dd><span>-</span></dd>
+                            {% endif %}
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% include 'confirm_delete.html' with object=object %}
+
+{% endblock %}
+
+{% block script %}
+
+    {#    <script>#}
+    {#        $('#asset_update_form').on('submit', function(event){#}
+    {#console.log($('#asset_update_form').serialize());#}
+    {#            event.preventDefault();#}
+    {#            updateAsset();#}
+    {#            return false;#}
+    {#        });#}
+    {#    </script>#}
+
+    <script>
+        function clearParent() {
+            $('#hidden_parent_id').val('');
+            $('#parent_id').val('');
+            M.updateTextFields()
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            {% if edit or duplicate %}
+                var comments_id = '#{{ form.comments.id_for_label }}';
+                $(comments_id).val('{{ object.comments|linebreaksn }}');
+                M.textareaAutoResize($(comments_id));
+            {% endif %}
+            M.updateTextFields();
+        })
+    </script>
+
+{% endblock %}
