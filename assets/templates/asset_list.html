@@ -4,39 +4,67 @@
 
 {% block content %}
 
-    <div class="page-header">
-        <h1 class="text-center">Asset List</h1>
-    </div>
+<div class="page-header">
+  <h1 class="text-center">Asset List</h1>
+</div>
 
-    <form id="asset-filter-form" onsubmit=>
-        {% csrf_token %}
-        <div class="input-group">
-            <input type="q" name="q" placeholder="Search" class="form-control" value="{{searchName}}">
-            <label for="asset_id" class="sr-only">Asset ID</label>
-            <span class="input-group-btn"><button type="submit" class="btn">Search</button></span>
-        </div>
-    </form>
+<form id="asset-search-form">
+  {% csrf_token %}
+  <div class="input-group">
+    <input type="query" name="query" placeholder="Search by Asset ID/Description" class="form-control" value="{{searchName}}">
+    <label for="asset_id" class="sr-only">Asset ID/Description:</label>
+    <span class="input-group-btn"><button type="submit" class="btn btn-default">Search</button></span>
+  </div>
+</form>
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Asset ID</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Quick Links</th>
-        </tr>
-        </thead>
-        <tbody id="asset_table_body">
-        {% include 'asset_list_table_body.html' %}
-        </tbody>
-    </table>
+<form class="form-inline" id="asset-filter-form">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="cat">Category:</label>
+    <select name="cat" class="form-control">
+          <option>None</option>
+          {% for name in categories %}
+          <option>
+            {{ name }}
+          </option>
+          {% endfor %}
+      </select>
+  </div>
+  <div class="form-group">
+    <label for="status">Status:</label>
+    <select name="status" class="form-control">
+    <option>None</option>
+            {% for name in statuses %}
+            <option>
+              {{ name }}
+            </option>
+            {% endfor %}
+    </select>
+  </div>
+  <!---TODO: Auto filter whenever an option is selected, instead of using a button --->
+  <button type="submit" class="btn btn-default">Filter</button>
+</form>
 
-    {% if is_paginated %}
-            <div class="text-center">
-                {% paginator %}
-            </div>
-    {% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Asset ID</th>
+      <th>Description</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th>Quick Links</th>
+    </tr>
+  </thead>
+  <tbody id="asset_table_body">
+    {% include 'partials/asset_list_table_body.html' %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+<div class="text-center">
+  {% paginator %}
+</div>
+{% endif %}
 
 {% endblock %}
 

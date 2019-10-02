@@ -20,18 +20,27 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     ordering = ['-pk']
         
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            return self.model.objects.filter(Q(asset_id__exact=q) | Q(description__icontains=q) | Q(comments__icontains=q))
-        elif q != "":
-            return self.model.objects.filter(Q(asset_id__exact=q))
+        #TODO Feedback to user when search fails
+        query = self.request.GET.get('query', "")
+        if len(query) >= 3:
+            return self.model.objects.filter(Q(asset_id__exact=query) | Q(description__icontains=query))
+        elif query != "":
+            return self.model.objects.filter(Q(asset_id__exact=query))
         else:
-            return self.model.objects.all()
+            cat = self.request.GET.get('cat', "")
+            status = self.request.GET.get('status', "")
+            if cat != "None":
+                return self.model.objects.filter(category__name__exact=cat)
+            elif status != "None":
+                return self.model.objects.filter(status__name__exact=status)
+            else:
+                return self.model.objects.all()
     
     def get_context_data(self, **kwargs):
-        q = self.request.GET.get('q', "")
         context = super(AssetList, self).get_context_data(**kwargs)
-        context["searchName"] = q
+        context["search_name"] = self.request.GET.get('query', "")
+        context["categories"] = models.AssetCategory.objects.all()
+        context["statuses"] = models.AssetStatus.objects.all()
         return context;
 
 class AssetDetail(LoginRequiredMixin, generic.DetailView):

@@ -9,13 +9,13 @@
 <div class="page-header">
   <h1>
       {% if edit and object %}
-          Edit Asset: {{ object.asset_id }} {{ object.description }}
+          Edit Asset: {{ object.asset_id }} - {{ object.description }}
       {% elif duplicate %}
           Duplication of Asset: {{ previous_asset_id }}
       {% elif not object %}
           Create Asset
       {% else %}
-          Asset: {{ object.asset_id }} {{ object.description }}
+          Asset: {{ object.asset_id }} - {{ object.description }}
       {% endif %}
   </h1>
 </div>
