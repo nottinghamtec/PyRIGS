@@ -6,340 +6,336 @@
 
 {% block content %}
 
-    <h4>
-        {% if edit and object %}
-            Edit Asset | {{ object.asset_id }}
-        {% elif duplicate %}
-            Duplication of Asset | {{ previous_asset_id }}
-        {% elif not object %}
-            Create Asset
+<div class="page-header">
+  <h1>
+            {% if edit and object %}
+                Edit Asset | {{ object.asset_id }}
+            {% elif duplicate %}
+                Duplication of Asset | {{ previous_asset_id }}
+            {% elif not object %}
+                Create Asset
+            {% else %}
+                Asset | {{ object.asset_id }}
+            {% endif %}
+
+        </h1>
+</div>
+
+<br>
+
+<form method="post" id="asset_update_form">
+  {% csrf_token %}
+  <input type="hidden" name="id" value="{{ object.id|default:0 }}">
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Asset Details
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="{{ form.asset_id.id_for_label }}" class="bold-text">Asset ID</label>
+        {% if edit or duplicate %}
+        {% if duplicate %}
+        {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+        {% elif object.asset_id %}
+        {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input form-control' value=object.asset_id %}
         {% else %}
-            Asset | {{ object.asset_id }}
+        {% render_field form.asset_id|add_class:'form-control' %}
         {% endif %}
+      </div>
 
-    </h4>
-    <div class="divider"></div>
-
-    <br>
-
-    <form method="post" id="asset_update_form">
-        {% csrf_token %}
-        <input type="hidden" name="id" value="{{ object.id|default:0 }}">
-
-        <div class="row">
-            <div class="col s12">
-                <div class="button-group right">
-                    {% if edit and object %}
-                        <!--edit-->
-                        <button type="button" class="btn" onclick="updateAsset()">Save</button>
-                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
-                        <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
-                    {% elif duplicate %}
-                        <!--duplicate-->
-                        <button type="button" class="btn" onclick="updateAsset()">Create Duplicate</button>
-                        <a href="{% url 'asset_detail' previous_asset_pk %}" class="btn">Cancel</a>
-                    {% elif not object %}
-                        <!--create-->
-                        <button type="button" class="btn" onclick="updateAsset()">Save</button>
-                    {% else %}
-                        <!--detail-->
-                        <a href="{% url 'asset_update' object.pk %}" class="btn">Edit</a>
-                        <a class="waves-effect waves-light btn" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
-                        <a class="waves-effect waves-light btn modal-trigger" href="#confirm_delete_modal">Delete</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="panel">
-                <div class="panel-heading">
-                    Asset Details
-                </div>
-                <div class="panel-body">
-                    <dl class="dl-horizontal">
-                        {% if edit or duplicate %}
-                            <div class="row">
-                            <div class="input-field col s12">
-                                {% if duplicate %}
-                                    {% render_field form.asset_id value=object.asset_id %}
-                                {% elif object.asset_id %}
-                                    {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input' value=object.asset_id %}
-                                {% else %}
-                                    {% render_field form.asset_id %}
-                                {% endif %}
-                                <label for="{{ form.asset_id.id_for_label }}" class="bold-text">Asset ID</label>
-                            </div>
-
-                            <div class="input-field col s12">
-                                {% render_field form.description value=object.description %}
-                                <label for="{{ form.description.id_for_label }}"
+      <div class="form-group">
+        <label for="{{ form.description.id_for_label }}"
                                        class="bold-text">Description</label>
-                            </div>
+        {% render_field form.description|add_class:'form-control' value=object.description %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.category.id_for_label }}" class="bold-text">Category</label>
+        <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
+                                        required class="form-control">
+            {% for id, choice in form.category.field.choices %}
+                <option value="{{ id }}"
+                        {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
+            {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
+        <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+            {% for id, choice in form.status.field.choices %}
+                <option value="{{ id }}"
+                        {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+            {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+        {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
+      </div>
+      <!---TODO: Lower default number of lines in comments box--->
+      <div class="form-group">
+        <label for="{{ form.comments.id_for_label }}">Comments</label>
+        {% render_field form.comments|add_class:'form-control' %}
+      </div>
+      {% else %}
+      <dt>Asset ID</dt>
+      <dd>{{ object.asset_id }}</dd>
 
-                            <div class="input-field col s12">
-                                <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
-                                        required>
-                                    {% for id, choice in form.category.field.choices %}
-                                        <option value="{{ id }}"
-                                                {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
-                                    {% endfor %}
-                                </select>
-                                <label for="{{ form.category.id_for_label }}" class="bold-text">Category</label>
-                            </div>
+      <dt>Description</dt>
+      <dd>{{ object.description }}</dd>
 
-                            <div class="input-field col s12">
-                                <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
-                                    {% for id, choice in form.status.field.choices %}
-                                        <option value="{{ id }}"
-                                                {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
-                                    {% endfor %}
-                                </select>
-                                <label for="{{ form.status.id_for_label }}" class="bold-text">Status</label>
-                            </div>
+      <dt>Category</dt>
+      <dd>{{ object.category }}</dd>
 
-                            <div class="input-field col s12">
-                                {% render_field form.serial_number value=object.serial_number %}
-                                <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
-                            </div>
+      <dt>Status</dt>
+      <dd>{{ object.status }}</dd>
 
-                            <div class="input-field col s12">
-                                {% render_field form.comments|add_class:'materialize-textarea' %}
-                                <label for="{{ form.comments.id_for_label }}">Comments</label>
-                            </div>
+      <dt>Serial Number</dt>
+      <dd>{{ object.serial_number|default:'-' }}</dd>
 
-                        {% else %}
-                            <dt>Asset ID</dt>
-                            <dd>{{ object.asset_id }}</dd>
+      <dt>Comments</dt>
+      <dd>{{ object.comments|default:'-'|linebreaksbr }}</dd>
+      {% endif %}
+    </div>
+  </div>
 
-                            <dt>Description</dt>
-                            <dd>{{ object.description }}</dd>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Purchase Details
+    </div>
+    <div class="panel-body">
+      {% if edit or duplicate %}
 
-                            <dt>Category</dt>
-                            <dd>{{ object.category }}</dd>
-
-                            <dt>Status</dt>
-                            <dd>{{ object.status }}</dd>
-
-                            <dt>Serial Number</dt>
-                            <dd>{{ object.serial_number|default:'-' }}</dd>
-
-                            <dt>Comments</dt>
-                            <dd>{{ object.comments|default:'-'|linebreaksbr }}</dd>
-                        {% endif %}
-                    </dl>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="panel">
-                <div class="panel-heading">
-                    Purchase Details
-                </div>
-                <div class="panel-body">
-                    <dl class="dl-horizontal">
-                        {% if edit or duplicate %}
-                            <div class="row">
-                                <div class="input-field col s12">
-                                    <select name="{{ form.purchased_from.name }}"
+      <div class="form-group">
+        <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
+        <select class="form-control" name="{{ form.purchased_from.name }}"
                                             id="{{ form.purchased_from.id_for_label }}">
                                         {% for id, choice in form.purchased_from.field.choices %}
                                             <option value="{{ id }}"
                                                     {% if object.purchased_from.id == id %}selected{% endif %}>{{ choice }}</option>
                                         {% endfor %}
                                     </select>
-                                    <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-                                </div>
+      </div>
 
-                                <div class="input-field col s12">
-                                    {% render_field form.purchase_price value=object.purchase_price %}
-                                    <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
-                                </div>
+      <div class="form-group">
+        <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
+        <div class="input-group">
+          <span class="input-group-addon">£</span>
+          {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
+        </div>
+      </div>
 
-                                <div class="input-field col s12">
-                                    {% render_field form.salvage_value value=object.salvage_value %}
-                                    <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
-                                </div>
+      <div class="form-group">
+        <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
+        <div class="input-group">
+          <span class="input-group-addon">£</span>
+          {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
+        </div>
+      </div>
 
-                                <div class="input-field col s12">
-                                    {% if object.date_acquired %}
-                                        {% render_field form.date_acquired|add_class:'datepicker' value=object.date_acquired|date %}
-                                    {% else %}
-                                        <input type="text" name="date_acquired" value="{% now "DATE_FORMAT" %}"
-                                               class="datepicker" id="id_date_acquired">
-                                    {% endif %}
-                                    <label for="{{ form.date_acquired.id_for_label }}" class="bold-text">Date
+      <div class="form-group">
+        <label for="{{ form.date_acquired.id_for_label }}" class="bold-text">Date
                                         Acquired</label>
-
-                                </div>
-
-                                <div class="input-field col s12">
-                                    {% render_field form.date_sold|add_class:'datepicker' value=object.date_sold|date %}
-                                    <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
-                                </div>
-                            </div>
-                        {% else %}
-                            <dt>Purchased From</dt>
-                            <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
-
-                            <dt>Purchase Price</dt>
-                            <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
-
-                            <dt>Salvage Value</dt>
-                            <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
-
-                            <dt>Date Acquired</dt>
-                            <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
-
-                            <dt>Date Sold</dt>
-                            <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
-                        {% endif %}
-                    </dl>
-                </div>
+        {% if object.date_acquired %}
+        {% render_field form.date_acquired|add_class:'datepicker form-control' value=object.date_acquired|date %}
+        {% else %}
+        <input type="text" name="date_acquired" value="{% now "DATE_FORMAT" %}"
+                                               class="datepicker form-control" id="id_date_acquired">
+                                    {% endif %}
             </div>
+
+        <!---TODO: Presumably, this should only appear if the asset is in the sold category?--->
+        <div class="form-group">
+          <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
+          {% render_field form.date_sold|add_class:'datepicker form-control' value=object.date_sold|date %}
+        </div>
+      </div>
+      {% else %}
+      <dt>Purchased From</dt>
+      <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
+
+      <dt>Purchase Price</dt>
+      <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
+
+      <dt>Salvage Value</dt>
+      <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
+
+      <dt>Date Acquired</dt>
+      <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
+
+      <dt>Date Sold</dt>
+      <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
+      {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  {% if object.is_cable %}
+  <div class="form-group">
+    <div class="panel">
+      <div class="panel-heading">
+        Cable Details
+      </div>
+      <div class="panel-body">
+        <dl class="dl-horizontal">
+          <dt>Length</dt>
+          <dd>{{ object.length }}m</dd>
+
+          <dt>Type</dt>
+          <dd>TODO</dd>
+
+          <dt>Required CSA</dt>
+          <dd>TODO</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Collection Details
+    </div>
+    <div class="panel-body">
+      <dl class="dl-horizontal">
+        {% if edit or duplicate %}
+
+        <div class="form-group">
+          <label for="parent_id">Parent</label>
+          <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id"
+                                         value="{{ object.parent.id }}">
+          <div class="input-group">
+            <input type="text" id="parent_id" value="{{ object.parent|default:'' }}"
+                                           disabled="" class="form-control">
+            <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="clearParent()">Clear
+         </button></span>
+          </div>
         </div>
 
-        {% if object.is_cable %}
-            <div class="row">
-                <div class="panel">
-                    <div class="panel-heading">
-                        Cable Details
-                    </div>
-                    <div class="panel-body">
-                        <dl class="dl-horizontal">
-                            <dt>Length</dt>
-                            <dd>{{ object.length }}m</dd>
+        <div class="form-group">
+          <label for="parent_search">Search for asset</label>
+          <div class="input-group">
+            <input type="text" id="parent_search" class="form-control">
+            <span class="input-group-btn"><button type="button" class="btn btn-default" onclick="formAssetSearch()">
+                                        <i class="glyphicon glyphicon-search"></i> Search
+                                    </button></span>
+          </div>
+        </div>
+        <div class="col s2">
 
-                            <dt>Type</dt>
-                            <dd>TODO</dd>
+          <br>
+                                </div>
+          <div class="col s12" id="formAssetSearchResult">
+            <!--Placeholder for search results-->
+          </div>
+        </div>
+        {% else %}
+        <dt>Parent</dt>
+        <dd>
+          {% if object.parent %}
+          <a href="{% url 'asset_detail' object.parent.pk %}">
+          {{ object.parent.asset_id }} - {{ object.parent.description }}
+          </a>
+          {% else %}
+          <span>-</span>
+          {% endif %}
+        </dd>
 
-                            <dt>Required CSA</dt>
-                            <dd>TODO</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
+        <dt>Children</dt>
+        {% if object.asset_parent.all %}
+        {% for child in object.asset_parent.all %}
+        <dd>
+          <a href="{% url 'asset_detail' child.pk %}">
+          {{ child.asset_id }} - {{ child.description }}
+          </a>
+        </dd>
+        {% endfor %}
+        {% else %}
+        <dd><span>-</span></dd>
         {% endif %}
+        {% endif %}
+      </dl>
+    </div>
+</form>
 
-        <div class="row">
-            <div class="panel">
-                <div class="panel-heading">
-                    Collection Details
-                </div>
-                <div class="panel-body">
-                    <dl class="dl-horizontal">
-                        {% if edit or duplicate %}
-                            <div class="row">
+<div class="btn-group">
+  {% if edit and object %}
+  <!--edit-->
+  <button type="button" class="btn btn-success" onclick="updateAsset()">Save</button>
+  <a class="btn btn-default" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
+  <a class="btn btn-danger" href="#confirm_delete_modal">Delete</a>
+  {% elif duplicate %}
+  <!--duplicate-->
+  <button type="button" class="btn btn-default" onclick="updateAsset()">Create Duplicate</button>
+  <a href="{% url 'asset_detail' previous_asset_pk %}" class="btn">Cancel</a>
+  {% elif not object %}
+  <!--create-->
+  <button type="button" class="btn btn-success" onclick="updateAsset()">Save</button>
+  {% else %}
+  <!--detail-->
+  <a href="{% url 'asset_update' object.pk %}" class="btn btn-warning">Edit</a>
+  <a class="btn btn-default" href="{% url 'asset_update' object.pk %}?duplicate=true">Duplicate</a>
+  <a class="btn btn-danger" href="#confirm_delete_modal">Delete</a>
+  {% endif %}
+</div>
 
-                                <div class="input-field col s10">
-                                    <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id"
-                                           value="{{ object.parent.id }}">
-                                    <input type="text" id="parent_id" value="{{ object.parent|default:'' }}"
-                                           disabled="">
-                                    <label for="parent_id">Parent</label>
-                                </div>
-                                <div class="col s2">
-                                    <button type="button" class="btn btn-flat" onclick="clearParent()">
-                                        <i class="material-icons">clear</i>
-                                    </button>
-                                </div>
-                                <div class="input-field col s10">
-                                    <input type="text" id="parent_search">
-                                    <label for="parent_search">Search for asset</label>
-                                    {#                                {% render_field form.parent value=object.parent %}#}
-                                </div>
-                                <div class="col s2">
-                                    <button type="button" class="btn btn-flat" onclick="formAssetSearch()">
-                                        <i class="material-icons">search</i>
-                                    </button>
-                                    <br>
-                                </div>
-                                <div class="col s12" id="formAssetSearchResult">
-                                    <!--Placeholder for search results-->
-                                </div>
-                            </div>
-                        {% else %}
-                            <dt>Parent</dt>
-                            <dd>
-                                {% if object.parent %}
-                                    <a href="{% url 'asset_detail' object.parent.pk %}">
-                                        {{ object.parent.asset_id }} - {{ object.parent.description }}
-                                    </a>
-                                {% else %}
-                                    <span>-</span>
-                                {% endif %}
-                            </dd>
-
-                            <dt>Children</dt>
-                            {% if object.asset_parent.all %}
-                                {% for child in object.asset_parent.all %}
-                                    <dd>
-                                        <a href="{% url 'asset_detail' child.pk %}">
-                                            {{ child.asset_id }} - {{ child.description }}
-                                        </a>
-                                    </dd>
-                                {% endfor %}
-                            {% else %}
-                                <dd><span>-</span></dd>
-                            {% endif %}
-                        {% endif %}
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    {% include 'confirm_delete.html' with object=object %}
+{% include 'confirm_delete.html' with object=object %}
 
 {% endblock %}
 
 {% block js %}
-    <script>
-        function updateAsset() {
-            $.ajax({
-                url: "{% url 'ajax_asset_update' %}", // the endpoint
-                type: "POST", // http method
-                data: {
-                    form: $('#asset_update_form').serialize()
-                },
-                traditional: true,
-                headers: {
-                    'X-CSRFToken': document.getElementById("asset_update_form").csrfmiddlewaretoken.value
-                },
+<script>
+  function updateAsset() {
+    $.ajax({
+      url: "{% url 'ajax_asset_update' %}", // the endpoint
+      type: "POST", // http method
+      data: {
+        form: $('#asset_update_form').serialize()
+      },
+      traditional: true,
+      headers: {
+        'X-CSRFToken': document.getElementById("asset_update_form").csrfmiddlewaretoken.value
+      },
 
-                success: function (data) {
-                    // console.log(data);
-                    window.location.href = data['url'];
-                },
+      success: function(data) {
+        // console.log(data);
+        window.location.href = data['url'];
+      },
 
-                error: function (xhr) { console.log(xhr.status + ": " + xhr.responseText) }
-            });
-        }
-    </script>
+      error: function(xhr) {
+        console.log(xhr.status + ": " + xhr.responseText)
+      }
+    });
+  }
+</script>
 
-    {#    <script>#}
-    {#        $('#asset_update_form').on('submit', function(event){#}
-    {#console.log($('#asset_update_form').serialize());#}
-    {#            event.preventDefault();#}
-    {#            updateAsset();#}
-    {#            return false;#}
-    {#        });#}
-    {#    </script>#}
+{#    <script>#}
+{#        $('#asset_update_form').on('submit', function(event){#}
+{#console.log($('#asset_update_form').serialize());#}
+{#            event.preventDefault();#}
+{#            updateAsset();#}
+{#            return false;#}
+{#        });#}
+{#    </script>#}
 
-    <script>
-        function clearParent() {
-            $('#hidden_parent_id').val('');
-            $('#parent_id').val('');
-        }
-    </script>
+<script>
+  function clearParent() {
+    $('#hidden_parent_id').val('');
+    $('#parent_id').val('');
+  }
+</script>
 
-    <script>
-        $(document).ready(function () {
-            {% if edit or duplicate %}
-                var comments_id = '#{{ form.comments.id_for_label }}';
-                $(comments_id).val('{{ object.comments|linebreaksn }}');
-            {% endif %}
-        })
-    </script>
+<script>
+  $(document).ready(function() {
+    {
+      %
+      if edit or duplicate %
+    }
+    var comments_id = '#{{ form.comments.id_for_label }}';
+    $(comments_id).val('{{ object.comments|linebreaksn }}'); {
+      %
+      endif %
+    }
+  })
+</script>
 {% endblock %}

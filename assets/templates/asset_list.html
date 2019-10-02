@@ -4,18 +4,18 @@
 
 {% block content %}
 
-    <h2 class="text-center">Asset List</h2>
-
-    <div class="col-lg-6">
-        <form method="post" id="asset-filter-form">
-            {% csrf_token %}
-            <div class="input-group">
-                <input type="text" name="asset_id" placeholder="Asset ID" class="form-control">
-                <label for="asset_id" class="sr-only">Asset ID</label>
-                <span class="input-group-btn"><button type="submit" class="btn">Search</button></span>
-            </div>
-        </form>
+    <div class="page-header">
+        <h1 class="text-center">Asset List</h1>
     </div>
+
+    <form method="post" id="asset-filter-form">
+        {% csrf_token %}
+        <div class="input-group">
+            <input type="text" name="asset_id" placeholder="Asset ID" class="form-control">
+            <label for="asset_id" class="sr-only">Asset ID</label>
+            <span class="input-group-btn"><button type="submit" class="btn">Search</button></span>
+        </div>
+    </form>
 
     <table class="table">
         <thead>
