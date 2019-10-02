@@ -1,15 +1,26 @@
 {% for item in object_list %}
     {#                <li><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }} - {{ item.description }}</a></li>#}
-    <tr>
+    <!---TODO: When the ability to filter the list is added, remove the colours from the filter - specifically, stop greying out sold/binned stuff if it is being searched for--->
+    <tr class="
+                {% if item.status.name == 'Broken' %}
+                  danger
+                {% elif item.status.name == 'Lost'%}
+                  warning
+                {% elif item.status.name == 'In Service'%}
+                  success
+                {% elif item.status.name in 'Sold|Binned'%}
+                  text-muted
+                {% endif %}
+                ">
         <td><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
         <td>{{ item.description }}</td>
         <td>{{ item.category }}</td>
         <td>{{ item.status }}</td>
         <td>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</button>
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</button>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
             </div>
         </td>
     </tr>
