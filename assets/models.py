@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from polymorphic.models import PolymorphicModel
 
 import datetime
 
@@ -36,9 +37,7 @@ class Supplier(models.Model):
         return self.name
 
 
-class BaseAsset(models.Model):
-    class Meta:
-        abstract = True
+class Asset(PolymorphicModel):
 
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=10)
@@ -56,18 +55,12 @@ class BaseAsset(models.Model):
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
-    length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('asset_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return str(self.asset_id) + ' - ' + self.description
-
-
-class Asset(BaseAsset):
-    pass
-
 
 class Connector(models.Model):
     description = models.CharField(max_length=80)
@@ -79,7 +72,7 @@ class Connector(models.Model):
         return self.description
 
 
-class Cable(BaseAsset):
+class Cable(Asset):
     plug = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='plug', null=True)
     socket = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='socket', null=True)
     length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True, help_text='m')

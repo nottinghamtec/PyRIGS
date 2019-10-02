@@ -1,20 +1,4 @@
-function filterAssetTable() {
-    $.ajax({
-        url : "/asset/filter/", // the endpoint
-        type : "POST", // http method
-        data : {
-            form: $('#asset-filter-form').serialize()
-        },
-        traditional: true,
 
-        success : function(data) {
-            // console.log(data);
-            $('#asset_table_body').html(data)
-        },
-
-        error : function(xhr) {console.log(xhr.status + ": " + xhr.responseText)}
-    });
-}
 
 
 

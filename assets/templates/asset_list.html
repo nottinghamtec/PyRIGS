@@ -8,10 +8,10 @@
         <h1 class="text-center">Asset List</h1>
     </div>
 
-    <form method="post" id="asset-filter-form">
+    <form id="asset-filter-form" onsubmit=>
         {% csrf_token %}
         <div class="input-group">
-            <input type="text" name="asset_id" placeholder="Asset ID" class="form-control">
+            <input type="q" name="q" placeholder="Search" class="form-control" value="{{searchName}}">
             <label for="asset_id" class="sr-only">Asset ID</label>
             <span class="input-group-btn"><button type="submit" class="btn">Search</button></span>
         </div>
@@ -40,12 +40,5 @@
 
 {% endblock %}
 
-{% block script %}
-    <script>
-        $('#asset-filter-form').on('submit', function (event) {
-            event.preventDefault();
-            filterAssetTable();
-            return false;
-        });
-    </script>
+{% block js %}
 {% endblock %}

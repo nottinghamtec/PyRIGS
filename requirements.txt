@@ -12,6 +12,7 @@ django-recaptcha==1.4.0
 django-registration-redux==2.4
 django-reversion==2.0.13
 django-toolbelt==0.0.1
+django-polymorphic==2.1.2
 djangorestframework==3.9.0
 premailer==3.2.0
 git+git://github.com/jazzband/django-widget-tweaks.git@1.4.2

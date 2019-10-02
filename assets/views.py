@@ -13,27 +13,24 @@ from dateutil import parser
 import simplejson as json
 from assets import models, forms
 
-
-class Login(auth_views.LoginView):
-    template_name = 'registration/login.html'
-
-
-class Logout(auth_views.LogoutView):
-    template_name = 'registration/logout.html'
-
-
-class PasswordChange(auth_views.PasswordChangeView):
-    template_name = 'registration/password_change.html'
-
-    def get_success_url(self):
-        return reverse_lazy('profile_detail', kwargs={'pk': self.request.user.id})
-
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
     paginate_by = 40
     ordering = ['-pk']
-
+        
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+        if len(q) >= 3:
+            return self.model.objects.filter(Q(asset_id__icontains=q) | Q(description__icontains=q) | Q(comments__icontains=q))
+        else:
+            return self.model.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        q = self.request.GET.get('q', "")
+        context = super(AssetList, self).get_context_data(**kwargs)
+        context["searchName"] = q
+        return context;
 
 class AssetDetail(LoginRequiredMixin, generic.DetailView):
     model = models.Asset
@@ -44,7 +41,6 @@ class AssetDetail(LoginRequiredMixin, generic.DetailView):
 #     fields = '__all__'
 #     template_name = 'asset_update.html'
 #     # success_url = reverse_lazy('asset_list')
-
 
 class AssetEdit(LoginRequiredMixin, generic.TemplateView):
     template_name = 'asset_update.html'
@@ -67,7 +63,6 @@ class AssetEdit(LoginRequiredMixin, generic.TemplateView):
             context['edit'] = True
 
         return context
-
 
 @login_required()
 def asset_update(request):
@@ -116,26 +111,6 @@ def asset_delete(request):
         context['url'] = reverse('asset_list')
 
         return HttpResponse(json.dumps(context), content_type='application/json')
-
-
-@login_required()
-def asset_filter(request):
-    context = dict()
-
-    if request.method == 'POST' and request.is_ajax():
-        defaults = QueryDict(request.POST['form'].encode('ASCII')).dict()
-        defaults.pop('csrfmiddlewaretoken')
-
-        context['object_list'] = models.Asset.objects.filter(
-            Q(pk__icontains=defaults.get('asset_id')) |
-            Q(asset_id__icontains=defaults.get('asset_id'))
-        )
-
-        if request.POST.get('sender', None) == 'asset_update':
-            return render(request, template_name='asset_update_search_results.html', context=context)
-        else:
-            return render(request, template_name='asset_list_table_body.html', context=context)
-
 
 class SupplierList(generic.ListView):
     model = models.Supplier
