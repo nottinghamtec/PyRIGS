@@ -17,7 +17,7 @@
         </div>
     </form>
 
-    <table class="table">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th>Asset ID</th>
@@ -33,7 +33,7 @@
     </table>
 
     {% if is_paginated %}
-            <div class="col-md-6 text-right">
+            <div class="text-center">
                 {% paginator %}
             </div>
     {% endif %}

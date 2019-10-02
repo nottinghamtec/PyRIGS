@@ -1,29 +1,36 @@
 {% extends 'base_assets.html' %}
 {% block title %}List{% endblock %}
+{% load paginator from filters %}
 
 {% block content %}
 
-    <h4>Supplier List</h4>
+<div class="page-header">
+    <h1>Supplier List</h1>
+</div>
 
-    <table class="striped">
-        <thead>
-        <tr>
-            <th>Supplier</th>
-            <th>Quick Links</th>
-        </tr>
-        </thead>
-        <tbody id="asset_table_body">
-            {% for item in object_list %}
-            <tr>
-                <td>{{ item.name }}</td>
-                <td>
-                    <a href="{% url 'supplier_update' item.pk %}"><i class="material-icons">edit</i></a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Supplier</th>
+      <th>Quick Links</th>
+    </tr>
+  </thead>
+  <tbody id="asset_table_body">
+    {% for item in object_list %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>
+        <a href="{% url 'supplier_update' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-    {% include 'helpers/paginator.html' %}
+{% if is_paginated %}
+<div class="text-center">
+  {% paginator %}
+</div>
+{% endif %}
 
 {% endblock %}
