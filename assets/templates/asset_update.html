@@ -9,20 +9,20 @@
 <div class="page-header">
   <h1>
             {% if edit and object %}
-                Edit Asset: {{ object.asset_id }}
+                Edit Asset: {{ object.asset_id }} {{ object.description }}
             {% elif duplicate %}
                 Duplication of Asset: {{ previous_asset_id }}
             {% elif not object %}
                 Create Asset
             {% else %}
-                Asset: {{ object.asset_id }}
+                Asset: {{ object.asset_id }} {{ object.description }}
             {% endif %}
 
         </h1>
 </div>
 
 <div class="pull-right" style="margin-bottom: 100px">
-  {% include 'helpers/asset_buttons.html' %}
+  {% include 'partials/asset_buttons.html' %}
 </div>
 
 <form method="post" id="asset_update_form">
@@ -260,9 +260,9 @@
     </div>
 </form>
 
-{% include 'helpers/asset_buttons.html' %}
+{% include 'partials/asset_buttons.html' %}
 
-{% include 'confirm_delete.html' with object=object %}
+{% include 'partials/confirm_delete.html' with object=object %}
 
 {% endblock %}
 
