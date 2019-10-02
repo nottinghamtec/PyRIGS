@@ -34,9 +34,9 @@
       Asset Details
     </div>
     <div class="panel-body">
+      {% if edit or duplicate %}
       <div class="form-group">
         <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
-        {% if edit or duplicate %}
         {% if duplicate %}
         {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
         {% elif object.asset_id %}
@@ -45,7 +45,6 @@
         {% render_field form.asset_id|add_class:'form-control' %}
         {% endif %}
       </div>
-
       <div class="form-group">
         <label for="{{ form.description.id_for_label }}"
                                        >Description</label>
@@ -107,7 +106,6 @@
     </div>
     <div class="panel-body">
       {% if edit or duplicate %}
-
       <div class="form-group">
         <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
         <select class="form-control" name="{{ form.purchased_from.name }}"
@@ -151,57 +149,33 @@
           <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
           {% render_field form.date_sold|add_class:'datepicker form-control' value=object.date_sold|date %}
         </div>
+        {% else %}
+        <dl>
+          <dt>Purchased From</dt>
+          <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
+
+          <dt>Purchase Price</dt>
+          <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
+
+          <dt>Salvage Value</dt>
+          <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
+
+          <dt>Date Acquired</dt>
+          <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
+
+          <dt>Date Sold</dt>
+          <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
+        </dl>
+        {% endif %}
       </div>
-      {% else %}
-      <dt>Purchased From</dt>
-      <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
-
-      <dt>Purchase Price</dt>
-      <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
-
-      <dt>Salvage Value</dt>
-      <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
-
-      <dt>Date Acquired</dt>
-      <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
-
-      <dt>Date Sold</dt>
-      <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
-      {% endif %}
-      </dl>
     </div>
-  </div>
 
-  {% if object.is_cable %}
-  <div class="form-group">
-    <div class="panel">
+    <div class="panel panel-default">
       <div class="panel-heading">
-        Cable Details
+        Collection Details
       </div>
       <div class="panel-body">
-        <dl class="dl-horizontal">
-          <dt>Length</dt>
-          <dd>{{ object.length }}m</dd>
-
-          <dt>Type</dt>
-          <dd>TODO</dd>
-
-          <dt>Required CSA</dt>
-          <dd>TODO</dd>
-        </dl>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Collection Details
-    </div>
-    <div class="panel-body">
-      <dl class="dl-horizontal">
         {% if edit or duplicate %}
-
         <div class="form-group">
           <label for="parent_id">Parent</label>
           <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id"
@@ -230,34 +204,35 @@
           <div class="col s12" id="formAssetSearchResult">
             <!--Placeholder for search results-->
           </div>
-        </div>
-        {% else %}
-        <dt>Parent</dt>
-        <dd>
-          {% if object.parent %}
-          <a href="{% url 'asset_detail' object.parent.pk %}">
-          {{ object.parent.asset_id }} - {{ object.parent.description }}
-          </a>
           {% else %}
-          <span>-</span>
-          {% endif %}
-        </dd>
+          <dl>
+            <dt>Parent</dt>
+            <dd>
+              {% if object.parent %}
+              <a href="{% url 'asset_detail' object.parent.pk %}">
+              {{ object.parent.asset_id }} - {{ object.parent.description }}
+              </a>
+              {% else %}
+              <span>-</span>
+              {% endif %}
+            </dd>
 
-        <dt>Children</dt>
-        {% if object.asset_parent.all %}
-        {% for child in object.asset_parent.all %}
-        <dd>
-          <a href="{% url 'asset_detail' child.pk %}">
-          {{ child.asset_id }} - {{ child.description }}
-          </a>
-        </dd>
-        {% endfor %}
-        {% else %}
-        <dd><span>-</span></dd>
+            <dt>Children</dt>
+            {% if object.asset_parent.all %}
+            {% for child in object.asset_parent.all %}
+            <dd>
+              <a href="{% url 'asset_detail' child.pk %}">
+              {{ child.asset_id }} - {{ child.description }}
+              </a>
+            </dd>
+            {% endfor %}
+            {% else %}
+            <dd><span>-</span></dd>
+            {% endif %}
+          </dl>
         {% endif %}
-        {% endif %}
-      </dl>
-    </div>
+        </div>
+      </div>
 </form>
 
 {% include 'partials/asset_buttons.html' %}
