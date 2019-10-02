@@ -3,13 +3,13 @@
 <div class="form-group">
     <label for="{{ field.id_for_label }}">{{ label|default:field.label }}</label>
     {% if css %}
-    {% render_field field|add_class:'form-control' %}
+    {% render_field  field|add_class:css %}
     {% elif disable_if_filled and field.value %}
-    {% render_field field|attr:'disabled'|add_class:'form-control' %}
+    {% render_field  field|attr:'disabled' %}
     {% elif css and disable_if_filled %}
-    {% render_field field|add_class:'form-control'|attr:'disabled' %}
+    {% render_field  field|add_class:css|attr:'disabled' %}
     {% else %}
-    {{ field|add_class:'form-control' }}
+    {{ field }}
     {% endif %}
     <span class="helper-text" data-error="{{ field.errors.text }}"></span>
 </div>

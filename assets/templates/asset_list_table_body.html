@@ -7,9 +7,9 @@
         <td>{{ item.status }}</td>
         <td>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</button>
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
-                <button type="button" class="btn btn-default" formaction="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</button>
+                <a type="button" class="btn btn-default" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                <a type="button" class="btn btn-default" href="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+                <a type="button" class="btn btn-default" href="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
             </div>
         </td>
     </tr>
