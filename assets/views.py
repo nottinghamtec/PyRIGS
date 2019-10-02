@@ -22,7 +22,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('q', "")
         if len(q) >= 3:
-            return self.model.objects.filter(Q(asset_id__icontains=q) | Q(description__icontains=q) | Q(comments__icontains=q))
+            return self.model.objects.filter(Q(asset_id__exact=q) | Q(description__icontains=q) | Q(comments__icontains=q))
+        elif q != "":
+            return self.model.objects.filter(Q(asset_id__exact=q))
         else:
             return self.model.objects.all()
     
