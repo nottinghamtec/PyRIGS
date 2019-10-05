@@ -14,6 +14,11 @@ class AssetForm(forms.ModelForm):
             raise ValidationError("Cannot sell an item before it is acquired")
         return self.cleaned_data["date_sold"]
 
+class CableForm(AssetForm):
+    class Meta:
+        model = models.Cable
+        fields = '__all__'
+
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = models.Supplier

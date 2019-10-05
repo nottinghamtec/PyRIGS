@@ -13,6 +13,12 @@ from dateutil import parser
 import simplejson as json
 from assets import models, forms
 
+class CableFormMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cableForm"] = forms.CableForm
+        return context
+
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
