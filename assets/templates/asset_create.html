@@ -47,7 +47,7 @@
             </div>
             <div class="form-group">
               <label for="{{ form.category.id_for_label }}" >Category</label>
-              <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control" onchange="changeCategory()">
+              <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control" onchange="checkIfCableHidden()">
             {% for id, choice in form.category.field.choices %}
               <option value="{{ id }}"
                 {% if object.category.id == id %}
@@ -58,7 +58,7 @@
             {% endfor %}
             </select>
             </div>
-            {% render_field form.is_cable|attr:'onchange=toggleBox()' value=object.is_cable %} <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
+            {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' value=object.is_cable %} <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
             <div class="form-group">
               <label for="{{ form.status.id_for_label }}" >Status</label>
               <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
@@ -146,8 +146,8 @@
             </div>
             <div class="panel-body">
               <div class="form-group">
-                <label for="{{ cableform.plug.id_for_label }}">Plug</label>
-                <select name="{{ cableform.plug.name }}" id="{{ cableform.plug.id_for_label }}" class="form-control">
+                <label for="{{ cable_form.plug.id_for_label }}">Plug</label>
+                <select name="{{ cable_form.plug.name }}" id="{{ cable_form.plug.id_for_label }}" class="form-control">
                   <option value="None">
                   {% for connector in connectors %}
                     <option value="{{ connector.pk }}">
@@ -157,8 +157,8 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="{{ cableform.socket.id_for_label }}">Socket</label>
-                <select name="{{ cableform.socket.name }}" id="{{ cableform.socket.id_for_label }}" class="form-control">
+                <label for="{{ cable_form.socket.id_for_label }}">Socket</label>
+                <select name="{{ cable_form.socket.name }}" id="{{ cable_form.socket.id_for_label }}" class="form-control">
                   <option value="None">
                   {% for connector in connectors %}
                     <option value="{{ connector.pk }}">
@@ -168,22 +168,22 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="{{ cableform.length.id_for_label }}">Length</label>
-                {% render_field cableform.length|add_class:'form-control' %}
-                <span class="input-group-addon">{{ cableform.length.help_text }}</span>
+                <label for="{{ cable_form.length.id_for_label }}">Length</label>
+                {% render_field cable_form.length|add_class:'form-control' %}
+                <span class="input-group-addon">{{ cable_form.length.help_text }}</span>
               </div>
               <div class="form-group">
-                <label for="{{ cableform.csa.id_for_label }}">Cross Sectional Area</label>
-                {% render_field cableform.csa|add_class:'form-control' value=object.csa %}
-                <span class="input-group-addon">{{ cableform.csa.help_text }}</span>
+                <label for="{{ cable_form.csa.id_for_label }}">Cross Sectional Area</label>
+                {% render_field cable_form.csa|add_class:'form-control' value=object.csa %}
+                <span class="input-group-addon">{{ cable_form.csa.help_text }}</span>
               </div>
               <div class="form-group">
-                <label for="{{ cableform.circuits.id_for_label }}">Circuits</label>
-                {% render_field cableform.circuits|add_class:'form-control' value=object.circuits %}
+                <label for="{{ cable_form.circuits.id_for_label }}">Circuits</label>
+                {% render_field cable_form.circuits|add_class:'form-control' value=object.circuits %}
               </div>
               <div class="form-group">
-                <label for="{{ cableform.cores.id_for_label }}">Cores</label>
-                {% render_field cableform.cores|add_class:'form-control' value=object.cores %}
+                <label for="{{ cable_form.cores.id_for_label }}">Cores</label>
+                {% render_field cable_form.cores|add_class:'form-control' value=object.cores %}
               </div>
             </div>
           </div>
@@ -215,15 +215,13 @@
 
 {% block js%}
 <script>
-  function toggleBox() {
-    if(document.getElementById("id_category").value == "26") { //TODO: CHANGE THIS IN PRODUCTION
-      document.getElementById("cable-table").hidden = !document.getElementById("cable-table").hidden ;
+  function checkIfCableHidden() {
+    if(document.getElementById("id_category").value == "3" && document.getElementById("id_is_cable").checked) { //TODO: CHANGE THIS IN PRODUCTION
+      document.getElementById("cable-table").hidden = false;
+    } else {
+      document.getElementById("cable-table").hidden = true;
     }
   }
-  function changeCategory() {
-    if(document.getElementById("id_is_cable").checked) {
-      this.toggleBox();
-    }
-  }
+  checkIfCableHidden()
 </script>
 {%endblock%}

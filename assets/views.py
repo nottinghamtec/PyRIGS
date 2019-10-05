@@ -16,7 +16,7 @@ from assets import models, forms
 class CableFormMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["cableForm"] = forms.CableForm
+        context["cable_form"] = forms.CableForm(**self.get_form_kwargs())
         return context
 
 class AssetList(LoginRequiredMixin, generic.ListView):
