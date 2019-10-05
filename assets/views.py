@@ -65,67 +65,49 @@ class AssetEdit(LoginRequiredMixin, generic.UpdateView):
         context['form'] = forms.AssetForm
         # context['asset_names'] = models.Asset.objects.values_list('asset_id', 'description').order_by('-date_acquired')[]
 
-        if self.request.GET.get('duplicate'):
-            context['duplicate'] = True
-            context['previous_asset_id'] = context['object'].asset_id
-            context['previous_asset_pk'] = context['object'].pk
-            context['object'].pk = 0
-            context['object'].asset_id = ''
-            context['object'].serial_number = ''
-        else:
-            context['edit'] = True
+        context['edit'] = True
 
         return context
+
+    def form_invalid(self, form):
+        print(form.errors)
+        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})
 
 class AssetCreate(LoginRequiredMixin, generic.CreateView):
-    template_name = 'asset_update.html'
+    template_name = 'asset_create.html'
     model = models.Asset
     form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
         context = super(AssetCreate, self).get_context_data(**kwargs)
+        
         context["create"] = True
         return context
+    
+    def get_success_url(self):
+        return reverse("asset_detail", kwargs={"pk":self.object.id})
 
-@login_required()
-def asset_update(request):
-    context = dict()
+class DuplicateMixin:
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.pk = None
+        return self.render_to_response(self.get_context_data())
 
-    if request.method == 'POST' and request.is_ajax():
-        defaults = QueryDict(request.POST['form'].encode('ASCII')).dict()
-        defaults.pop('csrfmiddlewaretoken')
+class AssetDuplicate(DuplicateMixin, AssetCreate):
+    template_name = 'asset_create.html'
+    model = models.Asset
+    form_class = forms.AssetForm
 
-        asset_pk = int(defaults.pop('id'))
-
-        if defaults['date_acquired']:
-            defaults['date_acquired'] = parser.parse(defaults.pop('date_acquired'))
-        else:
-            defaults['date_acquired'] = None
-
-        if defaults['date_sold']:
-            defaults['date_sold'] = parser.parse(defaults.pop('date_sold'))
-        else:
-            defaults['date_sold'] = None
-
-        # if defaults['parent']:
-        #     defaults['parent'] = models.Asset.objects.get(asset_id=defaults.pop('parent'))
-
-        form = forms.AssetForm(defaults)
-        context['valid'] = form.is_valid()
-        context['errors'] = form.errors.as_json()
-
-        if asset_pk == 0:
-            asset = models.Asset.objects.create(**form.cleaned_data)
-        else:
-            asset, created = models.Asset.objects.update_or_create(pk=asset_pk, defaults=form.cleaned_data)
-
-        context['url'] = reverse('asset_detail', args=[asset.pk])
-
-        return HttpResponse(json.dumps(context), content_type='application/json')
-
+    def get_context_data(self, **kwargs):
+        context = super(AssetCreate, self).get_context_data(**kwargs)
+        context["create"] = None
+        context["duplicate"] = True
+        context['previous_asset_id'] = self.get_object().asset_id
+        context["previous_asset_pk"] = pk = self.kwargs.get(self.pk_url_kwarg)
+        return context
 
 @login_required()
 def asset_delete(request):

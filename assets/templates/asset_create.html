@@ -1,0 +1,187 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+{% load asset_templatetags %}
+{% block title %}Asset {{ object.asset_id }}{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+  <h1>
+      {% if duplicate %}
+          Duplication of Asset: {{ previous_asset_id }}
+      {% else %}
+          Create Asset
+      {% endif %}
+  </h1>
+</div>
+{% if duplicate %}
+<form method="post" id="asset_update_form" action="{% url 'asset_duplicate' pk=previous_asset_pk%}">
+{% else %}
+<form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
+{% endif %}
+  <div class="row" style="padding-bottom: 1em">
+    <div class="col-sm-12">
+      <div class="pull-right">
+        {% include 'partials/asset_buttons.html' %}
+      </div>
+    </div>
+  </div>
+  {% csrf_token %}
+  <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Asset Details
+        </div>
+        <div class="panel-body">
+          <div class="form-group"
+            <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
+            {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {% render_field form.description|add_class:'form-control' value=object.description %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.category.id_for_label }}" >Category</label>
+            <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control">
+            {% for id, choice in form.category.field.choices %}
+              <option value="{{ id }}"
+                {% if object.category.id == id %}
+                  selected
+                {% endif %}>
+              {{ choice }}
+              </option>
+            {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="{{ form.status.id_for_label }}" >Status</label>
+            <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+              {% for id, choice in form.status.field.choices %}
+                <option value="{{ id }}"
+                  {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+              {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
+          </div>
+          <!---TODO: Lower default number of lines in comments box-->
+          <div class="form-group">
+            <label for="{{ form.comments.id_for_label }}">Comments</label>
+              {% render_field form.comments|add_class:'form-control' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Purchase Details
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
+            <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">
+              {% for id, choice in form.purchased_from.field.choices %}
+                <option value="{{ id }}"
+                {% if object.purchased_from.id == id %}
+                  selected
+                {% endif %}>
+                {{ choice }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
+            <div class="input-group">
+              <span class="input-group-addon">£</span>
+              {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
+            <div class="input-group">
+              <span class="input-group-addon">£</span>
+              {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.date_acquired.id_for_label }}" >Date Acquired</label>
+              {% if object.date_acquired%}
+                {% with date_acq=object.date_acquired|date:"Y-m-d" %}
+                {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
+                {% endwith %}
+              {% else %}
+                <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
+                  class="form-control" id="id_date_acquired">
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
+              {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
+              {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            Collection Details
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label for="parent_id">Parent</label>
+              <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id" value="{{ object.parent.id }}">
+              <div class="input-group">
+                <input type="text" id="parent_id" value="{{ object.parent|default:'' }}" disabled="" class="form-control">
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default" onclick="clearParent()">Clear</button>
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="parent_search">Search for asset</label>
+              <div class="input-group">
+                <input type="text" id="parent_search" class="form-control">
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default" onclick="formAssetSearch()">
+                    <i class="glyphicon glyphicon-search"></i> Search
+                  </button>
+                </span>
+              </div>
+            </div>
+            <div class="col s2">
+              <br>
+            </div>
+            <div class="col s12" id="formAssetSearchResult">
+              <!--Placeholder for search results-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          {% include 'partials/asset_buttons.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% include 'partials/confirm_delete.html' with object=object %}
+
+{% endblock %}

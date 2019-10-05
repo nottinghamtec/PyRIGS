@@ -12,8 +12,8 @@ urlpatterns = [
     path('asset/<int:pk>/', views.AssetDetail.as_view(), name='asset_detail'),
     path('asset/create/', views.AssetCreate.as_view(), name='asset_create'),
     path('asset/<int:pk>/edit/', views.AssetEdit.as_view(), name='asset_update'),
+    path('asset/<int:pk>/duplicate/', views.AssetDuplicate.as_view(), name='asset_duplicate'),
     path('asset/delete/', views.asset_delete, name='ajax_asset_delete'),
-    path('asset/update/', views.asset_update, name='ajax_asset_update'),
 
     path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
     path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),
