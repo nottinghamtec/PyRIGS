@@ -158,7 +158,7 @@
 
             <div class="form-group">
               <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
-              {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
+              {% with date_sol=object.date_sold|date:"Y-m-d" %}
               {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
               {% endwith %}
             </div>
