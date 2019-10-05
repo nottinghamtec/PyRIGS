@@ -61,7 +61,7 @@ class AssetSearch(AssetList):
         
         return JsonResponse(result, safe=False)
 
-class AssetDetail(LoginRequiredMixin, generic.DetailView):
+class AssetDetail(LoginRequiredMixin, CableFormMixin, generic.DetailView):
     model = models.Asset
     template_name = 'asset_update.html'
 
@@ -71,7 +71,7 @@ class AssetDetail(LoginRequiredMixin, generic.DetailView):
 #     template_name = 'asset_update.html'
 #     # success_url = reverse_lazy('asset_list')
 
-class AssetEdit(LoginRequiredMixin, generic.UpdateView):
+class AssetEdit(LoginRequiredMixin, CableFormMixin, generic.UpdateView):
     template_name = 'asset_update.html'
     model = models.Asset
     form_class = forms.AssetForm
@@ -91,7 +91,7 @@ class AssetEdit(LoginRequiredMixin, generic.UpdateView):
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})
 
-class AssetCreate(LoginRequiredMixin, generic.CreateView):
+class AssetCreate(LoginRequiredMixin, CableFormMixin, generic.CreateView):
     template_name = 'asset_create.html'
     model = models.Asset
     form_class = forms.AssetForm
