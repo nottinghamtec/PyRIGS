@@ -46,7 +46,7 @@
             {% if duplicate %}
             {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
             {% elif object.asset_id %}
-            {% render_field form.asset_id|attr:'readonly disabled'|add_class:'disabled_input form-control' value=object.asset_id %}
+            {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input form-control' value=object.asset_id %}
             {% else %}
             {% render_field form.asset_id|add_class:'form-control' %}
             {% endif %}

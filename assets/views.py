@@ -60,8 +60,6 @@ class AssetEdit(LoginRequiredMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssetEdit, self).get_context_data(**kwargs)
-        if self.kwargs:
-            context['object'] = get_object_or_404(models.Asset, pk=self.kwargs['pk'])
         context['form'] = forms.AssetForm
         # context['asset_names'] = models.Asset.objects.values_list('asset_id', 'description').order_by('-date_acquired')[]
 
@@ -70,7 +68,6 @@ class AssetEdit(LoginRequiredMixin, generic.UpdateView):
         return context
 
     def form_invalid(self, form):
-        print(form.errors)
         return super().form_invalid(form)
 
     def get_success_url(self):
