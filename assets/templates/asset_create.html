@@ -20,34 +20,34 @@
 {% else %}
 <form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
 {% endif %}
-  {% include 'form_errors.html' %}
-  <div class="row" style="padding-bottom: 1em">
-    <div class="col-sm-12">
-      <div class="pull-right">
-        {% include 'partials/asset_buttons.html' %}
+    {% include 'form_errors.html' %}
+    <div class="row" style="padding-bottom: 1em">
+      <div class="col-sm-12">
+        <div class="pull-right">
+          {% include 'partials/asset_buttons.html' %}
+        </div>
       </div>
     </div>
-  </div>
-  {% csrf_token %}
-  <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          Asset Details
-        </div>
-        <div class="panel-body">
-          <div class="form-group"
-            <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
-            {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+    {% csrf_token %}
+    <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            Asset Details
           </div>
-          <div class="form-group">
-            <label for="{{ form.description.id_for_label }}">Description</label>
-            {% render_field form.description|add_class:'form-control' value=object.description %}
-          </div>
-          <div class="form-group">
-            <label for="{{ form.category.id_for_label }}" >Category</label>
-            <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control">
+          <div class="panel-body">
+            <div class="form-group">
+              <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
+              {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.description.id_for_label }}">Description</label>
+              {% render_field form.description|add_class:'form-control' value=object.description %}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.category.id_for_label }}" >Category</label>
+              <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control" onchange="changeCategory()">
             {% for id, choice in form.category.field.choices %}
               <option value="{{ id }}"
                 {% if object.category.id == id %}
@@ -57,95 +57,147 @@
               </option>
             {% endfor %}
             </select>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.status.id_for_label }}" >Status</label>
-            <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+            </div>
+            {% render_field form.is_cable|attr:'onchange=toggleBox()' value=object.is_cable %} <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
+            <div class="form-group">
+              <label for="{{ form.status.id_for_label }}" >Status</label>
+              <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
               {% for id, choice in form.status.field.choices %}
                 <option value="{{ id }}"
                   {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
               {% endfor %}
             </select>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+            </div>
+            <div class="form-group">
+              <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
               {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
-          </div>
-          <!---TODO: Lower default number of lines in comments box-->
-          <div class="form-group">
-            <label for="{{ form.comments.id_for_label }}">Comments</label>
+            </div>
+            <!---TODO: Lower default number of lines in comments box-->
+            <div class="form-group">
+              <label for="{{ form.comments.id_for_label }}">Comments</label>
               {% render_field form.comments|add_class:'form-control' %}
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          Purchase Details
-        </div>
-        <div class="panel-body">
-          <div class="form-group">
-            <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-            <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">
-              {% for id, choice in form.purchased_from.field.choices %}
-                <option value="{{ id }}"
-                {% if object.purchased_from.id == id %}
-                  selected
-                {% endif %}>
-                {{ choice }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
-            <div class="input-group">
-              <span class="input-group-addon">£</span>
-              {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
-            <div class="input-group">
-              <span class="input-group-addon">£</span>
-              {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.date_acquired.id_for_label }}" >Date Acquired</label>
-              {% if object.date_acquired%}
-                {% with date_acq=object.date_acquired|date:"Y-m-d" %}
-                {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
-                {% endwith %}
-              {% else %}
-                <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
-                  class="form-control" id="id_date_acquired">
-              {% endif %}
-            </div>
-
-            <div class="form-group">
-              <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
-              {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
-              {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
-              {% endwith %}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="row">
       <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            Collection Details
+            Purchase Details
           </div>
           <div class="panel-body">
-            <div class="form-group">
-                <label for="selectpicker">Set Parent:</label>
+              <div class="form-group">
+                <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
+                <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">
+                {% for id, choice in form.purchased_from.field.choices %}
+                  <option value="{{ id }}"
+                  {% if object.purchased_from.id == id %}
+                    selected
+                  {% endif %}>
+                  {{ choice }}</option>
+                {% endfor %}
+              </select>
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
+                <div class="input-group">
+                  <span class="input-group-addon">£</span>
+                  {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
+                <div class="input-group">
+                  <span class="input-group-addon">£</span>
+                  {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.date_acquired.id_for_label }}" >Date Acquired</label>
+                {% if object.date_acquired%}
+                {% with date_acq=object.date_acquired|date:"Y-m-d" %}
+                {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
+                {% endwith %}
+                {% else %}
+                <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
+                    class="form-control" id="id_date_acquired">
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
+                {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
+                {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
+                {% endwith %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {#% if object.is_cable and object.category == "Power" %#}
+        <div class="col-md-6" hidden="true" id="cable-table">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Cable Details
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="{{ cableform.plug.id_for_label }}">Plug</label>
+                <select name="{{ cableform.plug.name }}" id="{{ cableform.plug.id_for_label }}" class="form-control">
+                  <option value="None">
+                  {% for connector in connectors %}
+                    <option value="{{ connector.pk }}">
+                    {{ connector.description }}
+                    </option>
+                  {%endfor%}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="{{ cableform.socket.id_for_label }}">Socket</label>
+                <select name="{{ cableform.socket.name }}" id="{{ cableform.socket.id_for_label }}" class="form-control">
+                  <option value="None">
+                  {% for connector in connectors %}
+                    <option value="{{ connector.pk }}">
+                    {{ connector.description }}
+                    </option>
+                  {%endfor%}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="{{ cableform.length.id_for_label }}">Length</label>
+                {% render_field cableform.length|add_class:'form-control' %}
+                <span class="input-group-addon">{{ cableform.length.help_text }}</span>
+              </div>
+              <div class="form-group">
+                <label for="{{ cableform.csa.id_for_label }}">Cross Sectional Area</label>
+                {% render_field cableform.csa|add_class:'form-control' value=object.csa %}
+                <span class="input-group-addon">{{ cableform.csa.help_text }}</span>
+              </div>
+              <div class="form-group">
+                <label for="{{ cableform.circuits.id_for_label }}">Circuits</label>
+                {% render_field cableform.circuits|add_class:'form-control' value=object.circuits %}
+              </div>
+              <div class="form-group">
+                <label for="{{ cableform.cores.id_for_label }}">Cores</label>
+                {% render_field cableform.cores|add_class:'form-control' value=object.cores %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Collection Details
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="selectpicker">Set Parent</label>
                 {% include 'partials/asset_picker.html' %}
+              </div>
             </div>
           </div>
         </div>
@@ -155,10 +207,23 @@
           {% include 'partials/asset_buttons.html' %}
         </div>
       </div>
-    </div>
-  </div>
-</form>
+  </form>
 
-{% include 'partials/confirm_delete.html' with object=object %}
+  {% include 'partials/confirm_delete.html' with object=object %}
 
-{% endblock %}
+  {% endblock %}
+
+{% block js%}
+<script>
+  function toggleBox() {
+    if(document.getElementById("id_category").value == "26") { //TODO: CHANGE THIS IN PRODUCTION
+      document.getElementById("cable-table").hidden = !document.getElementById("cable-table").hidden ;
+    }
+  }
+  function changeCategory() {
+    if(document.getElementById("id_is_cable").checked) {
+      this.toggleBox();
+    }
+  }
+</script>
+{%endblock%}

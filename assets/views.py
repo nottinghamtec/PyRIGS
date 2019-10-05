@@ -100,6 +100,7 @@ class AssetCreate(LoginRequiredMixin, CableFormMixin, generic.CreateView):
         context = super(AssetCreate, self).get_context_data(**kwargs)
         
         context["create"] = True
+        context["connectors"] = models.Connector.objects.all()
         return context
     
     def get_success_url(self):
