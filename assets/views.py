@@ -53,8 +53,10 @@ class AssetDetail(LoginRequiredMixin, generic.DetailView):
 #     template_name = 'asset_update.html'
 #     # success_url = reverse_lazy('asset_list')
 
-class AssetEdit(LoginRequiredMixin, generic.TemplateView):
+class AssetEdit(LoginRequiredMixin, generic.UpdateView):
     template_name = 'asset_update.html'
+    model = models.Asset
+    form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
         context = super(AssetEdit, self).get_context_data(**kwargs)
@@ -73,6 +75,19 @@ class AssetEdit(LoginRequiredMixin, generic.TemplateView):
         else:
             context['edit'] = True
 
+        return context
+
+    def get_success_url(self):
+        return reverse("asset_detail", kwargs={"pk":self.object.id})
+
+class AssetCreate(LoginRequiredMixin, generic.CreateView):
+    template_name = 'asset_update.html'
+    model = models.Asset
+    form_class = forms.AssetForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssetCreate, self).get_context_data(**kwargs)
+        context["create"] = True
         return context
 
 @login_required()

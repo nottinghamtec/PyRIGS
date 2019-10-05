@@ -19,7 +19,11 @@
       {% endif %}
   </h1>
 </div>
-
+{% if create %}
+<form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
+{% else %}
+<form method="post" id="asset_update_form" action="{% url 'asset_update' pk=object.pk%}">
+{% endif %}
 <div class="row" style="padding-bottom: 1em">
   <div class="col-sm-12">
     <div class="pull-right">
@@ -27,7 +31,6 @@
     </div>
   </div>
 </div>
-<form method="post" id="asset_update_form">
   {% csrf_token %}
   <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
   <div class="row">
@@ -76,7 +79,7 @@
             <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
             {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
           </div>
-          <!---TODO: Lower default number of lines in comments box--->
+          <!---TODO: Lower default number of lines in comments box-->
           <div class="form-group">
             <label for="{{ form.comments.id_for_label }}">Comments</label>
             {% render_field form.comments|add_class:'form-control' %}
@@ -143,16 +146,20 @@
             <label for="{{ form.date_acquired.id_for_label }}" >Date
                                         Acquired</label>
             {% if object.date_acquired %}
-            {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=object.date_acquired|date %}
+              {% with date_acq=object.date_acquired|date:"Y-m-d" %}
+              {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
+              {% endwith %}
             {% else %}
-            <input type="date" name="date_acquired" value="{% now "DATE_FORMAT" %}"
+            <input type="date" name="date_acquired" value="{% now "%Y-%m-%d%" %}"
                                                class="form-control" id="id_date_acquired">
                                     {% endif %}
             </div>
 
             <div class="form-group">
               <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
-              {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=object.date_sold|date %}
+              {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
+              {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
+              {% endwith %}
             </div>
             {% else %}
             <dl>
@@ -242,71 +249,15 @@
           </div>
         </div>
       </div>
+    <div class="row">
+      <div class="col-md-12">
+        {% include 'partials/asset_buttons.html' %}
+      </div>
+    </div>
 </form>
 
-<div class="row">
-  <div class="col-md-12">
-    {% include 'partials/asset_buttons.html' %}
-  </div>
-</div>
+
 
 {% include 'partials/confirm_delete.html' with object=object %}
 
-{% endblock %}
-
-{% block js %}
-<script>
-  function updateAsset() {
-    $.ajax({
-      url: "{% url 'ajax_asset_update' %}", // the endpoint
-      type: "POST", // http method
-      data: {
-        form: $('#asset_update_form').serialize()
-      },
-      traditional: true,
-      headers: {
-        'X-CSRFToken': document.getElementById("asset_update_form").csrfmiddlewaretoken.value
-      },
-
-      success: function(data) {
-        // console.log(data);
-        window.location.href = data['url'];
-      },
-
-      error: function(xhr) {
-        console.log(xhr.status + ": " + xhr.responseText)
-      }
-    });
-  }
-</script>
-
-{#    <script>#}
-{#        $('#asset_update_form').on('submit', function(event){#}
-{#console.log($('#asset_update_form').serialize());#}
-{#            event.preventDefault();#}
-{#            updateAsset();#}
-{#            return false;#}
-{#        });#}
-{#    </script>#}
-
-<script>
-  function clearParent() {
-    $('#hidden_parent_id').val('');
-    $('#parent_id').val('');
-  }
-</script>
-
-<script>
-  $(document).ready(function() {
-    {
-      %
-      if edit or duplicate %
-    }
-    var comments_id = '#{{ form.comments.id_for_label }}';
-    $(comments_id).val('{{ object.comments|linebreaksn }}'); {
-      %
-      endif %
-    }
-  })
-</script>
 {% endblock %}
