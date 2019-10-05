@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, QueryDict
+from django.http import HttpResponse, QueryDict, JsonResponse
 from django.core import serializers
 from django.views import generic
 from django.contrib.auth import views as auth_views
@@ -22,26 +22,38 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         #TODO Feedback to user when search fails
         query = self.request.GET.get('query', "")
+        queryset = self.model.objects.all()
         if len(query) >= 3:
-            return self.model.objects.filter(Q(asset_id__exact=query) | Q(description__icontains=query))
-        elif query != "":
-            return self.model.objects.filter(Q(asset_id__exact=query))
-        else:
-            cat = self.request.GET.get('cat', "")
-            status = self.request.GET.get('status', "")
-            if cat != "None":
-                return self.model.objects.filter(category__name__exact=cat)
-            elif status != "None":
-                return self.model.objects.filter(status__name__exact=status)
-            else:
-                return self.model.objects.all()
+            queryset = self.model.objects.filter(Q(asset_id__exact=query) | Q(description__icontains=query))
+        
+        cat = self.request.GET.get('cat', "")
+        status = self.request.GET.get('status', "")
+        if cat != "":
+            queryset = queryset.filter(category__name__exact=cat)
+        elif status != "":
+            queryset = queryset.filter(status__name__exact=status)
+
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
         context["search_name"] = self.request.GET.get('query', "")
+
         context["categories"] = models.AssetCategory.objects.all()
+        context["category_select"] = self.request.GET.get('cat', "")
+
         context["statuses"] = models.AssetStatus.objects.all()
+        context["status_select"] = self.request.GET.get('stats', "")
         return context;
+
+class AssetSearch(AssetList):
+    def render_to_response(self, context, **response_kwargs):
+        result = []
+
+        for asset in context["object_list"]:
+            result.append({"id":asset.pk, "label":(asset.asset_id + " | " + asset.description)})
+        
+        return JsonResponse(result, safe=False)
 
 class AssetDetail(LoginRequiredMixin, generic.DetailView):
     model = models.Asset

@@ -20,6 +20,7 @@
 {% else %}
 <form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
 {% endif %}
+  {% include 'form_errors.html' %}
   <div class="row" style="padding-bottom: 1em">
     <div class="col-sm-12">
       <div class="pull-right">
@@ -142,35 +143,8 @@
             Collection Details
           </div>
           <div class="panel-body">
-            <div class="form-group">
-              <label for="parent_id">Parent</label>
-              <input type="hidden" name="{{ form.parent.html_name }}" id="hidden_parent_id" value="{{ object.parent.id }}">
-              <div class="input-group">
-                <input type="text" id="parent_id" value="{{ object.parent|default:'' }}" disabled="" class="form-control">
-                <span class="input-group-btn">
-                  <button type="button" class="btn btn-default" onclick="clearParent()">Clear</button>
-                </span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="parent_search">Search for asset</label>
-              <div class="input-group">
-                <input type="text" id="parent_search" class="form-control">
-                <span class="input-group-btn">
-                  <button type="button" class="btn btn-default" onclick="formAssetSearch()">
-                    <i class="glyphicon glyphicon-search"></i> Search
-                  </button>
-                </span>
-              </div>
-            </div>
-            <div class="col s2">
-              <br>
-            </div>
-            <div class="col s12" id="formAssetSearchResult">
-              <!--Placeholder for search results-->
-            </div>
-          </div>
+            {% include 'partials/asset_picker.html' %}
+          </div
         </div>
       </div>
       <div class="row">

@@ -15,6 +15,8 @@ urlpatterns = [
     path('asset/<int:pk>/duplicate/', views.AssetDuplicate.as_view(), name='asset_duplicate'),
     path('asset/delete/', views.asset_delete, name='ajax_asset_delete'),
 
+    path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
+
     path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
     path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),
     path('supplier/create', views.SupplierCreate.as_view(), name='supplier_create'),
