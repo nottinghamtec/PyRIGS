@@ -36,7 +36,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         status = self.request.GET.get('status', "")
         if cat != "":
             queryset = queryset.filter(category__name__exact=cat)
-        elif status != "":
+        if status != "":
             queryset = queryset.filter(status__name__exact=status)
 
         return queryset
@@ -49,7 +49,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         context["category_select"] = self.request.GET.get('cat', "")
 
         context["statuses"] = models.AssetStatus.objects.all()
-        context["status_select"] = self.request.GET.get('stats', "")
+        context["status_select"] = self.request.GET.get('status', "")
         return context;
 
 class AssetSearch(AssetList):

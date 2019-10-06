@@ -8,7 +8,7 @@
   <h1 class="text-center">Asset List</h1>
 </div>
 
-<form id="asset-search-form">
+<form id="asset-search-form" method="get">
   {% csrf_token %}
   <div class="input-group">
     <input type="query" name="query" placeholder="Search by Asset ID/Description" class="form-control" value="{{search_name}}">
@@ -20,7 +20,7 @@
     <select name="cat" class="form-control">
           <option value="">None</option>
           {% for name in categories %}
-          {% if name == category_select %}
+          {% if name.name == category_select %}
           <option selected>
           {% else %}
           <option>
@@ -35,7 +35,7 @@
     <select name="status" class="form-control">
     <option value="">None</option>
             {% for name in statuses %}
-            {% if name == status_select %}
+            {% if name.name == status_select %}
             <option selected>
             {% else %}
             <option>
