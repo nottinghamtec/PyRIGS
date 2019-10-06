@@ -28,9 +28,12 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         #TODO Feedback to user when search fails
         query = self.request.GET.get('query', "")
-        queryset = self.model.objects.all()
-        if len(query) >= 3:
+        if len(query) == 0:
+            queryset = self.model.objects.all()
+        elif len(query) >= 3:
             queryset = self.model.objects.filter(Q(asset_id__exact=query) | Q(description__icontains=query))
+        else:
+            queryset = self.model.objects.filter(Q(asset_id__exact=query))
         
         cat = self.request.GET.get('cat', "")
         status = self.request.GET.get('status', "")
