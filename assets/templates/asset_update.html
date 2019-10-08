@@ -10,231 +10,58 @@
   <h1>
       {% if edit and object %}
           Edit Asset: {{ object.asset_id }} - {{ object.description }}
-      {% elif duplicate %}
-          Duplication of Asset: {{ previous_asset_id }}
-      {% elif not object %}
-          Create Asset
       {% else %}
           Asset: {{ object.asset_id }} - {{ object.description }}
       {% endif %}
   </h1>
 </div>
-{% if create %}
-<form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
-{% else %}
 <form method="post" id="asset_update_form" action="{% url 'asset_update' pk=object.pk%}">
-{% endif %}
-{% include 'form_errors.html' %}
-<div class="row" style="padding-bottom: 1em">
-  <div class="col-sm-12">
-    <div class="pull-right">
-      {% include 'partials/asset_buttons.html' %}
+  {% include 'form_errors.html' %}
+  <div class="row" style="padding-bottom: 1em">
+    <div class="col-sm-12">
+      <div class="pull-right">
+        {% include 'partials/asset_buttons.html' %}
+      </div>
     </div>
   </div>
-</div>
   {% csrf_token %}
   <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
   <div class="row">
     <div class="col-sm-12">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          Asset Details
-        </div>
-        <div class="panel-body">
-          {% if edit or duplicate %}
-          <div class="form-group">
-            <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
-            {% if duplicate %}
-            {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
-            {% elif object.asset_id %}
-            {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input form-control' value=object.asset_id %}
-            {% else %}
-            {% render_field form.asset_id|add_class:'form-control' %}
-            {% endif %}
-          </div>
-          <div class="form-group">
-            <label for="{{ form.description.id_for_label }}"
-                                       >Description</label>
-            {% render_field form.description|add_class:'form-control' value=object.description %}
-          </div>
-          <div class="form-group">
-            <label for="{{ form.category.id_for_label }}" >Category</label>
-            <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}"
-                                        required class="form-control">
-            {% for id, choice in form.category.field.choices %}
-                <option value="{{ id }}"
-                        {% if object.category.id == id %}selected{% endif %}>{{ choice }}</option>
-            {% endfor %}
-        </select>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.status.id_for_label }}" >Status</label>
-            <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
-            {% for id, choice in form.status.field.choices %}
-                <option value="{{ id }}"
-                        {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
-            {% endfor %}
-        </select>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
-            {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
-          </div>
-          <!---TODO: Lower default number of lines in comments box-->
-          <div class="form-group">
-            <label for="{{ form.comments.id_for_label }}">Comments</label>
-            {% render_field form.comments|add_class:'form-control' %}
-          </div>
-          {% else %}
-          <dt>Asset ID</dt>
-          <dd>{{ object.asset_id }}</dd>
-
-          <dt>Description</dt>
-          <dd>{{ object.description }}</dd>
-
-          <dt>Category</dt>
-          <dd>{{ object.category }}</dd>
-
-          <dt>Status</dt>
-          <dd>{{ object.status }}</dd>
-
-          <dt>Serial Number</dt>
-          <dd>{{ object.serial_number|default:'-' }}</dd>
-
-          <dt>Comments</dt>
-          <dd>{{ object.comments|default:'-'|linebreaksbr }}</dd>
-          {% endif %}
-        </div>
-      </div>
+      {% include 'partials/asset_form.html' %}
     </div>
   </div>
   <div class="row">
     <div class="col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          Purchase Details
-        </div>
-        <div class="panel-body">
-          {% if edit or duplicate %}
-          <div class="form-group">
-            <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-            <select class="form-control" name="{{ form.purchased_from.name }}"
-                                            id="{{ form.purchased_from.id_for_label }}">
-                                        {% for id, choice in form.purchased_from.field.choices %}
-                                            <option value="{{ id }}"
-                                                    {% if object.purchased_from.id == id %}selected{% endif %}>{{ choice }}</option>
-                                        {% endfor %}
-                                    </select>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
-            <div class="input-group">
-              <span class="input-group-addon">£</span>
-              {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
-            <div class="input-group">
-              <span class="input-group-addon">£</span>
-              {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.date_acquired.id_for_label }}" >Date
-                                        Acquired</label>
-            {% if object.date_acquired %}
-              {% with date_acq=object.date_acquired|date:"Y-m-d" %}
-              {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
-              {% endwith %}
-            {% else %}
-            <input type="date" name="date_acquired" value="{% now "%Y-%m-%d%" %}"
-                                               class="form-control" id="id_date_acquired">
-                                    {% endif %}
-            </div>
-
-            <div class="form-group">
-              <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
-              {% with date_sol=object.date_sold|date:"Y-m-d" %}
-              {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
-              {% endwith %}
-            </div>
-            {% else %}
-            <dl>
-              <dt>Purchased From</dt>
-              <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
-
-              <dt>Purchase Price</dt>
-              <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
-
-              <dt>Salvage Value</dt>
-              <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
-
-              <dt>Date Acquired</dt>
-              <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
-              {% if object.date_sold %}
-              <dt>Date Sold</dt>
-              <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
-              {% endif %}
-            </dl>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            Collection Details
-          </div>
-          <div class="panel-body">
-            {% if edit or duplicate %}
-            <div class="form-group">
-                <label for="selectpicker">Set Parent</label>
-                {% include 'partials/asset_picker.html' %}
-            </div>
-            {% else%}
-              <dl>
-                <dt>Parent</dt>
-                <dd>
-                  {% if object.parent %}
-                  <a href="{% url 'asset_detail' object.parent.pk %}">
-                  {{ object.parent.asset_id }} - {{ object.parent.description }}
-                  </a>
-                  {% else %}
-                  <span>-</span>
-                  {% endif %}
-                </dd>
-
-                <dt>Children</dt>
-                {% if object.asset_parent.all %}
-                {% for child in object.asset_parent.all %}
-                <dd>
-                  <a href="{% url 'asset_detail' child.pk %}">
-                  {{ child.asset_id }} - {{ child.description }}
-                  </a>
-                </dd>
-                {% endfor %}
-                {% else %}
-                <dd><span>-</span></dd>
-                {% endif %}
-              </dl>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-    <div class="row">
-      <div class="col-md-12">
-        {% include 'partials/asset_buttons.html' %}
-      </div>
+      {% include 'partials/purchasedetails_form.html' %}
     </div>
+    <div class="col-md-6" hidden="true" id="cable-table">
+      {% include 'partials/cable_form.html' %}
+    </div>
+    <div class="col-md-4">
+      {% include 'partials/parent_form.html' %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      {% include 'partials/asset_buttons.html' %}
+    </div>
+  </div>
 </form>
-
-
 
 {% include 'partials/confirm_delete.html' with object=object %}
 
 {% endblock %}
+
+{% block js%}
+<script>
+  function checkIfCableHidden() {
+    if (document.getElementById("id_is_cable").checked) {
+      document.getElementById("cable-table").hidden = false;
+    } else {
+      document.getElementById("cable-table").hidden = true;
+    }
+  }
+  checkIfCableHidden();
+</script>
+{%endblock%}
