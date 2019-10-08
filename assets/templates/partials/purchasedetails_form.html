@@ -5,7 +5,7 @@
     Purchase Details
   </div>
   <div class="panel-body">
-    {% if edit or duplicate %}
+    {% if create or edit or duplicate %}
     <div class="form-group">
       <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
       <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">

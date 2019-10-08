@@ -5,7 +5,7 @@
     Cable Details
   </div>
   <div class="panel-body">
-    {% if edit or duplicate %}
+    {% if create or edit or duplicate %}
     <div class="form-group">
       <label for="{{ form.plug.id_for_label }}">Plug</label>
       <select name="{{ form.plug.name }}" id="{{ form.plug.id_for_label }}" class="form-control">
