@@ -40,7 +40,7 @@ class Supplier(models.Model):
 class Asset(PolymorphicModel):
 
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
-    asset_id = models.CharField(max_length=10)
+    asset_id = models.CharField(max_length=10, unique=True)
     description = models.CharField(max_length=120)
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
