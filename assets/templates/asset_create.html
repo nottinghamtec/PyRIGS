@@ -169,13 +169,17 @@
               </div>
               <div class="form-group">
                 <label for="{{ form.length.id_for_label }}">Length</label>
-                {% render_field form.length|add_class:'form-control' %}
-                <span class="input-group-addon">{{ form.length.help_text }}</span>
+                <div class="input-group">
+                    {% render_field form.length|add_class:'form-control' %}
+                    <span class="input-group-addon">{{ form.length.help_text }}</span>
+                </div>
               </div>
               <div class="form-group">
                 <label for="{{ form.csa.id_for_label }}">Cross Sectional Area</label>
-                {% render_field form.csa|add_class:'form-control' value=object.csa %}
-                <span class="input-group-addon">{{ form.csa.help_text }}</span>
+                <div class="input-group">
+                    {% render_field form.csa|add_class:'form-control' value=object.csa %}
+                    <span class="input-group-addon">{{ form.csa.help_text }}</span>
+                </div>
               </div>
               <div class="form-group">
                 <label for="{{ form.circuits.id_for_label }}">Circuits</label>
