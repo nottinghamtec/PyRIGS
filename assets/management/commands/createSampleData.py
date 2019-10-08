@@ -21,6 +21,7 @@ class Command(BaseCommand):
         self.create_statuses()
         self.create_suppliers()
         self.create_assets()
+        self.create_connectors()
 
     def create_categories(self):
         categories = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']
@@ -60,3 +61,14 @@ class Command(BaseCommand):
                 asset.purchased_from = random.choice(suppliers)
 
             asset.save()
+
+    def create_connectors(self):
+        connectors = [
+            { "description":"13A UK", "current_rating":13, "voltage_rating":230, "num_pins":3 },
+            { "description":"16A", "current_rating":16, "voltage_rating":230, "num_pins":3 },
+            { "description":"32/3", "current_rating":32, "voltage_rating":400, "num_pins":5 },
+            { "description":"Socapex", "current_rating":23, "voltage_rating":600, "num_pins":19 },
+        ]
+        for connector in connectors:
+            conn = models.Connector.objects.create(**connector)
+            conn.save()

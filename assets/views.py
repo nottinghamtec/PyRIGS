@@ -13,12 +13,6 @@ from dateutil import parser
 import simplejson as json
 from assets import models, forms
 
-class CableFormMixin:
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cable_form"] = forms.CableForm()
-        return context
-
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
@@ -64,7 +58,7 @@ class AssetSearch(AssetList):
         
         return JsonResponse(result, safe=False)
 
-class AssetDetail(LoginRequiredMixin, CableFormMixin, generic.DetailView):
+class AssetDetail(LoginRequiredMixin, generic.DetailView):
     model = models.Asset
     template_name = 'asset_update.html'
 
@@ -74,19 +68,21 @@ class AssetDetail(LoginRequiredMixin, CableFormMixin, generic.DetailView):
 #     template_name = 'asset_update.html'
 #     # success_url = reverse_lazy('asset_list')
 
-class AssetEdit(LoginRequiredMixin, CableFormMixin, generic.UpdateView):
+class AssetEdit(LoginRequiredMixin, generic.UpdateView):
     template_name = 'asset_update.html'
     model = models.Asset
-    form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
-        context = super(AssetEdit, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['form'] = forms.AssetForm
-        # context['asset_names'] = models.Asset.objects.values_list('asset_id', 'description').order_by('-date_acquired')[]
-
         context['edit'] = True
 
         return context
+
+    def get_form_class(self):
+        if self.object.is_cable:
+            return forms.CableForm
+        return forms.AssetForm
 
     def form_invalid(self, form):
         return super().form_invalid(form)
@@ -94,7 +90,7 @@ class AssetEdit(LoginRequiredMixin, CableFormMixin, generic.UpdateView):
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})
 
-class AssetCreate(LoginRequiredMixin, CableFormMixin, generic.CreateView):
+class AssetCreate(LoginRequiredMixin, generic.CreateView):
     template_name = 'asset_create.html'
     model = models.Asset
     form_class = forms.AssetForm
@@ -106,6 +102,14 @@ class AssetCreate(LoginRequiredMixin, CableFormMixin, generic.CreateView):
         context["connectors"] = models.Connector.objects.all()
         return context
     
+    def get_form_class(self):
+        if self.request.method == "POST":
+            if 'is_cable' in self.request.POST:
+                return forms.CableForm
+            return forms.AssetForm
+        else:
+            return forms.CableForm #For GET, so that all form fields can be placed
+    
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})
 
@@ -116,16 +120,14 @@ class DuplicateMixin:
         return self.render_to_response(self.get_context_data())
 
 class AssetDuplicate(DuplicateMixin, AssetCreate):
-    template_name = 'asset_create.html'
     model = models.Asset
-    form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
-        context = super(AssetCreate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["create"] = None
         context["duplicate"] = True
         context['previous_asset_id'] = self.get_object().asset_id
-        context["previous_asset_pk"] = pk = self.kwargs.get(self.pk_url_kwarg)
+        context["previous_asset_pk"] = self.kwargs.get(self.pk_url_kwarg)
         return context
 
 @login_required()
