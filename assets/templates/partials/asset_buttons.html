@@ -1,7 +1,7 @@
 {% if edit and object %}
 <!--edit-->
 <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
-<a class="btn btn-default" href="{% url 'asset_update' object.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+<a class="btn btn-default" href="{% url 'asset_detail' previous_asset_pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
 <a class="btn btn-danger" data-toggle="modal" data-target="#confirm_delete_modal"><i class="glyphicon glyphicon-trash"></i> Delete</a>
 {% elif duplicate %}
 <!--duplicate-->
