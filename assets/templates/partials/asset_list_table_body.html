@@ -12,7 +12,7 @@
                 {% endif %}
                 ">
         <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
-        <td style="vertical-align: middle;">{{ item.description }}</td>
+        <td style="vertical-align: middle; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 25vw">{{ item.description }}</td>
         <td style="vertical-align: middle;">{{ item.category }}</td>
         <td style="vertical-align: middle;">{{ item.status }}</td>
         <td>
