@@ -11,10 +11,10 @@
                   text-muted
                 {% endif %}
                 ">
-        <td><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
-        <td>{{ item.description }}</td>
-        <td>{{ item.category }}</td>
-        <td>{{ item.status }}</td>
+        <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
+        <td style="vertical-align: middle;">{{ item.description }}</td>
+        <td style="vertical-align: middle;">{{ item.category }}</td>
+        <td style="vertical-align: middle;">{{ item.status }}</td>
         <td>
             <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
