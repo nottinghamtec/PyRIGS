@@ -47,7 +47,7 @@
             </div>
             <div class="form-group">
               <label for="{{ form.category.id_for_label }}" >Category</label>
-              <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control" onchange="checkIfCableHidden()">
+              <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control">
             {% for id, choice in form.category.field.choices %}
               <option value="{{ id }}"
                 {% if object.category.id == id %}
@@ -216,12 +216,12 @@
 {% block js%}
 <script>
   function checkIfCableHidden() {
-    if(document.getElementById("id_category").value == "33" && document.getElementById("id_is_cable").checked) { //TODO: CHANGE THIS IN PRODUCTION
-      document.getElementById("cable-table").hidden = false;
+    if(document.getElementById("id_is_cable").checked) {
+            document.getElementById("cable-table").hidden = false;
     } else {
       document.getElementById("cable-table").hidden = true;
     }
   }
-  checkIfCableHidden()
+  checkIfCableHidden();
 </script>
 {%endblock%}
