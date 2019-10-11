@@ -62,6 +62,11 @@ class Asset(PolymorphicModel):
     def __str__(self):
         return str(self.asset_id) + ' - ' + self.description
 
+    class Meta:
+        permissions = (
+            ('asset_finance', 'Can see financial data for assets'),
+        )
+
 class Connector(models.Model):
     description = models.CharField(max_length=80)
     current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text='Amps')
