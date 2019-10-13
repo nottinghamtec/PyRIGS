@@ -49,7 +49,11 @@ class Connector(models.Model):
 
 
 class Asset(models.Model):
-
+    class Meta:
+        permissions = (
+            ('asset_finance', 'Can see financial data for assets'),
+        )
+    
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=10, unique=True)
     description = models.CharField(max_length=120)

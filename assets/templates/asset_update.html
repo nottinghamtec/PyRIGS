@@ -32,9 +32,11 @@
     </div>
   </div>
   <div class="row">
+    {% if perms.asset.asset_financial %}
     <div class="col-md-6">
       {% include 'partials/purchasedetails_form.html' %}
     </div>
+    {%endif%}
     <div class="col-md-6" 
     {% if not object.is_cable %} hidden="true" {% endif %} id="cable-table">
       {% include 'partials/cable_form.html' %}

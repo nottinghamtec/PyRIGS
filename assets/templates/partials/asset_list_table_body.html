@@ -16,10 +16,13 @@
         <td style="vertical-align: middle;">{{ item.category }}</td>
         <td style="vertical-align: middle;">{{ item.status }}</td>
         <td>
+
             <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                {% if perms.assets.change_asset %}
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+                {% endif %}
             </div>
         </td>
     </tr>
