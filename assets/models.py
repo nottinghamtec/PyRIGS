@@ -50,6 +50,7 @@ class Connector(models.Model):
 
 class Asset(models.Model):
     class Meta:
+        ordering = ['asset_id']
         permissions = (
             ('asset_finance', 'Can see financial data for assets'),
         )
