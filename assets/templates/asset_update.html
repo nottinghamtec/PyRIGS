@@ -35,7 +35,8 @@
     <div class="col-md-6">
       {% include 'partials/purchasedetails_form.html' %}
     </div>
-    <div class="col-md-6" hidden="true" id="cable-table">
+    <div class="col-md-6" 
+    {% if not object.is_cable %} hidden="true" {% endif %} id="cable-table">
       {% include 'partials/cable_form.html' %}
     </div>
     <div class="col-md-4">
@@ -54,6 +55,7 @@
 {% endblock %}
 
 {% block js%}
+{% if edit %}
 <script>
   function checkIfCableHidden() {
     if (document.getElementById("id_is_cable").checked) {
@@ -64,4 +66,5 @@
   }
   checkIfCableHidden();
 </script>
-{%endblock%}
+{% endif %}
+{% endblock %}

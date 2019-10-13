@@ -1,9 +1,10 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from polymorphic.models import PolymorphicModel
 
 import datetime
-
+import re
 
 class AssetCategory(models.Model):
     class Meta:
@@ -37,7 +38,17 @@ class Supplier(models.Model):
         return self.name
 
 
-class Asset(PolymorphicModel):
+class Connector(models.Model):
+    description = models.CharField(max_length=80)
+    current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text='Amps')
+    voltage_rating = models.IntegerField(help_text='Volts')
+    num_pins = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.description
+
+
+class Asset(models.Model):
 
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=10, unique=True)
@@ -55,34 +66,56 @@ class Asset(PolymorphicModel):
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
-
-    def get_absolute_url(self):
-        return reverse('asset_detail', kwargs={'pk': self.pk})
-
-    def __str__(self):
-        return str(self.asset_id) + ' - ' + self.description
-
-class Connector(models.Model):
-    description = models.CharField(max_length=80)
-    current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text='Amps')
-    voltage_rating = models.IntegerField(help_text='Volts')
-    num_pins = models.IntegerField(blank=True, null=True)
-
-    def __str__(self):
-        return self.description
-
-
-class Cable(Asset):
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='plug', null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='socket', null=True)
+    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='plug', blank=True, null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='socket', blank=True, null=True)
     length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text='mm^2')
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
 
-    def cable_resistance(self):
-        rho = 0.0000000168
-        return (rho * self.length) / (self.csa * 1000000)
+    def get_absolute_url(self):
+        return reverse('asset_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return '{} - {}m - {}'.format(self.plug, self.length, self.socket)
+        out = str(self.asset_id) + ' - ' + self.description
+        if self.is_cable:
+            out += '{} - {}m - {}'.format(self.plug, self.length, self.socket)
+        return out
+
+    def clean(self):
+        if self.date_sold and self.date_acquired > self.date_sold:
+            raise ValidationError({"date_sold": "Cannot sell an item before it is acquired"})
+
+        self.asset_id = self.asset_id.upper()
+        if re.search("^[a-zA-Z0-9]+$", self.asset_id) is None:
+                raise ValidationError({"asset_id": "An Asset ID can only consist of letters and numbers"})
+
+        if self.purchase_price and self.purchase_price < 0:
+            raise ValidationError({"purchase_price": "A price cannot be negative"})
+
+        if self.salvage_value and self.salvage_value < 0:
+            raise ValidationError({"purchase_price": "A price cannot be negative"})
+
+        if self.is_cable:
+            if self.length is None:
+                raise ValidationError({"length": "The length of a cable must be a number"})
+            elif self.csa is None:
+                raise ValidationError({"csa": "The csa of a cable must be a number"})
+            elif self.circuits is None:
+                raise ValidationError({"circuits": "The number of circuits in a cable must be a number"})
+            elif self.cores is None:
+                raise ValidationError({"cores": "The number of cores in a cable must be a number"})
+            elif self.socket is None:
+                raise ValidationError({"plug": "A cable must have a plug"})
+            elif self.plug is None:
+                raise ValidationError({"socket": "A cable must have a socket"})
+
+            if self.length <= 0:
+                raise ValidationError({"length": "The length of a cable must be more than 0"})
+            elif self.csa <= 0:
+                raise ValidationError({"csa": "The CSA of a cable must be more than 0"})
+            elif self.circuits <= 0:
+                raise ValidationError({"circuits": "There must be at least one circuit in a cable"})
+            elif self.cores <= 0:
+                raise ValidationError({"cores": "There must be at least one core in a cable"})
+ 

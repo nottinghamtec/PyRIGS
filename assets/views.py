@@ -47,7 +47,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
 
         context["statuses"] = models.AssetStatus.objects.all()
         context["status_select"] = self.request.GET.get('status', "")
-        return context;
+        return context
 
 class AssetSearch(AssetList):
     def render_to_response(self, context, **response_kwargs):
@@ -62,29 +62,17 @@ class AssetDetail(LoginRequiredMixin, generic.DetailView):
     model = models.Asset
     template_name = 'asset_update.html'
 
-
-# class AssetCreate(LoginRequiredMixin, generic.TemplateView):
-#     fields = '__all__'
-#     template_name = 'asset_update.html'
-#     # success_url = reverse_lazy('asset_list')
-
 class AssetEdit(LoginRequiredMixin, generic.UpdateView):
     template_name = 'asset_update.html'
     model = models.Asset
+    form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['edit'] = True
+        context["connectors"] = models.Connector.objects.all()
 
         return context
-
-    def get_form_class(self):
-        if self.object.is_cable:
-            return forms.CableForm
-        return forms.AssetForm
-
-    def form_invalid(self, form):
-        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})
@@ -99,15 +87,8 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
         
         context["create"] = True
         context["connectors"] = models.Connector.objects.all()
+
         return context
-    
-    def get_form_class(self):
-        if self.request.method == "POST":
-            if 'is_cable' in self.request.POST:
-                return forms.CableForm
-            return forms.AssetForm
-        else:
-            return forms.CableForm #For GET, so that all form fields can be placed
     
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk":self.object.id})

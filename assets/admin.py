@@ -32,11 +32,6 @@ class ConnectorAdmin(admin.ModelAdmin):
     list_display = ['id', '__str__', 'current_rating', 'voltage_rating', 'num_pins']
 
 
-@admin.register(assets.Cable)
-class CableAdmin(admin.ModelAdmin):
-    pass
-
-
 admin.AdminSite.site_header = 'PyAssets - TEC\'s Asset System'
 admin.AdminSite.site_title = 'PyAssets Admin'
 admin.AdminSite.index_title = 'System Administration'
