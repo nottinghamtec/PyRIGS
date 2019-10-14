@@ -89,11 +89,15 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AssetCreate, self).get_context_data(**kwargs)
-
         context["create"] = True
         context["connectors"] = models.Connector.objects.all()
 
         return context
+
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        initial["asset_id"] = models.Asset.get_available_asset_id()
+        return initial
 
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk": self.object.id})

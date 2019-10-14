@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, connection
 from django.urls import reverse
 from polymorphic.models import PolymorphicModel
 
@@ -78,6 +78,22 @@ class Asset(models.Model):
     csa = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text='mm^2')
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
+
+    def get_available_asset_id():
+        sql = """
+        SELECT MIN(CAST(a.asset_id AS int))+1
+        FROM assets_asset a
+        LEFT OUTER JOIN assets_asset b ON
+            (CAST(a.asset_id AS int) + 1 = CAST(b.asset_id AS int))
+        WHERE b.asset_id IS NULL AND CAST(a.asset_id AS int) >= %s;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(sql, [9000])
+            row = cursor.fetchone()
+            if row[0] is None:
+                return 9000
+            else:
+                return row[0]
 
     def get_absolute_url(self):
         return reverse('asset_detail', kwargs={'pk': self.pk})
