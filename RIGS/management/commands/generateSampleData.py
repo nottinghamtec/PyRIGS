@@ -121,8 +121,19 @@ class Command(BaseCommand):
         self.keyholder_group = Group.objects.create(name='Keyholders')
         self.finance_group = Group.objects.create(name='Finance')
 
-        keyholderPerms = ["add_event", "change_event", "view_event", "add_eventitem", "change_eventitem", "delete_eventitem", "add_organisation", "change_organisation", "view_organisation", "add_person", "change_person", "view_person", "view_profile", "add_venue", "change_venue", "view_venue"]
-        financePerms = ["change_event", "view_event", "add_eventitem", "change_eventitem", "add_invoice", "change_invoice", "view_invoice", "add_organisation", "change_organisation", "view_organisation", "add_payment", "change_payment", "delete_payment", "add_person", "change_person", "view_person"]
+        keyholderPerms = ["add_event", "change_event", "view_event",
+                          "add_eventitem", "change_eventitem", "delete_eventitem",
+                          "add_organisation", "change_organisation", "view_organisation",
+                          "add_person", "change_person", "view_person", "view_profile",
+                          "add_venue", "change_venue", "view_venue",
+                          "add_asset", "change_asset", "delete_asset",
+                          "asset_finance"]
+        financePerms = ["change_event", "view_event", "add_eventitem",
+                        "change_eventitem", "add_invoice", "change_invoice", "view_invoice",
+                        "add_organisation", "change_organisation", "view_organisation",
+                        "add_payment", "change_payment", "delete_payment",
+                        "add_person", "change_person", "view_person",
+                        "asset_finance", "change_asset"]
 
         for permId in keyholderPerms:
             self.keyholder_group.permissions.add(Permission.objects.get(codename=permId))

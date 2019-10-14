@@ -39,6 +39,7 @@ class EmbeddedAuthenticationForm(AuthenticationForm):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.pop('autofocus', None)
 
+
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
 

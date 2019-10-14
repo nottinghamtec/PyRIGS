@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from assets import models
 
@@ -9,7 +10,7 @@ class AssetForm(forms.ModelForm):
         fields = '__all__'
 
 
-class SupplierForm(forms.ModelForm):
+class SupplierForm(forms.Form):
     class Meta:
         model = models.Supplier
         fields = '__all__'

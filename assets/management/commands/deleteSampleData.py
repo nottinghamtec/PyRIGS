@@ -21,7 +21,7 @@ class Command(BaseCommand):
         self.delete_objects(models.AssetCategory)
         self.delete_objects(models.AssetStatus)
         self.delete_objects(models.Supplier)
-        self.delete_objects(models.Collection)
+        self.delete_objects(models.Connector)
         self.delete_objects(models.Asset)
 
     def delete_objects(self, model):

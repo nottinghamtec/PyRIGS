@@ -1,0 +1,76 @@
+{% load widget_tweaks %}
+{% load asset_templatetags %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Purchase Details
+  </div>
+  <div class="panel-body">
+    {% if create or edit or duplicate %}
+    <div class="form-group">
+      <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
+      <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">
+                {% for id, choice in form.purchased_from.field.choices %}
+                  <option value="{{ id }}"
+                  {% if object.purchased_from.id == id %}
+                    selected
+                  {% endif %}>
+                  {{ choice }}</option>
+                {% endfor %}
+              </select>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
+      <div class="input-group">
+        <span class="input-group-addon">£</span>
+        {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
+      <div class="input-group">
+        <span class="input-group-addon">£</span>
+        {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.date_acquired.id_for_label }}" >Date Acquired</label>
+      {% if object.date_acquired%}
+      {% with date_acq=object.date_acquired|date:"Y-m-d" %}
+      {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
+      {% endwith %}
+      {% else %}
+      <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
+                    class="form-control" id="id_date_acquired">
+                {% endif %}
+              </div>
+
+      <div class="form-group">
+        <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
+        {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
+        {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}
+        {% endwith %}
+      </div>
+      {% else %}
+      <dl>
+        <dt>Purchased From</dt>
+        <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
+
+        <dt>Purchase Price</dt>
+        <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
+
+        <dt>Salvage Value</dt>
+        <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
+
+        <dt>Date Acquired</dt>
+        <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
+        {% if object.date_sold %}
+        <dt>Date Sold</dt>
+        <dd>{{ object.date_sold|default_if_none:'-' }}</dd>
+        {% endif %}
+      </dl>
+      {% endif %}
+    </div>
+  </div>

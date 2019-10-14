@@ -1,20 +1,27 @@
+{% if edit and object %}
+<!--edit-->
+<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
+<a class="btn btn-default" href="{% url 'asset_duplicate' object.pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+<a class="btn btn-danger" data-toggle="modal" data-target="#confirm_delete_modal"><i class="glyphicon glyphicon-trash"></i> Delete</a>
+{% elif duplicate %}
+<!--duplicate-->
+<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok-sign"></i> Create Duplicate</button>
+{% elif create %}
+<!--create-->
+<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
+{% else %}
+<!--detail view-->
 <div class="btn-group">
-  {% if edit and object %}
-  <!--edit-->
-  <button type="button" class="btn btn-success" onclick="updateAsset()"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
-  <a class="btn btn-default" href="{% url 'asset_update' object.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
-  <a class="btn btn-danger" data-toggle="modal" data-target="#confirm_delete_modal"><i class="glyphicon glyphicon-trash"></i> Delete</a>
-  {% elif duplicate %}
-  <!--duplicate-->
-  <button type="button" class="btn btn-default" onclick="updateAsset()"><i class="glyphicon glyphicon-ok-sign"></i> Create Duplicate</button>
-  <a href="{% url 'asset_detail' previous_asset_pk %}" class="btn btn-warning"><i class="glyphicon glyphicon-remove"></i> Cancel</a>
-  {% elif not object %}
-  <!--create-->
-  <button type="button" class="btn btn-success" onclick="updateAsset()"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
-  {% else %}
-  <!--detail view-->
-  <a href="{% url 'asset_update' object.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-  <a class="btn btn-default" href="{% url 'asset_update' object.pk %}?duplicate=true"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
-  <a class="btn btn-danger" data-toggle="modal" data-target="#confirm_delete_modal"><i class="glyphicon glyphicon-trash"></i> Delete</a>
-  {% endif %}
+    <a href="{% url 'asset_update' object.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+    <a class="btn btn-default" href="{% url 'asset_duplicate' object.pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+    <a class="btn btn-danger" data-toggle="modal" data-target="#confirm_delete_modal"><i class="glyphicon glyphicon-trash"></i> Delete</a>
 </div>
+{% endif %}
+{% if create or edit or duplicate %}
+<br>
+<button type="reset" class="btn btn-link" onclick="
+{%if duplicate%}
+{% url 'asset_detail' previous_asset_pk %}
+{%else%}
+history.back(){%endif%}">Cancel</button>
+{% endif %}

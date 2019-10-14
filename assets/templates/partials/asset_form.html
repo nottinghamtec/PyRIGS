@@ -1,0 +1,75 @@
+{% load widget_tweaks %}
+{% load asset_templatetags %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Asset Details
+  </div>
+  <div class="panel-body">
+    {% if create or edit or duplicate %}
+    <div class="form-group">
+        <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
+        {% if duplicate %}
+        {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+        {% elif object.asset_id %}
+        {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input form-control' value=object.asset_id %}
+        {% else %}
+        {% render_field form.asset_id|add_class:'form-control' %}
+        {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.description.id_for_label }}">Description</label>
+      {% render_field form.description|add_class:'form-control' value=object.description %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.category.id_for_label }}" >Category</label>
+      <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control">
+            {% for id, choice in form.category.field.choices %}
+              <option value="{{ id }}"
+                {% if object.category.id == id %}
+                  selected
+                {% endif %}>
+              {{ choice }}
+              </option>
+            {% endfor %}
+            </select>
+    </div>
+    {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %} <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
+    <div class="form-group">
+      <label for="{{ form.status.id_for_label }}" >Status</label>
+      <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
+              {% for id, choice in form.status.field.choices %}
+                <option value="{{ id }}"
+                  {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
+              {% endfor %}
+            </select>
+    </div>
+    <div class="form-group">
+      <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+      {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
+    </div>
+    <!---TODO: Lower default number of lines in comments box-->
+    <div class="form-group">
+      <label for="{{ form.comments.id_for_label }}">Comments</label>
+      {% render_field form.comments|add_class:'form-control' %}
+    </div>
+    {% else %}
+    <dt>Asset ID</dt>
+    <dd>{{ object.asset_id }}</dd>
+
+    <dt>Description</dt>
+    <dd style="overflow-wrap: break-word;">{{ object.description }}</dd>
+
+    <dt>Category</dt>
+    <dd>{{ object.category }}</dd>
+
+    <dt>Status</dt>
+    <dd>{{ object.status }}</dd>
+
+    <dt>Serial Number</dt>
+    <dd>{{ object.serial_number|default:'-' }}</dd>
+
+    <dt>Comments</dt>
+    <dd style="overflow-wrap: break-word;">{{ object.comments|default:'-'|linebreaksbr }}</dd>
+    {% endif %}
+  </div>
+</div>
