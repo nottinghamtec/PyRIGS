@@ -6,6 +6,7 @@ from polymorphic.models import PolymorphicModel
 import datetime
 import re
 
+
 class AssetCategory(models.Model):
     class Meta:
         verbose_name = 'Asset Category'
@@ -54,7 +55,7 @@ class Asset(models.Model):
         permissions = (
             ('asset_finance', 'Can see financial data for assets'),
         )
-    
+
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=10, unique=True)
     description = models.CharField(max_length=120)
@@ -123,4 +124,3 @@ class Asset(models.Model):
                 raise ValidationError({"circuits": "There must be at least one circuit in a cable"})
             elif self.cores <= 0:
                 raise ValidationError({"cores": "There must be at least one core in a cable"})
- 
