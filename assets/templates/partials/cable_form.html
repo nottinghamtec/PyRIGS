@@ -8,25 +8,11 @@
     {% if create or edit or duplicate %}
     <div class="form-group">
       <label for="{{ form.plug.id_for_label }}">Plug</label>
-      <select name="{{ form.plug.name }}" id="{{ form.plug.id_for_label }}" class="form-control">
-                  <option value="">
-                  {% for connector in connectors %}
-                    <option value="{{ connector.pk }}">
-                    {{ connector.description }}
-                    </option>
-                  {%endfor%}
-                </select>
+      {% render_field form.plug|add_class:'form-control'%}
     </div>
     <div class="form-group">
       <label for="{{ form.socket.id_for_label }}">Socket</label>
-      <select name="{{ form.socket.name }}" id="{{ form.socket.id_for_label }}" class="form-control">
-                  <option value="">
-                  {% for connector in connectors %}
-                    <option value="{{ connector.pk }}">
-                    {{ connector.description }}
-                    </option>
-                  {%endfor%}
-                </select>
+      {% render_field form.socket|add_class:'form-control'%}
     </div>
     <div class="form-group">
       <label for="{{ form.length.id_for_label }}">Length</label>

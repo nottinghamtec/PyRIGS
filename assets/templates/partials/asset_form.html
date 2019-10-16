@@ -22,26 +22,12 @@
     </div>
     <div class="form-group">
       <label for="{{ form.category.id_for_label }}" >Category</label>
-      <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" required class="form-control">
-            {% for id, choice in form.category.field.choices %}
-              <option value="{{ id }}"
-                {% if object.category.id == id %}
-                  selected
-                {% endif %}>
-              {{ choice }}
-              </option>
-            {% endfor %}
-            </select>
+      {% render_field form.category|add_class:'form-control'%}
     </div>
     {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %} <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
     <div class="form-group">
       <label for="{{ form.status.id_for_label }}" >Status</label>
-      <select class="form-control" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" required>
-              {% for id, choice in form.status.field.choices %}
-                <option value="{{ id }}"
-                  {% if not object.status.id and choice == "Active" or object.status.id == id %}selected{% endif %}>{{ choice }}</option>
-              {% endfor %}
-            </select>
+      {% render_field form.status|add_class:'form-control'%}
     </div>
     <div class="form-group">
       <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>

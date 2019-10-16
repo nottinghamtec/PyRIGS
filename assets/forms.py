@@ -15,7 +15,8 @@ class AssetSearchForm(forms.Form):
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
     status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
 
-class SupplierForm(forms.Form):
+
+class SupplierForm(forms.ModelForm):
     class Meta:
         model = models.Supplier
         fields = '__all__'

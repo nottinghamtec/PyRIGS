@@ -8,15 +8,7 @@
     {% if create or edit or duplicate %}
     <div class="form-group">
       <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-      <select class="form-control" name="{{ form.purchased_from.name }}" id="{{ form.purchased_from.id_for_label }}">
-                {% for id, choice in form.purchased_from.field.choices %}
-                  <option value="{{ id }}"
-                  {% if object.purchased_from.id == id %}
-                    selected
-                  {% endif %}>
-                  {{ choice }}</option>
-                {% endfor %}
-              </select>
+      {% render_field form.purchased_from|add_class:"form-control" %}
     </div>
 
     <div class="form-group">
