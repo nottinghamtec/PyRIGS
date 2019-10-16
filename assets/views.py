@@ -19,39 +19,51 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     template_name = 'asset_list.html'
     paginate_by = 40
     ordering = ['-pk']
+    hide_hidden_status = True
 
     def get_queryset(self):
-        # TODO Feedback to user when search fails
-        query = self.request.GET.get('query', "")
-        if len(query) == 0:
-            queryset = self.model.objects.all()
-        elif len(query) >= 3:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query) | Q(description__icontains=query))
+        if self.request.method == 'POST':
+            self.form = forms.AssetSearchForm(data=self.request.POST)
+        elif self.request.method == 'GET':
+            self.form = forms.AssetSearchForm(data=self.request.GET)
         else:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query))
+            self.form = forms.AssetSearchForm(data={})
+        form = self.form
+        if not form.is_valid():
+            return self.model.objects.none()
 
-        cat = self.request.GET.get('cat', "")
-        status = self.request.GET.get('status', "")
-        if cat != "":
-            queryset = queryset.filter(category__name__exact=cat)
-        if status != "":
-            queryset = queryset.filter(status__name__exact=status)
+        # TODO Feedback to user when search fails
+        query_string = form.cleaned_data['query'] or ""
+        if len(query_string) == 0:
+            queryset = self.model.objects.all()
+        elif len(query_string) >= 3:
+            queryset = self.model.objects.filter(Q(asset_id__exact=query_string) | Q(description__icontains=query_string))
+        else:
+            queryset = self.model.objects.filter(Q(asset_id__exact=query_string))
+
+        if form.cleaned_data['category']:
+            queryset = queryset.filter(category__in=form.cleaned_data['category'])
+
+        if len(form.cleaned_data['status']) > 0:
+            queryset = queryset.filter(status__in=form.cleaned_data['status'])
+        elif self.hide_hidden_status:
+            queryset = queryset.filter(status__in=models.AssetStatus.objects.filter(should_show=True))
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
-        context["search_name"] = self.request.GET.get('query', "")
+        context["form"] = self.form
 
         context["categories"] = models.AssetCategory.objects.all()
-        context["category_select"] = self.request.GET.get('cat', "")
 
         context["statuses"] = models.AssetStatus.objects.all()
-        context["status_select"] = self.request.GET.get('status', "")
         return context
 
 
 class AssetSearch(AssetList):
+    hide_hidden_status = False
+
     def render_to_response(self, context, **response_kwargs):
         result = []
 

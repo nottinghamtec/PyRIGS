@@ -10,6 +10,11 @@ class AssetForm(forms.ModelForm):
         fields = '__all__'
 
 
+class AssetSearchForm(forms.Form):
+    query = forms.CharField(required=False)
+    category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
+    status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
+
 class SupplierForm(forms.Form):
     class Meta:
         model = models.Supplier

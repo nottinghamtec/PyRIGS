@@ -24,6 +24,7 @@ class AssetStatus(models.Model):
         verbose_name_plural = 'Asset Statuses'
 
     name = models.CharField(max_length=80)
+    should_show = models.BooleanField(default=True, help_text="Should this be shown by default in the asset list.")
 
     def __str__(self):
         return self.name

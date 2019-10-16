@@ -1,6 +1,7 @@
 {% extends 'base_assets.html' %}
 {% block title %}List{% endblock %}
 {% load paginator from filters %}
+{% load widget_tweaks %}
 
 {% block content %}
 
@@ -11,41 +12,19 @@
 <form id="asset-search-form" method="get" class="form-inline pull-right">
   {% csrf_token %}
   <div class="input-group pull-right" style="width: auto;">
-    <input type="query" name="query" placeholder="Search by Asset ID/Description" class="form-control" value="{{search_name}}" style="width: 250px">
-    <label for="asset_id" class="sr-only">Asset ID/Description:</label>
+    {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Description' style="width: 250px"%}
+    <label for="query" class="sr-only">Asset ID/Description:</label>
     <span class="input-group-btn"><button type="submit" class="btn btn-default">Search</button></span>
   </div>
   <br>
   <div style="margin-top: 1em;" class="pull-right">
       <div class="form-group">
-        <label for="cat" class="sr-only">Category</label>
-        <select name="cat" class="form-control">
-              <option value="" class="text-muted">(category)</option>
-              {% for name in categories %}
-              {% if name.name == category_select %}
-              <option selected>
-              {% else %}
-              <option>
-              {% endif %}
-                {{ name }}
-              </option>
-              {% endfor %}
-          </select>
+        <label for="category" class="sr-only">Category</label>
+        {% render_field form.category|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Categories" data-header="Categories"%}
       </div>
       <div class="form-group">
         <label for="status" class="sr-only">Status</label>
-        <select name="status" class="form-control">
-        <option value="">(status)</option>
-                {% for name in statuses %}
-                {% if name.name == status_select %}
-                <option selected>
-                {% else %}
-                <option>
-                {% endif %}
-                  {{ name }}
-                </option>
-                {% endfor %}
-        </select>
+        {% render_field form.status|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Statuses" data-header="Statuses"%}
       </div>
       <!---TODO: Auto filter whenever an option is selected, instead of using a button -->
       <button type="submit" class="btn btn-default">Filter</button>
@@ -75,5 +54,13 @@
 
 {% endblock %}
 
-{% block js %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static "js/bootstrap-select.js" %}"></script>
+    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
 {% endblock %}
