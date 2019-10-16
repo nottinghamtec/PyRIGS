@@ -122,18 +122,6 @@ class AssetDuplicate(DuplicateMixin, AssetCreate):
         return context
 
 
-@login_required()
-def asset_delete(request):
-    context = dict()
-    if request.method == 'POST' and request.is_ajax():
-        asset = get_object_or_404(models.Asset, pk=request.POST.get('asset_id', None))
-        asset.delete()
-
-        context['url'] = reverse('asset_list')
-
-        return HttpResponse(json.dumps(context), content_type='application/json')
-
-
 class SupplierList(generic.ListView):
     model = models.Supplier
     template_name = 'supplier_list.html'
