@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         from django.conf import settings
 
-        if not settings.DEBUG:
+        if not (settings.DEBUG or settings.STAGING):
             raise CommandError('You cannot run this command in production')
 
         random.seed('Some object to see the random number generator')
