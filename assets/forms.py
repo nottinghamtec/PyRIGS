@@ -9,6 +9,11 @@ class AssetForm(forms.ModelForm):
         model = models.Asset
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['date_sold'].widget.format = '%Y-%m-%d'
+        self.fields['date_acquired'].widget.format = '%Y-%m-%d'
+
 
 class AssetSearchForm(forms.Form):
     query = forms.CharField(required=False)
