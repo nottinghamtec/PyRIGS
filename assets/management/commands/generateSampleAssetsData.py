@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.utils import timezone
+from django.db.models import Max
 import random
 
 from assets import models
@@ -22,6 +23,7 @@ class Command(BaseCommand):
         self.create_suppliers()
         self.create_assets()
         self.create_connectors()
+        self.create_cables()
 
     def create_categories(self):
         categories = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']
@@ -43,7 +45,7 @@ class Command(BaseCommand):
             models.Supplier.objects.create(name=supplier)
 
     def create_assets(self):
-        assest_description = ['Large cable', 'Shiny thing', 'New lights', 'Really expensive microphone', 'Box of fuse flaps', 'Expensive tool we didn\'t agree to buy', 'Cable drums', 'Boring amount of tape', 'Video stuff no one knows how to use', 'More amplifiers', 'Heatshrink']
+        asset_description = ['Large cable', 'Shiny thing', 'New lights', 'Really expensive microphone', 'Box of fuse flaps', 'Expensive tool we didn\'t agree to buy', 'Cable drums', 'Boring amount of tape', 'Video stuff no one knows how to use', 'More amplifiers', 'Heatshrink']
 
         categories = models.AssetCategory.objects.all()
         statuses = models.AssetStatus.objects.all()
@@ -51,12 +53,52 @@ class Command(BaseCommand):
 
         for i in range(100):
             asset = models.Asset.objects.create(
-                asset_id='{}'.format(i),
-                description=random.choice(assest_description),
+                asset_id='{}'.format(models.Asset.get_available_asset_id()),
+                description=random.choice(asset_description),
+                category=random.choice(categories),
+                status=random.choice(statuses),
+                date_acquired=timezone.now().date()
+            )
+
+            if i % 4 == 0:
+                asset.parent = models.Asset.objects.order_by('?').first()
+
+            if i % 3 == 0:
+                asset.purchased_from = random.choice(suppliers)
+
+            asset.save()
+
+    def create_cables(self):
+        asset_description = ['The worm', 'Harting without a cap', 'Heavy cable', 'Extension lead', 'IEC cable that we should remember to prep']
+
+        csas = [0.75, 1.00, 1.25, 2.5, 4]
+        lengths = [1,2,5,10,15,20,25,30,50,100]
+        cores = [3,5]
+        circuits = [1,2,3,6]
+        categories = models.AssetCategory.objects.all()
+        statuses = models.AssetStatus.objects.all()
+        suppliers = models.Supplier.objects.all()
+        connectors = models.Connector.objects.all()
+
+        for i in range(100):
+            asset = models.Asset.objects.create(
+                asset_id='{}'.format(models.Asset.get_available_asset_id()),
+                description=random.choice(asset_description),
                 category=random.choice(categories),
                 status=random.choice(statuses),
                 date_acquired=timezone.now().date(),
+
+                is_cable = True,
+                plug = random.choice(connectors),
+                socket = random.choice(connectors),
+                csa = random.choice(csas),
+                length = random.choice(lengths),
+                circuits = random.choice(circuits),
+                cores = random.choice(circuits)
             )
+
+            if i % 4 == 0:
+                asset.parent = models.Asset.objects.order_by('?').first()
 
             if i % 3 == 0:
                 asset.purchased_from = random.choice(suppliers)
