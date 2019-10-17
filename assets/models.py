@@ -33,6 +33,12 @@ class AssetStatus(models.Model):
 class Supplier(models.Model):
     name = models.CharField(max_length=80)
 
+    
+    class Meta:
+        permissions = (
+            ('view_supplier', 'Can view a supplier'),
+        )
+
     def get_absolute_url(self):
         return reverse('supplier_list')
 
@@ -55,6 +61,7 @@ class Asset(models.Model):
         ordering = ['asset_id']
         permissions = (
             ('asset_finance', 'Can see financial data for assets'),
+            ('view_asset', 'Can view an asset')
         )
 
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)

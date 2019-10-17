@@ -127,13 +127,10 @@ class Command(BaseCommand):
                           "add_person", "change_person", "view_person", "view_profile",
                           "add_venue", "change_venue", "view_venue",
                           "add_asset", "change_asset", "delete_asset",
-                          "asset_finance"]
-        financePerms = ["change_event", "view_event", "add_eventitem",
-                        "change_eventitem", "add_invoice", "change_invoice", "view_invoice",
-                        "add_organisation", "change_organisation", "view_organisation",
-                        "add_payment", "change_payment", "delete_payment",
-                        "add_person", "change_person", "view_person",
-                        "asset_finance", "change_asset"]
+                          "asset_finance", "view_asset", "view_supplier", "asset_finance", 
+                          "add_supplier"]
+        financePerms = keyholderPerms + ["add_invoice", "change_invoice", "view_invoice",
+                        "add_payment", "change_payment", "delete_payment"]
 
         for permId in keyholderPerms:
             self.keyholder_group.permissions.add(Permission.objects.get(codename=permId))
