@@ -20,6 +20,7 @@
                     <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
                     <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
                     {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>{% endif %}
+                    <a class="list-group-item" href="{% url 'asset_index' %}"><span class="glyphicon glyphicon-tag"></span> Asset Database </a>
 
                     <div class="list-group-item default"></div>
 

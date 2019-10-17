@@ -8,7 +8,7 @@ router = routers.DefaultRouter()
 router.register(r'api/assets', api.AssetViewSet)
 
 urlpatterns = [
-    path('', views.AssetList.as_view(), name='index'),
+    path('', views.AssetList.as_view(), name='asset_index'),
     path('asset/list/', views.AssetList.as_view(), name='asset_list'),
     path('asset/<int:pk>/', views.AssetDetail.as_view(), name='asset_detail'),
     path('asset/create/', permission_required_with_403('assets.create_asset')(views.AssetCreate.as_view()), name='asset_create'),
