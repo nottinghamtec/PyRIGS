@@ -113,38 +113,33 @@ class Asset(models.Model):
         return out
 
     def clean(self):
+        errdict = {}
         if self.date_sold and self.date_acquired > self.date_sold:
-            raise ValidationError({"date_sold": "Cannot sell an item before it is acquired"})
+            errdict["date_sold"] = ["Cannot sell an item before it is acquired"]
 
         self.asset_id = self.asset_id.upper()
         if re.search("^[a-zA-Z0-9]+$", self.asset_id) is None:
-                raise ValidationError({"asset_id": "An Asset ID can only consist of letters and numbers"})
+                errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers"]
 
         if self.purchase_price and self.purchase_price < 0:
-            raise ValidationError({"purchase_price": "A price cannot be negative"})
+            errdict["purchase_price"] = ["A price cannot be negative"]
 
         if self.salvage_value and self.salvage_value < 0:
-            raise ValidationError({"purchase_price": "A price cannot be negative"})
+            errdict["salvage_value"] = ["A price cannot be negative"]
 
         if self.is_cable:
-            if self.length is None:
-                raise ValidationError({"length": "The length of a cable must be a number"})
-            elif self.csa is None:
-                raise ValidationError({"csa": "The csa of a cable must be a number"})
-            elif self.circuits is None:
-                raise ValidationError({"circuits": "The number of circuits in a cable must be a number"})
-            elif self.cores is None:
-                raise ValidationError({"cores": "The number of cores in a cable must be a number"})
-            elif self.socket is None:
-                raise ValidationError({"plug": "A cable must have a plug"})
-            elif self.plug is None:
-                raise ValidationError({"socket": "A cable must have a socket"})
+            if not self.length or self.length <= 0:
+                errdict["length"] = ["The length of a cable must be more than 0"]
+            if not self.csa or self.csa <= 0:
+                errdict["csa"] = ["The CSA of a cable must be more than 0"]
+            if not self.circuits or self.circuits <= 0:
+                errdict["circuits"] = ["There must be at least one circuit in a cable"]
+            if not self.cores or self.cores <= 0:
+                errdict["cores"] = ["There must be at least one core in a cable"]
+            if self.socket is None:
+                errdict["socket"] = ["A cable must have a socket"]
+            if self.plug is None:
+                errdict["plug"] = ["A cable must have a plug"]
 
-            if self.length <= 0:
-                raise ValidationError({"length": "The length of a cable must be more than 0"})
-            elif self.csa <= 0:
-                raise ValidationError({"csa": "The CSA of a cable must be more than 0"})
-            elif self.circuits <= 0:
-                raise ValidationError({"circuits": "There must be at least one circuit in a cable"})
-            elif self.cores <= 0:
-                raise ValidationError({"cores": "There must be at least one core in a cable"})
+        if errdict != {}:  # If there was an error when validation
+            raise ValidationError(errdict)
