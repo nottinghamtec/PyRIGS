@@ -33,7 +33,6 @@ class AssetStatus(models.Model):
 class Supplier(models.Model):
     name = models.CharField(max_length=80)
 
-    
     class Meta:
         permissions = (
             ('view_supplier', 'Can view a supplier'),
