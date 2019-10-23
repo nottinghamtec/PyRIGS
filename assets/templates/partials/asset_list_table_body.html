@@ -15,7 +15,7 @@
         <td style="vertical-align: middle; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 25vw">{{ item.description }}</td>
         <td style="vertical-align: middle;">{{ item.category }}</td>
         <td style="vertical-align: middle;">{{ item.status }}</td>
-        <td>
+        <td class="hidden-xs">
 
             <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
