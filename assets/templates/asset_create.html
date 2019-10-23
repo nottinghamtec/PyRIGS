@@ -21,13 +21,6 @@
   <form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
     {% endif %}
     {% include 'form_errors.html' %}
-    <div class="row" style="padding-bottom: 1em">
-      <div class="col-sm-12">
-        <div class="pull-right">
-          {% include 'partials/asset_buttons.html' %}
-        </div>
-      </div>
-    </div>
     {% csrf_token %}
     <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
     <div class="row">
