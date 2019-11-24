@@ -8,7 +8,7 @@
     {% if create or edit or duplicate %}
     <div class="form-group">
       <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-      {% render_field form.purchased_from|add_class:"form-control" %}
+      {% include 'partials/supplier_picker.html' %}
     </div>
 
     <div class="form-group">

@@ -1,0 +1,63 @@
+<select name="parent_s" id="parent_s_id" class="selectpicker">
+    {% if object.parent%}
+    <option value="{{object.parent.pk}}" selected>{{object.parent.name}}</option>
+    {% endif %}
+</select>
+
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static "js/bootstrap-select.js" %}"></script>
+    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
+{% endblock %}
+
+{% block js %}
+<script>
+$('#parent_s_id')
+    .selectpicker({
+        liveSearch: true
+    })
+    .ajaxSelectPicker({
+        ajax: {
+            url: '{% url 'supplier_search_json'%}',
+            type: "get",
+            data: function () {
+                var params = {
+                    {% verbatim %}query: '{{{q}}}'{% endverbatim  %}
+                };
+                return params;
+            }
+        },
+        locale: {
+            emptyTitle: 'Search for supplier...'
+        },
+        preprocessData: function(data){
+            var suppliers = [];
+            if(data.length){
+                var len = data.length;
+                for(var i = 0; i < len; i++){
+                    var curr = data[i];
+                    suppliers.push(
+                        {
+                            'value': curr.id,
+                            'text': curr.label,
+                            'disabled': false
+                        }
+                    );
+                }
+                suppliers.push(
+                {
+                    'value': null,
+                    'text': "(no selection)"
+                });
+            }
+            return assets;
+        },
+        preserveSelected: false
+    });
+</script>
+{% endblock js %}

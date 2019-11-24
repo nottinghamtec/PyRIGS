@@ -172,7 +172,7 @@ class SupplierSearch(SupplierList):
         result = []
 
         for supplier in context["object_list"]:
-            result.append({"name": supplier.name})
+            result.append({"id": supplier.pk, "name": supplier.name})
 
         return JsonResponse(result, safe=False)
 
