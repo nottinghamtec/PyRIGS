@@ -140,6 +140,42 @@ class SupplierList(generic.ListView):
     paginate_by = 40
     ordering = ['name']
 
+    def get_queryset(self):
+        if self.request.method == 'POST':
+            self.form = forms.SupplierSearchForm(data=self.request.POST)
+        elif self.request.method == 'GET':
+            self.form = forms.SupplierSearchForm(data=self.request.GET)
+        else:
+            self.form = forms.SupplierSearchForm(data={})
+        form = self.form
+        if not form.is_valid():
+            return self.model.objects.none()
+
+        query_string = form.cleaned_data['query'] or ""
+        if len(query_string) == 0:
+            queryset = self.model.objects.all()
+        else:
+            queryset = self.model.objects.filter(Q(name__icontains=query_string))
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierList, self).get_context_data(**kwargs)
+        context["form"] = self.form
+        return context
+
+
+class SupplierSearch(SupplierList):
+    hide_hidden_status = False
+
+    def render_to_response(self, context, **response_kwargs):
+        result = []
+
+        for supplier in context["object_list"]:
+            result.append({"name": supplier.name})
+
+        return JsonResponse(result, safe=False)
+
 
 class SupplierDetail(generic.DetailView):
     model = models.Supplier

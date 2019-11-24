@@ -1,12 +1,22 @@
 {% extends 'base_assets.html' %}
-{% block title %}List{% endblock %}
+{% block title %}Supplier List{% endblock %}
 {% load paginator from filters %}
+{% load widget_tweaks %}
 
 {% block content %}
 
 <div class="page-header">
     <h1>Supplier List</h1>
 </div>
+
+<form id="supplier-search-form" method="get" class="form-inline pull-right">
+    {% csrf_token %}
+    <div class="input-group pull-right" style="width: auto;">
+        {% render_field form.query|add_class:'form-control' placeholder='Search by Name' style="width: 250px"%}
+        <label for="query" class="sr-only">Name:</label>
+        <span class="input-group-btn"><button type="submit" class="btn btn-default">Search</button></span>
+    </div>
+</form>
 
 <table class="table table-striped">
   <thead>

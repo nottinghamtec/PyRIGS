@@ -25,3 +25,7 @@ class SupplierForm(forms.ModelForm):
     class Meta:
         model = models.Supplier
         fields = '__all__'
+
+
+class SupplierSearchForm(forms.Form):
+    query = forms.CharField(required=False)

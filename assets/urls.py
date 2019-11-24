@@ -22,5 +22,7 @@ urlpatterns = [
     path('supplier/create', permission_required_with_403('assets.create_supplier')(views.SupplierCreate.as_view()), name='supplier_create'),
     path('supplier/<int:pk>/edit', permission_required_with_403('assets.edit_supplier')(views.SupplierUpdate.as_view()), name='supplier_update'),
 
+    path('supplier/search/', views.SupplierSearch.as_view(), name='supplier_search_json'),
+
     path('', include(router.urls)),
 ]
