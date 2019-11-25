@@ -1,4 +1,4 @@
-<select name="parent_s" id="parent_s_id" class="selectpicker">
+<select name="purchased_from" id="supplier_id" class="selectpicker">
     {% if object.parent%}
     <option value="{{object.parent.pk}}" selected>{{object.parent.name}}</option>
     {% endif %}
@@ -16,8 +16,9 @@
 {% endblock %}
 
 {% block js %}
+{{ js.super }}
 <script>
-$('#parent_s_id')
+$('#supplier_id')
     .selectpicker({
         liveSearch: true
     })
@@ -44,7 +45,7 @@ $('#parent_s_id')
                     suppliers.push(
                         {
                             'value': curr.id,
-                            'text': curr.label,
+                            'text': curr.name,
                             'disabled': false
                         }
                     );
@@ -55,7 +56,7 @@ $('#parent_s_id')
                     'text': "(no selection)"
                 });
             }
-            return assets;
+            return suppliers;
         },
         preserveSelected: false
     });
