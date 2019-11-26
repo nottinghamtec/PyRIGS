@@ -1,6 +1,6 @@
 Hi {{ to_name|default:"there" }},
 
-Your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for £{{object.amount}} by {{object.name}} as of {{object.last_edited_at}}.
+Your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for £{{object.amount}} by {{object.name}} as of {{object.event.last_edited_at}}.
 
 {% if object.event.organisation and object.event.organisation.union_account %}{# internal #}
 Your event is now fully booked and payment will be processed by the finance department automatically.
