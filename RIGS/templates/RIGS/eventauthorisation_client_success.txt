@@ -1,4 +1,4 @@
-Hi {{ to_name|default:"there" }},
+Hi {{ to_name|default_if_none:"there" }},
 
 Your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for £{{object.amount}} by {{object.name}} as of {{object.event.last_edited_at}}.
 
