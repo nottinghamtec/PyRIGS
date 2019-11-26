@@ -83,6 +83,7 @@ class EventEmbed(EventDetail):
 
 class EventRA(generic.base.RedirectView):
     permanent = False
+
     def get_redirect_url(self, *args, **kwargs):
         event = get_object_or_404(models.Event, pk=kwargs['pk'])
 
@@ -405,6 +406,7 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LogRiskAssessment(generic.View):
