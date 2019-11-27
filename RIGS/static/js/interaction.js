@@ -36,6 +36,16 @@ function updatePrices() {
     $('#total').text(parseFloat(sum + vat).toFixed(2));
 }
 
+function setupMDE(selector) {
+    editor = new SimpleMDE({ 
+        element: $(selector)[0],
+        forceSync: true,
+        toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
+        status: true,
+    });
+    $(selector).data('mde_editor',editor);
+}
+
 $('#item-table').on('click', '.item-delete', function () {
     delete objectitems[$(this).data('pk')]
     $('#item-' + $(this).data('pk')).remove();
