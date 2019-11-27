@@ -3,9 +3,11 @@
 		<thead>
 			<tr>
 				<td>Item</td>
+                {% if perms.RIGS.view_event %}
 				<td>Price</td>
 				<td>Quantity</td>
 				<td>Sub-total</td>
+                {% endif %}
 				{% if edit %}
 				<td class="text-right">
 					<button type="button" class="btn btn-default btn-xs item-add"
@@ -22,6 +24,7 @@
 				{% include 'RIGS/item_row.html' %}
 			{% endfor %}
 		</tbody>
+        {% if perms.RIGS.view_event %}
 		<tfoot>
 			<tr>
 				<td rowspan="3" colspan="2"></td>
@@ -43,6 +46,7 @@
 				<td colspan="2">£ <span id="total">{{object.total|default:0|floatformat:2}}</span></td>
 			</tr>
 		</tfoot>
+        {% endif %}
 	</table>
 </div>
 <table class="hidden invisible">
