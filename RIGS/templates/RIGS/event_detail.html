@@ -12,36 +12,9 @@
             </h1>
     </div>
         <div class="col-sm-12 text-right">
-            <div class="btn-group btn-page">
-                <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span> <span
-                            class="hidden-xs">Edit</span></a>
-                {% if event.is_rig %}
-                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                            class="glyphicon glyphicon-print"></span> <span
-                            class="hidden-xs">Print</span></a>
-                {% endif %}
-                <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span> <span
-                            class="hidden-xs">Duplicate</span></a>
-                {% if event.is_rig %}
-                    {% if perms.RIGS.add_invoice %}
-                        <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
-                        {% if event.invoice and event.invoice.is_closed %}
-                            btn-success
-                        {% elif event.invoice %}
-                            btn-warning
-                        {% else %}
-                            btn-danger
-                        {% endif %}
-                        " title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span> 
-                                <span class="hidden-xs">Invoice</span></a>
-                    {% endif %}
-                {% endif %}
-            </div>
+            {% include 'RIGS/event_detail_buttons.html' %}
         </div>
-    
+
     {% endif %}
     {% if object.is_rig %}
         {# only need contact details for a rig #}
@@ -175,7 +148,8 @@
                         <dd>{{ object.collector }}</dd>
                     {% endif %}
 
-                    {% if event.is_rig %}
+                    {% if event.is_rig and not event.internal %}
+                        <dd>&nbsp;</dd>
                         <dt>PO</dt>
                         <dd>{{ object.purchase_order }}</dd>
                     {% endif %}
@@ -183,36 +157,57 @@
             </div>
         </div>
     </div>
+    {% if event.is_rig and event.internal %}
+    <div class="col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Client Authorisation</div>
+            <div class="panel-body">
+                <dl class="dl-horizontal col-sm-6">
+                    <dt>Authorisation Request</dt>
+                    <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
+
+                    <dt>By</dt>
+                    <dd>{{ object.auth_request_by }}</dd>
+
+                    <dt>At</dt>
+                    <dd>{{ object.auth_request_at|date:"D d M Y H:i"|default:"" }}</dd>
+
+                    <dt>To</dt>
+                    <dd>{{ object.auth_request_to }}</dd>
+                </dl>
+                <dd class="visible-xs">&nbsp;</dd>
+                <dl class="dl-horizontal col-sm-6">
+                    <dt>Authorised</dt>
+                    <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
+
+                    <dt>Authorised by</dt>
+                    <dd>
+                        {%  if object.authorisation %}
+                            {{ object.authorisation.name }}
+                            (<a href="mailto:{{ object.authorisation.email }}">{{ object.authorisation.email }}</a>)
+                        {% endif %}
+                    </dd>
+
+                    <dt>Authorised at</dt>
+                    <dd>{{ object.authorisation.last_edited_at }}</dd>
+
+                    <dt>Authorised amount</dt>
+                    <dd>
+                        {% if object.authorisation %}
+                            £ {{ object.authorisation.amount|floatformat:"2" }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Requested by</dt>
+                    <dd>{{ object.authorisation.sent_by }}</dd>
+                </dl>
+            </div>
+        </div>
+    <div>
+    {% endif %}
     {% if not request.is_ajax %}
     <div class="col-sm-12 text-right">
-        <div class="btn-group btn-page">
-            <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                    class="glyphicon glyphicon-edit"></span> <span
-                        class="hidden-xs">Edit</span></a>
-            {% if event.is_rig %}
-                <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                        class="glyphicon glyphicon-print"></span> <span
-                        class="hidden-xs">Print</span></a>
-            {% endif %}
-            <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                    class="glyphicon glyphicon-duplicate"></span> <span
-                        class="hidden-xs">Duplicate</span></a>
-            {% if event.is_rig %}
-                {% if perms.RIGS.add_invoice %}
-                    <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
-                    {% if event.invoice and event.invoice.is_closed %}
-                        btn-success
-                    {% elif event.invoice %}
-                        btn-warning
-                    {% else %}
-                        btn-danger
-                    {% endif %}
-                    " title="Invoice Rig"><span
-                            class="glyphicon glyphicon-gbp"></span> 
-                            <span class="hidden-xs">Invoice</span></a>
-                {% endif %}
-            {% endif %}
-        </div>
+        {% include 'RIGS/event_detail_buttons.html' %}
     </div>
     {% endif %}
     {% if event.is_rig %}
@@ -230,34 +225,7 @@
         </div>
         {% if not request.is_ajax %}
         <div class="col-sm-12 text-right">
-            <div class="btn-group btn-page">
-                <a href="{% url 'event_update' event.pk %}" class="btn btn-default"><span
-                        class="glyphicon glyphicon-edit"></span> <span
-                            class="hidden-xs">Edit</span></a>
-                {% if event.is_rig %}
-                    <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-default"><span
-                            class="glyphicon glyphicon-print"></span> <span
-                            class="hidden-xs">Print</span></a>
-                {% endif %}
-                <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-default" title="Duplicate Rig"><span
-                        class="glyphicon glyphicon-duplicate"></span> <span
-                            class="hidden-xs">Duplicate</span></a>
-                {% if event.is_rig %}
-                    {% if perms.RIGS.add_invoice %}
-                        <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
-                        {% if event.invoice and event.invoice.is_closed %}
-                            btn-success
-                        {% elif event.invoice %}
-                            btn-warning
-                        {% else %}
-                            btn-danger
-                        {% endif %}
-                        " title="Invoice Rig"><span
-                                class="glyphicon glyphicon-gbp"></span> 
-                                <span class="hidden-xs">Invoice</span></a>
-                    {% endif %}
-                {% endif %}
-            </div>
+            {% include 'RIGS/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}

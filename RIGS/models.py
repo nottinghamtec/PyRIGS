@@ -1,19 +1,24 @@
 import datetime
 import hashlib
+import datetime
 import pytz
-import random
+
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.utils import timezone
+from django.utils.functional import cached_property
+from django.utils.encoding import python_2_unicode_compatible
+from reversion import revisions as reversion
+from reversion.models import Version
 import string
+
+import random
 from collections import Counter
 from decimal import Decimal
 
-import reversion
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse_lazy
-from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.functional import cached_property
+from django.urls import reverse_lazy
 
 
 # Create your models here.
@@ -28,13 +33,13 @@ class Profile(AbstractUser):
         size = 20
         chars = string.ascii_letters + string.digits
         new_api_key = ''.join(random.choice(chars) for x in range(size))
-        return new_api_key;
+        return new_api_key
 
     @property
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email).hexdigest() + "?d=wavatar&s=500"
+            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.encode('utf-8')).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
@@ -59,31 +64,30 @@ class Profile(AbstractUser):
 
 class RevisionMixin(object):
     @property
+    def current_version(self):
+        version = Version.objects.get_for_object(self).select_related('revision').first()
+        return version
+
+    @property
     def last_edited_at(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return version.revision.date_created
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return version.revision.date_created
 
     @property
     def last_edited_by(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return version.revision.user
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return version.revision.user
 
     @property
     def current_version_id(self):
-        versions = reversion.get_for_object(self)
-        if versions:
-            version = reversion.get_for_object(self)[0]
-            return "V{0} | R{1}".format(version.pk, version.revision.pk)
-        else:
+        version = self.current_version
+        if version is None:
             return None
+        return "V{0} | R{1}".format(version.pk, version.revision.pk)
 
 
 @reversion.register
@@ -175,7 +179,7 @@ class Organisation(models.Model, RevisionMixin):
 
 class VatManager(models.Manager):
     def current_rate(self):
-        return self.find_rate(datetime.datetime.now())
+        return self.find_rate(timezone.now())
 
     def find_rate(self, date):
         # return self.filter(startAt__lte=date).latest()
@@ -190,7 +194,7 @@ class VatManager(models.Manager):
 @reversion.register
 @python_2_unicode_compatible
 class VatRate(models.Model, RevisionMixin):
-    start_at = models.DateTimeField()
+    start_at = models.DateField()
     rate = models.DecimalField(max_digits=6, decimal_places=6)
     comment = models.CharField(max_length=255)
 
@@ -241,18 +245,12 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False) & ~models.Q(
-                status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today()) & ~models.Q(
-                status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
-            models.Q(status=Event.CANCELLED, start_date__gte=datetime.date.today())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
-                                                                                                 'organisation',
-                                                                                                 'venue', 'mic')
+            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now().date(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=timezone.now().date()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            models.Q(status=Event.CANCELLED, start_date__gte=timezone.now().date())  # Canceled but not started
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
         return events
 
     def events_in_bounds(self, start, end):
@@ -275,12 +273,12 @@ class EventManager(models.Manager):
 
     def rig_count(self):
         event_count = self.filter(
-            (models.Q(start_date__gte=datetime.date.today(), end_date__isnull=True, dry_hire=False,
+            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False,
                       is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=datetime.date.today(), dry_hire=False, is_rig=True) & ~models.Q(
+            (models.Q(end_date__gte=timezone.now().date(), dry_hire=False, is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=datetime.date.today(), is_rig=True) & ~models.Q(
+            (models.Q(dry_hire=True, start_date__gte=timezone.now().date(), is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Active dry hire
             (models.Q(dry_hire=True, checked_in_by__isnull=True, is_rig=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED)))  # Active dry hire GT
@@ -304,9 +302,9 @@ class Event(models.Model, RevisionMixin):
     )
 
     name = models.CharField(max_length=255)
-    person = models.ForeignKey('Person', null=True, blank=True)
-    organisation = models.ForeignKey('Organisation', blank=True, null=True)
-    venue = models.ForeignKey('Venue', blank=True, null=True)
+    person = models.ForeignKey('Person', null=True, blank=True, on_delete=models.CASCADE)
+    organisation = models.ForeignKey('Organisation', blank=True, null=True, on_delete=models.CASCADE)
+    venue = models.ForeignKey('Venue', blank=True, null=True, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
@@ -325,15 +323,23 @@ class Event(models.Model, RevisionMixin):
     meet_info = models.CharField(max_length=255, blank=True, null=True)
 
     # Crew management
-    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True)
+    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True, on_delete=models.CASCADE)
     mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
-                            verbose_name="MIC")
+                            verbose_name="MIC", on_delete=models.CASCADE)
 
     # Monies
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_received = models.CharField(max_length=255, blank=True, null=True)
     purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
     collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
+
+    # Authorisation request details
+    auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
+    auth_request_at = models.DateTimeField(null=True, blank=True)
+    auth_request_to = models.EmailField(null=True, blank=True)
+
+    # Risk assessment info
+    risk_assessment_edit_url = models.CharField(verbose_name="risk assessment", max_length=255, blank=True, null=True)
 
     # Calculated values
     """
@@ -367,7 +373,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def vat(self):
-        return self.sum_total * self.vat_rate.rate
+        return Decimal(self.sum_total * self.vat_rate.rate).quantize(Decimal('.01'))
 
     """
     Inc VAT
@@ -375,7 +381,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def total(self):
-        return self.sum_total + self.vat
+        return Decimal(self.sum_total + self.vat).quantize(Decimal('.01'))
 
     @property
     def cancelled(self):
@@ -384,6 +390,10 @@ class Event(models.Model, RevisionMixin):
     @property
     def confirmed(self):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
+
+    @property
+    def authorised(self):
+        return not self.internal and self.purchase_order or self.authorisation.amount == self.total
 
     @property
     def has_start_time(self):
@@ -445,13 +455,17 @@ class Event(models.Model, RevisionMixin):
         else:
             return endDate
 
+    @property
+    def internal(self):
+        return self.organisation and self.organisation.union_account
+
     objects = EventManager()
 
     def get_absolute_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return unicode(self.pk) + ": " + self.name
+        return str(self.pk) + ": " + self.name
 
     def clean(self):
         if self.end_date and self.start_date > self.end_date:
@@ -474,7 +488,7 @@ class Event(models.Model, RevisionMixin):
 
 
 class EventItem(models.Model):
-    event = models.ForeignKey('Event', related_name='items', blank=True)
+    event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     quantity = models.IntegerField()
@@ -493,17 +507,35 @@ class EventItem(models.Model):
 
 
 class EventCrew(models.Model):
-    event = models.ForeignKey('Event', related_name='crew')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rig = models.BooleanField(default=False)
     run = models.BooleanField(default=False)
     derig = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
 
 
+@reversion.register
+class EventAuthorisation(models.Model, RevisionMixin):
+    event = models.OneToOneField('Event', related_name='authorisation', on_delete=models.CASCADE)
+    email = models.EmailField()
+    name = models.CharField(max_length=255)
+    uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
+    account_code = models.CharField(max_length=50, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
+    sent_by = models.ForeignKey('RIGS.Profile', on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
+
+    @property
+    def activity_feed_string(self):
+        return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
+
+
 @python_2_unicode_compatible
 class Invoice(models.Model):
-    event = models.OneToOneField('Event')
+    event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
 
@@ -555,7 +587,7 @@ class Payment(models.Model):
         (ADJUSTMENT, 'TEC Adjustment'),
     )
 
-    invoice = models.ForeignKey('Invoice')
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE)
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
     method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)

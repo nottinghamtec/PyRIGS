@@ -40,13 +40,13 @@
                 </thead>
                 <tbody>
                 	{% for version in object_list %}
-                        {% if version.item_changes or version.field_changes or version.old == None %}
+                        
                             <tr>
                            		<td>{{ version.revision.date_created }}</td>
-                                <td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                                <td>{{ version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
-                                    {% if version.old == None %}
+                                    {% if version.changes.old is None %}
                                         {{object|to_class_name}} Created
                                     {% else %}
                                         {% include 'RIGS/version_changes.html' %}
@@ -56,7 +56,8 @@
                                     {{ version.revision.comment }}
                                 </td>
                             </tr>
-                        {% endif %}
+
+                        
         			{% endfor %}
 
                 </tbody>

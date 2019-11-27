@@ -67,16 +67,16 @@
                         
                             <tr>
                                 <td>{{ version.revision.date_created }}</td>
-                                <td><a href="{{ version.new.get_absolute_url }}">{{version.new|to_class_name}} {{ version.new.pk|stringformat:"05d" }}</a></td>
-                           		<td>{{ version.version.pk }}|{{ version.revision.pk }}</td>
+                                <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}} {{ version.changes.new.pk|stringformat:"05d" }}</a></td>
+                           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
-                                  {% if version.old == None %}
-                                    {{version.new|to_class_name}} Created
+                                  {% if version.changes.old == None %}
+                                    {{version.changes.new|to_class_name}} Created
                                   {% else %}
                                     {% include 'RIGS/version_changes.html' %}
                                   {% endif %}                        </td>
-                                  <td>{{ version.revision.comment }}</td>
+                                  <td>{{ version.changes.revision.comment }}</td>
                             </tr>
                         
         			{% endfor %}

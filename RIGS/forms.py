@@ -1,4 +1,3 @@
-__author__ = 'Ghost'
 from django import forms
 from django.utils import formats
 from django.conf import settings
@@ -10,8 +9,14 @@ import simplejson
 
 from RIGS import models
 
+# Override the django form defaults to use the HTML date/time/datetime UI elements
+forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
+forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
+forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
 # Registration
+
+
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     captcha = ReCaptchaField()
 
@@ -28,7 +33,13 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
-# Login form
+# Embedded Login form - remove the autofocus
+class EmbeddedAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.pop('autofocus', None)
+
+
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
 
@@ -45,7 +56,7 @@ class ProfileChangeForm(UserChangeForm):
 
 # Events Shit
 class EventForm(forms.ModelForm):
-    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + settings.DATETIME_INPUT_FORMATS
+    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
 
@@ -140,4 +151,32 @@ class EventForm(forms.ModelForm):
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status',
-                  'collector', 'purchase_order']
+                  'purchase_order', 'collector']
+
+
+class BaseClientEventAuthorisationForm(forms.ModelForm):
+    tos = forms.BooleanField(required=True, label="Terms of hire")
+    name = forms.CharField(label="Your Name")
+
+    def clean(self):
+        if self.cleaned_data.get('amount') != self.instance.event.total:
+            self.add_error('amount', 'The amount authorised must equal the total for the event (inc VAT).')
+        return super(BaseClientEventAuthorisationForm, self).clean()
+
+    class Meta:
+        abstract = True
+
+
+class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
+    def __init__(self, **kwargs):
+        super(InternalClientEventAuthorisationForm, self).__init__(**kwargs)
+        self.fields['uni_id'].required = True
+        self.fields['account_code'].required = True
+
+    class Meta:
+        model = models.EventAuthorisation
+        fields = ('tos', 'name', 'amount', 'uni_id', 'account_code')
+
+
+class EventAuthorisationRequestForm(forms.Form):
+    email = forms.EmailField(required=True, label='Authoriser Email')

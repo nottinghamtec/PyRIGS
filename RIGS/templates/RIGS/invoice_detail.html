@@ -11,7 +11,7 @@
 
             <div class="col-sm-4 text-right">
                 <div class="btn-group btn-page">
-                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Void Invoice">
+                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Delete Invoice">
                     <span class="glyphicon glyphicon-remove"></span> <span
                             class="hidden-xs">Delete</span>
                 </a>
@@ -19,7 +19,7 @@
                     <span class="glyphicon glyphicon-ban-circle"></span> <span
                             class="hidden-xs">Void</span>
                 </a>
-                <a href="{% url 'invoice_print' object.pk %}" target="_blank" class="btn btn-default"><span
+                <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice" class="btn btn-default"><span
                             class="glyphicon glyphicon-print"></span> <span
                             class="hidden-xs">Print</span></a>
                 </div>
@@ -76,8 +76,43 @@
                                 <dd>{{ object.checked_in_by.name }}</dd>
                             {% endif %}
 
-                            <dt>PO</dt>
-                            <dd>{{ object.event.purchase_order }}</dd>
+                            <dd>&nbsp;</dd>
+
+                            <dt>Authorised</dt>
+                            <dd>{{ object.event.authorised|yesno:"Yes,No" }}</dd>
+
+                            <dt>Authorised by</dt>
+                            <dd>
+                                {%  if object.event.authorised %}
+                                    {{ object.event.authorisation.name }}
+                                    (<a href="mailto:{{ object.event.authorisation.email }}">{{ object.event.authorisation.email }}</a>)
+                                {% endif %}
+                            </dd>
+
+                            {% if object.event.internal %}
+                                {# internal #}
+                                <dt>Uni ID</dt>
+                                <dd>{{ object.event.authorisation.uni_id }}</dd>
+
+                                <dt>Account code</dt>
+                                <dd>{{ object.event.authorisation.account_code }}</dd>
+                            {% else %}
+                                <dt>PO</dt>
+                                <dd>{{ object.event.purchase_order }}</dd>
+                            {% endif %}
+
+                            <dt>Authorised at</dt>
+                            <dd>{{ object.event.authorisation.last_edited_at }}</dd>
+
+                            <dt>Authorised amount</dt>
+                            <dd>
+                                {% if object.event.authorised %}
+                                    £ {{ object.event.authorisation.amount|floatformat:"2" }}
+                                {% endif %}
+                            </dd>
+
+                            <dt>Authorsation request sent by</dt>
+                            <dd>{{ object.authorisation.sent_by }}</dd>
                         </dl>
                     </div>
                 </div>

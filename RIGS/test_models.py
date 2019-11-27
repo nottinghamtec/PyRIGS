@@ -1,7 +1,11 @@
+
+
 import pytz
+from reversion import revisions as reversion
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from RIGS import models
+from RIGS import models, versioning
 from datetime import date, timedelta, datetime, time
 from decimal import *
 
@@ -15,71 +19,82 @@ class ProfileTestCase(TestCase):
 
 
 class VatRateTestCase(TestCase):
-    def setUp(self):
-        models.VatRate.objects.create(start_at='2014-03-01', rate=0.20, comment='test1')
-        models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2')
+    @classmethod
+    def setUpTestData(cls):
+        cls.rates = {
+            0: models.VatRate.objects.create(start_at='2014-03-01', rate=0.20, comment='test1'),
+            1: models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2'),
+        }
 
     def test_find_correct(self):
         r = models.VatRate.objects.find_rate('2015-03-01')
-        self.assertEqual(r.comment, 'test1')
+        self.assertEqual(r, self.rates[0])
         r = models.VatRate.objects.find_rate('2016-03-01')
-        self.assertEqual(r.comment, 'test2')
+        self.assertEqual(r, self.rates[1])
 
     def test_percent_correct(self):
-        r = models.VatRate.objects.get(rate=0.20)
-        self.assertEqual(r.as_percent, 20)
+        self.assertEqual(self.rates[0].as_percent, 20)
 
 
 class EventTestCase(TestCase):
-    def setUp(self):
-        self.all_events = set(range(1, 18))
-        self.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
-        self.not_current_events = set(self.all_events) - set(self.current_events)
+    @classmethod
+    def setUpTestData(cls):
+        cls.all_events = set(range(1, 18))
+        cls.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
+        cls.not_current_events = set(cls.all_events) - set(cls.current_events)
 
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-        self.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
+        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
 
-        # produce 7 normal events - 5 current
-        models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6),
-                                    description="start future no end")
-        models.Event.objects.create(name="TE E2", start_date=date.today(), description="start today no end")
-        models.Event.objects.create(name="TE E3", start_date=date.today(), end_date=date.today(),
-                                    description="start today with end today")
-        models.Event.objects.create(name="TE E4", start_date='2014-03-20', description="start past no end")
-        models.Event.objects.create(name="TE E5", start_date='2014-03-20', end_date='2014-03-21',
-                                    description="start past with end past")
-        models.Event.objects.create(name="TE E6", start_date=date.today() - timedelta(days=2),
-                                    end_date=date.today() + timedelta(days=2), description="start past, end future")
-        models.Event.objects.create(name="TE E7", start_date=date.today() + timedelta(days=2),
-                                    end_date=date.today() + timedelta(days=2), description="start + end in future")
+        cls.events = {
+            # produce 7 normal events - 5 current
+            1: models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6),
+                                           description="start future no end"),
+            2: models.Event.objects.create(name="TE E2", start_date=date.today(), description="start today no end"),
+            3: models.Event.objects.create(name="TE E3", start_date=date.today(), end_date=date.today(),
+                                           description="start today with end today"),
+            4: models.Event.objects.create(name="TE E4", start_date='2014-03-20', description="start past no end"),
+            5: models.Event.objects.create(name="TE E5", start_date='2014-03-20', end_date='2014-03-21',
+                                           description="start past with end past"),
+            6: models.Event.objects.create(name="TE E6", start_date=date.today() - timedelta(days=2),
+                                           end_date=date.today() + timedelta(days=2),
+                                           description="start past, end future"),
+            7: models.Event.objects.create(name="TE E7", start_date=date.today() + timedelta(days=2),
+                                           end_date=date.today() + timedelta(days=2),
+                                           description="start + end in future"),
 
-        # 2 cancelled - 1 current
-        models.Event.objects.create(name="TE E8", start_date=date.today() + timedelta(days=2),
-                                    end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
-                                    description="cancelled in future")
-        models.Event.objects.create(name="TE E9", start_date=date.today() - timedelta(days=1),
-                                    end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
-                                    description="cancelled and started")
+            # 2 cancelled - 1 current
+            8: models.Event.objects.create(name="TE E8", start_date=date.today() + timedelta(days=2),
+                                           end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
+                                           description="cancelled in future"),
+            9: models.Event.objects.create(name="TE E9", start_date=date.today() - timedelta(days=1),
+                                           end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
+                                           description="cancelled and started"),
 
-        # 5 dry hire - 3 current
-        models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True, description="dryhire today")
-        models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True, checked_in_by=self.profile,
-                                    description="dryhire today, checked in")
-        models.Event.objects.create(name="TE E12", start_date=date.today() - timedelta(days=1), dry_hire=True,
-                                    status=models.Event.BOOKED, description="dryhire past")
-        models.Event.objects.create(name="TE E13", start_date=date.today() - timedelta(days=2), dry_hire=True,
-                                    checked_in_by=self.profile, description="dryhire past checked in")
-        models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True,
-                                    status=models.Event.CANCELLED, description="dryhire today cancelled")
+            # 5 dry hire - 3 current
+            10: models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True,
+                                            description="dryhire today"),
+            11: models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True,
+                                            checked_in_by=cls.profile,
+                                            description="dryhire today, checked in"),
+            12: models.Event.objects.create(name="TE E12", start_date=date.today() - timedelta(days=1), dry_hire=True,
+                                            status=models.Event.BOOKED, description="dryhire past"),
+            13: models.Event.objects.create(name="TE E13", start_date=date.today() - timedelta(days=2), dry_hire=True,
+                                            checked_in_by=cls.profile, description="dryhire past checked in"),
+            14: models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True,
+                                            status=models.Event.CANCELLED, description="dryhire today cancelled"),
 
-        # 4 non rig - 3 current
-        models.Event.objects.create(name="TE E15", start_date=date.today(), is_rig=False, description="non rig today")
-        models.Event.objects.create(name="TE E16", start_date=date.today() + timedelta(days=1), is_rig=False,
-                                    description="non rig tomorrow")
-        models.Event.objects.create(name="TE E17", start_date=date.today() - timedelta(days=1), is_rig=False,
-                                    description="non rig yesterday")
-        models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED,
-                                    description="non rig today cancelled")
+            # 4 non rig - 3 current
+            15: models.Event.objects.create(name="TE E15", start_date=date.today(), is_rig=False,
+                                            description="non rig today"),
+            16: models.Event.objects.create(name="TE E16", start_date=date.today() + timedelta(days=1), is_rig=False,
+                                            description="non rig tomorrow"),
+            17: models.Event.objects.create(name="TE E17", start_date=date.today() - timedelta(days=1), is_rig=False,
+                                            description="non rig yesterday"),
+            18: models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False,
+                                            status=models.Event.CANCELLED,
+                                            description="non rig today cancelled"),
+        }
 
     def test_count(self):
         # Santiy check we have the expected events created
@@ -101,17 +116,23 @@ class EventTestCase(TestCase):
     def test_related_venue(self):
         v1 = models.Venue.objects.create(name="TE V1")
         v2 = models.Venue.objects.create(name="TE V2")
-        events = models.Event.objects.all()
-        for event in events[:2]:
-            event.venue = v1
-            event.save()
-        for event in events[3:4]:
-            event.venue = v2
+
+        e1 = []
+        e2 = []
+        for (key, event) in self.events.items():
+            if event.pk % 2:
+                event.venue = v1
+                e1.append(event)
+            else:
+                event.venue = v2
+                e2.append(event)
             event.save()
 
-        events = models.Event.objects.all()
-        self.assertItemsEqual(events[:2], v1.latest_events)
-        self.assertItemsEqual(events[3:4], v2.latest_events)
+        self.assertCountEqual(e1, v1.latest_events)
+        self.assertCountEqual(e2, v2.latest_events)
+
+        for (key, event) in self.events.items():
+            event.venue = None
 
     def test_related_vatrate(self):
         self.assertEqual(self.vatrate, models.Event.objects.all()[0].vat_rate)
@@ -120,33 +141,43 @@ class EventTestCase(TestCase):
         p1 = models.Person.objects.create(name="TE P1")
         p2 = models.Person.objects.create(name="TE P2")
 
-        events = models.Event.objects.all()
-        for event in events[:2]:
-            event.person = p1
-            event.save()
-        for event in events[3:4]:
-            event.person = p2
+        e1 = []
+        e2 = []
+        for (key, event) in self.events.items():
+            if event.pk % 2:
+                event.person = p1
+                e1.append(event)
+            else:
+                event.person = p2
+                e2.append(event)
             event.save()
 
-        events = models.Event.objects.all()
-        self.assertItemsEqual(events[:2], p1.latest_events)
-        self.assertItemsEqual(events[3:4], p2.latest_events)
+        self.assertCountEqual(e1, p1.latest_events)
+        self.assertCountEqual(e2, p2.latest_events)
+
+        for (key, event) in self.events.items():
+            event.person = None
 
     def test_related_organisation(self):
         o1 = models.Organisation.objects.create(name="TE O1")
         o2 = models.Organisation.objects.create(name="TE O2")
 
-        events = models.Event.objects.all()
-        for event in events[:2]:
-            event.organisation = o1
-            event.save()
-        for event in events[3:4]:
-            event.organisation = o2
+        e1 = []
+        e2 = []
+        for (key, event) in self.events.items():
+            if event.pk % 2:
+                event.organisation = o1
+                e1.append(event)
+            else:
+                event.organisation = o2
+                e2.append(event)
             event.save()
 
-        events = models.Event.objects.all()
-        self.assertItemsEqual(events[:2], o1.latest_events)
-        self.assertItemsEqual(events[3:4], o2.latest_events)
+        self.assertCountEqual(e1, o1.latest_events)
+        self.assertCountEqual(e2, o2.latest_events)
+
+        for (key, event) in self.events.items():
+            event.organisation = None
 
     def test_organisation_person_join(self):
         p1 = models.Person.objects.create(name="TE P1")
@@ -184,49 +215,49 @@ class EventTestCase(TestCase):
         self.assertEqual(len(o2.persons), 1)
 
     def test_cancelled_property(self):
-        event = models.Event.objects.all()[0]
-        event.status = models.Event.CANCELLED
-        event.save()
-        event = models.Event.objects.all()[0]
+        edit = self.events[1]
+        edit.status = models.Event.CANCELLED
+        edit.save()
+        event = models.Event.objects.get(pk=edit.pk)
         self.assertEqual(event.status, models.Event.CANCELLED)
         self.assertTrue(event.cancelled)
         event.status = models.Event.PROVISIONAL
         event.save()
 
     def test_confirmed_property(self):
-        event = models.Event.objects.all()[0]
-        event.status = models.Event.CONFIRMED
-        event.save()
-        event = models.Event.objects.all()[0]
+        edit = self.events[1]
+        edit.status = models.Event.CONFIRMED
+        edit.save()
+        event = models.Event.objects.get(pk=edit.pk)
         self.assertEqual(event.status, models.Event.CONFIRMED)
         self.assertTrue(event.confirmed)
         event.status = models.Event.PROVISIONAL
         event.save()
 
     def test_earliest_time(self):
-        event = models.Event(name="TE ET", start_date=date(2016, 01, 01))
+        event = models.Event(name="TE ET", start_date=date(2016, 0o1, 0o1))
 
         # Just a start date
-        self.assertEqual(event.earliest_time, date(2016, 01, 01))
+        self.assertEqual(event.earliest_time, date(2016, 0o1, 0o1))
 
         # With start time
         event.start_time = time(9, 00)
         self.assertEqual(event.earliest_time, self.create_datetime(2016, 1, 1, 9, 00))
 
         # With access time
-        event.access_at = self.create_datetime(2015, 12, 03, 9, 57)
+        event.access_at = self.create_datetime(2015, 12, 0o3, 9, 57)
         self.assertEqual(event.earliest_time, event.access_at)
 
         # With meet time
-        event.meet_at = self.create_datetime(2015, 12, 03, 9, 55)
+        event.meet_at = self.create_datetime(2015, 12, 0o3, 9, 55)
         self.assertEqual(event.earliest_time, event.meet_at)
 
         # Check order isn't important
-        event.start_date = date(2015, 12, 03)
-        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 03, 9, 00))
+        event.start_date = date(2015, 12, 0o3)
+        self.assertEqual(event.earliest_time, self.create_datetime(2015, 12, 0o3, 9, 00))
 
     def test_latest_time(self):
-        event = models.Event(name="TE LT", start_date=date(2016, 01, 01))
+        event = models.Event(name="TE LT", start_date=date(2016, 0o1, 0o1))
 
         # Just start date
         self.assertEqual(event.latest_time, event.start_date)
@@ -248,14 +279,14 @@ class EventTestCase(TestCase):
             # basic checks
             manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
             manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
-            manager.create(name='TE IB4', start_date='2016-01-04', access_at='2016-01-03'),
-            manager.create(name='TE IB5', start_date='2016-01-04', meet_at='2016-01-02'),
+            manager.create(name='TE IB4', start_date='2016-01-04', access_at=self.create_datetime(2016, 0o1, 0o3, 00, 00)),
+            manager.create(name='TE IB5', start_date='2016-01-04', meet_at=self.create_datetime(2016, 0o1, 0o2, 00, 00)),
 
             # negative check
             manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),
         ]
 
-        in_bounds = manager.events_in_bounds(datetime(2016, 1, 2), datetime(2016, 1, 3))
+        in_bounds = manager.events_in_bounds(self.create_datetime(2016, 1, 2, 0, 0), self.create_datetime(2016, 1, 3, 0, 0))
         self.assertIn(events[0], in_bounds)
         self.assertIn(events[1], in_bounds)
         self.assertIn(events[2], in_bounds)
@@ -327,3 +358,220 @@ class EventPricingTestCase(TestCase):
     def test_grand_total(self):
         self.assertEqual(self.e1.total, Decimal('84.48'))
         self.assertEqual(self.e2.total, Decimal('419.32'))
+
+
+class EventAuthorisationTestCase(TestCase):
+    def setUp(self):
+        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
+        self.person = models.Person.objects.create(name='Authorisation Test Person')
+        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
+                                                 start_date=date.today())
+        # Add some items
+        models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,
+                                        order=1)
+
+    def test_event_property(self):
+        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                         name="Test Auth 1", amount=self.event.total - 1,
+                                                         sent_by=self.profile)
+        self.assertFalse(self.event.authorised)
+        auth1.amount = self.event.total
+        auth1.save()
+        self.assertTrue(self.event.authorised)
+
+    def test_last_edited(self):
+        with reversion.create_revision():
+            auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+                                                            name="Test Auth", amount=self.event.total, sent_by=self.profile)
+        self.assertIsNotNone(auth.last_edited_at)
+
+
+class RIGSVersionTestCase(TestCase):
+    def setUp(self):
+        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
+
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.person = models.Person.objects.create(name='Authorisation Test Person')
+
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
+                                                     start_date=date.today())
+
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.event.notes = "A new note on the event"
+            self.event.save()
+
+    def test_find_parent_version(self):
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+        self.assertEqual(currentVersion._object_version.object.notes, "A new note on the event")
+
+        # Check the prev version is loaded correctly
+        previousVersion = currentVersion.parent
+        self.assertEqual(previousVersion._object_version.object.notes, None)
+
+        # Check that finding the parent of the first version fails gracefully
+        self.assertFalse(previousVersion.parent)
+
+    def test_changes_since(self):
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+
+        changes = currentVersion.changes
+        self.assertEqual(len(changes.field_changes), 1)
+
+    def test_manager(self):
+        objs = versioning.RIGSVersion.objects.get_for_multiple_models([models.Event, models.Person, models.Organisation])
+        self.assertEqual(len(objs), 4)
+
+    def test_text_field_types(self):
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.event.name = "New event name"  # Simple text
+            self.event.description = "hello world"  # Long text
+            self.event.save()
+
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+        diff = currentVersion.changes
+
+        # There are two changes
+        self.assertEqual(len(diff.field_changes), 2)
+        self.assertFalse(currentVersion.changes.items_changed)
+        self.assertTrue(currentVersion.changes.fields_changed)
+        self.assertTrue(currentVersion.changes.anything_changed)
+
+        # Only one has "linebreaks"
+        self.assertEqual(sum([x.linebreaks for x in diff.field_changes]), 1)
+
+        # None are "long" (email address)
+        self.assertEqual(sum([x.long for x in diff.field_changes]), 0)
+
+        # Try changing email field in person
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.person.email = "hello@world.com"
+            self.person.save()
+
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.person).latest(field_name='revision__date_created')
+        diff = currentVersion.changes
+
+        # Should be declared as long
+        self.assertTrue(diff.field_changes[0].long)
+
+    def test_text_diff(self):
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.event.notes = "An old note on the event"  # Simple text
+            self.event.save()
+
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+
+        # Check the diff is correct
+        self.assertEqual(currentVersion.changes.field_changes[0].diff,
+                         [{'type': 'equal', 'text': "A"},
+                          {'type': 'delete', 'text': " new"},
+                          {'type': 'insert', 'text': "n old"},
+                          {'type': 'equal', 'text': " note on the event"}
+                          ])
+
+    def test_choice_field(self):
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            self.event.status = models.Event.CONFIRMED
+            self.event.save()
+
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+        self.assertEqual(currentVersion.changes.field_changes[0].old, 'Provisional')
+        self.assertEqual(currentVersion.changes.field_changes[0].new, 'Confirmed')
+
+    def test_creation_behaviour(self):
+        firstVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created').parent
+        diff = firstVersion.changes
+
+        # Mainly to check for exceptions:
+        self.assertTrue(len(diff.field_changes) > 0)
+
+    def test_event_items(self):
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            item1 = models.EventItem.objects.create(event=self.event, name="TI I1", quantity=1, cost=1.00, order=1)
+            self.event.save()
+
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+
+        diffs = currentVersion.changes.item_changes
+
+        self.assertEqual(len(diffs), 1)
+        self.assertTrue(currentVersion.changes.items_changed)
+        self.assertFalse(currentVersion.changes.fields_changed)
+        self.assertTrue(currentVersion.changes.anything_changed)
+
+        self.assertTrue(diffs[0].old is None)
+        self.assertEqual(diffs[0].new.name, "TI I1")
+
+        # Edit the item
+        with reversion.create_revision():
+            reversion.set_user(self.profile)
+            item1.name = "New Name"
+            item1.save()
+            self.event.save()
+
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+
+        diffs = currentVersion.changes.item_changes
+
+        self.assertEqual(len(diffs), 1)
+
+        self.assertEqual(diffs[0].old.name, "TI I1")
+        self.assertEqual(diffs[0].new.name, "New Name")
+
+        # Check the diff
+        self.assertEqual(currentVersion.changes.item_changes[0].field_changes[0].diff,
+                         [{'type': 'delete', 'text': "TI I1"},
+                          {'type': 'insert', 'text': "New Name"},
+                          ])
+
+        # Delete the item
+
+        with reversion.create_revision():
+            item1.delete()
+            self.event.save()
+
+        # Find the most recent version
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest(field_name='revision__date_created')
+
+        diffs = currentVersion.changes.item_changes
+
+        self.assertEqual(len(diffs), 1)
+        self.assertTrue(currentVersion.changes.items_changed)
+        self.assertFalse(currentVersion.changes.fields_changed)
+        self.assertTrue(currentVersion.changes.anything_changed)
+
+        self.assertEqual(diffs[0].old.name, "New Name")
+        self.assertTrue(diffs[0].new is None)
