@@ -3,12 +3,14 @@
     <!---TODO: When the ability to filter the list is added, remove the colours from the filter - specifically, stop greying out sold/binned stuff if it is being searched for-->    <tr class="
                 {% if item.status.name == 'Broken' %}
                   danger
+                {% elif item.status.name == 'Scrapped'%}
+                  danger
                 {% elif item.status.name == 'Lost'%}
                   warning
-                {% elif item.status.name == 'In Service'%}
+                {% elif item.status.name == 'Not Built Yet'%}
+                  warning
+                {% elif item.status.name == 'Active'%}
                   success
-                {% elif item.status.name == 'Sold'%}
-                  info
                 {% endif %}
                 ">
         <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></td>
