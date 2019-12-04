@@ -10,7 +10,6 @@
 </div>
 
 <form id="asset-search-form" method="get" class="form-inline pull-right">
-  {% csrf_token %}
   <div class="input-group pull-right" style="width: auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Description' style="width: 250px"%}
     <label for="query" class="sr-only">Asset ID/Description:</label>
@@ -20,11 +19,11 @@
   <div style="margin-top: 1em;" class="pull-right">
       <div class="form-group">
         <label for="category" class="sr-only">Category</label>
-        {% render_field form.category|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Categories" data-header="Categories"%}
+        {% render_field form.category|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
       </div>
       <div class="form-group">
         <label for="status" class="sr-only">Status</label>
-        {% render_field form.status|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Statuses" data-header="Statuses"%}
+        {% render_field form.status|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
       </div>
       <!---TODO: Auto filter whenever an option is selected, instead of using a button -->
       <button type="submit" class="btn btn-default">Filter</button>

@@ -1,11 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.db.models import Q
 from assets import models, forms
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
@@ -13,13 +16,17 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     ordering = ['-pk']
     hide_hidden_status = True
 
+    def get_initial(self):
+        initial = {'status': models.AssetStatus.objects.filter(should_show=True)}
+        return initial
+
     def get_queryset(self):
         if self.request.method == 'POST':
             self.form = forms.AssetSearchForm(data=self.request.POST)
-        elif self.request.method == 'GET':
+        elif self.request.method == 'GET' and len(self.request.GET) > 0:
             self.form = forms.AssetSearchForm(data=self.request.GET)
         else:
-            self.form = forms.AssetSearchForm(data={})
+            self.form = forms.AssetSearchForm(data=self.get_initial())
         form = self.form
         if not form.is_valid():
             return self.model.objects.none()
