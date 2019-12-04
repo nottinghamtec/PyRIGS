@@ -1,16 +1,8 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, QueryDict, JsonResponse
-from django.core import serializers
+from django.http import JsonResponse
 from django.views import generic
-from django.contrib.auth import views as auth_views
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.db.models import Q
-import datetime
-from dateutil import parser
-# import json
-import simplejson as json
 from assets import models, forms
 
 

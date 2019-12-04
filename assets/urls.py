@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from assets import views
 
 from PyRIGS.decorators import permission_required_with_403

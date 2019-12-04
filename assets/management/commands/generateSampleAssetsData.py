@@ -1,8 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.core.management import call_command
 from django.utils import timezone
-from django.db.models import Max
-import random
 
 from assets import models
 

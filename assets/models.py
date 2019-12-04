@@ -1,10 +1,7 @@
+import re
 from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.urls import reverse
-from polymorphic.models import PolymorphicModel
-
-import datetime
-import re
 
 
 class AssetCategory(models.Model):
