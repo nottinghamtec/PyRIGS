@@ -1,11 +1,7 @@
 from django.urls import path, include
-from rest_framework import routers
-from assets import views, api
+from assets import views
 
 from PyRIGS.decorators import permission_required_with_403
-
-router = routers.DefaultRouter()
-router.register(r'api/assets', api.AssetViewSet)
 
 urlpatterns = [
     path('', views.AssetList.as_view(), name='asset_index'),
@@ -23,6 +19,4 @@ urlpatterns = [
     path('supplier/<int:pk>/edit', permission_required_with_403('assets.edit_supplier')(views.SupplierUpdate.as_view()), name='supplier_update'),
 
     path('supplier/search/', views.SupplierSearch.as_view(), name='supplier_search_json'),
-
-    path('', include(router.urls)),
 ]

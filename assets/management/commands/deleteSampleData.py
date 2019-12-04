@@ -12,12 +12,6 @@ class Command(BaseCommand):
         if not (settings.DEBUG):
             raise CommandError('You cannot run this command in production')
 
-        # self.delete_categories()
-        # self.create_statuses()
-        # self.create_suppliers()
-        # self.create_collections()
-        # self.create_assets()
-
         self.delete_objects(models.AssetCategory)
         self.delete_objects(models.AssetStatus)
         self.delete_objects(models.Supplier)
