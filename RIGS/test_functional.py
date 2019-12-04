@@ -88,7 +88,7 @@ class UserRegistrationTest(LiveServerTestCase):
         initials.send_keys('JS')
         phone.send_keys('0123456789')
         self.browser.execute_script(
-            "return jQuery('#g-recaptcha-response').val('PASSED')")
+            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
 
         # Submit incorrect form
         submit = self.browser.find_element_by_xpath("//input[@type='submit']")
@@ -110,8 +110,9 @@ class UserRegistrationTest(LiveServerTestCase):
         # Correct error
         password1.send_keys('correcthorsebatterystaple')
         password2.send_keys('correcthorsebatterystaple')
+        self.browser.execute_script("console.log('Hello, world!')")
         self.browser.execute_script(
-            "return jQuery('#g-recaptcha-response').val('PASSED')")
+            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
 
         # Submit again
         password2.send_keys(Keys.ENTER)
@@ -150,7 +151,7 @@ class UserRegistrationTest(LiveServerTestCase):
         username.send_keys('TestUsername')
         password.send_keys('correcthorsebatterystaple')
         self.browser.execute_script(
-            "return jQuery('#g-recaptcha-response').val('PASSED')")
+            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
         password.send_keys(Keys.ENTER)
 
         # Check we are logged in

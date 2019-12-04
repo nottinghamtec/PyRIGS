@@ -1,0 +1,16 @@
+{% for asset in object_list %}
+    <a href="javascript:void(0);" onclick="insertInParentField({{ asset.pk }}, '{{ asset }}')">
+        {{ asset.asset_id }} - {{ asset.description }}
+    </a>
+    <br>
+    {% empty %}
+    No assets match given ID
+{% endfor %}
+
+<script>
+    function insertInParentField(pk, str) {
+        $('#hidden_parent_id').val(pk);
+        $('#parent_id').val(str);
+        M.updateTextFields();
+    }
+</script>

@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 {% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
 
 {% block content %}
