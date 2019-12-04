@@ -15,7 +15,7 @@
       {% endif %}
   </h1>
 </div>
-<form method="post" id="asset_update_form" action="{% url 'asset_update' pk=object.pk%}">
+<form method="post" id="asset_update_form" action="{% url 'asset_update' pk=object.asset_id%}">
   {% include 'form_errors.html' %}
   {% csrf_token %}
   <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>

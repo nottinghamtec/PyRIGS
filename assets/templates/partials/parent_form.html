@@ -15,7 +15,7 @@
       <dt>Parent</dt>
       <dd>
         {% if object.parent %}
-        <a href="{% url 'asset_detail' object.parent.pk %}">
+        <a href="{% url 'asset_detail' object.parent.asset_id %}">
         {{ object.parent.asset_id }} - {{ object.parent.description }}
         </a>
         {% else %}
@@ -27,7 +27,7 @@
       {% if object.asset_parent.all %}
       {% for child in object.asset_parent.all %}
       <dd>
-        <a href="{% url 'asset_detail' child.pk %}">
+        <a href="{% url 'asset_detail' child.asset_id %}">
         {{ child.asset_id }} - {{ child.description }}
         </a>
       </dd>

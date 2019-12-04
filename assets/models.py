@@ -100,7 +100,7 @@ class Asset(models.Model):
                 return row[0]
 
     def get_absolute_url(self):
-        return reverse('asset_detail', kwargs={'pk': self.pk})
+        return reverse('asset_detail', kwargs={'pk': self.asset_id})
 
     def __str__(self):
         out = str(self.asset_id) + ' - ' + self.description

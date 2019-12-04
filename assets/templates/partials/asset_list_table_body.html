@@ -11,17 +11,17 @@
                   info
                 {% endif %}
                 ">
-        <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }}</a></td>
+        <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></td>
         <td style="vertical-align: middle; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 25vw">{{ item.description }}</td>
         <td style="vertical-align: middle;">{{ item.category }}</td>
         <td style="vertical-align: middle;">{{ item.status }}</td>
         <td class="hidden-xs">
 
             <div class="btn-group" role="group">
-                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.pk %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
                 {% if perms.assets.change_asset %}
-                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.pk %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_duplicate' item.pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
                 {% endif %}
             </div>
         </td>

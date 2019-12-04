@@ -16,7 +16,7 @@
   </h1>
 </div>
 {% if duplicate %}
-<form method="post" id="asset_update_form" action="{% url 'asset_duplicate' pk=previous_asset_pk%}">
+<form method="post" id="asset_update_form" action="{% url 'asset_duplicate' pk=previous_asset_id%}">
   {% else %}
   <form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
     {% endif %}

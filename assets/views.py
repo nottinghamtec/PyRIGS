@@ -65,12 +65,25 @@ class AssetSearch(AssetList):
         return JsonResponse(result, safe=False)
 
 
-class AssetDetail(LoginRequiredMixin, generic.DetailView):
+class AssetIDUrlMixin:
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        queryset = models.Asset.objects.filter(asset_id=pk)
+        try:
+            # Get the single item from the filtered queryset
+            obj = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+        {'verbose_name': queryset.model._meta.verbose_name})
+        return obj
+
+
+class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     model = models.Asset
     template_name = 'asset_update.html'
 
 
-class AssetEdit(LoginRequiredMixin, generic.UpdateView):
+class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
     template_name = 'asset_update.html'
     model = models.Asset
     form_class = forms.AssetForm
@@ -83,7 +96,7 @@ class AssetEdit(LoginRequiredMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("asset_detail", kwargs={"pk": self.object.id})
+        return reverse("asset_detail", kwargs={"pk": self.object.asset_id})
 
 
 class AssetCreate(LoginRequiredMixin, generic.CreateView):
@@ -104,7 +117,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
         return initial
 
     def get_success_url(self):
-        return reverse("asset_detail", kwargs={"pk": self.object.id})
+        return reverse("asset_detail", kwargs={"pk": self.object.asset_id})
 
 
 class DuplicateMixin:
@@ -114,7 +127,7 @@ class DuplicateMixin:
         return self.render_to_response(self.get_context_data())
 
 
-class AssetDuplicate(DuplicateMixin, AssetCreate):
+class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
     model = models.Asset
 
     def get_context_data(self, **kwargs):
@@ -122,7 +135,6 @@ class AssetDuplicate(DuplicateMixin, AssetCreate):
         context["create"] = None
         context["duplicate"] = True
         context['previous_asset_id'] = self.get_object().asset_id
-        context["previous_asset_pk"] = self.kwargs.get(self.pk_url_kwarg)
         return context
 
 
