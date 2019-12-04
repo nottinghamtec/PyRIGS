@@ -4,11 +4,13 @@
                 {% if item.status.name == 'Broken' %}
                   danger
                 {% elif item.status.name == 'Scrapped'%}
-                  danger
+                  warning
+                {% elif item.status.name == 'Sold'%}
+                  warning
                 {% elif item.status.name == 'Lost'%}
-                  warning
+                  danger
                 {% elif item.status.name == 'Not Built Yet'%}
-                  warning
+                  info
                 {% elif item.status.name == 'Active'%}
                   success
                 {% endif %}
