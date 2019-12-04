@@ -4,9 +4,9 @@ from assets import views
 from PyRIGS.decorators import permission_required_with_403
 
 urlpatterns = [
-    path('', views.AssetList.as_view(), name='asset_index'),
-    path('asset/list/', views.AssetList.as_view(), name='asset_list'),
-    path('asset/id/<str:pk>/', views.AssetDetail.as_view(), name='asset_detail'),
+    path('', permission_required_with_403('assets.view_asset')(views.AssetList.as_view()), name='asset_index'),
+    path('asset/list/', permission_required_with_403('assets.view_asset')(views.AssetList.as_view()), name='asset_list'),
+    path('asset/id/<str:pk>/', permission_required_with_403('assets.view_asset')(views.AssetDetail.as_view()), name='asset_detail'),
     path('asset/create/', permission_required_with_403('assets.create_asset')(views.AssetCreate.as_view()), name='asset_create'),
     path('asset/id/<str:pk>/edit/', permission_required_with_403('assets.change_asset')(views.AssetEdit.as_view()), name='asset_update'),
     path('asset/id/<str:pk>/duplicate/', permission_required_with_403('assets.create_asset')(views.AssetDuplicate.as_view()), name='asset_duplicate'),
