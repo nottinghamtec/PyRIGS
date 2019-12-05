@@ -64,7 +64,7 @@ class Asset(models.Model):
         )
 
     parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
-    asset_id = models.CharField(max_length=10, unique=True)
+    asset_id = models.CharField(max_length=15, unique=True)
     description = models.CharField(max_length=120)
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
@@ -88,7 +88,7 @@ class Asset(models.Model):
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
-    asset_id_prefix = models.CharField(max_length=5, default="")
+    asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
     def get_available_asset_id(wanted_prefix=""):
