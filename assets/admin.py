@@ -30,8 +30,3 @@ class AssetAdmin(admin.ModelAdmin):
 @admin.register(assets.Connector)
 class ConnectorAdmin(admin.ModelAdmin):
     list_display = ['id', '__str__', 'current_rating', 'voltage_rating', 'num_pins']
-
-
-admin.AdminSite.site_header = 'PyAssets - TEC\'s Asset System'
-admin.AdminSite.site_title = 'PyAssets Admin'
-admin.AdminSite.index_title = 'System Administration'
