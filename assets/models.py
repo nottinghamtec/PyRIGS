@@ -95,12 +95,12 @@ class Asset(models.Model):
         LEFT OUTER JOIN assets_asset b ON
             (a.asset_id_number + 1 = b.asset_id_number AND
             a.asset_id_prefix = b.asset_id_prefix)
-        WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = '';
+        WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = %s;
         """
         with connection.cursor() as cursor:
-            cursor.execute(sql, [9000])
+            cursor.execute(sql, [9000, wanted_prefix])
             row = cursor.fetchone()
-            if row[0] is None:
+            if row is None or row[0] is None:
                 return 9000
             else:
                 return row[0]
