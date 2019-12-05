@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from assets import models
-
+import random
 
 class Command(BaseCommand):
     help = 'Creates some sample data for testing'
