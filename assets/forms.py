@@ -7,6 +7,7 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = models.Asset
         fields = '__all__'
+        exclude = ['asset_id_prefix', 'asset_id_number']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

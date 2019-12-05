@@ -54,7 +54,7 @@ class Connector(models.Model):
 
 class Asset(models.Model):
     class Meta:
-        ordering = ['asset_id']
+        ordering = ['asset_id_prefix', 'asset_id_number']
         permissions = (
             ('asset_finance', 'Can see financial data for assets'),
             ('view_asset', 'Can view an asset')
@@ -83,13 +83,19 @@ class Asset(models.Model):
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
 
-    def get_available_asset_id():
+    # Hidden asset_id components
+    # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
+    asset_id_prefix = models.CharField(max_length=5)
+    asset_id_number = models.IntegerField()
+
+    def get_available_asset_id(wanted_prefix=""):
         sql = """
-        SELECT MIN(CAST(a.asset_id AS int))+1
+        SELECT a.asset_id_number+1
         FROM assets_asset a
         LEFT OUTER JOIN assets_asset b ON
-            (CAST(a.asset_id AS int) + 1 = CAST(b.asset_id AS int))
-        WHERE b.asset_id IS NULL AND CAST(a.asset_id AS int) >= %s;
+            (a.asset_id_number + 1 = b.asset_id_number AND
+            a.asset_id_prefix = b.asset_id_prefix)
+        WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = '';
         """
         with connection.cursor() as cursor:
             cursor.execute(sql, [9000])
@@ -114,8 +120,11 @@ class Asset(models.Model):
             errdict["date_sold"] = ["Cannot sell an item before it is acquired"]
 
         self.asset_id = self.asset_id.upper()
-        if re.search("^[a-zA-Z0-9]+$", self.asset_id) is None:
+        asset_search = re.search("^([A-Z0-9]*?[A-Z]?)([0-9]+)$", self.asset_id)
+        if asset_search is None:
                 errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers"]
+        self.asset_id_prefix = asset_search.group(1)
+        self.asset_id_number = int(asset_search.group(2))
 
         if self.purchase_price and self.purchase_price < 0:
             errdict["purchase_price"] = ["A price cannot be negative"]
