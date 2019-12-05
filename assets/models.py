@@ -3,6 +3,9 @@ from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.urls import reverse
 
+from django.db.models.signals import pre_save
+from django.dispatch.dispatcher import receiver
+
 
 class AssetCategory(models.Model):
     class Meta:
@@ -85,8 +88,8 @@ class Asset(models.Model):
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
-    asset_id_prefix = models.CharField(max_length=5)
-    asset_id_number = models.IntegerField()
+    asset_id_prefix = models.CharField(max_length=5, default="")
+    asset_id_number = models.IntegerField(default=1)
 
     def get_available_asset_id(wanted_prefix=""):
         sql = """
@@ -120,11 +123,9 @@ class Asset(models.Model):
             errdict["date_sold"] = ["Cannot sell an item before it is acquired"]
 
         self.asset_id = self.asset_id.upper()
-        asset_search = re.search("^([A-Z0-9]*?[A-Z]?)([0-9]+)$", self.asset_id)
+        asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", self.asset_id)
         if asset_search is None:
-                errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers"]
-        self.asset_id_prefix = asset_search.group(1)
-        self.asset_id_number = int(asset_search.group(2))
+                errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers, with a final number"]
 
         if self.purchase_price and self.purchase_price < 0:
             errdict["purchase_price"] = ["A price cannot be negative"]
@@ -148,3 +149,14 @@ class Asset(models.Model):
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
+
+
+@receiver(pre_save, sender=Asset)
+def pre_save_asset(sender, instance, **kwargs):
+    """Automatically fills in hidden members on database access"""
+    asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", instance.asset_id)
+    if asset_search is None:
+        instance.asset_id += "1"
+    asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", instance.asset_id)
+    instance.asset_id_prefix = asset_search.group(1)
+    instance.asset_id_number = int(asset_search.group(2))

@@ -1,7 +1,6 @@
 import random
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-
 from assets import models
 
 
@@ -96,8 +95,9 @@ class Command(BaseCommand):
                 cores=random.choice(circuits)
             )
 
-            prefix = random.choice(asset_prefixes)
-            asset.asset_id = prefix + str(models.Asset.get_available_asset_id(wanted_prefix=prefix))
+            if i % 5 == 0:
+                prefix = random.choice(asset_prefixes)
+                asset.asset_id = prefix + str(models.Asset.get_available_asset_id(wanted_prefix=prefix))
 
             if i % 4 == 0:
                 asset.parent = models.Asset.objects.order_by('?').first()
