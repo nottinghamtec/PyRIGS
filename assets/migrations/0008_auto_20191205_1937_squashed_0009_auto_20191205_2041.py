@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='asset',
             name='asset_id_prefix',
-            field=models.CharField(default='', max_length=5),
+            field=models.CharField(default='', max_length=8),
         ),
         migrations.RunPython(
             code=forwards,
@@ -56,10 +56,5 @@ class Migration(migrations.Migration):
             model_name='asset',
             name='asset_id',
             field=models.CharField(max_length=15, unique=True),
-        ),
-        migrations.AlterField(
-            model_name='asset',
-            name='asset_id_prefix',
-            field=models.CharField(default='', max_length=8),
-        ),
+        )
     ]
