@@ -1,8 +1,7 @@
+import random
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-
 from assets import models
-import random
 
 
 class Command(BaseCommand):
@@ -50,7 +49,7 @@ class Command(BaseCommand):
         suppliers = models.Supplier.objects.all()
 
         for i in range(100):
-            asset = models.Asset.objects.create(
+            asset = models.Asset(
                 asset_id='{}'.format(models.Asset.get_available_asset_id()),
                 description=random.choice(asset_description),
                 category=random.choice(categories),
@@ -63,11 +62,12 @@ class Command(BaseCommand):
 
             if i % 3 == 0:
                 asset.purchased_from = random.choice(suppliers)
-
+            asset.clean()
             asset.save()
 
     def create_cables(self):
         asset_description = ['The worm', 'Harting without a cap', 'Heavy cable', 'Extension lead', 'IEC cable that we should remember to prep']
+        asset_prefixes = ["C", "C4P", "CBNC", "CDMX", "CDV", "CRCD", "CSOCA", "CXLR"]
 
         csas = [0.75, 1.00, 1.25, 2.5, 4]
         lengths = [1, 2, 5, 10, 15, 20, 25, 30, 50, 100]
@@ -79,7 +79,7 @@ class Command(BaseCommand):
         connectors = models.Connector.objects.all()
 
         for i in range(100):
-            asset = models.Asset.objects.create(
+            asset = models.Asset(
                 asset_id='{}'.format(models.Asset.get_available_asset_id()),
                 description=random.choice(asset_description),
                 category=random.choice(categories),
@@ -95,12 +95,17 @@ class Command(BaseCommand):
                 cores=random.choice(circuits)
             )
 
+            if i % 5 == 0:
+                prefix = random.choice(asset_prefixes)
+                asset.asset_id = prefix + str(models.Asset.get_available_asset_id(wanted_prefix=prefix))
+
             if i % 4 == 0:
                 asset.parent = models.Asset.objects.order_by('?').first()
 
             if i % 3 == 0:
                 asset.purchased_from = random.choice(suppliers)
 
+            asset.clean()
             asset.save()
 
     def create_connectors(self):
