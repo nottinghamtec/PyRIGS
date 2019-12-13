@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.db.models import Q
 from assets import models, forms
-
+from RIGS import versioning
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -203,3 +203,17 @@ class SupplierUpdate(generic.UpdateView):
     model = models.Supplier
     form_class = forms.SupplierForm
     template_name = 'supplier_update.html'
+
+class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
+    def get_context_data(self, **kwargs):
+        thisModel = self.kwargs['model']
+        context = super(versioning.VersionHistory, self).get_context_data(**kwargs)
+        queryset = models.Asset.objects.filter(asset_id=self.kwargs['pk'])
+        try:
+            # Get the single item from the filtered queryset
+            context['object'] = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                          {'verbose_name': queryset.model._meta.verbose_name})
+
+        return context

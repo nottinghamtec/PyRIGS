@@ -1,5 +1,7 @@
+from django.conf.urls import url
 from django.urls import path
-from assets import views
+from assets import views, models
+from RIGS import versioning
 
 from PyRIGS.decorators import permission_required_with_403
 
@@ -10,6 +12,8 @@ urlpatterns = [
     path('asset/create/', permission_required_with_403('assets.add_asset')(views.AssetCreate.as_view()), name='asset_create'),
     path('asset/id/<str:pk>/edit/', permission_required_with_403('assets.change_asset')(views.AssetEdit.as_view()), name='asset_update'),
     path('asset/id/<str:pk>/duplicate/', permission_required_with_403('assets.add_asset')(views.AssetDuplicate.as_view()), name='asset_duplicate'),
+    path('asset/id/<str:pk>/history/', views.AssetVersionHistory.as_view(),
+        name='asset_history', kwargs={'model': models.Asset}),
 
     path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
 

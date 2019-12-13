@@ -6,6 +6,10 @@ from django.urls import reverse
 from django.db.models.signals import pre_save
 from django.dispatch.dispatcher import receiver
 
+from reversion import revisions as reversion
+from reversion.models import Version
+
+from RIGS.models import RevisionMixin
 
 class AssetCategory(models.Model):
     class Meta:
@@ -30,7 +34,8 @@ class AssetStatus(models.Model):
         return self.name
 
 
-class Supplier(models.Model):
+@reversion.register
+class Supplier(models.Model, RevisionMixin):
     name = models.CharField(max_length=80)
 
     class Meta:
@@ -55,7 +60,8 @@ class Connector(models.Model):
         return self.description
 
 
-class Asset(models.Model):
+@reversion.register
+class Asset(models.Model, RevisionMixin):
     class Meta:
         ordering = ['asset_id_prefix', 'asset_id_number']
         permissions = (
