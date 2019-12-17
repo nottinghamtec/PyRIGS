@@ -8,6 +8,7 @@ from django.db.models import Q
 from assets import models, forms
 from RIGS import versioning
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
@@ -36,7 +37,8 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         if len(query_string) == 0:
             queryset = self.model.objects.all()
         elif len(query_string) >= 3:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query_string) | Q(description__icontains=query_string))
+            queryset = self.model.objects.filter(
+                Q(asset_id__exact=query_string) | Q(description__icontains=query_string))
         else:
             queryset = self.model.objects.filter(Q(asset_id__exact=query_string))
 
@@ -46,7 +48,8 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         if len(form.cleaned_data['status']) > 0:
             queryset = queryset.filter(status__in=form.cleaned_data['status'])
         elif self.hide_hidden_status:
-            queryset = queryset.filter(status__in=models.AssetStatus.objects.filter(should_show=True))
+            queryset = queryset.filter(
+                status__in=models.AssetStatus.objects.filter(should_show=True))
 
         return queryset
 
@@ -204,6 +207,7 @@ class SupplierUpdate(generic.UpdateView):
     form_class = forms.SupplierForm
     template_name = 'supplier_update.html'
 
+
 class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
     def get_context_data(self, **kwargs):
         thisModel = self.kwargs['model']
@@ -218,11 +222,13 @@ class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
 
         return context
 
+
 class ActivityTable(generic.ListView):
     model = versioning.RIGSVersion
     template_name = "RIGS/activity_table.html"
     paginate_by = 25
 
     def get_queryset(self):
-        versions = versioning.RIGSVersion.objects.get_for_multiple_models([models.Asset, models.Supplier])
+        versions = versioning.RIGSVersion.objects.get_for_multiple_models(
+            [models.Asset, models.Supplier])
         return versions

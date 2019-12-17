@@ -11,6 +11,7 @@ from reversion.models import Version
 
 from RIGS.models import RevisionMixin
 
+
 class AssetCategory(models.Model):
     class Meta:
         verbose_name = 'Asset Category'
@@ -28,7 +29,8 @@ class AssetStatus(models.Model):
         verbose_name_plural = 'Asset Statuses'
 
     name = models.CharField(max_length=80)
-    should_show = models.BooleanField(default=True, help_text="Should this be shown by default in the asset list.")
+    should_show = models.BooleanField(
+        default=True, help_text="Should this be shown by default in the asset list.")
 
     def __str__(self):
         return self.name
@@ -69,7 +71,8 @@ class Asset(models.Model, RevisionMixin):
             ('view_asset', 'Can view an asset')
         )
 
-    parent = models.ForeignKey(to='self', related_name='asset_parent', blank=True, null=True, on_delete=models.SET_NULL)
+    parent = models.ForeignKey(to='self', related_name='asset_parent',
+                               blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=15, unique=True)
     description = models.CharField(max_length=120)
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
@@ -85,10 +88,14 @@ class Asset(models.Model, RevisionMixin):
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='plug', blank=True, null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL, related_name='socket', blank=True, null=True)
-    length = models.DecimalField(decimal_places=1, max_digits=10, blank=True, null=True, help_text='m')
-    csa = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text='mm^2')
+    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
+                             related_name='plug', blank=True, null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
+                               related_name='socket', blank=True, null=True)
+    length = models.DecimalField(decimal_places=1, max_digits=10,
+                                 blank=True, null=True, help_text='m')
+    csa = models.DecimalField(decimal_places=2, max_digits=10,
+                              blank=True, null=True, help_text='mm^2')
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
 
@@ -131,7 +138,8 @@ class Asset(models.Model, RevisionMixin):
         self.asset_id = self.asset_id.upper()
         asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", self.asset_id)
         if asset_search is None:
-                errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers, with a final number"]
+            errdict["asset_id"] = [
+                "An Asset ID can only consist of letters and numbers, with a final number"]
 
         if self.purchase_price and self.purchase_price < 0:
             errdict["purchase_price"] = ["A price cannot be negative"]
