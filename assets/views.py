@@ -217,3 +217,12 @@ class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
                           {'verbose_name': queryset.model._meta.verbose_name})
 
         return context
+
+class ActivityTable(generic.ListView):
+    model = versioning.RIGSVersion
+    template_name = "RIGS/activity_table.html"
+    paginate_by = 25
+
+    def get_queryset(self):
+        versions = versioning.RIGSVersion.objects.get_for_multiple_models([models.Asset, models.Supplier])
+        return versions

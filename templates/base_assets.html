@@ -29,6 +29,6 @@
         </li>
     {% endif %}
     {% if perms.assets.view_asset %}
-        <li><a href="{% url 'activity_table' %}">Recent Changes</a></li>
+        <li><a href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
     {% endif %}
 {% endblock %}

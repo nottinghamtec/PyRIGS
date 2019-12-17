@@ -14,6 +14,8 @@ urlpatterns = [
     path('asset/id/<str:pk>/duplicate/', permission_required_with_403('assets.add_asset')(views.AssetDuplicate.as_view()), name='asset_duplicate'),
     path('asset/id/<str:pk>/history/', views.AssetVersionHistory.as_view(),
         name='asset_history', kwargs={'model': models.Asset}),
+    path('activity',
+        permission_required_with_403('assets.view_asset')(views.ActivityTable.as_view()), name='asset_activity_table'),
 
     path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
 
