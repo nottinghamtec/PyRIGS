@@ -208,7 +208,16 @@ class SupplierUpdate(generic.UpdateView):
     template_name = 'supplier_update.html'
 
 
-class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
+class AssetVersionHistory(versioning.VersionHistory):
+    template_name = "asset_version_history.html"
+
+    def get_queryset(self, **kwargs):
+        thisModel = self.kwargs['model']
+
+        versions = versioning.RIGSVersion.objects.all()
+
+        return versions
+
     def get_context_data(self, **kwargs):
         thisModel = self.kwargs['model']
         context = super(versioning.VersionHistory, self).get_context_data(**kwargs)
@@ -225,7 +234,7 @@ class AssetVersionHistory(AssetIDUrlMixin, versioning.VersionHistory):
 
 class ActivityTable(generic.ListView):
     model = versioning.RIGSVersion
-    template_name = "RIGS/activity_table.html"
+    template_name = "asset_activity_table.html"
     paginate_by = 25
 
     def get_queryset(self):
