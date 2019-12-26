@@ -207,8 +207,10 @@ class SupplierUpdate(generic.UpdateView):
     form_class = forms.SupplierForm
     template_name = 'supplier_update.html'
 
+
 class SupplierVersionHistory(versioning.VersionHistory):
     template_name = "asset_version_history.html"
+
 
 # TODO: Reduce SQL queries
 class AssetVersionHistory(versioning.VersionHistory):
