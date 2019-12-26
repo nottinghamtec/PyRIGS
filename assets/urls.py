@@ -28,6 +28,8 @@ urlpatterns = [
          (views.SupplierCreate.as_view()), name='supplier_create'),
     path('supplier/<int:pk>/edit', permission_required_with_403('assets.change_supplier')
          (views.SupplierUpdate.as_view()), name='supplier_update'),
+    path('supplier/<str:pk>/history/', views.SupplierVersionHistory.as_view(),
+         name='supplier_history', kwargs={'model': models.Supplier}),
 
     path('supplier/search/', views.SupplierSearch.as_view(), name='supplier_search_json'),
 ]

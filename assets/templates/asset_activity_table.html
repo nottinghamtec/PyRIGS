@@ -69,7 +69,7 @@
 
                             <tr>
                                 <td>{{ version.revision.date_created }}</td>
-                                <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}} {{ version.changes.new.asset_id }}</a></td>
+                                <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}} {{ version.changes.new.asset_id|default:version.changes.new.pk }}</a></td>
                            		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
                                 <td>{{ version.revision.user.name }}</td>
                                 <td>
