@@ -207,14 +207,16 @@ class SupplierUpdate(generic.UpdateView):
     form_class = forms.SupplierForm
     template_name = 'supplier_update.html'
 
-
+# TODO: Reduce SQL queries
 class AssetVersionHistory(versioning.VersionHistory):
+    model = versioning.RIGSVersion
     template_name = "asset_version_history.html"
+    paginate_by = 25
 
     def get_queryset(self, **kwargs):
         thisModel = self.kwargs['model']
-
-        versions = versioning.RIGSVersion.objects.all()
+        pk = self.kwargs['pk']
+        versions = versioning.RIGSVersion.objects.get_for_object(models.Asset.objects.filter(asset_id=pk).get()).select_related("revision", "revision__user").all()
 
         return versions
 
@@ -232,7 +234,7 @@ class AssetVersionHistory(versioning.VersionHistory):
         return context
 
 
-class ActivityTable(generic.ListView):
+class ActivityTable(versioning.ActivityTable):
     model = versioning.RIGSVersion
     template_name = "asset_activity_table.html"
     paginate_by = 25
