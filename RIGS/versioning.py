@@ -206,17 +206,14 @@ class VersionHistory(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        thisModel = self.kwargs['model']
-
-        versions = RIGSVersion.objects.get_for_object_reference(thisModel, self.kwargs['pk']).select_related("revision", "revision__user").all()
-
-        return versions
+        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision", "revision__user").all()
+    
+    def get_object(self, **kwargs):
+        return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
-        thisModel = self.kwargs['model']
         context = super(VersionHistory, self).get_context_data(**kwargs)
-        thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
-        context['object'] = thisObject
+        context['object'] = self.get_object()
 
         return context
 

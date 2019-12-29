@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from assets import models, forms
 from RIGS import versioning
 
@@ -214,29 +215,8 @@ class SupplierVersionHistory(versioning.VersionHistory):
 
 # TODO: Reduce SQL queries
 class AssetVersionHistory(versioning.VersionHistory):
-    model = versioning.RIGSVersion
-    template_name = "asset_version_history.html"
-    paginate_by = 25
-
-    def get_queryset(self, **kwargs):
-        thisModel = self.kwargs['model']
-        pk = self.kwargs['pk']
-        versions = versioning.RIGSVersion.objects.get_for_object(models.Asset.objects.filter(asset_id=pk).get()).select_related("revision", "revision__user").all()
-
-        return versions
-
-    def get_context_data(self, **kwargs):
-        thisModel = self.kwargs['model']
-        context = super(versioning.VersionHistory, self).get_context_data(**kwargs)
-        queryset = models.Asset.objects.filter(asset_id=self.kwargs['pk'])
-        try:
-            # Get the single item from the filtered queryset
-            context['object'] = queryset.get()
-        except queryset.model.DoesNotExist:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
-                          {'verbose_name': queryset.model._meta.verbose_name})
-
-        return context
+    def get_object(self, **kwargs):
+        return get_object_or_404(models.Asset, asset_id=self.kwargs['pk'])
 
 
 class ActivityTable(versioning.ActivityTable):
