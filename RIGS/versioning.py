@@ -168,13 +168,12 @@ class RIGSVersionManager(VersionQuerySet):
         for model in model_array:
             content_types.append(ContentType.objects.get_for_model(model))
 
-        return self.filter(content_type__in=content_types).select_related("revision").order_by("-pk")
+        return self.filter(content_type__in=content_types).select_related("revision").order_by("-revision__date_created")
 
 
 class RIGSVersion(Version):
     class Meta:
         proxy = True
-        ordering = ['-date_created']
 
     objects = RIGSVersionManager.as_manager()
 
@@ -207,7 +206,7 @@ class VersionHistory(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision", "revision__user").all()
+        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision", "revision__user").all().order_by("-revision__date_created")
 
     def get_object(self, **kwargs):
         return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
@@ -226,7 +225,7 @@ class ActivityTable(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
-        return versions
+        return versions.order_by("-revision__date_created")
 
 
 class ActivityFeed(generic.ListView):
@@ -236,7 +235,7 @@ class ActivityFeed(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
-        return versions
+        return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
