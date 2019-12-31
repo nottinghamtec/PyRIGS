@@ -51,6 +51,14 @@ class Supplier(models.Model, RevisionMixin):
     def __str__(self):
         return self.name
 
+    @property
+    def assets(self):
+        p = []
+        for e in Asset.objects.filter(purchased_from=self):
+            p.append(e)
+
+        return p
+
 
 class Connector(models.Model):
     description = models.CharField(max_length=80)
