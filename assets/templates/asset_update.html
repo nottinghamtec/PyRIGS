@@ -45,6 +45,16 @@
   </div>
 </form>
 
+{% if not edit %}
+<div class="col-sm-12 text-right">
+    <div>
+        <a href="{% url 'asset_history' object.asset_id %}" title="View Revision History">
+            Last edited at {{ object.last_edited_at|default:'never' }} by {{ object.last_edited_by.name|default:'nobody' }}
+        </a>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block js%}

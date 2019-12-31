@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block titleelements %}
-    {% if perms.assets.view_asset%}
+    {% if perms.assets.view_asset %}
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assets<b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -16,7 +16,7 @@
             </ul>
         </li>
     {% endif %}
-    {% if perms.assets.view_supplier%}
+    {% if perms.assets.view_supplier %}
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Suppliers<b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -27,5 +27,8 @@
                 {% endif %}
             </ul>
         </li>
+    {% endif %}
+    {% if perms.assets.view_asset %}
+        <li><a href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
     {% endif %}
 {% endblock %}
