@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
+
+{% block extrahead %}
+<meta name="google" content="notranslate">
+{% endblock %}
+
 {% block titleheader %}
     <a class="nav navbar-brand navbar-left" href="/"><i class="glyphicon glyphicon-circle-arrow-left" style="vertical-align: middle !important;"></i> RIGS</a>
     <a class="nav navbar-brand" href="{% url 'asset_index' %}">Assets</a>
