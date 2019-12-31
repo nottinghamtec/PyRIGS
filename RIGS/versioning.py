@@ -174,6 +174,7 @@ class RIGSVersionManager(VersionQuerySet):
 class RIGSVersion(Version):
     class Meta:
         proxy = True
+        ordering = ['-date_created']
 
     objects = RIGSVersionManager.as_manager()
 
