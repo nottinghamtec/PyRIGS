@@ -1,0 +1,32 @@
+{% for item in object_list %}
+    {#                <li><a href="{% url 'asset_detail' item.pk %}">{{ item.asset_id }} - {{ item.description }}</a></li>#}
+    <!---TODO: When the ability to filter the list is added, remove the colours from the filter - specifically, stop greying out sold/binned stuff if it is being searched for-->    <tr class="
+                {% if item.status.name == 'Broken' %}
+                  danger
+                {% elif item.status.name == 'Scrapped'%}
+                  warning
+                {% elif item.status.name == 'Sold'%}
+                  warning
+                {% elif item.status.name == 'Lost'%}
+                  danger
+                {% elif item.status.name == 'Not Built Yet'%}
+                  info
+                {% elif item.status.name == 'Active'%}
+                  success
+                {% endif %}
+                ">
+        <td style="vertical-align: middle;"><a href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></td>
+        <td style="vertical-align: middle; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 25vw">{{ item.description }}</td>
+        <td style="vertical-align: middle;">{{ item.category }}</td>
+        <td style="vertical-align: middle;">{{ item.status }}</td>
+        <td class="hidden-xs">
+            <div class="btn-group" role="group">
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                {% if perms.assets.change_asset %}
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+                <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+{% endfor %}

@@ -414,7 +414,7 @@ class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
         # Run the management command and check there are no exceptions
-        call_command('generateSampleData')
+        call_command('generateSampleRIGSData')
 
         # Check there are lots of events
         self.assertTrue(models.Event.objects.all().count() > 100)
@@ -422,4 +422,4 @@ class TestSampleDataGenerator(TestCase):
     def test_production_exception(self):
         from django.core.management.base import CommandError
 
-        self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleData')
+        self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleRIGSData')
