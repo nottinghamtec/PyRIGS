@@ -207,7 +207,7 @@ class VersionHistory(generic.ListView):
 
     def get_queryset(self, **kwargs):
         return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision", "revision__user").all()
-    
+
     def get_object(self, **kwargs):
         return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
 
