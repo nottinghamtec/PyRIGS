@@ -16,6 +16,7 @@ class AssetCategory(models.Model):
     class Meta:
         verbose_name = 'Asset Category'
         verbose_name_plural = 'Asset Categories'
+        ordering = ['name']
 
     name = models.CharField(max_length=80)
 
@@ -27,6 +28,7 @@ class AssetStatus(models.Model):
     class Meta:
         verbose_name = 'Asset Status'
         verbose_name_plural = 'Asset Statuses'
+        ordering = ['name']
 
     name = models.CharField(max_length=80)
     should_show = models.BooleanField(
