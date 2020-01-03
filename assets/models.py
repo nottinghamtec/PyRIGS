@@ -33,7 +33,7 @@ class AssetStatus(models.Model):
     name = models.CharField(max_length=80)
     should_show = models.BooleanField(
         default=True, help_text="Should this be shown by default in the asset list.")
-    display_class = models.CharField(max_length=80, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
+    display_class = models.CharField(max_length=80, blank=True, null=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
 
     def __str__(self):
         return self.name
