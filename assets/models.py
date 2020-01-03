@@ -54,14 +54,6 @@ class Supplier(models.Model, RevisionMixin):
     def __str__(self):
         return self.name
 
-    @property
-    def assets(self):
-        p = []
-        for e in Asset.objects.filter(purchased_from=self):
-            p.append(e)
-
-        return p
-
 
 class Connector(models.Model):
     description = models.CharField(max_length=80)
@@ -89,7 +81,7 @@ class Asset(models.Model, RevisionMixin):
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=150, blank=True)
-    purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True)
+    purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True, related_name="assets")
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)

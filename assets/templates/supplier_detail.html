@@ -44,7 +44,7 @@
                             </tr>
                           </thead>
                           <tbody id="asset_table_body">
-                            {% with object.assets as object_list %}
+                            {% with object.assets.all as object_list %}
                                 {% include 'partials/asset_list_table_body.html' %}
                             {% endwith %}
                           </tbody>
