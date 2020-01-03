@@ -1,5 +1,22 @@
 {% load widget_tweaks %}
 {% load asset_templatetags %}
+{% load static %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static "js/bootstrap-select.js" %}"></script>
+    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/autocompleter.js" %}"></script>
+{% endblock %}
+
 <div class="panel panel-default">
   <div class="panel-heading">
     Purchase Details
@@ -7,8 +24,12 @@
   <div class="panel-body">
     {% if create or edit or duplicate %}
     <div class="form-group">
-      <label for="{{ form.purchased_from.id_for_label }}">Purchased From</label>
-      {% include 'partials/supplier_picker.html' %}
+      <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
+      <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
+        {% if object.purchased_from %}
+            <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
+        {% endif %}
+      </select>
     </div>
 
     <div class="form-group">

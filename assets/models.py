@@ -16,6 +16,7 @@ class AssetCategory(models.Model):
     class Meta:
         verbose_name = 'Asset Category'
         verbose_name_plural = 'Asset Categories'
+        ordering = ['name']
 
     name = models.CharField(max_length=80)
 
@@ -27,10 +28,12 @@ class AssetStatus(models.Model):
     class Meta:
         verbose_name = 'Asset Status'
         verbose_name_plural = 'Asset Statuses'
+        ordering = ['name']
 
     name = models.CharField(max_length=80)
     should_show = models.BooleanField(
         default=True, help_text="Should this be shown by default in the asset list.")
+    display_class = models.CharField(max_length=80, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
 
     def __str__(self):
         return self.name
@@ -78,7 +81,7 @@ class Asset(models.Model, RevisionMixin):
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=150, blank=True)
-    purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True)
+    purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True, related_name="assets")
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)

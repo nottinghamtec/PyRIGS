@@ -30,8 +30,8 @@
     <tr>
       <td>{{ item.name }}</td>
       <td>
+        <a href="{% url 'supplier_detail' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-eye-open"></i> View</a>
         <a href="{% url 'supplier_update' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-        <a href="{% url 'supplier_history' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-time"></i> History</a>
       </td>
     </tr>
     {% endfor %}
