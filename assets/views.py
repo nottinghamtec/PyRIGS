@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -8,6 +9,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from assets import models, forms
 from RIGS import versioning
+
+import simplejson
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -147,6 +150,28 @@ class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
         context["duplicate"] = True
         context['previous_asset_id'] = self.get_object().asset_id
         return context
+
+
+class AssetOembed(generic.View):
+    model = models.Asset
+
+    def get(self, request, pk=None):
+        embed_url = reverse('event_embed', args=[pk])
+        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
+
+        data = {
+            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
+            'version': '1.0',
+            'type': 'rich',
+            'height': '250'
+        }
+
+        json = simplejson.JSONEncoderForHTML().encode(data)
+        return HttpResponse(json, content_type="application/json")
+
+
+class AssetEmbed(AssetDetail):
+    template_name = 'asset_embed.html'
 
 
 class SupplierList(generic.ListView):
