@@ -156,7 +156,7 @@ class AssetOembed(generic.View):
     model = models.Asset
 
     def get(self, request, pk=None):
-        embed_url = reverse('event_embed', args=[pk])
+        embed_url = reverse('asset_embed', args=[pk])
         full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
 
         data = {
