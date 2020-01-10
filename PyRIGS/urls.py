@@ -12,6 +12,7 @@ urlpatterns = [
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^', include('RIGS.urls')),
+    url('^assets/', include('assets.urls')),
     url('^user/register/$', RegistrationView.as_view(form_class=RIGS.forms.ProfileRegistrationFormUniqueEmail),
         name="registration_register"),
     url('^user/', include('django.contrib.auth.urls')),

@@ -168,7 +168,7 @@ class RIGSVersionManager(VersionQuerySet):
         for model in model_array:
             content_types.append(ContentType.objects.get_for_model(model))
 
-        return self.filter(content_type__in=content_types).select_related("revision").order_by("-pk")
+        return self.filter(content_type__in=content_types).select_related("revision").order_by("-revision__date_created")
 
 
 class RIGSVersion(Version):
@@ -206,17 +206,14 @@ class VersionHistory(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        thisModel = self.kwargs['model']
+        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision", "revision__user").all().order_by("-revision__date_created")
 
-        versions = RIGSVersion.objects.get_for_object_reference(thisModel, self.kwargs['pk']).select_related("revision", "revision__user").all()
-
-        return versions
+    def get_object(self, **kwargs):
+        return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
-        thisModel = self.kwargs['model']
         context = super(VersionHistory, self).get_context_data(**kwargs)
-        thisObject = get_object_or_404(thisModel, pk=self.kwargs['pk'])
-        context['object'] = thisObject
+        context['object'] = self.get_object()
 
         return context
 
@@ -228,7 +225,7 @@ class ActivityTable(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
-        return versions
+        return versions.order_by("-revision__date_created")
 
 
 class ActivityFeed(generic.ListView):
@@ -238,7 +235,7 @@ class ActivityFeed(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
-        return versions
+        return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:'base_ajax.html,base.html' %}
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
 
 {% block title %}{{ object.pk|yesno:"Edit,Add" }} Venue{% endblock %}
