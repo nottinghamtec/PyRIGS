@@ -44,7 +44,7 @@
   </div>
 </form>
 
-{% if not edit %}
+{% if not edit and perms.assets.view_asset %}
 <div class="col-sm-12 text-right">
     <div>
         <a href="{% url 'asset_history' object.asset_id %}" title="View Revision History">
