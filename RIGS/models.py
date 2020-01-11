@@ -27,6 +27,7 @@ class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    is_approved = models.BooleanField(default=False)
 
     @classmethod
     def make_api_key(cls):

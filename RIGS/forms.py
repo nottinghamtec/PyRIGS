@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core import serializers
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail
+from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import ReCaptchaField
 import simplejson
 
@@ -52,6 +53,13 @@ class ProfileCreationForm(UserCreationForm):
 class ProfileChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = models.Profile
+
+
+class CheckApprovedForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_approved:
+            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
+        return AuthenticationForm.confirm_login_allowed(self, user)
 
 
 # Events Shit
