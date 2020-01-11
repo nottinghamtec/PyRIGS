@@ -5,13 +5,13 @@ from RIGS import versioning
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.clickjacking import xframe_options_exempt
-from PyRIGS.decorators import permission_required_with_403
+from PyRIGS.decorators import has_oembed, permission_required_with_403
 
 urlpatterns = [
     path('', views.AssetList.as_view(), name='asset_index'),
     path('asset/list/', views.AssetList.as_view(), name='asset_list'),
     # Lazy way to enable the oembed redirect...
-    path('asset/id/<str:pk>/', permission_required_with_403('', oembed_view="asset_oembed")(views.AssetDetail.as_view()), name='asset_detail'),
+    path('asset/id/<str:pk>/', has_oembed(oembed_view="asset_oembed")(views.AssetDetail.as_view()), name='asset_detail'),
     path('asset/create/', permission_required_with_403('assets.add_asset')
          (views.AssetCreate.as_view()), name='asset_create'),
     path('asset/id/<str:pk>/edit/', permission_required_with_403('assets.change_asset')
