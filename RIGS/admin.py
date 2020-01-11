@@ -24,6 +24,8 @@ admin.site.register(models.Payment)
 
 def approve_user(modeladmin, request, queryset):
     queryset.update(is_approved=True)
+
+
 approve_user.short_description = "Approve selected users"
 
 
