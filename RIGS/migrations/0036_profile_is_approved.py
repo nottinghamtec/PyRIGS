@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='is_approved',
-            # Approve existing profiles automatically, new ones default false. 
-            field=models.BooleanField(default=True),
+            field=models.BooleanField(default=False),
         ),
     ]
