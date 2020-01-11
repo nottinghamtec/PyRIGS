@@ -213,8 +213,9 @@ class SupplierVersionHistory(versioning.VersionHistory):
     template_name = "asset_version_history.html"
 
 
-# TODO: Reduce SQL queries
 class AssetVersionHistory(versioning.VersionHistory):
+    template_name = "asset_version_history.html"
+
     def get_object(self, **kwargs):
         return get_object_or_404(models.Asset, asset_id=self.kwargs['pk'])
 
