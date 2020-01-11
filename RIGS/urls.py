@@ -87,7 +87,7 @@ urlpatterns = [
         login_required()(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
-    url(r'^event/(?P<pk>\d+)/$', (
+    url(r'^event/(?P<pk>\d+)/$', permission_required_with_403('', oembed_view="event_oembed")(
             rigboard.EventDetail.as_view()),
         name='event_detail'),
     url(r'^event/(?P<pk>\d+)/embed/$',

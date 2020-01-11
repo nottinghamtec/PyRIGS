@@ -36,9 +36,10 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
 
 class CheckApprovedForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
-        if not user.is_approved and not user.is_superuser:
+        if user.is_approved or user.is_superuser:
+            return AuthenticationForm.confirm_login_allowed(self, user)
+        else:
             raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
-        return AuthenticationForm.confirm_login_allowed(self, user)
 
 
 # Embedded Login form - remove the autofocus
