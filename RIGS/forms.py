@@ -34,8 +34,15 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
+class CheckApprovedForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_approved and not user.is_superuser:
+            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
+        return AuthenticationForm.confirm_login_allowed(self, user)
+
+
 # Embedded Login form - remove the autofocus
-class EmbeddedAuthenticationForm(AuthenticationForm):
+class EmbeddedAuthenticationForm(CheckApprovedForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.pop('autofocus', None)
@@ -53,13 +60,6 @@ class ProfileCreationForm(UserCreationForm):
 class ProfileChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = models.Profile
-
-
-class CheckApprovedForm(AuthenticationForm):
-    def confirm_login_allowed(self, user):
-        if not user.is_approved and not user.is_superuser:
-            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
-        return AuthenticationForm.confirm_login_allowed(self, user)
 
 
 # Events Shit
