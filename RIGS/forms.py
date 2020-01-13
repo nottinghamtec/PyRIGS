@@ -22,7 +22,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
 
     class Meta:
         model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials', 'phone')
+        fields = ('username', 'email', 'first_name', 'last_name', 'initials')
 
     def clean_initials(self):
         """

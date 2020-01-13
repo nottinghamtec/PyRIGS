@@ -74,8 +74,9 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(last_name.get_attribute('placeholder'), 'Last name')
         initials = self.browser.find_element_by_id('id_initials')
         self.assertEqual(initials.get_attribute('placeholder'), 'Initials')
-        phone = self.browser.find_element_by_id('id_phone')
-        self.assertEqual(phone.get_attribute('placeholder'), 'Phone')
+        # No longer required for new users        
+        # phone = self.browser.find_element_by_id('id_phone')
+        # self.assertEqual(phone.get_attribute('placeholder'), 'Phone')
 
         # Fill the form out incorrectly
         username.send_keys('TestUsername')
@@ -86,7 +87,7 @@ class UserRegistrationTest(LiveServerTestCase):
         first_name.send_keys('John')
         last_name.send_keys('Smith')
         initials.send_keys('JS')
-        phone.send_keys('0123456789')
+        # phone.send_keys('0123456789')
         self.browser.execute_script(
             "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
 
@@ -164,7 +165,7 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(profileObject.first_name, 'John')
         self.assertEqual(profileObject.last_name, 'Smith')
         self.assertEqual(profileObject.initials, 'JS')
-        self.assertEqual(profileObject.phone, '0123456789')
+        # self.assertEqual(profileObject.phone, '0123456789')
         self.assertEqual(profileObject.email, 'test@example.com')
 
         # All is well
