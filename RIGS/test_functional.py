@@ -74,7 +74,7 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(last_name.get_attribute('placeholder'), 'Last name')
         initials = self.browser.find_element_by_id('id_initials')
         self.assertEqual(initials.get_attribute('placeholder'), 'Initials')
-        # No longer required for new users        
+        # No longer required for new users
         # phone = self.browser.find_element_by_id('id_phone')
         # self.assertEqual(phone.get_attribute('placeholder'), 'Phone')
 

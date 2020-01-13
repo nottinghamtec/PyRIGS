@@ -158,7 +158,15 @@
     </div>
     {% if event.is_rig and event.internal %}
     <div class="col-sm-12">
-        <div class="panel panel-default">
+        <div class="panel panel-default
+            {% if object.authorised %}
+                panel-success
+            {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                panel-warning
+            {% elif event.auth_request_to %}
+                panel-info
+            {% endif %}
+            ">
             <div class="panel-heading">Client Authorisation</div>
             <div class="panel-body">
                 <dl class="dl-horizontal col-sm-6">
