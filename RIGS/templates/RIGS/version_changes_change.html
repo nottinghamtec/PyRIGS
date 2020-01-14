@@ -2,11 +2,11 @@
 {% if change.linebreaks and change.new and change.old %}
     {% for diff in change.diff %}
         {% if diff.type == "insert" %}
-            <ins>{{ diff.text|linebreaksbr }}</ins>
+            <ins class="dont-break-out">{{ diff.text|linebreaksbr }}</ins>
         {% elif diff.type == "delete" %}
-            <del>{{diff.text|linebreaksbr}}</del>
+            <del class="dont-break-out">{{diff.text|linebreaksbr}}</del>
         {% else %}
-            <span>{{diff.text|linebreaksbr}}</span>
+            <span class="dont-break-out">{{diff.text|linebreaksbr}}</span>
         {% endif %}
     {% endfor %}
     {% else %}
