@@ -4,6 +4,11 @@ from assets import models
 
 
 class AssetForm(forms.ModelForm):
+    related_models = {
+        'asset': models.Asset,
+        'supplier': models.Supplier
+    }
+
     class Meta:
         model = models.Asset
         fields = '__all__'
