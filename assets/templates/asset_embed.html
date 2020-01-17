@@ -1,0 +1,45 @@
+{% extends 'base_embed.html' %}
+{% load static from staticfiles %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-12">
+        <a href="/assets">
+            <span class="source"> TEC Asset Database</span> 
+        </a>
+    </div>
+
+    <div class="col-sm-12">
+        <h3>
+            <a href="{% url 'asset_detail' object.asset_id %}">Asset: {{ object.asset_id }} | {{ object.description }} </a>
+            <small class="label label-default">
+                <strong>Category:</strong>
+                {{ object.category }}
+            </small>
+            &nbsp;
+            <small class="label label-{{ object.status.display_class|default:'default' }}">
+                <strong>Status:</strong>
+                {{ object.status }}
+            </small>
+        </h3>  
+        <br>
+        {% if object.serial_number %}
+            <p>
+            <strong>Serial Number: </strong>
+            {{ object.serial_number }}
+            </p>
+        {% endif %}
+        {% if object.comments %}
+            <p>
+            <strong>Comments: </strong>
+            {{ object.comments|linebreaksbr }}
+            </p>
+        {% endif %}
+            
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}
