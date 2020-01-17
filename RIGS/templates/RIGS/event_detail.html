@@ -122,7 +122,7 @@
                     <dd>&nbsp;</dd>
 
                     <dt>Event Description</dt>
-                    <dd>{{ event.description|linebreaksbr }}</dd>
+                    <dd class="dont-break-out">{{ event.description|linebreaksbr }}</dd>
 
                     <dd>&nbsp;</dd>
 
@@ -224,7 +224,7 @@
                 <div class="panel-body">
                     <div class="well well-sm">
                         <h4>Notes</h4>
-                        {{ event.notes|linebreaksbr }}
+                        <div class="dont-break-out">{{ event.notes|linebreaksbr }}</div>
                     </div>
                     {% include 'RIGS/item_table.html' %}
                 </div>
