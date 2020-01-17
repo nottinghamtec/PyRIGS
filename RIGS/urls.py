@@ -19,7 +19,7 @@ urlpatterns = [
     url('^user/login/$', views.login, name='login'),
     url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
 
-    url(r'^user/password_reset/$', password_reset, {'password_reset_form': forms.PasswordReset}),
+    url(r'^user/password_reset/$', views.PasswordResetDisabled.as_view()),
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
