@@ -264,7 +264,7 @@
                 </para>
             </td>
         </tr>
-        {% for payment in object.invoice.payment_set.all %}
+        {% for payment in object.invoice.payments.all %}
             <tr>
                 <td>{{ payment.get_method_display }}</td>
                 <td>{{ payment.date }}</td>

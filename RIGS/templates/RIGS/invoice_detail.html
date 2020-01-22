@@ -143,7 +143,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for payment in object.payment_set.all %}
+                            {% for payment in object.payments.all %}
                                 <tr>
                                     <td>{{ payment.date }}</td>
                                     <td>{{ payment.amount|floatformat:2 }}</td>

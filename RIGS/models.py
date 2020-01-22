@@ -527,7 +527,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
-@reversion.register(follow=['payment_set'])
+@reversion.register(follow=['payments'])
 @python_2_unicode_compatible
 class Invoice(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -544,7 +544,7 @@ class Invoice(models.Model, RevisionMixin):
 
     @property
     def payment_total(self):
-        total = self.payment_set.aggregate(total=models.Sum('amount'))['total']
+        total = self.payments.aggregate(total=models.Sum('amount'))['total']
         if total:
             return total
         return Decimal("0.00")
@@ -582,7 +582,7 @@ class Payment(models.Model):
         (ADJUSTMENT, 'TEC Adjustment'),
     )
 
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE)
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name="payments")
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
     method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)

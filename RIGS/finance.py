@@ -10,8 +10,9 @@ from django.template import RequestContext
 from django.template.loader import get_template
 from django.views import generic
 from django.db.models import Q
+from django.db import transaction
 from z3c.rml import rml2pdf
-
+import reversion
 from RIGS import models
 
 from django import forms
@@ -101,14 +102,14 @@ class InvoiceDelete(generic.DeleteView):
 
     def get(self, request, pk):
         obj = self.get_object()
-        if obj.payment_set.all().count() > 0:
+        if obj.payments.all().count() > 0:
             messages.info(self.request, 'To delete an invoice, delete the payments first.')
             return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).get(pk)
 
     def post(self, request, pk):
         obj = self.get_object()
-        if obj.payment_set.all().count() > 0:
+        if obj.payments.all().count() > 0:
             messages.info(self.request, 'To delete an invoice, delete the payments first.')
             return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).post(pk)
@@ -159,7 +160,10 @@ class InvoiceWaiting(generic.ListView):
 
 
 class InvoiceEvent(generic.View):
+    @transaction.atomic()
+    @reversion.create_revision()
     def get(self, *args, **kwargs):
+        reversion.set_user(self.request.user)
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         invoice, created = models.Invoice.objects.get_or_create(event=event)
@@ -184,6 +188,13 @@ class PaymentCreate(generic.CreateView):
         initial.update({'invoice': invoice})
         return initial
 
+    @transaction.atomic()
+    @reversion.create_revision()
+    def form_valid(self, form, *args, **kwargs):
+        reversion.add_to_revision(form.cleaned_data['invoice'])
+        reversion.set_comment("Payment removed")
+        return super().form_valid(form, *args, **kwargs)
+
     def get_success_url(self):
         messages.info(self.request, "location.reload()")
         return reverse_lazy('closemodal')
@@ -191,6 +202,13 @@ class PaymentCreate(generic.CreateView):
 
 class PaymentDelete(generic.DeleteView):
     model = models.Payment
+
+    @transaction.atomic()
+    @reversion.create_revision()
+    def delete(self, *args, **kwargs):
+        reversion.add_to_revision(self.get_object().invoice)
+        reversion.set_comment("Payment removed")
+        return super().delete(*args, **kwargs)
 
     def get_success_url(self):
         return self.request.POST.get('next')
