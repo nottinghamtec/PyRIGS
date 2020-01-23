@@ -5,7 +5,9 @@
 				<td>Item</td>
                 {% if perms.RIGS.view_event %}
 				<td>Price</td>
+                {% endif %}
 				<td>Quantity</td>
+                {% if perms.RIGS.view_event %}
 				<td>Sub-total</td>
                 {% endif %}
 				{% if edit %}

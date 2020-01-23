@@ -81,10 +81,10 @@ urlpatterns = [
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
     url(r'^rigboard/activity/$',
-        login_required()(versioning.ActivityTable.as_view()),
+        permission_required_with_403('perms.RIGS.view_event')(versioning.ActivityTable.as_view()),
         name='activity_table'),
     url(r'^rigboard/activity/feed/$',
-        login_required()(versioning.ActivityFeed.as_view()),
+        permission_required_with_403('perms.RIGS.view_event')(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
     url(r'^event/(?P<pk>\d+)/$', has_oembed(oembed_view="event_oembed")(
@@ -116,7 +116,7 @@ urlpatterns = [
         name='event_archive'),
 
     url(r'^event/(?P<pk>\d+)/history/$',
-        login_required()(versioning.VersionHistory.as_view()),
+        permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
         name='event_history', kwargs={'model': models.Event}),
 
     # Finance

@@ -74,7 +74,7 @@
             {% endif %}
         </div>
     {% endif %}
-    <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
+    <div class="col-sm-12 {% if event.is_rig and perms.RIGS.view_event %}col-md-6 col-lg-7{% endif %}">
         <div class="panel panel-info">
             <div class="panel-heading">Event Info</div>
             <div class="panel-body">
@@ -240,7 +240,7 @@
         </div>
         {% endif %}
     {% endif %}
-    {% if not request.is_ajax %}
+    {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             <div>
                 <a href="{% url 'event_history' object.pk %}" title="View Revision History">
@@ -252,7 +252,7 @@
 </div>
 {% endblock %}
 
-{% if request.is_ajax %}
+{% if request.is_ajax and perms.RIGS.view_event %}
     {% block footer %}
         <div class="row">
             <div class="col-sm-10 align-left">
