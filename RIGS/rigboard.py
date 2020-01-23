@@ -140,14 +140,17 @@ class EventUpdate(generic.UpdateView):
             if value is not None and value != '':
                 context[field] = model.objects.get(pk=value)
 
-        # If this event has already been emailed to a client, show a warning
-        if self.object.auth_request_at is not None:
-            messages.info(self.request, 'This event has already been sent to the client for authorisation, any changes you make will be visible to them immediately.')
-
-        if hasattr(self.object, 'authorised'):
-            messages.warning(self.request, 'This event has already been authorised by client, any changes to price will require reauthorisation.')
-
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        if not hasattr(context, 'duplicate'):
+            # If this event has already been emailed to a client, show a warning
+            if self.object.auth_request_at is not None:
+                messages.info(self.request, 'This event has already been sent to the client for authorisation, any changes you make will be visible to them immediately.')
+
+            if hasattr(self.object, 'authorised'):
+                messages.warning(self.request, 'This event has already been authorised by client, any changes to price will require reauthorisation.')
+        return super(EventUpdate, self).render_to_response(context, **response_kwargs)
 
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})

@@ -124,7 +124,7 @@
                     <dd>&nbsp;</dd>
 
                     <dt>Event Description</dt>
-                    <dd>{{ event.description|linebreaksbr }}</dd>
+                    <dd class="dont-break-out">{{ event.description|linebreaksbr }}</dd>
 
                     <dd>&nbsp;</dd>
 
@@ -160,7 +160,15 @@
     </div>
     {% if event.is_rig and event.internal and perms.RIGS.view_event %}
     <div class="col-sm-12">
-        <div class="panel panel-default">
+        <div class="panel panel-default
+            {% if object.authorised %}
+                panel-success
+            {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                panel-warning
+            {% elif event.auth_request_to %}
+                panel-info
+            {% endif %}
+            ">
             <div class="panel-heading">Client Authorisation</div>
             <div class="panel-body">
                 <dl class="dl-horizontal col-sm-6">
@@ -190,7 +198,7 @@
                     </dd>
 
                     <dt>Authorised at</dt>
-                    <dd>{{ object.authorisation.last_edited_at }}</dd>
+                    <dd>{{ object.authorisation.last_edited_at|date:"D d M Y H:i" }}</dd>
 
                     <dt>Authorised amount</dt>
                     <dd>
@@ -219,7 +227,7 @@
                     {% if perms.RIGS.view_event %}
                     <div class="well well-sm">
                         <h4>Notes</h4>
-                        {{ event.notes|linebreaksbr }}
+                        <div class="dont-break-out">{{ event.notes|linebreaksbr }}</div>
                     </div>
                     {% endif %}
                     {% include 'RIGS/item_table.html' %}
