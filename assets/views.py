@@ -213,7 +213,8 @@ class SupplierSearch(SupplierList):
 
         for supplier in context["object_list"]:
             result.append({"id": supplier.pk, "name": supplier.name})
-
+        import pdb
+        pdb.set_trace()
         return JsonResponse(result, safe=False)
 
 
