@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import get_template
+from registration.signals import user_activated
 from premailer import Premailer
 from z3c.rml import rml2pdf
 
@@ -102,3 +103,28 @@ def on_revision_commit(sender, instance, created, **kwargs):
 
 
 post_save.connect(on_revision_commit, sender=models.EventAuthorisation)
+
+
+def send_admin_awaiting_approval_email(user, request, **kwargs):
+    for admin in settings.ADMINS:
+        context = {
+            'request': request,
+            'link_suffix': 'admin/RIGS/profile/?is_approved__exact=0',
+            'number_of_users': models.Profile.users_awaiting_approval_count(models.Profile.objects),
+            'to_name': admin[0]
+        }
+
+        email = EmailMultiAlternatives(
+            "%s new users awaiting approval on RIGS" % (context['number_of_users']),
+            get_template("RIGS/admin_awaiting_approval.txt").render(context),
+            to=[admin[1]],
+            reply_to=[user.email],
+        )
+        css = staticfiles_storage.path('css/email.css')
+        html = Premailer(get_template("RIGS/admin_awaiting_approval.html").render(context),
+                         external_styles=css).transform()
+        email.attach_alternative(html, 'text/html')
+        email.send()
+
+
+user_activated.connect(send_admin_awaiting_approval_email)

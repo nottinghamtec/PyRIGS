@@ -54,6 +54,9 @@ class Profile(AbstractUser):
     def latest_events(self):
         return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
+    def users_awaiting_approval_count(self):
+        return self.filter(models.Q(is_approved=False)).count()
+
     def __str__(self):
         return self.name
 

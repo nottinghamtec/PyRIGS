@@ -1,0 +1,5 @@
+Hi {{ to_name|default_if_none:"Administrator" }},
+
+{{ number_of_users|default_if_none:"Some" }} new users are awaiting administrator approval on RIGS. Use this link to approve them: {{ request.scheme }}://{{ request.get_host }}/{{ link_suffix }}
+
+TEC PA & Lighting

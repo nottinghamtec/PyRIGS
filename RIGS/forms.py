@@ -2,6 +2,7 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import AuthenticationForm
@@ -32,7 +33,6 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
-
 
 class CheckApprovedForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
