@@ -34,6 +34,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
             raise forms.ValidationError("These initials are already in use. Please supply different initials.")
         return self.cleaned_data['initials']
 
+
 class CheckApprovedForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if user.is_approved or user.is_superuser:
