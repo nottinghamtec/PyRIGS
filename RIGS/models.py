@@ -28,6 +28,7 @@ class Profile(AbstractUser):
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
     is_approved = models.BooleanField(default=False)
+    last_emailed = models.DateTimeField(blank=True, null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
 
     @classmethod
     def make_api_key(cls):

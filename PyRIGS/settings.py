@@ -45,8 +45,10 @@ if not DEBUG:
 INTERNAL_IPS = ['127.0.0.1']
 
 ADMINS = (
-    [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Technical Director', 'td@nottinghamtec.co.uk')]
+    [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
 )
+if DEBUG:
+    ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
 # Application definition
 
