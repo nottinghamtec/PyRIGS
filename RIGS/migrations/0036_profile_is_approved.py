@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='is_approved',
             field=models.BooleanField(default=False),
         ),
+        migrations.AddField(
+            model_name='profile',
+            name='last_emailed',
+            field=models.DateTimeField(blank=True, null=True),
+        ),
     ]
