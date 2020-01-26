@@ -81,10 +81,10 @@ urlpatterns = [
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
     url(r'^rigboard/activity/$',
-        permission_required_with_403('perms.RIGS.view_event')(versioning.ActivityTable.as_view()),
+        permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
         name='activity_table'),
     url(r'^rigboard/activity/feed/$',
-        permission_required_with_403('perms.RIGS.view_event')(versioning.ActivityFeed.as_view()),
+        permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
     url(r'^event/(?P<pk>\d+)/$', has_oembed(oembed_view="event_oembed")(
