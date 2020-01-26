@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_rigs.html' %}
 {% load widget_tweaks %}
 {% load static %}
 {% load multiply from filters %}
@@ -63,7 +63,7 @@
                         } else {
                             $('.form-is_rig').slideDown();
                         }
-                        $('.form-hws').css('overflow', 'visible');
+                        $('.form-hws, .form-hws .form-is_rig').css('overflow', 'visible');
                     } else {
                         $('#{{form.is_rig.auto_id}}').prop('checked', false);
                         $('.form-is_rig').slideUp();
@@ -289,10 +289,10 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="Start date for event, required">
-                                    {% render_field form.start_date type="date" class+="form-control" %}
+                                    {% render_field form.start_date class+="form-control" %}
                                 </div>
                                 <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="Start time of event, can be left blank">
-                                    {% render_field form.start_time type="time" class+="form-control" %}
+                                    {% render_field form.start_time class+="form-control" %}
                                 </div>
                             </div>
                         </div>
@@ -304,10 +304,10 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
-                                    {% render_field form.end_date type="date" class+="form-control" %}
+                                    {% render_field form.end_date class+="form-control" %}
                                 </div>
                                 <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="End time of event, leave blank if unknown">
-                                    {% render_field form.end_time type="time" class+="form-control" %}
+                                    {% render_field form.end_time class+="form-control" %}
                                 </div>
                             </div>
 
@@ -329,7 +329,7 @@
                                    class="col-sm-4 control-label">{{ form.access_at.label }}</label>
 
                             <div class="col-sm-8">
-                                {% render_field form.access_at type="datetime-local" class+="form-control" %}
+                                {% render_field form.access_at class+="form-control" %}
                             </div>
                         </div>
                         <div class="form-group" data-toggle="tooltip" title="The date/time at which crew should meet for this event">
@@ -337,7 +337,7 @@
                                    class="col-sm-4 control-label">{{ form.meet_at.label }}</label>
 
                             <div class="col-sm-8">
-                                {% render_field form.meet_at type="datetime-local" class+="form-control" %}
+                                {% render_field form.meet_at class+="form-control" %}
                             </div>
                         </div>
                         <div class="form-group">
@@ -398,6 +398,7 @@
                                 {% render_field form.collector class+="form-control" %}
                             </div>
                         </div>
+
                         <div class="form-group" data-toggle="tooltip" title="The purchase order number (for external clients)">
                             <label for="{{ form.purchase_order.id_for_label }}"
                                    class="col-sm-4 control-label">{{ form.purchase_order.label }}</label>

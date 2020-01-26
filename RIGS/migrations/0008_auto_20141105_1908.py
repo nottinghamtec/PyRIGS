@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 from django.conf import settings
@@ -33,11 +33,11 @@ class Migration(migrations.Migration):
                 ('payment_method', models.CharField(blank=True, null=True, max_length=255)),
                 ('payment_received', models.CharField(blank=True, null=True, max_length=255)),
                 ('purchase_order', models.CharField(blank=True, null=True, max_length=255)),
-                ('based_on', models.ForeignKey(to='RIGS.Event', related_name='future_events')),
-                ('checked_in_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='event_checked_in')),
-                ('mic', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='event_mic')),
-                ('organisation', models.ForeignKey(to='RIGS.Organisation')),
-                ('person', models.ForeignKey(to='RIGS.Person')),
+                ('based_on', models.ForeignKey(to='RIGS.Event', related_name='future_events', on_delete=models.CASCADE)),
+                ('checked_in_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='event_checked_in', on_delete=models.CASCADE)),
+                ('mic', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='event_mic', on_delete=models.CASCADE)),
+                ('organisation', models.ForeignKey(to='RIGS.Organisation', on_delete=models.CASCADE)),
+                ('person', models.ForeignKey(to='RIGS.Person', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('quantity', models.IntegerField()),
                 ('cost', models.DecimalField(max_digits=10, decimal_places=2)),
                 ('order', models.IntegerField()),
-                ('event', models.ForeignKey(to='RIGS.Event', related_name='item')),
+                ('event', models.ForeignKey(to='RIGS.Event', related_name='item', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='event',
             name='venue',
-            field=models.ForeignKey(to='RIGS.Venue'),
+            field=models.ForeignKey(to='RIGS.Venue', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

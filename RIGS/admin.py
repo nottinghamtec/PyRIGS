@@ -2,7 +2,7 @@ from django.contrib import admin
 from RIGS import models, forms
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
-import reversion
+from reversion.admin import VersionAdmin
 
 from django.contrib.admin import helpers
 from django.template.response import TemplateResponse
@@ -12,10 +12,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from django.forms import ModelForm
 
+from reversion import revisions as reversion
+
 # Register your models here.
-admin.site.register(models.VatRate, reversion.VersionAdmin)
-admin.site.register(models.Event, reversion.VersionAdmin)
-admin.site.register(models.EventItem, reversion.VersionAdmin)
+admin.site.register(models.VatRate, VersionAdmin)
+admin.site.register(models.Event, VersionAdmin)
+admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice)
 admin.site.register(models.Payment)
 
@@ -41,7 +43,7 @@ class ProfileAdmin(UserAdmin):
     add_form = forms.ProfileCreationForm
 
 
-class AssociateAdmin(reversion.VersionAdmin):
+class AssociateAdmin(VersionAdmin):
     list_display = ('id', 'name', 'number_of_events')
     search_fields = ['id', 'name']
     list_display_links = ['id', 'name']
@@ -93,8 +95,7 @@ class AssociateAdmin(reversion.VersionAdmin):
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'forms': forms
             }
-            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context,
-                                    current_app=self.admin_site.name)
+            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context)
 
 
 @admin.register(models.Person)

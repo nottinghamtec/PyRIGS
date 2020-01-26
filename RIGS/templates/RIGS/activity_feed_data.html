@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base.html" %}
+{% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base_rigs.html" %}
 
 {% load static %}
 {% load paginator from filters %}
@@ -33,13 +33,13 @@
                 {% endif %}
                       <p>
                       <small>
-                        {% if version.old == None %}
+                        {% if version.changes.old == None %}
                           Created
                         {% else %}
                           Changed {% include 'RIGS/version_changes.html' %} in
                         {% endif %}
                           
-                        {% include 'RIGS/object_button.html' with object=version.new %}
+                        {% include 'RIGS/object_button.html' with object=version.changes.new %}
                         {% if version.revision.comment %}
                           ({{ version.revision.comment }})
                         {% endif %}

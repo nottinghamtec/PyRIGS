@@ -1,0 +1,58 @@
+{% load static from staticfiles %}
+{% load raven %}
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+  </head>
+
+  <body>
+
+    <table class="main-table">
+        <tr class="client-header">
+          <td align="center">
+            <!--[if mso]>
+             <center>
+             <table><tr><td width="640">
+            <![endif]-->
+            <table class="logos" cellpadding=20>
+                <tr>
+                    <td align="left">
+                        <img src="https://www.nottinghamtec.co.uk/imgs/tec_logo_white.png"/>
+                    </td>
+                    <td align="right">
+                        <img src="https://www.nottinghamtec.co.uk/imgs/UoNSU.png"/>
+                    </td>
+                </tr>
+            </table>
+            <!--[if mso]>
+             </td></tr></table>
+             </center>
+            <![endif]--> 
+          </td>
+        </tr>
+        <tr>
+        <td align="center" class="content-container">
+                <!--[if mso]>
+                 <center>
+                 <table><tr><td width="600">
+                <![endif]-->
+                <div class="content">
+                    {% block content %}{% endblock %}
+                </div>
+                <!--[if mso]>
+                 </td></tr></table>
+                 </center>
+                <![endif]--> 
+            </td>
+        </tr>
+    </table>
+
+    
+
+  </body>
+</html>

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_rigs.html' %}
 {% load paginator from filters %}
 
 {% block title %}Invoices{% endblock %}
@@ -51,7 +51,7 @@
                         <td>{% if object.event.organisation %}
                                 {{ object.event.organisation.name }}
                                 <br>
-                                <span class="text-muted">{{ object.event.organisation.union_account|yesno:'Internal,External' }}</span>
+                                <span class="text-muted">{{ object.event.internal|yesno:'Internal,External' }}</span>
                             {% else %}
                                 {{ object.event.person.name }}
                                 <br>
@@ -60,7 +60,11 @@
                         </td>
                         <td>{{ object.event.start_date }}</td>
                         <td>{{ object.invoice_date }}</td>
-                        <td>{{ object.balance|floatformat:2 }}</td>
+                        <td>
+                            {{ object.balance|floatformat:2 }}
+                            <br />
+                            <span class="text-muted">{{ object.event.purchase_order }}</span>
+                        </td>
                         <td class="text-right">
                             <a href="{% url 'invoice_detail' object.pk %}" class="btn btn-default">
                                 <span class="glyphicon glyphicon-pencil"></span>

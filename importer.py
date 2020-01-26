@@ -19,6 +19,7 @@ from multiprocessing import Process
 # Slight fix for needing to restablish the connection
 connection.close()
 
+
 def fix_email(email):
     if not (email is None or email is "") and ("@" not in email):
         email += "@nottingham.ac.uk"
@@ -31,7 +32,7 @@ def setup_cursor():
         return cursor
     except ConnectionDoesNotExist:
         print("Legacy database is not configured")
-        print(connections._databases)
+        print((connections._databases))
         return None
 
 
@@ -55,13 +56,13 @@ def import_users(delete=False):
             object.initials = row[6]
             object.phone = row[7]
             object.save()
-            print("Updated " + str(object))
+            print(("Updated " + str(object)))
         except ObjectDoesNotExist:
             object = models.Profile(pk=row[0], username=row[1], email=row[2], first_name=row[3], last_name=row[4],
                                     is_active=row[5], initials=row[6], phone=row[7])
             object.set_password(uuid.uuid4().hex)
             object.save()
-            print("Created " + str(object))
+            print(("Created " + str(object)))
 
 
 def import_people(delete=False):
@@ -85,15 +86,15 @@ def import_people(delete=False):
         if row[5] != "Normal":
             notes = row[5]
 
-        print("Trying %s %s %s" % (pk, name, phone))
+        print(("Trying %s %s %s" % (pk, name, phone)))
         person, created = models.Person.objects.get_or_create(pk=pk, name=name, phone=phone, email=email,
                                                               address=address, notes=notes)
         if created:
-            print("Created: " + person.__str__())
+            print(("Created: " + person.__str__()))
             with reversion.create_revision():
                 person.save()
         else:
-            print("Found: " + person.__str__())
+            print(("Found: " + person.__str__()))
 
 
 def import_organisations(delete=False):
@@ -113,11 +114,11 @@ def import_organisations(delete=False):
                                                                     address=row[3],
                                                                     union_account=row[4], notes=notes)
         if created:
-            print("Created: " + object.__str__())
+            print(("Created: " + object.__str__()))
             with reversion.create_revision():
                 object.save()
         else:
-            print("Found: " + object.__str__())
+            print(("Found: " + object.__str__()))
 
 
 def import_vat_rates(delete=False):
@@ -133,11 +134,11 @@ def import_vat_rates(delete=False):
         object, created = models.VatRate.objects.get_or_create(pk=row[0], start_at=start_at,
                                                                comment=row[3], rate=row[4])
         if created:
-            print("Created: " + object.__str__())
+            print(("Created: " + object.__str__()))
             with reversion.create_revision():
                 object.save()
         else:
-            print("Found: " + object.__str__())
+            print(("Found: " + object.__str__()))
 
 
 def import_venues(delete=False):
@@ -258,7 +259,7 @@ def import_nonrigs(delete=False):
     if (delete):
         try:
             models.Event.objects.filter(is_rig=False).delete()
-        except:
+        except BaseException:
             pass
     cursor = setup_cursor()
     if cursor is None:
@@ -286,7 +287,7 @@ def import_invoices(delete=False):
         try:
             models.Invoice.objects.all().delete()
             models.Payment.objects.all().delete()
-        except:
+        except BaseException:
             pass
     cursor = setup_cursor()
     if cursor is None:
@@ -295,11 +296,11 @@ def import_invoices(delete=False):
     cursor.execute(sql)
     for row in cursor.fetchall():
         print(row)
-        print row[1]
+        print(row[1])
         try:
             event = models.Event.objects.get(pk=row[1])
         except ObjectDoesNotExist:
-            print "Event %d not found" % row[1]
+            print("Event %d not found" % row[1])
             continue
         print(event)
 
@@ -332,6 +333,7 @@ def import_invoices(delete=False):
             p2.date = datetime.date.today()
             p2.save()
 
+
 @transaction.atomic
 def main():
     # processs = []
@@ -340,7 +342,7 @@ def main():
     # processs.append(Process(target=import_organisations, args=(True,)))
     # processs.append(Process(target=import_vat_rates, args=(True,)))
     # processs.append(Process(target=import_venues, args=(True,)))
-    
+
     #  # Start all processs
     # [x.start() for x in processs]
     # # Wait for all processs to finish
@@ -351,7 +353,7 @@ def main():
     import_organisations(True)
     import_vat_rates(True)
     import_venues(True)
-    
+
     import_rigs(True)
     import_eventitem(True)
     import_invoices(True)
@@ -367,6 +369,7 @@ def main():
         sql = "SELECT setval(\'\"RIGS_%s_id_seq\"\', (SELECT MAX(id) FROM \"RIGS_%s\"));" % (seq, seq)
         cursor = connections['default'].cursor()
         cursor.execute(sql)
+
 
 if __name__ == "__main__":
     main()

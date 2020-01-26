@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 
@@ -14,13 +14,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='event',
             name='venue',
-            field=models.ForeignKey(blank=True, to='RIGS.Venue', null=True),
+            field=models.ForeignKey(blank=True, to='RIGS.Venue', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='eventitem',
             name='event',
-            field=models.ForeignKey(related_name='items', blank=True, to='RIGS.Event'),
+            field=models.ForeignKey(related_name='items', blank=True, to='RIGS.Event', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

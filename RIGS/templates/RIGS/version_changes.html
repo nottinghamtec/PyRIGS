@@ -1,21 +1,26 @@
-{% for change in version.field_changes %}
+{% if version.changes.item_changes or version.changes.field_changes or version.changes.old == None %}
 
-	<button title="Changes to {{ change.field.verbose_name }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
-        {% include "RIGS/version_changes_change.html" %}
-        {% endspaceless %}'>{{ change.field.verbose_name }}</button>
+    {% for change in version.changes.field_changes %}
 
-{% endfor %}
+    	<button title="Changes to {{ change.field.verbose_name }}" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
+            {% include "RIGS/version_changes_change.html" %}
+            {% endspaceless %}'>{{ change.field.verbose_name }}</button>
 
-{% for itemChange in version.item_changes %}
-    <button title="Changes to item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
-        <ul class="list-group">
-        {% for change in itemChange.changes %}
-              <li class="list-group-item">
-                <h4 class="list-group-item-heading">{{ change.field.verbose_name }}</h4>
-                {% include "RIGS/version_changes_change.html" %}
-              </li>
-        {% endfor %}
-        </ul>
-        
-        {% endspaceless %}'>item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'</button>
-{% endfor %}
+    {% endfor %}
+
+    {% for itemChange in version.changes.item_changes %}
+        <button title="Changes to item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'" type="button" class="btn btn-default btn-xs" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
+            <ul class="list-group">
+            {% for change in itemChange.field_changes %}
+                  <li class="list-group-item">
+                    <h4 class="list-group-item-heading">{{ change.field.verbose_name }}</h4>
+                    <div class="dont-break-out">{% include "RIGS/version_changes_change.html" %}</div>
+                  </li>
+            {% endfor %}
+            </ul>
+            
+            {% endspaceless %}'>item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'</button>
+    {% endfor %}
+{% else %}
+    nothing useful
+{% endif %}
