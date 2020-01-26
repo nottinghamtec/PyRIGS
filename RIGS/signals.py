@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import get_template
+from django.urls import reverse
 from django.utils import timezone
 from registration.signals import user_activated
 from premailer import Premailer
@@ -109,13 +110,13 @@ post_save.connect(on_revision_commit, sender=models.EventAuthorisation)
 
 def send_admin_awaiting_approval_email(user, request, **kwargs):
     # Bit more controlled than just emailing all superusers
-    for admin in models.Profile.objects.filter(email__in=[y for x in settings.ADMINS for y in x]):
+    for admin in models.Profile.admins():
         # Check we've ever emailed them before and if so, if cooldown has passed.
         if admin.last_emailed is None or admin.last_emailed + settings.EMAIL_COOLDOWN <= timezone.now():
             context = {
                 'request': request,
-                'link_suffix': '/admin/RIGS/profile/?is_approved__exact=0',
-                'number_of_users': models.Profile.users_awaiting_approval_count(models.Profile.objects),
+                'link_suffix': reverse("admin:RIGS_profile_changelist") + '?is_approved__exact=0',
+                'number_of_users': models.Profile.users_awaiting_approval_count(),
                 'to_name': admin.first_name
             }
 
