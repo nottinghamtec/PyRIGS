@@ -111,7 +111,7 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
     # Bit more controlled than just emailing all superusers
     for admin in models.Profile.objects.filter(email__in=[y for x in settings.ADMINS for y in x]):
         # Check we've ever emailed them before and if so, if cooldown has passed.
-        if admin.last_emailed is None or admin.last_emailed + datetime.timedelta(minutes=15) <= timezone.now():
+        if admin.last_emailed is None or admin.last_emailed + settings.EMAIL_COOLDOWN <= timezone.now():
             context = {
                 'request': request,
                 'link_suffix': '/admin/RIGS/profile/?is_approved__exact=0',
