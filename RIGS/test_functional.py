@@ -233,7 +233,7 @@ class EventTest(LiveServerTestCase):
 
         # Slider expands and save button visible
         self.assertTrue(save.is_displayed())
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
 
         # For now, just check that HTML5 Client validation is in place TODO Test needs rewriting to properly test all levels of validation.
         self.assertTrue(self.browser.find_element_by_id('id_name').get_attribute('required') is not None)
@@ -471,7 +471,7 @@ class EventTest(LiveServerTestCase):
 
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
 
         # Check the items are visible
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -553,7 +553,7 @@ class EventTest(LiveServerTestCase):
         # Click Rig button
         self.browser.find_element_by_xpath('//button[.="Rig"]').click()
 
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('//*[@id="content"]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         # Set title
@@ -583,7 +583,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # Same date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -602,7 +602,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # Same date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -615,7 +615,7 @@ class EventTest(LiveServerTestCase):
         form.find_element_by_id('id_end_time').send_keys('06:00')
 
         # No end date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -634,7 +634,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # 2 dates, end after start
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
         self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-26'")
@@ -667,7 +667,7 @@ class EventTest(LiveServerTestCase):
         # Click Rig button
         self.browser.find_element_by_xpath('//button[.="Rig"]').click()
 
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         # Set title
