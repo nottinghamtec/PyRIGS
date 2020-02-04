@@ -23,6 +23,7 @@
                     <li><a href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span>
                         New Event</a></li>
                 {% endif %}
+
             </ul>
         </li>
     {% endif %}
@@ -49,8 +50,5 @@
     {% endif %}
     {% if perms.RIGS.view_venue %}
         <li><a href="{% url 'venue_list' %}">Venues</a></li>
-    {% endif %}
-    {% if user.is_authenticated %}
-        <li class="navbar-right">{% include 'RIGS/omnibar.html' with form_class="navbar-form" %}</li>
     {% endif %}
 {% endblock %}
