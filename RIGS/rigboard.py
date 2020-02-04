@@ -256,24 +256,23 @@ class EventArchive(generic.ArchiveIndexView):
         if start:
             filter &= Q(start_date__gte=start)
 
-
         q = self.request.GET.get('q', "")
 
         if q is not "":
             qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
 
-            #try and parse an int
+            # try and parse an int
             try:
                 val = int(q)
                 qfilter = qfilter | Q(pk=val)
-            except: #not an integer
+            except:  # noqa not an integer
                 pass
 
             try:
                 if q[0] == "N":
                     val = int(q[1:])
-                    qfilter = Q(pk=val) #If string is N###### then do a simple PK filter
-            except:
+                    qfilter = Q(pk=val)  # If string is N###### then do a simple PK filter
+            except:  # noqa
                 pass
 
             filter &= qfilter

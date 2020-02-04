@@ -93,12 +93,12 @@ class PersonList(generic.ListView):
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 
-        #try and parse an int
+        # try and parse an int
         try:
             val = int(q)
             filter = filter | Q(pk=val)
-        except:
-            #not an integer
+        except:  # noqa
+            # not an integer
             pass
 
         object_list = self.model.objects.filter(filter)
@@ -156,12 +156,12 @@ class OrganisationList(generic.ListView):
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 
-        #try and parse an int
+        # try and parse an int
         try:
             val = int(q)
             filter = filter | Q(pk=val)
-        except:
-            #not an integer
+        except:  # noqa
+            # not an integer
             pass
 
         object_list = self.model.objects.filter(filter)
@@ -219,12 +219,12 @@ class VenueList(generic.ListView):
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 
-        #try and parse an int
+        # try and parse an int
         try:
             val = int(q)
             filter = filter | Q(pk=val)
-        except:
-            #not an integer
+        except:  # noqa
+            # not an integer
             pass
 
         object_list = self.model.objects.filter(filter)
