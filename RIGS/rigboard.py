@@ -230,6 +230,7 @@ class EventArchive(generic.ArchiveIndexView):
     model = models.Event
     paginate_by = 25
     template_name = "RIGS/event_archive.html"
+    date_field = "start_date"
 
     def get_context_data(self, **kwargs):
         # get super context
