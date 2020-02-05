@@ -95,6 +95,7 @@ class AssetCreateTests(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
+
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
