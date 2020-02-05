@@ -79,7 +79,7 @@ class AssetForm(FormPage):
         'date_acquired': (regions.DatePicker, (By.ID, 'id_date_acquired')),
         'date_sold': (regions.DatePicker, (By.ID, 'id_date_sold')),
         'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
-        'status': (regions.SingleSelectPicker, (By.ID, 'id_category')),
+        'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
 
         'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
         'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),

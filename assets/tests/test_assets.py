@@ -9,6 +9,7 @@ from RIGS import models as rigsmodels
 from PyRIGS.tests.base import BaseTest, AutoLoginTest
 from assets import models
 from reversion import revisions as reversion
+from selenium.webdriver.common.keys import Keys
 import datetime
 
 
@@ -48,6 +49,51 @@ class AssetListTests(AutoLoginTest):
         self.assertEqual("10", assetIDs[2])
         self.assertEqual("C1", assetIDs[3])
 
+
+class AssetCreateTests(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        self.category = models.AssetCategory.objects.create(name="Health & Safety")
+        self.status = models.AssetStatus.objects.create(name="O.K.", should_show=True)
+        self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
+        self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
+        self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
+
+    def test_asset_form(self):
+        # Test that ID is automatically assigned and properly incremented
+        self.assertIn(self.page.asset_id, "9001")
+
+        self.page.description = "Bodge Lead"
+        self.page.category = "Health & Safety"
+        self.page.status = "O.K."
+        self.page.serial_number = "0124567890-SAUSAGE"
+        self.page.comments = "This is actually a sledgehammer, not a cable..."
+
+        self.page.purchased_from_selector.toggle()
+        self.assertTrue(self.page.purchased_from_selector.is_open)
+        self.page.purchased_from_selector.search(self.supplier.name[:-8])
+        self.page.purchased_from_selector.set_option(self.supplier.name, True)
+        self.assertFalse(self.page.purchased_from_selector.is_open)
+        self.page.purchase_price = "12.99"
+        self.page.salvage_value = "99.12"
+        self.date_acquired = "05022020"
+
+        self.page.parent_selector.toggle()
+        self.assertTrue(self.page.parent_selector.is_open)
+        # Searching it by ID autoselects it
+        self.page.parent_selector.search(self.parent.asset_id)
+        # Needed here but not earlier for whatever reason
+        self.driver.implicitly_wait(3)
+        # self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
+        # Need to explicitly close as we haven't selected anything to trigger the auto close
+        self.page.parent_selector.search(Keys.ESCAPE)
+        self.assertFalse(self.page.parent_selector.is_open)
+        self.assertTrue(self.page.parent_selector.options[0].selected)
+
+        self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
 
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
