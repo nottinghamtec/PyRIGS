@@ -107,6 +107,7 @@ class TestVersioningViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
 
+
 class TestEmbeddedViews(TestCase):
     @classmethod
     def setUpTestData(cls):
