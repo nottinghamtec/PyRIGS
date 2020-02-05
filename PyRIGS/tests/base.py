@@ -16,7 +16,6 @@ def create_browser():
 
 
 class BaseTest(LiveServerTestCase):
-    @classmethod
     def setUp(self):
         super().setUpClass()
         self.driver = create_browser()

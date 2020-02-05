@@ -6,7 +6,7 @@
   </div>
   <div class="panel-body">
     {% if create or edit or duplicate %}
-    <div class="form-group">
+    <div class="form-group" id="parent-group">
       <label for="selectpicker">Set Parent</label>
       {% include 'partials/asset_picker.html' %}
     </div>
