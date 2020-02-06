@@ -50,7 +50,7 @@ class AssetListTests(AutoLoginTest):
         self.assertEqual("C1", assetIDs[3])
 
 
-class TestAssetCreate(AutoLoginTest):
+class TestAssetForm(AutoLoginTest):
     def setUp(self):
         super().setUp()
         self.category = models.AssetCategory.objects.create(name="Health & Safety")
@@ -60,7 +60,7 @@ class TestAssetCreate(AutoLoginTest):
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
-    def test_asset_form(self):
+    def test_asset_create(self):
         # Test that ID is automatically assigned and properly incremented
         self.assertIn(self.page.asset_id, "9001")
 
@@ -96,7 +96,7 @@ class TestAssetCreate(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-    def test_cable_asset_form(self):
+    def test_cable_create(self):
         self.page.description = "IEC -> IEC"
         self.page.category = "Health & Safety"
         self.page.status = "O.K."
@@ -115,11 +115,29 @@ class TestAssetCreate(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
+    def test_asset_edit(self):
+        self.page = pages.AssetEdit(self.driver, self.live_server_url, asset_id="9000").open()
+
+        self.assertTrue(self.driver.find_element_by_id('id_asset_id').get_attribute('readonly') is not None)
+
+        new_description = "Big Shelf"
+        self.page.description = new_description
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+        self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
+
 
 class TestFormValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.profile = rigsmodels.Profile.objects.create(username="AssetCreateValidationTest", email="acvt@test.com", is_superuser=True, is_active=True, is_staff=True)
+        cls.category = models.AssetCategory.objects.create(name="Sound")
+        cls.status = models.AssetStatus.objects.create(name="Broken", should_show=True)
+        cls.asset = models.Asset.objects.create(asset_id="9999", description="The Office", status=cls.status, category=cls.category, date_acquired=datetime.date(2018, 6, 15))
+        cls.connector = models.Connector.objects.create(description="16A IEC", current_rating=16, voltage_rating=240, num_pins=3)
+        cls.cable_asset = models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=cls.status, category=cls.category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, plug=cls.connector, socket=cls.connector, length=10, csa="1.5", circuits=1, cores=3)
 
     def setUp(self):
         self.profile.set_password('testuser')
@@ -149,6 +167,33 @@ class TestFormValidation(TestCase):
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
         self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
         self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
+
+    # Given that validation is done at model level it *shouldn't* need retesting...gonna do it anyway!
+    def test_asset_edit(self):
+        url = reverse('asset_update', kwargs={'pk': self.asset.asset_id})
+        response = self.client.post(url, {'date_sold': '2000-12-01', 'date_acquired': '2020-12-01', 'purchase_price': '-50', 'salvage_value': '-50', 'description': "", 'status': "", 'category': ""})
+        # self.assertFormError(response, 'form', 'asset_id', 'This field is required.')
+        self.assertFormError(response, 'form', 'description', 'This field is required.')
+        self.assertFormError(response, 'form', 'status', 'This field is required.')
+        self.assertFormError(response, 'form', 'category', 'This field is required.')
+
+        self.assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
+        self.assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
+        self.assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+
+    def test_cable_edit(self):
+        url = reverse('asset_update', kwargs={'pk': self.cable_asset.asset_id})
+        # TODO Why do I have to send is_cable=True here?
+        response = self.client.post(url, {'is_cable': True, 'length': -3, 'csa': -3, 'circuits': -4, 'cores': -8})
+
+        # Can't figure out how to select the 'none' option...
+        # self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
+        # self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
+        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
+
 
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
