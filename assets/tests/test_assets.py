@@ -50,7 +50,7 @@ class AssetListTests(AutoLoginTest):
         self.assertEqual("C1", assetIDs[3])
 
 
-class AssetCreateTests(AutoLoginTest):
+class TestAssetCreate(AutoLoginTest):
     def setUp(self):
         super().setUp()
         self.category = models.AssetCategory.objects.create(name="Health & Safety")
@@ -115,6 +115,40 @@ class AssetCreateTests(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
+
+class TestFormValidation(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = rigsmodels.Profile.objects.create(username="AssetCreateValidationTest", email="acvt@test.com", is_superuser=True, is_active=True, is_staff=True)
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_asset_create(self):
+        url = reverse('asset_create')
+        response = self.client.post(url, {'date_sold': '2000-01-01', 'date_acquired': '2020-01-01', 'purchase_price': '-30', 'salvage_value': '-30'})
+        self.assertFormError(response, 'form', 'asset_id', 'This field is required.')
+        self.assertFormError(response, 'form', 'description', 'This field is required.')
+        self.assertFormError(response, 'form', 'status', 'This field is required.')
+        self.assertFormError(response, 'form', 'category', 'This field is required.')
+
+        self.assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
+        self.assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
+        self.assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+
+    def test_cable_create(self):
+        url = reverse('asset_create')
+        response = self.client.post(url, {'asset_id': 'X$%A', 'is_cable': True})
+        self.assertFormError(response, 'form', 'asset_id', 'An Asset ID can only consist of letters and numbers, with a final number')
+
+        self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
+        self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
+        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
