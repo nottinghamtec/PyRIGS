@@ -129,6 +129,65 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
 
 
+# @tag('slow') TODO: Django 2
+class TestAccessLevels(TestCase):
+    @override_settings(DEBUG=True)
+    def setUp(self):
+        super().setUp()
+        # Shortcut to create the levels - bonus side effect of testing the command (hopefully) matches production
+        call_command('generateSampleData')
+
+    def test_basic_access(self):
+        self.assertTrue(self.client.login(username="basic", password="basic"))
+
+        url = reverse('asset_list')
+        response = self.client.get(url)
+        # Check edit and duplicate buttons not shown in list
+        self.assertNotContains(response, 'Edit')
+        self.assertNotContains(response, 'Duplicate')
+
+        url = reverse('asset_detail', kwargs={'pk': "9000"})
+        response = self.client.get(url)
+        self.assertNotContains(response, 'Purchase Details')
+        self.assertNotContains(response, 'View Revision History')
+
+        request_url = reverse('asset_update', kwargs={'pk': "9000"})
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 403)
+
+        request_url = reverse('asset_duplicate', kwargs={'pk': "9000"})
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 403)
+
+        request_url = reverse('asset_history', kwargs={'pk': "9000"})
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 403)
+
+        request_url = reverse('supplier_create')
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 403)
+
+        request_url = reverse('supplier_update', kwargs={'pk': "1"})
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_keyholder_access(self):
+        self.assertTrue(self.client.login(username="keyholder", password="keyholder"))
+
+        url = reverse('asset_list')
+        response = self.client.get(url)
+        # Check edit and duplicate buttons shown in list
+        self.assertContains(response, 'Edit')
+        self.assertContains(response, 'Duplicate')
+
+        url = reverse('asset_detail', kwargs={'pk': "9000"})
+        response = self.client.get(url)
+        self.assertContains(response, 'Purchase Details')
+        self.assertContains(response, 'View Revision History')
+
+    # def test_finance_access(self): Level not used in assets currently
+
+
 class TestFormValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
