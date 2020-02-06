@@ -57,6 +57,7 @@ class AssetCreateTests(AutoLoginTest):
         self.status = models.AssetStatus.objects.create(name="O.K.", should_show=True)
         self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
+        self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_form(self):
@@ -83,7 +84,7 @@ class AssetCreateTests(AutoLoginTest):
         # Searching it by ID autoselects it
         self.page.parent_selector.search(self.parent.asset_id)
         # Needed here but not earlier for whatever reason
-        self.driver.implicitly_wait(3)
+        self.driver.implicitly_wait(1)
         # self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
         # Need to explicitly close as we haven't selected anything to trigger the auto close
         self.page.parent_selector.search(Keys.ESCAPE)
@@ -91,6 +92,25 @@ class AssetCreateTests(AutoLoginTest):
         self.assertTrue(self.page.parent_selector.options[0].selected)
 
         self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+    def test_cable_asset_form(self):
+        self.page.description = "IEC -> IEC"
+        self.page.category = "Health & Safety"
+        self.page.status = "O.K."
+        self.page.serial_number = "MELON-MELON-MELON"
+        self.page.comments = "You might need that"
+        self.page.is_cable = True
+
+        self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
+        self.page.plug = "IEC"
+        self.page.socket = "IEC"
+        self.page.length = 10
+        self.page.csa = "1.5"
+        self.page.circuits = 1
+        self.page.cores = 3
 
         self.page.submit()
         self.assertTrue(self.page.success)
