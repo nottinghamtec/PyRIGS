@@ -129,6 +129,43 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
 
 
+class SupplierListTests(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        models.Supplier.objects.create(name="Fullmetal Heavy Industry")
+        models.Supplier.objects.create(name="Acme.")
+        models.Supplier.objects.create(name="TEC PA & Lighting")
+        models.Supplier.objects.create(name="Caterpillar Inc.")
+        models.Supplier.objects.create(name="N.E.R.D")
+        models.Supplier.objects.create(name="Khumalo")
+        models.Supplier.objects.create(name="1984 Incorporated")
+        self.page = pages.SupplierList(self.driver, self.live_server_url).open()
+
+    def test_order(self):
+        names = list(map(lambda x: x.name, self.page.suppliers))
+        self.assertEqual("1984 Incorporated", names[0])
+        self.assertEqual("Acme.", names[1])
+        self.assertEqual("Caterpillar Inc.", names[2])
+        self.assertEqual("Fullmetal Heavy Industry", names[3])
+        self.assertEqual("Khumalo", names[4])
+        self.assertEqual("N.E.R.D", names[5])
+        self.assertEqual("TEC PA & Lighting", names[6])
+
+    def test_search(self):
+        self.page.set_query("TEC")
+        self.page.search()
+        self.assertTrue(len(self.page.suppliers) == 1)
+        self.assertEqual("TEC PA & Lighting", self.page.suppliers[0].name)
+
+        self.page.set_query("")
+        self.page.search()
+        self.assertTrue(len(self.page.suppliers) == 7)
+
+        self.page.set_query("This is not a supplier")
+        self.page.search()
+        self.assertTrue(len(self.page.suppliers) == 0)
+
+
 # @tag('slow') TODO: req. Django 3.0
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
@@ -269,7 +306,7 @@ class TestSampleDataGenerator(TestCase):
         call_command('deleteSampleData')
 
         self.assertTrue(models.Asset.objects.all().count() == 0)
-        self.assertTrue(models.Asset.objects.all().count() == 0)
+        self.assertTrue(models.Supplier.objects.all().count() == 0)
 
     def test_production_exception(self):
         from django.core.management.base import CommandError

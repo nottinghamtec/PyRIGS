@@ -124,3 +124,34 @@ class AssetCreate(AssetForm):
     @property
     def success(self):
         return '/create' not in self.driver.current_url
+
+
+class SupplierList(BasePage):
+    URL_TEMPLATE = reverse('supplier_list')
+
+    _supplier_item_locator = (By.CLASS_NAME, 'supplierRow')
+    _search_text_locator = (By.ID, 'id_query')
+    _go_button_locator = (By.ID, 'id_search')
+
+    class SupplierListRow(Region):
+        _name_locator = (By.CLASS_NAME, "supplierName")
+
+        @property
+        def name(self):
+            return self.find_element(*self._name_locator).text
+
+    @property
+    def suppliers(self):
+        return [self.SupplierListRow(self, i) for i in self.find_elements(*self._supplier_item_locator)]
+
+    @property
+    def query(self):
+        return self.find_element(*self._search_text_locator).text
+
+    def set_query(self, queryString):
+        element = self.find_element(*self._search_text_locator)
+        element.clear()
+        element.send_keys(queryString)
+
+    def search(self):
+        self.find_element(*self._go_button_locator).click()
