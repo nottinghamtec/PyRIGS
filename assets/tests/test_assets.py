@@ -7,7 +7,7 @@ from django.urls import reverse
 from urllib.parse import urlparse
 from RIGS import models as rigsmodels
 from PyRIGS.tests.base import BaseTest, AutoLoginTest
-from assets import models
+from assets import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.common.keys import Keys
 import datetime
@@ -264,6 +264,24 @@ class TestSupplierValidation(TestCase):
         self.assertFormError(response, 'form', 'name', 'This field is required.')
 
 
+class Test404(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = rigsmodels.Profile.objects.create(username="404Test", email="404@test.com", is_superuser=True, is_active=True, is_staff=True)
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test(self):
+        urls = {'asset_detail', 'asset_update', 'asset_duplicate', 'supplier_detail', 'supplier_update',}
+        for url_name in urls:
+            request_url = reverse(url_name, kwargs={'pk': "0000"})
+            response = self.client.get(request_url, follow=True)
+            self.assertEqual(response.status_code, 404)
+
+
 # @tag('slow') TODO: req. Django 3.0
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
@@ -271,6 +289,24 @@ class TestAccessLevels(TestCase):
         super().setUp()
         # Shortcut to create the levels - bonus side effect of testing the command (hopefully) matches production
         call_command('generateSampleData')
+
+    # Nothing should be available to the unauthenticated
+    def test_unauthenticated(self):
+        for url in urls.urlpatterns:
+            if url.name is not None:
+                pattern = str(url.pattern)
+                if "json" in url.name or pattern:
+                    # TODO
+                    pass
+                elif ":pk>" in pattern:
+                    request_url = reverse(url.name, kwargs={'pk': 9})
+                else:
+                    request_url = reverse(url.name)
+                response = self.client.get(request_url, HTTP_HOST='example.com')
+                self.assertEqual(response.status_code, 302)
+                response = self.client.get(request_url, follow=True, HTTP_HOST='example.com')
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'login')
 
     def test_basic_access(self):
         self.assertTrue(self.client.login(username="basic", password="basic"))
@@ -286,17 +322,11 @@ class TestAccessLevels(TestCase):
         self.assertNotContains(response, 'Purchase Details')
         self.assertNotContains(response, 'View Revision History')
 
-        request_url = reverse('asset_update', kwargs={'pk': "9000"})
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 403)
-
-        request_url = reverse('asset_duplicate', kwargs={'pk': "9000"})
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 403)
-
-        request_url = reverse('asset_history', kwargs={'pk': "9000"})
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 403)
+        urls = {'asset_history', 'asset_update', 'asset_duplicate'}
+        for url_name in urls:
+            request_url = reverse(url_name, kwargs={'pk': "9000"})
+            response = self.client.get(request_url, follow=True)
+            self.assertEqual(response.status_code, 403)
 
         request_url = reverse('supplier_create')
         response = self.client.get(request_url, follow=True)
