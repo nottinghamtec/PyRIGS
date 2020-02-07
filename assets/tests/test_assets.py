@@ -49,6 +49,46 @@ class TestAssetList(AutoLoginTest):
         self.assertEqual("10", assetIDs[2])
         self.assertEqual("C1", assetIDs[3])
 
+    def test_search(self):
+        self.page.set_query("10")
+        self.page.search()
+        self.assertTrue(len(self.page.assets) == 1)
+        self.assertEqual("Working Mic", self.page.assets[0].description)
+        self.assertEqual("10", self.page.assets[0].id)
+
+        self.page.set_query("light")
+        self.page.search()
+        self.assertTrue(len(self.page.assets) == 1)
+        self.assertEqual("A light", self.page.assets[0].description)
+
+        self.page.set_query("Random string")
+        self.page.search()
+        self.assertTrue(len(self.page.assets) == 0)
+
+        self.page.set_query("")
+        self.page.search()
+        # Only working stuff shown by default
+        self.assertTrue(len(self.page.assets) == 2)
+
+        self.page.status_selector.toggle()
+        self.assertTrue(self.page.status_selector.is_open)
+        self.page.status_selector.select_all()
+        self.page.status_selector.toggle()
+        self.assertFalse(self.page.status_selector.is_open)
+        self.page.search()
+        self.assertTrue(len(self.page.assets) == 4)
+
+        self.page.category_selector.toggle()
+        self.assertTrue(self.page.category_selector.is_open)
+        self.page.category_selector.set_option("Sound", True)
+        self.page.category_selector.close()
+        self.assertFalse(self.page.category_selector.is_open)
+        self.page.search()
+        self.assertTrue(len(self.page.assets) == 2)
+        assetIDs = list(map(lambda x: x.id, self.page.assets))
+        self.assertEqual("1", assetIDs[0])
+        self.assertEqual("2", assetIDs[1])
+
 
 class TestAssetForm(AutoLoginTest):
     def setUp(self):

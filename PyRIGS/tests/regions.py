@@ -21,8 +21,8 @@ class BootstrapSelectElement(Region):
     _main_button_locator = (By.CSS_SELECTOR, 'button.dropdown-toggle')
     _option_box_locator = (By.CSS_SELECTOR, 'ul.dropdown-menu')
     _option_locator = (By.CSS_SELECTOR, 'ul.dropdown-menu.inner>li>a[role=option]')
-    _select_all_locator = (By.CLASS_NAME, '.bs-select-all')
-    _deselect_all_locator = (By.CLASS_NAME, '.bs-deselect-all')
+    _select_all_locator = (By.CLASS_NAME, 'bs-select-all')
+    _deselect_all_locator = (By.CLASS_NAME, 'bs-deselect-all')
     _search_locator = (By.CSS_SELECTOR, '.bs-searchbox>input')
     _status_locator = (By.CLASS_NAME, 'status')
 
