@@ -87,7 +87,7 @@ class TestAssetList(AutoLoginTest):
         self.assertTrue(len(self.page.assets) == 2)
         assetIDs = list(map(lambda x: x.id, self.page.assets))
         self.assertEqual("1", assetIDs[0])
-        self.assertEqual("2", assetIDs[1])
+        self.assertEqual("10", assetIDs[1])
 
 
 class TestAssetForm(AutoLoginTest):
@@ -289,7 +289,7 @@ class Test404(TestCase):
         self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
 
     def test(self):
-        urls = {'asset_detail', 'asset_update', 'asset_duplicate', 'supplier_detail', 'supplier_update',}
+        urls = {'asset_detail', 'asset_update', 'asset_duplicate', 'supplier_detail', 'supplier_update'}
         for url_name in urls:
             request_url = reverse(url_name, kwargs={'pk': "0000"})
             response = self.client.get(request_url, follow=True)
