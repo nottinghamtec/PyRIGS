@@ -116,7 +116,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertTrue(self.page.success)
 
     def test_asset_edit(self):
-        self.page = pages.AssetEdit(self.driver, self.live_server_url, asset_id="9000").open()
+        self.page = pages.AssetEdit(self.driver, self.live_server_url, asset_id=self.parent.asset_id).open()
 
         self.assertTrue(self.driver.find_element_by_id('id_asset_id').get_attribute('readonly') is not None)
 
@@ -126,7 +126,20 @@ class TestAssetForm(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-        self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
+        self.assertEqual(models.Asset.objects.get(asset_id=self.parent.asset_id).description, new_description)
+
+    def test_asset_duplicate(self):
+        self.page = pages.AssetDuplicate(self.driver, self.live_server_url, asset_id=self.parent.asset_id).open()
+
+        self.assertNotEqual(self.parent.asset_id, self.page.asset_id)
+        self.assertEqual(self.parent.description, self.page.description)
+        self.assertEqual(self.parent.status.name, self.page.status)
+        self.assertEqual(self.parent.category.name, self.page.category)
+        self.assertEqual(self.parent.date_acquired, self.page.date_acquired.date())
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
+        self.assertEqual(models.Asset.objects.last().description, self.parent.description)
 
 
 class TestSupplierList(AutoLoginTest):
@@ -330,6 +343,15 @@ class TestFormValidation(TestCase):
         # Can't figure out how to select the 'none' option...
         # self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
         # self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
+        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
+        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
+
+    def test_asset_duplicate(self):
+        url = reverse('asset_duplicate', kwargs={'pk': self.cable_asset.asset_id})
+        response = self.client.post(url, {'is_cable': True, 'length': 0, 'csa': 0, 'circuits': 0, 'cores': 0})
+
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
         self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')

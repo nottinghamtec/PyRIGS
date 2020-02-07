@@ -68,6 +68,7 @@ class AssetList(BasePage):
 class AssetForm(FormPage):
     _purchased_from_select_locator = (By.CSS_SELECTOR, 'div#purchased-from-group>div.bootstrap-select')
     _parent_select_locator = (By.CSS_SELECTOR, 'div#parent-group>div.bootstrap-select')
+    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -97,15 +98,14 @@ class AssetForm(FormPage):
     def parent_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._parent_select_locator))
 
-
-class AssetEdit(AssetForm):
-    URL_TEMPLATE = '/assets/asset/id/{asset_id}/edit/'
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
-
     def submit(self):
         previous_errors = self.errors
         self.find_element(*self._submit_locator).click()
         self.wait.until(lambda x: self.errors != previous_errors or self.success)
+
+
+class AssetEdit(AssetForm):
+    URL_TEMPLATE = '/assets/asset/id/{asset_id}/edit/'
 
     @property
     def success(self):
@@ -114,16 +114,18 @@ class AssetEdit(AssetForm):
 
 class AssetCreate(AssetForm):
     URL_TEMPLATE = '/assets/asset/create/'
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
-
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
     @property
     def success(self):
         return '/create' not in self.driver.current_url
+
+
+class AssetDuplicate(AssetForm):
+    URL_TEMPLATE = '/assets/asset/id/{asset_id}/duplicate'
+
+    @property
+    def success(self):
+        return '/duplicate' not in self.driver.current_url
 
 
 class SupplierList(BasePage):
