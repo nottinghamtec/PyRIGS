@@ -129,7 +129,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
 
 
-# @tag('slow') TODO: Django 2
+# @tag('slow') TODO: req. Django 3.0
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -264,10 +264,18 @@ class TestSampleDataGenerator(TestCase):
         self.assertTrue(models.Asset.objects.all().count() > 50)
         self.assertTrue(models.Supplier.objects.all().count() > 50)
 
+    @override_settings(DEBUG=True)
+    def test_delete_sample_data(self):
+        call_command('deleteSampleData')
+
+        self.assertTrue(models.Asset.objects.all().count() == 0)
+        self.assertTrue(models.Asset.objects.all().count() == 0)
+
     def test_production_exception(self):
         from django.core.management.base import CommandError
 
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleAssetsData')
+        self.assertRaisesRegex(CommandError, ".*production", call_command, 'deleteSampleData')
 
 
 class TestVersioningViews(TestCase):
