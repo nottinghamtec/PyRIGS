@@ -13,7 +13,7 @@ from selenium.webdriver.common.keys import Keys
 import datetime
 
 
-class AssetListTests(AutoLoginTest):
+class TestAssetList(AutoLoginTest):
     def setUp(self):
         super().setUp()
         sound = models.AssetCategory.objects.create(name="Sound")
@@ -26,7 +26,7 @@ class AssetListTests(AutoLoginTest):
         models.Asset.objects.create(asset_id="10", description="Working Mic", status=working, category=sound, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="2", description="A light", status=working, category=lighting, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="C1", description="The pearl", status=broken, category=lighting, date_acquired=datetime.date(2020, 2, 1))
-        self.page = pages.AssetListPage(self.driver, self.live_server_url).open()
+        self.page = pages.AssetList(self.driver, self.live_server_url).open()
 
     def test_default_statuses_applied(self):
         # Only the working stuff should be shown initially
@@ -129,7 +129,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(models.Asset.objects.get(asset_id="9000").description, new_description)
 
 
-class SupplierListTests(AutoLoginTest):
+class TestSupplierList(AutoLoginTest):
     def setUp(self):
         super().setUp()
         models.Supplier.objects.create(name="Fullmetal Heavy Industry")
@@ -141,6 +141,7 @@ class SupplierListTests(AutoLoginTest):
         models.Supplier.objects.create(name="1984 Incorporated")
         self.page = pages.SupplierList(self.driver, self.live_server_url).open()
 
+    # Should be sorted alphabetically
     def test_order(self):
         names = list(map(lambda x: x.name, self.page.suppliers))
         self.assertEqual("1984 Incorporated", names[0])
@@ -164,6 +165,50 @@ class SupplierListTests(AutoLoginTest):
         self.page.set_query("This is not a supplier")
         self.page.search()
         self.assertTrue(len(self.page.suppliers) == 0)
+
+
+class TestSupplierCreateAndEdit(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
+
+    def test_supplier_create(self):
+        self.page = pages.SupplierCreate(self.driver, self.live_server_url).open()
+
+        self.page.name = "Optican Health Supplies"
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+    def test_supplier_edit(self):
+        self.page = pages.SupplierEdit(self.driver, self.live_server_url, supplier_id=self.supplier.pk).open()
+
+        self.assertEquals("Fullmetal Heavy Industry", self.page.name)
+        new_name = "Cyberdyne Systems"
+        self.page.name = new_name
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+
+class TestSupplierValidation(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = rigsmodels.Profile.objects.create(username="SupplierValidationTest", email="SVT@test.com", is_superuser=True, is_active=True, is_staff=True)
+        cls.supplier = models.Supplier.objects.create(name="Gadgetron Corporation")
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_create(self):
+        url = reverse('supplier_create')
+        response = self.client.post(url)
+        self.assertFormError(response, 'form', 'name', 'This field is required.')
+
+    def test_edit(self):
+        url = reverse('supplier_update', kwargs={'pk': self.supplier.pk})
+        response = self.client.post(url, {'name': ""})
+        self.assertFormError(response, 'form', 'name', 'This field is required.')
 
 
 # @tag('slow') TODO: req. Django 3.0

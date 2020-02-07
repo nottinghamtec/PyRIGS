@@ -9,7 +9,7 @@ from PyRIGS.tests.pages import BasePage, FormPage
 import pdb
 
 
-class AssetListPage(BasePage):
+class AssetList(BasePage):
     URL_TEMPLATE = '/assets/asset/list'
 
     _asset_item_locator = (By.CLASS_NAME, 'assetRow')
@@ -155,3 +155,32 @@ class SupplierList(BasePage):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+
+
+class SupplierForm(FormPage):
+    _submit_locator = (By.CLASS_NAME, 'btn-success')
+    form_items = {
+        'name': (regions.TextBox, (By.ID, 'id_name')),
+    }
+
+    def submit(self):
+        previous_errors = self.errors
+        self.find_element(*self._submit_locator).click()
+        self.wait.until(lambda x: self.errors != previous_errors or self.success)
+
+
+class SupplierCreate(SupplierForm):
+    URL_TEMPLATE = reverse('supplier_create')
+
+    @property
+    def success(self):
+        return '/create' not in self.driver.current_url
+
+
+class SupplierEdit(SupplierForm):
+    # TODO This should be using reverse
+    URL_TEMPLATE = '/assets/supplier/{supplier_id}/edit'
+
+    @property
+    def success(self):
+        return '/edit' not in self.driver.current_url
