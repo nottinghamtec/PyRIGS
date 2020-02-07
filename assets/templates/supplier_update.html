@@ -13,8 +13,8 @@
     </div>
     <form method="post">
         {% csrf_token %}
-            {{ form }}
-
+        {% include 'form_errors.html' %}
+        {{ form }}
         <input type="submit" value="Save" class="btn btn-success">
     </form>
 {% endblock %}

@@ -104,6 +104,15 @@ class TestAssetForm(AutoLoginTest):
         # Test that ID is automatically assigned and properly incremented
         self.assertIn(self.page.asset_id, "9001")
 
+        self.page.remove_all_required()
+        self.page.asset_id = "XX$X"
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("An Asset ID can only consist of letters and numbers, with a final number", self.page.errors["Asset id"])
+        self.assertIn("This field is required.", self.page.errors["Description"])
+
+        self.page.open()
+
         self.page.description = "Bodge Lead"
         self.page.category = "Health & Safety"
         self.page.status = "O.K."
@@ -227,6 +236,11 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
 
     def test_supplier_create(self):
         self.page = pages.SupplierCreate(self.driver, self.live_server_url).open()
+
+        self.page.remove_all_required()
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("This field is required.", self.page.errors["Name"])
 
         self.page.name = "Optican Health Supplies"
         self.page.submit()
