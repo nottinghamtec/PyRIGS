@@ -20,15 +20,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from RIGS import models
 
+from reversion import revisions as reversion
+from django.urls import reverse
+from django.core import mail, signing
+from PyRIGS.tests.base import create_browser
+from django.conf import settings
 
-def create_browser():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1920,1080")
-    if os.environ.get('CI', False):
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(chrome_options=options)
-    return driver
+import sys
 
 
 class UserRegistrationTest(LiveServerTestCase):

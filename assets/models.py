@@ -44,6 +44,7 @@ class Supplier(models.Model, RevisionMixin):
     name = models.CharField(max_length=80)
 
     class Meta:
+        ordering = ['name']
         permissions = (
             ('view_supplier', 'Can view a supplier'),
         )

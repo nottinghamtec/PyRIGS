@@ -38,3 +38,4 @@ z3c.rml==3.5.0
 zope.event==4.3.0
 zope.interface==4.5.0
 zope.schema==4.5.0
+pypom==2.2.0
