@@ -338,6 +338,9 @@ class Event(models.Model, RevisionMixin):
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(null=True, blank=True)
 
+    # Risk assessment info
+    risk_assessment_edit_url = models.CharField(verbose_name="risk assessment", max_length=255, blank=True, null=True)
+
     # Calculated values
     """
     EX Vat

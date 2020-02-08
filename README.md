@@ -1,20 +1,13 @@
 # TEC PA & Lighting - PyRIGS #
 [![Build Status](https://travis-ci.org/nottinghamtec/PyRIGS.svg?branch=develop)](https://travis-ci.org/nottinghamtec/PyRIGS)
-[![Coverage Status](https://coveralls.io/repos/github/nottinghamtec/PyRIGS/badge.svg?branch=develop)](https://coveralls.io/github/nottinghamtec/PyRIGS?branch=develop)
-[![Dependency Status](https://gemnasium.com/badges/github.com/nottinghamtec/PyRIGS.svg)](https://gemnasium.com/github.com/nottinghamtec/PyRIGS)
-
+[![Coverage Status](https://coveralls.io/repos/github/nottinghamtec/PyRIGS/badge.svg?branch=develop)](https://coveralls.io/github/nottinghamtec/PyRIGS)
 
 Welcome to TEC PA & Lightings PyRIGS program. This is a reimplementation of the existing Rig Information Gathering System (RIGS) that was developed using Ruby on Rails.
 
 The purpose of this project is to make the system more compatible and easier to understand such that should future changes be needed they can be made without having to understand the intricacies of Rails.
 
-At this stage the project is very early on, and the main focus has been on getting a working system that can be tested and put into use ASAP due to the imminent failure of the existing system. Because of this, the documentation is still quite weak, but this should be fixed as time goes on.
-
-This document is intended to get you up and running, but if don't care about what I have to say, just clone the sodding repository and have a poke around with what's in it, but for GODS SAKE DO NOT PUSH WITHOUT TESTING.
-
 ### What is this repository for? ###
-For the rapid development of the application for medium term deployment, the main branch is being used.
-Once the application is deployed in a production environment, other branches should be used to properly stage edits and pushes of new features. When a significant feature is developed on a branch, raise a pull request and it can be reviewed before being put into production.
+When a significant feature is developed on a branch, raise a pull request and it can be reviewed before being put into production.
 
 Most of the documents here assume a basic knowledge of how Python and Django work (hint, if I don't say something, Google it, you will find 10000's of answers). The documentation is purely to be specific to TEC's application of the framework.
 
@@ -26,7 +19,7 @@ For the more experienced developer/somebody who doesn't want a full IDE and want
 Please contact TJP for details on how to acquire these.
 
 ### Python Environment ###
-Whilst the Python version used is not critical to the running of the application, using the same version usually helps avoid a lot of issues. Mainly the C implementation of Python 2 (CPython 2) has been used (specifically the Python 2.7 standard). Most of the application has been written with Python 3 in mind however, and should run without issue. Some level of testing on Python 3 has been done, but there is no guarantee it will work (for more information on this please see [[Python Version]] on the wiki)
+Whilst the Python version used is not critical to the running of the application, using the same version usually helps avoid a lot of issues. Orginally written with the C implementation of Python 2 (CPython 2, specifically the Python 2.7 standard), the application now runs in Python 3.
 
 Once you have your Python distribution installed, go ahead an follow the steps to set up a virtualenv, which will isolate the project from the system environment.
 
@@ -77,6 +70,13 @@ python manage.py runserver
 ```
 Please refer to Django documentation for a full list of options available here.
 
+### Development using docker
+
+```
+docker build . -t pyrigs
+docker run -it --rm -p=8000:8000 -v $(pwd):/app pyrigs
+```
+
 ### Sample Data ###
 Sample data is available to aid local development and user acceptance testing. To load this data into your local database, first ensure the database is empty:
 ```
@@ -108,5 +108,4 @@ python manage.py test RIGS.test_models.EventTestCase.test_current_events
 
 ```
 
-### Committing, pushing and testing ###
-Feel free to commit as you wish, on your own branch. On my branch (master for development) do not commit code that you either know doesn't work or don't know works. If you must commit this code, please make sure you say in the commit message that it isn't working, and if you can why it isn't working. If and only if you absolutely must push, then please don't leave it as the HEAD for too long, it's not much to ask but when you are done just make sure you haven't broken the HEAD for the next person.
+[![forthebadge](https://forthebadge.com/images/badges/built-with-resentment.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://forthebadge.com)

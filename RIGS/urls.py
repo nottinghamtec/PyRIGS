@@ -19,7 +19,7 @@ urlpatterns = [
     url('^user/login/$', views.login, name='login'),
     url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
 
-    url(r'^user/password_reset/$', password_reset, {'password_reset_form': forms.PasswordReset}),
+    url(r'^user/password_reset/$', views.PasswordResetDisabled.as_view()),
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
@@ -101,6 +101,9 @@ urlpatterns = [
     url(r'^event/(?P<pk>\d+)/print/$',
         permission_required_with_403('RIGS.view_event')(rigboard.EventPrint.as_view()),
         name='event_print'),
+    url(r'^event/(?P<pk>\d+)/ra/$',
+        permission_required_with_403('RIGS.change_event')(rigboard.EventRA.as_view()),
+        name='event_ra'),
     url(r'^event/create/$',
         permission_required_with_403('RIGS.add_event')(rigboard.EventCreate.as_view()),
         name='event_create'),
@@ -184,6 +187,9 @@ urlpatterns = [
         name="api_secure"),
     url(r'^api/(?P<model>\w+)/(?P<pk>\d+)/$', login_required(views.SecureAPIRequest.as_view()),
         name="api_secure"),
+
+    # Risk assessment API
+    url(r'^log_risk_assessment/$', rigboard.LogRiskAssessment.as_view(), name='log_risk_assessment'),
 
     # Legacy URL's
     url(r'^rig/show/(?P<pk>\d+)/$',

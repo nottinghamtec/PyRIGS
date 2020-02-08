@@ -22,7 +22,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
 
     class Meta:
         model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials', 'phone')
+        fields = ('username', 'email', 'first_name', 'last_name', 'initials')
 
     def clean_initials(self):
         """
@@ -33,7 +33,13 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
-# Login form
+# Embedded Login form - remove the autofocus
+class EmbeddedAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.pop('autofocus', None)
+
+
 class PasswordReset(PasswordResetForm):
     captcha = ReCaptchaField(label='Captcha')
 
@@ -122,6 +128,11 @@ class EventForm(forms.ModelForm):
             item.full_clean('event')
 
         return item
+
+    def clean(self):
+        if self.cleaned_data.get("is_rig") and not (self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
+            raise forms.ValidationError('You haven\'t provided any client contact details. Please add a person or organisation.', code='contact')
+        return super(EventForm, self).clean()
 
     def save(self, commit=True):
         m = super(EventForm, self).save(commit=False)

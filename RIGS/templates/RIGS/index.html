@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_rigs.html' %}
 {% block title %}RIGS{% endblock %}
 
 {% block content %}
@@ -20,6 +20,7 @@
                     <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
                     <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
                     {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>{% endif %}
+                    <a class="list-group-item" href="{% url 'asset_index' %}"><span class="glyphicon glyphicon-tag"></span> Asset Database </a>
 
                     <div class="list-group-item default"></div>
 
@@ -27,7 +28,7 @@
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Wiki</a>
                     <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="glyphicon glyphicon-link"></span> Pre-Event Risk Assessment</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
-                    <a class="list-group-item" href="https://form.jotformeu.com/62203600438344" target="_blank"><span class="glyphicon glyphicon-link"></span> Subhire Insurance Form</a>
+                    <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="glyphicon glyphicon-link"></span> Subhire Insurance Form</a>
                 
             </div>
         </div>
@@ -71,9 +72,8 @@
         </div>
     </div>
     {% if perms.RIGS.view_event %}
-    <div class="col-sm-6" >
+    <div class="col-sm-6">
         {% include 'RIGS/activity_feed.html' %}    
-        
     </div>
     {% endif %}
 </div>
