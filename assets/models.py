@@ -43,12 +43,6 @@ class AssetStatus(models.Model):
 class Supplier(models.Model, RevisionMixin):
     name = models.CharField(max_length=80)
 
-    class Meta:
-        ordering = ['name']
-        permissions = (
-            ('view_supplier', 'Can view a supplier'),
-        )
-
     def get_absolute_url(self):
         return reverse('supplier_list')
 
@@ -70,10 +64,9 @@ class Connector(models.Model):
 class Asset(models.Model, RevisionMixin):
     class Meta:
         ordering = ['asset_id_prefix', 'asset_id_number']
-        permissions = (
-            ('asset_finance', 'Can see financial data for assets'),
-            ('view_asset', 'Can view an asset')
-        )
+        permissions = [
+            ('asset_finance', 'Can see financial data for assets')
+        ]
 
     parent = models.ForeignKey(to='self', related_name='asset_parent',
                                blank=True, null=True, on_delete=models.SET_NULL)

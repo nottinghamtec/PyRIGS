@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django.contrib.auth.views import password_reset
+from django.contrib.auth.views import PasswordResetView
 
 from django.contrib.auth.decorators import login_required
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
@@ -19,7 +19,7 @@ urlpatterns = [
     url('^user/login/$', views.login, name='login'),
     url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
 
-    url(r'^user/password_reset/$', views.PasswordResetDisabled.as_view()),
+    url(r'^user/password_reset/$', PasswordResetView.as_view()),
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),

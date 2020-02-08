@@ -44,9 +44,10 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = (
+# TODO This will conflict with merging the auth refactor
+ADMINS = [
     ('Tom Price', 'tomtom5152@gmail.com')
-)
+]
 
 # Application definition
 
@@ -167,6 +168,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
 NOCAPTCHA = True
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 # Email
 EMAILER_TEST = False
