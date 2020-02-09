@@ -8,14 +8,14 @@ __author__ = 'ghost'
 register = template.Library()
 
 @register.filter(name="markdown")
-def markdown_filter(text, format='html'):
+def markdown_filter(text, input_format='html'):
     # markdown library can't handle text=None
     if text is None:
         return text
     html = markdown.markdown(text, extensions=['markdown.extensions.nl2br'])
-    if format == 'html':
+    if input_format == 'html':
         return mark_safe('<div class="markdown">' + html + '</div>')
-    elif format == 'rml':
+    elif input_format == 'rml':
         # Convert format to RML
         soup = BeautifulSoup(html, "html.parser")
 
@@ -33,22 +33,20 @@ def markdown_filter(text, format='html'):
             bq.name = 'pre'
             bq.string = bq.text
 
-        for list in soup.findAll(['ul','ol']):
-            list['style'] = list.name
-            for li in list.findAll('li', recursive=False):
+        for alist in soup.find_all(['ul','ol']):
+            alist['style'] = alist.name
+            for li in alist.find_all('li', recursive=False):
                 text = li.find(text=True)
                 text.wrap(soup.new_tag('p'))
 
-            if list.parent.name != 'li':
+            if alist.parent.name != 'li':
                 indent = soup.new_tag('indent')
                 indent['left'] = '0.6cm'
 
-                list.wrap(indent)
+                alist.wrap(indent)
 
         # Paragraphs have a different tag
         for p in soup('p'):
             p.name = 'para'
 
-        # @todo: <ul> and <li> tags to not appear to be working
-
-        return mark_safe(soup)
+        return mark_safe(str(soup))

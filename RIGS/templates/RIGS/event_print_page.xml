@@ -1,6 +1,7 @@
+{% load markdown_tags %}
+
 <setNextFrame name="main"/>
 <nextFrame/>
-
 
 <blockTable style="headLayout" colWidths="330,165">
 <tr>
@@ -12,9 +13,7 @@
         </para>
 
         <keepInFrame>
-            <para style="style.event_description">
-            {{ object.description|default_if_none:""|linebreaksbr }}
-                </para>
+            {{ object.description|default_if_none:""|markdown:"rml" }}
         </keepInFrame>
     </td>
     <td>
@@ -114,7 +113,7 @@
             {% endif %}
         </td>
         <td rightPadding="0">
-            
+
                 <h2>Timings</h2>
                 <blockTable style="eventDetails" colWidths="55,75">
                 <tr>
@@ -184,9 +183,9 @@
             <para>{{ item.name }}
                 {% if item.description %}
                     </para>
-                    <para style="item_description">
-                    <em>{{ item.description|linebreaksbr }}</em>
-                    </para>
+                    <indent left="0.6cm">
+                        {{ item.description|markdown:"rml" }}
+                    </indent>
                     <para>
                 {% endif %}
             </para>
