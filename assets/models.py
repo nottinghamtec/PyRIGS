@@ -9,7 +9,7 @@ from django.dispatch.dispatcher import receiver
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import RevisionMixin
+from RIGS.models import RevisionMixin, Profile
 
 
 class AssetCategory(models.Model):
@@ -88,7 +88,12 @@ class Asset(models.Model, RevisionMixin):
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     comments = models.TextField(blank=True)
+    # TODO Remove
     next_sched_maint = models.DateField(blank=True, null=True)
+
+    # Audit
+    last_audited_at = models.DateTimeField(blank=True, null=True)
+    last_audited_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='audited_by', blank=True, null=True)
 
     # Cable assets
     is_cable = models.BooleanField(default=False)

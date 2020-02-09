@@ -35,5 +35,6 @@
     {# % endif % #}
     {% if perms.assets.view_asset %}
         <li><a href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
+        <li><a href="{% url 'asset_audit_list' %}">Audit</a></li>
     {% endif %}
 {% endblock %}

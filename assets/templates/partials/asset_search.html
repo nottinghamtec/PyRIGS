@@ -1,0 +1,28 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
+
+{% load widget_tweaks %}
+
+{% block title %}Asset Search{% endblock %}
+
+{% block content %}
+<form id="asset-search-form" method="get" class="form-inline pull-right">
+  <div class="input-group pull-right" style="width: auto;">
+    {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
+    <label for="query" class="sr-only">Asset ID/Description/Serial Number:</label>
+    <span class="input-group-btn"><button type="submit" class="btn btn-default">Search</button></span>
+  </div>
+  <br>
+  <div style="margin-top: 1em;" class="pull-right">
+      <div id="category-group" class="form-group">
+        <label for="category" class="sr-only">Category</label>
+        {% render_field form.category|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+      </div>
+      <div id="status-group" class="form-group">
+        <label for="status" class="sr-only">Status</label>
+        {% render_field form.status|attr:'multiple'|add_class:'form-control selectpicker' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+      </div>
+      <!---TODO: Auto filter whenever an option is selected, instead of using a button -->
+      <button id="filter-submit" type="submit" class="btn btn-default">Filter</button>
+    </div>
+</form>
+{% endblock %}

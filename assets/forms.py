@@ -12,7 +12,7 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = models.Asset
         fields = '__all__'
-        exclude = ['asset_id_prefix', 'asset_id_number']
+        exclude = ['asset_id_prefix', 'asset_id_number', 'last_audited_at', 'last_audited_by']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

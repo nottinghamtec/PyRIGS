@@ -11,6 +11,7 @@ from assets import models, forms
 from RIGS import versioning
 
 import simplejson
+import datetime
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -171,6 +172,34 @@ class AssetOembed(generic.View):
 
 class AssetEmbed(AssetDetail):
     template_name = 'asset_embed.html'
+
+
+class AssetAuditList(LoginRequiredMixin, generic.ListView):
+    model = models.Asset
+    template_name = 'asset_list.html'
+    paginate_by = 40
+    ordering = ['-pk']
+
+
+class AssetAudit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
+    template_name = 'asset_audit.html'
+    model = models.Asset
+    form_class = forms.AssetForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['edit'] = True
+        context['connectors'] = models.Connector.objects.all()
+
+        return context
+
+    def get_success_url(self):
+        # TODO For some reason this doesn't stick when done in form_valid??
+        asset = self.get_object()
+        asset.last_audited_by = self.request.user
+        asset.last_audited_at = datetime.datetime.now()
+        asset.save()
+        return reverse("asset_audit_list")
 
 
 class SupplierList(generic.ListView):

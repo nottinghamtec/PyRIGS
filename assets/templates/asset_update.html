@@ -35,6 +35,11 @@
     <div class="col-md-4">
       {% include 'partials/parent_form.html' %}
     </div>
+    {% if not edit %}
+    <div class="col-md-4">
+      {% include 'partials/audit_details.html' %}
+    </div>
+    {% endif %}
   </div>
   <div class="row">
     <div class="col-md-12">

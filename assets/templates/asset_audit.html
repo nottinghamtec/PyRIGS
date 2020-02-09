@@ -1,0 +1,82 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+{% block title %}Audit Asset {{ object.asset_id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>
+     Audit Asset: {{ object.asset_id }}
+  </h1>
+</div>
+<form class="form-horizontal" method="post" id="asset_update_form" action="{% url 'asset_audit' pk=object.asset_id%}">
+    {% include 'form_errors.html' %}
+    {% csrf_token %}
+    <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label for="{{ form.asset_id.id_for_label }}" class="col-sm-2 control-label">Asset ID</label>
+        <div class="col-sm-10">
+            {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}" class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10">
+            {% render_field form.description|add_class:'form-control' value=object.description %}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="{{ form.category.id_for_label }}" class="col-sm-2 control-label">Category</label>
+        <div class="col-sm-10">
+            {% render_field form.category|add_class:'form-control'%}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="{{ form.status.id_for_label }}" class="col-sm-2 control-label">Status</label>
+        <div class="col-sm-10">
+            {% render_field form.status|add_class:'form-control'%}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="{{ form.serial_number.id_for_label }}" class="col-sm-2 control-label">Serial Number</label>
+        <div class="col-sm-10">
+            {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="{{ form.date_acquired.id_for_label }}" class="col-sm-2 control-label">Date Acquired</label>
+        <div class="col-sm-10">
+            {% render_field form.date_acquired|add_class:'form-control' value=object.date_acquired %}
+        </div>
+        <!--- TODO Add buttons for 'today' and 'unknown' (sets to beginning of time)--->
+    </div>
+    <div class="form-group">
+        <label for="{{ form.is_cable.id_for_label }}" class="col-sm-2 control-label">Cable?</label>
+        <div class="col-sm-10">
+            {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %}
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-10 pull-right">
+        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Audit</button>
+        <br>
+        <button type="reset" class="btn btn-link" onclick="history.back()">Cancel</button>
+      </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block js%}
+{% if edit %}
+<script>
+  function checkIfCableHidden() {
+    if (document.getElementById("id_is_cable").checked) {
+      document.getElementById("cable-table").hidden = false;
+    } else {
+      document.getElementById("cable-table").hidden = true;
+    }
+  }
+  checkIfCableHidden();
+</script>
+{% endif %}
+{% endblock %}

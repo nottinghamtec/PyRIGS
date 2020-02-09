@@ -31,6 +31,9 @@ urlpatterns = [
          views.AssetOembed.as_view(),
          name='asset_oembed'),
 
+    path('asset/audit/', permission_required_with_403('assets.view_asset')(views.AssetAuditList.as_view()), name='asset_audit_list'),
+    path('asset/id/<str:pk>/audit/', permission_required_with_403('assets.view_asset')(views.AssetAudit.as_view()), name='asset_audit'),
+
     path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
     path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),
     path('supplier/create', permission_required_with_403('assets.add_supplier')
