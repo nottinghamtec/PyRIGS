@@ -1,0 +1,40 @@
+{% load widget_tweaks %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Collection Details
+  </div>
+  <div class="panel-body">
+    {% if create or edit or duplicate %}
+    <div class="form-group" id="parent-group">
+      <label for="selectpicker">Set Parent</label>
+      {% include 'partials/asset_picker.html' %}
+    </div>
+    {% else %}
+    <dl>
+      <dt>Parent</dt>
+      <dd>
+        {% if object.parent %}
+        <a href="{% url 'asset_detail' object.parent.asset_id %}">
+        {{ object.parent.asset_id }} - {{ object.parent.description }}
+        </a>
+        {% else %}
+        <span>-</span>
+        {% endif %}
+      </dd>
+
+      <dt>Children</dt>
+      {% if object.asset_parent.all %}
+      {% for child in object.asset_parent.all %}
+      <dd>
+        <a href="{% url 'asset_detail' child.asset_id %}">
+        {{ child.asset_id }} - {{ child.description }}
+        </a>
+      </dd>
+      {% endfor %}
+      {% else %}
+      <dd><span>-</span></dd>
+      {% endif %}
+    </dl>
+    {% endif%}
+  </div>
+</div>

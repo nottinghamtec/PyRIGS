@@ -1,0 +1,25 @@
+{% if edit and object %}
+<!--edit-->
+<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
+<a class="btn btn-default" href="{% url 'asset_duplicate' object.pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+{% elif duplicate %}
+<!--duplicate-->
+<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-ok-sign"></i> Create Duplicate</button>
+{% elif create %}
+<!--create-->
+<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
+{% else %}
+<!--detail view-->
+<div class="btn-group">
+    <a href="{% url 'asset_update' object.asset_id %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+    <a class="btn btn-default" href="{% url 'asset_duplicate' object.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+</div>
+{% endif %}
+{% if create or edit or duplicate %}
+<br>
+<button type="reset" class="btn btn-link" onclick="
+{%if duplicate%}
+{% url 'asset_detail' previous_asset_id %}
+{%else%}
+history.back(){%endif%}">Cancel</button>
+{% endif %}

@@ -65,6 +65,15 @@ textarea {
   overflow: hidden;
 }
 
+.dont-break-out {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+}
+
 .modal-dialog {
   z-index: inherit; // bug fix introduced in 52682ce
 }
