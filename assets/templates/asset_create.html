@@ -1,9 +1,36 @@
 {% extends 'base_assets.html' %}
+{% load static %}
 {% load widget_tweaks %}
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
 
-{% block content %}
+{% block css %}
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+{% endblock %}
 
+{% block preload_js %}
+    <script src="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+{% endblock %}
+
+{% block js %}
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script>
+        function checkIfCableHidden() {
+          if (document.getElementById("id_is_cable").checked) {
+            document.getElementById("cable-table").hidden = false;
+          } else {
+            document.getElementById("cable-table").hidden = true;
+          }
+        }
+        checkIfCableHidden();
+
+        $(document).ready(function () {
+            setupMDE('#id_comments');
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
 <div class="page-header">
   <h1>
       {% if duplicate %}
@@ -44,17 +71,4 @@
     </div>
   </form>
 
-  {% endblock %}
-
-  {% block js%}
-  <script>
-    function checkIfCableHidden() {
-      if (document.getElementById("id_is_cable").checked) {
-        document.getElementById("cable-table").hidden = false;
-      } else {
-        document.getElementById("cable-table").hidden = true;
-      }
-    }
-    checkIfCableHidden();
-  </script>
-  {%endblock%}
+{% endblock %}

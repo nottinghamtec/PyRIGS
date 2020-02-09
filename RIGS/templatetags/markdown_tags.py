@@ -7,6 +7,7 @@ __author__ = 'ghost'
 
 register = template.Library()
 
+
 @register.filter(name="markdown")
 def markdown_filter(text, input_format='html'):
     # markdown library can't handle text=None
@@ -33,7 +34,7 @@ def markdown_filter(text, input_format='html'):
             bq.name = 'pre'
             bq.string = bq.text
 
-        for alist in soup.find_all(['ul','ol']):
+        for alist in soup.find_all(['ul', 'ol']):
             alist['style'] = alist.name
             for li in alist.find_all('li', recursive=False):
                 text = li.find(text=True)
