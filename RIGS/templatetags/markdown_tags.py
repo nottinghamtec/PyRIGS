@@ -14,11 +14,14 @@ def markdown_filter(text, input_format='html'):
     if text is None:
         return text
     html = markdown.markdown(text, extensions=['markdown.extensions.nl2br'])
+    # Convert format to RML
+    soup = BeautifulSoup(html, "html.parser")
+    # Prevent code injection
+    for script in soup('script'):
+        script.string = "Your script shall not pass!"
     if input_format == 'html':
-        return mark_safe('<div class="markdown">' + html + '</div>')
+        return mark_safe('<div class="markdown">' + str(soup) + '</div>')
     elif input_format == 'rml':
-        # Convert format to RML
-        soup = BeautifulSoup(html, "html.parser")
 
         # Image aren't supported so remove them
         for img in soup('img'):
