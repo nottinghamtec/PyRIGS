@@ -1,4 +1,5 @@
 {% load widget_tweaks %}
+{% load markdown_tags %}
 <div class="panel panel-default">
   <div class="panel-heading">
     Asset Details
@@ -35,14 +36,14 @@
     <!---TODO: Lower default number of lines in comments box-->
     <div class="form-group">
       <label for="{{ form.comments.id_for_label }}">Comments</label>
-      {% render_field form.comments|add_class:'form-control' %}
+      {% render_field form.comments|add_class:'form-control md-enabled' %}
     </div>
     {% else %}
     <dt>Asset ID</dt>
     <dd>{{ object.asset_id }}</dd>
 
     <dt>Description</dt>
-    <dd style="overflow-wrap: break-word;">{{ object.description }}</dd>
+    <dd class="dont-break-out">{{ object.description }}</dd>
 
     <dt>Category</dt>
     <dd>{{ object.category }}</dd>
@@ -54,7 +55,7 @@
     <dd>{{ object.serial_number|default:'-' }}</dd>
 
     <dt>Comments</dt>
-    <dd style="overflow-wrap: break-word;">{{ object.comments|default:'-'|linebreaksbr }}</dd>
+    <dd class="dont-break-out well">{{ object.comments|default:'-'|markdown }}</dd>
     {% endif %}
   </div>
 </div>

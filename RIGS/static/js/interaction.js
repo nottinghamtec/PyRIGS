@@ -1,3 +1,7 @@
+marked.setOptions({
+    breaks: true,
+})
+
 function setupItemTable(items_json) {
     objectitems = JSON.parse(items_json)
     $.each(objectitems, function (key, val) {
@@ -30,6 +34,16 @@ function updatePrices() {
     var vat = sum * Number($('#vat-rate').data('rate'));
     $('#vat').text(parseFloat(vat).toFixed(2));
     $('#total').text(parseFloat(sum + vat).toFixed(2));
+}
+
+function setupMDE(selector) {
+    editor = new SimpleMDE({ 
+        element: $(selector)[0],
+        forceSync: true,
+        toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
+        status: true,
+    });
+    $(selector).data('mde_editor',editor);
 }
 
 $('#item-table').on('click', '.item-delete', function () {
@@ -106,7 +120,7 @@ $('body').on('submit', '#item-form', function (e) {
     // update the table
     $row = $('#item-' + pk);
     $row.find('.name').html(escapeHtml(fields.name));
-    $row.find('.description').html(nl2br(escapeHtml(fields.description)));
+    $row.find('.description').html(marked(fields.description));
     $row.find('.cost').html(parseFloat(fields.cost).toFixed(2));
     $row.find('.quantity').html(fields.quantity);
 
