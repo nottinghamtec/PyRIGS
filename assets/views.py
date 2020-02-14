@@ -187,6 +187,8 @@ class AssetEmbed(AssetDetail):
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
 
+    def form_valid(self):
+        print('test')
 
 class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'

@@ -8,6 +8,11 @@
     <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
+    <script>
+    function onClick() {
+         $('#searchButton').attr("href", "{% url 'asset_audit' None %}".replace('None', $('#{{form.query.id_for_label}}').val()));
+    }
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -19,7 +24,7 @@
   <div class="input-group pull-right" style="width: auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' style="width: 250px"%}
     <label for="query" class="sr-only">Asset ID:</label>
-    <span class="input-group-btn"><a class="btn btn-default modal-href" href="{% url 'asset_audit' 9000 %}"">Search</a></span>
+    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onClick()">Search</a></span>
   </div>
 </form>
 
