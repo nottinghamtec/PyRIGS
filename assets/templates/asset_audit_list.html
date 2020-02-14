@@ -1,0 +1,46 @@
+{% extends 'base_assets.html' %}
+{% block title %}Asset Audit List{% endblock %}
+{% load static %}
+{% load paginator from filters %}
+{% load widget_tweaks %}
+
+{% block js %}
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="{% static "js/interaction.js" %}"></script>
+    <script src="{% static "js/modal.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="text-center">Asset Audit List</h1>
+</div>
+
+<form id="asset-search-form" class="form-horizontal" method="POST">
+  <div class="input-group pull-right" style="width: auto;">
+    {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' style="width: 250px"%}
+    <label for="query" class="sr-only">Asset ID:</label>
+    <span class="input-group-btn"><a class="btn btn-default modal-href" href="{% url 'asset_audit' 9000 %}"">Search</a></span>
+  </div>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Asset ID</th>
+      <th>Description</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th class="hidden-xs">Quick Links</th>
+    </tr>
+  </thead>
+  <tbody id="asset_table_body">
+    {% include 'partials/asset_list_table_body.html' %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+<div class="text-center">
+  {% paginator %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,14 +1,9 @@
-{% extends 'base_assets.html' %}
+{% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
 {% load widget_tweaks %}
 {% block title %}Audit Asset {{ object.asset_id }}{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>
-     Audit Asset: {{ object.asset_id }}
-  </h1>
-</div>
-<form class="form-horizontal" method="post" id="asset_update_form" action="{% url 'asset_audit' pk=object.asset_id%}">
+<form class="form-horizontal" method="post" id="asset_update_form" action="{{ form.action|default:request.path }}">
     {% include 'form_errors.html' %}
     {% csrf_token %}
     <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
@@ -58,25 +53,10 @@
     </div>
     <div class="row">
       <div class="col-md-10 pull-right">
-        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Audit</button>
-        <br>
-        <button type="reset" class="btn btn-link" onclick="history.back()">Cancel</button>
+        <div class="form-group">
+           <input class="btn btn-primary pull-left" type="submit"/>
+        </div>
       </div>
     </div>
 </form>
-{% endblock %}
-
-{% block js%}
-{% if edit %}
-<script>
-  function checkIfCableHidden() {
-    if (document.getElementById("id_is_cable").checked) {
-      document.getElementById("cable-table").hidden = false;
-    } else {
-      document.getElementById("cable-table").hidden = true;
-    }
-  }
-  checkIfCableHidden();
-</script>
-{% endif %}
 {% endblock %}
