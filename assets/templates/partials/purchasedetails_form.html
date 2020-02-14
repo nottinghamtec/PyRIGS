@@ -1,5 +1,4 @@
 {% load widget_tweaks %}
-{% load asset_templatetags %}
 {% load static %}
 
 
@@ -23,7 +22,7 @@
   </div>
   <div class="panel-body">
     {% if create or edit or duplicate %}
-    <div class="form-group">
+    <div class="form-group" id="purchased-from-group">
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
       <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
         {% if object.purchased_from %}
