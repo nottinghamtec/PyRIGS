@@ -186,9 +186,12 @@ class AssetEmbed(AssetDetail):
 @method_decorator(csrf_exempt, name='dispatch')
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
+    hide_hidden_status = False
 
-    def form_valid(self):
-        print('test')
+    # TODO Refresh this when the modal is submitted
+    def get_queryset(self):
+        self.form = forms.AssetSearchForm(data={})
+        return self.model.objects.filter(Q(last_audited_at__isnull=True))
 
 class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
