@@ -1,6 +1,14 @@
 {% extends 'base_rigs.html' %}
 {% block title %}RIGS{% endblock %}
 
+{% block js %}
+<script>
+    $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        })
+</script>
+{% endblock %}
+
 {% block content %}
     <div class="col-sm-12">
         <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
@@ -11,7 +19,7 @@
     </div>
     <div class="row">
     <div class="col-sm-{% if perms.RIGS.view_event %}6{% else %}12{% endif %}">
-        
+
         <div class="panel panel-default">
             <div class="panel-heading">
                  <h4 class="list-group-item-heading">Quick Links</h4>
@@ -29,13 +37,13 @@
                     <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="glyphicon glyphicon-link"></span> Pre-Event Risk Assessment</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
                     <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="glyphicon glyphicon-link"></span> Subhire Insurance Form</a>
-                
+
             </div>
         </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">
-              <h4 class="panel-title">Search Rigboard 
+              <h4 class="panel-title">Search Rigboard
                 <a href="{% url 'search_help' %}" class="pull-right modal-href"><span class="glyphicon glyphicon-question-sign"</span></a></h4>
             </div>
             <script>
@@ -55,11 +63,11 @@
             <div class="list-group">
                 <div class="list-group-item">
                     <form id="searchForm" class="form" role="form" method="GET">
-                        <div class="input-group">
-                            <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search Phrase" />
+                        <div class="input-group" data-toggle="tooltip" title="Use the dropdown button to select what to search. The default is Event Archive.">
+                            <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search..." />
                             <span class="input-group-btn">
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-search"></span> <span class="caret"></button>
+                                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-search"></span> Search <span class="caret"></span></button>
                                      <ul id="search-options" class="dropdown-menu">
                                       <li><a data-action="{% url 'event_archive' %}" href="#">Events</a></li>
                                       <li><a data-action="{% url 'person_list' %}" href="#">People</a></li>
@@ -68,7 +76,6 @@
                                       {% if perms.RIGS.view_invoice %}
                                       <li><a data-action="{% url 'invoice_archive' %}" href="#">Invoices</a></li>
                                       {% endif %}
-
                                     </ul>
                                 </div>
                             </span>
@@ -80,7 +87,7 @@
     </div>
     {% if perms.RIGS.view_event %}
     <div class="col-sm-6">
-        {% include 'RIGS/activity_feed.html' %}    
+        {% include 'RIGS/activity_feed.html' %}
     </div>
     {% endif %}
 </div>
