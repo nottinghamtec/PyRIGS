@@ -9,6 +9,12 @@
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
     <script>
+    $('document').ready(function(){
+        $('#asset-search-form').submit(function () {
+         $('#searchButton').focus().click();
+         return false;
+        });
+    });
     function onClick() {
          $('#searchButton').attr("href", "{% url 'asset_audit' None %}".replace('None', $('#{{form.query.id_for_label}}').val()));
     }
@@ -21,10 +27,10 @@
 </div>
 
 <form id="asset-search-form" class="form-horizontal" method="POST">
-  <div class="input-group pull-right" style="width: auto;">
-    {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' style="width: 250px"%}
+  <div class="input-group input-group-lg" style="width: auto;">
+    {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
     <label for="query" class="sr-only">Asset ID:</label>
-    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onClick()">Search</a></span>
+    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onClick()" class="submit" type="submit">Search</a></span>
   </div>
 </form>
 
