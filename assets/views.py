@@ -193,8 +193,10 @@ class AssetAuditList(AssetList):
         self.form = forms.AssetSearchForm(data={})
         return self.model.objects.filter(Q(last_audited_at__isnull=True))
 
+
 class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
+    form_class = forms.AssetAuditForm
 
     def get_success_url(self):
         # TODO For some reason this doesn't stick when done in form_valid??
