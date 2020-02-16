@@ -26,6 +26,7 @@ class AssetAuditForm(AssetForm):
         # TODO Inherit exlcusions from superclass
         exclude = ['asset_id_prefix', 'asset_id_number', 'last_audited_at', 'last_audited_by', 'parent']
 
+
 class AssetSearchForm(forms.Form):
     query = forms.CharField(required=False)
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)

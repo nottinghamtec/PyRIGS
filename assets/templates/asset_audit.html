@@ -114,11 +114,16 @@
       </div>
     </div>
   </div>
+  {% if not request.is_ajax %}
+    <div class="form-group pull-right">
+        <button class="btn btn-success" type="submit" form="asset_audit_form">Mark Audited</button>
+    </div>
+  {% endif %}
 </form>
 {% endblock %}
 
 {% block footer %}
 <div class="form-group">
-  <button class="btn btn-success modal-action" type="submit" form="asset_audit_form">Mark Audited</button>
+  <button class="btn btn-success pull-right" type="submit" form="asset_audit_form" onclick="onAuditClick({{form.asset_id.value}});">Mark Audited</button>
 </div>
 {% endblock %}

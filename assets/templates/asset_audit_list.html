@@ -15,8 +15,11 @@
          return false;
         });
     });
-    function onClick() {
+    function onSearchClick() {
          $('#searchButton').attr("href", "{% url 'asset_audit' None %}".replace('None', $('#{{form.query.id_for_label}}').val()));
+    }
+    function onAuditClick(assetID) {
+         $('#' + assetID).remove();
     }
     </script>
 {% endblock %}
@@ -31,7 +34,7 @@
   <div class="input-group input-group-lg" style="width: auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
     <label for="query" class="sr-only">Asset ID:</label>
-    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onClick()" class="submit" type="submit">Search</a></span>
+    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onSearchClick()" class="submit" type="submit">Search</a></span>
   </div>
 </form>
 
