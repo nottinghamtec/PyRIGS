@@ -7,6 +7,9 @@
         <td class="assetCategory" style="vertical-align: middle;">{{ item.category }}</td>
         <td class="assetStatus" style="vertical-align: middle;">{{ item.status }}</td>
         <td class="hidden-xs">
+            {% if audit %}
+                <a type="button" class="btn btn-info" href="{% url 'asset_audit' item.asset_id %}"><i class="glyphicon glyphicon-object-align-left"></i> Audit</a>
+            {% else %}
             <div class="btn-group" role="group">
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
                 {% if perms.assets.change_asset %}
@@ -14,6 +17,7 @@
                 <a type="button" class="btn btn-default btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
                 {% endif %}
             </div>
+            {% endif %}
         </td>
     </tr>
 {% endfor %}

@@ -26,6 +26,7 @@
   <h1 class="text-center">Asset Audit List</h1>
 </div>
 
+<h3>Audit Asset:</h3>
 <form id="asset-search-form" class="form-horizontal" method="POST">
   <div class="input-group input-group-lg" style="width: auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
@@ -34,6 +35,7 @@
   </div>
 </form>
 
+<h3>Assets Requiring Audit:</h3>
 <table class="table">
   <thead>
     <tr>
@@ -41,11 +43,11 @@
       <th>Description</th>
       <th>Category</th>
       <th>Status</th>
-      <th class="hidden-xs">Quick Links</th>
+      <th class="hidden-xs"></th>
     </tr>
   </thead>
   <tbody id="asset_table_body">
-    {% include 'partials/asset_list_table_body.html' %}
+    {% include 'partials/asset_list_table_body.html' with audit="true" %}
   </tbody>
 </table>
 
