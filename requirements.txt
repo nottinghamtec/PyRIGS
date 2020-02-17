@@ -10,7 +10,7 @@ django-debug-toolbar==2.2
 django-ical==1.7.0
 django-recaptcha==2.0.6
 django-registration-redux==2.7
-django-reversion==3.0.6
+django-reversion==3.0.7
 django-toolbelt==0.0.1
 premailer==3.6.1
 git+git://github.com/jazzband/django-widget-tweaks.git@1.4.2
