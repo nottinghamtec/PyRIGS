@@ -29,8 +29,8 @@ class Command(BaseCommand):
     def create_profile(self):
         name = "Fred Johnson"
         models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0], last_name=name.split(" ")[-1],
-                                                       email=name.replace(" ", "") + "@example.com",
-                                                       initials="".join([j[0].upper() for j in name.split()]))
+                                      email=name.replace(" ", "") + "@example.com",
+                                      initials="".join([j[0].upper() for j in name.split()]))
 
     def create_categories(self):
         categories = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']

@@ -14,6 +14,9 @@
   function setLength(length) {
       $('#id_length').val(length);
   }
+  function setCSA(CSA) {
+      $('#id_csa').val(CSA);
+  }
   function checkIfCableHidden() {
     if (document.getElementById("id_is_cable").checked) {
       document.getElementById("cable-table").hidden = false;
@@ -106,18 +109,22 @@
         </div>
       </div>
       <div class="col-sm-4">
-        <btn class="btn btn-danger" onclick="setLength('5');">5m</btn>
-        <btn class="btn btn-success" onclick="setLength('10');">10m</btn>
-        <btn class="btn btn-info" onclick="setLength('20');">20m</btn>
-    </div>
+        <btn class="btn btn-danger" onclick="setLength('5');">5{{ form.length.help_text }}</btn>
+        <btn class="btn btn-success" onclick="setLength('10');">10{{ form.length.help_text }}</btn>
+        <btn class="btn btn-info" onclick="setLength('20');">20{{ form.length.help_text }}</btn>
+      </div>
     </div>
     <div class="form-group">
       <label for="{{ form.csa.id_for_label }}" class="col-sm-2 control-label">Cross Sectional Area</label>
-      <div class="col-sm-10">
+      <div class="col-sm-6">
         <div class="input-group">
           {% render_field form.csa|add_class:'form-control' value=object.csa %}
           <span class="input-group-addon">{{ form.csa.help_text }}</span>
         </div>
+      </div>
+      <div class="col-sm-4">
+        <btn class="btn btn-default" onclick="setCSA('1.5');">1.5{{ form.csa.help_text }}</btn>
+        <btn class="btn btn-default" onclick="setCSA('2.5');">2.5{{ form.csa.help_text }}</btn>
       </div>
     </div>
     <div class="form-group">

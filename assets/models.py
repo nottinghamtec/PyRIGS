@@ -104,7 +104,7 @@ class Asset(models.Model, RevisionMixin):
     length = models.DecimalField(decimal_places=1, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
-                              blank=True, null=True, help_text='mm^2')
+                              blank=True, null=True, help_text='mm²')
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
 
