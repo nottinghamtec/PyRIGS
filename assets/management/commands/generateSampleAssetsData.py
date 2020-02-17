@@ -17,12 +17,20 @@ class Command(BaseCommand):
 
         random.seed('Some object to see the random number generator')
 
+        self.create_profile()
         self.create_categories()
         self.create_statuses()
         self.create_suppliers()
         self.create_assets()
         self.create_connectors()
         self.create_cables()
+
+    # Make sure that there's at least one profile if this command is run standalone
+    def create_profile(self):
+        name = "Fred Johnson"
+        models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0], last_name=name.split(" ")[-1],
+                                                       email=name.replace(" ", "") + "@example.com",
+                                                       initials="".join([j[0].upper() for j in name.split()]))
 
     def create_categories(self):
         categories = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']
