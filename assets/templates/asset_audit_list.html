@@ -14,10 +14,30 @@
          $('#searchButton').focus().click();
          return false;
         });
+        $('#searchButton').click(function (e) {
+             e.preventDefault();
+             var url = "{% url 'asset_audit' None %}";
+             var id = $("#{{form.query.id_for_label}}").val();
+             url = url.replace('None', id);
+             $.ajax({
+                url: url,
+                success: function(){
+                    $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length == 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                        });
+                    }
+                },
+                error:function(){
+                    $("#error404").attr("hidden", false);
+                }
+             });
+        });
     });
-    function onSearchClick() {
-         $('#searchButton').attr("href", "{% url 'asset_audit' None %}".replace('None', $('#{{form.query.id_for_label}}').val()));
-    }
     function onAuditClick(assetID) {
          $('#' + assetID).remove();
     }
@@ -29,12 +49,17 @@
   <h1 class="text-center">Asset Audit List</h1>
 </div>
 
+<div id="error404" class="alert alert-danger alert-dismissable" hidden=true>
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	<span>Asset with that ID does not exist!</span>
+</div>
+
 <h3>Audit Asset:</h3>
 <form id="asset-search-form" class="form-horizontal" method="POST">
   <div class="input-group input-group-lg" style="width: auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
     <label for="query" class="sr-only">Asset ID:</label>
-    <span class="input-group-btn"><a id="searchButton" class="btn btn-default modal-href" href="{% url 'asset_audit' None %}" onclick="onSearchClick()" class="submit" type="submit">Search</a></span>
+    <span class="input-group-btn"><a id="searchButton" class="btn btn-default" class="submit" type="submit">Search</a></span>
   </div>
 </form>
 
