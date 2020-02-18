@@ -34,3 +34,9 @@ class SupplierForm(forms.ModelForm):
 
 class SupplierSearchForm(forms.Form):
     query = forms.CharField(required=False)
+
+
+class CableTypeForm(forms.ModelForm):
+    class Meta:
+        model = models.CableType
+        fields = '__all__'

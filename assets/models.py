@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.urls import reverse
 
+from django.db.models import F
 from django.db.models.signals import pre_save
 from django.dispatch.dispatcher import receiver
 
@@ -67,6 +68,9 @@ class Connector(models.Model):
 
 
 class CableType(models.Model):
+    class Meta:
+        ordering = ['plug', 'socket', '-circuits']
+
     circuits = models.IntegerField(blank=True, null=True)
     cores = models.IntegerField(blank=True, null=True)
     plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
@@ -75,7 +79,7 @@ class CableType(models.Model):
                                related_name='socket', blank=True, null=True)
 
     def __str__(self):
-        return self.plug.description + "--->" + self.socket.description
+        return  "%s → %s" % (self.plug.description, self.socket.description)
 
 
 @reversion.register
@@ -139,7 +143,7 @@ class Asset(models.Model, RevisionMixin):
     def __str__(self):
         out = str(self.asset_id) + ' - ' + self.description
         if self.is_cable:
-            out += '{} - {}m - {}'.format(self.plug, self.length, self.socket)
+            out += '{} - {}m - {}'.format(self.cable_type.plug, self.length, self.cable_type.socket)
         return out
 
     def clean(self):
@@ -164,14 +168,16 @@ class Asset(models.Model, RevisionMixin):
                 errdict["length"] = ["The length of a cable must be more than 0"]
             if not self.csa or self.csa <= 0:
                 errdict["csa"] = ["The CSA of a cable must be more than 0"]
-            if not self.circuits or self.circuits <= 0:
-                errdict["circuits"] = ["There must be at least one circuit in a cable"]
-            if not self.cores or self.cores <= 0:
-                errdict["cores"] = ["There must be at least one core in a cable"]
-            if self.socket is None:
-                errdict["socket"] = ["A cable must have a socket"]
-            if self.plug is None:
-                errdict["plug"] = ["A cable must have a plug"]
+            if not self.cable_type:
+                errdict["cable_type"] = ["A cable must have a type"]
+            # if not self.circuits or self.circuits <= 0:
+            #     errdict["circuits"] = ["There must be at least one circuit in a cable"]
+            # if not self.cores or self.cores <= 0:
+            #    errdict["cores"] = ["There must be at least one core in a cable"]
+            # if self.socket is None:
+            #     errdict["socket"] = ["A cable must have a socket"]
+            # if self.plug is None:
+            #    errdict["plug"] = ["A cable must have a plug"]
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)

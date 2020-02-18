@@ -9,7 +9,6 @@
       <label for="{{ form.cable_type.id_for_label }}">Cable Type</label>
       <div class="input-group">
         {% render_field form.cable_type|add_class:'form-control' %}
-        <span class="input-group-addon">{{ form.length.help_text }}</span>
       </div>
     </div>
     <div class="form-group">
@@ -28,23 +27,14 @@
     </div>
     {% else %}
     <dl>
-      <dt>Socket</dt>
-      <dd>{{ object.socket|default_if_none:'-' }}</dd>
-
-      <dt>Plug</dt>
-      <dd>{{ object.plug|default_if_none:'-' }}</dd>
+      <dt>Cable Type</dt>
+      <dd>{{ object.cable_type|default_if_none:'-' }}</dd>
 
       <dt>Length</dt>
       <dd>{{ object.length|default_if_none:'-' }}m</dd>
 
       <dt>Cross Sectional Area</dt>
-      <dd>{{ object.csa|default_if_none:'-' }}m^2</dd>
-
-      <dt>Circuits</dt>
-      <dd>{{ object.circuits|default_if_none:'-' }}</dd>
-
-      <dt>Cores</dt>
-      <dd>{{ object.cores|default_if_none:'-' }}</dd>
+      <dd>{{ object.csa|default_if_none:'-' }}mm²</dd>
     </dl>
     {% endif %}
   </div>
