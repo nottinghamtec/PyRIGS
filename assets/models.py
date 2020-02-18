@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.urls import reverse
 
-from django.db.models import F
 from django.db.models.signals import pre_save
 from django.dispatch.dispatcher import receiver
 

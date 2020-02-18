@@ -8,7 +8,11 @@
       {% if create %}Create{% elif edit %}Edit{% endif %} Cable Type
   </h1>
 </div>
-<form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
+{% if create %}
+<form method="POST" action="{% url 'cable_type_create'%}">
+{% elif edit %}
+<form method="POST" action="{% url 'cable_type_update' object.id %}">
+{% endif %}
 {% include 'form_errors.html' %}
 {% csrf_token %}
 <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
