@@ -66,6 +66,18 @@ class Connector(models.Model):
         return self.description
 
 
+class CableType(models.Model):
+    circuits = models.IntegerField(blank=True, null=True)
+    cores = models.IntegerField(blank=True, null=True)
+    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
+                             related_name='plug', blank=True, null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
+                               related_name='socket', blank=True, null=True)
+
+    def __str__(self):
+        return self.plug.description + "--->" + self.socket.description
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
     class Meta:
@@ -92,16 +104,12 @@ class Asset(models.Model, RevisionMixin):
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                             related_name='plug', blank=True, null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                               related_name='socket', blank=True, null=True)
+    cable_type = models.ForeignKey(to=CableType, blank=True, null=True, on_delete=models.SET_NULL)
     length = models.DecimalField(decimal_places=1, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
                               blank=True, null=True, help_text='mm^2')
-    circuits = models.IntegerField(blank=True, null=True)
-    cores = models.IntegerField(blank=True, null=True)
+
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"

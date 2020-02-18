@@ -92,7 +92,7 @@ class Command(BaseCommand):
                 csa=random.choice(csas),
                 length=random.choice(lengths),
                 circuits=random.choice(circuits),
-                cores=random.choice(circuits)
+                cores=random.choice(cores)
             )
 
             if i % 5 == 0:

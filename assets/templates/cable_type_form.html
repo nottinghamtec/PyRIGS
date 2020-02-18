@@ -1,0 +1,37 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+{% block title %}Asset {{ object.asset_id }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>
+      Create Cable Type
+  </h1>
+</div>
+<form method="post" id="asset_update_form" action="{% url 'asset_create'%}">
+{% include 'form_errors.html' %}
+{% csrf_token %}
+<input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
+<div class="row">
+  <div class="col-sm-12">
+    <div class="form-group">
+      <label for="{{ form.plug.id_for_label }}">Plug</label>
+      {% render_field form.plug|add_class:'form-control'%}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.socket.id_for_label }}">Socket</label>
+      {% render_field form.socket|add_class:'form-control'%}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.circuits.id_for_label }}">Circuits</label>
+      {% render_field form.circuits|add_class:'form-control' value=object.circuits %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.cores.id_for_label }}">Cores</label>
+      {% render_field form.cores|add_class:'form-control' value=object.cores %}
+    </div>
+  </div>
+</div>
+</form>
+{% endblock %}
