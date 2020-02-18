@@ -278,7 +278,8 @@ class CableTypeCreate(generic.CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("cable_type_detail", kwargs={"pk": self.object.pk })
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})
+
 
 class CableTypeUpdate(generic.UpdateView):
     model = models.CableType
@@ -292,4 +293,4 @@ class CableTypeUpdate(generic.UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("cable_type_detail", kwargs={"pk": self.object.pk })
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})

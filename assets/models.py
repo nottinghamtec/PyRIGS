@@ -78,7 +78,7 @@ class CableType(models.Model):
                                related_name='socket', blank=True, null=True)
 
     def __str__(self):
-        return  "%s → %s" % (self.plug.description, self.socket.description)
+        return "%s → %s" % (self.plug.description, self.socket.description)
 
 
 @reversion.register
@@ -112,7 +112,6 @@ class Asset(models.Model, RevisionMixin):
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
                               blank=True, null=True, help_text='mm^2')
-
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
