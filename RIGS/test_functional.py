@@ -482,8 +482,10 @@ class EventTest(LiveServerTestCase):
 
         # Add item
         form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
-        wait.until(animation_is_finished())
         modal = self.browser.find_element_by_id("itemModal")
+        wait.until(animation_is_finished())
+        # See modal has opened
+        self.assertTrue(modal.is_displayed())
         modal.find_element_by_id("item_name").send_keys("Test Item 3")
         modal.find_element_by_id("item_description").send_keys(
             "This is an item description\nthat for reasons unknown spans two lines")
