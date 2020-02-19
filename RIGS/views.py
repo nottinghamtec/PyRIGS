@@ -380,7 +380,3 @@ class ResetApiKey(generic.RedirectView):
         self.request.user.save()
 
         return reverse_lazy('profile_detail')
-
-
-class PasswordResetDisabled(generic.TemplateView):
-    template_name = "RIGS/password_reset_disable.html"

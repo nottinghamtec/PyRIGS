@@ -19,8 +19,6 @@ urlpatterns = [
 
     path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
-    url(r'^user/password_reset/$', PasswordResetView.as_view()),
-
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
         name='person_list'),
