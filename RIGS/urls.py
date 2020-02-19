@@ -1,3 +1,4 @@
+from django.urls import path
 from django.conf.urls import url
 from django.contrib.auth.views import PasswordResetView
 
@@ -16,8 +17,7 @@ urlpatterns = [
     url('^$', login_required(views.Index.as_view()), name='index'),
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
-    url('^user/login/$', views.login, name='login'),
-    url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
+    path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
     url(r'^user/password_reset/$', PasswordResetView.as_view()),
 
