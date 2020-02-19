@@ -41,6 +41,9 @@ class AssetStatus(models.Model):
 
 @reversion.register
 class Supplier(models.Model, RevisionMixin):
+    class Meta:
+        ordering = ['name']
+
     name = models.CharField(max_length=80)
 
     def get_absolute_url(self):

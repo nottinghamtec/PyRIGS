@@ -94,7 +94,8 @@ class UserRegistrationTest(LiveServerTestCase):
         # Read what the error is
         alert = self.browser.find_element_by_css_selector(
             'div.alert-danger').text
-        self.assertIn("password fields didn't match", alert)
+        # Note to future maintainers - mind out for smart quotes...
+        self.assertIn("password fields didn’t match", alert)
 
         # Passwords should be empty
         self.assertEqual(password1.get_attribute('value'), '')
