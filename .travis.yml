@@ -19,7 +19,7 @@ before_script:
   - python manage.py collectstatic --noinput
 
 script:
-  - pep8 . --exclude=migrations,importer*
+  - pycodestyle . --exclude=migrations,importer*
   - python manage.py check
   - python manage.py makemigrations --check --dry-run
   - coverage run manage.py test --verbosity=2

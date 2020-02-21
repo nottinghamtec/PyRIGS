@@ -69,7 +69,7 @@ def send_eventauthorisation_success_email(instance):
                      external_styles=css).transform()
     client_email.attach_alternative(html, 'text/html')
 
-    escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', instance.event.name)
+    escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', instance.event.name)
 
     client_email.attach('N%05d - %s - CONFIRMATION.pdf' % (instance.event.pk, escapedEventName),
                         merged.getvalue(),

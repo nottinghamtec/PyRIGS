@@ -110,7 +110,7 @@ class EventCreate(generic.CreateView):
         context['currentVAT'] = models.VatRate.objects.current_rate()
 
         form = context['form']
-        if re.search('"-\d+"', form['items_json'].value()):
+        if re.search(r'"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
@@ -218,7 +218,7 @@ class EventPrint(generic.View):
 
         response = HttpResponse(content_type='application/pdf')
 
-        escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
+        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
 
         response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
         response.write(merged.getvalue())

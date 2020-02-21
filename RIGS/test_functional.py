@@ -122,7 +122,7 @@ class UserRegistrationTest(LiveServerTestCase):
         email = mail.outbox[0]
         self.assertIn('John Smith "JS" activation required', email.subject)
         urls = re.findall(
-            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
+            r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
         self.assertEqual(len(urls), 1)
 
         mail.outbox = []  # empty this for later
