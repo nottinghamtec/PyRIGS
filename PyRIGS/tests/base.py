@@ -11,7 +11,7 @@ def create_browser():
     if os.environ.get('CI', False):
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(options=options)
     return driver
 
 

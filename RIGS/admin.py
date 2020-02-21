@@ -1,7 +1,7 @@
 from django.contrib import admin
 from RIGS import models, forms
 from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from reversion.admin import VersionAdmin
 
 from django.contrib.admin import helpers
