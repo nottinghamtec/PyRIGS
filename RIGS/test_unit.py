@@ -226,7 +226,7 @@ class TestPrintPaperwork(TestCase):
         cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
 
         cls.events = {
-            1: models.Event.objects.create(name="TE E1", start_date=date.today()),
+            1: models.Event.objects.create(name="TE E1", start_date=date.today(), description="This is an event description\nthat for a very specific reason spans two lines."),
         }
 
         cls.invoices = {
