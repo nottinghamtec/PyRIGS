@@ -206,7 +206,6 @@ class EventPrint(generic.View):
         }
 
         rml = template.render(context)
-
         buffer = rml2pdf.parseString(rml)
         merger.append(PdfFileReader(buffer))
         buffer.close()

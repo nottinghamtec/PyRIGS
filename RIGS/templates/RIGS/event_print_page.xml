@@ -1,7 +1,6 @@
+{% load filters %}
 <setNextFrame name="main"/>
 <nextFrame/>
-
-
 <blockTable style="headLayout" colWidths="330,165">
 <tr>
     <td>
@@ -13,7 +12,7 @@
 
         <keepInFrame>
             <para style="style.event_description">
-            {{ object.description|default_if_none:""|linebreaksbr }}
+            {{ object.description|default_if_none:""|linebreaksxml }}
                 </para>
         </keepInFrame>
     </td>
@@ -75,9 +74,9 @@
                 {% if invoice %}
                     <keepInFrame>
                         {% if object.organisation.address %}
-                            <para style="specific_description">{{ object.organisation.address|default_if_none:""|linebreaksbr }}</para>
+                            <para style="specific_description">{{ object.organisation.address|default_if_none:""|linebreaksxml }}</para>
                         {% elif object.person.address %}
-                            <para style="specific_description">{{ object.person.address|default_if_none:""|linebreaksbr }}</para>
+                            <para style="specific_description">{{ object.person.address|default_if_none:""|linebreaksxml }}</para>
                         {% endif %}
                     </keepInFrame>
                 {% endif %}
@@ -109,12 +108,12 @@
             <h3>{{ object.venue.name }}</h3>
             {% if not invoice %}
             <keepInFrame>
-            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksbr }}</para>
+            <para style="specific_description">{{ object.venue.address|default_if_none:""|linebreaksxml }}</para>
             </keepInFrame>
             {% endif %}
         </td>
         <td rightPadding="0">
-            
+
                 <h2>Timings</h2>
                 <blockTable style="eventDetails" colWidths="55,75">
                 <tr>
@@ -185,7 +184,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                    <em>{{ item.description|linebreaksbr }}</em>
+                    <em>{{ item.description|linebreaksxml }}</em>
                     </para>
                     <para>
                 {% endif %}
