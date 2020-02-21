@@ -12,7 +12,7 @@ install:
   - export PATH=$PATH:$(pwd)
   - chmod +x chromedriver
   - pip install -r requirements.txt
-  - pip install coveralls codeclimate-test-reporter pep8
+  - pip install coveralls codeclimate-test-reporter pycodestyle
 
 before_script:
   - export PATH=$PATH:/usr/lib/chromium-browser/
