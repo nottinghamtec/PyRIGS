@@ -10,6 +10,8 @@ from PyRIGS.tests.base import BaseTest, AutoLoginTest
 from assets import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from RIGS.test_functional import animation_is_finished
 import datetime
 
 
@@ -254,6 +256,54 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.page.name = new_name
         self.page.submit()
         self.assertTrue(self.page.success)
+
+
+class TestAssetAudit(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        self.category = models.AssetCategory.objects.create(name="Haulage")
+        self.status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
+        self.supplier = models.Supplier.objects.create(name="The Bazaar")
+        self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1, voltage_rating=40, num_pins=13)
+        models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
+
+    def test_audit_process(self):
+        asset_id = "1111"
+        self.page.set_query(asset_id)
+        self.page.search()
+        wait = WebDriverWait(self.driver, 3)
+        wait.until(animation_is_finished())
+
+        mdl = self.page.modal
+        self.assertTrue(mdl.is_displayed)
+        # Do it wrong on purpose to check error display
+        mdl.remove_all_required()
+        mdl.description = ""
+        mdl.submit()
+        wait.until(animation_is_finished())
+        self.assertTrue(mdl.is_displayed)
+        self.assertIn("This field is required.", mdl.errors["Description"])
+        # Now do it properly
+        new_desc = "A BIG hammer"
+        mdl.description = new_desc
+        mdl.submit()
+        wait.until(animation_is_finished())
+        self.assertFalse(mdl.is_displayed)
+
+        # Check data is correct
+        audited = models.Asset.objects.get(asset_id="1111")
+        self.assertEqual(audited.description, new_desc)
+        # Make sure audit 'log' was filled out
+        self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
+        self.assertEqual(datetime.datetime.now().date(), audited.last_audited_at.date())
+        self.assertEqual(datetime.datetime.now().hour, audited.last_audited_at.hour)
+        self.assertEqual(datetime.datetime.now().minute, audited.last_audited_at.minute)
+        # Check we've removed it from the 'needing audit' list
+        self.assertNotIn(asset_id, self.page.assets)
 
 
 class TestSupplierValidation(TestCase):

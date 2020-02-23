@@ -6,7 +6,7 @@ from selenium.webdriver import Chrome
 from django.urls import reverse
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage
-import pdb
+from selenium.common.exceptions import NoSuchElementException
 
 
 class AssetList(BasePage):
@@ -186,3 +186,109 @@ class SupplierEdit(SupplierForm):
     @property
     def success(self):
         return '/edit' not in self.driver.current_url
+
+
+class AssetAuditList(AssetList):
+    URL_TEMPLATE = reverse('asset_audit_list')
+
+    _search_text_locator = (By.ID, 'id_query')
+    _go_button_locator = (By.ID, 'searchButton')
+    _modal_locator = (By.ID, 'modal')
+
+    @property
+    def modal(self):
+        return self.AssetAuditModal(self, self.find_element(*self._modal_locator))
+
+    @property
+    def query(self):
+        return self.find_element(*self._search_text_locator).text
+
+    def set_query(self, queryString):
+        element = self.find_element(*self._search_text_locator)
+        element.clear()
+        element.send_keys(queryString)
+
+    def search(self):
+        self.find_element(*self._go_button_locator).click()
+
+    class AssetAuditModal(Region):
+        _errors_selector = (By.CLASS_NAME, "alert-danger")
+        # Don't use the usual success selector - that tries and fails to hit the '10m long cable' helper button...
+        _submit_locator = (By.ID, "id_mark_audited")
+        form_items = {
+            'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
+            'description': (regions.TextBox, (By.ID, 'id_description')),
+            'is_cable': (regions.CheckBox, (By.ID, 'id_is_cable')),
+            'serial_number': (regions.TextBox, (By.ID, 'id_serial_number')),
+            'salvage_value': (regions.TextBox, (By.ID, 'id_salvage_value')),
+            'date_acquired': (regions.DatePicker, (By.ID, 'id_date_acquired')),
+            'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
+            'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
+
+            'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
+            'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),
+            'length': (regions.TextBox, (By.ID, 'id_length')),
+            'csa': (regions.TextBox, (By.ID, 'id_csa')),
+            'circuits': (regions.TextBox, (By.ID, 'id_circuits')),
+            'cores': (regions.TextBox, (By.ID, 'id_cores'))
+        }
+
+        @property
+        def is_displayed(self):
+            return self.root.is_displayed()
+
+        @property
+        def errors(self):
+            try:
+                error_page = self.ErrorPage(self, self.find_element(*self._errors_selector))
+                return error_page.errors
+            except NoSuchElementException:
+                return None
+
+        def submit(self):
+            previous_errors = self.errors
+            self.root.find_element(*self._submit_locator).click()
+            # self.wait.until(lambda x: not self.is_displayed)
+
+        class ErrorPage(Region):
+            _error_item_selector = (By.CSS_SELECTOR, "dl>span")
+
+            class ErrorItem(Region):
+                _field_selector = (By.CSS_SELECTOR, "dt")
+                _error_selector = (By.CSS_SELECTOR, "dd>ul>li")
+
+                @property
+                def field_name(self):
+                    return self.find_element(*self._field_selector).text
+
+                @property
+                def errors(self):
+                    return [x.text for x in self.find_elements(*self._error_selector)]
+
+            @property
+            def errors(self):
+                error_items = [self.ErrorItem(self, x) for x in self.find_elements(*self._error_item_selector)]
+                errors = {}
+                for error in error_items:
+                    errors[error.field_name] = error.errors
+                return errors
+
+        def remove_all_required(self):
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+
+        def __getattr__(self, name):
+            if name in self.form_items:
+                element = self.form_items[name]
+                form_element = element[0](self, self.find_element(*element[1]))
+                return form_element.value
+            else:
+                return super().__getattribute__(name)
+
+        def __setattr__(self, name, value):
+            if name in self.form_items:
+                element = self.form_items[name]
+                form_element = element[0](self, self.find_element(*element[1]))
+                form_element.set_value(value)
+            else:
+                self.__dict__[name] = value
