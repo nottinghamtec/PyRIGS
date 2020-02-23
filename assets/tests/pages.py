@@ -98,11 +98,6 @@ class AssetForm(FormPage):
     def parent_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._parent_select_locator))
 
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
-
 
 class AssetEdit(AssetForm):
     URL_TEMPLATE = '/assets/asset/id/{asset_id}/edit/'
@@ -164,11 +159,6 @@ class SupplierForm(FormPage):
     form_items = {
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }
-
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
 
 class SupplierCreate(SupplierForm):
@@ -240,7 +230,7 @@ class AssetAuditList(AssetList):
         @property
         def errors(self):
             try:
-                error_page = self.ErrorPage(self, self.find_element(*self._errors_selector))
+                error_page = regions.ErrorPage(self, self.find_element(*self._errors_selector))
                 return error_page.errors
             except NoSuchElementException:
                 return None
@@ -248,30 +238,7 @@ class AssetAuditList(AssetList):
         def submit(self):
             previous_errors = self.errors
             self.root.find_element(*self._submit_locator).click()
-            # self.wait.until(lambda x: not self.is_displayed)
-
-        class ErrorPage(Region):
-            _error_item_selector = (By.CSS_SELECTOR, "dl>span")
-
-            class ErrorItem(Region):
-                _field_selector = (By.CSS_SELECTOR, "dt")
-                _error_selector = (By.CSS_SELECTOR, "dd>ul>li")
-
-                @property
-                def field_name(self):
-                    return self.find_element(*self._field_selector).text
-
-                @property
-                def errors(self):
-                    return [x.text for x in self.find_elements(*self._error_selector)]
-
-            @property
-            def errors(self):
-                error_items = [self.ErrorItem(self, x) for x in self.find_elements(*self._error_item_selector)]
-                errors = {}
-                for error in error_items:
-                    errors[error.field_name] = error.errors
-                return errors
+            # self.wait.until(lambda x: not self.is_displayed) TODO
 
         def remove_all_required(self):
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
