@@ -292,7 +292,7 @@ class TestAssetAudit(AutoLoginTest):
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
-        wait.until(animation_is_finished())
+        self.wait.until(animation_is_finished())
         self.assertFalse(mdl.is_displayed)
 
         # Check data is correct
