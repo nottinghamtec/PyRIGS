@@ -184,6 +184,7 @@ class AssetAuditList(AssetList):
     _search_text_locator = (By.ID, 'id_query')
     _go_button_locator = (By.ID, 'searchButton')
     _modal_locator = (By.ID, 'modal')
+    _errors_selector = (By.CLASS_NAME, "alert-danger")
 
     @property
     def modal(self):
@@ -200,6 +201,13 @@ class AssetAuditList(AssetList):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+
+    @property
+    def error(self):
+        try:
+            return self.find_element(*self._errors_selector)
+        except NoSuchElementException:
+            return None
 
     class AssetAuditModal(Region):
         _errors_selector = (By.CLASS_NAME, "alert-danger")

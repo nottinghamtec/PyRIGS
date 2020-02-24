@@ -9,6 +9,7 @@ from RIGS import models as rigsmodels
 from PyRIGS.tests.base import BaseTest, AutoLoginTest
 from assets import models, urls
 from reversion import revisions as reversion
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from RIGS.test_functional import animation_is_finished
@@ -270,13 +271,13 @@ class TestAssetAudit(AutoLoginTest):
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
+        self.wait = WebDriverWait(self.driver, 3)
 
     def test_audit_process(self):
         asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
-        wait = WebDriverWait(self.driver, 3)
-        wait.until(animation_is_finished())
+        self.wait.until(animation_is_finished())
 
         mdl = self.page.modal
         self.assertTrue(mdl.is_displayed)
@@ -284,7 +285,7 @@ class TestAssetAudit(AutoLoginTest):
         mdl.remove_all_required()
         mdl.description = ""
         mdl.submit()
-        wait.until(animation_is_finished())
+        self.wait.until(animation_is_finished())
         self.assertTrue(mdl.is_displayed)
         self.assertIn("This field is required.", mdl.errors["Description"])
         # Now do it properly
@@ -304,6 +305,31 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(datetime.datetime.now().minute, audited.last_audited_at.minute)
         # Check we've removed it from the 'needing audit' list
         self.assertNotIn(asset_id, self.page.assets)
+
+    def test_audit_list(self):
+        self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
+
+        assetRow = self.page.assets[0]
+        assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
+        self.wait.until(animation_is_finished())
+        mdl = self.page.modal
+        self.assertTrue(mdl.is_displayed)
+        self.assertEqual(mdl.asset_id, assetRow.id)
+
+        # First close button is for the not found error
+        mdl.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
+        self.wait.until(animation_is_finished())
+        self.assertFalse(mdl.is_displayed)
+        # Make sure audit log was NOT filled out
+        audited = models.Asset.objects.get(asset_id=assetRow.id)
+        self.assertEqual(None, audited.last_audited_by)
+
+        # Check that a failed search works
+        self.page.set_query("NOTFOUND")
+        self.page.search()
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.page.modal.is_displayed)
+        self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
 
 class TestSupplierValidation(TestCase):

@@ -4,6 +4,7 @@ from selenium.webdriver import Chrome
 from selenium.common.exceptions import NoSuchElementException
 from PyRIGS.tests import regions
 
+
 class BasePage(Page):
     form_items = {}
 

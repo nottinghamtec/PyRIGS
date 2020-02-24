@@ -134,24 +134,24 @@ class SingleSelectPicker(Region):
 
 
 class ErrorPage(Region):
-            _error_item_selector = (By.CSS_SELECTOR, "dl>span")
+    _error_item_selector = (By.CSS_SELECTOR, "dl>span")
 
-            class ErrorItem(Region):
-                _field_selector = (By.CSS_SELECTOR, "dt")
-                _error_selector = (By.CSS_SELECTOR, "dd>ul>li")
+    class ErrorItem(Region):
+        _field_selector = (By.CSS_SELECTOR, "dt")
+        _error_selector = (By.CSS_SELECTOR, "dd>ul>li")
 
-                @property
-                def field_name(self):
-                    return self.find_element(*self._field_selector).text
+        @property
+        def field_name(self):
+            return self.find_element(*self._field_selector).text
 
-                @property
-                def errors(self):
-                    return [x.text for x in self.find_elements(*self._error_selector)]
+        @property
+        def errors(self):
+            return [x.text for x in self.find_elements(*self._error_selector)]
 
-            @property
-            def errors(self):
-                error_items = [self.ErrorItem(self, x) for x in self.find_elements(*self._error_item_selector)]
-                errors = {}
-                for error in error_items:
-                    errors[error.field_name] = error.errors
-                return errors
+    @property
+    def errors(self):
+        error_items = [self.ErrorItem(self, x) for x in self.find_elements(*self._error_item_selector)]
+        errors = {}
+        for error in error_items:
+            errors[error.field_name] = error.errors
+        return errors
