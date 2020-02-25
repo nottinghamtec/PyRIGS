@@ -280,20 +280,20 @@ class TestAssetAudit(AutoLoginTest):
         self.wait.until(animation_is_finished())
 
         mdl = self.page.modal
-        self.assertTrue(mdl.is_displayed)
+        self.assertTrue(self.page.modal_is_displayed)
         # Do it wrong on purpose to check error display
         mdl.remove_all_required()
         mdl.description = ""
         mdl.submit()
         self.wait.until(animation_is_finished())
-        self.assertTrue(mdl.is_displayed)
+        self.assertTrue(self.page.modal_is_displayed)
         self.assertIn("This field is required.", mdl.errors["Description"])
         # Now do it properly
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
         self.wait.until(animation_is_finished())
-        self.assertFalse(mdl.is_displayed)
+        self.assertFalse(self.page.modal_is_displayed)
 
         # Check data is correct
         audited = models.Asset.objects.get(asset_id="1111")
@@ -312,14 +312,13 @@ class TestAssetAudit(AutoLoginTest):
         assetRow = self.page.assets[0]
         assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
         self.wait.until(animation_is_finished())
-        mdl = self.page.modal
-        self.assertTrue(mdl.is_displayed)
-        self.assertEqual(mdl.asset_id, assetRow.id)
+        self.assertTrue(self.page.modal_is_displayed)
+        self.assertEqual(self.page.modal.asset_id, assetRow.id)
 
         # First close button is for the not found error
-        mdl.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
+        self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
         self.wait.until(animation_is_finished())
-        self.assertFalse(mdl.is_displayed)
+        self.assertFalse(self.page.modal_is_displayed)
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=assetRow.id)
         self.assertEqual(None, audited.last_audited_by)
@@ -328,7 +327,7 @@ class TestAssetAudit(AutoLoginTest):
         self.page.set_query("NOTFOUND")
         self.page.search()
         self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.modal.is_displayed)
+        self.assertFalse(self.page.modal_is_displayed)
         self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
 
