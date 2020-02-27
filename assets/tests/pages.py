@@ -203,10 +203,6 @@ class AssetAuditList(AssetList):
         self.find_element(*self._go_button_locator).click()
 
     @property
-    def modal_is_displayed(self):
-        return self.driver.find_element_by_id('modal').is_displayed()
-
-    @property
     def error(self):
         try:
             return self.find_element(*self._errors_selector)

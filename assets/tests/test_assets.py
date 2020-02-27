@@ -9,6 +9,7 @@ from RIGS import models as rigsmodels
 from PyRIGS.tests.base import BaseTest, AutoLoginTest
 from assets import models, urls
 from reversion import revisions as reversion
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -271,28 +272,28 @@ class TestAssetAudit(AutoLoginTest):
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
-        self.wait = WebDriverWait(self.driver, 10)
+        self.wait = WebDriverWait(self.driver, 5)
 
     def test_audit_process(self):
         asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
         mdl = self.page.modal
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.modal_is_displayed)
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         # Do it wrong on purpose to check error display
         mdl.remove_all_required()
         mdl.description = ""
         mdl.submit()
+        # self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.modal_is_displayed)
+        # self.assertTrue(self.driver.find_element_by_id('modal').is_displayed())
         self.assertIn("This field is required.", mdl.errors["Description"])
         # Now do it properly
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
         self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.modal_is_displayed)
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
         # Check data is correct
         audited = models.Asset.objects.get(asset_id="1111")
@@ -310,14 +311,13 @@ class TestAssetAudit(AutoLoginTest):
 
         assetRow = self.page.assets[0]
         assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.modal_is_displayed)
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, assetRow.id)
 
         # First close button is for the not found error
         self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
         self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.modal_is_displayed)
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=assetRow.id)
         self.assertEqual(None, audited.last_audited_by)
@@ -326,7 +326,7 @@ class TestAssetAudit(AutoLoginTest):
         self.page.set_query("NOTFOUND")
         self.page.search()
         self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.modal_is_displayed)
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
 
