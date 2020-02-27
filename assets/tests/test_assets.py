@@ -271,15 +271,14 @@ class TestAssetAudit(AutoLoginTest):
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
-        self.wait = WebDriverWait(self.driver, 3)
+        self.wait = WebDriverWait(self.driver, 10)
 
     def test_audit_process(self):
         asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
-        self.wait.until(animation_is_finished())
-
         mdl = self.page.modal
+        self.wait.until(animation_is_finished())
         self.assertTrue(self.page.modal_is_displayed)
         # Do it wrong on purpose to check error display
         mdl.remove_all_required()
