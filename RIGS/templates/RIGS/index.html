@@ -34,10 +34,11 @@
 
                     <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Forum</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Wiki</a>
+                    {% if perms.RIGS.view_event %}
                     <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="glyphicon glyphicon-link"></span> Pre-Event Risk Assessment</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
                     <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="glyphicon glyphicon-link"></span> Subhire Insurance Form</a>
-
+                    {% endif %}
             </div>
         </div>
 
