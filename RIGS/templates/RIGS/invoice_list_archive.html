@@ -11,3 +11,14 @@ All Invoices
 {% block description %}
 <p>This page displays all invoices: outstanding, paid, and void</p>
 {% endblock %}
+
+{% block search %}
+	<div class="col-sm-3 col-sm-offset-9">
+		<form class="form form-horizontal col-sm-12">
+		    <div class="form-group">
+		        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
+		               class="form-control"/>
+		    </div>
+		</form>
+	</div>
+{% endblock %}

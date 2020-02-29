@@ -1,6 +1,14 @@
 {% extends 'base_rigs.html' %}
 {% block title %}RIGS{% endblock %}
 
+{% block js %}
+<script>
+    $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        })
+</script>
+{% endblock %}
+
 {% block content %}
     <div class="col-sm-12">
         <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
@@ -36,35 +44,41 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-              <h4 class="panel-title">Search Rigboard</h4>
+              <h4 class="panel-title">Search Rigboard
+                <a href="{% url 'search_help' %}" class="pull-right modal-href"><span class="glyphicon glyphicon-question-sign"</span></a></h4>
             </div>
+            <script>
+                $(document).ready(function(){
+                    $('#search-options li a').click(function(){
+                        $('#searchForm').attr('action', $(this).data('action')).submit();
+                    });
+                    $('#id_search_input').keypress(function (e) {
+                      if (e.which == 13) {
+                        $('#searchForm').attr('action', $('#search-options li a').first().data('action')).submit();
+                        return false;
+                      }
+                    });
+
+                });
+            </script>
             <div class="list-group">
                 <div class="list-group-item">
-                    <form class="form" role="form" action="{% url 'person_list' %}" method="GET">
-                        <div class="input-group">
-                            <input type="search" name="q" class="form-control" placeholder="Search People" />
+                    <form id="searchForm" class="form" role="form" method="GET">
+                        <div class="input-group" data-toggle="tooltip" title="Use the dropdown button to select what to search. The default is Event Archive.">
+                            <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search..." />
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                            </span>
-                        </div>
-                    </form>
-                </div>
-                <div class="list-group-item">
-                    <form class="form" role="form" action="{% url 'organisation_list' %}" method="GET">
-                        <div class="input-group">
-                            <input type="search" name="q" class="form-control" placeholder="Search Organisations" />
-                            <span class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                            </span>
-                        </div>
-                    </form>
-                </div>
-                <div class="list-group-item">
-                    <form class="form" role="form" action="{% url 'venue_list' %}" method="GET">
-                        <div class="input-group">
-                            <input type="search" name="q" class="form-control" placeholder="Search Venues" />
-                            <span class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-search"></span> Search <span class="caret"></span></button>
+                                     <ul id="search-options" class="dropdown-menu">
+                                      <li><a data-action="{% url 'event_archive' %}" href="#">Events</a></li>
+                                      <li><a data-action="{% url 'person_list' %}" href="#">People</a></li>
+                                      <li><a data-action="{% url 'organisation_list' %}" href="#">Organisations</a></li>
+                                      <li><a data-action="{% url 'venue_list' %}" href="#">Venues</a></li>
+                                      {% if perms.RIGS.view_invoice %}
+                                      <li><a data-action="{% url 'invoice_archive' %}" href="#">Invoices</a></li>
+                                      {% endif %}
+                                    </ul>
+                                </div>
                             </span>
                         </div>
                     </form>
