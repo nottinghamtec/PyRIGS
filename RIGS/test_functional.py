@@ -141,7 +141,31 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(password.get_attribute('placeholder'), 'Password')
         self.assertEqual(password.get_attribute('type'), 'password')
 
+        # Expected to fail as not approved
         username.send_keys('TestUsername')
+        password.send_keys('correcthorsebatterystaple')
+        self.browser.execute_script(
+            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
+        password.send_keys(Keys.ENTER)
+
+        # Test approval
+        profileObject = models.Profile.objects.all()[0]
+        self.assertFalse(profileObject.is_approved)
+
+        # Read what the error is
+        alert = self.browser.find_element_by_css_selector(
+            'div.alert-danger').text
+        self.assertIn("approved", alert)
+
+        # Approve the user so we can proceed
+        profileObject.is_approved = True
+        profileObject.save()
+
+        # Retry login
+        self.browser.get(self.live_server_url + '/user/login')
+        username = self.browser.find_element_by_id('id_username')
+        username.send_keys('TestUsername')
+        password = self.browser.find_element_by_id('id_password')
         password.send_keys('correcthorsebatterystaple')
         self.browser.execute_script(
             "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
@@ -152,7 +176,6 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertIn('Hi John', udd)
 
         # Check all the data actually got saved
-        profileObject = models.Profile.objects.all()[0]
         self.assertEqual(profileObject.username, 'TestUsername')
         self.assertEqual(profileObject.first_name, 'John')
         self.assertEqual(profileObject.last_name, 'Smith')

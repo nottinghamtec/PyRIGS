@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 import raven
 import secrets
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -44,9 +45,9 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = (
-    ('Tom Price', 'tomtom5152@gmail.com')
-)
+ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+if DEBUG:
+    ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
 # Application definition
 
@@ -181,6 +182,8 @@ if not DEBUG or EMAILER_TEST:
     DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_COOLDOWN = datetime.timedelta(minutes=15)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
