@@ -1,3 +1,4 @@
+import datetime
 import re
 import urllib.request
 import urllib.error
@@ -10,6 +11,9 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import get_template
+from django.urls import reverse
+from django.utils import timezone
+from registration.signals import user_activated
 from premailer import Premailer
 from z3c.rml import rml2pdf
 
@@ -102,3 +106,35 @@ def on_revision_commit(sender, instance, created, **kwargs):
 
 
 post_save.connect(on_revision_commit, sender=models.EventAuthorisation)
+
+
+def send_admin_awaiting_approval_email(user, request, **kwargs):
+    # Bit more controlled than just emailing all superusers
+    for admin in models.Profile.admins():
+        # Check we've ever emailed them before and if so, if cooldown has passed.
+        if admin.last_emailed is None or admin.last_emailed + settings.EMAIL_COOLDOWN <= timezone.now():
+            context = {
+                'request': request,
+                'link_suffix': reverse("admin:RIGS_profile_changelist") + '?is_approved__exact=0',
+                'number_of_users': models.Profile.users_awaiting_approval_count(),
+                'to_name': admin.first_name
+            }
+
+            email = EmailMultiAlternatives(
+                "%s new users awaiting approval on RIGS" % (context['number_of_users']),
+                get_template("RIGS/admin_awaiting_approval.txt").render(context),
+                to=[admin.email],
+                reply_to=[user.email],
+            )
+            css = staticfiles_storage.path('css/email.css')
+            html = Premailer(get_template("RIGS/admin_awaiting_approval.html").render(context),
+                             external_styles=css).transform()
+            email.attach_alternative(html, 'text/html')
+            email.send()
+
+            # Update last sent
+            admin.last_emailed = timezone.now()
+            admin.save()
+
+
+user_activated.connect(send_admin_awaiting_approval_email)
