@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -87,8 +87,7 @@ class AssetIDUrlMixin:
             # Get the single item from the filtered queryset
             obj = queryset.get()
         except queryset.model.DoesNotExist:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
-                          {'verbose_name': queryset.model._meta.verbose_name})
+            raise Http404("No assets found matching the query")
         return obj
 
 
@@ -213,7 +212,6 @@ class SupplierSearch(SupplierList):
 
         for supplier in context["object_list"]:
             result.append({"id": supplier.pk, "name": supplier.name})
-
         return JsonResponse(result, safe=False)
 
 

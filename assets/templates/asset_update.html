@@ -1,6 +1,5 @@
 {% extends 'base_assets.html' %}
 {% load widget_tweaks %}
-{% load asset_templatetags %}
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
 
 {% block content %}
@@ -40,7 +39,6 @@
   <div class="row">
     <div class="col-md-12">
       {% include 'partials/asset_buttons.html' %}
-    </div>
   </div>
 </form>
 

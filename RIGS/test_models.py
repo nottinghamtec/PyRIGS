@@ -1,5 +1,3 @@
-
-
 import pytz
 from reversion import revisions as reversion
 from django.conf import settings
@@ -8,6 +6,7 @@ from django.test import TestCase
 from RIGS import models, versioning
 from datetime import date, timedelta, datetime, time
 from decimal import *
+from PyRIGS.tests.base import create_browser
 
 
 class ProfileTestCase(TestCase):

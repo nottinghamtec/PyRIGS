@@ -27,6 +27,8 @@ class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    is_approved = models.BooleanField(default=False)
+    last_emailed = models.DateTimeField(blank=True, null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
 
     @classmethod
     def make_api_key(cls):
@@ -52,6 +54,14 @@ class Profile(AbstractUser):
     @property
     def latest_events(self):
         return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+
+    @classmethod
+    def admins(cls):
+        return Profile.objects.filter(email__in=[y for x in settings.ADMINS for y in x])
+
+    @classmethod
+    def users_awaiting_approval_count(cls):
+        return Profile.objects.filter(models.Q(is_approved=False)).count()
 
     def __str__(self):
         return self.name

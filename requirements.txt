@@ -18,7 +18,7 @@ gunicorn==19.8.1
 icalendar==4.0.1
 lxml==4.2.1
 Markdown==2.6.11
-Pillow==5.1.0
+Pillow==6.2.0
 psycopg2==2.7.4
 Pygments==2.2.0
 PyPDF2==1.26.0
@@ -38,3 +38,4 @@ z3c.rml==3.5.0
 zope.event==4.3.0
 zope.interface==4.5.0
 zope.schema==4.5.0
+pypom==2.2.0
