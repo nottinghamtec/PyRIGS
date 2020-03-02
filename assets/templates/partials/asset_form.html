@@ -32,6 +32,10 @@
       <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
       {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
     </div>
+    <div class="form-group">
+      <label for="{{ form.nickname.id_for_label }}">Nickname</label>
+      {% render_field form.nickname|add_class:'form-control' value=object.nickname %}
+    </div>
     <!---TODO: Lower default number of lines in comments box-->
     <div class="form-group">
       <label for="{{ form.comments.id_for_label }}">Comments</label>
@@ -52,6 +56,9 @@
 
     <dt>Serial Number</dt>
     <dd>{{ object.serial_number|default:'-' }}</dd>
+
+    <dt>Nickname</dt>
+    <dd>{{ object.nickname|default:'-' }}</dd>
 
     <dt>Comments</dt>
     <dd style="overflow-wrap: break-word;">{{ object.comments|default:'-'|linebreaksbr }}</dd>
