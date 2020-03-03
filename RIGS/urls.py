@@ -21,6 +21,8 @@ urlpatterns = [
 
     url(r'^user/password_reset/$', views.PasswordResetDisabled.as_view()),
 
+    url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
+
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
         name='person_list'),
