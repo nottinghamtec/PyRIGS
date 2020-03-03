@@ -82,7 +82,7 @@ class Asset(models.Model, RevisionMixin):
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=150, blank=True)
-    nickname = models.CharField(max_length=20, blank=True, unique=True)
+    nickname = models.CharField(max_length=20, blank=True, null=True, unique=True)  # Null = true required because of the unique constraint
     purchased_from = models.ForeignKey(to=Supplier, on_delete=models.CASCADE, blank=True, null=True, related_name="assets")
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
