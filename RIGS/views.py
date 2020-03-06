@@ -35,6 +35,20 @@ class Index(generic.TemplateView):
         return context
 
 
+def login(request, **kwargs):
+    if request.user.is_authenticated:
+        next = request.GET.get('next', '/')
+        return HttpResponseRedirect(next)
+    else:
+        from django.contrib.auth.views import login
+
+        return login(request, authentication_form=forms.CheckApprovedForm)
+
+
+class SearchHelp(generic.TemplateView):
+    template_name = 'RIGS/search_help.html'
+
+
 # This view should be exempt from requiring CSRF token.
 # Then we can check for it and show a nice error
 # Don't worry, django.contrib.auth.views.login will
@@ -74,11 +88,20 @@ class PersonList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(email__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', None)
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', 'name')
         if orderBy is not None:
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -128,11 +151,20 @@ class OrganisationList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', "")
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -182,11 +214,20 @@ class VenueList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', "")
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list

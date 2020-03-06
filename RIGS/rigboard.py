@@ -225,10 +225,18 @@ class EventPrint(generic.View):
         return response
 
 
-class EventArchive(generic.ArchiveIndexView):
+class EventArchive(generic.ListView):
     model = models.Event
-    date_field = "start_date"
     paginate_by = 25
+    template_name = "RIGS/event_archive.html"
+
+    def get_context_data(self, **kwargs):
+        # get super context
+        context = super(EventArchive, self).get_context_data(**kwargs)
+
+        context['start'] = self.request.GET.get('start', None)
+        context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
+        return context
 
     def get_queryset(self):
         start = self.request.GET.get('start', None)
@@ -240,19 +248,34 @@ class EventArchive(generic.ArchiveIndexView):
                                  "Muppet! Check the dates, it has been fixed for you.")
             start, end = end, start  # Stop the impending fail
 
-        filter = False
+        filter = Q()
         if end != "":
-            filter = Q(start_date__lte=end)
+            filter &= Q(start_date__lte=end)
         if start:
-            if filter:
-                filter = filter & Q(start_date__gte=start)
-            else:
-                filter = Q(start_date__gte=start)
+            filter &= Q(start_date__gte=start)
 
-        if filter:
-            qs = self.model.objects.filter(filter).order_by('-start_date')
-        else:
-            qs = self.model.objects.all().order_by('-start_date')
+        q = self.request.GET.get('q', "")
+
+        if q is not "":
+            qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
+
+            # try and parse an int
+            try:
+                val = int(q)
+                qfilter = qfilter | Q(pk=val)
+            except:  # noqa not an integer
+                pass
+
+            try:
+                if q[0] == "N":
+                    val = int(q[1:])
+                    qfilter = Q(pk=val)  # If string is N###### then do a simple PK filter
+            except:  # noqa
+                pass
+
+            filter &= qfilter
+
+        qs = self.model.objects.filter(filter).order_by('-start_date')
 
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')

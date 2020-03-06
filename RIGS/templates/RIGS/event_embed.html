@@ -21,7 +21,7 @@
         </span>
 
         <h3>
-            <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' object.pk %}"{% endif %}>
+            <a href="{% url 'event_detail' object.pk %}">
                 {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
                 | {{ object.name }} </a>
                 {% if object.venue %}

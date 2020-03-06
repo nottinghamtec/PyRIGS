@@ -7,7 +7,7 @@ from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from PyRIGS.decorators import permission_required_with_403
+from PyRIGS.decorators import permission_required_with_403, has_oembed
 from PyRIGS.decorators import api_key_required
 
 urlpatterns = [
@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
     path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
+
+    url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
@@ -85,8 +87,7 @@ urlpatterns = [
         permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
-    url(r'^event/(?P<pk>\d+)/$',
-        permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(
+    url(r'^event/(?P<pk>\d+)/$', has_oembed(oembed_view="event_oembed")(
             rigboard.EventDetail.as_view()),
         name='event_detail'),
     url(r'^event/(?P<pk>\d+)/embed/$',

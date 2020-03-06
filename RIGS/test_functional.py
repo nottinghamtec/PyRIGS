@@ -142,7 +142,31 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(password.get_attribute('placeholder'), 'Password')
         self.assertEqual(password.get_attribute('type'), 'password')
 
+        # Expected to fail as not approved
         username.send_keys('TestUsername')
+        password.send_keys('correcthorsebatterystaple')
+        self.browser.execute_script(
+            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
+        password.send_keys(Keys.ENTER)
+
+        # Test approval
+        profileObject = models.Profile.objects.all()[0]
+        self.assertFalse(profileObject.is_approved)
+
+        # Read what the error is
+        alert = self.browser.find_element_by_css_selector(
+            'div.alert-danger').text
+        self.assertIn("approved", alert)
+
+        # Approve the user so we can proceed
+        profileObject.is_approved = True
+        profileObject.save()
+
+        # Retry login
+        self.browser.get(self.live_server_url + '/user/login')
+        username = self.browser.find_element_by_id('id_username')
+        username.send_keys('TestUsername')
+        password = self.browser.find_element_by_id('id_password')
         password.send_keys('correcthorsebatterystaple')
         self.browser.execute_script(
             "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
@@ -153,7 +177,6 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertIn('Hi John', udd)
 
         # Check all the data actually got saved
-        profileObject = models.Profile.objects.all()[0]
         self.assertEqual(profileObject.username, 'TestUsername')
         self.assertEqual(profileObject.first_name, 'John')
         self.assertEqual(profileObject.last_name, 'Smith')
@@ -232,7 +255,7 @@ class EventTest(LiveServerTestCase):
 
         # Slider expands and save button visible
         self.assertTrue(save.is_displayed())
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
 
         # For now, just check that HTML5 Client validation is in place TODO Test needs rewriting to properly test all levels of validation.
         self.assertTrue(self.browser.find_element_by_id('id_name').get_attribute('required') is not None)
@@ -470,7 +493,7 @@ class EventTest(LiveServerTestCase):
 
         save = self.browser.find_element_by_xpath(
             '(//button[@type="submit"])[3]')
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
 
         # Check the items are visible
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -554,7 +577,7 @@ class EventTest(LiveServerTestCase):
         # Click Rig button
         self.browser.find_element_by_xpath('//button[.="Rig"]').click()
 
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('//*[@id="content"]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         # Set title
@@ -584,7 +607,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # Same date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -603,7 +626,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # Same date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -616,7 +639,7 @@ class EventTest(LiveServerTestCase):
         form.find_element_by_id('id_end_time').send_keys('06:00')
 
         # No end date, end time before start time
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
@@ -635,7 +658,7 @@ class EventTest(LiveServerTestCase):
         self.assertIn("can't finish before it has started", error.find_element_by_xpath('//dd[1]/ul/li').text)
 
         # 2 dates, end after start
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
         self.browser.execute_script("document.getElementById('id_start_date').value='3015-04-24'")
         self.browser.execute_script("document.getElementById('id_end_date').value='3015-04-26'")
@@ -668,7 +691,7 @@ class EventTest(LiveServerTestCase):
         # Click Rig button
         self.browser.find_element_by_xpath('//button[.="Rig"]').click()
 
-        form = self.browser.find_element_by_tag_name('form')
+        form = self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/form')
         save = self.browser.find_element_by_xpath('(//button[@type="submit"])[3]')
 
         # Set title
@@ -1202,3 +1225,47 @@ class TECEventAuthorisationTest(TestCase):
         self.assertEqual(self.event.auth_request_by, self.profile)
         self.assertEqual(self.event.auth_request_to, 'client@functional.test')
         self.assertIsNotNone(self.event.auth_request_at)
+
+
+class SearchTest(LiveServerTestCase):
+    def setUp(self):
+        self.profile = models.Profile(
+            username="SearchTest", first_name="Search", last_name="Test", initials="STU", is_superuser=True)
+        self.profile.set_password("SearchTestPassword")
+        self.profile.save()
+
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+
+        self.browser = create_browser()
+        self.browser.implicitly_wait(10)  # Set implicit wait session wide
+
+        os.environ['RECAPTCHA_TESTING'] = 'True'
+
+        models.Event.objects.create(name="Right Event", status=models.Event.PROVISIONAL,
+                                    start_date=date.today(), description="This event is searched for endlessly over and over")
+        models.Event.objects.create(name="Wrong Event", status=models.Event.PROVISIONAL, start_date=date.today(),
+                                    description="This one should never be found.")
+
+    def tearDown(self):
+        self.browser.quit()
+        os.environ['RECAPTCHA_TESTING'] = 'False'
+
+    def test_search(self):
+        self.browser.get(self.live_server_url)
+        username = self.browser.find_element_by_id('id_username')
+        password = self.browser.find_element_by_id('id_password')
+        submit = self.browser.find_element_by_css_selector(
+            'input[type=submit]')
+
+        username.send_keys("SearchTest")
+        password.send_keys("SearchTestPassword")
+        submit.click()
+
+        form = self.browser.find_element_by_id('searchForm')
+        search_box = form.find_element_by_id('id_search_input')
+        search_box.send_keys('Right')
+        search_box.send_keys(Keys.ENTER)
+
+        event_name = self.browser.find_element_by_xpath('//*[@id="content"]/div[1]/div[4]/div/div/table/tbody/tr[1]/td[3]/h4').text
+        self.assertIn('Right', event_name)
+        self.assertNotIn('Wrong', event_name)
