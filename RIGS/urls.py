@@ -3,6 +3,7 @@ from django.conf.urls import url
 from django.contrib.auth.views import PasswordResetView
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -17,7 +18,7 @@ urlpatterns = [
     url('^$', login_required(views.Index.as_view()), name='index'),
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
-    path('user/login/', views.login, name='login'),
+    path('user/login/', LoginView.as_view(authentication_form=forms.CheckApprovedForm), name='login'),
     path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
     url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),

@@ -34,16 +34,6 @@ class Index(generic.TemplateView):
         context['rig_count'] = models.Event.objects.rig_count()
         return context
 
-# TODO: CBV?
-def login(request, **kwargs):
-    if request.user.is_authenticated:
-        next = request.GET.get('next', '/')
-        return HttpResponseRedirect(next)
-    else:
-        from django.contrib.auth.views import login
-
-        return login(request, authentication_form=forms.CheckApprovedForm)
-
 
 class SearchHelp(generic.TemplateView):
     template_name = 'RIGS/search_help.html'
