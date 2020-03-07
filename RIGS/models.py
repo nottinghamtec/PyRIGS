@@ -486,7 +486,7 @@ class Event(models.Model, RevisionMixin):
         if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
             raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
 
-        accessAndStartSameDay = self.start_date == self.access_at.date()
+        accessAndStartSameDay = self.access_at is not None and self.start_date == self.access_at.date()
         if self.access_at.date() > self.start_date or (accessAndStartSameDay and self.access_at.time() > self.start_time):
             raise ValidationError('Regardless of what some clients might think, access time cannot be after the event has started.')
 
