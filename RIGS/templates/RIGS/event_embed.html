@@ -1,8 +1,7 @@
 {% extends 'base_embed.html' %}
-{% load static from staticfiles %}
+{% load static %}
 
 {% block content %}
-
 <div class="row">
     <div class="col-sm-12">
         <a href="/">
@@ -72,7 +71,6 @@
                 </p>
             </div>
             <div class="col-xs-6">
-
                 {% if object.meet_at %}
                     <p>
                         <strong>Crew meet:</strong>
@@ -97,10 +95,7 @@
             {{ object.description|linebreaksbr }}
             </p>
         {% endif %}
-
         </table>
     </div>
 </div>
-
-
 {% endblock %}

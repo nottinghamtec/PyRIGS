@@ -3,6 +3,7 @@ from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
+from django.contrib.auth.views import LoginView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core import serializers
@@ -34,16 +35,6 @@ class Index(generic.TemplateView):
         return context
 
 
-def login(request, **kwargs):
-    if request.user.is_authenticated:
-        next = request.GET.get('next', '/')
-        return HttpResponseRedirect(next)
-    else:
-        from django.contrib.auth.views import login
-
-        return login(request, authentication_form=forms.CheckApprovedForm)
-
-
 class SearchHelp(generic.TemplateView):
     template_name = 'RIGS/search_help.html'
 
@@ -52,14 +43,11 @@ class SearchHelp(generic.TemplateView):
 # Then we can check for it and show a nice error
 # Don't worry, django.contrib.auth.views.login will
 # check for it before logging  the user in
-@csrf_exempt
-def login_embed(request, **kwargs):
-    if request.user.is_authenticated:
-        next = request.GET.get('next', '/')
-        return HttpResponseRedirect(next)
-    else:
-        from django.contrib.auth.views import login
+class LoginEmbed(LoginView):
+    template_name = 'registration/login_embed.html'
 
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
         if request.method == "POST":
             csrf_cookie = request.COOKIES.get('csrftoken', None)
 
@@ -67,7 +55,7 @@ def login_embed(request, **kwargs):
                 messages.warning(request, 'Cookies do not seem to be enabled. Try logging in using a new tab.')
                 request.method = 'GET'  # Render the page without trying to login
 
-        return login(request, template_name="registration/login_embed.html", authentication_form=forms.EmbeddedAuthenticationForm)
+        return super().dispatch(request, *args, **kwargs)
 
 
 """
@@ -423,7 +411,3 @@ class ResetApiKey(generic.RedirectView):
         self.request.user.save()
 
         return reverse_lazy('profile_detail')
-
-
-class PasswordResetDisabled(generic.TemplateView):
-    template_name = "RIGS/password_reset_disable.html"

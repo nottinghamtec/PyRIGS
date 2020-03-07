@@ -2,8 +2,22 @@ from django import template
 from django import forms
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorDict
+from django.utils.text import normalize_newlines
+from django.template.defaultfilters import stringfilter
+from django.utils.safestring import SafeData, mark_safe
+from django.utils.html import escape
 
 register = template.Library()
+
+
+@register.filter(is_safe=True, needs_autoescape=True)
+@stringfilter
+def linebreaksxml(value, autoescape=True):
+    autoescape = autoescape and not isinstance(value, SafeData)
+    value = normalize_newlines(value)
+    if autoescape:
+        value = escape(value)
+    return mark_safe(value.replace('\n', '<br />'))
 
 
 @register.filter

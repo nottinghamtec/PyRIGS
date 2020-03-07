@@ -1,3 +1,4 @@
+from django.urls import path
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -15,8 +16,8 @@ urlpatterns = [
     url('^assets/', include('assets.urls')),
     url('^user/register/$', RegistrationView.as_view(form_class=RIGS.forms.ProfileRegistrationFormUniqueEmail),
         name="registration_register"),
-    url('^user/', include('django.contrib.auth.urls')),
-    url('^user/', include('registration.backends.default.urls')),
+    path('user/', include('django.contrib.auth.urls')),
+    path('user/', include('registration.backends.default.urls')),
 
     url(r'^admin/', admin.site.urls),
 ]
