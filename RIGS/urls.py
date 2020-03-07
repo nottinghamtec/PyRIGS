@@ -17,6 +17,7 @@ urlpatterns = [
     url('^$', login_required(views.Index.as_view()), name='index'),
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
+    path('user/login/', views.login, name='login'),
     path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
     url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
