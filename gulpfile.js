@@ -4,7 +4,7 @@ var gulp = require('gulp');
 
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
-var uglify = require('gulp-uglify');
+var terser = require('gulp-terser');
 var sass = require('gulp-sass');
 var flatten = require('gulp-flatten');
 let cleanCSS = require('gulp-clean-css');
@@ -20,9 +20,9 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/jquery/**/jquery.min.js'])
+    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/popper\.js/**/popper.js', 'node_modules/moment/**/moment.js'])
     .pipe(flatten())
-    .pipe(uglify())
+    .pipe(terser())
     .pipe(gulp.dest('RIGS/static/js'));
 });
 

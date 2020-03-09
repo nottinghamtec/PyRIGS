@@ -1,56 +1,54 @@
 {% extends 'base.html' %}
 {% block titleheader %}
-    <a class="navbar-brand" href="/">RIGS</a>
+<a class="navbar-brand" href="/">RIGS</a>
 {% endblock %}
 
 {% block titleelements %}
-    {% if user.is_authenticated %}
-        <a href="/">Home</a>
-            <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Rigboard
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span>
-                    Rigboard</a></li>
-                <li><a href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span>
-                    Archive</a></li>
-                <li><a href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span>
-                    Calendar</a></li>
-                {% if perms.RIGS.view_event %}
-                    <li><a href="{% url 'activity_table' %}"><span
-                            class="glyphicon glyphicon-random"></span> Recent Changes</a></li>
-                {% endif %}
-                {% if perms.RIGS.add_event %}
-                    <li><a href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span>
-                        New Event</a></li>
-                {% endif %}
-        </div>
-            </ul>
-        </li>
+{% if user.is_authenticated %}
+<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRigboard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Rigboard
+  </a>
+  <div class="dropdown-menu" aria-labelledby="navbarDropdownRigboard">
+    <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span>
+                        Rigboard</a>
+    <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span>
+                        Archive</a>
+    <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span>
+                        Calendar</a>
+    {% if perms.RIGS.view_event %}
+    <a class="dropdown-item" href="{% url 'activity_table' %}"><span
+                                class="glyphicon glyphicon-random"></span> Recent Changes</a>
     {% endif %}
-    {% if perms.RIGS.view_invoice %}
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invoices<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                {% if perms.RIGS.add_invoice %}
-                    <li><a href="{% url 'invoice_waiting' %}"><span
-                            class="glyphicon glyphicon-briefcase text-danger"></span> Waiting</a></li>
-                {% endif %}
-                <li><a href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp text-warning"></span> Outstanding</a>
-                </li>
-                <li><a href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span>
-                    Archive</a></li>
-            </ul>
-        </li>
+    {% if perms.RIGS.add_event %}
+    <a class="dropdown-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span>
+                            New Event</a>
     {% endif %}
-    {% if perms.RIGS.view_person %}
-        <li><a href="{% url 'person_list' %}">People</a></li>
+   </div>
+</li>
+{% endif %}
+{% if perms.RIGS.view_invoice %}
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Invoices
+  </a>
+  <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
+    {% if perms.RIGS.add_invoice %}
+    <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="glyphicon glyphicon-briefcase text-danger"></span> Waiting</a>
     {% endif %}
-    {% if perms.RIGS.view_organisation %}
-        <li><a href="{% url 'organisation_list' %}">Organisations</a></li>
-    {% endif %}
-    {% if perms.RIGS.view_venue %}
-        <li><a href="{% url 'venue_list' %}">Venues</a></li>
-    {% endif %}
+    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp text-warning"></span> Outstanding</a>
+    <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a>
+  </div>
+</li>
+{% endif %}
+{% if perms.RIGS.view_person %}
+<li class="nav-item"><a class="nav-link" href="{% url 'person_list' %}">People</a></li>
+{% endif %}
+{% if perms.RIGS.view_organisation %}
+<li class="nav-item"><a class="nav-link" href="{% url 'organisation_list' %}">Organisations</a></li>
+{% endif %}
+{% if perms.RIGS.view_venue %}
+<li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
+{% endif %}
 {% endblock %}
