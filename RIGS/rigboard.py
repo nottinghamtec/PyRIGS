@@ -34,7 +34,7 @@ __author__ = 'ghost'
 
 
 class RigboardIndex(generic.TemplateView):
-    template_name = 'RIGS/rigboard.html'
+    template_name = 'rigboard.html'
 
     def get_context_data(self, **kwargs):
         # get super context
@@ -46,7 +46,7 @@ class RigboardIndex(generic.TemplateView):
 
 
 class WebCalendar(generic.TemplateView):
-    template_name = 'RIGS/calendar.html'
+    template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super(WebCalendar, self).get_context_data(**kwargs)
@@ -78,7 +78,7 @@ class EventOembed(generic.View):
 
 
 class EventEmbed(EventDetail):
-    template_name = 'RIGS/event_embed.html'
+    template_name = 'event_embed.html'
 
 
 class EventRA(generic.base.RedirectView):
@@ -189,7 +189,7 @@ class EventDuplicate(EventUpdate):
 class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
-        template = get_template('RIGS/event_print.xml')
+        template = get_template('event_print.xml')
 
         merger = PdfFileMerger()
 
@@ -197,8 +197,8 @@ class EventPrint(generic.View):
             'object': object,
             'fonts': {
                 'opensans': {
-                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                    'regular': 'static/fonts/OPENSANS-REGULAR.TTF',
+                    'bold': 'static/fonts/OPENSANS-BOLD.TTF',
                 }
             },
             'quote': True,
@@ -287,8 +287,8 @@ class EventArchive(generic.ListView):
 
 
 class EventAuthorise(generic.UpdateView):
-    template_name = 'RIGS/eventauthorisation_form.html'
-    success_template = 'RIGS/eventauthorisation_success.html'
+    template_name = 'eventauthorisation_form.html'
+    success_template = 'eventauthorisation_success.html'
 
     def form_valid(self, form):
         self.object = form.save()
@@ -351,7 +351,7 @@ class EventAuthorise(generic.UpdateView):
 class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
     model = models.Event
     form_class = forms.EventAuthorisationRequestForm
-    template_name = 'RIGS/eventauthorisation_request.html'
+    template_name = 'eventauthorisation_request.html'
 
     @method_decorator(decorators.nottinghamtec_address_required)
     def dispatch(self, *args, **kwargs):

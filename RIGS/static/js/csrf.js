@@ -1,1 +1,0 @@
-$.ajaxSetup({beforeSend:function(e,t){/^http:.*/.test(t.url)||/^https:.*/.test(t.url)||e.setRequestHeader("X-CSRFToken",function(e){var t=null;if(document.cookie&&""!=document.cookie)for(var n=document.cookie.split(";"),o=0;o<n.length;o++){var r=jQuery.trim(n[o]);if(r.substring(0,e.length+1)==e+"="){t=decodeURIComponent(r.substring(e.length+1));break}}return t}("csrftoken"))}});

@@ -64,7 +64,6 @@
 </nav>
 
 <div class="container">
-    <div id="content" class="row">
         {% block content-header %}
             {% if error %}
                 <div class="error">{{ error }}</div>{% endif %}
@@ -82,12 +81,6 @@
         {% endblock %}
 
         {% block content %}{% endblock %}
-    </div>
-
-    <div id="sidebar" class="column">
-        {% block sidebar %}
-        {% endblock %}
-    </div>
 </div>
 
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
