@@ -6,7 +6,7 @@
     <div>
         <h1 class="bd-title" id="content">Rigboard</h1>
         {% if perms.RIGS.add_event %}
-        <a href="{% url 'event_create' %}" class="btn btn-lg btn-outline-primary float-right">New <span class="glyphicon glyphicon-plus"></span></a>
+        <a href="{% url 'event_create' %}" class="btn btn-lg btn-outline-primary float-right">New <span class="fas fa-plus"></span></a>
         {% endif %}
     </div>
     {% include 'event_table.html' %}

@@ -43,7 +43,7 @@
                             <span class="label label-default">Dry Hire</span>
                         {% endif %}
                         {% if event.is_rig and perms.RIGS.view_event and event.authorised %}
-                            <span class="glyphicon glyphicon-check"></span>
+                            <span class="fas fa-check"></span>
                         {% endif %}
                     </h4>
                     {% if event.is_rig and not event.cancelled %}
@@ -97,7 +97,7 @@
                             {% endif %}
                         </div>
                     {% elif event.is_rig %}
-                        <span class="glyphicon glyphicon-exclamation-sign"></span>
+                        <span class="fas fa-exclamation-sign"></span>
                     {% endif %}
                 </td>
             </tr>

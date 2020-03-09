@@ -41,10 +41,10 @@
 			<div class="col-sm-6 text-right">
 			    <div class="btn-group btn-page">
 			        <a href="{% url 'profile_update_self' %}" class="btn btn-default">
-						Edit Profile <span class="glyphicon glyphicon-pencil"></span>
+						Edit Profile <span class="fas fa-pencil"></span>
 					</a>
 					<a href="{% url 'password_change' %}" class="btn btn-default">
-						Change Password <span class="glyphicon glyphicon-lock"></span>
+						Change Password <span class="fas fa-lock"></span>
 					</a>
 			    </div>
 			</div>
@@ -79,7 +79,7 @@
 			<div class="pull-right">
 				<a href="{% url 'reset_api_key' %}" class="btn btn-default">
 					{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
-					<span class="glyphicon glyphicon-repeat"></span>
+					<span class="fas fa-repeat"></span>
 				</a>
 			</div>
 		

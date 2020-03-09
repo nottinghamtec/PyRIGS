@@ -25,19 +25,19 @@
                  <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
             <div class="list-group">
-                    <a class="list-group-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span> Rigboard</a>
-                    <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span> Calendar</a>
-                    {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span> New Event</a>{% endif %}
-                    <a class="list-group-item" href="{% url 'asset_index' %}"><span class="glyphicon glyphicon-tag"></span> Asset Database </a>
+                    <a class="list-group-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span> Rigboard</a>
+                    <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span> Calendar</a>
+                    {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>{% endif %}
+                    <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset Database </a>
 
                     <div class="list-group-item default"></div>
 
-                    <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Forum</a>
-                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="glyphicon glyphicon-link"></span> TEC Wiki</a>
+                    <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="fas fa-link"></span> TEC Forum</a>
+                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="fas fa-link"></span> TEC Wiki</a>
                     {% if perms.RIGS.view_event %}
-                    <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="glyphicon glyphicon-link"></span> Pre-Event Risk Assessment</a>
-                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="glyphicon glyphicon-link"></span> Price List</a>
-                    <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="glyphicon glyphicon-link"></span> Subhire Insurance Form</a>
+                    <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="fas fa-link"></span> Pre-Event Risk Assessment</a>
+                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="fas fa-link"></span> Price List</a>
+                    <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="fas fa-link"></span> Subhire Insurance Form</a>
                     {% endif %}
             </div>
         </div>
@@ -45,7 +45,7 @@
         <div class="card card-default">
             <div class="card-heading">
               <h4 class="card-title">Search Rigboard
-                <a href="{% url 'search_help' %}" class="pull-right modal-href"><span class="glyphicon glyphicon-question-sign"</span></a></h4>
+                <a href="{% url 'search_help' %}" class="pull-right modal-href"><span class="fas fa-question-sign"</span></a></h4>
             </div>
             <script>
                 $(document).ready(function(){
@@ -68,7 +68,7 @@
                             <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search..." />
                             <span class="input-group-btn">
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-search"></span> Search <span class="caret"></span></button>
+                                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fas fa-search"></span> Search <span class="caret"></span></button>
                                      <ul id="search-options" class="dropdown-menu">
                                       <li><a data-action="{% url 'event_archive' %}" href="#">Events</a></li>
                                       <li><a data-action="{% url 'person_list' %}" href="#">People</a></li>

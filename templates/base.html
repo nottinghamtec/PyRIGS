@@ -44,7 +44,7 @@
         <li class="nav-item dropdown align-self-end" id="user">
                 {% if user.is_authenticated %}
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="glyphicon glyphicon-user"></span>
+                        <span class="fas fa-user"></span>
                         Hi {{ user.first_name }}
                     </a>
                     <div class="dropdown-menu" id="userdropdown">
@@ -89,6 +89,7 @@
 <script src="{% static 'js/popper.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script src="{% static 'js/moment.js' %}"></script>
+<script src="{% static 'js/fontawesome.min.js' %}"></script>
 <script>
     Date.prototype.getISOString = function () {
         var yyyy = this.getFullYear().toString();

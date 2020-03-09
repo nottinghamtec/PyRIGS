@@ -57,7 +57,7 @@
                         <td>
                             {{ object.name }}
                             {% if object.is_rig and perms.RIGS.view_event and object.authorised %}
-                                <span class="glyphicon glyphicon-check"></span>
+                                <span class="fas fa-check"></span>
                             {% endif %}
                         </td>
                         <td>
@@ -75,7 +75,7 @@
                                 {{ object.mic.initials }}<br>
                                 <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
                             {% else %}
-                                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                <span class="fas fa-exclamation-sign"></span>
                             {% endif %}
                         </td>
                         <td class="text-right">
@@ -83,7 +83,7 @@
                                class="btn btn-default"
                                data-toggle="tooltip"
                                title="'Invoice' this event - click this when paperwork has been sent to treasury">
-                                <span class="glyphicon glyphicon-gbp"></span>
+                                <span class="fas fa-gbp"></span>
                             </a>
                         </td>
                     </tr>

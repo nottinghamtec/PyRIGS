@@ -11,18 +11,18 @@
     Rigboard
   </a>
   <div class="dropdown-menu" aria-labelledby="navbarDropdownRigboard">
-    <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="glyphicon glyphicon-list"></span>
+    <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span>
                         Rigboard</a>
-    <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="glyphicon glyphicon-book"></span>
+    <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="fas fa-book"></span>
                         Archive</a>
-    <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="glyphicon glyphicon-calendar"></span>
+    <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span>
                         Calendar</a>
     {% if perms.RIGS.view_event %}
     <a class="dropdown-item" href="{% url 'activity_table' %}"><span
-                                class="glyphicon glyphicon-random"></span> Recent Changes</a>
+                                class="fas fa-random"></span> Recent Changes</a>
     {% endif %}
     {% if perms.RIGS.add_event %}
-    <a class="dropdown-item" href="{% url 'event_create' %}"><span class="glyphicon glyphicon-plus"></span>
+    <a class="dropdown-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span>
                             New Event</a>
     {% endif %}
    </div>
@@ -35,10 +35,10 @@
   </a>
   <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
     {% if perms.RIGS.add_invoice %}
-    <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="glyphicon glyphicon-briefcase text-danger"></span> Waiting</a>
+    <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting</a>
     {% endif %}
-    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="glyphicon glyphicon-gbp text-warning"></span> Outstanding</a>
-    <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="glyphicon glyphicon-book"></span> Archive</a>
+    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-gbp text-warning"></span> Outstanding</a>
+    <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
   </div>
 </li>
 {% endif %}

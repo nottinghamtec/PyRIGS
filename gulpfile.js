@@ -20,7 +20,7 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/popper\.js/**/popper.js', 'node_modules/moment/**/moment.js'])
+    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/popper\.js/**/popper.js', 'node_modules/moment/**/moment.js', 'node_modules/@fortawesome/fontawesome-free/js/all.js'])
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest('RIGS/static/js'));

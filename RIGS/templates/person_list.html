@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-2">
                 <a href="{% url 'person_create' %}" class="btn btn-default pull-right">New <span
-                        class="glyphicon glyphicon-plus"></span></a>
+                        class="fas fa-plus"></span></a>
             </div>
             <div class="col-sm-3 col-sm-offset-9">
                 <form class="form form-horizontal col-sm-12">
@@ -48,10 +48,10 @@
                         <td>{{ person.notes|yesno|capfirst }}</td>
                         <td>
                             <a href="{% url 'person_detail' person.pk %}" class="btn btn-default modal-href">
-                                <span class="glyphicon glyphicon-eye-open"></span>
+                                <span class="fas fa-eye-open"></span>
                             </a>
                             <a href="{% url 'person_update' person.pk %}" class="btn btn-default"><span
-                                    class="glyphicon glyphicon-pencil"></span></a>
+                                    class="fas fa-pencil"></span></a>
                         </td>
                     </tr>
                 {% empty %}
