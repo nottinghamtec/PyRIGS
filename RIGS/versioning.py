@@ -201,7 +201,7 @@ class RIGSVersion(Version):
 
 class VersionHistory(generic.ListView):
     model = RIGSVersion
-    template_name = "RIGS/version_history.html"
+    template_name = "version_history.html"
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
@@ -219,7 +219,7 @@ class VersionHistory(generic.ListView):
 
 class ActivityTable(generic.ListView):
     model = RIGSVersion
-    template_name = "RIGS/activity_table.html"
+    template_name = "activity_table.html"
     paginate_by = 25
 
     def get_queryset(self):
@@ -229,7 +229,7 @@ class ActivityTable(generic.ListView):
 
 class ActivityFeed(generic.ListView):
     model = RIGSVersion
-    template_name = "RIGS/activity_feed_data.html"
+    template_name = "activity_feed_data.html"
     paginate_by = 25
 
     def get_queryset(self):

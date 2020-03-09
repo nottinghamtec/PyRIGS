@@ -27,7 +27,7 @@ Displays the current rig count along with a few other bits and pieces
 
 
 class Index(generic.TemplateView):
-    template_name = 'RIGS/index.html'
+    template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
         context = super(Index, self).get_context_data(**kwargs)
@@ -36,7 +36,7 @@ class Index(generic.TemplateView):
 
 
 class SearchHelp(generic.TemplateView):
-    template_name = 'RIGS/search_help.html'
+    template_name = 'search_help.html'
 
 
 # This view should be exempt from requiring CSRF token.

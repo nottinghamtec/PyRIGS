@@ -12,7 +12,7 @@
     </div>
         {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
-            {% include 'RIGS/event_detail_buttons.html' %}
+            {% include 'event_detail_buttons.html' %}
         </div>
         {% endif %}
 
@@ -20,9 +20,9 @@
     {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
         <div class="col-sm-12 col-md-6 col-lg-5">
-            <div class="panel panel-default">
-                <div class="panel-heading">Contact Details</div>
-                <div class="panel-body">
+            <div class="card card-default">
+                <div class="card-heading">Contact Details</div>
+                <div class="card-body">
                     <dl class="dl-horizontal">
                         <dt>Person</dt>
                         <dd>
@@ -46,9 +46,9 @@
                 </div>
             </div>
             {% if event.organisation %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">Organisation</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-heading">Organisation</div>
+                    <div class="card-body">
                         <dl class="dl-horizontal">
                             <dt>Organisation</dt>
                             <dd>
@@ -75,9 +75,9 @@
         </div>
     {% endif %}
     <div class="col-sm-12 {% if event.is_rig and perms.RIGS.view_event %}col-md-6 col-lg-7{% endif %}">
-        <div class="panel panel-info">
-            <div class="panel-heading">Event Info</div>
-            <div class="panel-body">
+        <div class="card card-info">
+            <div class="card-heading">Event Info</div>
+            <div class="card-body">
                 <dl class="dl-horizontal">
                     <dt>Event Venue</dt>
                     <dd>
@@ -160,17 +160,17 @@
     </div>
     {% if event.is_rig and event.internal and perms.RIGS.view_event %}
     <div class="col-sm-12">
-        <div class="panel panel-default
+        <div class="card card-default
             {% if object.authorised %}
-                panel-success
+                card-success
             {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-                panel-warning
+                card-warning
             {% elif event.auth_request_to %}
-                panel-info
+                card-info
             {% endif %}
             ">
-            <div class="panel-heading">Client Authorisation</div>
-            <div class="panel-body">
+            <div class="card-heading">Client Authorisation</div>
+            <div class="card-body">
                 <dl class="dl-horizontal col-sm-6">
                     <dt>Authorisation Request</dt>
                     <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
@@ -216,27 +216,27 @@
     {% endif %}
     {% if not request.is_ajax and perms.RIGS.view_event %}
     <div class="col-sm-12 text-right">
-        {% include 'RIGS/event_detail_buttons.html' %}
+        {% include 'event_detail_buttons.html' %}
     </div>
     {% endif %}
     {% if event.is_rig %}
         <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">Event Details</div>
-                <div class="panel-body">
+            <div class="card card-default">
+                <div class="card-heading">Event Details</div>
+                <div class="card-body">
                     {% if perms.RIGS.view_event %}
                     <div class="well well-sm">
                         <h4>Notes</h4>
                         <div class="dont-break-out">{{ event.notes|linebreaksbr }}</div>
                     </div>
                     {% endif %}
-                    {% include 'RIGS/item_table.html' %}
+                    {% include 'item_table.html' %}
                 </div>
             </div>
         </div>
         {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
-            {% include 'RIGS/event_detail_buttons.html' %}
+            {% include 'event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}
@@ -253,7 +253,7 @@
 {% endblock %}
 
 {% if request.is_ajax %}
-    {% block footer %}
+    {% block barter %}
         <div class="row">
             {% if perms.RIGS.view_event %}
             <div class="col-sm-10 align-left">

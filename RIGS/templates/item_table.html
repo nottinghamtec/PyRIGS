@@ -1,4 +1,4 @@
-<div class="panel table-responsive">
+<div class="card table-responsive">
 	<table class="table table-hover" id="item-table" {% if edit %}data-orderurl="{#% url 'item_order' %#}"{% endif %}>
 		<thead>
 			<tr>
@@ -23,11 +23,11 @@
 		</thead>
 		<tbody id="item-table-body">
 			{% for item in object.items.all %}
-				{% include 'RIGS/item_row.html' %}
+				{% include 'item_row.html' %}
 			{% endfor %}
 		</tbody>
         {% if perms.RIGS.view_event %}
-		<tfoot>
+		<tbart>
 			<tr>
 				<td rowspan="3" colspan="2"></td>
 				<td>Total (ex. VAT)</td>
@@ -47,7 +47,7 @@
 				<td>Total</td>
 				<td colspan="2">£ <span id="total">{{object.total|default:0|floatformat:2}}</span></td>
 			</tr>
-		</tfoot>
+		</tbart>
         {% endif %}
 	</table>
 </div>

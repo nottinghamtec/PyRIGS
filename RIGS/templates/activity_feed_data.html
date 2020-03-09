@@ -5,7 +5,7 @@
 {% load to_class_name from filters %}
 
 {% block content %}
-  
+
     <div class="list-group-item">
       <div class="media">
         {% for version in object_list %}
@@ -36,10 +36,10 @@
                         {% if version.changes.old == None %}
                           Created
                         {% else %}
-                          Changed {% include 'RIGS/version_changes.html' %} in
+                          Changed {% include 'version_changes.html' %} in
                         {% endif %}
-                          
-                        {% include 'RIGS/object_button.html' with object=version.changes.new %}
+
+                        {% include 'object_button.html' with object=version.changes.new %}
                         {% if version.revision.comment %}
                           ({{ version.revision.comment }})
                         {% endif %}
@@ -50,5 +50,5 @@
         </div>
       </div>
     </div>
-  
+
 {% endblock %}

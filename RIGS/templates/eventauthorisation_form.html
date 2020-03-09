@@ -33,23 +33,23 @@
     </div>
 
     <div class="row">
-        {% include 'RIGS/client_eventdetails.html' %}
+        {% include 'client_eventdetails.html' %}
     </div>
 
     <div class="row">
         <div class="col-sm-12">
             {% with object=event %}
-                {% include 'RIGS/item_table.html' %}
+                {% include 'item_table.html' %}
             {% endwith %}
         </div>
     </div>
 
     <div class="row">
         <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading" id="eventauth">Event Authorisation</div>
+            <div class="card card-default">
+                <div class="card-heading" id="eventauth">Event Authorisation</div>
 
-                <div class="panel-body">
+                <div class="card-body">
                     <form class="form-horizontal itemised_form" role="form" method="POST" action="#eventauth">
                         {% csrf_token %}
                         {% include 'form_errors.html' %}

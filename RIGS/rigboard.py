@@ -228,7 +228,7 @@ class EventPrint(generic.View):
 class EventArchive(generic.ListView):
     model = models.Event
     paginate_by = 25
-    template_name = "RIGS/event_archive.html"
+    template_name = "event_archive.html"
 
     def get_context_data(self, **kwargs):
         # get super context
@@ -396,12 +396,12 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
         msg = EmailMultiAlternatives(
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
-            get_template("RIGS/eventauthorisation_client_request.txt").render(context),
+            get_template("eventauthorisation_client_request.txt").render(context),
             to=[email],
             reply_to=[self.request.user.email],
         )
         css = staticfiles_storage.path('css/email.css')
-        html = premailer.Premailer(get_template("RIGS/eventauthorisation_client_request.html").render(context),
+        html = premailer.Premailer(get_template("eventauthorisation_client_request.html").render(context),
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
 
@@ -411,7 +411,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
 
 class EventAuthoriseRequestEmailPreview(generic.DetailView):
-    template_name = "RIGS/eventauthorisation_client_request.html"
+    template_name = "eventauthorisation_client_request.html"
     model = models.Event
 
     def render_to_response(self, context, **response_kwargs):

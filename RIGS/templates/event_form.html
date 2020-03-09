@@ -166,9 +166,9 @@
 
     {# Contact details #}
     <div class="col-sm-12 col-md-6">
-        <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
-            <div class="panel-heading">Contact Details</div>
-            <div class="panel-body">
+        <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
+            <div class="card-heading">Contact Details</div>
+            <div class="card-body">
                 <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
                     <label for="{{ form.person.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.person.label }}</label>
@@ -225,9 +225,9 @@
                 </div>
             </div>
         </div>
-        <div class="panel panel-default form-hws form-non_rig">
-            <div class="panel-heading">Event Description</div>
-            <div class="panel-body">
+        <div class="card card-default form-hws form-non_rig">
+            <div class="card-heading">Event Description</div>
+            <div class="card-body">
                 <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
                     <label for="{{ form.description.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.description.label }}</label>
@@ -243,9 +243,9 @@
 
     {# Event details #}
     <div class="col-sm-12 col-md-6">
-        <div class="panel panel-default form-hws form-non_rig">
-            <div class="panel-heading">Event Details</div>
-            <div class="panel-body">
+        <div class="card card-default form-hws form-non_rig">
+            <div class="card-heading">Event Details</div>
+            <div class="card-body">
                 <div id="form-hws">
                     <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
                         <label for="{{ form.name.id_for_label }}"
@@ -424,15 +424,15 @@
 
     {# Notes and item shit #}
     <div class="col-sm-12">
-        <div class="panel panel-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
-            <div class="panel-body">
+        <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
+            <div class="card-body">
                 <div class="col-sm-12">
                     <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
                         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
                         {% render_field form.notes class+="form-control" %}
                     </div>
                 </div>
-                {% include "RIGS/item_table.html" %}
+                {% include 'item_table.html" %}
             </div>
         </div>
     </div>
@@ -445,5 +445,5 @@
     </div>
     </form>
 
-    {% include 'RIGS/item_modal.html' %}
+    {% include 'item_modal.html' %}
 {% endblock %}

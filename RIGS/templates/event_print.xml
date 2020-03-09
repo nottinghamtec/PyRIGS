@@ -127,7 +127,7 @@
     </template>
 
     <story firstPageTemplate="Headed">
-            {% include "RIGS/event_print_page.xml" %}
+            {% include 'event_print_page.xml" %}
     </story>
 
 </document>

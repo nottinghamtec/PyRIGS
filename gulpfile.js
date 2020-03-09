@@ -20,7 +20,11 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.js'])
-        .pipe(uglify())
-        .pipe(gulp.dest('RIGS/static/js'));
+    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/jquery/**/jquery.min.js'])
+    .pipe(flatten())
+    .pipe(uglify())
+    .pipe(gulp.dest('RIGS/static/js'));
 });
+
+exports.default = gulp.parallel('sass', 'scripts');
+exports.build = gulp.parallel('sass', 'scripts');

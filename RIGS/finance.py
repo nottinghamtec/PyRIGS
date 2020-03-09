@@ -21,7 +21,7 @@ forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
-    template_name = 'RIGS/invoice_list_active.html'
+    template_name = 'invoice_list_active.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceIndex, self).get_context_data(**kwargs)
@@ -57,7 +57,7 @@ class InvoicePrint(generic.View):
     def get(self, request, pk):
         invoice = get_object_or_404(models.Invoice, pk=pk)
         object = invoice.event
-        template = get_template('RIGS/event_print.xml')
+        template = get_template('event_print.xml')
 
         context = {
             'object': object,
@@ -120,7 +120,7 @@ class InvoiceDelete(generic.DeleteView):
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
-    template_name = 'RIGS/invoice_list_archive.html'
+    template_name = 'invoice_list_archive.html'
     paginate_by = 25
 
     def get_queryset(self):
@@ -155,7 +155,7 @@ class InvoiceArchive(generic.ListView):
 class InvoiceWaiting(generic.ListView):
     model = models.Event
     paginate_by = 25
-    template_name = 'RIGS/event_invoice.html'
+    template_name = 'event_invoice.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)

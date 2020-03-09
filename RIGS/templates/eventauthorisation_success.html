@@ -15,22 +15,22 @@
         </div>
     </div>
 
-    {% include 'RIGS/client_eventdetails.html' %}
+    {% include 'client_eventdetails.html' %}
 
     <div class="row">
         <div class="col-sm-12">
             {% with object=event %}
-                {% include 'RIGS/item_table.html' %}
+                {% include 'item_table.html' %}
             {% endwith %}
         </div>
     </div>
 
     <div class="row">
         <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">Event Authorisation</div>
+            <div class="card card-default">
+                <div class="card-heading">Event Authorisation</div>
 
-                <div class="panel-body">
+                <div class="card-body">
                     <div class="row">
                         <div class="col-sm-12 col-md-6">
                             <dl class="dl-horizontal">

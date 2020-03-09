@@ -20,8 +20,8 @@
     <div class="row">
     <div class="col-sm-{% if perms.RIGS.view_event %}6{% else %}12{% endif %}">
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card card-default">
+            <div class="card-heading">
                  <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
             <div class="list-group">
@@ -42,9 +42,9 @@
             </div>
         </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">Search Rigboard
+        <div class="card card-default">
+            <div class="card-heading">
+              <h4 class="card-title">Search Rigboard
                 <a href="{% url 'search_help' %}" class="pull-right modal-href"><span class="glyphicon glyphicon-question-sign"</span></a></h4>
             </div>
             <script>
@@ -88,7 +88,7 @@
     </div>
     {% if perms.RIGS.view_event %}
     <div class="col-sm-6">
-        {% include 'RIGS/activity_feed.html' %}
+        {% include 'activity_feed.html' %}
     </div>
     {% endif %}
 </div>
