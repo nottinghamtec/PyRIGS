@@ -1,65 +1,34 @@
 <div class="table-responsive">
     <table class="table">
-        <thead>
-        <td>#</td>
-        <td>Event Date</td>
-        <td>Event Details</td>
-        <td>Event Timings</td>
-        <td>MIC</td>
+        <thead class="thead-dark">
+            <tr>
+                <td>#</td>
+                <td>Event Date</td>
+                <td>Event Timings</td>
+                <td>Event Details</td>
+                <td>Status</td>
+                <td>Authorisation</td>
+                <td>MIC</td>
+            </tr>
         </thead>
         <tbody>
         {% for event in events %}
             <tr class="
-                        {% if event.cancelled %}
-							active text-muted
-                        {% elif not event.is_rig %}
-                            info
-						{% elif event.confirmed and event.mic %}
-						{# interpreated as (booked and mic) #}
-							success
-						{% elif event.mic %}
-							warning
-						{% else %}
-							danger
-						{% endif %}
-                        ">
+            {% if event.cancelled %}
+                active text-muted
+            {% elif not event.is_rig %}
+                info
+            {% endif %}">
+                <!---Number-->
                 <td>{{ event.pk }}</td>
+                <!--Dates-->
                 <td>
                     <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
                         <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
                     {% endif %}
-                    <span class="text-muted">{{ event.get_status_display }}</span>
                 </td>
-                <td>
-                    <h4>
-                        <a href="{% url 'event_detail' event.pk %}">
-                            {{ event.name }}
-                        </a>
-                        {% if event.venue %}
-                            <small>at {{ event.venue }}</small>
-                        {% endif %}
-                        {% if event.dry_hire %}
-                            <span class="label label-default">Dry Hire</span>
-                        {% endif %}
-                        {% if event.is_rig and perms.RIGS.view_event and event.authorised %}
-                            <span class="fas fa-check"></span>
-                        {% endif %}
-                    </h4>
-                    {% if event.is_rig and not event.cancelled %}
-                        <h5>
-                            {{ event.person.name }}
-                            {% if event.organisation %}
-                                for {{ event.organisation.name }}
-                            {% endif %}
-                        </h5>
-                    {% endif %}
-                    {% if not event.cancelled and event.description %}
-                        <div>
-                            {{ event.description|linebreaksbr }}
-                        </div>
-                    {% endif %}
-                </td>
+                <!---Times-->
                 <td>
                     {% if not event.cancelled %}
                         <dl class="dl-horizontal">
@@ -84,9 +53,48 @@
                         </dl>
                     {% endif %}
                 </td>
-                <td class="text-right">
+                <!---Details-->
+                <td>
+                    <h4>
+                        <a href="{% url 'event_detail' event.pk %}">
+                            {{ event.name }}
+                        </a>
+                        {% if event.venue %}
+                            <small>at {{ event.venue }}</small>
+                        {% endif %}
+                        {% if event.dry_hire %}
+                            <span class="badge badge-secondary">Dry Hire</span>
+                        {% endif %}
+                        
+                    </h4>
+                    {% if event.is_rig and not event.cancelled %}
+                        <h5>
+                            {{ event.person.name }}
+                            {% if event.organisation %}
+                                for {{ event.organisation.name }}
+                            {% endif %}
+                        </h5>
+                    {% endif %}
+                    {% if not event.cancelled and event.description %}
+                        <div>
+                            {{ event.description|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                </td>
+                <!---Status-->
+                <td class="bg-{% if event.confirmed %}success{%else%}warning{%endif%}">
+                    <span>{{ event.get_status_display }}</span>
+                </td>
+                <!---Authorisation-->
+                <td>
+                    {% if event.is_rig and perms.RIGS.view_event and event.authorised %}
+                        <span class="fas fa-check"></span>
+                    {% endif %}
+                </td>
+                <!---MIC-->
+                <td class="text-center">
                     {% if event.mic %}
-                        {{ event.mic.initials }}
+                        "{{ event.mic.initials }}"
                         <div>
                             {% if perms.RIGS.view_profile %}
                                 <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
@@ -97,7 +105,7 @@
                             {% endif %}
                         </div>
                     {% elif event.is_rig %}
-                        <span class="fas fa-exclamation-sign"></span>
+                        <span class="fas fa-exclamation"></span>
                     {% endif %}
                 </td>
             </tr>

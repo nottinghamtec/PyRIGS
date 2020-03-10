@@ -51,19 +51,6 @@
 {% if perms.RIGS.view_venue %}
 <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
 {% endif %}
-<script>
-    $(document).ready(function(){
-        $('#search-options option').click(function(){
-            $('#searchForm').attr('action', $(this).data('action')).submit();
-        });
-        $('#id_search_input').keypress(function (e) {
-          if (e.which == 13) {
-            $('#searchForm').attr('action', $('#search-options option').first().data('action')).submit();
-            return false;
-          }
-        });
-    });
-</script>
 <form id="searchForm" class="form form-inline" role="form" method="GET">
   <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search..." />
   <div class="input-group-append">
@@ -80,4 +67,19 @@
   <button class="btn btn-primary form-control"><span class="fas fa-search"></span> Search</button>
 </form>
 <a href="{% url 'search_help' %}" class="nav-link modal-href"><span class="fas fa-question"></span></a></h4>
+{% endblock %}
+{% block js %}
+<script>
+    $(document).ready(function(){
+        $('#search-options option').click(function(){
+            $('#searchForm').attr('action', $(this).data('action')).submit();
+        });
+        $('#id_search_input').keypress(function (e) {
+          if (e.which == 13) {
+            $('#searchForm').attr('action', $('#search-options option').first().data('action')).submit();
+            return false;
+          }
+        });
+    });
+</script>
 {% endblock %}
