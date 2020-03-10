@@ -1,9 +1,6 @@
 from django.urls import path
 from django.conf.urls import url
-from django.contrib.auth.views import PasswordResetView
-
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -12,14 +9,8 @@ from PyRIGS.decorators import permission_required_with_403, has_oembed
 from PyRIGS.decorators import api_key_required
 
 urlpatterns = [
-    # Examples:
-    # url(r'^$', 'PyRIGS.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-    url('^$', login_required(views.Index.as_view()), name='index'),
+    path('', login_required(views.Index.as_view()), name='index'),
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
-
-    path('user/login/', LoginView.as_view(authentication_form=forms.CheckApprovedForm), name='login'),
-    path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
     url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
 
@@ -168,16 +159,6 @@ urlpatterns = [
         name='event_authorise_preview'),
     url(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
         name='event_authorise'),
-
-    # User editing
-    url(r'^user/$', login_required(views.ProfileDetail.as_view()), name='profile_detail'),
-    url(r'^user/(?P<pk>\d+)/$',
-        permission_required_with_403('RIGS.view_profile')(views.ProfileDetail.as_view()),
-        name='profile_detail'),
-    url(r'^user/edit/$', login_required(views.ProfileUpdateSelf.as_view()),
-        name='profile_update_self'),
-    url(r'^user/reset_api_key$', login_required(views.ResetApiKey.as_view(permanent=False)),
-        name='reset_api_key'),
 
     # ICS Calendar - API key authentication
     url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
