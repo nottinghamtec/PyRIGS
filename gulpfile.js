@@ -15,7 +15,7 @@ var sourcemaps = require('gulp-sourcemaps');
 sass.compiler = require('node-sass');
 
 gulp.task('sass', function () {
-  return gulp.src('web_assets/scss/**/*.scss')
+  return gulp.src(['web_assets/scss/**/*.scss', 'node_modules/fullcalendar/dist/fullcalendar.css'])
     .pipe(sourcemaps.init())
     .pipe(flatten())
     .pipe(sass().on('error', sass.logError))
@@ -26,7 +26,7 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/popper\.js/**/popper.js', 'node_modules/moment/moment.js', 'node_modules/@fortawesome/fontawesome-free/js/all.js', 'node_modules/jquery/dist/jquery.js'])
+    return gulp.src(['web_assets/js/**/*.js', 'node_modules/bootstrap/**/bootstrap.min.js', 'node_modules/popper\.js/**/popper.js', 'node_modules/moment/min/moment.min.js', 'node_modules/@fortawesome/fontawesome-free/js/all.js', 'node_modules/jquery/dist/jquery.js', 'node_modules/fullcalendar/dist/fullcalendar.js'])
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest('RIGS/static/js'));

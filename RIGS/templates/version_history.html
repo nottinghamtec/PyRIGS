@@ -35,31 +35,23 @@
                     <td>Version ID</td>
                     <td>User</td>
                     <td>Changes</td>
-                    <td>Comment</td>
                 </tr>
                 </thead>
                 <tbody>
                 	{% for version in object_list %}
-                        
-                            <tr>
-                           		<td>{{ version.revision.date_created }}</td>
-                                <td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                                <td>{{ version.revision.user.name }}</td>
-                                <td>
-                                    {% if version.changes.old is None %}
-                                        {{object|to_class_name}} Created
-                                    {% else %}
-                                        {% include 'version_changes.html' %}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {{ version.revision.comment }}
-                                </td>
-                            </tr>
-
-                        
+                    <tr>
+                        <td>{{ version.revision.date_created }}</td>
+                        <td>{{ version.pk }}|{{ version.revision.pk }}</td>
+                        <td>{{ version.revision.user.name }}</td>
+                        <td>
+                            {% if version.changes.old is None %}
+                                {{object|to_class_name}} Created
+                            {% else %}
+                                {% include 'version_changes.html' %}
+                            {% endif %}
+                        </td>
+                    </tr>
         			{% endfor %}
-
                 </tbody>
             </table>
          </div>

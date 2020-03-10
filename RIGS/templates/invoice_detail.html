@@ -29,7 +29,7 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="card card-default">
-                    <div class="card-heading">Invoice Details</div>
+                    <div class="card-header">Invoice Details</div>
                     <div class="card-body">
                         {% if object.event.organisation %}
                             {{ object.event.organisation.name }}<br/>
@@ -43,7 +43,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="card card-{% if object.is_closed %}success{% else %}warning{% endif %}">
-                    <div class="card-heading">Event Details<span class="pull-right">
+                    <div class="card-header">Event Details<span class="pull-right">
                         {% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(OUTSTANDING){% endif %}
                         </span>
                     </div>

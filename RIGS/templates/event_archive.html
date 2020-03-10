@@ -10,27 +10,22 @@
         </div>
         <div class="col-sm-12">
             <form class="form-inline">
-                    
                 <div class="input-group">
                       <div class="input-group-addon">Start</div>
                     <input type="date" name="start" id="start" value="{{ start|default_if_none:"" }}" placeholder="Start" class="form-control" />
                 </div>
-            
                 <div class="input-group">
                       <div class="input-group-addon">End</div>
                     <input type="date" name="end" id="end" value="{{ end|default_if_none:"" }}" placeholder="End" class="form-control" />
-                </div>
-            
+                </div>  
                 <div class="input-group">
                     <div class="input-group-addon">Keyword</div>
                     <input type="search" name="q" placeholder="Keyword" value="{{ request.GET.q }}"
                            class="form-control"/>
-                </div>
-                        
+                </div>                
                 <div class="input-group">
                         <input type="submit" class="btn btn-primary" value="Search"/>
-                </div>
-                    
+                </div>               
             </form>
         </div>
 

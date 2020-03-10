@@ -105,7 +105,7 @@ urlpatterns = [
     url(r'^event/(?P<pk>\d+)/duplicate/$',
         permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
         name='event_duplicate'),
-    url(r'^event/archive/$', login_required()(rigboard.EventArchive.as_view()),
+    path('event/archive/', login_required()(rigboard.EventArchive.as_view()),
         name='event_archive'),
 
     url(r'^event/(?P<pk>\d+)/history/$',

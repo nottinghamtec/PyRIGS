@@ -19,7 +19,7 @@
         {% endif %}
         <div class="col-sm-6">
             <div class="card card-info">
-                <div class="card-heading">Person Details</div>
+                <div class="card-header">Person Details</div>
                 <div class="card-body">
                     <dl class="dl-horizontal">
                         <dt>Name</dt>
@@ -43,7 +43,7 @@
 
         <div class="col-sm-6">
             <div class="card card-default">
-                <div class="card-heading">Associated Organisations</div>
+                <div class="card-header">Associated Organisations</div>
                 <div class="card-body">
                     <div class="list-group">
                         {% for organisation,count in object.organisations %}
@@ -58,7 +58,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="card card-default">
-                <div class="card-heading">Associated Events</div>
+                <div class="card-header">Associated Events</div>
                 <div class="card-body">
                     {% with object.latest_events as events %}
                         {% include 'event_table.html' %}

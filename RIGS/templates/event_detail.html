@@ -4,28 +4,27 @@
 {% block content %}
 <div class="row">
     {% if not request.is_ajax %}
-    <div class="col-sm-12">
-            <h1>
-                {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
-                | {{ object.name }} {% if event.dry_hire %}<span class="badge">Dry Hire</span>{% endif %}
-            </h1>
-    </div>
+        <div class="col-sm-12">
+                <h1>
+                    {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
+                    | {{ object.name }} {% if event.dry_hire %}<span class="badge badge-secondary">Dry Hire</span>{% endif %}
+                </h1>
+        </div>
         {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'event_detail_buttons.html' %}
         </div>
         {% endif %}
-
     {% endif %}
     {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
         <div class="col-sm-12 col-md-6 col-lg-5">
             <div class="card card-default">
-                <div class="card-heading">Contact Details</div>
+                <div class="card-header">Contact Details</div>
                 <div class="card-body">
                     <dl class="dl-horizontal">
                         <dt>Person</dt>
-                        <dd>
+                        <dd
                             {% if object.person %}
                                 <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
                                     {{ object.person }}
@@ -47,7 +46,7 @@
             </div>
             {% if event.organisation %}
                 <div class="card card-default">
-                    <div class="card-heading">Organisation</div>
+                    <div class="card-header">Organisation</div>
                     <div class="card-body">
                         <dl class="dl-horizontal">
                             <dt>Organisation</dt>
@@ -76,7 +75,7 @@
     {% endif %}
     <div class="col-sm-12 {% if event.is_rig and perms.RIGS.view_event %}col-md-6 col-lg-7{% endif %}">
         <div class="card card-info">
-            <div class="card-heading">Event Info</div>
+            <div class="card-header">Event Info</div>
             <div class="card-body">
                 <dl class="dl-horizontal">
                     <dt>Event Venue</dt>
@@ -169,7 +168,7 @@
                 card-info
             {% endif %}
             ">
-            <div class="card-heading">Client Authorisation</div>
+            <div class="card-header">Client Authorisation</div>
             <div class="card-body">
                 <dl class="dl-horizontal col-sm-6">
                     <dt>Authorisation Request</dt>
@@ -222,14 +221,17 @@
     {% if event.is_rig %}
         <div class="col-sm-12">
             <div class="card card-default">
-                <div class="card-heading">Event Details</div>
+                <div class="card-header">Event Details</div>
                 <div class="card-body">
                     {% if perms.RIGS.view_event %}
-                    <div class="well well-sm">
-                        <h4>Notes</h4>
-                        <div class="dont-break-out">{{ event.notes|linebreaksbr }}</div>
+                    <div class="card bg-secondary">
+                        <div class="card-header">Notes</div>
+                        <div class="card-body">
+                            <p class="dont-break-out">{{ event.notes|linebreaksbr }}</p>
+                        </div>            
                     </div>
                     {% endif %}
+                    <br>
                     {% include 'item_table.html' %}
                 </div>
             </div>
