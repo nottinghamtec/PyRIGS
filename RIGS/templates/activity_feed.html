@@ -8,19 +8,7 @@
       window.location.href = $(this).attr('href');
     }
   });
-
-      // This keeps timeago values correct, but uses an insane amount of resources
-      // $(function () {
-      //     setInterval(function() {
-      //         $('.date').each(function (index, dateElem) {
-      //           var $dateElem = $(dateElem);
-      //           var formatted = moment($dateElem.attr('data-date')).fromNow();
-      //           $dateElem.text(formatted);
-      //          })
-      //        });
-      //     }, 10000);
-        moment().twitter();
-
+  moment().twitter();
 })
   $(document).ready(function() {
     $(function () {
@@ -44,12 +32,11 @@
 </script>
 {% endblock %}
 
-<div class="card card-default">
-  <div class="card-heading">
-    <h4 class="card-title">Recent Changes</h4>
+<div class="card">
+  <div class="card-header">
+    <h4>Recent Changes</h4>
   </div>
-
-  <div class="list-group">
+  <div class="list-group list-group-flush">
     <div id="activity_loading" class="list-group-item loading-animation">
       <div class="circle"></div>
       <div class="circle1"></div>

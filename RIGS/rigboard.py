@@ -56,6 +56,7 @@ class WebCalendar(generic.TemplateView):
 
 
 class EventDetail(generic.DetailView):
+    template_name = 'event_detail.html'
     model = models.Event
 
 

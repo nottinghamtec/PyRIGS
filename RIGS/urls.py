@@ -80,7 +80,7 @@ urlpatterns = [
         permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
-    url(r'^event/(?P<pk>\d+)/$', has_oembed(oembed_view="event_oembed")(
+    path('event/<pk>/', has_oembed(oembed_view="event_oembed")(
             rigboard.EventDetail.as_view()),
         name='event_detail'),
     url(r'^event/(?P<pk>\d+)/embed/$',

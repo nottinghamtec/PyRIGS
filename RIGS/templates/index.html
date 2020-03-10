@@ -10,28 +10,38 @@
 {% endblock %}
 
 {% block content %}
-    <div class="col-sm-12">
-        <h1>R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
-    </div>
-    <div class="col-sm-12">
-        <p><h4 class="list-group-item-heading" style="margin:0;">Welcome back {{ user.get_full_name }}, there are {{ rig_count }} rigs coming up.</h4>
-        </p>
-    </div>
-    <div class="row">
-    <div class="col-sm-{% if perms.RIGS.view_event %}6{% else %}12{% endif %}">
-
-        <div class="card card-default">
-            <div class="card-heading">
-                 <h4 class="list-group-item-heading">Quick Links</h4>
+<h1 class="bd-title">R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
+<h4 class="list-group-item-heading" style="margin:0;">Welcome back {{ user.get_full_name }}, there are {{ rig_count }} rigs coming up.</h4>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="card bg-primary">
+            <div class="card-header">
+                <h4 class="list-group-item-heading">RIGS</h4>
             </div>
-            <div class="list-group">
-                    <a class="list-group-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span> Rigboard</a>
-                    <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span> Calendar</a>
-                    {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>{% endif %}
-                    <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset Database </a>
-
-                    <div class="list-group-item default"></div>
-
+            <div class="list-group list-group-flush">
+                <a class="list-group-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span> Rigboard</a>
+                <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span> Calendar</a>
+                {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>{% endif %}
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card bg-warning">
+            <div class="card-header">
+                <h4 class="list-group-item-heading">Asset Database</h4>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset Database </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card">
+            <div class="card-header">
+                    <h4 class="list-group-item-heading">Quick Links</h4>
+            </div>
+            <div class="list-group list-group-flush">
                     <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="fas fa-link"></span> TEC Forum</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="fas fa-link"></span> TEC Wiki</a>
                     {% if perms.RIGS.view_event %}
@@ -42,8 +52,10 @@
             </div>
         </div>
     </div>
+</div>
+<div class="row">
     {% if perms.RIGS.view_event %}
-    <div class="col-sm-6">
+    <div class="col-sm-12">
         {% include 'activity_feed.html' %}
     </div>
     {% endif %}
