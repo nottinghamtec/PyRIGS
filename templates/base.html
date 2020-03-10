@@ -21,6 +21,8 @@
     {% block css %}
     {% endblock %}
 
+    <script src="{% static 'js/moment.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdn.ravenjs.com/1.3.0/jquery,native/raven.min.js"></script>
     <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% block preload_js %}
@@ -85,10 +87,8 @@
 
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="{% static 'js/popper.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
-<script src="{% static 'js/moment.js' %}"></script>
 <script src="{% static 'js/fontawesome.min.js' %}"></script>
 <script>
     Date.prototype.getISOString = function () {
