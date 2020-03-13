@@ -12,9 +12,10 @@
 {% block content %}
 <h1 class="bd-title">R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></h1>
 <h4 class="list-group-item-heading" style="margin:0;">Welcome back {{ user.get_full_name }}, there are {{ rig_count }} rigs coming up.</h4>
+<br>
 <div class="row">
-    <div class="col-sm-4">
-        <div class="card bg-primary">
+    <div class="col-sm">
+        <div class="card">
             <div class="card-header">
                 <h4 class="list-group-item-heading">RIGS</h4>
             </div>
@@ -22,22 +23,14 @@
                 <a class="list-group-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span> Rigboard</a>
                 <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span> Calendar</a>
                 {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>{% endif %}
-                
             </div>
-        </div>
-    </div>
-    <div class="col-sm-4">
-        <div class="card bg-warning">
             <div class="card-header">
                 <h4 class="list-group-item-heading">Asset Database</h4>
             </div>
             <div class="list-group list-group-flush">
-                <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset Database </a>
+                <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset List </a>
+                {% if perms.assets.add_asset %}<a class="list-group-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> New Asset</a>{% endif %}
             </div>
-        </div>
-    </div>
-    <div class="col-sm-4">
-        <div class="card">
             <div class="card-header">
                     <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
@@ -45,19 +38,16 @@
                     <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="fas fa-link"></span> TEC Forum</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="fas fa-link"></span> TEC Wiki</a>
                     {% if perms.RIGS.view_event %}
-                    <a class="list-group-item" href="http://members.nottinghamtec.co.uk/wiki/images/2/22/Event_Risk_Assesment.pdf" target="_blank"><span class="fas fa-link"></span> Pre-Event Risk Assessment</a>
                     <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="fas fa-link"></span> Price List</a>
-                    <a class="list-group-item" href="https://goo.gl/forms/jdPWov8PCNPoXtbn2" target="_blank"><span class="fas fa-link"></span> Subhire Insurance Form</a>
                     {% endif %}
             </div>
         </div>
     </div>
-</div>
-<div class="row">
     {% if perms.RIGS.view_event %}
-    <div class="col-sm-12">
+    <div class="col-sm">
         {% include 'activity_feed.html' %}
     </div>
     {% endif %}
-</div>
+</div><!---end row--->
+
 {% endblock %}

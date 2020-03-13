@@ -5,18 +5,23 @@
   "author": "Tom Price",
   "license": "MIT",
   "dependencies": {
+    "@activix/bootstrap-datetimepicker": "^2.0.7",
     "@fortawesome/fontawesome-free": "^5.12.1",
+    "ajax-bootstrap-select": "^1.4.5",
+    "autocompleter": "^6.0.2",
     "autoprefixer": "^9.7.4",
     "bootstrap": "^4.4.1",
     "fullcalendar": "^3.10.1",
     "gulp-flatten": "^0.4.0",
     "jquery": "^3.4.1",
+    "konami": "^1.6.2",
     "moment": "^2.24.0",
     "popper.js": "^1.16.1",
     "transform": "^1.1.2"
   },
   "devDependencies": {
     "animate-sass": "^0.8.2",
+    "browser-sync": "^2.26.7",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.2.0",
     "gulp-concat": "^2.6.1",
