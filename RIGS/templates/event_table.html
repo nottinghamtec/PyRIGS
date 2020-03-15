@@ -11,9 +11,10 @@
         </thead>
         <tbody>
         {% for event in events %}
+            <!---TODO: Red if all chips are red, amber if mixed, green if good to go + MIC...--->
             <tr class="
             {% if event.cancelled %}
-                text-muted
+                text-muted table-secondary
             {% elif not event.is_rig %}
                 info
             {% endif %}">
@@ -63,7 +64,6 @@
                         {% if event.dry_hire %}
                             <span class="badge badge-secondary">Dry Hire</span>
                         {% endif %}
-
                     </h4>
                     {% if event.is_rig and not event.cancelled %}
                         <h5>
@@ -87,17 +87,19 @@
                     {% endif %}
                 </td>
                 <!---MIC-->
-                <td class="text-center">
+                <td>
                     {% if event.mic %}
-                        "{{ event.mic.initials }}"
-                        <div>
+                        <div class="media">
                             {% if perms.RIGS.view_profile %}
                                 <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
-                                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
-                                </a>
-                            {% else %}
-                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
                             {% endif %}
+                                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo mr-3"/>
+                            {% if perms.RIGS.view_profile %}
+                                </a>
+                            {% endif %}
+                            <div class="media-body">
+                                <p>{{ event.mic.initials }}</p>
+                            </div>
                         </div>
                     {% elif event.is_rig %}
                         <span class="fas fa-exclamation"></span>

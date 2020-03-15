@@ -16,28 +16,32 @@
     <div class="col-sm">
         <div class="card">
             <div class="card-header">
-                <h4 class="list-group-item-heading">RIGS</h4>
+                <h4 class="list-group-item-heading">Rigboard</h4>
             </div>
             <div class="list-group list-group-flush">
-                <a class="list-group-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span> Rigboard</a>
-                <a class="list-group-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span> Calendar</a>
-                {% if perms.RIGS.add_event %}<a class="list-group-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>{% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><i class="fas fa-list"></i> Rigboard</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><i class="fas fa-calendar"></i> Calendar</a>
+                {% if perms.RIGS.add_event %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><i class="fas fa-plus"></i> New Event</a>
+                {% endif %}
             </div>
             <div class="card-header">
                 <h4 class="list-group-item-heading">Asset Database</h4>
             </div>
             <div class="list-group list-group-flush">
-                <a class="list-group-item" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span> Asset List </a>
-                {% if perms.assets.add_asset %}<a class="list-group-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> New Asset</a>{% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><i class="fas fa-tag"></i> Asset List </a>
+                {% if perms.assets.add_asset %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><i class="fas fa-plus"></i> New Asset</a>
+                {% endif %}
             </div>
             <div class="card-header">
                     <h4 class="list-group-item-heading">Quick Links</h4>
             </div>
             <div class="list-group list-group-flush">
-                    <a class="list-group-item" href="https://forum.nottinghamtec.co.uk" target="_blank"><span class="fas fa-link"></span> TEC Forum</a>
-                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><span class="fas fa-link"></span> TEC Wiki</a>
+                    <a class="list-group-item list-group-item-action" href="https://forum.nottinghamtec.co.uk" target="_blank"><i class="fas fa-comment-alt"></i> TEC Forum</a>
+                    <a class="list-group-item list-group-item-action" href="//members.nottinghamtec.co.uk/wiki" target="_blank"><i class="fas fa-pen-square"></i> TEC Wiki</a>
                     {% if perms.RIGS.view_event %}
-                    <a class="list-group-item" href="//members.nottinghamtec.co.uk/price" target="_blank"><span class="fas fa-link"></span> Price List</a>
+                        <a class="list-group-item list-group-item-action" href="//members.nottinghamtec.co.uk/price" target="_blank"><i class="fas fa-pound-sign"></i> Price List</a>
                     {% endif %}
             </div>
         </div>
