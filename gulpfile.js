@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var gulp = require('gulp');
 
@@ -16,16 +16,14 @@ var { exec } = require("child_process");
 
 sass.compiler = require('node-sass');
 
-function sass() {
-  return gulp.src(["RIGS/scss/**/*.scss",
-                    "node_modules/fullcalendar/dist/fullcalendar.css",
+function styles(done) {
+    return gulp.src(['RIGS/static/scss/**/*.scss',
+                    'node_modules/fullcalendar/dist/fullcalendar.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.min.css',
-                    'node_modules/autocompleter/autocompleter.min.css',
+                    'node_modules/autocompleter/autocomplete.css',
                     'node_modules/@activix/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css'])
     .pipe(sourcemaps.init())
-    .pipe(flatten())
     .pipe(sass().on('error', sass.logError))
-    .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(postcss([ autoprefixer() ]))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('RIGS/static/css'))
@@ -76,10 +74,11 @@ function browserSyncReload(done) {
 }
 
 function watchFiles() {
-  gulp.watch("RIGS/static/scss/**/*", sass);
+  gulp.watch("RIGS/static/scss/**/*", styles);
   gulp.watch("RIGS/static/js/**/*", scripts);
   gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html'],  browserSyncReload);
 }
 
+exports.css = styles;
 exports.js = scripts;
 exports.watch = gulp.parallel(watchFiles, browserSync);

@@ -54,8 +54,8 @@
 {% if perms.RIGS.view_venue %}
 <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
 {% endif %}
-<form id="searchForm" class="form-inline" role="form" method="GET">
-    <div class="input-group input-group-sm">
+<form id="searchForm" class="form-inline flex-nowrap mx-3" role="form" method="GET">
+    <div class="input-group input-group-sm flex-nowrap">
         <div class="input-group-prepend">
             <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." />
         </div>

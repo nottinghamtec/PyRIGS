@@ -1,6 +1,5 @@
+@import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
-@import "node_modules/animate-sass/animate";
-//@import "node_modules/transform/transform";
 
 body, .pad-top {
   padding-top: 50px;
@@ -31,11 +30,6 @@ body, .pad-top {
 textarea {
   width: 100%;
   resize: vertical;
-}
-
-.btn-page, .btn-pad {
-  // .btn-page should be refactored out to .btn-page in the future
-  margin: 0 0 0.5em;
 }
 
 .custom-combobox {
@@ -78,6 +72,10 @@ del {
 ins {
   background-color: #dff0d8;
   border-radius: 3px;
+}
+
+.nav-link {
+  color: $gray-400 !important;
 }
 
 .loading-animation {
