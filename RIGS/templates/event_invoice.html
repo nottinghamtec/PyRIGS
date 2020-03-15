@@ -75,15 +75,15 @@
                                 {{ object.mic.initials }}<br>
                                 <img src="{{ object.mic.profile_picture }}" class="event-mic-photo"/>
                             {% else %}
-                                <span class="fas fa-exclamation-sign"></span>
+                                <span class="fas fa-exclamation"></span>
                             {% endif %}
                         </td>
                         <td class="text-right">
                             <a href="{% url 'invoice_event' object.pk %}"
-                               class="btn btn-default"
+                               class="btn btn-primary"
                                data-toggle="tooltip"
                                title="'Invoice' this event - click this when paperwork has been sent to treasury">
-                                <span class="fas fa-gbp"></span>
+                                <i class="fas fa-pound-sign"></i>
                             </a>
                         </td>
                     </tr>

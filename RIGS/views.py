@@ -202,6 +202,7 @@ class OrganisationUpdate(generic.UpdateView):
 
 
 class VenueList(generic.ListView):
+    template_name = "venue_list.html"
     model = models.Venue
     paginate_by = 20
 

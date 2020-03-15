@@ -8,7 +8,7 @@
 {% block js %}
     <script src="{% static "js/tooltip.js" %}"></script>
     <script src="{% static "js/popover.js" %}"></script>
-    <script src="{% static "js/moment.min.js" %}"></script>
+    <script src="{% static "js/moment.js" %}"></script>
     <script>
     	$(function () {
 		  $('[data-toggle="popover"]').popover().click(function(){
@@ -16,28 +16,12 @@
           window.location.href = $(this).attr('href');
         }
       });
-
-          // This keeps timeago values correct, but uses an insane amount of resources
-          // $(function () {
-          //     setInterval(function() {
-          //         $('.date').each(function (index, dateElem) {
-          //           var $dateElem = $(dateElem);
-          //           var formatted = moment($dateElem.attr('data-date')).fromNow();
-          //           $dateElem.text(formatted);
-          //          })
-          //        });
-          //     }, 10000);
-
-
-            $('.date').each(function (index, dateElem) {
-                var $dateElem = $(dateElem);
-                var formatted = moment($dateElem.attr('data-date')).fromNow();
-                $dateElem.text(formatted);
-               });
-             
-
+    $('.date').each(function (index, dateElem) {
+        var $dateElem = $(dateElem);
+        var formatted = moment($dateElem.attr('data-date')).fromNow();
+        $dateElem.text(formatted);
+       });
 		})
-
     </script>
 {% endblock %}
 
@@ -47,10 +31,9 @@
             <div class="col-sm-12">
                 <h3>Rigboard Activity Stream</h3>
             </div>
-            <div class="text-right col-sm-12">{% paginator %}</div>
         </div>
+        {% paginator %}
         <div class="table-responsive">
-
         	<table class="table table-striped">
                 <thead>
                 <tr>
@@ -59,12 +42,11 @@
                     <td>Version ID</td>
                     <td>User</td>
                     <td>Changes</td>
-                    <td>Comment</td>
                 </tr>
                 </thead>
                 <tbody>
                 	{% for version in object_list %}
-                        
+
                             <tr>
                                 <td>{{ version.revision.date_created }}</td>
                                 <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}} {{ version.changes.new.pk|stringformat:"05d" }}</a></td>
@@ -75,16 +57,15 @@
                                     {{version.changes.new|to_class_name}} Created
                                   {% else %}
                                     {% include 'version_changes.html' %}
-                                  {% endif %}                        </td>
-                                  <td>{{ version.changes.revision.comment }}</td>
+                                  {% endif %}
+                                </td>
                             </tr>
-                        
-        			{% endfor %}
 
+        			{% endfor %}
                 </tbody>
             </table>
 
         </div>
-        <div class="align-right">{% paginator %}</div>
+        {% paginator %}
     </div>
 {% endblock %}

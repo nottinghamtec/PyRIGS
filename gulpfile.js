@@ -59,6 +59,7 @@ function scripts() {
 
 function browserSync(done) {
   exec('python manage.py runserver');
+  // TODO Pipe errors from django to gulp output
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
     notify: true,

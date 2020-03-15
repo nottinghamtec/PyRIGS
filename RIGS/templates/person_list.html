@@ -7,62 +7,22 @@
 {% block title %}People{% endblock %}
 
 {% block content %}
-    <div class="col-sm-10 col-sm-offset-1">
-        <div class="row">
-            <div class="col-sm-10">
-                <h3>People</h3>
-            </div>
-            <div class="col-sm-2">
-                <a href="{% url 'person_create' %}" class="btn btn-primary pull-right">New <span
-                        class="fas fa-plus"></span></a>
-            </div>
-            <div class="col-sm-3 col-sm-offset-9">
-                <form class="form form-horizontal col-sm-12">
-                    <div class="form-group">
-                        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-                               class="form-control"/>
-                    </div>
-                </form>
-            </div>
-            <div class="text-right col-sm-12">{% paginator %}</div>
+    <div class="row">
+        <div class="col-sm-10">
+            <h3>People</h3>
         </div>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <td></td>
-                    <td>Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></td>
-                    <td>Email</td>
-                    <td>Phone</td>
-                    <td>Notes</td>
-                    <td></td>
-                </tr>
-                </thead>
-                <tbody>
-                {% for person in person_list %}
-                    <tr>
-                        <td>{{ person.pk }}</td>
-                        <td>{{ person.name }}</td>
-                        <td>{{ person.email }}</td>
-                        <td><a href="tel:{{ person.phone }}">{{ person.phone }}</a></td>
-                        <td>{{ person.notes|yesno|capfirst }}</td>
-                        <td>
-                            <a href="{% url 'person_detail' person.pk %}" class="btn btn-light modal-href">
-                                <span class="fas fa-eye"></span>
-                            </a>
-                            <a href="{% url 'person_update' person.pk %}" class="btn btn-secondary"><span
-                                    class="fas fa-user-edit"></span></a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td></td>
-                        <td colspan="5">No people stored</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-sm-2">
+            <a href="{% url 'person_create' %}" class="btn btn-primary pull-right">New <span
+                    class="fas fa-plus"></span></a>
         </div>
-        <div class="align-right">{% paginator %}</div>
+        <div class="col-sm-3 col-sm-offset-9">
+            <form class="form form-horizontal col-sm-12">
+                <div class="form-group">
+                    <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
+                           class="form-control"/>
+                </div>
+            </form>
+        </div>
     </div>
+    {% include 'partials/generic_list.html' with edit="person_update" detail="person_detail" %}
 {% endblock %}

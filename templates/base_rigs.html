@@ -30,7 +30,6 @@
     {% endif %}
    </div>
 </li>
-{% endif %}
 {% if perms.RIGS.view_invoice %}
 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -72,6 +71,7 @@
     <button class="btn btn-primary form-control form-control-sm btn-sm">Search</button>
     <a href="{% url 'search_help' %}" class="nav-link modal-href btn-sm"><span class="fas fa-question-circle"></span></a>
 </form>
+{% endif %}
 {% endblock %}
 {% block js %}
 <script src="{% static 'js/tooltip.js' %}"></script>

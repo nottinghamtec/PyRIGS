@@ -18,29 +18,27 @@
     {% endif %}
     {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
-        <div class="col-sm-12 col-md-6 col-lg-5">
-            <div class="card card-default">
+        <div class="col-sm">
+            <div class="card card-default mb-3">
                 <div class="card-header">Contact Details</div>
                 <div class="card-body">
-                    <dl class="dl-horizontal">
-                        <dt>Person</dt>
-                        <dd
+                    <dl class="row">
+                        <dt class="col-sm-6">Person</dt>
+                        <dd class="col-sm-6"
                             {% if object.person %}
                                 <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
                                     {{ object.person }}
                                 </a>
                             {% endif %}
                         </dd>
-
-                        <dt>Email</dt>
-                        <dd>
+                        <dt class="col-sm-6">Email</dt>
+                        <dd class="col-sm-6">
                             <a href="mailto:{{object.person.email}}" target="_blank">
                                 <span class="overflow-ellipsis">{{ object.person.email }}</span>
                             </a>
                         </dd>
-
-                        <dt>Phone Number</dt>
-                        <dd><a href="tel:{{object.person.phone}}">{{ object.person.phone }}</a></dd>
+                        <dt class="col-sm-6">Phone Number</dt>
+                        <dd class="col-sm-6"><a href="tel:{{object.person.phone}}">{{ object.person.phone }}</a></dd>
                     </dl>
                 </div>
             </div>
@@ -48,38 +46,36 @@
                 <div class="card card-default">
                     <div class="card-header">Organisation</div>
                     <div class="card-body">
-                        <dl class="dl-horizontal">
-                            <dt>Organisation</dt>
-                            <dd>
+                        <dl class="row">
+                            <dt class="col-sm-6">Organisation</dt>
+                            <dd class="col-sm-6">
                                 {% if object.organisation %}
                                     <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
                                         {{ object.organisation }}
                                     </a>
                                 {% endif %}
                             </dd>
-
-                            <dt>Phone Number</dt>
-                            <dd>
+                            <dt class="col-sm-6">Phone Number</dt>
+                            <dd class="col-sm-6">
                                 <a href="tel:{{object.person.phone}}">
                                     {{ object.organisation.phone }}
                                 </a>
                             </dd>
-
-                            <dt>Has SU Account</dt>
-                            <dd>{{ event.organisation.union_account|yesno|capfirst }}</dd>
+                            <dt class="col-sm-6">Has SU Account</dt>
+                            <dd class="col-sm-6">{{ event.organisation.union_account|yesno|capfirst }}</dd>
                         </dl>
                     </div>
                 </div>
             {% endif %}
         </div>
     {% endif %}
-    <div class="col-sm-12 {% if event.is_rig and perms.RIGS.view_event %}col-md-6 col-lg-7{% endif %}">
+    <div class="col-sm">
         <div class="card card-info">
             <div class="card-header">Event Info</div>
             <div class="card-body">
-                <dl class="dl-horizontal">
-                    <dt>Event Venue</dt>
-                    <dd>
+                <dl class="row">
+                    <dt class="col-sm-6">Event Venue</dt>
+                    <dd class="col-sm-6">
                         {% if object.venue %}
                             <a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">
                                 {{ object.venue }}
@@ -88,8 +84,8 @@
                     </dd>
 
                     {% if event.is_rig %}
-                        <dt>Event MIC</dt>
-                        <dd>
+                        <dt class="col-sm-6">Event MIC</dt>
+                        <dd class="col-sm-6">
                             {% if event.mic and perms.RIGS.view_profile %}
                                 <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
                                     {{ event.mic.name }}
@@ -100,35 +96,35 @@
                         </dd>
                     {% endif %}
 
-                    <dt>Status</dt>
-                    <dd>{{ event.get_status_display }}</dd>
+                    <dt class="col-sm-6">Status</dt>
+                    <dd class="col-sm-6">{{ event.get_status_display }}</dd>
 
-                    <dd>&nbsp;</dd>
+                    <dd class="col-sm-12">&nbsp;</dd>
 
                     {% if event.is_rig %}
-                        <dt>Crew Meet</dt>
-                        <dd>{{ event.meet_at|date:"D d M Y H:i"|default:"" }}</dd>
-                        <dd>{{ event.meet_info|default:"" }}</dd>
+                        <dt class="col-sm-6">Crew Meet</dt>
+                        <dd class="col-sm-6">{{ event.meet_at|date:"D d M Y H:i"|default:"TBC" }}</dd>
+                        <!---TODO<dd class="col-sm-6">{{ event.meet_info|default:"" }}</dd>--->
 
-                        <dt>Access From</dt>
-                        <dd>{{ event.access_at|date:"D d M Y H:i"|default:"" }}</dd>
+                        <dt class="col-sm-6">Access From</dt>
+                        <dd class="col-sm-6">{{ event.access_at|date:"D d M Y H:i"|default:"TBC" }}</dd>
                     {% endif %}
 
-                    <dt>Event Starts</dt>
-                    <dd>{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
+                    <dt class="col-sm-6">Event Starts</dt>
+                    <dd class="col-sm-6">{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
 
-                    <dt>Event Ends</dt>
-                    <dd>{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
+                    <dt class="col-sm-6">Event Ends</dt>
+                    <dd class="col-sm-6">{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
 
-                    <dd>&nbsp;</dd>
+                    <dd class="col-sm-12">&nbsp;</dd>
 
-                    <dt>Event Description</dt>
-                    <dd class="dont-break-out">{{ event.description|linebreaksbr }}</dd>
+                    <dt class="col-sm-6">Event Description</dt>
+                    <dd class="dont-break-out col-sm-12">{{ event.description|linebreaksbr }}</dd>
 
-                    <dd>&nbsp;</dd>
+                    <dd class="col-sm-12">&nbsp;</dd>
 
-                    <dt>Based On</dt>
-                    <dd>
+                    <dt class="col-sm-6">Based On</dt>
+                    <dd class="col-sm-6">
                         {% if object.based_on %}
                             <a href="{% url 'event_detail' pk=object.based_on.pk %}">
                                 {% if object.based_on.is_rig %}N{{ object.based_on.pk|stringformat:"05d" }}{% else %}
@@ -139,19 +135,19 @@
                     </dd>
 
                     {% if event.dry_hire %}
-                        <dt>Checked In By</dt>
-                        <dd>{{ object.checked_in_by.name }}</dd>
+                        <dt class="col-sm-6">Checked In By</dt>
+                        <dd class="col-sm-6">{{ object.checked_in_by.name }}</dd>
                     {% endif %}
 
                     {% if event.is_rig %}
-                        <dt>Collected By</dt>
-                        <dd>{{ object.collector }}</dd>
+                        <dt class="col-sm-6">Collected By</dt>
+                        <dd class="col-sm-6">{{ object.collector }}</dd>
                     {% endif %}
 
                     {% if event.is_rig and not event.internal and perms.RIGS.view_event %}
-                        <dd>&nbsp;</dd>
-                        <dt>PO</dt>
-                        <dd>{{ object.purchase_order }}</dd>
+                        <dd class="col-sm-12">&nbsp;</dd>
+                        <dt class="col-sm-6">PO</dt>
+                        <dd class="col-sm-6">{{ object.purchase_order }}</dd>
                     {% endif %}
                 </dl>
             </div>
@@ -170,7 +166,7 @@
             ">
             <div class="card-header">Client Authorisation</div>
             <div class="card-body">
-                <dl class="dl-horizontal col-sm-6">
+                <dl class="col-sm-6">
                     <dt>Authorisation Request</dt>
                     <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
 
@@ -184,7 +180,7 @@
                     <dd>{{ object.auth_request_to }}</dd>
                 </dl>
                 <dd class="visible-xs">&nbsp;</dd>
-                <dl class="dl-horizontal col-sm-6">
+                <dl class="col-sm-6">
                     <dt>Authorised</dt>
                     <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
 
