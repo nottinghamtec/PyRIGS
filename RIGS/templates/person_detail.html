@@ -4,7 +4,7 @@
 {% block title %}Person | {{ object.name }}{% endblock %}
 
 {% block content %}
-    <div class="row">
+    <div class="row my-3">
         {% if not request.is_ajax %}
             <div class="col-sm-12">
                 <h1>Person | {{ object.name }}</h1>
@@ -12,12 +12,12 @@
 
             <div class="col-sm-12 text-right">
                 <div class="btn-group btn-page">
-                    <a href="{% url 'person_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
+                    <a href="{% url 'person_update' object.pk %}" class="btn btn-light"><span
+                        class="fas fa-edit"></span> Edit</a>
                 </div>
             </div>
         {% endif %}
-        <div class="col-sm-6">
+        <div class="col-sm">
             <div class="card card-info">
                 <div class="card-header">Person Details</div>
                 <div class="card-body">
@@ -36,12 +36,12 @@
 
                         <dt>Notes</dt>
                         <dd>{{ object.notes|linebreaksbr }}</dd>
-                    </dl>                        
+                    </dl>
                 </div>
             </div>
         </div>
 
-        <div class="col-sm-6">
+        <div class="col-sm">
             <div class="card card-default">
                 <div class="card-header">Associated Organisations</div>
                 <div class="card-body">
@@ -55,7 +55,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row my-3">
         <div class="col-sm-12">
             <div class="card card-default">
                 <div class="card-header">Associated Events</div>
@@ -67,41 +67,30 @@
             </div>
         </div>
     </div>
-
-
     {% if not request.is_ajax %}
         <div class="row">
             <div class="col-sm-12 text-right">
                 <div class="btn-group btn-page">
-                    <a href="{% url 'person_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
+                    <a href="{% url 'person_update' object.pk %}" class="btn btn-light"><span
+                        class="fas fa-edit"></span> Edit</a>
                 </div>
-                <div>
-                    <a href="{% url 'person_history' object.pk %}" title="View Revision History">
-                        Last edited {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
-                    </a>
-                </div>
+                {% include 'partials/last_edited.html' with target="person_history" %}
             </div>
         </div>
     {% endif %}
-
 {% endblock %}
 
 {% if request.is_ajax %}
-    {% block barter %}
+    {% block footer %}
         <div class="row">
             <div class="col-sm-12 text-right">
                 <div class="btn-group btn-page">
-                    <a href="{% url 'person_detail' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-eye-open"></span> Open Page</a>
-                    <a href="{% url 'person_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
+                    <a href="{% url 'person_detail' object.pk %}" class="btn btn-primary"><span
+                        class="fas fa-eye"></span> Open Page</a>
+                    <a href="{% url 'person_update' object.pk %}" class="btn btn-light"><span
+                        class="fas fa-user-edit"></span> Edit</a>
                 </div>
-                <div>
-                    <a href="{% url 'person_history' object.pk %}" title="View Revision History">
-                        Last edited {{ object.last_edited_at }} by {{ object.last_edited_by.name }}
-                    </a>
-                </div>
+                {% include 'partials/last_edited.html' with target="person_history" %}
             </div>
         </div>
     {% endblock %}

@@ -56,7 +56,7 @@ function browserSyncReload(done) {
 function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*", sass);
   gulp.watch("RIGS/static/js/**/*", scripts);
-  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html'],  browserSyncReload);
+  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html', /*TODO'RIGS/.py'*/],  browserSyncReload);
 }
 
 exports.watch = gulp.parallel(watchFiles, browserSync);

@@ -73,6 +73,7 @@ class CloseModal(generic.TemplateView):
 
 
 class PersonList(generic.ListView):
+    template_name = 'person_list.html'
     model = models.Person
     paginate_by = 20
 
@@ -98,6 +99,7 @@ class PersonList(generic.ListView):
 
 
 class PersonDetail(generic.DetailView):
+    template_name = 'person_detail.html'
     model = models.Person
 
 
@@ -136,6 +138,7 @@ class PersonUpdate(generic.UpdateView):
 
 
 class OrganisationList(generic.ListView):
+    template_name='organisation_list.html'
     model = models.Organisation
     paginate_by = 20
 

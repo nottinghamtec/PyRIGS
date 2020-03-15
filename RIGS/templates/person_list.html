@@ -13,7 +13,7 @@
                 <h3>People</h3>
             </div>
             <div class="col-sm-2">
-                <a href="{% url 'person_create' %}" class="btn btn-default pull-right">New <span
+                <a href="{% url 'person_create' %}" class="btn btn-primary pull-right">New <span
                         class="fas fa-plus"></span></a>
             </div>
             <div class="col-sm-3 col-sm-offset-9">
@@ -47,11 +47,11 @@
                         <td><a href="tel:{{ person.phone }}">{{ person.phone }}</a></td>
                         <td>{{ person.notes|yesno|capfirst }}</td>
                         <td>
-                            <a href="{% url 'person_detail' person.pk %}" class="btn btn-default modal-href">
-                                <span class="fas fa-eye-open"></span>
+                            <a href="{% url 'person_detail' person.pk %}" class="btn btn-light modal-href">
+                                <span class="fas fa-eye"></span>
                             </a>
-                            <a href="{% url 'person_update' person.pk %}" class="btn btn-default"><span
-                                    class="fas fa-pencil"></span></a>
+                            <a href="{% url 'person_update' person.pk %}" class="btn btn-secondary"><span
+                                    class="fas fa-user-edit"></span></a>
                         </td>
                     </tr>
                 {% empty %}

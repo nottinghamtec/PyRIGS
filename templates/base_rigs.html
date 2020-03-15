@@ -37,7 +37,7 @@
     {% if perms.RIGS.add_invoice %}
     <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting</a>
     {% endif %}
-    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-gbp text-warning"></span> Outstanding</a>
+    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding</a>
     <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
   </div>
 </li>
