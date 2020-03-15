@@ -37,16 +37,18 @@ function scripts() {
                     'node_modules/jquery/dist/jquery.js',
                     'node_modules/ravenjs/ravenjs.js', //TODO Upgrade to Sentry
                     /* Bootstrap Plugins */
+                    'node_modules/bootstrap/js/dist/tooltip.js',
+                    'node_modules/bootstrap/js/dist/popover.js',
                     'node_modules/bootstrap/js/dist/dropdown.js',
                     'node_modules/bootstrap/js/dist/collapse.js',
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/@fortawesome/fontawesome-free/js/all.js',
                     'node_modules/popper.js/**/popper.js',
-                    'node_modules/moment/min/moment.min.js',
+                    /*'node_modules/moment/min/moment.min.js',*/
                     'node_modules/fullcalendar/dist/fullcalendar.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.min.js',
                     'node_modules/konami/konami.js',
-                    'node_modules/autocompleter/autocompleter.min.js',
+                    'node_modules/autocompleter/autocomplete.min.js',
                     'node_modules/@activix/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js'])
     .pipe(flatten())
     .pipe(terser())
@@ -73,7 +75,7 @@ function browserSyncReload(done) {
 function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*", sass);
   gulp.watch("RIGS/static/js/**/*", scripts);
-  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html', /*TODO'RIGS/.py'*/],  browserSyncReload);
+  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html'],  browserSyncReload);
 }
 
 exports.watch = gulp.parallel(watchFiles, browserSync);

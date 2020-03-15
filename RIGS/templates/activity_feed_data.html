@@ -1,15 +1,14 @@
 {% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base_rigs.html" %}
 
 {% load static %}
+{% load humanize %}
 {% load paginator from filters %}
 {% load to_class_name from filters %}
 
 {% block content %}
-
     <div class="list-group-item">
       <div class="media">
         {% for version in object_list %}
-
                 {% if not version.withPrevious %}
                   {% if not forloop.first %}
                       </div> {#/.media-body#}
@@ -18,7 +17,7 @@
                   <div class="list-group-item">
                     <div class="media">
                   {% endif %}
-                      <div class="media-left">
+                      <div class="align-self-start mr-3">
                         {% if version.revision.user %}
                           <a href="{% url 'profile_detail' pk=version.revision.user.pk %}" class="modal-href">
                             <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" />
@@ -26,10 +25,10 @@
                         {% endif %}
                       </div>
                       <div class="media-body">
-                        <h5>{{ version.revision.user.name }}
-                          <span class="pull-right"><small><span class="date" data-date="{{version.revision.date_created|date:"c"}}"></span></small></span>
+                        <h5>
+                          {{ version.revision.user.name }}
+                          <span class="ml-3"><small>{{version.revision.date_created|naturaltime}}</small></span>
                         </h5>
-
                 {% endif %}
                       <p>
                       <small>

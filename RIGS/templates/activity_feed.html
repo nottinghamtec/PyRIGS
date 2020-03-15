@@ -1,6 +1,8 @@
 {% load static %}
 
 {% block js %}
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script src="{% static 'js/popover.js' %}"></script>
 <script>
 	$(function () {
   $('[data-toggle="popover"]').popover().click(function(){
@@ -8,7 +10,7 @@
       window.location.href = $(this).attr('href');
     }
   });
-  moment().twitter();
+  //moment().twitter();
 })
   $(document).ready(function() {
     $(function () {
@@ -20,11 +22,11 @@
 
           $('#activity [data-toggle="popover"]').popover();
 
-          $('.date').each(function (index, dateElem) {
+          /*$('.date').each(function (index, dateElem) {
             var $dateElem = $(dateElem);
             var formatted = moment($dateElem.attr('data-date')).twitterLong();
             $dateElem.text(formatted);
-          });
+          });*/
 
         });
     });

@@ -22,6 +22,7 @@
     {% endblock %}
 
     <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/popper.js' %}"></script>
     <script src="{% static 'js/ravenjs.js' %}"></script>
     <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% block preload_js %}
