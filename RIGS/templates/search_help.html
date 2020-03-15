@@ -17,54 +17,45 @@
               <div class="card-body">
                 <p>
                 Searches for entire query in:
-                    <button type="button" class="btn btn-default btn-xs">name</button>
-                    <button type="button" class="btn btn-default btn-xs">description</button> and 
-                    <button type="button" class="btn btn-default btn-xs">notes</button>
+                    <span class="badge badge-dark">name</span>
+                    <span class="badge badge-dark">description</span> and
+                    <span class="badge badge-dark">notes</span>
                 </p>
-                <p>You can search for an event by <button type="button" class="btn btn-default btn-xs">event_id</button> by entering an integer, or using the format <code>N01234</code></p>
-                <p>On the search results page you can also specify the date range for the <button type="button" class="btn btn-default btn-xs">start_date</button> of the event</p>
-                <p>Events are sorted in reverse <button type="button" class="btn btn-default btn-xs">start_date</button> order (most recent events at the top)</p>
+                <p>You can search for an event by <span class="badge badge-dark">event_id</span> by entering an integer, or using the format <code>N01234</code></p>
+                <p>On the search results page you can also specify the date range for the <span class="badge badge-dark">start_date</span> of the event</p>
+                <p>Events are sorted in reverse <span class="badge badge-dark">start_date</span> order (most recent events at the top)</p>
               </div>
-            </div>
-
-            <div class="card card-default">
               <div class="card-header">
                 <h3 class="card-title">Searching People/Organisations/Venues</h3>
               </div>
               <div class="card-body">
                 <p>
                 Searches for entire search phrase in:
-                    <button type="button" class="btn btn-default btn-xs">name</button>
-                    <button type="button" class="btn btn-default btn-xs">email</button>
-                    <button type="button" class="btn btn-default btn-xs">address</button>
-                    <button type="button" class="btn btn-default btn-xs">notes</button> and 
-                    <button type="button" class="btn btn-default btn-xs">phone</button>
+                    <span class="badge badge-dark">name</span>
+                    <span class="badge badge-dark">email</span>
+                    <span class="badge badge-dark">address</span>
+                    <span class="badge badge-dark">notes</span> and
+                    <span class="badge badge-dark">phone</span>
                 </p>
-                <p>You can search for an entry by <button type="button" class="btn btn-default btn-xs">id</button> by entering an integer</p>
-                <p>Entries are sorted in alphabetical order by <button type="button" class="btn btn-default btn-xs">name</button></p>
+                <p>You can search for an entry by <span class="badge badge-dark">id</span> by entering an integer</p>
+                <p>Entries are sorted in alphabetical order by <span class="badge badge-dark">name</span></p>
               </div>
-            </div>
-
-            {% if perms.RIGS.view_invoice %}
-                <div class="card card-default">
-                  <div class="card-header">
-                    <h3 class="card-title">Searching Invoices</h3>
-                  </div>
-                  <div class="card-body">
-                    <p>
-                    Searches for entire search phrase in:
-                        <button type="button" class="btn btn-default btn-xs">event__name</button>
-                    </p>
-                    <p>You can search for an event's invoice by entering the <button type="button" class="btn btn-default btn-xs">event_id</button> using the format <code>N01234</code></p>
-                    <p>You can search for an invoice by <button type="button" class="btn btn-default btn-xs">invoice_id</button> using the format <code>#01234</code></p>
-                    <p>Entering a raw integer will search by both <button type="button" class="btn btn-default btn-xs">invoice_id</button> and <button type="button" class="btn btn-default btn-xs">event_id</button></p>
-                    <p>Entries are sorted in reverse <button type="button" class="btn btn-default btn-xs">invoice_date</button> order</p>
-                  </div>
-                </div>
+              {% if perms.RIGS.view_invoice %}
+              <div class="card-header">
+                <h3 class="card-title">Searching Invoices</h3>
+              </div>
+              <div class="card-body">
+                <p>
+                Searches for entire search phrase in:
+                    <span class="badge badge-dark">event__name</span>
+                </p>
+                <p>You can search for an event's invoice by entering the <span class="badge badge-dark">event_id</span> using the format <code>N01234</code></p>
+                <p>You can search for an invoice by <span class="badge badge-dark">invoice_id</span> using the format <code>#01234</code></p>
+                <p>Entering a raw integer will search by both <span class="badge badge-dark">invoice_id</span> and <span class="badge badge-dark">event_id</span></p>
+                <p>Entries are sorted in reverse <span class="badge badge-dark">invoice_date</span> order</p>
+              </div>
             {% endif %}
-
-            
-
+            </div>
         </div>
     </div>
 {% endblock %}
