@@ -32,7 +32,7 @@
 {% block content %}
 <div class="row">
 	<div class="col-md-10 col-md-offset-1">
-		
+
 		<div class="col-sm-6">
 			<h3>{{object.name}}</h3>
 		</div>
@@ -40,10 +40,10 @@
 			{% if object.pk == user.pk %}
 			<div class="col-sm-6 text-right">
 			    <div class="btn-group btn-page">
-			        <a href="{% url 'profile_update_self' %}" class="btn btn-default">
-						Edit Profile <span class="fas fa-pencil"></span>
+			        <a href="{% url 'profile_update_self' %}" class="btn btn-secondary">
+						Edit Profile <i class="fas fa-edit"></i>
 					</a>
-					<a href="{% url 'password_change' %}" class="btn btn-default">
+					<a href="{% url 'password_change' %}" class="btn btn-secondary">
 						Change Password <span class="fas fa-lock"></span>
 					</a>
 			    </div>
@@ -75,14 +75,14 @@
 			</dl>
 			{% if not request.is_ajax %}
 			{% if object.pk == user.pk %}
-			
+
 			<div class="pull-right">
 				<a href="{% url 'reset_api_key' %}" class="btn btn-default">
 					{% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
 					<span class="fas fa-repeat"></span>
 				</a>
 			</div>
-		
+
 			<h4>Personal iCal Details</h4>
 
 			<dl class="dl-horizontal">
@@ -136,7 +136,7 @@
 			{% endif %}
 			{% endif %}
 		</div>
-		
+
 		<div class="col-sm-3">
 			<div class="center-block">
 				<img src="{{object.profile_picture}}" class="img-responsive img-rounded" />

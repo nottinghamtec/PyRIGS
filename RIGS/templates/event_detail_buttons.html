@@ -1,4 +1,4 @@
-<div class="btn-group py-2">
+<div class="btn-group py-3">
     <a href="{% url 'event_update' event.pk %}" class="btn btn-secondary"><span
             class="fas fa-edit"></span> <span
             class="hidden-xs">Edit</span></a>
@@ -22,7 +22,7 @@
             class="hidden-xs">Duplicate</span></a>
     {% if event.is_rig %}
         {% if event.internal %}
-            <a class="btn btn-default item-add modal-href event-authorise-request
+            <a class="btn item-add modal-href event-authorise-request
                     {% if event.authorised %}
                         btn-success
                     {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
@@ -32,7 +32,7 @@
                     {% endif %}
                     "
                href="{% url 'event_authorise_request' object.pk %}">
-                <i class="fas fa-send"></i>
+                <i class="fas fa-paper-plane"></i>
                 <span class="hidden-xs">
                     {% if event.authorised %}
                         Authorised

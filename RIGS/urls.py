@@ -147,7 +147,7 @@ urlpatterns = [
         name='payment_delete'),
 
     # Client event authorisation
-    url(r'^event/(?P<pk>\d+)/auth/$',
+    path('event/<pk>/auth/',
         permission_required_with_403('RIGS.change_event')(
             rigboard.EventAuthorisationRequest.as_view()
         ),

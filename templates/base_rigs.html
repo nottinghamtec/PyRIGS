@@ -8,70 +8,95 @@
 
 {% block titleelements %}
 {% if user.is_authenticated %}
-<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRigboard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Rigboard
-  </a>
-  <div class="dropdown-menu" aria-labelledby="navbarDropdownRigboard">
-    <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span>
-                        Rigboard</a>
-    <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="fas fa-book"></span>
-                        Archive</a>
-    <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span>
-                        Calendar</a>
-    {% if perms.RIGS.view_event %}
-    <a class="dropdown-item" href="{% url 'activity_table' %}"><span
-                                class="fas fa-random"></span> Recent Changes</a>
+    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRigboard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Rigboard
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownRigboard">
+        <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span>
+                            Rigboard</a>
+        <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="fas fa-book"></span>
+                            Archive</a>
+        <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span>
+                            Calendar</a>
+        {% if perms.RIGS.view_event %}
+        <a class="dropdown-item" href="{% url 'activity_table' %}"><span
+                                    class="fas fa-random"></span> Recent Changes</a>
+        {% endif %}
+        {% if perms.RIGS.add_event %}
+        <a class="dropdown-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span>
+                                New Event</a>
+        {% endif %}
+       </div>
+    </li>
+    {% if perms.RIGS.view_invoice %}
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Invoices
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
+        {% if perms.RIGS.add_invoice %}
+        <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting</a>
+        {% endif %}
+        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding</a>
+        <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
+      </div>
+    </li>
     {% endif %}
-    {% if perms.RIGS.add_event %}
-    <a class="dropdown-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span>
-                            New Event</a>
+    {% if perms.RIGS.view_person %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'person_list' %}">People</a></li>
     {% endif %}
-   </div>
-</li>
-{% if perms.RIGS.view_invoice %}
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Invoices
-  </a>
-  <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
-    {% if perms.RIGS.add_invoice %}
-    <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting</a>
+    {% if perms.RIGS.view_organisation %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'organisation_list' %}">Organisations</a></li>
     {% endif %}
-    <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding</a>
-    <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
-  </div>
-</li>
-{% endif %}
-{% if perms.RIGS.view_person %}
-<li class="nav-item"><a class="nav-link" href="{% url 'person_list' %}">People</a></li>
-{% endif %}
-{% if perms.RIGS.view_organisation %}
-<li class="nav-item"><a class="nav-link" href="{% url 'organisation_list' %}">Organisations</a></li>
-{% endif %}
-{% if perms.RIGS.view_venue %}
-<li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
-{% endif %}
-<form id="searchForm" class="form-inline flex-nowrap mx-3" role="form" method="GET">
-    <div class="input-group input-group-sm flex-nowrap">
-        <div class="input-group-prepend">
-            <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." />
+    {% if perms.RIGS.view_venue %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
+    {% endif %}
+    <form id="searchForm" class="form-inline flex-nowrap mx-3" role="form" method="GET">
+        <div class="input-group input-group-sm flex-nowrap">
+            <div class="input-group-prepend">
+                <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." />
+            </div>
+            <select id="search-options" class="custom-select form-control">
+              <option selected data-action="{% url 'event_archive' %}" href="#">Events</option>
+              <option data-action="{% url 'person_list' %}" href="#">People</option>
+              <option data-action="{% url 'organisation_list' %}" href="#">Organisations</option>
+              <option data-action="{% url 'venue_list' %}" href="#">Venues</option>
+              {% if perms.RIGS.view_invoice %}
+              <option data-action="{% url 'invoice_archive' %}" href="#">Invoices</option>
+              {% endif %}
+            </select>
         </div>
-        <select id="search-options" class="custom-select form-control">
-          <option selected data-action="{% url 'event_archive' %}" href="#">Events</option>
-          <option data-action="{% url 'person_list' %}" href="#">People</option>
-          <option data-action="{% url 'organisation_list' %}" href="#">Organisations</option>
-          <option data-action="{% url 'venue_list' %}" href="#">Venues</option>
-          {% if perms.RIGS.view_invoice %}
-          <option data-action="{% url 'invoice_archive' %}" href="#">Invoices</option>
-          {% endif %}
-        </select>
-    </div>
-    <button class="btn btn-primary form-control form-control-sm btn-sm">Search</button>
-    <a href="{% url 'search_help' %}" class="nav-link modal-href btn-sm"><span class="fas fa-question-circle"></span></a>
-</form>
+        <button class="btn btn-primary form-control form-control-sm btn-sm">Search</button>
+        <a href="{% url 'search_help' %}" class="nav-link modal-href btn-sm"><span class="fas fa-question-circle"></span></a>
+    </form>
 {% endif %}
+<li class="nav-item dropdown" id="user">
+    {% if user.is_authenticated %}
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Hi {{ user.first_name }}
+        </a>
+        <ul class="dropdown-menu p-3" id="userdropdown">
+                <li class="media">
+                    <a href="{% url 'profile_detail' %}">
+                        <img src="{{ request.user.profile_picture }}" class="media-object"/>
+                        <div class="media-body">
+                            <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
+                            <p class="muted">{{ request.user.email }}</p>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                <a href="{% url 'logout' %}" class="btn btn-primary align"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
+    {% else %}
+        <a class="nav-link" href="{% url 'login' %}">
+            Login
+        </a>
+    {% endif %}
+</li>
 {% endblock %}
 {% block js %}
 <script src="{% static 'js/tooltip.js' %}"></script>

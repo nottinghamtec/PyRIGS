@@ -164,10 +164,12 @@ class OrganisationList(generic.ListView):
 
 
 class OrganisationDetail(generic.DetailView):
+    template_name = 'organisation_detail.html'
     model = models.Organisation
 
 
 class OrganisationCreate(generic.CreateView):
+    template_name = 'organisation_form.html'
     model = models.Organisation
     fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
 
@@ -185,6 +187,7 @@ class OrganisationCreate(generic.CreateView):
 
 
 class OrganisationUpdate(generic.UpdateView):
+    template_name = 'organisation_form.html'
     model = models.Organisation
     fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
 
@@ -381,6 +384,7 @@ class SecureAPIRequest(generic.View):
 
 
 class ProfileDetail(generic.DetailView):
+    template_name="profile_detail.html"
     model = models.Profile
 
     def get_queryset(self):
@@ -394,6 +398,7 @@ class ProfileDetail(generic.DetailView):
 
 
 class ProfileUpdateSelf(generic.UpdateView):
+    template_name="profile_form.html"
     model = models.Profile
     fields = ['first_name', 'last_name', 'email', 'initials', 'phone']
 

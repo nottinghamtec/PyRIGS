@@ -111,7 +111,7 @@ def nottinghamtec_address_required(function):
     def wrap(request, *args, **kwargs):
         # Fail if current user's email address isn't @nottinghamtec.co.uk
         if not request.user.email.endswith('@nottinghamtec.co.uk'):
-            error_resp = render(request, 'RIGS/eventauthorisation_request_error.html')
+            error_resp = render(request, 'eventauthorisation_request_error.html')
             return error_resp
 
         return function(request, *args, **kwargs)

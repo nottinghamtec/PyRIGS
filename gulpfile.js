@@ -13,6 +13,7 @@ var postcss = require('gulp-postcss')
 var sourcemaps = require('gulp-sourcemaps');
 var browsersync = require('browser-sync').create();
 var { exec } = require("child_process");
+var spawn = require('child_process').spawn;
 
 sass.compiler = require('node-sass');
 
@@ -35,7 +36,7 @@ function scripts() {
     return gulp.src(['RIGS/static/js/src/**/.js',
                     'node_modules/jquery/dist/jquery.js',
                     'node_modules/popper.js/dist/umd/popper.js',
-                    'node_modules/ravenjs/ravenjs.js', //TODO Upgrade to Sentry
+                    'node_modules/raven-js/dist/raven.js', //TODO Upgrade to Sentry
                     /* Bootstrap Plugins */
                     'node_modules/bootstrap/js/dist/util.js',
                     'node_modules/bootstrap/js/dist/tooltip.js',
@@ -60,8 +61,7 @@ function scripts() {
 }
 
 function browserSync(done) {
-  exec('python manage.py runserver');
-  // TODO Pipe errors from django to gulp output
+  spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'});
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
     notify: true,

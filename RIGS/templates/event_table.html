@@ -4,7 +4,6 @@
             <tr>
                 <td>#</td>
                 <td>Event Date</td>
-                <td>Event Timings</td>
                 <td>Event Details</td>
                 <td>MIC</td>
             </tr>
@@ -26,9 +25,7 @@
                     {% if event.end_date and event.end_date != event.start_date %}
                         <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
                     {% endif %}
-                </td>
-                <!---Times-->
-                <td>
+                    <!---Times-->
                     {% if not event.cancelled %}
                         <dl class="dl-horizontal">
                             {% if event.meet_at %}

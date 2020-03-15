@@ -3,12 +3,11 @@
 {% load static %}
 
 {% block js %}
-    <script src="{% static "js/tooltip.js" %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         });
-
         $('form').on('submit', function () {
             $('#loading-modal').modal({
                 backdrop: 'static',
@@ -23,13 +22,11 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-12">
-            <h1>
-                {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %}
-                | {{ event.name }} {% if event.dry_hire %}<span class="badge">Dry Hire</span>{% endif %}
-            </h1>
-        </div>
+    <div class="page-header my-3">
+        <h1>
+            {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %}
+            | {{ event.name }} {% if event.dry_hire %}<span class="badge">Dry Hire</span>{% endif %}
+        </h1>
     </div>
 
     <div class="row">
@@ -46,7 +43,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-            <div class="card card-default">
+            <div class="card border-primary">
                 <div class="card-header" id="eventauth">Event Authorisation</div>
 
                 <div class="card-body">
@@ -120,7 +117,7 @@
 
                                 <div class="col-sm-12 col-md-4 text-right">
                                     <div class="btn-group">
-                                        <button class="btn btn-primary" type="submit">Authorise</button>
+                                        <button class="btn btn-primary btn-lg" type="submit">Authorise</button>
                                     </div>
                                 </div>
                             </div>
