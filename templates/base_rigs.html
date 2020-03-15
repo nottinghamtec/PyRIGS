@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+
+{% load static %}
+
 {% block titleheader %}
 <a class="navbar-brand" href="/">RIGS</a>
 {% endblock %}
@@ -52,7 +55,7 @@
 <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
 {% endif %}
 <form id="searchForm" class="form form-inline" role="form" method="GET">
-  <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search..." />
+  <input id="id_search_input" type="search" name="q" class="form-control w-25" placeholder="Search..." />
   <div class="input-group-append">
     <select class="custom-select form-control">
       <option selected data-action="{% url 'event_archive' %}" href="#">Events</option>
@@ -65,10 +68,17 @@
     </select>
   </div>
   <button class="btn btn-primary form-control"><span class="fas fa-search"></span> Search</button>
+  <a href="{% url 'search_help' %}" class="nav-link modal-href"><span class="fas fa-question"></span></a></h4>
 </form>
-<a href="{% url 'search_help' %}" class="nav-link modal-href"><span class="fas fa-question"></span></a></h4>
 {% endblock %}
 {% block js %}
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script src="{% static 'js/popover.js' %}"></script>
+<script>
+    $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
 <script>
     $(document).ready(function(){
         $('#search-options option').click(function(){

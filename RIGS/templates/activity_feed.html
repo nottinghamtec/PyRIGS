@@ -4,6 +4,11 @@
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/popover.js' %}"></script>
 <script>
+    $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+<script>
 	$(function () {
   $('[data-toggle="popover"]').popover().click(function(){
     if($(this).attr('href')){

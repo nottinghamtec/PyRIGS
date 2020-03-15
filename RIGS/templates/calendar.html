@@ -10,11 +10,9 @@
 {% endblock %}
 
 {% block js %}
-    {# <script src="//code.jquery.com/jquery-latest.min.js"></script> #}
-    <script src="{% static "js/moment.min.js" %}"></script>
-    <script src="{% static "js/fullcalendar.js" %}"></script>
+    <script src="{% static 'js/moment.min.js' %}"></script>
+    <script src="{% static 'js/fullcalendar.js' %}"></script>
     <script>
-
         function getUrlVars() {
             var vars = {};
             var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -59,7 +57,7 @@
                 header:false,
 
                 events: function(start_moment, end_moment, timezone, callback) {
-                    
+
                     $.ajax({
                         url: '/api/event',
                         dataType: 'json',
@@ -88,13 +86,13 @@
                                     'title': $(this).attr('title'),
                                     'url': $(this).attr('url')
                                 }
-                               
+
                                 if($(this).attr('is_rig')==true || $(this).attr('status') == "Cancelled"){
                                     thisEvent['color'] = colours[$(this).attr('status')];
                                 }else{
                                     thisEvent['color'] = colours['non-rig'];
                                 }
-                                
+
                                 events.push(thisEvent);
                             });
                             callback(events);
@@ -140,7 +138,7 @@
 
 
             });
-          
+
             // set some button listeners
 
             $('#next-button').click(function(){ $('#calendar').fullCalendar('next') });
@@ -169,7 +167,7 @@
                 }
             });
 
-            
+
             // Go to the initial settings, if they're valid
             view = viewFromUrl['{{view}}'];
             $('#calendar').fullCalendar( 'changeView', view);
@@ -180,7 +178,7 @@
             }else{
                 console.log('Supplied date is invalid - using default')
             }
-            
+
         });
 
     </script>
@@ -215,7 +213,7 @@
                   <button type="button" class="btn btn-default" id="week-button">Week</button>
                   <button type="button" class="btn btn-default" id="day-button">Day</button>
                 </div>
-              
+
             </div>
         </div>
     </div>

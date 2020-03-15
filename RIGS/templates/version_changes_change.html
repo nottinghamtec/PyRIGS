@@ -11,7 +11,7 @@
     {% endfor %}
     {% else %}
     {% if change.old %}
-        <del {% if change.long %}class="overflow-ellipsis"{% endif %}>
+        <del{% if change.long %} class="overflow-ellipsis"{% endif %}>
             {% if change.linebreaks %}
                 {{change.old|linebreaksbr}}
             {% else %}
@@ -23,7 +23,7 @@
         <br/>
     {% endif %}
     {% if change.new %}
-        <ins {% if change.long %}class="overflow-ellipsis"{% endif %}>
+        <ins{% if change.long %} class="overflow-ellipsis"{% endif %}>
             {% if change.linebreaks %}
                 {{change.new|linebreaksbr}}
             {% else %}

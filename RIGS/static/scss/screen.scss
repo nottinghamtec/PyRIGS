@@ -1,5 +1,4 @@
 @import "node_modules/bootstrap/scss/bootstrap";
-@import "vars";
 @import "node_modules/animate-sass/animate";
 //@import "node_modules/transform/transform";
 
@@ -144,7 +143,7 @@ ins {
   }*/
 }
 
-html.embedded{
+html.embedded {
   display: flex;
   flex-direction: column;
   width: 100%;

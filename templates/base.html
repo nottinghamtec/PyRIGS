@@ -30,37 +30,40 @@
 
     {% block extra-head %}{% endblock %}
 </head>
+
 <body>
 {% include "analytics.html" %}
-<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" role="navigation">
-  {% block titleheader %}
-  {% endblock %}
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-        {% block titleelements %}
-        {% endblock %}
-        <li class="nav-item dropdown align-self-end" id="user">
-                {% if user.is_authenticated %}
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="fas fa-user"></span>
-                        Hi {{ user.first_name }}
-                    </a>
-                    <div class="dropdown-menu" id="userdropdown">
-                    <div class="col-sm-12 text-right">
-                        <a href="{% url 'logout' %}" class="dropdown-item btn btn-primary" >Logout</a>
-                    </div>
-                    </div>
-                {% else %}
-                    <a class="nav-link" href="{% url 'login' %}">
-                        <span class="icon-user"></span>
-                        Login
-                    </a>
-                {% endif %}
-            </li>
-    </ul>
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark justify-content-between" role="navigation">
+  <div class="container">
+      {% block titleheader %}
+      {% endblock %}
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            {% block titleelements %}
+            {% endblock %}
+            <li class="nav-item dropdown align-self-end" id="user">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="fas fa-user"></span>
+                            Hi {{ user.first_name }}
+                        </a>
+                        <div class="dropdown-menu" id="userdropdown">
+                        <div class="col-sm-12 text-right">
+                            <a href="{% url 'logout' %}" class="dropdown-item btn btn-primary" >Logout</a>
+                        </div>
+                        </div>
+                    {% else %}
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <span class="icon-user"></span>
+                            Login
+                        </a>
+                    {% endif %}
+                </li>
+        </ul>
+      </div>
   </div>
 </nav>
 
@@ -95,6 +98,7 @@
     };
 </script>
 <!---script src="{% static "js/jquery.cookie.js" %}"></script--->
+<script src="{% static 'js/util.js' %}"></script>
 <script src="{% static 'js/alert.js' %}"></script>
 <script src="{% static 'js/collapse.js' %}"></script>
 <script>
