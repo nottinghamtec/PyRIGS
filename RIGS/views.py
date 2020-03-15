@@ -78,7 +78,7 @@ class PersonList(generic.ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
+        q = self.request.GET.get('query', "")
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 
@@ -143,7 +143,7 @@ class OrganisationList(generic.ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
+        q = self.request.GET.get('query', "")
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 
@@ -207,7 +207,7 @@ class VenueList(generic.ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
+        q = self.request.GET.get('query', "")
 
         filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
 

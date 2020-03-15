@@ -11,18 +11,6 @@
         <div class="col-sm-10">
             <h3>People</h3>
         </div>
-        <div class="col-sm-2">
-            <a href="{% url 'person_create' %}" class="btn btn-primary pull-right">New <span
-                    class="fas fa-plus"></span></a>
-        </div>
-        <div class="col-sm-3 col-sm-offset-9">
-            <form class="form form-horizontal col-sm-12">
-                <div class="form-group">
-                    <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-                           class="form-control"/>
-                </div>
-            </form>
-        </div>
     </div>
-    {% include 'partials/generic_list.html' with edit="person_update" detail="person_detail" %}
+    {% include 'partials/generic_list.html' with edit="person_update" detail="person_detail" create="person_create" %}
 {% endblock %}
