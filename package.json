@@ -11,6 +11,7 @@
     "autocompleter": "^6.0.2",
     "autoprefixer": "^9.7.4",
     "bootstrap": "^4.4.1",
+    "bootstrap-select": "^1.13.12",
     "fullcalendar": "^3.10.1",
     "gulp-flatten": "^0.4.0",
     "jquery": "^3.4.1",

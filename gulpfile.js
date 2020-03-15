@@ -19,7 +19,8 @@ sass.compiler = require('node-sass');
 function styles(done) {
     return gulp.src(['RIGS/static/scss/**/*.scss',
                     'node_modules/fullcalendar/dist/fullcalendar.css',
-                    'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.min.css',
+                    'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
+                    'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
                     'node_modules/autocompleter/autocomplete.css',
                     'node_modules/@activix/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css'])
     .pipe(sourcemaps.init())
@@ -47,6 +48,7 @@ function scripts() {
                     'node_modules/@fortawesome/fontawesome-free/js/all.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/dist/fullcalendar.js',
+                    'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
                     'node_modules/konami/konami.js',
                     'node_modules/autocompleter/autocomplete.js',
@@ -78,6 +80,7 @@ function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*", styles);
   gulp.watch("RIGS/static/js/**/*", scripts);
   gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html'],  browserSyncReload);
+  //gulp.watch("gulpfile.js", gulp.parallel(styles, scripts)); TODO This causes a reload loop
 }
 
 exports.css = styles;
