@@ -190,36 +190,31 @@
             <div class="pull-left">
                 <span id="calendar-header" class="h2"></span>
             </div>
-
-            <div class="form-inline pull-right btn-page">
-                <div class="input-group">
+            <div class="form-inline float-right btn-page my-3">
+                <div class="input-group mx-2">
                   <input type="date" class="form-control" id="go-to-date-input" placeholder="Go to date...">
-                  <span class="input-group-btn">
-                    <button class="btn btn-default" id="go-to-date-button" type="button" disabled>Go!</button>
+                  <span class="input-group-append">
+                    <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
                   </span>
                 </div>
-
-                <div class="btn-group">
+                <div class="btn-group mx-2">
                   <button type="button" class="btn btn-primary" id="today-button">Today</button>
                 </div>
-
-                <div class="btn-group">
-                  <button type="button" class="btn btn-default" id="prev-button"><span class="fas fa-chevron-left"></span></button>
-                  <button type="button" class="btn btn-default" id="next-button"><span class="fas fa-chevron-right"></span></button>
+                <div class="btn-group mx-2">
+                  <button type="button" class="btn btn-secondary" id="prev-button"><span class="fas fa-chevron-left"></span></button>
+                  <button type="button" class="btn btn-secondary" id="next-button"><span class="fas fa-chevron-right"></span></button>
                 </div>
-
-                <div class="btn-group">
-                  <button type="button" class="btn btn-default" id="month-button">Month</button>
-                  <button type="button" class="btn btn-default" id="week-button">Week</button>
-                  <button type="button" class="btn btn-default" id="day-button">Day</button>
+                <div class="btn-group ml-2">
+                  <button type="button" class="btn btn-light" id="month-button">Month</button>
+                  <button type="button" class="btn btn-light" id="week-button">Week</button>
+                  <button type="button" class="btn btn-light" id="day-button">Day</button>
                 </div>
-
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-12">
             <div id='calendar'>
-            </div>
         </div>
+    </div>
 {% endblock %}

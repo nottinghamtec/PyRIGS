@@ -8,18 +8,6 @@
         <div class="col-sm-10">
             <h3>Organisations</h3>
         </div>
-        <div class="col-sm-2">
-            <a href="{% url 'organisation_create' %}" class="btn btn-default pull-right">New <span
-                    class="fas fa-plus"></span></a>
-        </div>
-        <div class="col-sm-3 col-sm-offset-9">
-            <form class="form form-horizontal col-sm-12">
-                <div class="form-group">
-                    <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-                           class="form-control"/>
-                </div>
-            </form>
-        </div>
     </div>
-    {% include 'partials/generic_list.html' with edit="organisation_update" detail="organisation_detail" union_account=True %}
+    {% include 'partials/generic_list.html' with edit="organisation_update" detail="organisation_detail" create="organisation_create" union_account=True %}
 {% endblock %}

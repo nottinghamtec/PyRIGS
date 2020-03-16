@@ -78,7 +78,10 @@ urlpatterns = [
          permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
          name='activity_feed'),
 
-    path('event/<pk>/', has_oembed(oembed_view="event_oembed")(
+    path('event/create/',
+        permission_required_with_403('RIGS.add_event')(rigboard.EventCreate.as_view()),
+        name='event_create'),
+    path('event/<str:pk>/', has_oembed(oembed_view="event_oembed")(
         rigboard.EventDetail.as_view()),
          name='event_detail'),
     url(r'^event/(?P<pk>\d+)/embed/$', xframe_options_exempt(
@@ -93,9 +96,6 @@ urlpatterns = [
     url(r'^event/(?P<pk>\d+)/ra/$',
         permission_required_with_403('RIGS.change_event')(rigboard.EventRA.as_view()),
         name='event_ra'),
-    url(r'^event/create/$',
-        permission_required_with_403('RIGS.add_event')(rigboard.EventCreate.as_view()),
-        name='event_create'),
     url(r'^event/(?P<pk>\d+)/edit/$',
         permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
         name='event_update'),

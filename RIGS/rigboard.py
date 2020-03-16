@@ -104,6 +104,7 @@ class EventRA(generic.base.RedirectView):
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
+    template_name = 'event_form.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)

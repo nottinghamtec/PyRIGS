@@ -33,7 +33,7 @@ function styles(done) {
 }
 
 function scripts() {
-    return gulp.src(['RIGS/static/js/src/**/.js',
+    return gulp.src(['RIGS/static/js/src/**/*.js',
                     'node_modules/jquery/dist/jquery.js',
                     'node_modules/popper.js/dist/umd/popper.js',
                     'node_modules/raven-js/dist/raven.js', //TODO Upgrade to Sentry
@@ -83,6 +83,5 @@ function watchFiles() {
   //gulp.watch("gulpfile.js", gulp.parallel(styles, scripts)); TODO This causes a reload loop
 }
 
-exports.css = styles;
-exports.js = scripts;
+exports.build = gulp.parallel(styles, scripts);
 exports.watch = gulp.parallel(watchFiles, browserSync);
