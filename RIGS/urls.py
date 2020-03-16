@@ -1,12 +1,11 @@
-from django.urls import path
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
-from RIGS import models, views, rigboard, finance, ical, versioning, forms
-from django.views.generic import RedirectView
+from django.urls import path
 from django.views.decorators.clickjacking import xframe_options_exempt
-
-from PyRIGS.decorators import permission_required_with_403, has_oembed
-from PyRIGS.decorators import api_key_required
+from django.views.generic import RedirectView
+from PyRIGS.decorators import (api_key_required, has_oembed,
+                               permission_required_with_403)
+from RIGS import finance, ical, models, rigboard, versioning, views
 
 urlpatterns = [
     path('', login_required(views.Index.as_view()), name='index'),
@@ -73,19 +72,17 @@ urlpatterns = [
     url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     url(r'^rigboard/archive/$', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
-    path('rigboard/activity/',
-        permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
-        name='activity_table'),
+    path('rigboard/activity/', permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
+         name='activity_table'),
     path('rigboard/activity/feed/',
-        permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
-        name='activity_feed'),
+         permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
+         name='activity_feed'),
 
     path('event/<pk>/', has_oembed(oembed_view="event_oembed")(
-            rigboard.EventDetail.as_view()),
-        name='event_detail'),
-    url(r'^event/(?P<pk>\d+)/embed/$',
-        xframe_options_exempt(
-            login_required(login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
+        rigboard.EventDetail.as_view()),
+         name='event_detail'),
+    url(r'^event/(?P<pk>\d+)/embed/$', xframe_options_exempt(
+        login_required(login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
         name='event_embed'),
     url(r'^event/(?P<pk>\d+)/oembed_json/$',
         rigboard.EventOembed.as_view(),
@@ -106,7 +103,7 @@ urlpatterns = [
         permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
         name='event_duplicate'),
     path('event/archive/', login_required()(rigboard.EventArchive.as_view()),
-        name='event_archive'),
+         name='event_archive'),
 
     url(r'^event/(?P<pk>\d+)/history/$',
         permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
@@ -148,10 +145,10 @@ urlpatterns = [
 
     # Client event authorisation
     path('event/<pk>/auth/',
-        permission_required_with_403('RIGS.change_event')(
-            rigboard.EventAuthorisationRequest.as_view()
-        ),
-        name='event_authorise_request'),
+         permission_required_with_403('RIGS.change_event')(
+             rigboard.EventAuthorisationRequest.as_view()
+         ),
+         name='event_authorise_request'),
     url(r'^event/(?P<pk>\d+)/auth/preview/$',
         permission_required_with_403('RIGS.change_event')(
             rigboard.EventAuthoriseRequestEmailPreview.as_view()

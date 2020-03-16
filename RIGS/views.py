@@ -138,7 +138,7 @@ class PersonUpdate(generic.UpdateView):
 
 
 class OrganisationList(generic.ListView):
-    template_name='organisation_list.html'
+    template_name = 'organisation_list.html'
     model = models.Organisation
     paginate_by = 20
 
@@ -384,7 +384,7 @@ class SecureAPIRequest(generic.View):
 
 
 class ProfileDetail(generic.DetailView):
-    template_name="profile_detail.html"
+    template_name = "profile_detail.html"
     model = models.Profile
 
     def get_queryset(self):
@@ -398,7 +398,7 @@ class ProfileDetail(generic.DetailView):
 
 
 class ProfileUpdateSelf(generic.UpdateView):
-    template_name="profile_form.html"
+    template_name = "profile_form.html"
     model = models.Profile
     fields = ['first_name', 'last_name', 'email', 'initials', 'phone']
 
