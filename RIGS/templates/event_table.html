@@ -2,23 +2,26 @@
     <table class="table">
         <thead class="thead-dark">
             <tr>
-                <td>#</td>
-                <td>Event Date</td>
-                <td>Event Details</td>
-                <td>MIC</td>
+                <th scope="col">#</th>
+                <th scope="col">Event Date</th>
+                <th scope="col">Event Details</th>
+                <th scope="col">MIC</th>
             </tr>
         </thead>
         <tbody>
         {% for event in events %}
-            <!---TODO: Red if all chips are red, amber if mixed, green if good to go + MIC...--->
             <tr class="
             {% if event.cancelled %}
                 text-muted table-secondary
+            {% elif event.authorised and event.risk_assessment_edit_url and event.mic %}
+                table-success
             {% elif not event.is_rig %}
-                info
+                table-info
+            {% else %}
+                table-warning
             {% endif %}">
                 <!---Number-->
-                <td>{{ event.pk }}</td>
+                <th scope="row">{{ event.pk }}</th>
                 <!--Dates-->
                 <td>
                     <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
@@ -75,13 +78,25 @@
                             {{ event.description|linebreaksbr }}
                         </div>
                     {% endif %}
-                    <span class="badge badge-{% if event.confirmed %}success{%else%}warning{%endif%}">{{ event.get_status_display }}</span>
-                    {% if event.is_rig and perms.RIGS.view_event and event.authorised %}
-                    <span class="badge badge-success">Authorised <i class="fas fa-check"></i></span>
+                    <!---Overall status at a glance--->
+                    <span class="badge badge-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
+                    {% if event.is_rig %}
+                        {% if event.purchase_order %}
+                            <span class="badge badge-success">PO: {{ event.purchase_order }}</i></span>
+                        {% elif event.authorised %}
+                            <span class="badge badge-success">Payment: Authorised <i class="fas fa-check"></i></span>
+                        {% else %}
+                            <span class="badge badge-danger">Payment: <i class="fas fa-times"></i></span>
+                        {% endif %}
+                        <!-- TODO show invoice stuff here -->
+
+                        {% if event.risk_assessment_edit_url %}
+                            <span class="badge badge-success">RA: <i class="fas fa-check"></i></span>
+                        {% else %}
+                            <span class="badge badge-danger">RA: <i class="fas fa-times"></i></span>
+                        {% endif %}
                     {% endif %}
-                    {% if event.is_rig and perms.RIGS.view_event and event.risk_assessment_edit_url %}
-                    <span class="badge badge-success">RA <i class="fas fa-check"></i></span>
-                    {% endif %}
+
                 </td>
                 <!---MIC-->
                 <td>

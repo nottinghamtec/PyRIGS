@@ -177,7 +177,7 @@ class Command(BaseCommand):
     def setupEvents(self):
         names = ["Outdoor Concert", "Hall Open Mic Night", "Festival", "Weekend Event", "Magic Show", "Society Ball", "Evening Show", "Talent Show", "Acoustic Evening", "Hire of Things", "SU Event",
                  "End of Term Show", "Theatre Show", "Outdoor Fun Day", "Summer Carnival", "Open Days", "Magic Show", "Awards Ceremony", "Debating Event", "Club Night", "DJ Evening", "Building Projection", "Choir Concert"]
-        descriptions = ["A brief desciption of the event", "This event is boring", "Probably wont happen", "Warning: this has lots of kit"]
+        descriptions = ["A brief description of the event", "This event is boring", "Probably wont happen", "Warning: this has lots of kit"]
         notes = ["The client came into the office at some point", "Who knows if this will happen", "Probably should check this event", "Maybe not happening", "Run away!"]
 
         itemOptions = [{'name': 'Speakers', 'description': 'Some really really big speakers \n these are very loud', 'quantity': 2, 'cost': 200.00},
