@@ -2,8 +2,6 @@
 
 var gulp = require('gulp');
 
-var concat = require('gulp-concat');
-var rename = require('gulp-rename');
 var terser = require('gulp-terser');
 var sass = require('gulp-sass');
 var flatten = require('gulp-flatten');
