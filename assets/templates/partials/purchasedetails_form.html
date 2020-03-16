@@ -1,26 +1,9 @@
 {% load widget_tweaks %}
-{% load static %}
-
-
-{% block css %}
-    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
-{% endblock %}
-
-{% block preload_js %}
-    <script src="{% static "js/bootstrap-select.js" %}"></script>
-    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
-{% endblock %}
-
-{% block js %}
-    <script src="{% static "js/autocompleter.js" %}"></script>
-{% endblock %}
-
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card">
+  <div class="card-header">
     Purchase Details
   </div>
-  <div class="panel-body">
+  <div class="card-body">
     {% if create or edit or duplicate %}
     <div class="form-group" id="purchased-from-group">
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>

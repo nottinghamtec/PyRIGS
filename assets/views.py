@@ -93,17 +93,17 @@ class AssetIDUrlMixin:
 
 class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     model = models.Asset
-    template_name = 'asset_update.html'
+    template_name = 'asset_detail.html'
 
 
 class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
-    template_name = 'asset_update.html'
+    template_name = 'asset_form.html'
     model = models.Asset
     form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['edit'] = True
+        context["edit"] = True
         context["connectors"] = models.Connector.objects.all()
 
         return context
@@ -113,7 +113,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
 
 
 class AssetCreate(LoginRequiredMixin, generic.CreateView):
-    template_name = 'asset_create.html'
+    template_name = 'asset_form.html'
     model = models.Asset
     form_class = forms.AssetForm
 
@@ -141,8 +141,6 @@ class DuplicateMixin:
 
 
 class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
-    model = models.Asset
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["create"] = None

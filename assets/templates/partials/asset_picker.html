@@ -3,20 +3,7 @@
     <option value="{{object.parent.pk}}" selected>{{object.parent.description}}</option>
     {% endif %}
 </select>
-
-{% load static %}
-{% block css %}
-    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
-{% endblock %}
-
-{% block preload_js %}
-    <script src="{% static "js/bootstrap-select.js" %}"></script>
-    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
-{% endblock %}
-
 {% block js %}
-{{ js.super }}
 <script>
 $('#parent_id')
     .selectpicker({
@@ -56,7 +43,7 @@ $('#parent_id')
                     'text': "No parent"
                 });
             }
-            
+
             return assets;
         },
         preserveSelected: false
