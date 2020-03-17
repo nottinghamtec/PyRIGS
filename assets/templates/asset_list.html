@@ -20,14 +20,14 @@
 </div>
 
 <form id="asset-search-form" method="get" class="form my-2">
-  <div class="row py-2">
+  <div class="row my-2">
       <div class="input-group">
         {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
         <label for="query" class="sr-only">Asset ID/Description/Serial Number:</label>
         <span class="input-group-append"><button type="submit" class="btn btn-primary">Search</button></span>
       </div>
   </div>
-  <div class="row py-2 justify-content-end">
+  <div class="row my-2 justify-content-end">
       <div id="category-group" class="form-group px-2">
         <label for="category" class="sr-only">Category</label>
         {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
@@ -41,7 +41,7 @@
   </div>
 </form>
 
-<a href="{% url 'asset_create' %}" class="btn btn-outline-primary float-right my-3">New <i class="fas fa-plus"></i></a>
+<a href="{% url 'asset_create' %}" class="btn btn-success float-right my-3">New <i class="fas fa-plus"></i></a>
 
 <table class="table">
   <thead>

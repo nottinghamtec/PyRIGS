@@ -6,10 +6,10 @@
         <td class="assetStatus" style="vertical-align: middle;">{{ item.status }}</td>
         <td class="hidden-xs">
             <div class="btn-group" role="group">
-                <a type="button" class="btn btn-primary btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="glyphicon glyphicon-eye-open"></i> View</a>
+                <a type="button" class="btn btn-primary btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="fas fa-eye"></i> View</a>
                 {% if perms.assets.change_asset %}
-                <a type="button" class="btn btn-warning btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-                <a type="button" class="btn btn-secondary btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+                <a type="button" class="btn btn-warning btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="fas fa-edit"></i> Edit</a>
+                <a type="button" class="btn btn-secondary btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="fas fa-clone"></i> Duplicate</a>
                 {% endif %}
             </div>
         </td>

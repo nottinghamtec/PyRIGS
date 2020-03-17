@@ -25,6 +25,10 @@
                 {% if perms.assets.add_asset %}
                     <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><i class="fas fa-plus"></i> New Asset</a>
                 {% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><i class="fas fa-parachute-box"></i> Supplier List </a>
+                {% if perms.assets.add_asset %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><i class="fas fa-plus"></i> New Supplier</a>
+                {% endif %}
             </div>
             <div class="card-header">
                     <h4 class="list-group-item-heading">Quick Links</h4>
