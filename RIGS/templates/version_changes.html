@@ -1,9 +1,9 @@
 {% if version.changes.item_changes or version.changes.field_changes or version.changes.old == None %}
     {% for change in version.changes.field_changes %}
-    	<a tabindex="0" title="Changes to {{ change.field.verbose_name }}" type="button" class="badge badge-light" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</a>
+    	<a tabindex="0" title="Changes to {{ change.field.verbose_name }}" type="button" class="badge badge-secondary" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</a>
     {% endfor %}
     {% for itemChange in version.changes.item_changes %}
-        <a tabindex="0" title="Changes to item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'" type="button" class="badge badge-light" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
+        <a tabindex="0" title="Changes to item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'" type="button" class="badge badge-secondary" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
             <ul class="list-group">
             {% for change in itemChange.field_changes %}
                   <li class="list-group-item">

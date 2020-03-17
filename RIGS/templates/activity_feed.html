@@ -9,14 +9,13 @@
     })
 </script>
 <script>
-	$(function () {
-  $('[data-toggle="popover"]').popover().click(function(){
-    if($(this).attr('href')){
-      window.location.href = $(this).attr('href');
-    }
-  });
-  //moment().twitter();
-})
+  $(function () {
+        $('[data-toggle="popover"]').popover().click(function(){
+        if($(this).attr('href')){
+          window.location.href = $(this).attr('href');
+        }
+    });
+  })
   $(document).ready(function() {
     $(function () {
         $( "#activity" ).hide();
@@ -24,15 +23,10 @@
           $('#activity_loading').slideUp('slow',function(){
               $('#activity').slideDown('slow');
           });
-
-          $('#activity [data-toggle="popover"]').popover();
-
-          /*$('.date').each(function (index, dateElem) {
-            var $dateElem = $(dateElem);
-            var formatted = moment($dateElem.attr('data-date')).twitterLong();
-            $dateElem.text(formatted);
-          });*/
-
+          var whiteList = $.fn.tooltip.Constructor.Default.whiteList
+          whiteList.ins = []
+          whiteList.del = []
+          $('#activity [data-toggle="popover"]').popover({whiteList: whiteList});
         });
     });
   });

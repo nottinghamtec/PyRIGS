@@ -9,7 +9,7 @@
             <span class="dont-break-out">{{diff.text|linebreaksbr}}</span>
         {% endif %}
     {% endfor %}
-    {% else %}
+{% else %}
     {% if change.old %}
         <del{% if change.long %} class="overflow-ellipsis"{% endif %}>
             {% if change.linebreaks %}
