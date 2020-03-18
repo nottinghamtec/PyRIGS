@@ -11,15 +11,15 @@
 
             <div class="col-sm-4 text-right">
                 <div class="btn-group btn-page">
-                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-default" title="Delete Invoice">
-                    <span class="fas fa-remove"></span> <span
+                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
+                    <span class="fas fa-times"></span> <span
                             class="hidden-xs">Delete</span>
                 </a>
-                <a href="{% url 'invoice_void' object.pk %}" class="btn btn-default" title="Void Invoice">
-                    <span class="fas fa-ban-circle"></span> <span
+                <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
+                    <span class="fas fa-ban"></span> <span
                             class="hidden-xs">Void</span>
                 </a>
-                <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice" class="btn btn-default"><span
+                <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice" class="btn btn-primary"><span
                             class="fas fa-print"></span> <span
                             class="hidden-xs">Print</span></a>
                 </div>
@@ -29,7 +29,9 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="card card-default">
-                    <div class="card-header">Invoice Details</div>
+                    <div class="card-header">Invoice Details<span class="float-right">
+                        {% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(OUTSTANDING){% endif %}
+                        </span></div>
                     <div class="card-body">
                         {% if object.event.organisation %}
                             {{ object.event.organisation.name }}<br/>
@@ -42,81 +44,13 @@
                 </div>
             </div>
             <div class="col-sm-6">
-                <div class="card card-{% if object.is_closed %}success{% else %}warning{% endif %}">
-                    <div class="card-header">Event Details<span class="pull-right">
-                        {% if object.void %}(VOID){% elif object.is_closed %}(PAID){% else %}(OUTSTANDING){% endif %}
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <dl class="dl-horizontal">
-                            <dt>Event Number</dt>
-                            <dd>N{{ object.event.pk|stringformat:"05d" }}</dd>
-
-                            <dt>Event</dt>
-                            <dd>{{ object.event.name }}</dd>
-
-                            <dt>Event Venue</dt>
-                            <dd>{{ object.event.venue }}</dd>
-
-                            <dt>Event MIC</dt>
-                            <dd>{{ object.event.mic.name }}</dd>
-
-                            <dt>Event Starts</dt>
-                            <dd>{{ object.event.start_date|date:"d M Y" }} {{ object.event.start_time|date:"H:i" }}</dd>
-
-                            <dt>Event Ends</dt>
-                            <dd>{{ object.event.end_date|date:"d M Y" }} {{ object.event.end_time|date:"H:i" }}</dd>
-
-                            <dt>Status</dt>
-                            <dd>{{ object.event.get_status_display }}</dd>
-
-                            {% if object.event.dry_hire %}
-                                <dd>&nbsp;</dd>
-                                <dt>Checked In By</dt>
-                                <dd>{{ object.checked_in_by.name }}</dd>
-                            {% endif %}
-
-                            <dd>&nbsp;</dd>
-
-                            <dt>Authorised</dt>
-                            <dd>{{ object.event.authorised|yesno:"Yes,No" }}</dd>
-
-                            <dt>Authorised by</dt>
-                            <dd>
-                                {%  if object.event.authorised %}
-                                    {{ object.event.authorisation.name }}
-                                    (<a href="mailto:{{ object.event.authorisation.email }}">{{ object.event.authorisation.email }}</a>)
-                                {% endif %}
-                            </dd>
-
-                            {% if object.event.internal %}
-                                {# internal #}
-                                <dt>Uni ID</dt>
-                                <dd>{{ object.event.authorisation.uni_id }}</dd>
-
-                                <dt>Account code</dt>
-                                <dd>{{ object.event.authorisation.account_code }}</dd>
-                            {% else %}
-                                <dt>PO</dt>
-                                <dd>{{ object.event.purchase_order }}</dd>
-                            {% endif %}
-
-                            <dt>Authorised at</dt>
-                            <dd>{{ object.event.authorisation.last_edited_at }}</dd>
-
-                            <dt>Authorised amount</dt>
-                            <dd>
-                                {% if object.event.authorised %}
-                                    £ {{ object.event.authorisation.amount|floatformat:"2" }}
-                                {% endif %}
-                            </dd>
-
-                            <dt>Authorisation request sent by</dt>
-                            <dd>{{ object.authorisation.sent_by }}</dd>
-                        </dl>
-                    </div>
-                </div>
+                {% include 'partials/event_details.html' %}
             </div>
+            {% if object.event.internal %}
+            <div class="col-sm-6">
+                {% include 'partials/auth_details.html' %}
+            </div>
+            {% endif %}
         </div>
 
         <div class="row">
@@ -132,22 +66,21 @@
                         </div>
                         <table class="table table-hover">
                             <thead>
-                            <tr>
-                                <td>Date</td>
-                                <td>Amount</td>
-                                <td>Method</td>
-                                <td></td>
-                            </tr>
+                                <tr>
+                                    <th scope="col">Date</td>
+                                    <th scope="col">Amount</td>
+                                    <th scope="col">Method</td>
+                                    <th scope="col"></td>
+                                </tr>
                             </thead>
                             <tbody>
                             {% for payment in object.payment_set.all %}
                                 <tr>
-                                    <td>{{ payment.date }}</td>
+                                    <th scope="row">{{ payment.date }}</th>
                                     <td>{{ payment.amount|floatformat:2 }}</td>
                                     <td>{{ payment.get_method_display }}</td>
                                     <td>
-                                        <a href="{% url 'payment_delete' payment.pk %}"
-                                           class="btn btn-small btn-danger"><span class="fas fa-remove"</a>
+                                        <a href="{% url 'payment_delete' payment.pk %}" class="btn btn-small btn-danger"><span class="fas fa-times"</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -171,7 +104,7 @@
                     </div>
                 </div>
             </div>
+            {% include 'partials/last_edited.html' with target="invoice_history" %}
         </div>
-
     </div>
 {% endblock %}

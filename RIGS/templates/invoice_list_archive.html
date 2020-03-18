@@ -1,4 +1,4 @@
-{% extends 'RIGS/invoice_list.html' %}
+{% extends 'invoice_list.html' %}
 
 {% block title %}
 Invoice Archive
@@ -13,12 +13,12 @@ All Invoices
 {% endblock %}
 
 {% block search %}
-	<div class="col-sm-3 col-sm-offset-9">
-		<form class="form form-horizontal col-sm-12">
-		    <div class="form-group">
-		        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-		               class="form-control"/>
-		    </div>
-		</form>
-	</div>
+<div class="col-sm-3 col-sm-offset-9">
+	<form class="form form-horizontal col-sm-12">
+	    <div class="form-group">
+	        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
+	               class="form-control"/>
+	    </div>
+	</form>
+</div>
 {% endblock %}

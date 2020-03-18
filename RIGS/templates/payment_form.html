@@ -4,48 +4,48 @@
 {% block title %}Add Payment{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-offset-3 col-sm-6">
-            <form action="{{ form.action|default:request.path }}" method="post" class="form-horizontal">{% csrf_token %}
-                <input type="hidden" name="{{ form.invoice.name }}" value="{{ form.invoice.value }}"/>
+<div class="row">
+    <div class="col-sm">
+        <form action="{{ form.action|default:request.path }}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="{{ form.invoice.name }}" value="{{ form.invoice.value }}"/>
 
-                <div class="row">
-                    {% include 'form_errors.html' %}
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label"
-                               for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
-
-                        <div class="col-sm-10">
-                            {% render_field form.date class+="form-control" %}
-                        </div>
+            <div class="row">
+                {% include 'form_errors.html' %}
+                <div class="form-group col-sm">
+                    <label class="col-sm-2 control-label"
+                           for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.date class+="form-control" %}
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label"
-                               for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
-
-                        <div class="col-sm-10">
-                            <div class="input-group">
-                                <div class="input-group-addon">£</div>
-                                {% render_field form.amount class+="form-control" %}
+                <div class="form-group col-xs-12">
+                    <label class="col-sm-2 control-label"
+                           for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+                    <div class="col-sm-10">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">£</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label"
-                               for="{{ form.method.id_for_label }}">{{ form.method.label }}</label>
-
-                        <div class="col-sm-10">
-                            {% render_field form.method class+="form-control" %}
-                        </div>
-                    </div>
-                    <div class="text-right col-sm-3 col-sm-offset-9">
-                        <div class="form-group">
-                            <input type="submit" class="form-control btn btn-primary"/>
+                            {% render_field form.amount class+="form-control" %}
                         </div>
                     </div>
                 </div>
-            </form>
-        </div>
+                <div class="form-group col-sm">
+                    <label class="col-sm-2 control-label"
+                           for="{{ form.method.id_for_label }}">{{ form.method.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.method class+="form-control" %}
+                    </div>
+                </div>
+                <div class="float-right col-sm">
+                    <div class="form-group">
+                        <input type="submit" class="form-control btn btn-primary"/>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}

@@ -1,11 +1,11 @@
-{% extends 'RIGS/invoice_list.html' %}
+{% extends 'invoice_list.html' %}
 
 {% block title %}
 Outstanding Invoices
 {% endblock %}
 
 {% block heading %}
-Outstanding Invoices ({{ count }} Events, £ {{ total|floatformat:2 }})
+Outstanding Invoices ({{ count }} Events, £{{ total|floatformat:2 }})
 {% endblock %}
 
 {% block description %}

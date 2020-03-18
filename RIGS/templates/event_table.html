@@ -10,16 +10,7 @@
         </thead>
         <tbody>
         {% for event in events %}
-            <tr class="
-            {% if event.cancelled %}
-                text-muted table-secondary
-            {% elif event.authorised and event.risk_assessment_edit_url and event.mic %}
-                table-success
-            {% elif not event.is_rig %}
-                table-info
-            {% else %}
-                table-warning
-            {% endif %}">
+            <tr {% include 'partials/event_table_colour.html' %}>
                 <!---Number-->
                 <th scope="row">{{ event.pk }}</th>
                 <!--Dates-->

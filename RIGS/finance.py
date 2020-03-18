@@ -51,6 +51,7 @@ class InvoiceIndex(generic.ListView):
 
 class InvoiceDetail(generic.DetailView):
     model = models.Invoice
+    template_name = 'invoice_detail.html'
 
 
 class InvoicePrint(generic.View):
@@ -155,7 +156,7 @@ class InvoiceArchive(generic.ListView):
 class InvoiceWaiting(generic.ListView):
     model = models.Event
     paginate_by = 25
-    template_name = 'event_invoice.html'
+    template_name = 'invoice_list_waiting.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)
@@ -203,6 +204,7 @@ class InvoiceEvent(generic.View):
 class PaymentCreate(generic.CreateView):
     model = models.Payment
     fields = ['invoice', 'date', 'amount', 'method']
+    template_name = 'payment_form.html'
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()
