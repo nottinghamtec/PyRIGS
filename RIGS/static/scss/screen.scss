@@ -78,69 +78,6 @@ ins {
   color: $gray-400 !important;
 }
 
-.loading-animation {
-  position: relative;
-  margin: 30px auto 0;
-
-  .circle {
-      background-color: rgba(0,0,0,0);
-      border: 5px solid rgba(0,183,229,0.9);
-      opacity: .9;
-      border-right: 5px solid rgba(0,0,0,0);
-      border-left: 5px solid rgba(0,0,0,0);
-      border-radius: 50px;
-      box-shadow: 0 0 35px #2187e7;
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
-      //@include animated(spinPulse 1s infinite ease-in-out);
-  }
-
-  .circle1 {
-      background-color: rgba(0,0,0,0);
-      border: 5px solid rgba(0,183,229,0.9);
-      opacity: .9;
-      border-left: 5px solid rgba(0,0,0,0);
-      border-right: 5px solid rgba(0,0,0,0);
-      border-radius: 50px;
-      box-shadow: 0 0 15px #2187e7;
-      width: 30px;
-      height: 30px;
-      margin: 0 auto;
-      position: relative;
-      top: -40px;
-      //@include animated(spinoffPulse 1s infinite linear);
-  }
-
-  /*@include animate-keyframe(spinPulse) {
-      0% {
-          @include rotate(160deg);
-          opacity: 0;
-          box-shadow: 0 0 1px #2187e7;
-      }
-
-      50% {
-          @include rotate(145deg);
-          opacity: 1;
-      }
-
-      100% {
-          @include rotate(-320deg);
-          opacity: 0;
-      };
-  }
-
-  @include animate-keyframe(spinoffPulse) {
-      0% {
-          @include rotate(0deg);
-      }
-
-      100% {
-          @include rotate(360deg);
-      };
-  }*/
-}
-
 html.embedded {
   display: flex;
   flex-direction: column;
