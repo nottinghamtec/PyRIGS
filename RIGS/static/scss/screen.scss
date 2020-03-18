@@ -1,10 +1,6 @@
 @import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
 
-body, .pad-top {
-  padding-top: 50px;
-}
-
 #content {
   padding: 40px 15px;
 }
@@ -79,8 +75,7 @@ ins {
 }
 
 .skip-link {
-  background: $info;
-  color: $white;
+  background: $dark;
   outline: unset;
   height: 30px;
   left: 50%;
@@ -91,7 +86,7 @@ ins {
 }
 
 .skip-link:focus {
-  transform: translateY(0%);
+  transform: translateY(45px); /* TODO Remove absolute positioning */
 }
 
 html.embedded {
