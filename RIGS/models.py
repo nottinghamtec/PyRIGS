@@ -93,7 +93,6 @@ class RevisionMixin(object):
         return "V{0} | R{1}".format(version.pk, version.revision.pk)
 
 
-@reversion.register
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -130,7 +129,6 @@ class Person(models.Model, RevisionMixin):
         return reverse_lazy('person_detail', kwargs={'pk': self.pk})
 
 
-@reversion.register
 class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -202,7 +200,6 @@ class VatRate(models.Model, RevisionMixin):
         return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
 
 
-@reversion.register
 class Venue(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -482,15 +479,6 @@ class EventItem(models.Model):
 
     def __str__(self):
         return str(self.event.pk) + "." + str(self.order) + ": " + self.event.name + " | " + self.name
-
-
-class EventCrew(models.Model):
-    event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    rig = models.BooleanField(default=False)
-    run = models.BooleanField(default=False)
-    derig = models.BooleanField(default=False)
-    notes = models.TextField(blank=True, null=True)
 
 
 @reversion.register
