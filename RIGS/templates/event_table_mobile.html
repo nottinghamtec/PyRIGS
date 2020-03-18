@@ -1,0 +1,38 @@
+{% for event in events %}
+<div class="card my-1
+{% if event.cancelled %}
+    text-muted border-secondary
+{% elif event.authorised and event.risk_assessment_edit_url and event.mic %}
+    border-success
+{% elif not event.is_rig %}
+    border-info
+{% else %}
+    border-warning
+{% endif %}
+">
+  <div class="card-header">
+    <a href="{% url 'event_detail' event.pk %}">{{ event.pk }} | {{ event.name }}</a>
+    {% if event.dry_hire %}
+        <span class="badge badge-pill badge-secondary">Dry Hire</span>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    {% include 'partials/event_status.html' %}
+    <h6 class="pt-2"><strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
+    {% if event.end_date and event.end_date != event.start_date %}
+    <strong>⁠– {{ event.end_date|date:"D d/m/Y"  }}</strong></h4>
+    {% else %}
+    </h6>
+    {% endif %}
+    <ul class="list-group list-group-flush pb-3">
+        <li class="list-group-item">Venue: {{ event.venue }}</li>
+        <li class="list-group-item">Client: {{ event.person }}</li>
+        <li class="list-group-item">Organisation: {{ event.organisation }}</li>
+    </ul>
+    {% if not event.cancelled and event.description %}
+      <p>{{ event.description|linebreaksbr }}</p>
+    {% endif %}
+  </div>
+  <div class="card-footer">MIC: {% if event.mic %}<p>{{ event.mic.initials }}</p>{% elif event.is_rig %}<i class="fas fa-exclamation"></i>{% endif %}</div>
+</div>
+{% endfor %}

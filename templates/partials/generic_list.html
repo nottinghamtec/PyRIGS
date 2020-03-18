@@ -50,14 +50,15 @@
                 </td>
             </tr>
         {% empty %}
-            <tr>
-                <td></td>
-                <td colspan="5">Nothing found</td>
+            <tr class="table-warning">
+                <td colspan="6" class="text-center">Nothing found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
 {% if is_paginated %}
-<div class="col-sm-12">{% paginator %}</div>
+    <div class="row justify-content-center">
+            {% paginator %}
+    </div>
 {% endif %}

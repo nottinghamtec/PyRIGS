@@ -231,10 +231,12 @@ class VenueList(generic.ListView):
 
 
 class VenueDetail(generic.DetailView):
+    template_name = 'venue_detail.html'
     model = models.Venue
 
 
 class VenueCreate(generic.CreateView):
+    template_name = 'venue_form.html'
     model = models.Venue
     fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
 

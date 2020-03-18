@@ -74,29 +74,9 @@
                         </h5>
                     {% endif %}
                     {% if not event.cancelled and event.description %}
-                        <div>
-                            {{ event.description|linebreaksbr }}
-                        </div>
+                        <p>{{ event.description|linebreaksbr }}</p>
                     {% endif %}
-                    <!---Overall status at a glance--->
-                    <span class="badge badge-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
-                    {% if event.is_rig %}
-                        {% if event.purchase_order %}
-                            <span class="badge badge-success">PO: {{ event.purchase_order }}</i></span>
-                        {% elif event.authorised %}
-                            <span class="badge badge-success">Payment: Authorised <i class="fas fa-check"></i></span>
-                        {% else %}
-                            <span class="badge badge-danger">Payment: <i class="fas fa-times"></i></span>
-                        {% endif %}
-                        <!-- TODO show invoice stuff here -->
-
-                        {% if event.risk_assessment_edit_url %}
-                            <span class="badge badge-success">RA: <i class="fas fa-check"></i></span>
-                        {% else %}
-                            <span class="badge badge-danger">RA: <i class="fas fa-times"></i></span>
-                        {% endif %}
-                    {% endif %}
-
+                    {% include 'partials/event_status.html' %}
                 </td>
                 <!---MIC-->
                 <td>
