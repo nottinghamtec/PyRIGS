@@ -1,16 +1,14 @@
+import simplejson
+from assets import forms, models
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.http import HttpResponse, Http404
+from django.db.models import Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.urls import reverse
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from assets import models, forms
-from RIGS import versioning
-
-import simplejson
+from versioning import versioning
 
 
 @method_decorator(csrf_exempt, name='dispatch')

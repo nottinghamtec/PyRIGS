@@ -1,21 +1,6 @@
-{% load static %}
-
 {% block js %}
-<script src="{% static 'js/tooltip.js' %}"></script>
-<script src="{% static 'js/popover.js' %}"></script>
+{% include 'version_scripts.html' %}
 <script>
-    $(function () {
-          $('[data-toggle="tooltip"]').tooltip();
-    })
-</script>
-<script>
-  $(function () {
-        $('[data-toggle="popover"]').popover().click(function(){
-        if($(this).attr('href')){
-          window.location.href = $(this).attr('href');
-        }
-    });
-  })
   $(document).ready(function() {
     $(function () {
         $( "#activity" ).hide();

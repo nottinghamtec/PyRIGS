@@ -5,7 +5,8 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
 from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
-from RIGS import finance, ical, models, rigboard, versioning, views
+from RIGS import finance, ical, models, rigboard, views
+from versioning import versioning
 
 urlpatterns = [
     path('', login_required(views.Index.as_view()), name='index'),

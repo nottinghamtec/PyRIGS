@@ -1,0 +1,19 @@
+{% if version.changes.item_changes or version.changes.field_changes or version.changes.old == None %}
+    {% for change in version.changes.field_changes %}
+    	<span title="Changes to {{ change.field.verbose_name }}" class="badge badge-info p-2" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</span>
+    {% endfor %}
+    {% for itemChange in version.changes.item_changes %}
+        <span title="Changes to item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'" class="badge badge-info p-1" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
+            <ul class="list-group">
+            {% for change in itemChange.field_changes %}
+                  <li class="list-group-item">
+                    <h4 class="list-group-item-heading">{{ change.field.verbose_name }}</h4>
+                    <div class="dont-break-out">{% include 'version_changes_change.html' with change=itemChange %}</div>
+                  </li>
+            {% endfor %}
+            </ul>
+            {% endspaceless %}'>item '{% if itemChange.new %}{{ itemChange.new.name }}{% else %}{{ itemChange.old.name }}{% endif %}'</span>
+    {% endfor %}
+{% else %}
+    nothing useful
+{% endif %}

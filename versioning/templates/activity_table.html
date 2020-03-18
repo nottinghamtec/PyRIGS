@@ -1,28 +1,11 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
-{% load static %}
 {% load paginator from filters %}
 {% load to_class_name from filters %}
 
 {% block title %}Rigboard Activity Stream{% endblock %}
 
 {% block js %}
-    <script src="{% static "js/tooltip.js" %}"></script>
-    <script src="{% static "js/popover.js" %}"></script>
-    <script src="{% static "js/moment.js" %}"></script>
-    <script>
-    	$(function () {
-		  $('[data-toggle="popover"]').popover().click(function(){
-        if($(this).attr('href')){
-          window.location.href = $(this).attr('href');
-        }
-      });
-    $('.date').each(function (index, dateElem) {
-        var $dateElem = $(dateElem);
-        var formatted = moment($dateElem.attr('data-date')).fromNow();
-        $dateElem.text(formatted);
-       });
-		})
-    </script>
+{% include 'version_scripts.html' %}
 {% endblock %}
 
 {% block content %}

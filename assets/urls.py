@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.urls import path
 from assets import views, models
-from RIGS import versioning
+from versioning import versioning
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.clickjacking import xframe_options_exempt

@@ -1,18 +1,14 @@
-
-
-import logging
 import datetime
+import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404
-from django.views import generic
-from django.utils.functional import cached_property
-from django.db.models import IntegerField, EmailField, TextField
-from django.contrib.contenttypes.models import ContentType
-
-from reversion.models import Version, VersionQuerySet
 from diff_match_patch import diff_match_patch
-
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import EmailField, IntegerField, TextField
+from django.shortcuts import get_object_or_404
+from django.utils.functional import cached_property
+from django.views import generic
+from reversion.models import Version, VersionQuerySet
 from RIGS import models
 
 logger = logging.getLogger('tec.pyrigs')

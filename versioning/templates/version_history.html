@@ -1,22 +1,11 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 {% load to_class_name from filters %}
 {% load paginator from filters %}
-{% load static %}
 
 {% block title %}{{object|to_class_name}} {{ object.pk|stringformat:"05d" }} - Revision History{% endblock %}
 
 {% block js %}
-    <script src="{% static "js/tooltip.js" %}"></script>
-    <script src="{% static "js/popover.js" %}"></script>
-    <script>
-    	$(function () {
-            $('[data-toggle="popover"]').popover().click(function(){
-                    if($(this).attr('href')){
-                      window.location.href = $(this).attr('href');
-                    }
-                  });
-        })
-    </script>
+{% include 'version_scripts.html' %}
 {% endblock %}
 
 {% block content %}

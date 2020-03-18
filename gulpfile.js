@@ -77,7 +77,7 @@ function browserSyncReload(done) {
 function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*", styles);
   gulp.watch("RIGS/static/js/**/*", scripts);
-  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html'],  browserSyncReload);
+  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html', 'versioning/templates/**/*.html'],  browserSyncReload);
   //gulp.watch("gulpfile.js", gulp.parallel(styles, scripts)); TODO This causes a reload loop
 }
 
