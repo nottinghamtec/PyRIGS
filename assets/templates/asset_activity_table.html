@@ -10,7 +10,7 @@
 {% block js %}
     <script src="{% static "js/tooltip.js" %}"></script>
     <script src="{% static "js/popover.js" %}"></script>
-    <script src="{% static "js/moment.min.js" %}"></script>
+    <script src="{% static "js/moment.js" %}"></script>
     <script>
     	$(function () {
 		  $('[data-toggle="popover"]').popover().click(function(){
@@ -18,28 +18,12 @@
           window.location.href = $(this).attr('href');
         }
       });
-
-          // This keeps timeago values correct, but uses an insane amount of resources
-          // $(function () {
-          //     setInterval(function() {
-          //         $('.date').each(function (index, dateElem) {
-          //           var $dateElem = $(dateElem);
-          //           var formatted = moment($dateElem.attr('data-date')).fromNow();
-          //           $dateElem.text(formatted);
-          //          })
-          //        });
-          //     }, 10000);
-
-
-            $('.date').each(function (index, dateElem) {
-                var $dateElem = $(dateElem);
-                var formatted = moment($dateElem.attr('data-date')).fromNow();
-                $dateElem.text(formatted);
-               });
-
-
+    $('.date').each(function (index, dateElem) {
+        var $dateElem = $(dateElem);
+        var formatted = moment($dateElem.attr('data-date')).fromNow();
+        $dateElem.text(formatted);
+       });
 		})
-
     </script>
 {% endblock %}
 

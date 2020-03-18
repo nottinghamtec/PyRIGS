@@ -31,26 +31,26 @@
 </head>
 
 <body>
+<a class="skip-link" href='#main'>Skip to content</a>
 {% include "analytics.html" %}
-    {% block navbar %}
-    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" role="navigation">
-      <div class="container">
-          {% block titleheader %}
-          {% endblock %}
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                {% block titleelements %}
-                {% endblock %}
-            </ul>
-          </div>
+{% block navbar %}
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" role="navigation">
+  <div class="container">
+      {% block titleheader %}
+      {% endblock %}
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            {% block titleelements %}
+            {% endblock %}
+        </ul>
       </div>
-    </nav>
+  </div>
+</nav>
 {% endblock %}
-
-<div class="container py-4">
+<div class="container py-4" id="main">
     {% block content-header %}
         {% if error %}
             <div class="error">{{ error }}</div>{% endif %}

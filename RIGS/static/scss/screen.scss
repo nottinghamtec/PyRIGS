@@ -78,6 +78,22 @@ ins {
   color: $gray-400 !important;
 }
 
+.skip-link {
+  background: $info;
+  color: $white;
+  outline: unset;
+  height: 30px;
+  left: 50%;
+  padding: 8px;
+  position: absolute;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
+}
+
+.skip-link:focus {
+  transform: translateY(0%);
+}
+
 html.embedded {
   display: flex;
   flex-direction: column;

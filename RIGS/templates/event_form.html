@@ -92,8 +92,8 @@
                   .attr({type : 'text/css', rel : 'stylesheet'})
                   .attr('href', '{% static "css/bootstrap-datetimepicker.min.css" %}');
                 $.when(
-                    $.getScript( "{% static "js/moment.min.js" %}" ),
-                    $.getScript( "{% static "js/bootstrap-datetimepicker.min.js" %}" ),
+                    $.getScript( "{% static "js/moment.js" %}" ),
+                    $.getScript( "{% static "js/bootstrap-datetimepicker.js" %}" ),
                     $.Deferred(function( deferred ){
                         $( deferred.resolve );
                     })
