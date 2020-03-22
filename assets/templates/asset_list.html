@@ -19,7 +19,7 @@
   <h1 class="text-center">Asset List</h1>
 </div>
 
-<form id="asset-search-form" method="get" class="form my-2">
+<form id="asset-search-form" method="GET" class="form my-2">
   <div class="row my-2">
       <div class="input-group">
         {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
@@ -30,33 +30,34 @@
   <div class="row my-2 justify-content-end">
       <div id="category-group" class="form-group px-2">
         <label for="category" class="sr-only">Category</label>
-        {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+        {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-xs' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
       </div>
       <div id="status-group" class="form-group px-2">
         <label for="status" class="sr-only">Status</label>
-        {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+        {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-xs' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
       </div>
-      <!---TODO: Auto filter whenever an option is selected, instead of using a button -->
       <button id="filter-submit" type="submit" class="btn btn-secondary">Filter</button>
   </div>
 </form>
 
 <a href="{% url 'asset_create' %}" class="btn btn-success float-right my-3">New <i class="fas fa-plus"></i></a>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Asset ID</th>
-      <th scope="col">Description</th>
-      <th scope="col">Category</th>
-      <th scope="col">Status</th>
-      <th scope="col" class="hidden-xs">Quick Links</th>
-    </tr>
-  </thead>
-  <tbody id="asset_table_body">
-    {% include 'partials/asset_list_table_body.html' %}
-  </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Asset ID</th>
+          <th scope="col" class="w-25">Description</th>
+          <th scope="col">Category</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="d-none d-sm-block">Quick Links</th>
+        </tr>
+      </thead>
+      <tbody id="asset_table_body">
+        {% include 'partials/asset_list_table_body.html' %}
+      </tbody>
+    </table>
+</div>
 
 {% if is_paginated %}
 <div class="text-center">

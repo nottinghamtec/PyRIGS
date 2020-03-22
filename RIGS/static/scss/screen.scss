@@ -74,6 +74,10 @@ ins {
   color: $gray-400 !important;
 }
 
+.btn-light {
+    background-color: $gray-200 !important;
+}
+
 .skip-link {
   background: $dark;
   outline: unset;
@@ -87,6 +91,11 @@ ins {
 
 .skip-link:focus {
   transform: translateY(45px); /* TODO Remove absolute positioning */
+}
+
+svg {
+    display: inline;
+    white-space: no-wrap;
 }
 
 html.embedded {

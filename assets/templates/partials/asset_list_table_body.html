@@ -1,15 +1,15 @@
 {% for item in object_list %}
     <tr class="{{ item.status.display_class|default:'' }} assetRow">
-        <th scope="row" style="vertical-align: middle;"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
-        <td class="assetDesc" style="vertical-align: middle; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 25vw">{{ item.description }}</td>
-        <td class="assetCategory" style="vertical-align: middle;">{{ item.category }}</td>
-        <td class="assetStatus" style="vertical-align: middle;">{{ item.status }}</td>
-        <td class="hidden-xs">
-            <div class="btn-group" role="group">
-                <a type="button" class="btn btn-primary btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="fas fa-eye"></i> View</a>
+        <th scope="row"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
+        <td class="assetDesc w-25">{{ item.description }}</td>
+        <td class="assetCategory">{{ item.category }}</td>
+        <td class="assetStatus">{{ item.status }}</td>
+        <td class="d-none d-sm-block">
+            <div class="btn-group d-flex" role="group">
+                <a type="button" class="btn btn-primary btn-sm flex-nowrap" href="{% url 'asset_detail' item.asset_id %}"><span class="fas fa-eye fa-fw text-nowrap"></span><span class="d-none d-md-block text-nowrap"> View</span></a>
                 {% if perms.assets.change_asset %}
-                <a type="button" class="btn btn-warning btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="fas fa-edit"></i> Edit</a>
-                <a type="button" class="btn btn-secondary btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="fas fa-clone"></i> Duplicate</a>
+                <a type="button" style="display: inline !important; white-space: no-wrap !important;" class="btn btn-warning btn-sm text-nowrap flex-nowrap" href="{% url 'asset_update' item.asset_id %}"><span class="fas fa-edit fa-fw" style="display: inline !important;"></span><span class="d-none d-md-block"> Edit</span></a>
+                <a type="button" class="btn btn-secondary btn-sm text-nowrap" href="{% url 'asset_duplicate' item.asset_id %}"><span class="fas fa-clone fa-fw"></span><span class="d-none d-md-block"> Duplicate</span></a>
                 {% endif %}
             </div>
         </td>

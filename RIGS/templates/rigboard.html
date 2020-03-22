@@ -3,12 +3,10 @@
 {% block title %}Rigboard{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <h1 class="bd-title col-xs-12">Rigboard</h1>
-        {% if perms.RIGS.add_event %}
-        <a href="{% url 'event_create' %}" class="btn btn-success float-right my-3 col-xs-12">New <i class="fas fa-plus"></i></a>
-        {% endif %}
-    </div>
+    <h1>Rigboard</h1>
+    {% if perms.RIGS.add_event %}
+    <a href="{% url 'event_create' %}" class="btn btn-success my-3 float-right">New <i class="fas fa-plus"></i></a>
+    {% endif %}
     <div class="d-none d-md-block">
         {% include 'event_table.html' %}
     </div>
