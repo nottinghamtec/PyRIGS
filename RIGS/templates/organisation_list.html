@@ -4,10 +4,8 @@
 {% block title %}Organisations{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-10">
-            <h3>Organisations</h3>
-        </div>
-    </div>
-    {% include 'partials/generic_list.html' with edit="organisation_update" detail="organisation_detail" create="organisation_create" union_account=True %}
+<div class="row">
+    <h3>Organisations</h3>
+</div>
+{% include 'partials/generic_list.html' with edit="organisation_update" detail="organisation_detail" create="organisation_create" union_account=True %}
 {% endblock %}

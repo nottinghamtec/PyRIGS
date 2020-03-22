@@ -4,11 +4,8 @@
 {% load widget_tweaks %}
 
 {% block content %}
-
-<div class="page-header">
-    <h1>Supplier List</h1>
+<div class="row">
+    <h3>Suppliers</h3>
 </div>
-
 {% include 'partials/generic_list.html' with edit="supplier_update" detail="supplier_detail" create="supplier_create" %}
-
 {% endblock %}

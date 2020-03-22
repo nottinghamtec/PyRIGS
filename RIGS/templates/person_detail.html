@@ -18,52 +18,47 @@
             </div>
         {% endif %}
         <div class="col-sm">
-            <div class="card card-info">
-                <div class="card-header">Person Details</div>
+            <div class="card border-info">
+                <div class="card-header bg-info">Person Details</div>
                 <div class="card-body">
-                    <dl class="dl-horizontal">
-                        <dt>Name</dt>
+                    <dl class="row">
+                        <dt class="col-6">Name</dt>
                         <dd>{{ object.name }}</dd>
 
-                        <dt>Phone</dt>
+                        <dt class="col-6">Phone</dt>
                         <dd><a href="tel:{{ object.phone }}">{{ object.phone }}</a></dd>
 
-                        <dt>Email</dt>
+                        <dt class="col-6">Email</dt>
                         <dd><a href="mailto:{{ object.email }}"><span class="overflow-ellipsis">{{ object.email }}</span></a></dd>
 
-                        <dt>Address</dt>
+                        <dt class="col-6">Address</dt>
                         <dd>{{ object.address|linebreaksbr }}</dd>
 
-                        <dt>Notes</dt>
-                        <dd>{{ object.notes|linebreaksbr }}</dd>
+                        <dt class="col-12">Notes</dt>
+                        <dd class="col-12">{{ object.notes|linebreaksbr }}</dd>
                     </dl>
                 </div>
             </div>
         </div>
-
         <div class="col-sm">
-            <div class="card card-default">
+            <div class="card">
                 <div class="card-header">Associated Organisations</div>
-                <div class="card-body">
-                    <div class="list-group">
-                        {% for organisation,count in object.organisations %}
-                            <a class="list-group-item" href="{% url 'organisation_detail' organisation.pk %}">{{ organisation.pk|stringformat:"05d" }} | {{ organisation.name }} <span class="badge" title="{{count}} events with {{object.name}} for {{organisation.name}}">{{count}}</span></a>
-                        {% endfor %}
-                    </div>
-                </div>
+                <ul class="list-group list-group-flush">
+                    {% for organisation,count in object.organisations %}
+                        <a class="list-group-item list-group-item-action" href="{% url 'organisation_detail' organisation.pk %}">{{ organisation.pk|stringformat:"05d" }} | {{ organisation.name }} <span class="badge badge-secondary" title="{{count}} events with {{object.name}} for {{organisation.name}}">{{count}}</span></a>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
 
     <div class="row my-3">
         <div class="col-sm-12">
-            <div class="card card-default">
+            <div class="card">
                 <div class="card-header">Associated Events</div>
-                <div class="card-body">
-                    {% with object.latest_events as events %}
-                        {% include 'event_table.html' %}
-                    {% endwith %}
-                </div>
+                {% with object.latest_events as events %}
+                    {% include 'event_table.html' %}
+                {% endwith %}
             </div>
         </div>
     </div>
@@ -82,16 +77,16 @@
 
 {% if request.is_ajax %}
     {% block footer %}
-        <div class="row">
-            <div class="col-sm-12 text-right">
-                <div class="btn-group btn-page">
-                    <a href="{% url 'person_detail' object.pk %}" class="btn btn-primary"><span
-                        class="fas fa-eye"></span> Open Page</a>
-                    <a href="{% url 'person_update' object.pk %}" class="btn btn-light"><span
-                        class="fas fa-user-edit"></span> Edit</a>
-                </div>
-                {% include 'partials/last_edited.html' with target="person_history" %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="btn-group btn-page">
+                <a href="{% url 'person_detail' object.pk %}" class="btn btn-primary"><span
+                    class="fas fa-eye"></span> Open Page</a>
+                <a href="{% url 'person_update' object.pk %}" class="btn btn-light"><span
+                    class="fas fa-user-edit"></span> Edit</a>
             </div>
+            {% include 'partials/last_edited.html' with target="person_history" %}
         </div>
+    </div>
     {% endblock %}
 {% endif %}

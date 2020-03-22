@@ -104,6 +104,7 @@ class PersonDetail(generic.DetailView):
 
 
 class PersonCreate(generic.CreateView):
+    template_name = 'person_form.html'
     model = models.Person
     fields = ['name', 'phone', 'email', 'address', 'notes']
 
@@ -121,6 +122,7 @@ class PersonCreate(generic.CreateView):
 
 
 class PersonUpdate(generic.UpdateView):
+    template_name = 'person_form.html'
     model = models.Person
     fields = ['name', 'phone', 'email', 'address', 'notes']
 

@@ -106,7 +106,7 @@ urlpatterns = [
     path('invoice/<int:pk>/delete/', permission_required_with_403('RIGS.change_invoice')(finance.InvoiceDelete.as_view()),
          name='invoice_delete'),
     path('invoice/(<int:pk>/history/', permission_required_with_403('RIGS.view_invoice')(versioning.VersionHistory.as_view()),
-        name='invoice_history', kwargs={'model': models.Invoice}),
+         name='invoice_history', kwargs={'model': models.Invoice}),
 
     path('payment/create/', permission_required_with_403('RIGS.add_payment')(finance.PaymentCreate.as_view()),
          name='payment_create'),

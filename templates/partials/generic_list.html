@@ -1,12 +1,8 @@
 {% load url_replace from filters %}
 {% load orderby from filters %}
 {% load paginator from filters %}
-<div class="row justify-content-end">
-    <a href="{% url create %}" class="btn btn-success">New <span
-            class="fas fa-plus"></span></a>
-</div>
-<div class="row justify-content-end">
-    <form class="form-inline py-3">
+<div class="row justify-content-end py-3">
+    <form class="form-inline pr-3">
         {% csrf_token %}
         <div class="input-group pull-right">
             <input type="search" name="query" placeholder="Search" value="{{ request.GET.query }}"
@@ -14,51 +10,57 @@
             <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search">Search</button></span>
         </div>
     </form>
+    <a href="{% url create %}" class="btn btn-success">New <span
+            class="fas fa-plus"></span></a>
 </div>
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></td>
-                <th scope="col">Email</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Notes</th>
-                {% if union_account %} {#TODO#}
-                <th scope="col">Union Account</th>
-                {% endif %}
-                <th scope="col">Quick Links</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for object in object_list %}
-            <tr>
-                <th scope="row">{{ object.pk }}</th>
-                <td>{{ object.name }}</td>
-                <td>{{ object.email }}</td>
-                <td>{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
-                <td>{{ object.notes|yesno|capfirst }}</td>
-                {% if union_account %}
-                <td>{{ object.union_account|yesno|capfirst }}</td>
-                {% endif %}
-                <td>
-                    <a href="{% url detail object.pk %}" class="btn btn-primary modal-href">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <a href="{% url edit object.pk %}" class="btn btn-secondary"><i
-                            class="fas fa-edit"></i></a>
-                </td>
-            </tr>
-        {% empty %}
+<div class="row">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></td>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Notes</th>
+                    {% if union_account %} {#TODO#}
+                    <th scope="col">Union Account</th>
+                    {% endif %}
+                    <th scope="col">Quick Links</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <th scope="row" class="align-middle">{{ object.pk }}</th>
+                    <td class="align-middle">{{ object.name }}</td>
+                    <td class="align-middle">{{ object.email }}</td>
+                    <td class="align-middle">{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
+                    <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>
+                    {% if union_account %}
+                    <td>{{ object.union_account|yesno|capfirst }}</td>
+                    {% endif %}
+                    <td>
+                        <div class="btn-group d-flex" role="group">
+                            <a href="{% url detail object.pk %}" class="btn btn-primary btn-sm modal-href">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="{% url edit object.pk %}" class="btn btn-warning btn-sm"><i
+                                    class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
             <tr class="table-warning">
                 <td colspan="6" class="text-center">Nothing found</td>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% if is_paginated %}
-    <div class="row justify-content-center">
-            {% paginator %}
-    </div>
+<div class="row justify-content-center">
+        {% paginator %}
+</div>
 {% endif %}
