@@ -6,6 +6,34 @@ from django.urls import reverse
 from RIGS import models
 
 
+def get_oembed(login_url, request, oembed_view, kwargs):
+    context = {}
+    context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
+    context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
+    resp = render(request, 'login_redirect.html', context=context)
+    return resp
+
+
+def has_oembed(oembed_view, login_url=None):
+    if not login_url:
+        from django.conf import settings
+        login_url = settings.LOGIN_URL
+
+    def _dec(view_func):
+        def _checklogin(request, *args, **kwargs):
+            if request.user.is_authenticated:
+                return view_func(request, *args, **kwargs)
+            else:
+                if oembed_view is not None:
+                    return get_oembed(login_url, request, oembed_view, kwargs)
+                else:
+                    return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
+        _checklogin.__doc__ = view_func.__doc__
+        _checklogin.__dict__ = view_func.__dict__
+        return _checklogin
+    return _dec
+
+
 def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
     """
     Decorator for views that checks that the user passes the given test.
@@ -25,11 +53,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                 return view_func(request, *args, **kwargs)
             elif not request.user.is_authenticated:
                 if oembed_view is not None:
-                    context = {}
-                    context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
-                    context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
-                    resp = render(request, 'login_redirect.html', context=context)
-                    return resp
+                    return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
                     return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
             else:

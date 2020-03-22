@@ -1,12 +1,14 @@
+from django.urls import path
 from django.conf.urls import url
-from django.contrib.auth.views import password_reset
+from django.contrib.auth.views import PasswordResetView
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from RIGS import models, views, rigboard, finance, ical, versioning, forms
 from django.views.generic import RedirectView
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from PyRIGS.decorators import permission_required_with_403
+from PyRIGS.decorators import permission_required_with_403, has_oembed
 from PyRIGS.decorators import api_key_required
 
 urlpatterns = [
@@ -16,10 +18,10 @@ urlpatterns = [
     url('^$', login_required(views.Index.as_view()), name='index'),
     url(r'^closemodal/$', views.CloseModal.as_view(), name='closemodal'),
 
-    url('^user/login/$', views.login, name='login'),
-    url('^user/login/embed/$', xframe_options_exempt(views.login_embed), name='login_embed'),
+    path('user/login/', LoginView.as_view(authentication_form=forms.CheckApprovedForm), name='login'),
+    path('user/login/embed/', xframe_options_exempt(views.LoginEmbed.as_view()), name='login_embed'),
 
-    url(r'^user/password_reset/$', password_reset, {'password_reset_form': forms.PasswordReset}),
+    url(r'^search_help/$', views.SearchHelp.as_view(), name='search_help'),
 
     # People
     url(r'^people/$', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
@@ -87,8 +89,7 @@ urlpatterns = [
         permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
         name='activity_feed'),
 
-    url(r'^event/(?P<pk>\d+)/$',
-        permission_required_with_403('RIGS.view_event', oembed_view="event_oembed")(
+    url(r'^event/(?P<pk>\d+)/$', has_oembed(oembed_view="event_oembed")(
             rigboard.EventDetail.as_view()),
         name='event_detail'),
     url(r'^event/(?P<pk>\d+)/embed/$',

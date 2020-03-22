@@ -3,13 +3,17 @@
 		<thead>
 			<tr>
 				<td>Item</td>
+                {% if perms.RIGS.view_event %}
 				<td>Price</td>
+                {% endif %}
 				<td>Quantity</td>
+                {% if perms.RIGS.view_event %}
 				<td>Sub-total</td>
+                {% endif %}
 				{% if edit %}
 				<td class="text-right">
 					<button type="button" class="btn btn-default btn-xs item-add"
-						data-url="{#% url eventitem_add object.pk %#}" data-toggle="modal"
+						data-toggle="modal"
 						data-target="#itemModal">
 						<span class="glyphicon glyphicon-plus"></span>
 					</button>
@@ -22,6 +26,7 @@
 				{% include 'RIGS/item_row.html' %}
 			{% endfor %}
 		</tbody>
+        {% if perms.RIGS.view_event %}
 		<tfoot>
 			<tr>
 				<td rowspan="3" colspan="2"></td>
@@ -43,6 +48,7 @@
 				<td colspan="2">£ <span id="total">{{object.total|default:0|floatformat:2}}</span></td>
 			</tr>
 		</tfoot>
+        {% endif %}
 	</table>
 </div>
 <table class="hidden invisible">

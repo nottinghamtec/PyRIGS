@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.views import generic
 from django.db.models import Q
 from z3c.rml import rml2pdf
+from django.db.models import Q
 
 from RIGS import models
 
@@ -76,7 +77,7 @@ class InvoicePrint(generic.View):
 
         pdfData = buffer.read()
 
-        escapedEventName = re.sub('[^a-zA-Z0-9 \n\.]', '', object.name)
+        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (invoice.pk, invoice.event.pk, escapedEventName)
@@ -121,6 +122,34 @@ class InvoiceArchive(generic.ListView):
     model = models.Invoice
     template_name = 'RIGS/invoice_list_archive.html'
     paginate_by = 25
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+
+        filter = Q(event__name__icontains=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+            filter = filter | Q(event__pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        try:
+            if q[0] == "N":
+                val = int(q[1:])
+                filter = Q(event__pk=val)  # If string is Nxxxxx then filter by event number
+            elif q[0] == "#":
+                val = int(q[1:])
+                filter = Q(pk=val)  # If string is #xxxxx then filter by invoice number
+        except:  # noqa
+            pass
+
+        object_list = self.model.objects.filter(filter).order_by('-invoice_date')
+
+        return object_list
 
 
 class InvoiceWaiting(generic.ListView):

@@ -1,6 +1,5 @@
-{% load static from staticfiles %}
+{% load static %}
 {% load raven %}
-
 
 <!DOCTYPE html>
 <html
@@ -52,7 +51,7 @@
                 {% endblock %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
+                <li class="dropdown" id="user">
                     {% if user.is_authenticated %}
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <span class="glyphicon glyphicon-user"></span>

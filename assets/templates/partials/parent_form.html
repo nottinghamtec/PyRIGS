@@ -1,12 +1,11 @@
 {% load widget_tweaks %}
-{% load asset_templatetags %}
 <div class="panel panel-default">
   <div class="panel-heading">
     Collection Details
   </div>
   <div class="panel-body">
     {% if create or edit or duplicate %}
-    <div class="form-group">
+    <div class="form-group" id="parent-group">
       <label for="selectpicker">Set Parent</label>
       {% include 'partials/asset_picker.html' %}
     </div>

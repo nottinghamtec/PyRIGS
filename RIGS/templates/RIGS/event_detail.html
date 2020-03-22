@@ -10,12 +10,14 @@
                 | {{ object.name }} {% if event.dry_hire %}<span class="badge">Dry Hire</span>{% endif %}
             </h1>
     </div>
+        {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'RIGS/event_detail_buttons.html' %}
         </div>
+        {% endif %}
 
     {% endif %}
-    {% if object.is_rig %}
+    {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
         <div class="col-sm-12 col-md-6 col-lg-5">
             <div class="panel panel-default">
@@ -72,7 +74,7 @@
             {% endif %}
         </div>
     {% endif %}
-    <div class="col-sm-12 {% if event.is_rig %}col-md-6 col-lg-7{% endif %}">
+    <div class="col-sm-12 {% if event.is_rig and perms.RIGS.view_event %}col-md-6 col-lg-7{% endif %}">
         <div class="panel panel-info">
             <div class="panel-heading">Event Info</div>
             <div class="panel-body">
@@ -122,7 +124,7 @@
                     <dd>&nbsp;</dd>
 
                     <dt>Event Description</dt>
-                    <dd>{{ event.description|linebreaksbr }}</dd>
+                    <dd class="dont-break-out">{{ event.description|linebreaksbr }}</dd>
 
                     <dd>&nbsp;</dd>
 
@@ -147,7 +149,7 @@
                         <dd>{{ object.collector }}</dd>
                     {% endif %}
 
-                    {% if event.is_rig and not event.internal %}
+                    {% if event.is_rig and not event.internal and perms.RIGS.view_event %}
                         <dd>&nbsp;</dd>
                         <dt>PO</dt>
                         <dd>{{ object.purchase_order }}</dd>
@@ -156,9 +158,17 @@
             </div>
         </div>
     </div>
-    {% if event.is_rig and event.internal %}
+    {% if event.is_rig and event.internal and perms.RIGS.view_event %}
     <div class="col-sm-12">
-        <div class="panel panel-default">
+        <div class="panel panel-default
+            {% if object.authorised %}
+                panel-success
+            {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                panel-warning
+            {% elif event.auth_request_to %}
+                panel-info
+            {% endif %}
+            ">
             <div class="panel-heading">Client Authorisation</div>
             <div class="panel-body">
                 <dl class="dl-horizontal col-sm-6">
@@ -188,7 +198,7 @@
                     </dd>
 
                     <dt>Authorised at</dt>
-                    <dd>{{ object.authorisation.last_edited_at }}</dd>
+                    <dd>{{ object.authorisation.last_edited_at|date:"D d M Y H:i" }}</dd>
 
                     <dt>Authorised amount</dt>
                     <dd>
@@ -204,7 +214,7 @@
         </div>
     <div>
     {% endif %}
-    {% if not request.is_ajax %}
+    {% if not request.is_ajax and perms.RIGS.view_event %}
     <div class="col-sm-12 text-right">
         {% include 'RIGS/event_detail_buttons.html' %}
     </div>
@@ -214,21 +224,23 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Event Details</div>
                 <div class="panel-body">
+                    {% if perms.RIGS.view_event %}
                     <div class="well well-sm">
                         <h4>Notes</h4>
-                        {{ event.notes|linebreaksbr }}
+                        <div class="dont-break-out">{{ event.notes|linebreaksbr }}</div>
                     </div>
+                    {% endif %}
                     {% include 'RIGS/item_table.html' %}
                 </div>
             </div>
         </div>
-        {% if not request.is_ajax %}
+        {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'RIGS/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}
-    {% if not request.is_ajax %}
+    {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             <div>
                 <a href="{% url 'event_history' object.pk %}" title="View Revision History">
@@ -243,12 +255,16 @@
 {% if request.is_ajax %}
     {% block footer %}
         <div class="row">
+            {% if perms.RIGS.view_event %}
             <div class="col-sm-10 align-left">
                 <a href="{% url 'event_history' object.pk %}" title="View Revision History">
                     Last edited at {{ object.last_edited_at|default:'never' }} by {{ object.last_edited_by.name|default:'nobody' }}
                 </a>
             </div>
             <div class="col-sm-2">
+            {% else %}
+            <div class="col-sm-12">
+            {% endif %}
                 <div class="pull-right">
                     <a href="{% url 'event_detail' object.pk %}" class="btn btn-primary">Open Event Page <span
                             class="glyphicon glyphicon-eye"></span></a>

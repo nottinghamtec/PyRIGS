@@ -25,7 +25,7 @@ class FieldComparison(object):
         self._new = new
 
     def display_value(self, value):
-        if isinstance(self.field, IntegerField) and len(self.field.choices) > 0:
+        if isinstance(self.field, IntegerField) and self.field.choices is not None and len(self.field.choices) > 0:
             return [x[1] for x in self.field.choices if x[0] == value][0]
         if self.field.name == "risk_assessment_edit_url":
             return "completed" if value else ""
@@ -184,8 +184,7 @@ class RIGSVersion(Version):
         versions = RIGSVersion.objects.get_for_object_reference(self.content_type.model_class(), thisId).select_related("revision", "revision__user").all()
 
         try:
-            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest(
-                field_name='revision__date_created')
+            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest('revision__date_created')
         except ObjectDoesNotExist:
             return False
 

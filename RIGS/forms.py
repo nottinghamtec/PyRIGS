@@ -2,8 +2,10 @@ from django import forms
 from django.utils import formats
 from django.conf import settings
 from django.core import serializers
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
 from registration.forms import RegistrationFormUniqueEmail
+from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import ReCaptchaField
 import simplejson
 
@@ -22,7 +24,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
 
     class Meta:
         model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials', 'phone')
+        fields = ('username', 'email', 'first_name', 'last_name', 'initials')
 
     def clean_initials(self):
         """
@@ -33,8 +35,16 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         return self.cleaned_data['initials']
 
 
+class CheckApprovedForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if user.is_approved or user.is_superuser:
+            return AuthenticationForm.confirm_login_allowed(self, user)
+        else:
+            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
+
+
 # Embedded Login form - remove the autofocus
-class EmbeddedAuthenticationForm(AuthenticationForm):
+class EmbeddedAuthenticationForm(CheckApprovedForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.pop('autofocus', None)
@@ -128,6 +138,11 @@ class EventForm(forms.ModelForm):
             item.full_clean('event')
 
         return item
+
+    def clean(self):
+        if self.cleaned_data.get("is_rig") and not (self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
+            raise forms.ValidationError('You haven\'t provided any client contact details. Please add a person or organisation.', code='contact')
+        return super(EventForm, self).clean()
 
     def save(self, commit=True):
         m = super(EventForm, self).save(commit=False)

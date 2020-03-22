@@ -8,7 +8,6 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.encoding import python_2_unicode_compatible
 from reversion import revisions as reversion
 from reversion.models import Version
 import string
@@ -22,11 +21,12 @@ from django.urls import reverse_lazy
 
 
 # Create your models here.
-@python_2_unicode_compatible
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    is_approved = models.BooleanField(default=False)
+    last_emailed = models.DateTimeField(blank=True, null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
 
     @classmethod
     def make_api_key(cls):
@@ -53,13 +53,16 @@ class Profile(AbstractUser):
     def latest_events(self):
         return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
+    @classmethod
+    def admins(cls):
+        return Profile.objects.filter(email__in=[y for x in settings.ADMINS for y in x])
+
+    @classmethod
+    def users_awaiting_approval_count(cls):
+        return Profile.objects.filter(models.Q(is_approved=False)).count()
+
     def __str__(self):
         return self.name
-
-    class Meta:
-        permissions = (
-            ('view_profile', 'Can view Profile'),
-        )
 
 
 class RevisionMixin(object):
@@ -91,7 +94,6 @@ class RevisionMixin(object):
 
 
 @reversion.register
-@python_2_unicode_compatible
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -127,14 +129,8 @@ class Person(models.Model, RevisionMixin):
     def get_absolute_url(self):
         return reverse_lazy('person_detail', kwargs={'pk': self.pk})
 
-    class Meta:
-        permissions = (
-            ('view_person', 'Can view Persons'),
-        )
-
 
 @reversion.register
-@python_2_unicode_compatible
 class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -171,11 +167,6 @@ class Organisation(models.Model, RevisionMixin):
     def get_absolute_url(self):
         return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
 
-    class Meta:
-        permissions = (
-            ('view_organisation', 'Can view Organisations'),
-        )
-
 
 class VatManager(models.Manager):
     def current_rate(self):
@@ -192,7 +183,6 @@ class VatManager(models.Manager):
 
 
 @reversion.register
-@python_2_unicode_compatible
 class VatRate(models.Model, RevisionMixin):
     start_at = models.DateField()
     rate = models.DecimalField(max_digits=6, decimal_places=6)
@@ -213,7 +203,6 @@ class VatRate(models.Model, RevisionMixin):
 
 
 @reversion.register
-@python_2_unicode_compatible
 class Venue(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -235,11 +224,6 @@ class Venue(models.Model, RevisionMixin):
 
     def get_absolute_url(self):
         return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
-
-    class Meta:
-        permissions = (
-            ('view_venue', 'Can view Venues'),
-        )
 
 
 class EventManager(models.Manager):
@@ -287,7 +271,6 @@ class EventManager(models.Manager):
 
 
 @reversion.register(follow=['items'])
-@python_2_unicode_compatible
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
     PROVISIONAL = 0
@@ -481,11 +464,6 @@ class Event(models.Model, RevisionMixin):
         self.full_clean()
         super(Event, self).save(*args, **kwargs)
 
-    class Meta:
-        permissions = (
-            ('view_event', 'Can view Events'),
-        )
-
 
 class EventItem(models.Model):
     event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
@@ -523,7 +501,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
     uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
     account_code = models.CharField(max_length=50, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
-    sent_by = models.ForeignKey('RIGS.Profile', on_delete=models.CASCADE)
+    sent_by = models.ForeignKey('Profile', on_delete=models.CASCADE)
 
     def get_absolute_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
@@ -533,7 +511,6 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
-@python_2_unicode_compatible
 class Invoice(models.Model):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
@@ -566,13 +543,9 @@ class Invoice(models.Model):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
 
     class Meta:
-        permissions = (
-            ('view_invoice', 'Can view Invoices'),
-        )
         ordering = ['-invoice_date']
 
 
-@python_2_unicode_compatible
 class Payment(models.Model):
     CASH = 'C'
     INTERNAL = 'I'
