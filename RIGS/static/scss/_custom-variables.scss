@@ -1,2 +1,7 @@
-$font-size-base: 0.875rem; //Make it look less primary school
 $font-family-sans-serif:  "Open Sans", sans-serif;
+//Make it look less primary school
+$font-size-base: 0.875rem;
+$theme-colors: (
+  "warning": #ffd351,
+  "info": #53bbcc
+);
