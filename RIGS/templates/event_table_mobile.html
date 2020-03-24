@@ -1,16 +1,15 @@
+<div class="card">
 {% for event in events %}
-<div class="card my-1
-{% if event.cancelled %}
-    text-muted border-secondary
+  <div class="card-header {% if event.cancelled %}
+    text-muted bg-secondary
 {% elif event.authorised and event.risk_assessment_edit_url and event.mic %}
-    border-success
+    bg-success
 {% elif not event.is_rig %}
-    border-info
+    bg-info
 {% else %}
-    border-warning
+    bg-warning
 {% endif %}
 ">
-  <div class="card-header">
     <a href="{% url 'event_detail' event.pk %}">{{ event.pk }} | {{ event.name }}</a>
     {% if event.dry_hire %}
         <span class="badge badge-pill badge-secondary">Dry Hire</span>
@@ -34,5 +33,9 @@
     {% endif %}
   </div>
   <div class="card-footer">MIC: {% if event.mic %}<p>{{ event.mic.initials }}</p>{% elif event.is_rig %}<i class="fas fa-exclamation"></i>{% endif %}</div>
+{% empty %}
+<div class="card-body bg-warning">
+    <p>No events found</p>
 </div>
 {% endfor %}
+</div>

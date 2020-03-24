@@ -7,10 +7,7 @@
 {% if perms.RIGS.add_event %}
 <a href="{% url 'event_create' %}" class="btn btn-success my-3 float-right">New <i class="fas fa-plus"></i></a>
 {% endif %}
-<div class="d-none d-md-block">
-    {% include 'event_table.html' %}
-</div>
-<div class="d-xs-block d-sm-block d-md-none">
-    {% include 'event_table_mobile.html' %}
-</div>
+
+{% include 'event_table.html' %}
+
 {% endblock %}

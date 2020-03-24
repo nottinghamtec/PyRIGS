@@ -6,19 +6,12 @@
 {% block content %}
     <div class="row">
         {% if not request.is_ajax %}
-            <div class="col-sm-12">
-                <h1>Organisation | {{ object.name }}</h1>
-            </div>
-
-            <div class="col-sm-12 text-right">
-                <div class="btn-group btn-page">
-                    <a href="{% url 'organisation_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
-                </div>
-            </div>
+        <div class="col-sm-12">
+            <h1>Organisation | {{ object.name }}</h1>
+        </div>
         {% endif %}
-        <div class="col-sm-6">
-            <div class="card card-info">
+        <div class="col-sm">
+            <div class="card bg-info">
                 <div class="card-header">Organisation Details</div>
                 <div class="card-body">
                     <dl class="dl-horizontal">
@@ -43,9 +36,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-sm-6">
-            <div class="card card-default">
+        <div class="col-sm">
+            <div class="card">
                 <div class="card-header">Associated People</div>
                 <div class="card-body">
                     <div class="list-group">
@@ -57,16 +49,13 @@
             </div>
         </div>
     </div>
-
-    <div class="row">
+    <div class="row my-2">
         <div class="col-sm-12">
-            <div class="card card-default">
+            <div class="card">
                 <div class="card-header">Associated Events</div>
-                <div class="card-body">
-                    {% with object.latest_events as events %}
-                        {% include 'event_table.html' %}
-                    {% endwith %}
-                </div>
+                {% with object.latest_events as events %}
+                    {% include 'event_table.html' %}
+                {% endwith %}
             </div>
         </div>
     </div>
@@ -75,9 +64,9 @@
     {% if not request.is_ajax %}
         <div class="row">
             <div class="col-sm-12 text-right">
-                <div class="btn-group btn-page">
+                <div class="btn-group">
                     <a href="{% url 'organisation_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
+                        class="fas fa-edit"></span> Edit</a>
                 </div>
                 {% include 'partials/last_edited.html' with target="organisation_history" %}
             </div>
@@ -90,11 +79,11 @@
     {% block footer %}
         <div class="row">
             <div class="col-sm-12 text-right">
-                <div class="btn-group btn-page">
-                    <a href="{% url 'organisation_detail' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-eye-open"></span> Open Page</a>
-                    <a href="{% url 'organisation_update' object.pk %}" class="btn btn-default"><span
-                        class="fas fa-pencil"></span> Edit</a>
+                <div class="btn-group">
+                    <a href="{% url 'organisation_detail' object.pk %}" class="btn btn-primary"><span
+                        class="fas fa-eye"></span> Open Page</a>
+                    <a href="{% url 'organisation_update' object.pk %}" class="btn btn-warning"><span
+                        class="fas fa-edit"></span> Edit</a>
                 </div>
                 {% include 'partials/last_edited.html' with target="organisation_history" %}
             </div>
