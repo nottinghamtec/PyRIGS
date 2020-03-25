@@ -1,0 +1,19 @@
+<div class="card">
+{% for object in object_list %}
+    <div class="card-header">
+        <a href="{% url detail object.pk %}">{{ object.pk }} | {{ object.name }}</a>
+    </div>
+    <div class="card-body">
+        <ul>
+            <li><strong>Email:</strong> {{ object.email }}</li>
+            <li><strong>Phone:</strong> {% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</li>
+            <li><strong>Notes:</strong>{{ object.notes|yesno|capfirst }}</li>
+            {% if union_account %}
+            <li>strong>Union Account:</strong> {{ object.union_account|yesno|capfirst }}</li>
+            {% endif %}
+       </ul>
+       <a href="{% url edit object.pk %}" class="btn btn-warning btn-sm"><i
+                                        class="fas fa-edit"></i> Edit</a>
+   </div>
+{% endfor %}
+</div>
