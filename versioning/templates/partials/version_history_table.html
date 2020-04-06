@@ -1,0 +1,29 @@
+{% load to_class_name from filters %}
+<div class="table-responsive">
+	<table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Date</td>
+            <th scope="col">Version ID</td>
+            <th scope="col">User</td>
+            <th scope="col">Changes</td>
+        </tr>
+        </thead>
+        <tbody>
+        	{% for version in object_list %}
+            <tr>
+                <th scope="row">{{ version.revision.date_created }}</th>
+                <td>{{ version.pk }}|{{ version.revision.pk }}</td>
+                <td>{{ version.revision.user.name }}</td>
+                <td>
+                    {% if version.changes.old is None %}
+                        {{object|to_class_name}} Created
+                    {% else %}
+                        {% include 'version_changes.html' %}
+                    {% endif %}
+                </td>
+            </tr>
+			{% endfor %}
+        </tbody>
+    </table>
+ </div>

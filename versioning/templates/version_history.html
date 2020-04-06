@@ -10,40 +10,8 @@
 
 {% block content %}
 <div class="col-sm-12">
-        <div class="row">
-            <div class="col-sm-12">
-                <h3><a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.pk|stringformat:"05d" }}</a> - Revision History</h3>
-            </div>
-        </div>
-        <div>{% paginator %}</div>
-        <div class="table-responsive">
-        	<table class="table table-striped">
-                <thead>
-                <tr>
-                    <td>Date</td>
-                    <td>Version ID</td>
-                    <td>User</td>
-                    <td>Changes</td>
-                </tr>
-                </thead>
-                <tbody>
-                	{% for version in object_list %}
-                    <tr>
-                        <td>{{ version.revision.date_created }}</td>
-                        <td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                        <td>{{ version.revision.user.name }}</td>
-                        <td>
-                            {% if version.changes.old is None %}
-                                {{object|to_class_name}} Created
-                            {% else %}
-                                {% include 'version_changes.html' %}
-                            {% endif %}
-                        </td>
-                    </tr>
-        			{% endfor %}
-                </tbody>
-            </table>
-         </div>
+    <h3><a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.pk|stringformat:"05d" }}</a> - Revision History</h3>
+    {% include 'partials/version_history_table.html' %}
     <div>{% paginator %}</div>
 </div>
 {% endblock %}

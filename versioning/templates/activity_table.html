@@ -10,45 +10,8 @@
 
 {% block content %}
 <div class="col-sm-12">
-        <div class="row">
-            <div class="col-sm-12">
-                <h3>Rigboard Activity Stream</h3>
-            </div>
-        </div>
-        {% paginator %}
-        <div class="table-responsive">
-        	<table class="table table-striped">
-                <thead>
-                <tr>
-                    <td>Date</td>
-                    <td>Object</td>
-                    <td>Version ID</td>
-                    <td>User</td>
-                    <td>Changes</td>
-                </tr>
-                </thead>
-                <tbody>
-                	{% for version in object_list %}
-
-                            <tr>
-                                <td>{{ version.revision.date_created }}</td>
-                                <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}} {{ version.changes.new.pk|stringformat:"05d" }}</a></td>
-                           		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                                <td>{{ version.revision.user.name }}</td>
-                                <td>
-                                  {% if version.changes.old == None %}
-                                    {{version.changes.new|to_class_name}} Created
-                                  {% else %}
-                                    {% include 'version_changes.html' %}
-                                  {% endif %}
-                                </td>
-                            </tr>
-
-        			{% endfor %}
-                </tbody>
-            </table>
-
-        </div>
-        {% paginator %}
-    </div>
+    <h3>Rigboard Activity Stream</h3>
+    {% include 'partials/activity_table_body.html' %}
+    {% paginator %}
+</div>
 {% endblock %}

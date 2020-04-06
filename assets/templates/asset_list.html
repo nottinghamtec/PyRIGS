@@ -15,11 +15,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1 class="text-center">Asset List</h1>
-</div>
-
-<form id="asset-search-form" method="GET" class="form my-2">
+<h1>Asset List</h1>
+<form id="asset-search-form" method="GET" class="form py-2">
   <div class="row my-2">
       <div class="input-group">
         {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
@@ -27,14 +24,14 @@
         <span class="input-group-append"><button type="submit" class="btn btn-primary">Search</button></span>
       </div>
   </div>
-  <div class="row my-2 justify-content-end">
+  <div class="row justify-content-end">
       <div id="category-group" class="form-group px-2">
         <label for="category" class="sr-only">Category</label>
-        {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-xs' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+        {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
       </div>
       <div id="status-group" class="form-group px-2">
         <label for="status" class="sr-only">Status</label>
-        {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-xs' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+        {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
       </div>
       <button id="filter-submit" type="submit" class="btn btn-secondary">Filter</button>
   </div>
