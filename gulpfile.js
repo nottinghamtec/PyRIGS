@@ -18,6 +18,7 @@ sass.compiler = require('node-sass');
 function styles(done) {
     return gulp.src(['RIGS/static/scss/**/*.scss',
                     'node_modules/fullcalendar/dist/fullcalendar.css',
+                    'node_modules/fullcalendar/dist/fullcalendar.print.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
                     'node_modules/autocompleter/autocomplete.css',
