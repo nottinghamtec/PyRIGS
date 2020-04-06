@@ -209,6 +209,7 @@ class VersionHistory(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(VersionHistory, self).get_context_data(**kwargs)
         context['object'] = self.get_object()
+        context['id'] = self.get_object().pk
 
         return context
 
@@ -221,6 +222,12 @@ class ActivityTable(generic.ListView):
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models([models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
         return versions.order_by("-revision__date_created")
+
+    def get_context_data(self, **kwargs):
+        context = super(ActivityTable, self).get_context_data(**kwargs)
+        context['title'] = 'Rigboard'
+
+        return context
 
 
 class ActivityFeed(generic.ListView):
