@@ -15,20 +15,21 @@
 </div>
 <div class="row">
     {% if perms.assets.asset_finance %}
-    <div class="col-md-6">
+    <div class="col-md-6 py-3">
       {% include 'partials/purchasedetails_form.html' %}
     </div>
     {% endif %}
-    <div class="col-md-6" {% if not object.is_cable %}hidden="true"{% endif %} id="cable-table">
+    <div class="col-md-6 py-3" {% if not object.is_cable %}hidden="true"{% endif %} id="cable-table">
       {% include 'partials/cable_form.html' %}
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 py-3">
       {% include 'partials/parent_form.html' %}
     </div>
 </div>
-<div class="row">
-<div class="col-md-12">
-  {% include 'partials/asset_buttons.html' %}
+<div class="row justify-content-end">
+{% include 'partials/asset_buttons.html' %}
 </div>
+<div class="row justify-content-end">
 {% include 'partials/last_edited.html' with target="asset_history" id=object.asset_id %}
+</div>
 {% endblock %}
