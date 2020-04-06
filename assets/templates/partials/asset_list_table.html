@@ -1,9 +1,9 @@
 <div class="table-responsive">
     <table class="table">
-      <thead>
+      <thead class="thead-dark">
         <tr>
           <th scope="col">Asset ID</th>
-          <th scope="col" class="w-25">Description</th>
+          <th scope="col">Description</th>
           <th scope="col">Category</th>
           <th scope="col">Status</th>
           <th scope="col" class="d-none d-sm-table-cell">Quick Links</th>
@@ -13,7 +13,7 @@
         {% for item in object_list %}
             <tr class="{{ item.status.display_class|default:'' }} assetRow">
                 <th scope="row"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
-                <td class="assetDesc w-25 text-truncate">{{ item.description }}</td>
+                <td class="assetDesc"><span class="text-truncate d-inline-block">{{ item.description }}</span></td>
                 <td class="assetCategory">{{ item.category }}</td>
                 <td class="assetStatus">{{ item.status }}</td>
                 <td class="d-none d-sm-table-cell">
