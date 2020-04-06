@@ -2,55 +2,41 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="row">
-                    <div class="col-sm-8">
-                        <h4>{{ object.name|default:"New Event" }}</h4>
-                    </div>
-                    <div class="col-sm-4 text-right">
-                        <button type="button" class="close" data-dismiss="modal"><span
-                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    </div>
-                </div>
+                 <h4>{{ object.name|default:"New Event" }}</h4>
             </div>
-            <form class="form-horizontal" id="item-form">
+            <form id="item-form">
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group form-row">
                         <label for="item_name" class="col-sm-2 control-label">Item Name</label>
-
                         <div class="col-sm-10">
                             <input type="text" placeholder="Item Name" class="form-control" required maxlength="255"
                                    id="item_name"/>
                         </div>
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-group form-row">
                         <label for="item_description" class="col-sm-2 control-label">Description</label>
-
                         <div class="col-sm-10">
                             <textarea type="text" placeholder="Description" class="form-control"
                                       id="item_description" rows="8"></textarea>
                         </div>
                     </div>
-
-                    <div class="row">
+                    <div class="form-row">
                         <div class="col-sm-6">
-                            <div class="form-group">
+                            <div class="form-group form-row">
                                 <label for="item_quantity" class="col-sm-4 control-label">Quantity</label>
-
                                 <div class="col-sm-8">
                                     <input type="number" placeholder="Quantity" class="form-control" required
                                            min="1" id="item_quantity"/>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-sm-6">
-                            <div class="form-group">
+                            <div class="form-group form-row">
                                 <label for="item_cost" class="col-sm-4 control-label">Cost</label>
 
                                 <div class="col-sm-8">
                                     <div class="input-group">
-                                        <div class="input-group-addon">£</div>
+                                        <div class="input-group-prepend"><span class="input-group-text">£</span></div>
                                         <input type="number" placeholder="Cost" class="form-control" required
                                                min="-99999999.99" max="99999999.99" step="0.01"
                                                id="item_cost"/>
@@ -60,12 +46,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-barter">
-                    <div class="col-sm-12">
-                        <div class="pull-right">
-                            <input type="submit" class="btn btn-primary">
-                        </div>
-                    </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary">
                 </div>
             </form>
         </div>
