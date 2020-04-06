@@ -1,0 +1,36 @@
+<div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Asset ID</th>
+          <th scope="col" class="w-25">Description</th>
+          <th scope="col">Category</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="d-none d-sm-table-cell">Quick Links</th>
+        </tr>
+      </thead>
+      <tbody id="asset_table_body">
+        {% for item in object_list %}
+            <tr class="{{ item.status.display_class|default:'' }} assetRow">
+                <th scope="row"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
+                <td class="assetDesc w-25 text-truncate">{{ item.description }}</td>
+                <td class="assetCategory">{{ item.category }}</td>
+                <td class="assetStatus">{{ item.status }}</td>
+                <td class="d-none d-sm-table-cell">
+                    <div class="btn-group" role="group">
+                        <a type="button" class="btn btn-primary btn-sm" href="{% url 'asset_detail' item.asset_id %}"><i class="fas fa-eye fa-fw"></i><span class="d-none d-sm-inline"> View</span></a>
+                        {% if perms.assets.change_asset %}
+                        <a type="button" class="btn btn-warning btn-sm" href="{% url 'asset_update' item.asset_id %}"><i class="fas fa-edit fa-fw"></i><span class="d-none d-sm-inline"> Edit</span></a>
+                        <a type="button" class="btn btn-secondary btn-sm" href="{% url 'asset_duplicate' item.asset_id %}"><i class="fas fa-clone fa-fw"></i><span class="d-none d-sm-inline"> Duplicate</span></a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Nothing found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

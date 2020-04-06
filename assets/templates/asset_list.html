@@ -42,22 +42,7 @@
 
 <a href="{% url 'asset_create' %}" class="btn btn-success float-right my-3">New <i class="fas fa-plus"></i></a>
 
-<div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Asset ID</th>
-          <th scope="col" class="w-25">Description</th>
-          <th scope="col">Category</th>
-          <th scope="col">Status</th>
-          <th scope="col" class="d-none d-sm-block">Quick Links</th>
-        </tr>
-      </thead>
-      <tbody id="asset_table_body">
-        {% include 'partials/asset_list_table_body.html' %}
-      </tbody>
-    </table>
-</div>
+{% include 'partials/asset_list_table.html' %}
 
 {% if is_paginated %}
 <div class="text-center">
