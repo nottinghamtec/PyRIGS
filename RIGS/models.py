@@ -25,7 +25,8 @@ class Profile(AbstractUser):
     phone = models.CharField(max_length=13, null=True, blank=True)
     api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
     is_approved = models.BooleanField(default=False)
-    last_emailed = models.DateTimeField(blank=True, null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
+    last_emailed = models.DateTimeField(blank=True,
+                                        null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
 
     @classmethod
     def make_api_key(cls):
@@ -38,7 +39,8 @@ class Profile(AbstractUser):
     def profile_picture(self):
         url = ""
         if settings.USE_GRAVATAR or settings.USE_GRAVATAR is None:
-            url = "https://www.gravatar.com/avatar/" + hashlib.md5(self.email.encode('utf-8')).hexdigest() + "?d=wavatar&s=500"
+            url = "https://www.gravatar.com/avatar/" + hashlib.md5(
+                self.email.encode('utf-8')).hexdigest() + "?d=wavatar&s=500"
         return url
 
     @property
@@ -225,12 +227,18 @@ class Venue(models.Model, RevisionMixin):
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=timezone.now().date(), dry_hire=False) & ~models.Q(status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=timezone.now().date()) & ~models.Q(status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
+            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now().date(), dry_hire=False) & ~models.Q(
+                status=Event.CANCELLED)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=timezone.now().date()) & ~models.Q(
+                status=Event.CANCELLED)) |  # Active dry hire
+            (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
+                        models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=timezone.now().date())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
+                                                                                                 'organisation',
+                                                                                                 'venue', 'mic')
         return events
 
     def events_in_bounds(self, start, end):
@@ -261,7 +269,7 @@ class EventManager(models.Manager):
             (models.Q(dry_hire=True, start_date__gte=timezone.now().date(), is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Active dry hire
             (models.Q(dry_hire=True, checked_in_by__isnull=True, is_rig=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED)))  # Active dry hire GT
+                    models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED)))  # Active dry hire GT
         ).count()
         return event_count
 
@@ -302,7 +310,8 @@ class Event(models.Model, RevisionMixin):
     meet_info = models.CharField(max_length=255, blank=True, null=True)
 
     # Crew management
-    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True, on_delete=models.CASCADE)
+    checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True,
+                                      on_delete=models.CASCADE)
     mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
                             verbose_name="MIC", on_delete=models.CASCADE)
 

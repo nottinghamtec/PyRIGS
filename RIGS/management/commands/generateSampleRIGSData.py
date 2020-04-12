@@ -27,7 +27,8 @@ class Command(BaseCommand):
         if not (settings.DEBUG or settings.STAGING):
             raise CommandError('You cannot run this command in production')
 
-        random.seed('Some object to seed the random number generator')  # otherwise it is done by time, which could lead to inconsistant tests
+        random.seed(
+            'Some object to seed the random number generator')  # otherwise it is done by time, which could lead to inconsistant tests
 
         with transaction.atomic():
             models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
@@ -45,8 +46,18 @@ class Command(BaseCommand):
             self.setupUsefulProfiles()
 
     def setupPeople(self):
-        names = ["Regulus Black", "Sirius Black", "Lavender Brown", "Cho Chang", "Vincent Crabbe", "Vincent Crabbe", "Bartemius Crouch", "Fleur Delacour", "Cedric Diggory", "Alberforth Dumbledore", "Albus Dumbledore", "Dudley Dursley", "Petunia Dursley", "Vernon Dursley", "Argus Filch", "Seamus Finnigan", "Nicolas Flamel", "Cornelius Fudge", "Goyle", "Gregory Goyle", "Hermione Granger", "Rubeus Hagrid", "Igor Karkaroff", "Viktor Krum", "Bellatrix Lestrange", "Alice Longbottom", "Frank Longbottom", "Neville Longbottom", "Luna Lovegood", "Xenophilius Lovegood",  # noqa
-                 "Remus Lupin", "Draco Malfoy", "Lucius Malfoy", "Narcissa Malfoy", "Olympe Maxime", "Minerva McGonagall", "Mad-Eye Moody", "Peter Pettigrew", "Harry Potter", "James Potter", "Lily Potter", "Quirinus Quirrell", "Tom Riddle", "Mary Riddle", "Lord Voldemort", "Rita Skeeter", "Severus Snape", "Nymphadora Tonks", "Dolores Janes Umbridge", "Arthur Weasley", "Bill Weasley", "Charlie Weasley", "Fred Weasley", "George Weasley", "Ginny Weasley", "Molly Weasley", "Percy Weasley", "Ron Weasley", "Dobby", "Fluffy", "Hedwig", "Moaning Myrtle", "Aragog", "Grawp"]  # noqa
+        names = ["Regulus Black", "Sirius Black", "Lavender Brown", "Cho Chang", "Vincent Crabbe", "Vincent Crabbe",
+                 "Bartemius Crouch", "Fleur Delacour", "Cedric Diggory", "Alberforth Dumbledore", "Albus Dumbledore",
+                 "Dudley Dursley", "Petunia Dursley", "Vernon Dursley", "Argus Filch", "Seamus Finnigan",
+                 "Nicolas Flamel", "Cornelius Fudge", "Goyle", "Gregory Goyle", "Hermione Granger", "Rubeus Hagrid",
+                 "Igor Karkaroff", "Viktor Krum", "Bellatrix Lestrange", "Alice Longbottom", "Frank Longbottom",
+                 "Neville Longbottom", "Luna Lovegood", "Xenophilius Lovegood",  # noqa
+                 "Remus Lupin", "Draco Malfoy", "Lucius Malfoy", "Narcissa Malfoy", "Olympe Maxime",
+                 "Minerva McGonagall", "Mad-Eye Moody", "Peter Pettigrew", "Harry Potter", "James Potter",
+                 "Lily Potter", "Quirinus Quirrell", "Tom Riddle", "Mary Riddle", "Lord Voldemort", "Rita Skeeter",
+                 "Severus Snape", "Nymphadora Tonks", "Dolores Janes Umbridge", "Arthur Weasley", "Bill Weasley",
+                 "Charlie Weasley", "Fred Weasley", "George Weasley", "Ginny Weasley", "Molly Weasley", "Percy Weasley",
+                 "Ron Weasley", "Dobby", "Fluffy", "Hedwig", "Moaning Myrtle", "Aragog", "Grawp"]  # noqa
         for i, name in enumerate(names):
             with reversion.create_revision():
                 reversion.set_user(random.choice(self.profiles))
@@ -68,8 +79,32 @@ class Command(BaseCommand):
                 self.people.append(newPerson)
 
     def setupOrganisations(self):
-        names = ["Acme, inc.", "Widget Corp", "123 Warehousing", "Demo Company", "Smith and Co.", "Foo Bars", "ABC Telecom", "Fake Brothers", "QWERTY Logistics", "Demo, inc.", "Sample Company", "Sample, inc", "Acme Corp", "Allied Biscuit", "Ankh-Sto Associates", "Extensive Enterprise", "Galaxy Corp", "Globo-Chem", "Mr. Sparkle", "Globex Corporation", "LexCorp", "LuthorCorp", "North Central Positronics", "Omni Consimer Products", "Praxis Corporation", "Sombra Corporation", "Sto Plains Holdings", "Tessier-Ashpool", "Wayne Enterprises", "Wentworth Industries", "ZiffCorp", "Bluth Company", "Strickland Propane", "Thatherton Fuels", "Three Waters", "Water and Power", "Western Gas & Electric", "Mammoth Pictures", "Mooby Corp", "Gringotts", "Thrift Bank", "Flowers By Irene", "The Legitimate Businessmens Club", "Osato Chemicals", "Transworld Consortium", "Universal Export", "United Fried Chicken", "Virtucon", "Kumatsu Motors", "Keedsler Motors", "Powell Motors", "Industrial Automation", "Sirius Cybernetics Corporation", "U.S. Robotics and Mechanical Men", "Colonial Movers", "Corellian Engineering Corporation", "Incom Corporation", "General Products", "Leeding Engines Ltd.", "Blammo",  # noqa
-                 "Input, Inc.", "Mainway Toys", "Videlectrix", "Zevo Toys", "Ajax", "Axis Chemical Co.", "Barrytron", "Carrys Candles", "Cogswell Cogs", "Spacely Sprockets", "General Forge and Foundry", "Duff Brewing Company", "Dunder Mifflin", "General Services Corporation", "Monarch Playing Card Co.", "Krustyco", "Initech", "Roboto Industries", "Primatech", "Sonky Rubber Goods", "St. Anky Beer", "Stay Puft Corporation", "Vandelay Industries", "Wernham Hogg", "Gadgetron", "Burleigh and Stronginthearm", "BLAND Corporation", "Nordyne Defense Dynamics", "Petrox Oil Company", "Roxxon", "McMahon and Tate", "Sixty Second Avenue", "Charles Townsend Agency", "Spade and Archer", "Megadodo Publications", "Rouster and Sideways", "C.H. Lavatory and Sons", "Globo Gym American Corp", "The New Firm", "SpringShield", "Compuglobalhypermeganet", "Data Systems", "Gizmonic Institute", "Initrode", "Taggart Transcontinental", "Atlantic Northern", "Niagular", "Plow King", "Big Kahuna Burger", "Big T Burgers and Fries", "Chez Quis", "Chotchkies", "The Frying Dutchman", "Klimpys", "The Krusty Krab", "Monks Diner", "Milliways", "Minuteman Cafe", "Taco Grande", "Tip Top Cafe", "Moes Tavern", "Central Perk", "Chasers"]  # noqa
+        names = ["Acme, inc.", "Widget Corp", "123 Warehousing", "Demo Company", "Smith and Co.", "Foo Bars",
+                 "ABC Telecom", "Fake Brothers", "QWERTY Logistics", "Demo, inc.", "Sample Company", "Sample, inc",
+                 "Acme Corp", "Allied Biscuit", "Ankh-Sto Associates", "Extensive Enterprise", "Galaxy Corp",
+                 "Globo-Chem", "Mr. Sparkle", "Globex Corporation", "LexCorp", "LuthorCorp",
+                 "North Central Positronics", "Omni Consimer Products", "Praxis Corporation", "Sombra Corporation",
+                 "Sto Plains Holdings", "Tessier-Ashpool", "Wayne Enterprises", "Wentworth Industries", "ZiffCorp",
+                 "Bluth Company", "Strickland Propane", "Thatherton Fuels", "Three Waters", "Water and Power",
+                 "Western Gas & Electric", "Mammoth Pictures", "Mooby Corp", "Gringotts", "Thrift Bank",
+                 "Flowers By Irene", "The Legitimate Businessmens Club", "Osato Chemicals", "Transworld Consortium",
+                 "Universal Export", "United Fried Chicken", "Virtucon", "Kumatsu Motors", "Keedsler Motors",
+                 "Powell Motors", "Industrial Automation", "Sirius Cybernetics Corporation",
+                 "U.S. Robotics and Mechanical Men", "Colonial Movers", "Corellian Engineering Corporation",
+                 "Incom Corporation", "General Products", "Leeding Engines Ltd.", "Blammo",  # noqa
+                 "Input, Inc.", "Mainway Toys", "Videlectrix", "Zevo Toys", "Ajax", "Axis Chemical Co.", "Barrytron",
+                 "Carrys Candles", "Cogswell Cogs", "Spacely Sprockets", "General Forge and Foundry",
+                 "Duff Brewing Company", "Dunder Mifflin", "General Services Corporation", "Monarch Playing Card Co.",
+                 "Krustyco", "Initech", "Roboto Industries", "Primatech", "Sonky Rubber Goods", "St. Anky Beer",
+                 "Stay Puft Corporation", "Vandelay Industries", "Wernham Hogg", "Gadgetron",
+                 "Burleigh and Stronginthearm", "BLAND Corporation", "Nordyne Defense Dynamics", "Petrox Oil Company",
+                 "Roxxon", "McMahon and Tate", "Sixty Second Avenue", "Charles Townsend Agency", "Spade and Archer",
+                 "Megadodo Publications", "Rouster and Sideways", "C.H. Lavatory and Sons", "Globo Gym American Corp",
+                 "The New Firm", "SpringShield", "Compuglobalhypermeganet", "Data Systems", "Gizmonic Institute",
+                 "Initrode", "Taggart Transcontinental", "Atlantic Northern", "Niagular", "Plow King",
+                 "Big Kahuna Burger", "Big T Burgers and Fries", "Chez Quis", "Chotchkies", "The Frying Dutchman",
+                 "Klimpys", "The Krusty Krab", "Monks Diner", "Milliways", "Minuteman Cafe", "Taco Grande",
+                 "Tip Top Cafe", "Moes Tavern", "Central Perk", "Chasers"]  # noqa
         for i, name in enumerate(names):
             with reversion.create_revision():
                 reversion.set_user(random.choice(self.profiles))
@@ -93,8 +128,18 @@ class Command(BaseCommand):
                 self.organisations.append(newOrganisation)
 
     def setupVenues(self):
-        names = ["Bear Island", "Crossroads Inn", "Deepwood Motte", "The Dreadfort", "The Eyrie", "Greywater Watch", "The Iron Islands", "Karhold", "Moat Cailin", "Oldstones", "Raventree Hall", "Riverlands", "The Ruby Ford", "Saltpans", "Seagard", "Torrhen's Square", "The Trident", "The Twins", "The Vale of Arryn", "The Whispering Wood", "White Harbor", "Winterfell", "The Arbor", "Ashemark", "Brightwater Keep", "Casterly Rock", "Clegane's Keep", "Dragonstone", "Dorne", "God's Eye", "The Golden Tooth",  # noqa
-                 "Harrenhal", "Highgarden", "Horn Hill", "Fingers", "King's Landing", "Lannisport", "Oldtown", "Rainswood", "Storm's End", "Summerhall", "Sunspear", "Tarth", "Castle Black", "Craster's Keep", "Fist of the First Men", "The Frostfangs", "The Gift", "The Skirling Pass", "The Wall", "Asshai", "Astapor", "Braavos", "The Dothraki Sea", "Lys", "Meereen", "Myr", "Norvos", "Pentos", "Qarth", "Qohor", "The Red Waste", "Tyrosh", "Vaes Dothrak", "Valyria", "Village of the Lhazareen", "Volantis", "Yunkai"]  # noqa
+        names = ["Bear Island", "Crossroads Inn", "Deepwood Motte", "The Dreadfort", "The Eyrie", "Greywater Watch",
+                 "The Iron Islands", "Karhold", "Moat Cailin", "Oldstones", "Raventree Hall", "Riverlands",
+                 "The Ruby Ford", "Saltpans", "Seagard", "Torrhen's Square", "The Trident", "The Twins",
+                 "The Vale of Arryn", "The Whispering Wood", "White Harbor", "Winterfell", "The Arbor", "Ashemark",
+                 "Brightwater Keep", "Casterly Rock", "Clegane's Keep", "Dragonstone", "Dorne", "God's Eye",
+                 "The Golden Tooth",  # noqa
+                 "Harrenhal", "Highgarden", "Horn Hill", "Fingers", "King's Landing", "Lannisport", "Oldtown",
+                 "Rainswood", "Storm's End", "Summerhall", "Sunspear", "Tarth", "Castle Black", "Craster's Keep",
+                 "Fist of the First Men", "The Frostfangs", "The Gift", "The Skirling Pass", "The Wall", "Asshai",
+                 "Astapor", "Braavos", "The Dothraki Sea", "Lys", "Meereen", "Myr", "Norvos", "Pentos", "Qarth",
+                 "Qohor", "The Red Waste", "Tyrosh", "Vaes Dothrak", "Valyria", "Village of the Lhazareen", "Volantis",
+                 "Yunkai"]  # noqa
         for i, name in enumerate(names):
             with reversion.create_revision():
                 reversion.set_user(random.choice(self.profiles))
@@ -139,9 +184,11 @@ class Command(BaseCommand):
             self.finance_group.permissions.add(Permission.objects.get(codename=permId))
 
     def setupGenericProfiles(self):
-        names = ["Clara Oswin Oswald", "Rory Williams", "Amy Pond", "River Song", "Martha Jones", "Donna Noble", "Jack Harkness", "Mickey Smith", "Rose Tyler"]
+        names = ["Clara Oswin Oswald", "Rory Williams", "Amy Pond", "River Song", "Martha Jones", "Donna Noble",
+                 "Jack Harkness", "Mickey Smith", "Rose Tyler"]
         for i, name in enumerate(names):
-            newProfile = models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0], last_name=name.split(" ")[-1],
+            newProfile = models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0],
+                                                       last_name=name.split(" ")[-1],
                                                        email=name.replace(" ", "") + "@example.com",
                                                        initials="".join([j[0].upper() for j in name.split()]))
             if i % 2 == 0:
@@ -151,19 +198,23 @@ class Command(BaseCommand):
             self.profiles.append(newProfile)
 
     def setupUsefulProfiles(self):
-        superUser = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User", initials="SU",
-                                                  email="superuser@example.com", is_superuser=True, is_active=True, is_staff=True)
+        superUser = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User",
+                                                  initials="SU",
+                                                  email="superuser@example.com", is_superuser=True, is_active=True,
+                                                  is_staff=True)
         superUser.set_password('superuser')
         superUser.save()
 
-        financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User", initials="FU",
+        financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User",
+                                                    initials="FU",
                                                     email="financeuser@example.com", is_active=True)
         financeUser.groups.add(self.finance_group)
         financeUser.groups.add(self.keyholder_group)
         financeUser.set_password('finance')
         financeUser.save()
 
-        keyholderUser = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User", initials="KU",
+        keyholderUser = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User",
+                                                      initials="KU",
                                                       email="keyholderuser@example.com", is_active=True)
         keyholderUser.groups.add(self.keyholder_group)
         keyholderUser.set_password('keyholder')
@@ -175,20 +226,32 @@ class Command(BaseCommand):
         basicUser.save()
 
     def setupEvents(self):
-        names = ["Outdoor Concert", "Hall Open Mic Night", "Festival", "Weekend Event", "Magic Show", "Society Ball", "Evening Show", "Talent Show", "Acoustic Evening", "Hire of Things", "SU Event",
-                 "End of Term Show", "Theatre Show", "Outdoor Fun Day", "Summer Carnival", "Open Days", "Magic Show", "Awards Ceremony", "Debating Event", "Club Night", "DJ Evening", "Building Projection", "Choir Concert"]
-        descriptions = ["A brief description of the event", "This event is boring", "Probably wont happen", "Warning: this has lots of kit"]
-        notes = ["The client came into the office at some point", "Who knows if this will happen", "Probably should check this event", "Maybe not happening", "Run away!"]
+        names = ["Outdoor Concert", "Hall Open Mic Night", "Festival", "Weekend Event", "Magic Show", "Society Ball",
+                 "Evening Show", "Talent Show", "Acoustic Evening", "Hire of Things", "SU Event",
+                 "End of Term Show", "Theatre Show", "Outdoor Fun Day", "Summer Carnival", "Open Days", "Magic Show",
+                 "Awards Ceremony", "Debating Event", "Club Night", "DJ Evening", "Building Projection",
+                 "Choir Concert"]
+        descriptions = ["A brief description of the event", "This event is boring", "Probably wont happen",
+                        "Warning: this has lots of kit"]
+        notes = ["The client came into the office at some point", "Who knows if this will happen",
+                 "Probably should check this event", "Maybe not happening", "Run away!"]
 
-        itemOptions = [{'name': 'Speakers', 'description': 'Some really really big speakers \n these are very loud', 'quantity': 2, 'cost': 200.00},
-                       {'name': 'Projector', 'description': 'Some kind of video thinamejig, probably with unnecessary processing for free', 'quantity': 1, 'cost': 500.00},
-                       {'name': 'Lighting Desk', 'description': 'Cannot provide guarentee that it will work', 'quantity': 1, 'cost': 200.52},
-                       {'name': 'Moving lights', 'description': 'Flashy lights, with the copper', 'quantity': 8, 'cost': 50.00},
-                       {'name': 'Microphones', 'description': 'Make loud noise \n you will want speakers with this', 'quantity': 5, 'cost': 0.50},
-                       {'name': 'Sound Mixer Thing', 'description': 'Might be analogue, might be digital', 'quantity': 1, 'cost': 100.00},
-                       {'name': 'Electricity', 'description': 'You need this', 'quantity': 1, 'cost': 200.00},
-                       {'name': 'Crew', 'description': 'Costs nothing, because reasons', 'quantity': 1, 'cost': 0.00},
-                       {'name': 'Loyalty Discount', 'description': 'Have some negative moneys', 'quantity': 1, 'cost': -50.00}]
+        itemOptions = [
+            {'name': 'Speakers', 'description': 'Some really really big speakers \n these are very loud', 'quantity': 2,
+             'cost': 200.00},
+            {'name': 'Projector',
+             'description': 'Some kind of video thinamejig, probably with unnecessary processing for free',
+             'quantity': 1, 'cost': 500.00},
+            {'name': 'Lighting Desk', 'description': 'Cannot provide guarentee that it will work', 'quantity': 1,
+             'cost': 200.52},
+            {'name': 'Moving lights', 'description': 'Flashy lights, with the copper', 'quantity': 8, 'cost': 50.00},
+            {'name': 'Microphones', 'description': 'Make loud noise \n you will want speakers with this', 'quantity': 5,
+             'cost': 0.50},
+            {'name': 'Sound Mixer Thing', 'description': 'Might be analogue, might be digital', 'quantity': 1,
+             'cost': 100.00},
+            {'name': 'Electricity', 'description': 'You need this', 'quantity': 1, 'cost': 200.00},
+            {'name': 'Crew', 'description': 'Costs nothing, because reasons', 'quantity': 1, 'cost': 0.00},
+            {'name': 'Loyalty Discount', 'description': 'Have some negative moneys', 'quantity': 1, 'cost': -50.00}]
 
         dayDelta = -120  # start adding events from 4 months ago
 
@@ -226,7 +289,8 @@ class Command(BaseCommand):
                     newEvent.venue = random.choice(self.venues)
 
                 # Could have any status, equally weighted
-                newEvent.status = random.choice([models.Event.BOOKED, models.Event.CONFIRMED, models.Event.PROVISIONAL, models.Event.CANCELLED])
+                newEvent.status = random.choice(
+                    [models.Event.BOOKED, models.Event.CONFIRMED, models.Event.PROVISIONAL, models.Event.CANCELLED])
 
                 newEvent.dry_hire = (random.randint(0, 7) == 0)  # 1 in 7 are dry hire
 
@@ -257,4 +321,5 @@ class Command(BaseCommand):
                         if newEvent.status is models.Event.CANCELLED:  # void cancelled events
                             newInvoice.void = True
                         elif random.randint(0, 2) > 1:  # 1 in 3 have been paid
-                            models.Payment.objects.create(invoice=newInvoice, amount=newInvoice.balance, date=datetime.date.today())
+                            models.Payment.objects.create(invoice=newInvoice, amount=newInvoice.balance,
+                                                          date=datetime.date.today())

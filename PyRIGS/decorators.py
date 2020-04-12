@@ -8,7 +8,8 @@ from RIGS import models
 
 def get_oembed(login_url, request, oembed_view, kwargs):
     context = {}
-    context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], reverse(oembed_view, kwargs=kwargs))
+    context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'],
+                                                  reverse(oembed_view, kwargs=kwargs))
     context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
     resp = render(request, 'login_redirect.html', context=context)
     return resp
@@ -28,9 +29,11 @@ def has_oembed(oembed_view, login_url=None):
                     return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
                     return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
+
         _checklogin.__doc__ = view_func.__doc__
         _checklogin.__dict__ = view_func.__dict__
         return _checklogin
+
     return _dec
 
 
@@ -60,9 +63,11 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                 resp = render(request, '403.html')
                 resp.status_code = 403
                 return resp
+
         _checklogin.__doc__ = view_func.__doc__
         _checklogin.__dict__ = view_func.__dict__
         return _checklogin
+
     return _dec
 
 
@@ -80,6 +85,7 @@ def api_key_required(function):
     Failed users will be given a 403 error.
     Should only be used for urls which include <api_pk> and <api_key> kwargs
     """
+
     def wrap(request, *args, **kwargs):
 
         userid = kwargs.get('api_pk')
@@ -101,6 +107,7 @@ def api_key_required(function):
         if user_object.api_key != key:
             return error_resp
         return function(request, *args, **kwargs)
+
     return wrap
 
 
@@ -108,6 +115,7 @@ def nottinghamtec_address_required(function):
     """
     Checks that the current user has an email address ending @nottinghamtec.co.uk
     """
+
     def wrap(request, *args, **kwargs):
         # Fail if current user's email address isn't @nottinghamtec.co.uk
         if not request.user.email.endswith('@nottinghamtec.co.uk'):
@@ -115,4 +123,5 @@ def nottinghamtec_address_required(function):
             return error_resp
 
         return function(request, *args, **kwargs)
+
     return wrap

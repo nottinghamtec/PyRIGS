@@ -33,7 +33,8 @@ class CheckApprovedForm(AuthenticationForm):
         if user.is_approved or user.is_superuser:
             return AuthenticationForm.confirm_login_allowed(self, user)
         else:
-            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
+            raise forms.ValidationError(
+                "Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
 
 
 # Embedded Login form - remove the autofocus

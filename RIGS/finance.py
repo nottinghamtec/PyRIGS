@@ -16,6 +16,7 @@ from django.db.models import Q
 from RIGS import models
 
 from django import forms
+
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 
 
@@ -81,7 +82,8 @@ class InvoicePrint(generic.View):
         escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (invoice.pk, invoice.event.pk, escapedEventName)
+        response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (
+        invoice.pk, invoice.event.pk, escapedEventName)
         response.write(pdfData)
         return response
 
@@ -174,8 +176,8 @@ class InvoiceWaiting(generic.ListView):
         # @todo find a way to select items
         events = self.model.objects.filter(
             (
-                Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
-                Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
+                    Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
+                    Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
             ) & Q(invoice__isnull=True) &  # Has not already been invoiced
             Q(is_rig=True)  # Is a rig (not non-rig)
 

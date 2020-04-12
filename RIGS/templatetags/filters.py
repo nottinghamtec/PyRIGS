@@ -91,7 +91,6 @@ register.inclusion_tag('pagination.html', takes_context=True)(paginator)
 
 @register.simple_tag
 def url_replace(request, field, value):
-
     dict_ = request.GET.copy()
 
     dict_[field] = value
@@ -101,7 +100,6 @@ def url_replace(request, field, value):
 
 @register.simple_tag
 def orderby(request, field, attr):
-
     dict_ = request.GET.copy()
 
     if dict_.__contains__(field) and dict_[field] == attr:

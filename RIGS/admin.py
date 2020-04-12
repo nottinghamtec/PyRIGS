@@ -22,6 +22,7 @@ admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice)
 admin.site.register(models.Payment)
 
+
 def approve_user(modeladmin, request, queryset):
     queryset.update(is_approved=True)
 

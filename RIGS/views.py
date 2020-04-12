@@ -16,7 +16,6 @@ import operator
 from registration.views import RegistrationView
 from django.views.decorators.csrf import csrf_exempt
 
-
 from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
@@ -37,6 +36,7 @@ class Index(generic.TemplateView):
 
 class SearchHelp(generic.TemplateView):
     template_name = 'search_help.html'
+
 
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
@@ -60,7 +60,8 @@ class PersonList(generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('query', "")
 
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
+            phone__startswith=q) | Q(phone__endswith=q)
 
         # try and parse an int
         try:
@@ -127,7 +128,8 @@ class OrganisationList(generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('query', "")
 
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
+            phone__startswith=q) | Q(phone__endswith=q)
 
         # try and parse an int
         try:
@@ -194,7 +196,8 @@ class VenueList(generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('query', "")
 
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
+            phone__startswith=q) | Q(phone__endswith=q)
 
         # try and parse an int
         try:

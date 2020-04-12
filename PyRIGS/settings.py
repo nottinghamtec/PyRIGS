@@ -26,7 +26,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
-
 STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
@@ -45,7 +44,8 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'),
+          ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
 if DEBUG:
     ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
@@ -167,8 +167,10 @@ LOGOUT_URL = '/user/logout/'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY',
+                                      "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY',
+                                       "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
 NOCAPTCHA = True
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

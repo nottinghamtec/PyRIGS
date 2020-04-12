@@ -31,8 +31,10 @@ class FormPage(BasePage):
     _errors_selector = (By.CLASS_NAME, "alert-danger")
 
     def remove_all_required(self):
-        self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
-        self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+        self.driver.execute_script(
+            "Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+        self.driver.execute_script(
+            "Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
 
     @property
     def errors(self):

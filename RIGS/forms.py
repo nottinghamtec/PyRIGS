@@ -16,6 +16,7 @@ forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
 forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
+
 # Events Shit
 class EventForm(forms.ModelForm):
     datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)
@@ -92,8 +93,11 @@ class EventForm(forms.ModelForm):
         return item
 
     def clean(self):
-        if self.cleaned_data.get("is_rig") and not (self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
-            raise forms.ValidationError('You haven\'t provided any client contact details. Please add a person or organisation.', code='contact')
+        if self.cleaned_data.get("is_rig") and not (
+                self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
+            raise forms.ValidationError(
+                'You haven\'t provided any client contact details. Please add a person or organisation.',
+                code='contact')
         return super(EventForm, self).clean()
 
     def save(self, commit=True):

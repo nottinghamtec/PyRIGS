@@ -16,10 +16,10 @@ import operator
 from registration.views import RegistrationView
 from django.views.decorators.csrf import csrf_exempt
 
-
 from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
+
 
 # This view should be exempt from requiring CSRF token.
 # Then we can check for it and show a nice error

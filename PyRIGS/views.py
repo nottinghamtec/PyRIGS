@@ -16,10 +16,10 @@ import operator
 from registration.views import RegistrationView
 from django.views.decorators.csrf import csrf_exempt
 
-
 from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
+
 
 class SecureAPIRequest(generic.View):
     models = {

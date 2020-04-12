@@ -532,7 +532,8 @@ class EventTest(LiveServerTestCase):
         self.assertFalse(hasattr(newEvent, 'authorised'))
 
         self.assertNotIn("N%05d" % testEvent.pk, self.browser.find_element_by_xpath('//h1').text)
-        self.assertNotIn("Event data duplicated but not yet saved", self.browser.find_element_by_id('content').text)  # Check info message not visible
+        self.assertNotIn("Event data duplicated but not yet saved",
+                         self.browser.find_element_by_id('content').text)  # Check info message not visible
 
         # Check the new items are visible
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -546,7 +547,8 @@ class EventTest(LiveServerTestCase):
         # Check the PO hasn't carried through
         self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
-        self.assertIn("N%05d" % testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        self.assertIn("N%05d" % testEvent.pk,
+                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
         self.browser.get(self.live_server_url + '/event/' + str(testEvent.pk))  # Go back to the old event
 
@@ -557,7 +559,8 @@ class EventTest(LiveServerTestCase):
         # Check the PO remains on the old event
         self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
 
-        self.assertNotIn("N%05d" % testEvent.pk, infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        self.assertNotIn("N%05d" % testEvent.pk,
+                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
         # Check the items are as they were
         table = self.browser.find_element_by_id('item-table')  # ID number is known, see above
@@ -587,7 +590,7 @@ class EventTest(LiveServerTestCase):
         # Set person
         person = models.Person.objects.create(name='Date Validation Person', email='datevalidation@functional.test')
         person_select = form.find_element_by_xpath(
-                '//button[@data-id="id_person"]')
+            '//button[@data-id="id_person"]')
         person_select.send_keys(person.name)
         person_dropped = form.find_element_by_xpath(
             '//ul[contains(@class, "dropdown-menu")]//span[contains(text(), "%s")]' % person.name)
@@ -701,7 +704,7 @@ class EventTest(LiveServerTestCase):
         # Set person
         person = models.Person.objects.create(name='Rig Non-Rig Person', email='rignonrig@functional.test')
         person_select = form.find_element_by_xpath(
-                '//button[@data-id="id_person"]')
+            '//button[@data-id="id_person"]')
         person_select.send_keys(person.name)
         person_dropped = form.find_element_by_xpath(
             '//ul[contains(@class, "dropdown-menu")]//span[contains(text(), "%s")]' % person.name)
@@ -768,8 +771,10 @@ class EventTest(LiveServerTestCase):
         organisationPanel = self.browser.find_element_by_xpath('//div[contains(text(), "Contact Details")]/..')
 
     def testEventEdit(self):
-        person = models.Person.objects.create(name="Event Edit Person", email="eventdetail@person.tests.rigs", phone="123 123")
-        organisation = models.Organisation.objects.create(name="Event Edit Organisation", email="eventdetail@organisation.tests.rigs", phone="123 456")
+        person = models.Person.objects.create(name="Event Edit Person", email="eventdetail@person.tests.rigs",
+                                              phone="123 123")
+        organisation = models.Organisation.objects.create(name="Event Edit Organisation",
+                                                          email="eventdetail@organisation.tests.rigs", phone="123 456")
         venue = models.Venue.objects.create(name="Event Detail Venue")
 
         eventData = {
@@ -979,8 +984,11 @@ class IcalTest(LiveServerTestCase):
                 self.assertNotContains(response, "TE E" + str(test) + " ")
 
         # Check that times have been included correctly
-        self.assertContains(response, specialEvent.start_date.strftime('%Y%m%d') + 'T' + specialEvent.start_time.strftime('%H%M%S'))
-        self.assertContains(response, specialEvent.end_date.strftime('%Y%m%d') + 'T' + specialEvent.end_time.strftime('%H%M%S'))
+        self.assertContains(response,
+                            specialEvent.start_date.strftime('%Y%m%d') + 'T' + specialEvent.start_time.strftime(
+                                '%H%M%S'))
+        self.assertContains(response,
+                            specialEvent.end_date.strftime('%Y%m%d') + 'T' + specialEvent.end_time.strftime('%H%M%S'))
 
         # Only dry hires
         self.browser.find_element_by_xpath("//input[@value='rig']").click()
@@ -1242,7 +1250,8 @@ class SearchTest(LiveServerTestCase):
         os.environ['RECAPTCHA_TESTING'] = 'True'
 
         models.Event.objects.create(name="Right Event", status=models.Event.PROVISIONAL,
-                                    start_date=date.today(), description="This event is searched for endlessly over and over")
+                                    start_date=date.today(),
+                                    description="This event is searched for endlessly over and over")
         models.Event.objects.create(name="Wrong Event", status=models.Event.PROVISIONAL, start_date=date.today(),
                                     description="This one should never be found.")
 
@@ -1266,6 +1275,7 @@ class SearchTest(LiveServerTestCase):
         search_box.send_keys('Right')
         search_box.send_keys(Keys.ENTER)
 
-        event_name = self.browser.find_element_by_xpath('//*[@id="content"]/div[1]/div[4]/div/div/table/tbody/tr[1]/td[3]/h4').text
+        event_name = self.browser.find_element_by_xpath(
+            '//*[@id="content"]/div[1]/div[4]/div/div/table/tbody/tr[1]/td[3]/h4').text
         self.assertIn('Right', event_name)
         self.assertNotIn('Wrong', event_name)

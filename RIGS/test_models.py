@@ -278,14 +278,17 @@ class EventTestCase(TestCase):
             # basic checks
             manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
             manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
-            manager.create(name='TE IB4', start_date='2016-01-04', access_at=self.create_datetime(2016, 0o1, 0o3, 00, 00)),
-            manager.create(name='TE IB5', start_date='2016-01-04', meet_at=self.create_datetime(2016, 0o1, 0o2, 00, 00)),
+            manager.create(name='TE IB4', start_date='2016-01-04',
+                           access_at=self.create_datetime(2016, 0o1, 0o3, 00, 00)),
+            manager.create(name='TE IB5', start_date='2016-01-04',
+                           meet_at=self.create_datetime(2016, 0o1, 0o2, 00, 00)),
 
             # negative check
             manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),
         ]
 
-        in_bounds = manager.events_in_bounds(self.create_datetime(2016, 1, 2, 0, 0), self.create_datetime(2016, 1, 3, 0, 0))
+        in_bounds = manager.events_in_bounds(self.create_datetime(2016, 1, 2, 0, 0),
+                                             self.create_datetime(2016, 1, 3, 0, 0))
         self.assertIn(events[0], in_bounds)
         self.assertIn(events[1], in_bounds)
         self.assertIn(events[2], in_bounds)
@@ -389,7 +392,8 @@ class EventAuthorisationTestCase(TestCase):
     def test_last_edited(self):
         with reversion.create_revision():
             auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
-                                                            name="Test Auth", amount=self.event.total, sent_by=self.profile)
+                                                            name="Test Auth", amount=self.event.total,
+                                                            sent_by=self.profile)
         self.assertIsNotNone(auth.last_edited_at)
 
 
@@ -442,7 +446,8 @@ class RIGSVersionTestCase(TestCase):
         self.assertEqual(len(changes.field_changes), 1)
 
     def test_manager(self):
-        objs = versioning.RIGSVersion.objects.get_for_multiple_models([models.Event, models.Person, models.Organisation])
+        objs = versioning.RIGSVersion.objects.get_for_multiple_models(
+            [models.Event, models.Person, models.Organisation])
         self.assertEqual(len(objs), 4)
 
     def test_text_field_types(self):
