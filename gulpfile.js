@@ -21,7 +21,7 @@ function styles(done) {
                     'node_modules/fullcalendar/dist/fullcalendar.print.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/autocompleter/autocomplete.css',
+                    //'node_modules/autocompleter/autocomplete.css',
                     'node_modules/@activix/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css'])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
@@ -34,6 +34,9 @@ function styles(done) {
 function scripts() {
     return gulp.src(['RIGS/static/js/src/**/*.js',
                     'node_modules/jquery/dist/jquery.js',
+                    /* JQuery Plugins */
+                    'node_modules/jquery-ui-dist/jquery-ui.js',
+
                     'node_modules/popper.js/dist/umd/popper.js',
                     'node_modules/raven-js/dist/raven.js', //TODO Upgrade to Sentry
                     /* Bootstrap Plugins */
@@ -51,7 +54,7 @@ function scripts() {
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
                     'node_modules/konami/konami.js',
-                    'node_modules/autocompleter/autocomplete.js',
+                    //'node_modules/autocompleter/autocomplete.js',
                     'node_modules/@activix/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js'])
     .pipe(flatten())
     .pipe(terser())

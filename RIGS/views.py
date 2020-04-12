@@ -324,7 +324,7 @@ class SecureAPIRequest(generic.View):
             return HttpResponse(data, content_type="application/" + format)
 
         # Supply data for autocomplete ajax request in json form
-        term = request.GET.get('term', None)
+        term = request.GET.get('q', None)
         if term:
             if fields is None:  # Default to just name
                 fields = ['name']
@@ -346,7 +346,7 @@ class SecureAPIRequest(generic.View):
                 data = {
                     'pk': o.pk,
                     'value': o.pk,
-                    'label': o.name,
+                    'text': o.name,
                 }
                 try:  # See if there is a valid update URL
                     data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
