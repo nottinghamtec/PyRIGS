@@ -1,5 +1,5 @@
 from RIGS.models import Profile
-from RIGS.forms import ProfileRegistrationFormUniqueEmail
+from users.forms import ProfileRegistrationFormUniqueEmail
 from registration.signals import user_registered
 
 

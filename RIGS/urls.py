@@ -125,12 +125,6 @@ urlpatterns = [
     url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
         name="ics_calendar"),
 
-    # API
-    path('api/<str:model>/', login_required(views.SecureAPIRequest.as_view()),
-         name="api_secure"),
-    path('api/<str:model>/<int:pk>/', login_required(views.SecureAPIRequest.as_view()),
-         name="api_secure"),
-
     # Risk assessment API
     path('log_risk_assessment/', rigboard.LogRiskAssessment.as_view(), name='log_risk_assessment'),
 

@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'versioning',
+    'users',
     'RIGS',
     'assets',
 

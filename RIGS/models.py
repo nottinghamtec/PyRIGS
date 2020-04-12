@@ -20,7 +20,6 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse_lazy
 
 
-# Create your models here.
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, null=True, blank=True)

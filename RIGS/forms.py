@@ -16,54 +16,6 @@ forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
 forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
-# Registration
-
-
-class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
-    captcha = ReCaptchaField()
-
-    class Meta:
-        model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials')
-
-    def clean_initials(self):
-        """
-        Validate that the supplied initials are unique.
-        """
-        if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
-            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
-        return self.cleaned_data['initials']
-
-
-class CheckApprovedForm(AuthenticationForm):
-    def confirm_login_allowed(self, user):
-        if user.is_approved or user.is_superuser:
-            return AuthenticationForm.confirm_login_allowed(self, user)
-        else:
-            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
-
-
-# Embedded Login form - remove the autofocus
-class EmbeddedAuthenticationForm(CheckApprovedForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.pop('autofocus', None)
-
-
-class PasswordReset(PasswordResetForm):
-    captcha = ReCaptchaField(label='Captcha')
-
-
-class ProfileCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = models.Profile
-
-
-class ProfileChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = models.Profile
-
-
 # Events Shit
 class EventForm(forms.ModelForm):
     datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)

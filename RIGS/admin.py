@@ -1,5 +1,6 @@
 from django.contrib import admin
 from RIGS import models, forms
+from users import forms as user_forms
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 from reversion.admin import VersionAdmin
@@ -20,7 +21,6 @@ admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice)
 admin.site.register(models.Payment)
-
 
 def approve_user(modeladmin, request, queryset):
     queryset.update(is_approved=True)
@@ -48,8 +48,8 @@ class ProfileAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2'),
         }),
     )
-    form = forms.ProfileChangeForm
-    add_form = forms.ProfileCreationForm
+    form = user_forms.ProfileChangeForm
+    add_form = user_forms.ProfileCreationForm
     actions = [approve_user]
 
 
