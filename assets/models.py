@@ -63,19 +63,23 @@ class Connector(models.Model):
         return self.description
 
 
+# Things are nullable that shouldn't be because I didn't properly fix the data structure when moving this to its own model...
 class CableType(models.Model):
     class Meta:
         ordering = ['plug', 'socket', '-circuits']
 
-    circuits = models.IntegerField(blank=True, null=True)
-    cores = models.IntegerField(blank=True, null=True)
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                             related_name='plug', blank=True, null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                               related_name='socket', blank=True, null=True)
+    circuits = models.IntegerField(default=1)
+    cores = models.IntegerField(default=3)
+    plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                             related_name='plug', null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                               related_name='socket', null=True)
 
     def __str__(self):
-        return "%s → %s" % (self.plug.description, self.socket.description)
+        if self.plug and self.socket:
+            return "%s → %s" % (self.plug.description, self.socket.description)
+        else:
+            return "Unknown"
 
 
 @reversion.register
