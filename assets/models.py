@@ -9,7 +9,7 @@ from django.dispatch.dispatcher import receiver
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import RevisionMixin, Profile
+from RIGS.models import RevisionMixin
 
 
 class AssetCategory(models.Model):
@@ -63,19 +63,23 @@ class Connector(models.Model):
         return self.description
 
 
+# Things are nullable that shouldn't be because I didn't properly fix the data structure when moving this to its own model...
 class CableType(models.Model):
     class Meta:
         ordering = ['plug', 'socket', '-circuits']
 
-    circuits = models.IntegerField(blank=True, null=True)
-    cores = models.IntegerField(blank=True, null=True)
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                             related_name='plug', blank=True, null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                               related_name='socket', blank=True, null=True)
+    circuits = models.IntegerField(default=1)
+    cores = models.IntegerField(default=3)
+    plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                             related_name='plug', null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                               related_name='socket', null=True)
 
     def __str__(self):
-        return "%s → %s" % (self.plug.description, self.socket.description)
+        if self.plug and self.socket:
+            return "%s → %s" % (self.plug.description, self.socket.description)
+        else:
+            return "Unknown"
 
 
 @reversion.register
@@ -99,12 +103,6 @@ class Asset(models.Model, RevisionMixin):
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     comments = models.TextField(blank=True)
-    # TODO Remove
-    next_sched_maint = models.DateField(blank=True, null=True)
-
-    # Audit
-    last_audited_at = models.DateTimeField(blank=True, null=True)
-    last_audited_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='audited_by', blank=True, null=True)
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
@@ -112,7 +110,7 @@ class Asset(models.Model, RevisionMixin):
     length = models.DecimalField(decimal_places=1, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
-                              blank=True, null=True, help_text='mm²')
+                              blank=True, null=True, help_text='mm^2')
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
