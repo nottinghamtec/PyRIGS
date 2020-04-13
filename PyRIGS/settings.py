@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 import raven
 import secrets
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -44,12 +45,11 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = (
-    ('Tom Price', 'tomtom5152@gmail.com')
-)
+ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+if DEBUG:
+    ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -168,6 +168,8 @@ RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', "6LeIxAcTAAAAAJcZV
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
 NOCAPTCHA = True
 
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
 # Email
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
@@ -181,6 +183,8 @@ if not DEBUG or EMAILER_TEST:
     DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_COOLDOWN = datetime.timedelta(minutes=15)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/

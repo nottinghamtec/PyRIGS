@@ -1,0 +1,9 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+    <p>Hi {{ to_name|default_if_none:"Administrator" }},</p>
+
+    <p>{{ number_of_users|default_if_none:"Some" }} new users are awaiting administrator approval on RIGS. Click <a href="{{ request.scheme }}://{{ request.get_host }}{{ link_suffix }}">here</a> to  approve them.</p>
+
+    <p>TEC PA &amp; Lighting</p>
+{% endblock %}

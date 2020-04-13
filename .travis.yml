@@ -12,14 +12,14 @@ install:
   - export PATH=$PATH:$(pwd)
   - chmod +x chromedriver
   - pip install -r requirements.txt
-  - pip install coveralls codeclimate-test-reporter pep8
+  - pip install coveralls codeclimate-test-reporter pycodestyle
 
 before_script:
   - export PATH=$PATH:/usr/lib/chromium-browser/
   - python manage.py collectstatic --noinput
 
 script:
-  - pep8 . --exclude=migrations,importer*
+  - pycodestyle . --exclude=migrations,importer*
   - python manage.py check
   - python manage.py makemigrations --check --dry-run
   - coverage run manage.py test --verbosity=2

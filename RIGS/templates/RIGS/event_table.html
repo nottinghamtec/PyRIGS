@@ -33,7 +33,7 @@
                 </td>
                 <td>
                     <h4>
-                        <a {% if perms.RIGS.view_event %}href="{% url 'event_detail' event.pk %}" {% endif %}>
+                        <a href="{% url 'event_detail' event.pk %}">
                             {{ event.name }}
                         </a>
                         {% if event.venue %}

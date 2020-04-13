@@ -3,6 +3,7 @@ from django.http.response import HttpResponseRedirect
 from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
+from django.contrib.auth.views import LoginView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core import serializers
@@ -34,28 +35,19 @@ class Index(generic.TemplateView):
         return context
 
 
-def login(request, **kwargs):
-    if request.user.is_authenticated:
-        next = request.GET.get('next', '/')
-        return HttpResponseRedirect(next)
-    else:
-        from django.contrib.auth.views import login
-
-        return login(request)
+class SearchHelp(generic.TemplateView):
+    template_name = 'RIGS/search_help.html'
 
 
 # This view should be exempt from requiring CSRF token.
 # Then we can check for it and show a nice error
 # Don't worry, django.contrib.auth.views.login will
 # check for it before logging  the user in
-@csrf_exempt
-def login_embed(request, **kwargs):
-    if request.user.is_authenticated:
-        next = request.GET.get('next', '/')
-        return HttpResponseRedirect(next)
-    else:
-        from django.contrib.auth.views import login
+class LoginEmbed(LoginView):
+    template_name = 'registration/login_embed.html'
 
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
         if request.method == "POST":
             csrf_cookie = request.COOKIES.get('csrftoken', None)
 
@@ -63,7 +55,7 @@ def login_embed(request, **kwargs):
                 messages.warning(request, 'Cookies do not seem to be enabled. Try logging in using a new tab.')
                 request.method = 'GET'  # Render the page without trying to login
 
-        return login(request, template_name="registration/login_embed.html", authentication_form=forms.EmbeddedAuthenticationForm)
+        return super().dispatch(request, *args, **kwargs)
 
 
 """
@@ -86,11 +78,20 @@ class PersonList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(email__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', None)
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', 'name')
         if orderBy is not None:
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -140,11 +141,20 @@ class OrganisationList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', "")
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -194,11 +204,20 @@ class VenueList(generic.ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
-        if len(q) >= 3:
-            object_list = self.model.objects.filter(Q(name__icontains=q) | Q(address__icontains=q))
-        else:
-            object_list = self.model.objects.all()
-        orderBy = self.request.GET.get('orderBy', "")
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', "name")
         if orderBy is not "":
             object_list = object_list.order_by(orderBy)
         return object_list
@@ -392,7 +411,3 @@ class ResetApiKey(generic.RedirectView):
         self.request.user.save()
 
         return reverse_lazy('profile_detail')
-
-
-class PasswordResetDisabled(generic.TemplateView):
-    template_name = "RIGS/password_reset_disable.html"
