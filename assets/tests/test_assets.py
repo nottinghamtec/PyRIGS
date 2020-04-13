@@ -98,6 +98,7 @@ class TestAssetForm(AutoLoginTest):
         self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
+        self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -154,12 +155,10 @@ class TestAssetForm(AutoLoginTest):
         self.page.is_cable = True
 
         self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
-        self.page.plug = "IEC"
+        self.page.cable_type = "IEC → IEC"
         self.page.socket = "IEC"
         self.page.length = 10
         self.page.csa = "1.5"
-        self.page.circuits = 1
-        self.page.cores = 3
 
         self.page.submit()
         self.assertTrue(self.page.success)
@@ -375,7 +374,8 @@ class TestFormValidation(TestCase):
         cls.status = models.AssetStatus.objects.create(name="Broken", should_show=True)
         cls.asset = models.Asset.objects.create(asset_id="9999", description="The Office", status=cls.status, category=cls.category, date_acquired=datetime.date(2018, 6, 15))
         cls.connector = models.Connector.objects.create(description="16A IEC", current_rating=16, voltage_rating=240, num_pins=3)
-        cls.cable_asset = models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=cls.status, category=cls.category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, plug=cls.connector, socket=cls.connector, length=10, csa="1.5", circuits=1, cores=3)
+        cls.cable_type = models.CableType.objects.create(circuits=11, cores=3, plug=cls.connector, socket=cls.connector)
+        cls.cable_asset = models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=cls.status, category=cls.category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, cable_type=cls.cable_type, length=10, csa="1.5")
 
     def setUp(self):
         self.profile.set_password('testuser')
@@ -399,12 +399,9 @@ class TestFormValidation(TestCase):
         response = self.client.post(url, {'asset_id': 'X$%A', 'is_cable': True})
         self.assertFormError(response, 'form', 'asset_id', 'An Asset ID can only consist of letters and numbers, with a final number')
 
-        self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
-        self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        self.assertFormError(response, 'form', 'cable_type', 'A cable must have a type')
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
     # Given that validation is done at model level it *shouldn't* need retesting...gonna do it anyway!
     def test_asset_edit(self):
@@ -422,24 +419,19 @@ class TestFormValidation(TestCase):
     def test_cable_edit(self):
         url = reverse('asset_update', kwargs={'pk': self.cable_asset.asset_id})
         # TODO Why do I have to send is_cable=True here?
-        response = self.client.post(url, {'is_cable': True, 'length': -3, 'csa': -3, 'circuits': -4, 'cores': -8})
+        response = self.client.post(url, {'is_cable': True, 'length': -3, 'csa': -3})
 
-        # Can't figure out how to select the 'none' option...
-        # self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
-        # self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        # TODO Can't figure out how to select the 'none' option...
+        # self.assertFormError(response, 'form', 'cable_type', 'A cable must have a type')
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
     def test_asset_duplicate(self):
         url = reverse('asset_duplicate', kwargs={'pk': self.cable_asset.asset_id})
-        response = self.client.post(url, {'is_cable': True, 'length': 0, 'csa': 0, 'circuits': 0, 'cores': 0})
+        response = self.client.post(url, {'is_cable': True, 'length': 0, 'csa': 0})
 
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
 
 class TestSampleDataGenerator(TestCase):
