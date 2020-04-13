@@ -14,6 +14,7 @@ from RIGS import versioning
 
 import simplejson
 import datetime
+from django.utils import timezone
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -202,7 +203,7 @@ class AssetAudit(AssetEdit):
         # TODO For some reason this doesn't stick when done in form_valid??
         asset = self.get_object()
         asset.last_audited_by = self.request.user
-        asset.last_audited_at = datetime.datetime.now()
+        asset.last_audited_at = timezone.now()
         asset.save()
         return super().get_success_url()
 

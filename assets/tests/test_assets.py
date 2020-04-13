@@ -15,6 +15,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from RIGS.test_functional import animation_is_finished
 import datetime
+from django.utils import timezone
 
 
 class TestAssetList(AutoLoginTest):
@@ -299,9 +300,9 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(audited.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
-        self.assertEqual(datetime.datetime.now().date(), audited.last_audited_at.date())
-        self.assertEqual(datetime.datetime.now().hour, audited.last_audited_at.hour)
-        self.assertEqual(datetime.datetime.now().minute, audited.last_audited_at.minute)
+        self.assertEqual(timezone.now().date(), audited.last_audited_at.date())
+        self.assertEqual(timezone.now().hour, audited.last_audited_at.hour)
+        self.assertEqual(timezone.now().minute, audited.last_audited_at.minute)
         # Check we've removed it from the 'needing audit' list
         self.assertNotIn(asset_id, self.page.assets)
 
