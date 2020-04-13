@@ -92,6 +92,9 @@ class Command(BaseCommand):
         suppliers = models.Supplier.objects.all()
         connectors = models.Connector.objects.all()
 
+        for i in range(len(connectors)):
+            models.CableType.objects.create(plug=random.choice(connectors), socket=random.choice(connectors), circuits=random.choice(circuits), cores=random.choice(cores))
+
         for i in range(100):
             asset = models.Asset(
                 asset_id='{}'.format(models.Asset.get_available_asset_id()),
@@ -101,12 +104,9 @@ class Command(BaseCommand):
                 date_acquired=timezone.now().date(),
 
                 is_cable=True,
-                plug=random.choice(connectors),
-                socket=random.choice(connectors),
+                cable_type=random.choice(models.CableType.objects.all()),
                 csa=random.choice(csas),
                 length=random.choice(lengths),
-                circuits=random.choice(circuits),
-                cores=random.choice(circuits)
             )
 
             if i % 5 == 0:

@@ -286,3 +286,45 @@ class ActivityTable(versioning.ActivityTable):
         versions = versioning.RIGSVersion.objects.get_for_multiple_models(
             [models.Asset, models.Supplier])
         return versions
+
+
+class CableTypeList(generic.ListView):
+    model = models.CableType
+    template_name = 'cable_type_list.html'
+    paginate_by = 40
+    # ordering = ['__str__']
+
+
+class CableTypeDetail(generic.DetailView):
+    model = models.CableType
+    template_name = 'cable_type_form.html'
+
+
+class CableTypeCreate(generic.CreateView):
+    model = models.CableType
+    template_name = "cable_type_form.html"
+    form_class = forms.CableTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeCreate, self).get_context_data(**kwargs)
+        context["create"] = True
+
+        return context
+
+    def get_success_url(self):
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})
+
+
+class CableTypeUpdate(generic.UpdateView):
+    model = models.CableType
+    template_name = "cable_type_form.html"
+    form_class = forms.CableTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeUpdate, self).get_context_data(**kwargs)
+        context["edit"] = True
+
+        return context
+
+    def get_success_url(self):
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})

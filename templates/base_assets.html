@@ -10,29 +10,31 @@
 {% endblock %}
 
 {% block titleelements %}
-    {# % if perms.assets.view_asset % #}
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assets<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="{% url 'asset_list' %}"><span class="glyphicon glyphicon-list"></span> List Assets</a></li>
-                {% if perms.assets.add_asset %}
-                    <li><a href="{% url 'asset_create' %}"><span class="glyphicon glyphicon-plus"></span> Create Asset</a></li>
-                {% endif %}
-            </ul>
-        </li>
-    {# % endif % #}
-    {# % if perms.assets.view_supplier % #}
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Suppliers<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="{% url 'supplier_list' %}"><span class="glyphicon glyphicon-list"></span>
-                    List Suppliers</a></li>
-                {% if perms.assets.add_supplier %}
-                    <li><a href="{% url 'supplier_create' %}"><span class="glyphicon glyphicon-plus"></span> Create Supplier</a></li>
-                {% endif %}
-            </ul>
-        </li>
-    {# % endif % #}
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Assets<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'asset_list' %}"><span class="glyphicon glyphicon-list"></span> List Assets</a></li>
+            {% if perms.assets.add_asset %}
+                <li><a href="{% url 'asset_create' %}"><span class="glyphicon glyphicon-plus"></span> Create Asset</a></li>
+            {% endif %}
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'cable_type_list' %}"><span class="glyphicon glyphicon-list"></span>
+                List Cable Types</a></li>
+            {% if perms.assets.add_cable_type %}
+                <li><a href="{% url 'cable_type_create' %}"><span class="glyphicon glyphicon-plus"></span> Create Cable Type</a></li>
+            {% endif %}
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Suppliers<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'supplier_list' %}"><span class="glyphicon glyphicon-list"></span>
+                List Suppliers</a></li>
+            {% if perms.assets.add_supplier %}
+                <li><a href="{% url 'supplier_create' %}"><span class="glyphicon glyphicon-plus"></span> Create Supplier</a></li>
+            {% endif %}
+        </ul>
+    </li>
     {% if perms.assets.view_asset %}
         <li><a href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
         <li><a href="{% url 'asset_audit_list' %}">Audit</a></li>

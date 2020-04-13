@@ -82,12 +82,9 @@ class AssetForm(FormPage):
         'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
         'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
 
-        'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
-        'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),
+        'cable_type': (regions.SingleSelectPicker, (By.ID, 'id_cable_type')),
         'length': (regions.TextBox, (By.ID, 'id_length')),
         'csa': (regions.TextBox, (By.ID, 'id_csa')),
-        'circuits': (regions.TextBox, (By.ID, 'id_circuits')),
-        'cores': (regions.TextBox, (By.ID, 'id_cores'))
     }
 
     @property
