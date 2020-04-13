@@ -9,7 +9,7 @@ from django.dispatch.dispatcher import receiver
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import RevisionMixin
+from RIGS.models import RevisionMixin, Profile
 
 
 class AssetCategory(models.Model):
@@ -104,13 +104,17 @@ class Asset(models.Model, RevisionMixin):
     salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     comments = models.TextField(blank=True)
 
+    # Audit
+    last_audited_at = models.DateTimeField(blank=True, null=True)
+    last_audited_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='audited_by', blank=True, null=True)
+
     # Cable assets
     is_cable = models.BooleanField(default=False)
     cable_type = models.ForeignKey(to=CableType, blank=True, null=True, on_delete=models.SET_NULL)
     length = models.DecimalField(decimal_places=1, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
-                              blank=True, null=True, help_text='mm^2')
+                              blank=True, null=True, help_text='mm²')
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
