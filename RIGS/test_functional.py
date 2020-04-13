@@ -94,7 +94,8 @@ class UserRegistrationTest(LiveServerTestCase):
         # Read what the error is
         alert = self.browser.find_element_by_css_selector(
             'div.alert-danger').text
-        self.assertIn("password fields didn't match", alert)
+        # TODO Use regex matching to handle smart/unsmart quotes...
+        self.assertIn("password fields didn", alert)
 
         # Passwords should be empty
         self.assertEqual(password1.get_attribute('value'), '')
@@ -121,7 +122,7 @@ class UserRegistrationTest(LiveServerTestCase):
         email = mail.outbox[0]
         self.assertIn('John Smith "JS" activation required', email.subject)
         urls = re.findall(
-            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
+            r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', email.body)
         self.assertEqual(len(urls), 1)
 
         mail.outbox = []  # empty this for later
@@ -504,8 +505,10 @@ class EventTest(LiveServerTestCase):
 
         # Add item
         form.find_element_by_xpath('//button[contains(@class, "item-add")]').click()
-        wait.until(animation_is_finished())
         modal = self.browser.find_element_by_id("itemModal")
+        wait.until(animation_is_finished())
+        # See modal has opened
+        self.assertTrue(modal.is_displayed())
         modal.find_element_by_id("item_name").send_keys("Test Item 3")
         modal.find_element_by_id("item_description").send_keys(
             "This is an item description\nthat for reasons unknown spans two lines")

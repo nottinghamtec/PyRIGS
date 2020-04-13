@@ -253,7 +253,7 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
     def test_supplier_edit(self):
         self.page = pages.SupplierEdit(self.driver, self.live_server_url, supplier_id=self.supplier.pk).open()
 
-        self.assertEquals("Fullmetal Heavy Industry", self.page.name)
+        self.assertEqual("Fullmetal Heavy Industry", self.page.name)
         new_name = "Cyberdyne Systems"
         self.page.name = new_name
         self.page.submit()

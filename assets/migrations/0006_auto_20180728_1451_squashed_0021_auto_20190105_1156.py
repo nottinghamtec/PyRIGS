@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='asset',
             name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=None, related_name='asset_parent', to='assets.Asset'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='asset_parent', to='assets.Asset'),
         ),
         migrations.RemoveField(
             model_name='asset',
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                 ('circuits', models.IntegerField(blank=True, null=True)),
                 ('cores', models.IntegerField(blank=True, null=True)),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='assets.AssetCategory')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=None, related_name='asset_parent', to='assets.Cable')),
+                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='asset_parent', to='assets.Cable')),
             ],
             options={
                 'abstract': False,
