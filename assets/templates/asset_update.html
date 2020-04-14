@@ -1,4 +1,4 @@
-{% extends 'base_assets.html' %}
+{% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
 {% load widget_tweaks %}
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
 
@@ -23,18 +23,23 @@
     </div>
   </div>
   <div class="row">
-    {% if perms.assets.asset_finance %}
-    <div class="col-md-6">
-      {% include 'partials/purchasedetails_form.html' %}
-    </div>
-    {%endif%}
-    <div class="col-md-6"
+    <div class="col-md-4"
     {% if not object.is_cable %} hidden="true" {% endif %} id="cable-table">
       {% include 'partials/cable_form.html' %}
     </div>
+    {% if perms.assets.asset_finance %}
+    <div class="col-md-4">
+      {% include 'partials/purchasedetails_form.html' %}
+    </div>
+    {%endif%}
     <div class="col-md-4">
       {% include 'partials/parent_form.html' %}
     </div>
+    {% if not edit %}
+    <div class="col-md-4">
+      {% include 'partials/audit_details.html' %}
+    </div>
+    {% endif %}
   </div>
   <div class="row">
     <div class="col-md-12">

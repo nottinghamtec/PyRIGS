@@ -6,7 +6,7 @@ from selenium.webdriver import Chrome
 from django.urls import reverse
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage
-import pdb
+from selenium.common.exceptions import NoSuchElementException
 
 
 class AssetList(BasePage):
@@ -95,11 +95,6 @@ class AssetForm(FormPage):
     def parent_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._parent_select_locator))
 
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
-
 
 class AssetEdit(AssetForm):
     URL_TEMPLATE = '/assets/asset/id/{asset_id}/edit/'
@@ -162,11 +157,6 @@ class SupplierForm(FormPage):
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }
 
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
-
 
 class SupplierCreate(SupplierForm):
     URL_TEMPLATE = reverse('supplier_create')
@@ -183,3 +173,90 @@ class SupplierEdit(SupplierForm):
     @property
     def success(self):
         return '/edit' not in self.driver.current_url
+
+
+class AssetAuditList(AssetList):
+    URL_TEMPLATE = reverse('asset_audit_list')
+
+    _search_text_locator = (By.ID, 'id_query')
+    _go_button_locator = (By.ID, 'searchButton')
+    _modal_locator = (By.ID, 'modal')
+    _errors_selector = (By.CLASS_NAME, "alert-danger")
+
+    @property
+    def modal(self):
+        return self.AssetAuditModal(self, self.find_element(*self._modal_locator))
+
+    @property
+    def query(self):
+        return self.find_element(*self._search_text_locator).text
+
+    def set_query(self, queryString):
+        element = self.find_element(*self._search_text_locator)
+        element.clear()
+        element.send_keys(queryString)
+
+    def search(self):
+        self.find_element(*self._go_button_locator).click()
+
+    @property
+    def error(self):
+        try:
+            return self.find_element(*self._errors_selector)
+        except NoSuchElementException:
+            return None
+
+    class AssetAuditModal(Region):
+        _errors_selector = (By.CLASS_NAME, "alert-danger")
+        # Don't use the usual success selector - that tries and fails to hit the '10m long cable' helper button...
+        _submit_locator = (By.ID, "id_mark_audited")
+        form_items = {
+            'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
+            'description': (regions.TextBox, (By.ID, 'id_description')),
+            'is_cable': (regions.CheckBox, (By.ID, 'id_is_cable')),
+            'serial_number': (regions.TextBox, (By.ID, 'id_serial_number')),
+            'salvage_value': (regions.TextBox, (By.ID, 'id_salvage_value')),
+            'date_acquired': (regions.DatePicker, (By.ID, 'id_date_acquired')),
+            'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
+            'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
+
+            'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
+            'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),
+            'length': (regions.TextBox, (By.ID, 'id_length')),
+            'csa': (regions.TextBox, (By.ID, 'id_csa')),
+            'circuits': (regions.TextBox, (By.ID, 'id_circuits')),
+            'cores': (regions.TextBox, (By.ID, 'id_cores'))
+        }
+
+        @property
+        def errors(self):
+            try:
+                error_page = regions.ErrorPage(self, self.find_element(*self._errors_selector))
+                return error_page.errors
+            except NoSuchElementException:
+                return None
+
+        def submit(self):
+            previous_errors = self.errors
+            self.root.find_element(*self._submit_locator).click()
+            # self.wait.until(lambda x: not self.is_displayed) TODO
+
+        def remove_all_required(self):
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+
+        def __getattr__(self, name):
+            if name in self.form_items:
+                element = self.form_items[name]
+                form_element = element[0](self, self.find_element(*element[1]))
+                return form_element.value
+            else:
+                return super().__getattribute__(name)
+
+        def __setattr__(self, name, value):
+            if name in self.form_items:
+                element = self.form_items[name]
+                form_element = element[0](self, self.find_element(*element[1]))
+                form_element.set_value(value)
+            else:
+                self.__dict__[name] = value

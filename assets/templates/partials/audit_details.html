@@ -1,0 +1,8 @@
+<div class="panel {% if object.last_audited_at is not None %} panel-success {% else %} panel-warning {% endif %}">
+  <div class="panel-heading">
+    Audit Details
+  </div>
+  <div class="panel-body">
+        <p>Audited at <span class="label label-default">{{ object.last_audited_at|default_if_none:'-' }}</span> by <span class="label label-info">{{ object.last_audited_by|default_if_none:'-' }}</span></p>
+  </div>
+</div>
