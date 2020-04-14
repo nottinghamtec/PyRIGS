@@ -21,11 +21,11 @@ class AssetForm(forms.ModelForm):
         self.fields['date_acquired'].widget.format = '%Y-%m-%d'
 
 
-# Needed to prevent assets losing parent data on audit
 class AssetAuditForm(AssetForm):
     class Meta(AssetForm.Meta):
-        # TODO Inherit exlcusions from superclass
-        exclude = ['asset_id_prefix', 'asset_id_number', 'last_audited_at', 'last_audited_by', 'parent']
+        # Prevents assets losing existing data that isn't included in the audit form
+        exclude = ['asset_id_prefix', 'asset_id_number', 'last_audited_at', 'last_audited_by',
+                    'parent', 'purchased_from', 'purchase_price', 'comments']
 
 
 class AssetSearchForm(forms.Form):
