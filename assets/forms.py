@@ -25,7 +25,7 @@ class AssetAuditForm(AssetForm):
     class Meta(AssetForm.Meta):
         # Prevents assets losing existing data that isn't included in the audit form
         exclude = ['asset_id_prefix', 'asset_id_number', 'last_audited_at', 'last_audited_by',
-                    'parent', 'purchased_from', 'purchase_price', 'comments']
+                   'parent', 'purchased_from', 'purchase_price', 'comments']
 
 
 class AssetSearchForm(forms.Form):
