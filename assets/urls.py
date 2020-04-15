@@ -22,6 +22,11 @@ urlpatterns = [
     path('activity', permission_required_with_403('assets.view_asset')
          (views.ActivityTable.as_view()), name='asset_activity_table'),
 
+    path('cabletype/list/', permission_required_with_403('assets.view_cable_type')(views.CableTypeList.as_view()), name='cable_type_list'),
+    path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),
+    path('cabletype/<int:pk>/update/', permission_required_with_403('assets.change_cable_type')(views.CableTypeUpdate.as_view()), name='cable_type_update'),
+    path('cabletype/<int:pk>/detail/', permission_required_with_403('assets.view_cable_type')(views.CableTypeDetail.as_view()), name='cable_type_detail'),
+
     path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
     path('asset/id/<str:pk>/embed/',
          xframe_options_exempt(
@@ -30,6 +35,9 @@ urlpatterns = [
     path('asset/id/<str:pk>/oembed_json/',
          views.AssetOembed.as_view(),
          name='asset_oembed'),
+
+    path('asset/audit/', permission_required_with_403('assets.change_asset')(views.AssetAuditList.as_view()), name='asset_audit_list'),
+    path('asset/id/<str:pk>/audit/', permission_required_with_403('assets.change_asset')(views.AssetAudit.as_view()), name='asset_audit'),
 
     path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
     path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),

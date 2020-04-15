@@ -9,7 +9,7 @@ from django.dispatch.dispatcher import receiver
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import RevisionMixin
+from RIGS.models import RevisionMixin, Profile
 
 
 class AssetCategory(models.Model):
@@ -68,6 +68,25 @@ class Connector(models.Model):
         return self.description
 
 
+# Things are nullable that shouldn't be because I didn't properly fix the data structure when moving this to its own model...
+class CableType(models.Model):
+    class Meta:
+        ordering = ['plug', 'socket', '-circuits']
+
+    circuits = models.IntegerField(default=1)
+    cores = models.IntegerField(default=3)
+    plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                             related_name='plug', null=True)
+    socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
+                               related_name='socket', null=True)
+
+    def __str__(self):
+        if self.plug and self.socket:
+            return "%s → %s" % (self.plug.description, self.socket.description)
+        else:
+            return "Unknown"
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
     class Meta:
@@ -90,18 +109,17 @@ class Asset(models.Model, RevisionMixin):
     salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
     comments = models.TextField(blank=True)
 
+    # Audit
+    last_audited_at = models.DateTimeField(blank=True, null=True)
+    last_audited_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='audited_by', blank=True, null=True)
+
     # Cable assets
     is_cable = models.BooleanField(default=False)
-    plug = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                             related_name='plug', blank=True, null=True)
-    socket = models.ForeignKey(Connector, on_delete=models.SET_NULL,
-                               related_name='socket', blank=True, null=True)
+    cable_type = models.ForeignKey(to=CableType, blank=True, null=True, on_delete=models.SET_NULL)
     length = models.DecimalField(decimal_places=1, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
-                              blank=True, null=True, help_text='mm^2')
-    circuits = models.IntegerField(blank=True, null=True)
-    cores = models.IntegerField(blank=True, null=True)
+                              blank=True, null=True, help_text='mm²')
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
@@ -131,7 +149,7 @@ class Asset(models.Model, RevisionMixin):
     def __str__(self):
         out = str(self.asset_id) + ' - ' + self.description
         if self.is_cable:
-            out += '{} - {}m - {}'.format(self.plug, self.length, self.socket)
+            out += '{} - {}m - {}'.format(self.cable_type.plug, self.length, self.cable_type.socket)
         return out
 
     def clean(self):
@@ -156,14 +174,16 @@ class Asset(models.Model, RevisionMixin):
                 errdict["length"] = ["The length of a cable must be more than 0"]
             if not self.csa or self.csa <= 0:
                 errdict["csa"] = ["The CSA of a cable must be more than 0"]
-            if not self.circuits or self.circuits <= 0:
-                errdict["circuits"] = ["There must be at least one circuit in a cable"]
-            if not self.cores or self.cores <= 0:
-                errdict["cores"] = ["There must be at least one core in a cable"]
-            if self.socket is None:
-                errdict["socket"] = ["A cable must have a socket"]
-            if self.plug is None:
-                errdict["plug"] = ["A cable must have a plug"]
+            if not self.cable_type:
+                errdict["cable_type"] = ["A cable must have a type"]
+            # if not self.circuits or self.circuits <= 0:
+            #     errdict["circuits"] = ["There must be at least one circuit in a cable"]
+            # if not self.cores or self.cores <= 0:
+            #    errdict["cores"] = ["There must be at least one core in a cable"]
+            # if self.socket is None:
+            #     errdict["socket"] = ["A cable must have a socket"]
+            # if self.plug is None:
+            #    errdict["plug"] = ["A cable must have a plug"]
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)

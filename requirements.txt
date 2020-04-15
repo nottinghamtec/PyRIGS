@@ -21,4 +21,5 @@ requests==2.23.0
 selenium==3.141.0
 simplejson==3.17.0
 whitenoise==5.0.1
+reportlab==3.4.0
 z3c.rml==3.9.1

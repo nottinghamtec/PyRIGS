@@ -1,10 +1,15 @@
+import datetime
+
 import simplejson
 from assets import forms, models
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core import serializers
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
@@ -107,7 +112,14 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("asset_detail", kwargs={"pk": self.object.asset_id})
+        if self.request.is_ajax():
+            url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy('asset_update', kwargs={'pk': self.object.pk}))
+            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
+        else:
+            url = reverse_lazy('asset_detail', kwargs={'pk': self.object.asset_id, })
+        return url
 
 
 class AssetCreate(LoginRequiredMixin, generic.CreateView):
@@ -167,6 +179,30 @@ class AssetOembed(generic.View):
 
 class AssetEmbed(AssetDetail):
     template_name = 'asset_embed.html'
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AssetAuditList(AssetList):
+    template_name = 'asset_audit_list.html'
+    hide_hidden_status = False
+
+    # TODO Refresh this when the modal is submitted
+    def get_queryset(self):
+        self.form = forms.AssetSearchForm(data={})
+        return self.model.objects.filter(Q(last_audited_at__isnull=True))
+
+
+class AssetAudit(AssetEdit):
+    template_name = 'asset_audit.html'
+    form_class = forms.AssetAuditForm
+
+    def get_success_url(self):
+        # TODO For some reason this doesn't stick when done in form_valid??
+        asset = self.get_object()
+        asset.last_audited_by = self.request.user
+        asset.last_audited_at = timezone.now()
+        asset.save()
+        return super().get_success_url()
 
 
 class SupplierList(generic.ListView):
@@ -263,3 +299,44 @@ class ActivityTable(versioning.ActivityTable):
         context['title'] = 'Asset Database'
 
         return context
+
+class CableTypeList(generic.ListView):
+    model = models.CableType
+    template_name = 'cable_type_list.html'
+    paginate_by = 40
+    # ordering = ['__str__']
+
+
+class CableTypeDetail(generic.DetailView):
+    model = models.CableType
+    template_name = 'cable_type_form.html'
+
+
+class CableTypeCreate(generic.CreateView):
+    model = models.CableType
+    template_name = "cable_type_form.html"
+    form_class = forms.CableTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeCreate, self).get_context_data(**kwargs)
+        context["create"] = True
+
+        return context
+
+    def get_success_url(self):
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})
+
+
+class CableTypeUpdate(generic.UpdateView):
+    model = models.CableType
+    template_name = "cable_type_form.html"
+    form_class = forms.CableTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeUpdate, self).get_context_data(**kwargs)
+        context["edit"] = True
+
+        return context
+
+    def get_success_url(self):
+        return reverse("cable_type_detail", kwargs={"pk": self.object.pk})

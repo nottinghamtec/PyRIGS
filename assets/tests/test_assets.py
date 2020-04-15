@@ -9,8 +9,13 @@ from RIGS import models as rigsmodels
 from PyRIGS.tests.base import BaseTest, AutoLoginTest
 from assets import models, urls
 from reversion import revisions as reversion
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from RIGS.test_functional import animation_is_finished
 import datetime
+from django.utils import timezone
 
 
 class TestAssetList(AutoLoginTest):
@@ -98,6 +103,7 @@ class TestAssetForm(AutoLoginTest):
         self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
+        self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -154,12 +160,10 @@ class TestAssetForm(AutoLoginTest):
         self.page.is_cable = True
 
         self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
-        self.page.plug = "IEC"
+        self.page.cable_type = "IEC → IEC"
         self.page.socket = "IEC"
         self.page.length = 10
         self.page.csa = "1.5"
-        self.page.circuits = 1
-        self.page.cores = 3
 
         self.page.submit()
         self.assertTrue(self.page.success)
@@ -254,6 +258,76 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.page.name = new_name
         self.page.submit()
         self.assertTrue(self.page.success)
+
+
+class TestAssetAudit(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        self.category = models.AssetCategory.objects.create(name="Haulage")
+        self.status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
+        self.supplier = models.Supplier.objects.create(name="The Bazaar")
+        self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1, voltage_rating=40, num_pins=13)
+        models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
+        self.wait = WebDriverWait(self.driver, 5)
+
+    def test_audit_process(self):
+        asset_id = "1111"
+        self.page.set_query(asset_id)
+        self.page.search()
+        mdl = self.page.modal
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
+        # Do it wrong on purpose to check error display
+        mdl.remove_all_required()
+        mdl.description = ""
+        mdl.submit()
+        # self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
+        self.wait.until(animation_is_finished())
+        # self.assertTrue(self.driver.find_element_by_id('modal').is_displayed())
+        self.assertIn("This field is required.", mdl.errors["Description"])
+        # Now do it properly
+        new_desc = "A BIG hammer"
+        mdl.description = new_desc
+        mdl.submit()
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
+
+        # Check data is correct
+        audited = models.Asset.objects.get(asset_id="1111")
+        self.assertEqual(audited.description, new_desc)
+        # Make sure audit 'log' was filled out
+        self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
+        self.assertEqual(timezone.now().date(), audited.last_audited_at.date())
+        self.assertEqual(timezone.now().hour, audited.last_audited_at.hour)
+        self.assertEqual(timezone.now().minute, audited.last_audited_at.minute)
+        # Check we've removed it from the 'needing audit' list
+        self.assertNotIn(asset_id, self.page.assets)
+
+    def test_audit_list(self):
+        self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
+
+        assetRow = self.page.assets[0]
+        assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
+        self.assertEqual(self.page.modal.asset_id, assetRow.id)
+
+        # First close button is for the not found error
+        self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
+        # Make sure audit log was NOT filled out
+        audited = models.Asset.objects.get(asset_id=assetRow.id)
+        self.assertEqual(None, audited.last_audited_by)
+
+        # Check that a failed search works
+        self.page.set_query("NOTFOUND")
+        self.page.search()
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
+        self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
 
 class TestSupplierValidation(TestCase):
@@ -375,7 +449,8 @@ class TestFormValidation(TestCase):
         cls.status = models.AssetStatus.objects.create(name="Broken", should_show=True)
         cls.asset = models.Asset.objects.create(asset_id="9999", description="The Office", status=cls.status, category=cls.category, date_acquired=datetime.date(2018, 6, 15))
         cls.connector = models.Connector.objects.create(description="16A IEC", current_rating=16, voltage_rating=240, num_pins=3)
-        cls.cable_asset = models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=cls.status, category=cls.category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, plug=cls.connector, socket=cls.connector, length=10, csa="1.5", circuits=1, cores=3)
+        cls.cable_type = models.CableType.objects.create(circuits=11, cores=3, plug=cls.connector, socket=cls.connector)
+        cls.cable_asset = models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=cls.status, category=cls.category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, cable_type=cls.cable_type, length=10, csa="1.5")
 
     def setUp(self):
         self.profile.set_password('testuser')
@@ -399,12 +474,9 @@ class TestFormValidation(TestCase):
         response = self.client.post(url, {'asset_id': 'X$%A', 'is_cable': True})
         self.assertFormError(response, 'form', 'asset_id', 'An Asset ID can only consist of letters and numbers, with a final number')
 
-        self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
-        self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        self.assertFormError(response, 'form', 'cable_type', 'A cable must have a type')
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
     # Given that validation is done at model level it *shouldn't* need retesting...gonna do it anyway!
     def test_asset_edit(self):
@@ -422,24 +494,19 @@ class TestFormValidation(TestCase):
     def test_cable_edit(self):
         url = reverse('asset_update', kwargs={'pk': self.cable_asset.asset_id})
         # TODO Why do I have to send is_cable=True here?
-        response = self.client.post(url, {'is_cable': True, 'length': -3, 'csa': -3, 'circuits': -4, 'cores': -8})
+        response = self.client.post(url, {'is_cable': True, 'length': -3, 'csa': -3})
 
-        # Can't figure out how to select the 'none' option...
-        # self.assertFormError(response, 'form', 'plug', 'A cable must have a plug')
-        # self.assertFormError(response, 'form', 'socket', 'A cable must have a socket')
+        # TODO Can't figure out how to select the 'none' option...
+        # self.assertFormError(response, 'form', 'cable_type', 'A cable must have a type')
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
     def test_asset_duplicate(self):
         url = reverse('asset_duplicate', kwargs={'pk': self.cable_asset.asset_id})
-        response = self.client.post(url, {'is_cable': True, 'length': 0, 'csa': 0, 'circuits': 0, 'cores': 0})
+        response = self.client.post(url, {'is_cable': True, 'length': 0, 'csa': 0})
 
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-        self.assertFormError(response, 'form', 'circuits', 'There must be at least one circuit in a cable')
-        self.assertFormError(response, 'form', 'cores', 'There must be at least one core in a cable')
 
 
 class TestSampleDataGenerator(TestCase):
