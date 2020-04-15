@@ -34,3 +34,17 @@ class AutoLoginTest(BaseTest):
         self.profile.save()
         loginPage = pages.LoginPage(self.driver, self.live_server_url).open()
         loginPage.login("EventTest", "EventTestPassword")
+
+
+# Checks if animation is done
+class animation_is_finished(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, driver):
+        numberAnimating = driver.execute_script('return $(":animated").length')
+        finished = numberAnimating == 0
+        if finished:
+            import time
+            time.sleep(0.1)
+        return finished
