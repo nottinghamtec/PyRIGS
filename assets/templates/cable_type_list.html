@@ -11,21 +11,21 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>Cable Type</th>
-      <th>Circuits</th>
-      <th>Cores</th>
-      <th>Quick Links</th>
+      <th scope="col">Cable Type</th>
+      <th scope="col">Circuits</th>
+      <th scope="col">Cores</th>
+      <th scope="col">Quick Links</th>
     </tr>
   </thead>
   <tbody>
     {% for item in object_list %}
     <tr>
-      <td>{{ item }}</td>
+      <th scope="row">{{ item }}</th>
       <td>{{ item.circuits }}</td>
       <td>{{ item.cores }}</td>
       <td>
-        <a href="{% url 'cable_type_detail' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-eye-open"></i> View</a>
-        <a href="{% url 'cable_type_update' item.pk %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+        <a href="{% url 'cable_type_detail' item.pk %}" class="btn btn-primary"><span class="fas fas-eye-open"></span> View</a>
+        <a href="{% url 'cable_type_update' item.pk %}" class="btn btn-warning"><span class="fas fas-edit"></span> Edit</a>
       </td>
     </tr>
     {% endfor %}

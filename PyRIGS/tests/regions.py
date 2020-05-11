@@ -32,12 +32,12 @@ class BootstrapSelectElement(Region):
 
     def toggle(self):
         original_state = self.is_open
-        return self.find_element(*self._main_button_locator).click()
         option_box = self.find_element(*self._option_box_locator)
         if original_state:
             self.wait.until(expected_conditions.invisibility_of_element_located(option_box))
         else:
             self.wait.until(expected_conditions.visibility_of_element_located(option_box))
+        return self.find_element(*self._main_button_locator).click()
 
     def open(self):
         if not self.is_open:

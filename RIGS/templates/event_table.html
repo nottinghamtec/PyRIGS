@@ -11,11 +11,11 @@
             </thead>
             <tbody>
             {% for event in events %}
-            <tr {% include 'partials/event_table_colour.html' %}>
+            <tr {% include 'partials/event_table_colour.html' %} id="event_row">
                 <!---Number-->
-                <th scope="row">{{ event.pk }}</th>
+                <th scope="row" id="event_number">{{ event.pk }}</th>
                 <!--Dates-->
-                <td>
+                <td id="event_dates">
                     <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
                     {% if event.end_date and event.end_date != event.start_date %}
                         <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
@@ -45,7 +45,7 @@
                     {% endif %}
                 </td>
                 <!---Details-->
-                <td>
+                <td id="event_details">
                     <h4>
                         <a href="{% url 'event_detail' event.pk %}">
                             {{ event.name }}
@@ -71,7 +71,7 @@
                     {% include 'partials/event_status.html' %}
                 </td>
                 <!---MIC-->
-                <td>
+                <td id="event_mic">
                     {% if event.mic %}
                         <div class="media">
                             {% if perms.RIGS.view_profile %}

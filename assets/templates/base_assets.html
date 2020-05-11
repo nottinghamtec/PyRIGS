@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block titleheader %}
-    <a class="nav navbar-brand navbar-left" href="/"><i class="fas fa-arrow-circle-left" style="vertical-align: middle !important;"></i> RIGS</a>
+    <a class="nav navbar-brand navbar-left" href="/"><span class="fas fa-arrow-circle-left" style="vertical-align: middle !important;"></span> RIGS</a>
     <a class="nav navbar-brand" href="{% url 'asset_index' %}">Assets</a>
 {% endblock %}
 
@@ -13,23 +13,23 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Assets</a>
         <div class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'asset_list' %}"><i class="fas fa-list"></i> List Assets</a>
+            <a class="dropdown-item" href="{% url 'asset_list' %}"><span class="fas fa-list"></span> List Assets</a>
             {% if perms.assets.add_asset %}
-                <a class="dropdown-item" href="{% url 'asset_create' %}"><i class="fas fa-plus"></i> Create Asset</a>
+                <a class="dropdown-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> Create Asset</a>
             {% endif %}
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{% url 'cable_type_list' %}"><i class="fas fa-list"></i> List Cable Types</a>
+            <a class="dropdown-item" href="{% url 'cable_type_list' %}"><span class="fas fa-list"></span> List Cable Types</a>
             {% if perms.assets.add_cable_type %}
-            <a class="dropdown-item" href="{% url 'cable_type_create' %}"><i class="fas fa-plus"></i> Create Cable Type</a>
+            <a class="dropdown-item" href="{% url 'cable_type_create' %}"><span class="fas fa-plus"></span> Create Cable Type</a>
             {% endif %}
         </div>
     </li>
     <div class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Suppliers</a>
         <ul class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'supplier_list' %}"><i class="fas fa-list"></i> List Suppliers</a>
+            <a class="dropdown-item" href="{% url 'supplier_list' %}"><span class="fas fa-list"></span> List Suppliers</a>
             {% if perms.assets.add_supplier %}
-                <a class="dropdown-item" href="{% url 'supplier_create' %}"><i class="fas fa-plus"></i> Create Supplier</a>
+                <a class="dropdown-item" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> Create Supplier</a>
             {% endif %}
         </ul>
     </div>

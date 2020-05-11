@@ -22,6 +22,7 @@
             {{ object.status }}
         </span>
         </h4>
+        <dl>
         {% if object.serial_number %}
             <dt>Serial Number: </dt>
             <dd>{{ object.serial_number }}</dd>
@@ -30,7 +31,7 @@
             <dt>Comments: </dt>
             <dd class="dont-break-out">{{ object.comments|linebreaksbr }}<dd>
         {% endif %}
-
+        </dl>
         </table>
     </div>
 </div>

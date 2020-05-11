@@ -64,19 +64,6 @@ class EventTest(LiveServerTestCase):
 
         self.assertEqual(self.live_server_url + n, self.browser.current_url)
 
-    def testRigboardButtons(self):
-        # Requests address
-        self.browser.get(self.live_server_url + '/rigboard/')
-        # Gets redirected to login
-        self.authenticate('/rigboard/')
-
-        # Completes and comes back to rigboard
-        # Clicks add new
-        self.browser.find_element_by_partial_link_text("New").click()
-        self.assertEqual(
-            self.live_server_url + '/event/create/', self.browser.current_url)
-        self.browser.get(self.live_server_url + '/rigboard/')
-
     def testRigCreate(self):
         # Requests address
         self.browser.get(self.live_server_url + '/event/create/')
@@ -1060,7 +1047,6 @@ class TECEventAuthorisationTest(TestCase):
         self.assertEqual(self.event.auth_request_by, self.profile)
         self.assertEqual(self.event.auth_request_to, 'client@functional.test')
         self.assertIsNotNone(self.event.auth_request_at)
-
 
 class SearchTest(LiveServerTestCase):
     def setUp(self):
