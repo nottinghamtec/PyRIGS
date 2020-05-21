@@ -129,7 +129,6 @@ class TestAssetForm(AutoLoginTest):
         self.assertTrue(self.page.purchased_from_selector.is_open)
         self.page.purchased_from_selector.search(self.supplier.name[:-8])
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
-        self.assertFalse(self.page.purchased_from_selector.is_open)
         self.page.purchase_price = "12.99"
         self.page.salvage_value = "99.12"
         self.date_acquired = "05022020"
