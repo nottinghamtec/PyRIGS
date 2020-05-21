@@ -58,6 +58,8 @@ class CreateEvent(FormPage):
     _venue_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
     _mic_selector_selector = (By.XPATH, '//*[@id="form-hws"]/div[7]/div[1]/div/div')
 
+    _add_person_selector = (By.XPATH, '//a[@data-target="#id_person" and contains(@href, "add")]')
+
     form_items = {
         'description': (regions.TextBox, (By.ID, 'id_description')),
 
@@ -94,6 +96,10 @@ class CreateEvent(FormPage):
     @property
     def mic_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._mic_selector_selector))
+
+    def add_person(self):
+        self.find_element(*self._add_person_selector).click()
+        return regions.Modal(self, self.driver.find_element_by_id('modal'))
 
     @property
     def success(self):

@@ -181,3 +181,39 @@ class ErrorPage(Region):
         for error in error_items:
             errors[error.field_name] = error.errors
         return errors
+
+
+class Modal(Region):
+    _submit_locator = (By.CSS_SELECTOR, '.btn-primary')
+    _header_selector = (By.TAG_NAME, 'h3')
+
+    form_items = {
+        'name': (TextBox, (By.ID, 'id_name'))
+    }
+
+    @property
+    def header(self):
+        return self.find_element(*self._header_selector).text
+
+    @property
+    def is_open(self):
+        return self.root.is_displayed()
+
+    def submit(self):
+        self.root.find_element(*self._submit_locator).click()
+
+    def __getattr__(self, name):
+        if name in self.form_items:
+            element = self.form_items[name]
+            form_element = element[0](self, self.find_element(*element[1]))
+            return form_element.value
+        else:
+            return super().__getattribute__(name)
+
+    def __setattr__(self, name, value):
+        if name in self.form_items:
+            element = self.form_items[name]
+            form_element = element[0](self, self.find_element(*element[1]))
+            form_element.set_value(value)
+        else:
+            self.__dict__[name] = value
