@@ -4,8 +4,10 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver import Chrome
 from django.urls import reverse
 from PyRIGS.tests import regions
+from RIGS.tests import regions as rigs_regions
 from PyRIGS.tests.pages import BasePage, FormPage
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 
 class Index(BasePage):
     URL_TEMPLATE = reverse('index')
@@ -59,6 +61,7 @@ class CreateEvent(FormPage):
     _mic_selector_selector = (By.XPATH, '//*[@id="form-hws"]/div[7]/div[1]/div/div')
 
     _add_person_selector = (By.XPATH, '//a[@data-target="#id_person" and contains(@href, "add")]')
+    _add_item_selector = (By.XPATH, '//button[contains(@class, "item-add")]')
 
     form_items = {
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -81,6 +84,9 @@ class CreateEvent(FormPage):
     def select_event_type(self, type_name):
         self.find_element(By.XPATH, '//button[.="' + type_name + '"]').click()
 
+    def item_row(self, ID):
+        return rigs_regions.ItemRow(self, self.find_element(By.ID, "item-" + ID))
+
     @property
     def is_expanded(self):
         return self.find_element(*self._bottom_save_selector).is_displayed()
@@ -100,6 +106,12 @@ class CreateEvent(FormPage):
     def add_person(self):
         self.find_element(*self._add_person_selector).click()
         return regions.Modal(self, self.driver.find_element_by_id('modal'))
+
+    def add_event_item(self):
+        self.find_element(*self._add_item_selector).click()
+        element = self.driver.find_element_by_id('itemModal')
+        self.wait.until(EC.visibility_of(element))
+        return regions.ItemModal(self, element)
 
     @property
     def success(self):

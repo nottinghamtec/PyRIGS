@@ -17,7 +17,7 @@ from RIGS.tests import regions
 import datetime
 from datetime import date, time, timedelta
 from django.utils import timezone
-from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.action_chains import ActionChains
 
 class TestRigboard(AutoLoginTest):
     def setUp(self):
@@ -148,97 +148,67 @@ class TestEventCreate(AutoLoginTest):
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(modal.is_open)
 
-        person2 = models.Person.objects.get(name=person_name)
-        options = list((x for x in self.page.person_selector.options if x.selected))
-        self.assertTrue(len(options) == 1)
-        self.assertEqual(person2.name, options[0].name)
-        # and backend
-        # self.assertEqual(person1.pk, int(self.page.person_selector.get_attribute("value")))
+        # TODO
 
-        # Was right the first time, change it back
-        self.page.person_selector.search(person1.name)
-        # TODO Check multiple cannot be selected? Is that necessary?
-        self.page.person_selector.set_option(person1.name, True)
+    def test_event_item_creation(self):
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.page.is_expanded)
+        self.page.select_event_type("Rig")
+        self.wait.until(animation_is_finished())
+        self.assertTrue(self.page.is_expanded)
 
-        options = list((x for x in self.page.person_selector.options if x.selected))
-        self.assertTrue(len(options) == 1)
-        self.assertEqual(person2.name, options[0].name)
-        # and backend
-        # self.assertEqual(person1.pk, int(self.page.person_selector.get_attribute("value")))
+        self.page.name = "Test Event with Items"
 
-        pass
+        self.page.person_selector.toggle()
+        self.assertTrue(self.page.person_selector.is_open)
+        self.page.person_selector.search(self.client.name)
+        self.page.person_selector.set_option(self.client.name, True)
+        # TODO This should not be necessary, normally closes automatically
+        self.page.person_selector.toggle()
+        self.assertFalse(self.page.person_selector.is_open)
 
-        # Edit Person 1 to have a better name
-        form.find_element_by_xpath(
-            '//a[@data-target="#id_person" and contains(@href, "%s/edit/")]' % person1.pk).click()
-        wait.until(animation_is_finished())
-        self.assertTrue(modal.is_displayed())
-        self.assertIn("Edit Person", modal.find_element_by_tag_name('h3').text)
-        name = modal.find_element_by_xpath(
-            '//div[@id="modal"]//input[@id="id_name"]')
-        self.assertEqual(person1.name, name.get_attribute('value'))
-        name.clear()
-        name.send_keys('Rig ' + person1.name)
-        name.send_keys(Keys.ENTER)
+        self.page.start_date = datetime.date(1984, 1, 1)
 
-        wait.until(animation_is_finished())
+        modal = self.page.add_event_item()
+        self.wait.until(animation_is_finished())
+        # See modal has opened
+        self.assertTrue(modal.is_open)
+        self.assertIn("New Event", modal.header)
 
-        self.assertFalse(modal.is_displayed())
-        person1 = models.Person.objects.get(pk=person1.pk)
-        self.assertEqual(person1.name, form.find_element_by_xpath(
-            '//button[@data-id="id_person"]/span').text)
+        modal.name = "Test Item 1"
+        modal.description = "This is an item description\nthat for reasons unknown spans two lines"
+        modal.quantity = "2"
+        modal.price = "23.95"
+        modal.submit()
+        self.wait.until(animation_is_finished())
 
-        # Create organisation
-        wait.until(animation_is_finished())
-        add_button = self.browser.find_element_by_xpath(
-            '//a[@data-target="#id_organisation" and contains(@href, "add")]')
-        add_button.click()
-        modal = self.browser.find_element_by_id('modal')
-        wait.until(animation_is_finished())
-        self.assertTrue(modal.is_displayed())
-        self.assertIn("Add Organisation", modal.find_element_by_tag_name('h3').text)
-        modal.find_element_by_xpath(
-            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Organisation")
-        modal.find_element_by_xpath(
-            '//div[@id="modal"]//input[@type="submit"]').click()
+        # Confirm item has been saved to json field
+        objectitems = self.driver.execute_script("return objectitems;")
+        self.assertEqual(1, len(objectitems))
+        testitem = objectitems["-1"]['fields']  # as we are deliberately creating this we know the ID
+        self.assertEqual("Test Item 1", testitem['name'])
+        self.assertEqual("2", testitem['quantity'])  # test a couple of "worse case" fields
 
-        # See it is selected
-        wait.until(animation_is_finished())
-        self.assertFalse(modal.is_displayed())
-        obj = models.Organisation.objects.get(name="Test Organisation")
-        self.assertEqual(obj.name, form.find_element_by_xpath(
-            '//button[@data-id="id_organisation"]/span').text)
-        # and backend
-        option = form.find_element_by_xpath(
-            '//select[@id="id_organisation"]//option[@selected="selected"]')
-        self.assertEqual(obj.pk, int(option.get_attribute("value")))
+        total = self.driver.find_element_by_id('total')
+        ActionChains(self.driver).move_to_element(total).perform()
 
-        # Create venue
-        wait.until(animation_is_finished())
-        add_button = self.browser.find_element_by_xpath(
-            '//a[@data-target="#id_venue" and contains(@href, "add")]')
-        wait.until(animation_is_finished())
-        add_button.click()
-        wait.until(animation_is_finished())
-        modal = self.browser.find_element_by_id('modal')
-        wait.until(animation_is_finished())
-        self.assertTrue(modal.is_displayed())
-        self.assertIn("Add Venue", modal.find_element_by_tag_name('h3').text)
-        modal.find_element_by_xpath(
-            '//div[@id="modal"]//input[@id="id_name"]').send_keys("Test Venue")
-        modal.find_element_by_xpath(
-            '//div[@id="modal"]//input[@type="submit"]').click()
+        # See new item appear in table
+        row = self.page.item_row("-1")  # ID number is known, see above
+        # Scroll into view
+        self.assertIn("Test Item 1", row.name)
+        self.assertIn("This is an item description",
+                      row.description)
+        self.assertEqual('23.95', row.price)
+        self.assertEqual("2", row.quantity)
+        self.assertEqual('47.90', row.subtotal)
 
-        # See it is selected
-        wait.until(animation_is_finished())
-        self.assertFalse(modal.is_displayed())
-        obj = models.Venue.objects.get(name="Test Venue")
-        self.assertEqual(obj.name, form.find_element_by_xpath(
-            '//button[@data-id="id_venue"]/span').text)
-        # and backend
-        option = form.find_element_by_xpath(
-            '//select[@id="id_venue"]//option[@selected="selected"]')
-        self.assertEqual(obj.pk, int(option.get_attribute("value")))
+        # Check totals TODO convert to page properties
+        self.assertEqual("47.90", self.driver.find_element_by_id('sumtotal').text)
+        self.assertIn("(TBC)", self.driver.find_element_by_id('vat-rate').text)
+        self.assertEqual("9.58", self.driver.find_element_by_id('vat').text)
+        self.assertEqual("57.48", total.text)
+
+        self.page.submit()
 
     # TODO Testing of internal rig (approval system interface)
 
@@ -249,7 +219,23 @@ class TestEventCreate(AutoLoginTest):
         self.wait.until(animation_is_finished())
         self.assertTrue(self.page.is_expanded)
 
-        # self.assertFalse(self.page.person_selector.is_displayed())
+        self.assertFalse(self.page.person_selector.is_open)
+
+        rig_name = "Test Non-Rig"
+        self.page.name = rig_name
+
+        # Double-check we don't lose data when swapping
+        self.page.select_event_type("Rig")
+        self.wait.until(animation_is_finished())
+        self.assertEquals(self.page.name, rig_name)
+        self.wait.until(animation_is_finished())
+        self.page.select_event_type("Non-Rig")
+
+        self.page.start_date = datetime.date(2020, 1, 1)
+        self.page.status = "Confirmed"
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
 
     def test_subhire_creation(self):
         pass
