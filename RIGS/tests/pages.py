@@ -47,6 +47,58 @@ class Rigboard(BasePage):
         return [self.EventListRow(self, i) for i in self.find_elements(*self._event_row_locator)]
 
 
+class CreateEvent(FormPage):
+    URL_TEMPLATE = reverse('event_create')
+
+    _is_rig_selector = (By.ID, 'is_rig-selector')
+    _bottom_save_selector = (By.XPATH, '//*[@id="main"]/form/div/div[6]/div/button')
+    _submit_locator = _bottom_save_selector
+    # TODO The ID is now no longer on the highest level element on the selector, annoyingly
+    _person_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
+    _venue_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
+    _mic_selector_selector = (By.XPATH, '//*[@id="form-hws"]/div[7]/div[1]/div/div')
+
+    form_items = {
+        'description': (regions.TextBox, (By.ID, 'id_description')),
+
+        'name': (regions.TextBox, (By.ID, 'id_name')),
+        'start_date': (regions.DatePicker, (By.ID, 'id_start_date')),
+        'start_time': (regions.TimePicker, (By.ID, 'id_start_time')),
+        'end_date': (regions.DatePicker, (By.ID, 'id_start_date')),
+        'end_time': (regions.TimePicker, (By.ID, 'id_start_time')),
+        'access_at': (regions.DateTimePicker, (By.ID, 'id_access_at')),
+        'meet_at': (regions.DateTimePicker, (By.ID, 'id_meet_at')),
+        'dry_hire': (regions.CheckBox, (By.ID, 'id_dry_hire')),
+        'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
+        'collected_by': (regions.TextBox, (By.ID, 'id_collector')),
+        'po': (regions.TextBox, (By.ID, 'id_purchase_order')),
+
+        'notes': (regions.TextBox, (By.ID, 'id_notes'))
+    }
+
+    def select_event_type(self, type_name):
+        self.find_element(By.XPATH, '//button[.="' + type_name + '"]').click()
+
+    @property
+    def is_expanded(self):
+        return self.find_element(*self._bottom_save_selector).is_displayed()
+
+    @property
+    def person_selector(self):
+        return regions.BootstrapSelectElement(self, self.find_element(*self._person_selector_selector))
+
+    @property
+    def venue_selector(self):
+        return regions.BootstrapSelectElement(self, self.find_element(*self._venue_selector_selector))
+
+    @property
+    def mic_selector(self):
+        return regions.BootstrapSelectElement(self, self.find_element(*self._mic_selector_selector))
+
+    @property
+    def success(self):
+        return '/create' not in self.driver.current_url
+
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')
     _search_go_selector = (By.ID, 'id_search')

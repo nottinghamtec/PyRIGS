@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 <div class="col-md-6 mt-3">
-    <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}">
+    <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3">
         <div class="card-header">Contact Details</div>
         <div class="card-body">
             <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
@@ -17,11 +17,11 @@
                         </div>
                         <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                             <div class="btn-group">
-                                <a href="{% url 'person_create' %}" class="btn btn-outline-success modal-href"
+                                <a href="{% url 'person_create' %}" class="btn btn-success modal-href"
                                    data-target="#{{ form.person.id_for_label }}">
                                     <span class="fas fa-plus"></span>
                                 </a>
-                                <a href="{% if form.person.value %}{% url 'person_update' form.person.value %}{% endif %}" class="btn btn-outline-warning modal-href" id="{{ form.person.id_for_label }}-update" data-target="#{{ form.person.id_for_label }}">
+                                <a href="{% if form.person.value %}{% url 'person_update' form.person.value %}{% endif %}" class="btn btn-warning modal-href" id="{{ form.person.id_for_label }}-update" data-target="#{{ form.person.id_for_label }}">
                                     <span class="fas fa-user-edit"></span>
                                 </a>
                             </div>
@@ -44,11 +44,11 @@
                         </div>
                         <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                             <div class="btn-group">
-                                <a href="{% url 'organisation_create' %}" class="btn btn-outline-success modal-href"
+                                <a href="{% url 'organisation_create' %}" class="btn btn-success modal-href"
                                    data-target="#{{ form.organisation.id_for_label }}">
                                     <span class="fas fa-plus"></span>
                                 </a>
-                                <a href="{% if form.organisation.value %}{% url 'organisation_update' form.organisation.value %}{% endif %}" class="btn btn-outline-warning modal-href" id="{{ form.organisation.id_for_label }}-update" data-target="#{{ form.organisation.id_for_label }}">
+                                <a href="{% if form.organisation.value %}{% url 'organisation_update' form.organisation.value %}{% endif %}" class="btn btn-warning modal-href" id="{{ form.organisation.id_for_label }}-update" data-target="#{{ form.organisation.id_for_label }}">
                                     <span class="fas fa-edit"></span>
                                 </a>
                             </div>

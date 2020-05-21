@@ -27,11 +27,11 @@
                             </div>
                             <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                 <div class="btn-group">
-                                    <a href="{% url 'venue_create' %}" class="btn btn-default modal-href"
+                                    <a href="{% url 'venue_create' %}" class="btn btn-success modal-href"
                                        data-target="#{{ form.venue.id_for_label }}">
                                         <span class="fas fa-plus"></span>
                                     </a>
-                                    <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-default modal-href" id="{{ form.venue.id_for_label }}-update" data-target="#{{ form.venue.id_for_label }}">
+                                    <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-warning modal-href" id="{{ form.venue.id_for_label }}-update" data-target="#{{ form.venue.id_for_label }}">
                                         <span class="fas fa-edit"></span>
                                     </a>
                                 </div>
@@ -63,17 +63,8 @@
                             <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
                                 {% render_field form.end_date class+="form-control" %}
                             </div>
-                            <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="End time of event, leave blank if unknown">
+                            <div class="col-sm-12 col-md-4" data-toggle="tooltip" title="End time of event, leave blank if unknown">
                                 {% render_field form.end_time class+="form-control" %}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-12 col-md-offset-7 col-md-5">
-                                <div class="btn-group btn-group-justified">
-                                    <btn class="btn btn-default btn-xs" onclick="setTime23Hours()">23:00</btn>
-                                    <btn class="btn btn-default btn-xs" onclick="setTime02Hours()">02:00</btn>
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -4,6 +4,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.keys import Keys
 import datetime
 
 
@@ -33,10 +34,10 @@ class BootstrapSelectElement(Region):
     def toggle(self):
         original_state = self.is_open
         option_box = self.find_element(*self._option_box_locator)
-        if original_state:
-            self.wait.until(expected_conditions.invisibility_of_element_located(option_box))
+        if not original_state:
+            self.wait.until(expected_conditions.invisibility_of_element(option_box))
         else:
-            self.wait.until(expected_conditions.visibility_of_element_located(option_box))
+            self.wait.until(expected_conditions.visibility_of(option_box))
         return self.find_element(*self._main_button_locator).click()
 
     def open(self):
@@ -121,6 +122,31 @@ class DatePicker(Region):
         self.root.clear()
         self.root.send_keys(value.strftime("%d%m%Y"))
 
+
+class TimePicker(Region):
+    @property
+    def value(self):
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%H:%M")
+
+    def set_value(self, value):
+        self.root.clear()
+        self.root.send_keys(value.strftime("%H:%M"))
+
+
+class DateTimePicker(Region):
+    @property
+    def value(self):
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d %H:%M")
+
+    def set_value(self, value):
+        self.root.clear()
+
+        date = value.date().strftime("%d%m%Y")
+        time = value.time().strftime("%H%M")
+
+        self.root.send_keys(date)
+        self.root.send_keys(Keys.TAB)
+        self.root.send_keys(time)
 
 class SingleSelectPicker(Region):
     @property
