@@ -52,5 +52,30 @@
 	</table>
 </div>
 <table class="hidden invisible">
-    {% include 'item_row.html' %}
+    <tr id="new-item-row" class="item_row">
+        <td>
+            <span class="name"></span>
+                <div class="item-description">
+                    <em class="description"></em>
+                </div>
+        </td>
+        <td>£&nbsp;<span class="cost"></span></td>
+        <td class="quantity"></td>
+        <td>£&nbsp;<span class="sub-total"></span></td>
+        {% if edit %}
+        <td class="vert-align text-right">
+            <div class="btn-group" role="group" aria-label="Action buttons">
+	            <button type="button" class="item-edit btn btn-xs btn-warning"
+			            data-pk="{{item.pk}}"
+			            data-toggle="modal" data-target="#itemModal">
+		            <span class="fas fa-edit"></span>
+	            </button>
+	            <button type="button" class="item-delete btn btn-xs btn-danger"
+			            data-pk="{{item.pk}}">
+		            <span class="fas fa-times-circle"></span>
+	            </button>
+            </div>
+        </td>
+	    {% endif %}
+    </tr>
 </table>
