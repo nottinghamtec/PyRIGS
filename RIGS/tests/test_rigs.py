@@ -67,7 +67,7 @@ class TestRigboard(AutoLoginTest):
         # Ideally get a response object to assert 200 on
 
 
-class TEventCreate(AutoLoginTest):
+class TestEventCreate(AutoLoginTest):
     def setUp(self):
         super().setUp()
         self.client = models.Person.objects.create(name='Creation Test Person', email='god@functional.test')
@@ -149,6 +149,48 @@ class TEventCreate(AutoLoginTest):
         self.assertFalse(modal.is_open)
 
         # TODO
+        
+    def test_date_validation(self):
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.page.is_expanded)
+        self.page.select_event_type("Rig")
+        self.wait.until(animation_is_finished())
+        self.assertTrue(self.page.is_expanded)
+        
+        self.page.person_selector.toggle()
+        self.assertTrue(self.page.person_selector.is_open)
+        self.page.person_selector.search(self.client.name)
+        self.page.person_selector.set_option(self.client.name, True)
+        # TODO This should not be necessary, normally closes automatically
+        self.page.person_selector.toggle()
+        self.assertFalse(self.page.person_selector.is_open)
+
+        self.page.name = "Test Date Validation"
+        # Both dates, no times, end before start
+        self.page.start_date = datetime.date(2020, 1, 10)
+        self.page.end_date = datetime.date(2020, 1, 1)
+        # Expected to fail
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
+        self.wait.until(animation_is_finished())
+        
+        #end time before start
+        self.page.start_date = datetime.date(2020, 1, 1)
+        self.page.start_time = datetime.time(10)
+        self.page.end_time = datetime.time(9)
+        
+        # Expected to fail
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
+        
+        # Fix it
+        self.page.end_time = datetime.time(23)
+
+        # Should work
+        self.page.submit()
+        self.assertTrue(self.page.success)
 
     def test_event_item_creation(self):
         self.wait.until(animation_is_finished())

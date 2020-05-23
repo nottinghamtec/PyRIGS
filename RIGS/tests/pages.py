@@ -54,7 +54,7 @@ class CreateEvent(FormPage):
 
     _is_rig_selector = (By.ID, 'is_rig-selector')
     _bottom_save_selector = (By.XPATH, '//*[@id="main"]/form/div/div[6]/div/button')
-    _submit_locator = _bottom_save_selector
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
     # TODO The ID is now no longer on the highest level element on the selector, annoyingly
     _person_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
     _venue_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
@@ -72,8 +72,8 @@ class CreateEvent(FormPage):
         'name': (regions.TextBox, (By.ID, 'id_name')),
         'start_date': (regions.DatePicker, (By.ID, 'id_start_date')),
         'start_time': (regions.TimePicker, (By.ID, 'id_start_time')),
-        'end_date': (regions.DatePicker, (By.ID, 'id_start_date')),
-        'end_time': (regions.TimePicker, (By.ID, 'id_start_time')),
+        'end_date': (regions.DatePicker, (By.ID, 'id_end_date')),
+        'end_time': (regions.TimePicker, (By.ID, 'id_end_time')),
         'access_at': (regions.DateTimePicker, (By.ID, 'id_access_at')),
         'meet_at': (regions.DateTimePicker, (By.ID, 'id_meet_at')),
         'dry_hire': (regions.CheckBox, (By.ID, 'id_dry_hire')),
