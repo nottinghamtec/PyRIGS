@@ -12,7 +12,7 @@ gunicorn==20.0.4
 icalendar==4.0.4
 lxml==4.5.0
 premailer==3.6.1
-psycopg2==2.8.4
+psycopg2-binary==2.8.4
 PyPDF2==1.26.0
 PyPOM==2.2.0
 pytz==2019.3

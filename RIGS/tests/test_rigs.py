@@ -67,7 +67,7 @@ class TestRigboard(AutoLoginTest):
         # Ideally get a response object to assert 200 on
 
 
-class TestEventCreate(AutoLoginTest):
+class TEventCreate(AutoLoginTest):
     def setUp(self):
         super().setUp()
         self.client = models.Person.objects.create(name='Creation Test Person', email='god@functional.test')
@@ -239,3 +239,106 @@ class TestEventCreate(AutoLoginTest):
 
     def test_subhire_creation(self):
         pass
+    
+
+class TestEventDuplicate(AutoLoginTest):
+    def setUp(self):
+        super().setUp()
+        self.client = models.Person.objects.create(name='Duplicate Test Person', email='duplicate@functional.test')
+        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                                start_date=date.today() + timedelta(days=6),
+                                                description="start future no end",
+                                                purchase_order='TESTPO',
+                                                person=self.client,
+                                                auth_request_by=self.profile,
+                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                auth_request_to="some@email.address")
+
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
+        self.page = pages.DuplicateEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        self.wait = WebDriverWait(self.driver, 5)
+        
+    def test_rig_duplicate(self):
+        table = self.page.item_table
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+        
+        # Check the info message is visible
+        self.assertIn("Event data duplicated but not yet saved", self.page.warning)
+
+        modal = self.page.add_event_item()
+        self.wait.until(animation_is_finished())
+        # See modal has opened
+        self.assertTrue(modal.is_open)
+        self.assertIn(self.testEvent.name, modal.header)
+
+        modal.name = "Test Item 3"
+        modal.description = "This is an item description\nthat for reasons unknown spans two lines"
+        modal.quantity = "2"
+        modal.price = "23.95"
+        modal.submit()
+        self.wait.until(animation_is_finished())
+
+        # Attempt to save 
+        ActionChains(self.driver).move_to_element(table).perform()
+        self.page.submit()
+        
+        # TODO Rewrite when EventDetail page is implemented
+        newEvent = models.Event.objects.latest('pk')
+
+        self.assertEqual(newEvent.auth_request_to, None)
+        self.assertEqual(newEvent.auth_request_by, None)
+        self.assertEqual(newEvent.auth_request_at, None)
+
+        self.assertFalse(hasattr(newEvent, 'authorised'))
+
+        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h1').text)
+        self.assertNotIn("Event data duplicated but not yet saved", self.page.warning)  # Check info message not visible
+
+        # Check the new items are visible
+        table = self.page.item_table
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+        self.assertIn("Test Item 3", table.text)
+
+        infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertIn("N0000%d" % self.testEvent.pk,
+                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        # Check the PO hasn't carried through
+        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+
+        self.assertIn("N%05d" % self.testEvent.pk,
+                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+
+        self.driver.get(self.live_server_url + '/event/' + str(self.testEvent.pk))  # Go back to the old event
+
+        # Check that based-on hasn't crept into the old event
+        infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        self.assertNotIn("N0000%d" % self.testEvent.pk,
+                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        # Check the PO remains on the old event
+        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+
+        self.assertNotIn("N%05d" % self.testEvent.pk,
+                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+
+        # Check the items are as they were
+        table = self.page.item_table  # ID number is known, see above
+        self.assertIn("Test Item 1", table.text)
+        self.assertIn("Test Item 2", table.text)
+        self.assertNotIn("Test Item 3", table.text)

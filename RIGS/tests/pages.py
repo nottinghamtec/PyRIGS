@@ -62,6 +62,9 @@ class CreateEvent(FormPage):
 
     _add_person_selector = (By.XPATH, '//a[@data-target="#id_person" and contains(@href, "add")]')
     _add_item_selector = (By.XPATH, '//button[contains(@class, "item-add")]')
+    
+    _event_table_selector = (By.ID, 'item-table')
+    _warning_selector = (By.XPATH, '/html/body/div[1]/div[1]')
 
     form_items = {
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -86,6 +89,14 @@ class CreateEvent(FormPage):
 
     def item_row(self, ID):
         return rigs_regions.ItemRow(self, self.find_element(By.ID, "item-" + ID))
+    
+    @property
+    def item_table(self):
+        return self.find_element(*self._event_table_selector)
+    
+    @property
+    def warning(self):
+        return self.find_element(*self._warning_selector).text
 
     @property
     def is_expanded(self):
@@ -116,6 +127,14 @@ class CreateEvent(FormPage):
     @property
     def success(self):
         return '/create' not in self.driver.current_url
+    
+class DuplicateEvent(CreateEvent):
+    URL_TEMPLATE = 'event/{event_id}/duplicate'
+    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
+    
+    @property
+    def success(self):
+        return '/duplicate' not in self.driver.current_url
 
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')
