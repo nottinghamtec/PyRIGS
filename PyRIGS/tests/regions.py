@@ -149,6 +149,7 @@ class DateTimePicker(Region):
         self.root.send_keys(Keys.TAB)
         self.root.send_keys(time)
 
+
 class SingleSelectPicker(Region):
     @property
     def value(self):

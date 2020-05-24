@@ -83,7 +83,7 @@ class InvoicePrint(generic.View):
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (
-        invoice.pk, invoice.event.pk, escapedEventName)
+            invoice.pk, invoice.event.pk, escapedEventName)
         response.write(pdfData)
         return response
 
@@ -176,8 +176,8 @@ class InvoiceWaiting(generic.ListView):
         # @todo find a way to select items
         events = self.model.objects.filter(
             (
-                    Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
-                    Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
+                Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
+                Q(end_date__lte=datetime.date.today())  # Has end date, finishes before
             ) & Q(invoice__isnull=True) &  # Has not already been invoiced
             Q(is_rig=True)  # Is a rig (not non-rig)
 

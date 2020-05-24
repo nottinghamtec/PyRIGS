@@ -28,6 +28,7 @@ from django.conf import settings
 
 import sys
 
+
 class IcalTest(LiveServerTestCase):
     def setUp(self):
         self.all_events = set(range(1, 18))
@@ -414,6 +415,7 @@ class TECEventAuthorisationTest(TestCase):
         self.assertEqual(self.event.auth_request_by, self.profile)
         self.assertEqual(self.event.auth_request_to, 'client@functional.test')
         self.assertIsNotNone(self.event.auth_request_at)
+
 
 class SearchTest(LiveServerTestCase):
     def setUp(self):

@@ -185,4 +185,3 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(profileObject.email, 'test@example.com')
 
         # All is well
-

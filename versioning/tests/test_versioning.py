@@ -194,6 +194,8 @@ class RIGSVersionTestCase(TestCase):
         self.assertTrue(diffs[0].new is None)
 
 # Unit Tests
+
+
 class TestVersioningViews(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -273,5 +275,4 @@ class TestVersioningViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-#Functional Tests
-
+# Functional Tests

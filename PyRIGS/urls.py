@@ -8,7 +8,8 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.views import LoginView
 from registration.backends.default.views import RegistrationView
 from PyRIGS.decorators import permission_required_with_403
-import RIGS, users
+import RIGS
+import users
 from PyRIGS import views
 
 urlpatterns = [

@@ -7,9 +7,11 @@ import pytz
 from datetime import date, time, datetime, timedelta
 from django.conf import settings
 
+
 def create_datetime(year, month, day, hour, min):
-        tz = pytz.timezone(settings.TIME_ZONE)
-        return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
+    tz = pytz.timezone(settings.TIME_ZONE)
+    return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
+
 
 def create_browser():
     options = webdriver.ChromeOptions()

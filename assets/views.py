@@ -300,6 +300,7 @@ class ActivityTable(versioning.ActivityTable):
 
         return context
 
+
 class CableTypeList(generic.ListView):
     model = models.CableType
     template_name = 'cable_type_list.html'

@@ -20,19 +20,20 @@ from django.utils import timezone
 from selenium.webdriver.common.action_chains import ActionChains
 from django.db import transaction
 
+
 class BaseRigboardTest(AutoLoginTest):
     def setUp(self):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         super().setUp()
         self.client = models.Person.objects.create(name='Rigboard Test Person', email='rigboard@functional.test')
         self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
-                                                start_date=date.today() + timedelta(days=6),
-                                                description="start future no end",
-                                                purchase_order='TESTPO',
-                                                person=self.client,
-                                                auth_request_by=self.profile,
-                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
-                                                auth_request_to="some@email.address")
+                                                     start_date=date.today() + timedelta(days=6),
+                                                     description="start future no end",
+                                                     purchase_order='TESTPO',
+                                                     person=self.client,
+                                                     auth_request_by=self.profile,
+                                                     auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                     auth_request_to="some@email.address")
 
         item1 = models.EventItem(
             event=self.testEvent,
@@ -50,7 +51,7 @@ class BaseRigboardTest(AutoLoginTest):
             order=2,
         ).save()
         self.wait = WebDriverWait(self.driver, 5)
-        
+
     def select_event_type(self, event_type):
         self.wait.until(animation_is_finished())
         self.assertFalse(self.page.is_expanded)
@@ -58,17 +59,18 @@ class BaseRigboardTest(AutoLoginTest):
         self.wait.until(animation_is_finished())
         self.assertTrue(self.page.is_expanded)
 
+
 class TestRigboard(BaseRigboardTest):
     def setUp(self):
         super().setUp()
         self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
-                                                start_date=date.today() + timedelta(days=8),
-                                                description="start future no end, later",
-                                                purchase_order='TESTPO',
-                                                person=self.client,
-                                                auth_request_by=self.profile,
-                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
-                                                auth_request_to="some@email.address")
+                                                      start_date=date.today() + timedelta(days=8),
+                                                      description="start future no end, later",
+                                                      purchase_order='TESTPO',
+                                                      person=self.client,
+                                                      auth_request_by=self.profile,
+                                                      auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                      auth_request_to="some@email.address")
         self.page = pages.Rigboard(self.driver, self.live_server_url).open()
 
     def test_buttons(self):
@@ -163,10 +165,10 @@ class TestEventCreate(BaseRigboardTest):
         self.assertEqual(self.page.person_selector.options[1].name, person_name)
 
         # TODO
-        
+
     def test_date_validation(self):
         self.select_event_type("Rig")
-        
+
         self.page.person_selector.toggle()
         self.assertTrue(self.page.person_selector.is_open)
         self.page.person_selector.search(self.client.name)
@@ -184,17 +186,17 @@ class TestEventCreate(BaseRigboardTest):
         self.assertFalse(self.page.success)
         self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
         self.wait.until(animation_is_finished())
-        
-        #end time before start
+
+        # end time before start
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.start_time = datetime.time(10)
         self.page.end_time = datetime.time(9)
-        
+
         # Expected to fail
         self.page.submit()
         self.assertFalse(self.page.success)
         self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
-        
+
         # Fix it
         self.page.end_time = datetime.time(23)
 
@@ -283,18 +285,18 @@ class TestEventCreate(BaseRigboardTest):
 
     def test_subhire_creation(self):
         pass
-    
+
 
 class TestEventDuplicate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
         self.page = pages.DuplicateEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        
+
     def test_rig_duplicate(self):
         table = self.page.item_table
         self.assertIn("Test Item 1", table.text)
         self.assertIn("Test Item 2", table.text)
-        
+
         # Check the info message is visible
         self.assertIn("Event data duplicated but not yet saved", self.page.warning)
 
@@ -311,10 +313,10 @@ class TestEventDuplicate(BaseRigboardTest):
         modal.submit()
         self.wait.until(animation_is_finished())
 
-        # Attempt to save 
+        # Attempt to save
         ActionChains(self.driver).move_to_element(table).perform()
         self.page.submit()
-        
+
         # TODO Rewrite when EventDetail page is implemented
         newEvent = models.Event.objects.latest('pk')
 
@@ -359,16 +361,16 @@ class TestEventDuplicate(BaseRigboardTest):
         self.assertIn("Test Item 1", table.text)
         self.assertIn("Test Item 2", table.text)
         self.assertNotIn("Test Item 3", table.text)
-        
-    
+
+
 class TestEventEdit(BaseRigboardTest):
     def setUp(self):
         super().setUp()
         self.page = pages.EditEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        
+
     def test_rig_edit(self):
         self.page.name = "Edited Event"
-        
+
         modal = self.page.add_event_item()
         self.wait.until(animation_is_finished())
         # See modal has opened
@@ -382,25 +384,25 @@ class TestEventEdit(BaseRigboardTest):
         modal.submit()
         self.wait.until(animation_is_finished())
 
-        # Attempt to save 
+        # Attempt to save
         ActionChains(self.driver).move_to_element(self.page.item_table).perform()
         self.page.submit()
-        
+
         self.assertTrue(self.page.success)
-        
+
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
         self.assertIn(self.page.event_name, self.testEvent.name)
         self.assertEqual(self.page.name, self.testEvent.person.name)
         # Check the new items are visible
         table = self.page.item_table
         self.assertIn("Test Item 3", table.text)
-        
-        
+
+
 class TestEventDetail(BaseRigboardTest):
     def setUp(self):
         super().setUp()
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-            
+
     def test_rig_detail(self):
         self.assertIn("N%05d | %s" % (self.testEvent.pk, self.testEvent.name), self.page.event_name)
         self.assertEqual(person.name, self.page.name)
