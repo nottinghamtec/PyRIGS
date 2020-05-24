@@ -9,7 +9,7 @@
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
       <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
         {% if object.purchased_from %}
-            <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
+        <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
         {% endif %}
       </select>
     </div>
@@ -37,7 +37,7 @@
       {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
       {% endwith %}
       {% else %}
-      <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
+      <input type="date" name="date_acquired" value="{% now 'Y-m-d' %}"
                     class="form-control" id="id_date_acquired">
                 {% endif %}
               </div>

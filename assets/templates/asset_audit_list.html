@@ -56,10 +56,12 @@
 
 <h3>Audit Asset:</h3>
 <form id="asset-search-form" class="form-horizontal" method="POST">
-  <div class="input-group input-group-lg" style="width: auto;">
+  <div class="input-group input-group-lg" style="width=auto;">
     {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
-    <label for="query" class="sr-only">Asset ID:</label>
-    <span class="input-group-btn"><a id="searchButton" class="btn btn-default" class="submit" type="submit">Search</a></span>
+    <div class="input-group-append">
+        <label for="query" class="sr-only">Asset ID:</label>
+        <a id="searchButton" class="btn btn-primary" class="submit" type="submit">Search</a>
+    </div>
   </div>
 </form>
 

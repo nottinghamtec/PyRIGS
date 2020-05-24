@@ -7,7 +7,11 @@
     {% if create or edit or duplicate %}
     <div class="form-group" id="parent-group">
       <label for="selectpicker">Set Parent</label>
-      {% include 'partials/asset_picker.html' %}
+      <select name="parent" id="parent_id" class="form-control selectpicker" data-live-search="true">
+        {% if object.parent %}
+        <option value="{{object.parent.pk}}" selected>{{object.parent.description}}</option>
+        {% endif %}
+      </select>
     </div>
     {% else %}
     <dl>

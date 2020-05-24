@@ -308,17 +308,17 @@ class TestAssetAudit(AutoLoginTest):
     def test_audit_list(self):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
 
-        assetRow = self.page.assets[0]
-        assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
+        asset_row = self.page.assets[0]
+        asset_row.find_element(By.XPATH, "//button[contains(., 'Audit')]").click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
-        self.assertEqual(self.page.modal.asset_id, assetRow.id)
+        self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
         # First close button is for the not found error
         self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
         self.wait.until(animation_is_finished())
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
-        audited = models.Asset.objects.get(asset_id=assetRow.id)
+        audited = models.Asset.objects.get(asset_id=asset_row.id)
         self.assertEqual(None, audited.last_audited_by)
 
         # Check that a failed search works

@@ -5,8 +5,8 @@
 {% block title %}Asset {{ object.asset_id }}{% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static "css/bootstrap-select.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
 {% endblock %}
 
 {% block js %}
@@ -22,6 +22,51 @@
           }
         }
         checkIfCableHidden();
+    </script>
+    <script>
+    $('#parent_id')
+        .selectpicker({
+            liveSearch: true
+        })
+        .ajaxSelectPicker({
+            ajax: {
+                url: '{% url 'asset_search_json' %}',
+                type: "GET",
+                data: function () {
+                    var params = {
+                        {% verbatim %}query: '{{{q}}}'{% endverbatim  %}
+                    };
+                    return params;
+                }
+            },
+            locale: {
+                emptyTitle: 'Search for item...'
+            },
+            preprocessData: function(data){
+                var assets = [];
+                if(data.length){
+                    var len = data.length;
+                    for(var i = 0; i < len; i++){
+                        var curr = data[i];
+                        assets.push(
+                            {
+                                'value': curr.id,
+                                'text': curr.label,
+                                'disabled': false
+                            }
+                        );
+                    }
+                    assets.push(
+                    {
+                        'value': null,
+                        'text': "No parent"
+                    });
+                }
+
+                return assets;
+            },
+            preserveSelected: false
+        });
     </script>
 {% endblock %}
 
