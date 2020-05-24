@@ -47,7 +47,33 @@ class Rigboard(BasePage):
     @property
     def events(self):
         return [self.EventListRow(self, i) for i in self.find_elements(*self._event_row_locator)]
+    
 
+class EventDetail(BasePage):
+    URL_TEMPLATE = 'event/{event_id}'
+    
+    # TODO Refactor into regions to match template fragmentation
+    _event_name_selector = (By.XPATH, '//h1')
+    _person_panel_selector = (By.XPATH, '//div[contains(text(), "Contact Details")]/..')
+    _name_selector = (By.XPATH, '//dt[text()="Person"]/following-sibling::dd[1]')
+    _email_selector = (By.XPATH, '//dt[text()="Email"]/following-sibling::dd[1]')
+    _phone_selector = (By.XPATH, '//dt[text()="Phone Number"]/following-sibling::dd[1]')
+    
+    @property
+    def event_name(self):
+        return self.find_element(*self._event_name_selector).text
+    
+    @property
+    def name(self):
+        return self.find_element(*self._person_panel_selector).find_element(*self._name_selector).text
+        
+    @property
+    def email(self):
+        return self.find_element(*self._person_panel_selector).find_element(*self._email_selector).text
+    
+    @property
+    def phone(self):
+        return self.find_element(*self._person_panel_selector).find_element(*self._phone_selector).text
 
 class CreateEvent(FormPage):
     URL_TEMPLATE = reverse('event_create')
@@ -135,6 +161,14 @@ class DuplicateEvent(CreateEvent):
     @property
     def success(self):
         return '/duplicate' not in self.driver.current_url
+    
+class EditEvent(CreateEvent):
+    URL_TEMPLATE = 'event/{event_id}/edit'
+    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
+    
+    @property
+    def success(self):
+        return '/edit' not in self.driver.current_url
 
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')

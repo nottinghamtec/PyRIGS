@@ -18,29 +18,57 @@ import datetime
 from datetime import date, time, timedelta
 from django.utils import timezone
 from selenium.webdriver.common.action_chains import ActionChains
+from django.db import transaction
 
-class TestRigboard(AutoLoginTest):
+class BaseRigboardTest(AutoLoginTest):
     def setUp(self):
-        super().setUp()
-        client = models.Person.objects.create(name='Rigboard Test Person', email='rigboard@functional.test')
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+        super().setUp()
+        self.client = models.Person.objects.create(name='Rigboard Test Person', email='rigboard@functional.test')
         self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                 start_date=date.today() + timedelta(days=6),
                                                 description="start future no end",
                                                 purchase_order='TESTPO',
-                                                person=client,
-                                                auth_request_by=self.profile,
-                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
-                                                auth_request_to="some@email.address")
-        self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
-                                                start_date=date.today() + timedelta(days=8),
-                                                description="start future no end, later",
-                                                purchase_order='TESTPO',
-                                                person=client,
+                                                person=self.client,
                                                 auth_request_by=self.profile,
                                                 auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
                                                 auth_request_to="some@email.address")
 
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
+        self.wait = WebDriverWait(self.driver, 5)
+        
+    def select_event_type(self, event_type):
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.page.is_expanded)
+        self.page.select_event_type(event_type)
+        self.wait.until(animation_is_finished())
+        self.assertTrue(self.page.is_expanded)
+
+class TestRigboard(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
+        self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
+                                                start_date=date.today() + timedelta(days=8),
+                                                description="start future no end, later",
+                                                purchase_order='TESTPO',
+                                                person=self.client,
+                                                auth_request_by=self.profile,
+                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                auth_request_to="some@email.address")
         self.page = pages.Rigboard(self.driver, self.live_server_url).open()
 
     def test_buttons(self):
@@ -67,20 +95,13 @@ class TestRigboard(AutoLoginTest):
         # Ideally get a response object to assert 200 on
 
 
-class TestEventCreate(AutoLoginTest):
+class TestEventCreate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
-        self.client = models.Person.objects.create(name='Creation Test Person', email='god@functional.test')
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         self.page = pages.CreateEvent(self.driver, self.live_server_url).open()
-        self.wait = WebDriverWait(self.driver, 5)
 
     def test_rig_creation(self):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type("Rig")
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
+        self.select_event_type("Rig")
 
         self.page.person_selector.toggle()
         self.assertTrue(self.page.person_selector.is_open)
@@ -107,11 +128,7 @@ class TestEventCreate(AutoLoginTest):
 
     # TODO
     def test_modals(self):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type("Rig")
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
+        self.select_event_type("Rig")
         # Create new person
         modal = self.page.add_person()
         # animation_is_finished doesn't work for whatever reason...
@@ -127,13 +144,9 @@ class TestEventCreate(AutoLoginTest):
         self.assertFalse(modal.is_open)
 
         # See new person selected
-        select_element = self.driver.find_element(By.ID,'id_person')
-        select_object = Select(select_element)
-
-        person1 = models.Person.objects.get(name=person_name)
-        self.assertEqual(person1.name, select_object.first_selected_option.text)
-        # and backend
-        # self.assertEqual(person1.pk, int(self.page.person_selector.get_attribute("value")))
+        self.page.person_selector.toggle()
+        self.assertEqual(self.page.person_selector.options[0].name, person_name)
+        self.page.person_selector.toggle()
 
         # Change mind and add another
         self.wait.until(animation_is_finished())
@@ -147,15 +160,12 @@ class TestEventCreate(AutoLoginTest):
         modal.submit()
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(modal.is_open)
+        self.assertEqual(self.page.person_selector.options[1].name, person_name)
 
         # TODO
         
     def test_date_validation(self):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type("Rig")
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
+        self.select_event_type("Rig")
         
         self.page.person_selector.toggle()
         self.assertTrue(self.page.person_selector.is_open)
@@ -193,11 +203,7 @@ class TestEventCreate(AutoLoginTest):
         self.assertTrue(self.page.success)
 
     def test_event_item_creation(self):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type("Rig")
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
+        self.select_event_type("Rig")
 
         self.page.name = "Test Event with Items"
 
@@ -255,11 +261,7 @@ class TestEventCreate(AutoLoginTest):
     # TODO Testing of internal rig (approval system interface)
 
     def test_non_rig_creation(self):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type("Non-Rig")
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
+        self.select_event_type("Non-Rig")
 
         self.assertFalse(self.page.person_selector.is_open)
 
@@ -283,37 +285,10 @@ class TestEventCreate(AutoLoginTest):
         pass
     
 
-class TestEventDuplicate(AutoLoginTest):
+class TestEventDuplicate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
-        self.client = models.Person.objects.create(name='Duplicate Test Person', email='duplicate@functional.test')
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
-                                                start_date=date.today() + timedelta(days=6),
-                                                description="start future no end",
-                                                purchase_order='TESTPO',
-                                                person=self.client,
-                                                auth_request_by=self.profile,
-                                                auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
-                                                auth_request_to="some@email.address")
-
-        item1 = models.EventItem(
-            event=self.testEvent,
-            name="Test Item 1",
-            cost="10.00",
-            quantity="1",
-            order=1
-        ).save()
-        item2 = models.EventItem(
-            event=self.testEvent,
-            name="Test Item 2",
-            description="Foo",
-            cost="9.72",
-            quantity="3",
-            order=2,
-        ).save()
         self.page = pages.DuplicateEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        self.wait = WebDriverWait(self.driver, 5)
         
     def test_rig_duplicate(self):
         table = self.page.item_table
@@ -384,3 +359,50 @@ class TestEventDuplicate(AutoLoginTest):
         self.assertIn("Test Item 1", table.text)
         self.assertIn("Test Item 2", table.text)
         self.assertNotIn("Test Item 3", table.text)
+        
+    
+class TestEventEdit(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
+        self.page = pages.EditEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        
+    def test_rig_edit(self):
+        self.page.name = "Edited Event"
+        
+        modal = self.page.add_event_item()
+        self.wait.until(animation_is_finished())
+        # See modal has opened
+        self.assertTrue(modal.is_open)
+        self.assertIn(self.testEvent.name, modal.header)
+
+        modal.name = "Test Item 3"
+        modal.description = "This is an item description\nthat for reasons unknown spans two lines"
+        modal.quantity = "2"
+        modal.price = "23.95"
+        modal.submit()
+        self.wait.until(animation_is_finished())
+
+        # Attempt to save 
+        ActionChains(self.driver).move_to_element(self.page.item_table).perform()
+        self.page.submit()
+        
+        self.assertTrue(self.page.success)
+        
+        self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        self.assertIn(self.page.event_name, self.testEvent.name)
+        self.assertEqual(self.page.name, self.testEvent.person.name)
+        # Check the new items are visible
+        table = self.page.item_table
+        self.assertIn("Test Item 3", table.text)
+        
+        
+class TestEventDetail(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
+        self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+            
+    def test_rig_detail(self):
+        self.assertIn("N%05d | %s" % (self.testEvent.pk, self.testEvent.name), self.page.event_name)
+        self.assertEqual(person.name, self.page.name)
+        self.assertEqual(person.email, self.page.email)
+        self.assertEqual(person.phone, self.page.phone)
