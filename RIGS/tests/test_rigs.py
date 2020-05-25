@@ -203,6 +203,33 @@ class TestEventCreate(BaseRigboardTest):
         # Should work
         self.page.submit()
         self.assertTrue(self.page.success)
+        
+    def test_access_validation(self):
+        self.select_event_type("Rig")
+
+        self.page.person_selector.toggle()
+        self.assertTrue(self.page.person_selector.is_open)
+        self.page.person_selector.search(self.client.name)
+        self.page.person_selector.set_option(self.client.name, True)
+        # TODO This should not be necessary, normally closes automatically
+        self.page.person_selector.toggle()
+        self.assertFalse(self.page.person_selector.is_open)
+        
+        self.page.name = "Access Validation Test"
+        
+        self.page.start_date = datetime.date(2020, 1, 1)
+        self.page.access_at = datetime.datetime(2020, 1, 5, 10)
+                                            
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("access time cannot be after the event has started.", self.page.errors["General form errors"][0])
+        
+        #Fix it
+        self.page.access_at = datetime.datetime(2020, 1, 1, 10)
+        
+        # Should work
+        self.page.submit()
+        self.assertTrue(self.page.success)
 
     def test_event_item_creation(self):
         self.select_event_type("Rig")
@@ -217,7 +244,8 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 
-        self.page.start_date = datetime.date(1984, 1, 1)
+        # Note to self, don't set dates before 2014, which is the beginning of VAT as far as the tests are concerned...
+        self.page.start_date = datetime.date(2084, 1, 1)
 
         modal = self.page.add_event_item()
         self.wait.until(animation_is_finished())
