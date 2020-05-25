@@ -138,7 +138,7 @@ class SecureAPIRequest(generic.View):
 
 class GenericListView(generic.ListView):
     paginate_by = 20
-    
+
     def get_queryset(self):
         q = self.request.GET.get('q', "")
 

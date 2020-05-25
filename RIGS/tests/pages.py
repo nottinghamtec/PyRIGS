@@ -59,6 +59,7 @@ class EventDetail(BasePage):
     _name_selector = (By.XPATH, '//dt[text()="Person"]/following-sibling::dd[1]')
     _email_selector = (By.XPATH, '//dt[text()="Email"]/following-sibling::dd[1]')
     _phone_selector = (By.XPATH, '//dt[text()="Phone Number"]/following-sibling::dd[1]')
+    _event_table_selector = (By.ID, 'item-table')
 
     @property
     def event_name(self):
@@ -75,6 +76,10 @@ class EventDetail(BasePage):
     @property
     def phone(self):
         return self.find_element(*self._person_panel_selector).find_element(*self._phone_selector).text
+
+    @property
+    def item_table(self):
+        return self.find_element(*self._event_table_selector)
 
 
 class CreateEvent(FormPage):

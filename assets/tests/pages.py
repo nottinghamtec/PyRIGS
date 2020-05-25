@@ -16,7 +16,7 @@ class AssetList(BasePage):
     _search_text_locator = (By.ID, 'id_query')
     _status_select_locator = (By.CSS_SELECTOR, 'div#status-group>div.bootstrap-select')
     _category_select_locator = (By.CSS_SELECTOR, 'div#category-group>div.bootstrap-select')
-    _go_button_locator = (By.ID, 'filter-submit')
+    _go_button_locator = (By.ID, 'id_search')
 
     class AssetListRow(Region):
         _asset_id_locator = (By.CLASS_NAME, "assetID")
@@ -123,12 +123,12 @@ class AssetDuplicate(AssetForm):
 class SupplierList(BasePage):
     URL_TEMPLATE = reverse('supplier_list')
 
-    _supplier_item_locator = (By.CLASS_NAME, 'supplierRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _supplier_item_locator = (By.ID, 'row_item')
+    _search_text_locator = (By.XPATH, '//*[@id="main"]/div[2]/form/div/input')
     _go_button_locator = (By.ID, 'id_search')
 
     class SupplierListRow(Region):
-        _name_locator = (By.CLASS_NAME, "supplierName")
+        _name_locator = (By.ID, "cell_name")
 
         @property
         def name(self):

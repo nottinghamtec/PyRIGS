@@ -166,7 +166,9 @@ class TestEventCreate(BaseRigboardTest):
         modal.submit()
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(modal.is_open)
-        self.assertEqual(self.page.person_selector.options[1].name, person_name)
+        self.page.person_selector.toggle()
+        self.assertEqual(self.page.person_selector.options[0].name, person_name)
+        self.page.person_selector.toggle()
 
         # TODO
 
@@ -392,7 +394,7 @@ class TestEventDuplicate(BaseRigboardTest):
         self.assertIn("Test Item 3", table.text)
 
         infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
-        self.assertIn("N0000%d" % self.testEvent.pk,
+        self.assertIn("N%05d" % self.testEvent.pk,
                       infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
         # Check the PO hasn't carried through
         self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
@@ -404,7 +406,7 @@ class TestEventDuplicate(BaseRigboardTest):
 
         # Check that based-on hasn't crept into the old event
         infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
-        self.assertNotIn("N0000%d" % self.testEvent.pk,
+        self.assertNotIn("N%05d" % self.testEvent.pk,
                          infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
         # Check the PO remains on the old event
         self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
@@ -471,7 +473,8 @@ class TestEventEdit(BaseRigboardTest):
         self.assertTrue(self.page.success)
 
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        self.assertIn(self.page.event_name, self.testEvent.name)
+        self.testEvent.refresh_from_db()
+        self.assertIn(self.testEvent.name, self.page.event_name)
         self.assertEqual(self.page.name, self.testEvent.person.name)
         # Check the new items are visible
         table = self.page.item_table
@@ -509,9 +512,9 @@ class TestEventDetail(BaseRigboardTest):
 
     def test_rig_detail(self):
         self.assertIn("N%05d | %s" % (self.testEvent.pk, self.testEvent.name), self.page.event_name)
-        self.assertEqual(person.name, self.page.name)
-        self.assertEqual(person.email, self.page.email)
-        self.assertEqual(person.phone, self.page.phone)
+        self.assertEqual(self.client.name, self.page.name)
+        self.assertEqual(self.client.email, self.page.email)
+        self.assertEqual(self.client.phone, None)
 
 
 class TestCalendar(BaseRigboardTest):

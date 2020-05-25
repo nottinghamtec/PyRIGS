@@ -135,15 +135,12 @@ class TestAssetForm(AutoLoginTest):
 
         self.page.parent_selector.toggle()
         self.assertTrue(self.page.parent_selector.is_open)
-        # Searching it by ID autoselects it
         self.page.parent_selector.search(self.parent.asset_id)
         # Needed here but not earlier for whatever reason
         self.driver.implicitly_wait(1)
-        # self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
-        # Need to explicitly close as we haven't selected anything to trigger the auto close
-        self.page.parent_selector.search(Keys.ESCAPE)
-        self.assertFalse(self.page.parent_selector.is_open)
+        self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
         self.assertTrue(self.page.parent_selector.options[0].selected)
+        self.page.parent_selector.toggle()
 
         self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
 
@@ -220,6 +217,7 @@ class TestSupplierList(AutoLoginTest):
     def test_search(self):
         self.page.set_query("TEC")
         self.page.search()
+
         self.assertTrue(len(self.page.suppliers) == 1)
         self.assertEqual("TEC PA & Lighting", self.page.suppliers[0].name)
 
@@ -291,7 +289,7 @@ class TestAssetAudit(AutoLoginTest):
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
-        self.wait.until(animation_is_finished())
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
         # Check data is correct
@@ -309,13 +307,13 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
 
         asset_row = self.page.assets[0]
-        asset_row.find_element(By.XPATH, "//button[contains(., 'Audit')]").click()
+        self.driver.find_element(By.XPATH, "//*[@id='asset_table_body']/tr[1]/td[4]/a").click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
         # First close button is for the not found error
-        self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
-        self.wait.until(animation_is_finished())
+        self.page.find_element(By.XPATH, '//*[@id="modal"]/div/div/div[1]/button').click()
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
