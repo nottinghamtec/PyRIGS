@@ -19,6 +19,7 @@ from datetime import date, time, timedelta
 from django.utils import timezone
 from selenium.webdriver.common.action_chains import ActionChains
 from django.db import transaction
+from django.test.client import Client
 
 
 class BaseRigboardTest(AutoLoginTest):
@@ -26,6 +27,19 @@ class BaseRigboardTest(AutoLoginTest):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         super().setUp()
         self.client = models.Person.objects.create(name='Rigboard Test Person', email='rigboard@functional.test')
+        self.wait = WebDriverWait(self.driver, 5)
+
+    def select_event_type(self, event_type):
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.page.is_expanded)
+        self.page.select_event_type(event_type)
+        self.wait.until(animation_is_finished())
+        self.assertTrue(self.page.is_expanded)
+
+
+class TestRigboard(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
         self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                      start_date=date.today() + timedelta(days=6),
                                                      description="start future no end",
@@ -50,19 +64,6 @@ class BaseRigboardTest(AutoLoginTest):
             quantity="3",
             order=2,
         ).save()
-        self.wait = WebDriverWait(self.driver, 5)
-
-    def select_event_type(self, event_type):
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.page.is_expanded)
-        self.page.select_event_type(event_type)
-        self.wait.until(animation_is_finished())
-        self.assertTrue(self.page.is_expanded)
-
-
-class TestRigboard(BaseRigboardTest):
-    def setUp(self):
-        super().setUp()
         self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
                                                       start_date=date.today() + timedelta(days=8),
                                                       description="start future no end, later",
@@ -318,6 +319,30 @@ class TestEventCreate(BaseRigboardTest):
 class TestEventDuplicate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
+        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                                     start_date=date.today() + timedelta(days=6),
+                                                     description="start future no end",
+                                                     purchase_order='TESTPO',
+                                                     person=self.client,
+                                                     auth_request_by=self.profile,
+                                                     auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                     auth_request_to="some@email.address")
+
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
         self.page = pages.DuplicateEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     def test_rig_duplicate(self):
@@ -394,6 +419,30 @@ class TestEventDuplicate(BaseRigboardTest):
 class TestEventEdit(BaseRigboardTest):
     def setUp(self):
         super().setUp()
+        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                                     start_date=date.today() + timedelta(days=6),
+                                                     description="start future no end",
+                                                     purchase_order='TESTPO',
+                                                     person=self.client,
+                                                     auth_request_by=self.profile,
+                                                     auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                     auth_request_to="some@email.address")
+
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
         self.page = pages.EditEvent(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     def test_rig_edit(self):
@@ -429,6 +478,30 @@ class TestEventEdit(BaseRigboardTest):
 class TestEventDetail(BaseRigboardTest):
     def setUp(self):
         super().setUp()
+        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                                     start_date=date.today() + timedelta(days=6),
+                                                     description="start future no end",
+                                                     purchase_order='TESTPO',
+                                                     person=self.client,
+                                                     auth_request_by=self.profile,
+                                                     auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                     auth_request_to="some@email.address")
+
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     def test_rig_detail(self):
@@ -436,3 +509,188 @@ class TestEventDetail(BaseRigboardTest):
         self.assertEqual(person.name, self.page.name)
         self.assertEqual(person.email, self.page.email)
         self.assertEqual(person.phone, self.page.phone)
+
+
+class TestCalendar(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
+        self.all_events = set(range(1, 18))
+        self.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
+        self.not_current_events = set(self.all_events) - set(self.current_events)
+        
+        # produce 7 normal events - 5 current - 1 last week - 1 two years ago - 2 provisional - 2 confirmed - 3 booked
+        models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                    start_date=date.today() + timedelta(days=6), description="start future no end")
+        models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL, start_date=date.today(),
+                                    description="start today no end")
+        models.Event.objects.create(name="TE E3", status=models.Event.CONFIRMED, start_date=date.today(),
+                                    end_date=date.today(), description="start today with end today")
+        models.Event.objects.create(name="TE E4", status=models.Event.CONFIRMED,
+                                    start_date=date.today() - timedelta(weeks=104),
+                                    description="start past 2 years no end")
+        models.Event.objects.create(name="TE E5", status=models.Event.BOOKED,
+                                    start_date=date.today() - timedelta(days=7),
+                                    end_date=date.today() - timedelta(days=1),
+                                    description="start past 1 week with end past")
+        models.Event.objects.create(name="TE E6", status=models.Event.BOOKED,
+                                    start_date=date.today() - timedelta(days=2),
+                                    start_time=time(8, 00),
+                                    end_date=date.today() + timedelta(days=2),
+                                    end_time=time(23, 00), description="start past, end future")
+        models.Event.objects.create(name="TE E7", status=models.Event.BOOKED,
+                                    start_date=date.today() + timedelta(days=2),
+                                    end_date=date.today() + timedelta(days=2), description="start + end in future")
+
+        # 2 cancelled - 1 current
+        models.Event.objects.create(name="TE E8", start_date=date.today() + timedelta(days=2),
+                                    end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
+                                    description="cancelled in future")
+        models.Event.objects.create(name="TE E9", start_date=date.today() - timedelta(days=1),
+                                    end_date=date.today() + timedelta(days=2), status=models.Event.CANCELLED,
+                                    description="cancelled and started")
+
+        # 5 dry hire - 3 current - 1 cancelled
+        models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True, description="dryhire today")
+        models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True, checked_in_by=self.profile,
+                                    description="dryhire today, checked in")
+        models.Event.objects.create(name="TE E12", start_date=date.today() - timedelta(days=1), dry_hire=True,
+                                    status=models.Event.BOOKED, description="dryhire past")
+        models.Event.objects.create(name="TE E13", start_date=date.today() - timedelta(days=2), dry_hire=True,
+                                    checked_in_by=self.profile, description="dryhire past checked in")
+        models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True,
+                                    status=models.Event.CANCELLED, description="dryhire today cancelled")
+
+        # 4 non rig - 3 current
+        models.Event.objects.create(name="TE E15", start_date=date.today(), is_rig=False, description="non rig today")
+        models.Event.objects.create(name="TE E16", start_date=date.today() + timedelta(days=1), is_rig=False,
+                                    description="non rig tomorrow")
+        models.Event.objects.create(name="TE E17", start_date=date.today() - timedelta(days=1), is_rig=False,
+                                    description="non rig yesterday")
+        models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED,
+                                    description="non rig today cancelled")
+        
+        self.page = pages.UserPage(self.driver, self.live_server_url).open()
+        
+    def test_api_key_generation(self):
+        # Completes and comes back to /user/
+        # Checks that no api key is displayed
+        self.assertEqual("No API Key Generated", self.page.api_key)
+
+        # Now creates an API key, and check a URL is displayed one
+        self.page.generate_key()
+        self.assertIn("rigs.ics", self.page.cal_url)
+        self.assertNotIn("?", self.page.cal_url)
+
+        # Lets change everything so it's not the default value
+        self.page.toggle_filter('rig')
+        self.page.toggle_filter('non-rig')
+        self.page.toggle_filter('dry-hire')
+        self.page.toggle_filter('cancelled')
+        self.page.toggle_filter('provisional')
+        self.page.toggle_filter('confirmed')
+
+        # and then check the url is correct
+        self.assertIn(
+            "rigs.ics?rig=false&non-rig=false&dry-hire=false&cancelled=true&provisional=false&confirmed=false",
+            self.page.cal_url)
+
+        # Awesome - all seems to work
+            
+    def test_ics_files(self):
+        specialEvent = models.Event.objects.get(name="TE E6")
+        
+        # Now creates an API key, and check a URL is displayed one
+        self.page.generate_key()
+
+        c = Client()
+
+        # Default settings - should have all non-cancelled events
+        # Get the ical file (can't do this in selanium because reasons)
+        icalUrl = self.page.cal_url
+        response = c.get(self.page.cal_url)
+        self.assertEqual(200, response.status_code)
+
+        # content = response.content.decode('utf-8')
+
+        # Check has entire file
+        self.assertContains(response, "BEGIN:VCALENDAR")
+        self.assertContains(response, "END:VCALENDAR")
+
+        expectedIn = [1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17]
+        for test in range(1, 18):
+            if test in expectedIn:
+                self.assertContains(response, "TE E" + str(test) + " ")
+            else:
+                self.assertNotContains(response, "TE E" + str(test) + " ")
+
+        # Check that times have been included correctly
+        self.assertContains(response,
+                            specialEvent.start_date.strftime('%Y%m%d') + 'T' + specialEvent.start_time.strftime(
+                                '%H%M%S'))
+        self.assertContains(response,
+                            specialEvent.end_date.strftime('%Y%m%d') + 'T' + specialEvent.end_time.strftime('%H%M%S'))
+
+        # Only non rigs
+        self.page.toggle_filter('rig')
+        self.page.toggle_filter('non-rig')
+        
+        icalUrl = self.page.cal_url
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+        
+        expectedIn = [10, 11, 12, 13]
+        for test in range(1, 18):
+            if test in expectedIn:
+                self.assertContains(response, "TE E" + str(test) + " ")
+            else:
+                self.assertNotContains(response, "TE E" + str(test) + " ")
+
+        # Only provisional rigs
+        self.page.toggle_filter('rig')
+        self.page.toggle_filter('dry-hire')
+        self.page.toggle_filter('confirmed')
+
+        icalUrl = self.page.cal_url
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn = [1, 2]
+        for test in range(1, 18):
+            if test in expectedIn:
+                self.assertContains(response, "TE E" + str(test) + " ")
+            else:
+                self.assertNotContains(response, "TE E" + str(test) + " ")
+
+        # Only cancelled non-rigs
+        self.page.toggle_filter('rig')
+        self.page.toggle_filter('non-rig')
+        self.page.toggle_filter('provisional')
+        self.page.toggle_filter('cancelled')
+
+        icalUrl = self.page.cal_url
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn = [18]
+        for test in range(1, 18):
+            if test in expectedIn:
+                self.assertContains(response, "TE E" + str(test) + " ")
+            else:
+                self.assertNotContains(response, "TE E" + str(test) + " ")
+
+        # Nothing selected
+        self.page.toggle_filter('non-rig')
+        self.page.toggle_filter('cancelled')
+
+        icalUrl = self.page.cal_url
+        response = c.get(icalUrl)
+        self.assertEqual(200, response.status_code)
+
+        expectedIn = []
+        for test in range(1, 18):
+            if test in expectedIn:
+                self.assertContains(response, "TE E" + str(test) + " ")
+            else:
+                self.assertNotContains(response, "TE E" + str(test) + " ")
+
+                # Wow - that was a lot of tests

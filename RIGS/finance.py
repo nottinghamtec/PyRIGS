@@ -102,6 +102,7 @@ class InvoiceVoid(generic.View):
 
 class InvoiceDelete(generic.DeleteView):
     model = models.Invoice
+    template_name = 'invoice_confirm_delete.html'
 
     def get(self, request, pk):
         obj = self.get_object()

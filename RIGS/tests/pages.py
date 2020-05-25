@@ -179,3 +179,25 @@ class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')
     _search_go_selector = (By.ID, 'id_search')
     _add_item_selector = (By.CSS_SELECTOR, '.btn-success')
+    
+    
+class UserPage(BasePage):
+    URL_TEMPLATE = 'user/'
+    
+    _api_key_selector = (By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/div/dl/dd[1]')
+    _cal_url_selector = (By.ID, 'cal-url')
+    _generation_button_selector = (By.LINK_TEXT, 'Generate API Key')
+    
+    @property
+    def api_key(self):
+        return self.find_element(*self._api_key_selector).text
+    
+    @property
+    def cal_url(self):
+        return self.find_element(*self._cal_url_selector).text
+
+    def toggle_filter(self, type_name):
+        self.find_element(By.XPATH, "//input[@value='" + type_name + "']").click()
+        
+    def generate_key(self):
+        self.find_element(*self._generation_button_selector).click()
