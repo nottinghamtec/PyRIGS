@@ -7,7 +7,7 @@ addons:
   chrome: stable
 
 install:
-  - wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
+  - latest=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE) | wget https://chromedriver.storage.googleapis.com/$latest/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - export PATH=$PATH:$(pwd)
   - chmod +x chromedriver
