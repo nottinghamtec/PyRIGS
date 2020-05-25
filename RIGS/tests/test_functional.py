@@ -27,7 +27,7 @@ from PyRIGS.tests.base import create_browser, animation_is_finished
 from django.conf import settings
 
 import sys
-  
+
 
 class ClientEventAuthorisationTest(TestCase):
     auth_data = {

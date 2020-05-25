@@ -204,7 +204,7 @@ class TestEventCreate(BaseRigboardTest):
         # Should work
         self.page.submit()
         self.assertTrue(self.page.success)
-        
+
     def test_access_validation(self):
         self.select_event_type("Rig")
 
@@ -215,19 +215,19 @@ class TestEventCreate(BaseRigboardTest):
         # TODO This should not be necessary, normally closes automatically
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
-        
+
         self.page.name = "Access Validation Test"
-        
+
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.access_at = datetime.datetime(2020, 1, 5, 10)
-                                            
+
         self.page.submit()
         self.assertFalse(self.page.success)
         self.assertIn("access time cannot be after the event has started.", self.page.errors["General form errors"][0])
-        
-        #Fix it
+
+        # Fix it
         self.page.access_at = datetime.datetime(2020, 1, 1, 10)
-        
+
         # Should work
         self.page.submit()
         self.assertTrue(self.page.success)
@@ -517,7 +517,7 @@ class TestCalendar(BaseRigboardTest):
         self.all_events = set(range(1, 18))
         self.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
         self.not_current_events = set(self.all_events) - set(self.current_events)
-        
+
         # produce 7 normal events - 5 current - 1 last week - 1 two years ago - 2 provisional - 2 confirmed - 3 booked
         models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                     start_date=date.today() + timedelta(days=6), description="start future no end")
@@ -568,9 +568,9 @@ class TestCalendar(BaseRigboardTest):
                                     description="non rig yesterday")
         models.Event.objects.create(name="TE E18", start_date=date.today(), is_rig=False, status=models.Event.CANCELLED,
                                     description="non rig today cancelled")
-        
+
         self.page = pages.UserPage(self.driver, self.live_server_url).open()
-        
+
     def test_api_key_generation(self):
         # Completes and comes back to /user/
         # Checks that no api key is displayed
@@ -595,10 +595,10 @@ class TestCalendar(BaseRigboardTest):
             self.page.cal_url)
 
         # Awesome - all seems to work
-            
+
     def test_ics_files(self):
         specialEvent = models.Event.objects.get(name="TE E6")
-        
+
         # Now creates an API key, and check a URL is displayed one
         self.page.generate_key()
 
@@ -633,11 +633,11 @@ class TestCalendar(BaseRigboardTest):
         # Only non rigs
         self.page.toggle_filter('rig')
         self.page.toggle_filter('non-rig')
-        
+
         icalUrl = self.page.cal_url
         response = c.get(icalUrl)
         self.assertEqual(200, response.status_code)
-        
+
         expectedIn = [10, 11, 12, 13]
         for test in range(1, 18):
             if test in expectedIn:
