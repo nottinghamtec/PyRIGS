@@ -29,10 +29,12 @@
       {% include 'partials/audit_details.html' %}
     </div>
 </div>
+{% if perms.RIGS.view_asset %}
 <div class="row justify-content-end">
 {% include 'partials/asset_buttons.html' %}
 </div>
 <div class="row justify-content-end">
 {% include 'partials/last_edited.html' with target="asset_history" id=object.asset_id %}
 </div>
+{% endif %}
 {% endblock %}
