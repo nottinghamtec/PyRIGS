@@ -1,4 +1,5 @@
 from pypom import Page, Region
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
 from selenium.common.exceptions import NoSuchElementException
@@ -38,8 +39,9 @@ class FormPage(BasePage):
             "Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
 
     def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
+        submit = self.find_element(*self._submit_locator)
+        ActionChains(self.driver).move_to_element(submit).perform()
+        submit.click()
         # self.wait.until(lambda x: self.errors != previous_errors or self.success) This breaks my date validation test... :D
 
     @property
