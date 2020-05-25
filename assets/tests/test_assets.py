@@ -119,11 +119,11 @@ class TestAssetForm(AutoLoginTest):
 
         self.page.open()
 
-        self.page.description = "Bodge Lead"
-        self.page.category = "Health & Safety"
-        self.page.status = "O.K."
-        self.page.serial_number = "0124567890-SAUSAGE"
-        self.page.comments = "This is actually a sledgehammer, not a cable..."
+        self.page.description = desc = "Bodge Lead"
+        self.page.category = cat = "Health & Safety"
+        self.page.status = status = "O.K."
+        self.page.serial_number = sn = "0124567890-SAUSAGE"
+        self.page.comments = comments = "This is actually a sledgehammer, not a cable..."
 
         self.page.purchased_from_selector.toggle()
         self.assertTrue(self.page.purchased_from_selector.is_open)
@@ -131,7 +131,7 @@ class TestAssetForm(AutoLoginTest):
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
         self.page.purchase_price = "12.99"
         self.page.salvage_value = "99.12"
-        self.date_acquired = "05022020"
+        self.page.date_acquired = acquired = datetime.date(2020, 5, 20)
 
         self.page.parent_selector.toggle()
         self.assertTrue(self.page.parent_selector.is_open)
@@ -146,6 +146,15 @@ class TestAssetForm(AutoLoginTest):
 
         self.page.submit()
         self.assertTrue(self.page.success)
+        # Check that data is right
+        asset = models.Asset.objects.get(asset_id="9001")
+        self.assertEqual(asset.description, desc)
+        self.assertEqual(asset.category.name, cat)
+        self.assertEqual(asset.status.name, status)
+        self.assertEqual(asset.serial_number, sn)
+        self.assertEqual(asset.comments, comments)
+        # This one is important as it defaults to today's date
+        self.assertEqual(asset.date_acquired, acquired)
 
     def test_cable_create(self):
         self.page.description = "IEC -> IEC"
