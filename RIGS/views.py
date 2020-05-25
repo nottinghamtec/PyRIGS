@@ -20,6 +20,8 @@ from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
 
+from PyRIGS.views import GenericListView
+
 """
 Displays the current rig count along with a few other bits and pieces
 """
@@ -52,31 +54,9 @@ class CloseModal(generic.TemplateView):
         return {'messages': messages.get_messages(self.request)}
 
 
-class PersonList(generic.ListView):
+class PersonList(GenericListView):
     template_name = 'person_list.html'
     model = models.Person
-    paginate_by = 20
-
-    def get_queryset(self):
-        q = self.request.GET.get('query', "")
-
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
-            phone__startswith=q) | Q(phone__endswith=q)
-
-        # try and parse an int
-        try:
-            val = int(q)
-            filter = filter | Q(pk=val)
-        except:  # noqa
-            # not an integer
-            pass
-
-        object_list = self.model.objects.filter(filter)
-
-        orderBy = self.request.GET.get('orderBy', 'name')
-        if orderBy is not None:
-            object_list = object_list.order_by(orderBy)
-        return object_list
 
 
 class PersonDetail(generic.DetailView):
@@ -120,31 +100,9 @@ class PersonUpdate(generic.UpdateView):
         return url
 
 
-class OrganisationList(generic.ListView):
+class OrganisationList(GenericListView):
     template_name = 'organisation_list.html'
     model = models.Organisation
-    paginate_by = 20
-
-    def get_queryset(self):
-        q = self.request.GET.get('query', "")
-
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
-            phone__startswith=q) | Q(phone__endswith=q)
-
-        # try and parse an int
-        try:
-            val = int(q)
-            filter = filter | Q(pk=val)
-        except:  # noqa
-            # not an integer
-            pass
-
-        object_list = self.model.objects.filter(filter)
-
-        orderBy = self.request.GET.get('orderBy', "name")
-        if orderBy is not "":
-            object_list = object_list.order_by(orderBy)
-        return object_list
 
 
 class OrganisationDetail(generic.DetailView):
@@ -188,31 +146,9 @@ class OrganisationUpdate(generic.UpdateView):
         return url
 
 
-class VenueList(generic.ListView):
+class VenueList(GenericListView):
     template_name = "venue_list.html"
     model = models.Venue
-    paginate_by = 20
-
-    def get_queryset(self):
-        q = self.request.GET.get('query', "")
-
-        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
-            phone__startswith=q) | Q(phone__endswith=q)
-
-        # try and parse an int
-        try:
-            val = int(q)
-            filter = filter | Q(pk=val)
-        except:  # noqa
-            # not an integer
-            pass
-
-        object_list = self.model.objects.filter(filter)
-
-        orderBy = self.request.GET.get('orderBy', "name")
-        if orderBy is not "":
-            object_list = object_list.order_by(orderBy)
-        return object_list
 
 
 class VenueDetail(generic.DetailView):

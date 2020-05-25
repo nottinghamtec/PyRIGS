@@ -5,7 +5,7 @@
     <form class="form-inline pr-3">
         {% csrf_token %}
         <div class="input-group pull-right">
-            <input type="search" name="query" placeholder="Search" value="{{ request.GET.query }}"
+            <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
                    class="form-control"/>
             <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search">Search</button></span>
         </div>
@@ -31,9 +31,9 @@
                 </thead>
                 <tbody>
                 {% for object in object_list %}
-                    <tr>
+                    <tr id="row_item">
                         <th scope="row" class="align-middle">{{ object.pk }}</th>
-                        <td class="align-middle">{{ object.name }}</td>
+                        <td class="align-middle" id="cell_name">{{ object.name }}</td>
                         <td class="align-middle">{{ object.email }}</td>
                         <td class="align-middle">{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
                         <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>

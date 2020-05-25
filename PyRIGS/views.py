@@ -134,3 +134,28 @@ class SecureAPIRequest(generic.View):
             return HttpResponse(json, content_type="application/json")  # Always json
 
         return HttpResponse(model)
+
+
+class GenericListView(generic.ListView):
+    paginate_by = 20
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q', "")
+
+        filter = Q(name__icontains=q) | Q(email__icontains=q) | Q(address__icontains=q) | Q(notes__icontains=q) | Q(
+            phone__startswith=q) | Q(phone__endswith=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        object_list = self.model.objects.filter(filter)
+
+        orderBy = self.request.GET.get('orderBy', "name")
+        if orderBy is not "":
+            object_list = object_list.order_by(orderBy)
+        return object_list
