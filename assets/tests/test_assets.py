@@ -104,6 +104,7 @@ class TestAssetForm(AutoLoginTest):
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
         self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
+        self.wait = WebDriverWait(self.driver, 5)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -145,6 +146,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
 
         self.page.submit()
+        self.wait.until(animation_is_finished())
         self.assertTrue(self.page.success)
         # Check that data is right
         asset = models.Asset.objects.get(asset_id="9001")

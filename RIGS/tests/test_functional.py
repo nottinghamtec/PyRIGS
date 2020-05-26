@@ -127,6 +127,7 @@ class TestEventCreate(BaseRigboardTest):
 
         # TODO Test validation with some wrong data
         self.page.submit()
+        self.driver.implicitly_wait(10)
         self.assertTrue(self.page.success)
 
     # TODO

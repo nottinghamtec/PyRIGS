@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 import datetime
-from PyRIGS.tests.regions import Modal
+from PyRIGS.tests.regions import TextBox, Modal
 
 
 class Header(Region):
