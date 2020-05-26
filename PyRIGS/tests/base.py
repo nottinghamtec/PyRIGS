@@ -16,6 +16,9 @@ def create_datetime(year, month, day, hour, min):
 def create_browser():
     options = webdriver.ChromeOptions()
     options.add_argument("--window-size=1920,1080")
+    # No caching, please and thank you
+    options.add_argument("--aggressive-cache-discard")
+    options.add_argument("--disk-cache-size=0")
     if os.environ.get('CI', False):
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
