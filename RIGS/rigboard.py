@@ -262,7 +262,7 @@ class EventArchive(generic.ListView):
 
         q = self.request.GET.get('q', "")
 
-        if q is not "":
+        if q != "":
             qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
 
             # try and parse an int

@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 import datetime
-from PyRIGS.regions import Modal
+from PyRIGS.tests.regions import Modal
 
 
 class Header(Region):
@@ -39,6 +39,7 @@ class ItemRow(Region):
     @property
     def subtotal(self):
         return self.find_element(*self._subtotal_locator).text
+
 
 class ItemModal(Modal):
     _header_selector = (By.TAG_NAME, 'h4')

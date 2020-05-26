@@ -156,6 +156,6 @@ class GenericListView(generic.ListView):
         object_list = self.model.objects.filter(filter)
 
         orderBy = self.request.GET.get('orderBy', "name")
-        if orderBy is not "":
+        if orderBy != "":
             object_list = object_list.order_by(orderBy)
         return object_list
