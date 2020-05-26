@@ -109,11 +109,8 @@ class TestEventCreate(BaseRigboardTest):
     def test_rig_creation(self):
         self.select_event_type("Rig")
 
-        self.page.person_selector.toggle()
-        self.assertTrue(self.page.person_selector.is_open)
         self.page.person_selector.search(self.client.name)
         self.page.person_selector.set_option(self.client.name, True)
-        # TODO This should not be necessary, normally closes automatically
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 
@@ -175,11 +172,8 @@ class TestEventCreate(BaseRigboardTest):
     def test_date_validation(self):
         self.select_event_type("Rig")
 
-        self.page.person_selector.toggle()
-        self.assertTrue(self.page.person_selector.is_open)
         self.page.person_selector.search(self.client.name)
         self.page.person_selector.set_option(self.client.name, True)
-        # TODO This should not be necessary, normally closes automatically
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 
@@ -213,8 +207,6 @@ class TestEventCreate(BaseRigboardTest):
     def test_access_validation(self):
         self.select_event_type("Rig")
 
-        self.page.person_selector.toggle()
-        self.assertTrue(self.page.person_selector.is_open)
         self.page.person_selector.search(self.client.name)
         self.page.person_selector.set_option(self.client.name, True)
         # TODO This should not be necessary, normally closes automatically
@@ -228,6 +220,7 @@ class TestEventCreate(BaseRigboardTest):
 
         self.page.submit()
         self.assertFalse(self.page.success)
+        self.assertTrue(self.page.errors is not None)
         self.assertIn("access time cannot be after the event has started.", self.page.errors["General form errors"][0])
 
         # Fix it
@@ -242,8 +235,6 @@ class TestEventCreate(BaseRigboardTest):
 
         self.page.name = "Test Event with Items"
 
-        self.page.person_selector.toggle()
-        self.assertTrue(self.page.person_selector.is_open)
         self.page.person_selector.search(self.client.name)
         self.page.person_selector.set_option(self.client.name, True)
         # TODO This should not be necessary, normally closes automatically
@@ -372,7 +363,6 @@ class TestEventDuplicate(BaseRigboardTest):
         self.wait.until(animation_is_finished())
 
         # Attempt to save
-        ActionChains(self.driver).move_to_element(table).perform()
         self.page.submit()
 
         # TODO Rewrite when EventDetail page is implemented

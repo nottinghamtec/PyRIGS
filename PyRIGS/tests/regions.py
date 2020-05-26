@@ -219,15 +219,3 @@ class Modal(Region):
             form_element.set_value(value)
         else:
             self.__dict__[name] = value
-
-
-# TODO Move to RIGS regions
-class ItemModal(Modal):
-    _header_selector = (By.TAG_NAME, 'h4')
-
-    form_items = {
-        'name': (TextBox, (By.ID, 'item_name')),
-        'description': (TextBox, (By.ID, 'item_description')),
-        'quantity': (TextBox, (By.ID, 'item_quantity')),
-        'price': (TextBox, (By.ID, 'item_cost'))
-    }

@@ -155,7 +155,7 @@ class CreateEvent(FormPage):
         self.find_element(*self._add_item_selector).click()
         element = self.driver.find_element_by_id('itemModal')
         self.wait.until(EC.visibility_of(element))
-        return regions.ItemModal(self, element)
+        return rigs_regions.ItemModal(self, element)
 
     @property
     def success(self):
