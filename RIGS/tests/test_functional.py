@@ -127,7 +127,6 @@ class TestEventCreate(BaseRigboardTest):
 
         # TODO Test validation with some wrong data
         self.page.submit()
-        self.driver.implicitly_wait(10)
         self.assertTrue(self.page.success)
 
     # TODO
@@ -169,7 +168,8 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.toggle()
 
         # TODO
-
+        
+    # TODO Convert the below three tests into non-live tests and use only one wrong data in the above test to check error display
     def test_date_validation(self):
         self.select_event_type("Rig")
 
@@ -187,7 +187,24 @@ class TestEventCreate(BaseRigboardTest):
         self.assertFalse(self.page.success)
         self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
         self.wait.until(animation_is_finished())
+        
+        # Fix it
+        self.page.end_date = datetime.date(2020, 1, 11)
+        
+        # Should work
+        self.page.submit()
+        self.assertTrue(self.page.success)
+    
+    # TODO Seperated because of the way submit checks erroring
+    def test_date_validation_2(self):
+        self.select_event_type("Rig")
 
+        self.page.person_selector.search(self.client.name)
+        self.page.person_selector.set_option(self.client.name, True)
+        self.page.person_selector.toggle()
+        self.assertFalse(self.page.person_selector.is_open)
+
+        self.page.name = "Test Date Validation"
         # end time before start
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.start_time = datetime.time(10)
@@ -210,7 +227,6 @@ class TestEventCreate(BaseRigboardTest):
 
         self.page.person_selector.search(self.client.name)
         self.page.person_selector.set_option(self.client.name, True)
-        # TODO This should not be necessary, normally closes automatically
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 

@@ -39,10 +39,11 @@ class FormPage(BasePage):
             "Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
 
     def submit(self):
+        previous_errors = self.errors
         submit = self.find_element(*self._submit_locator)
         ActionChains(self.driver).move_to_element(submit).perform()
         submit.click()
-        # self.wait.until(lambda x: self.errors != previous_errors or self.success) This breaks my date validation test... :D
+        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
     @property
     def errors(self):
