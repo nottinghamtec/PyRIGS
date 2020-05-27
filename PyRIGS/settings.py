@@ -247,3 +247,6 @@ RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
     'RISK_ASSESSMENT_URL') else "http://example.com"
 RISK_ASSESSMENT_SECRET = os.environ.get('RISK_ASSESSMENT_SECRET') if os.environ.get(
     'RISK_ASSESSMENT_SECRET') else secrets.token_hex(15)
+
+IMGUR_UPLOAD_CLIENT_ID = os.environ.get('IMGUR_UPLOAD_CLIENT_ID', '')
+IMGUR_UPLOAD_CLIENT_SECRET = os.environ.get('IMGUR_UPLOAD_CLIENT_SECRET', '')

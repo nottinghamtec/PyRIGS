@@ -24,7 +24,7 @@ from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 
-
+@screenshot_failure_cls
 class BaseRigboardTest(AutoLoginTest):
     def setUp(self):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
@@ -39,7 +39,7 @@ class BaseRigboardTest(AutoLoginTest):
         self.wait.until(animation_is_finished())
         self.assertTrue(self.page.is_expanded)
 
-
+@screenshot_failure_cls
 class TestRigboard(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -100,7 +100,7 @@ class TestRigboard(BaseRigboardTest):
         self.assertIn('create', self.driver.current_url)
         # Ideally get a response object to assert 200 on
 
-
+@screenshot_failure_cls
 class TestEventCreate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -328,7 +328,7 @@ class TestEventCreate(BaseRigboardTest):
     def test_subhire_creation(self):
         pass
 
-
+@screenshot_failure_cls
 class TestEventDuplicate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -427,7 +427,7 @@ class TestEventDuplicate(BaseRigboardTest):
         self.assertIn("Test Item 2", table.text)
         self.assertNotIn("Test Item 3", table.text)
 
-
+@screenshot_failure_cls
 class TestEventEdit(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -487,7 +487,7 @@ class TestEventEdit(BaseRigboardTest):
         table = self.page.item_table
         self.assertIn("Test Item 3", table.text)
 
-
+@screenshot_failure_cls
 class TestEventDetail(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -523,7 +523,7 @@ class TestEventDetail(BaseRigboardTest):
         self.assertEqual(self.client.email, self.page.email)
         self.assertEqual(self.client.phone, None)
 
-
+@screenshot_failure_cls
 class TestCalendar(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -708,7 +708,7 @@ class TestCalendar(BaseRigboardTest):
 
                 # Wow - that was a lot of tests
 
-
+@screenshot_failure_cls
 class ClientEventAuthorisationTest(TestCase):
     auth_data = {
         'name': 'Test ABC',
@@ -814,7 +814,7 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertEqual(mail.outbox[0].to, ['authemail@function.test'])
         self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
 
-
+@screenshot_failure_cls
 class TECEventAuthorisationTest(TestCase):
     @classmethod
     def setUpTestData(cls):

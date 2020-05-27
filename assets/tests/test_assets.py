@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from urllib.parse import urlparse
 from RIGS import models as rigsmodels
-from PyRIGS.tests.base import BaseTest, AutoLoginTest
+from PyRIGS.tests.base import BaseTest, AutoLoginTest, screenshot_failure_cls
 from assets import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.support import expected_conditions as EC
@@ -17,7 +17,7 @@ from PyRIGS.tests.base import animation_is_finished
 import datetime
 from django.utils import timezone
 
-
+@screenshot_failure_cls
 class TestAssetList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -40,6 +40,7 @@ class TestAssetList(AutoLoginTest):
         self.assertIn("A light", assetDescriptions)
         self.assertIn("Working Mic", assetDescriptions)
 
+    
     def test_asset_order(self):
         # Only the working stuff should be shown initially
         self.page.status_selector.open()
@@ -94,7 +95,7 @@ class TestAssetList(AutoLoginTest):
         self.assertEqual("1", assetIDs[0])
         self.assertEqual("10", assetIDs[1])
 
-
+@screenshot_failure_cls
 class TestAssetForm(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -201,7 +202,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertTrue(self.page.success)
         self.assertEqual(models.Asset.objects.last().description, self.parent.description)
 
-
+@screenshot_failure_cls
 class TestSupplierList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -240,7 +241,7 @@ class TestSupplierList(AutoLoginTest):
         self.page.search()
         self.assertTrue(len(self.page.suppliers) == 0)
 
-
+@screenshot_failure_cls
 class TestSupplierCreateAndEdit(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -267,7 +268,7 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-
+@screenshot_failure_cls
 class TestAssetAudit(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -337,7 +338,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
-
+@screenshot_failure_cls
 class TestSupplierValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -359,7 +360,7 @@ class TestSupplierValidation(TestCase):
         response = self.client.post(url, {'name': ""})
         self.assertFormError(response, 'form', 'name', 'This field is required.')
 
-
+@screenshot_failure_cls
 class Test404(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -379,6 +380,7 @@ class Test404(TestCase):
 
 
 # @tag('slow') TODO: req. Django 3.0
+@screenshot_failure_cls
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -448,7 +450,7 @@ class TestAccessLevels(TestCase):
 
     # def test_finance_access(self): Level not used in assets currently
 
-
+@screenshot_failure_cls
 class TestFormValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -516,7 +518,7 @@ class TestFormValidation(TestCase):
         self.assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
 
-
+@screenshot_failure_cls
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
@@ -540,7 +542,7 @@ class TestSampleDataGenerator(TestCase):
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleAssetsData')
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'deleteSampleData')
 
-
+@screenshot_failure_cls
 class TestVersioningViews(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -583,7 +585,7 @@ class TestVersioningViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
 
-
+@screenshot_failure_cls
 class TestEmbeddedViews(TestCase):
     @classmethod
     def setUpTestData(cls):
