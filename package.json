@@ -6,13 +6,17 @@
   "license": "MIT",
   "dependencies": {
     "@activix/bootstrap-datetimepicker": "^2.0.7",
+    "@forevolve/bootstrap-dark": "^1.0.0-alpha.1075",
     "@fortawesome/fontawesome-free": "^5.12.1",
     "ajax-bootstrap-select": "^1.4.5",
     "autocompleter": "^6.0.2",
     "autoprefixer": "^9.7.4",
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.17",
+    "dark-mode-switch": "^1.0.0",
     "fullcalendar": "^3.10.1",
+    "gulp-if": "^3.0.0",
+    "gulp-rename": "^2.0.0",
     "jquery": "^3.4.1",
     "jquery-ui-dist": "^1.12.1",
     "konami": "^1.6.2",
@@ -32,6 +36,6 @@
     "node-sass": "^4.13.1"
   },
   "scripts": {
-        "gulp": "gulp"
+    "gulp": "gulp"
   }
 }

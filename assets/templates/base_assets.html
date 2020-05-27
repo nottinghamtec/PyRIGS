@@ -10,31 +10,32 @@
 {% endblock %}
 
 {% block titleelements %}
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Assets</a>
-        <div class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'asset_list' %}"><span class="fas fa-list"></span> List Assets</a>
-            {% if perms.assets.add_asset %}
-                <a class="dropdown-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> Create Asset</a>
-            {% endif %}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{% url 'cable_type_list' %}"><span class="fas fa-list"></span> List Cable Types</a>
-            {% if perms.assets.add_cable_type %}
-            <a class="dropdown-item" href="{% url 'cable_type_create' %}"><span class="fas fa-plus"></span> Create Cable Type</a>
-            {% endif %}
-        </div>
-    </li>
-    <div class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Suppliers</a>
-        <ul class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'supplier_list' %}"><span class="fas fa-list"></span> List Suppliers</a>
-            {% if perms.assets.add_supplier %}
-                <a class="dropdown-item" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> Create Supplier</a>
-            {% endif %}
-        </ul>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Assets</a>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'asset_list' %}"><span class="fas fa-list"></span> List Assets</a>
+        {% if perms.assets.add_asset %}
+            <a class="dropdown-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> Create Asset</a>
+        {% endif %}
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{% url 'cable_type_list' %}"><span class="fas fa-list"></span> List Cable Types</a>
+        {% if perms.assets.add_cable_type %}
+        <a class="dropdown-item" href="{% url 'cable_type_create' %}"><span class="fas fa-plus"></span> Create Cable Type</a>
+        {% endif %}
     </div>
-    {% if perms.assets.view_asset %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'asset_audit_list' %}">Audit</a></li>
-    {% endif %}
+</li>
+<div class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Suppliers</a>
+    <ul class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'supplier_list' %}"><span class="fas fa-list"></span> List Suppliers</a>
+        {% if perms.assets.add_supplier %}
+            <a class="dropdown-item" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> Create Supplier</a>
+        {% endif %}
+    </ul>
+</div>
+{% if perms.assets.view_asset %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'asset_activity_table' %}">Recent Changes</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'asset_audit_list' %}">Audit</a></li>
+{% endif %}
+{% include 'partials/navbar_user.html' %}
 {% endblock %}

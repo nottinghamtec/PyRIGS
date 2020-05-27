@@ -1,3 +1,9 @@
+[data-theme='dark'] {
+    @import "custom-variables";
+    @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
+    background: #222;
+    color: white;
+}
 @import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
 
