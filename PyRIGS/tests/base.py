@@ -62,7 +62,7 @@ def screenshot_failure(func):
             if not pathlib.Path("screenshots").is_dir():
                 os.mkdir("screenshots")
             self.driver.save_screenshot(screenshot_file)
-            
+
             if settings.IMGUR_UPLOAD_CLIENT_ID != "":
                 config = {
                     'album': None,
@@ -78,11 +78,13 @@ def screenshot_failure(func):
             raise e
     return wrapper_func
 
+
 def screenshot_failure_cls(cls):
     for attr in cls.__dict__:
         if callable(getattr(cls, attr)) and attr.startswith("test"):
             setattr(cls, attr, screenshot_failure(getattr(cls, attr)))
     return cls
+
 
 # Checks if animation is done
 class animation_is_finished(object):
