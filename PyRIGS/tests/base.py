@@ -58,7 +58,7 @@ def screenshot_failure(func):
             func(self, *args, **kwargs)
         except Exception as e:
             screenshot_name = func.__module__ + "." + func.__qualname__
-            screenshot_file = "screenshots/"+func.__qualname__+".png"
+            screenshot_file = "screenshots/" + func.__qualname__ + ".png"
             if not pathlib.Path("screenshots").is_dir():
                 os.mkdir("screenshots")
             self.driver.save_screenshot(screenshot_file)

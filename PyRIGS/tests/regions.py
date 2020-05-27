@@ -19,6 +19,8 @@ def parse_bool_from_string(string):
         return False
 
 # 12-Hour vs 24-Hour Time. Affects widget display
+
+
 def get_time_format():
     # Default
     time_format = "%H:%M"

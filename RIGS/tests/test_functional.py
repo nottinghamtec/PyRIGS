@@ -23,8 +23,6 @@ from django.test.client import Client
 from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
-import sys
-
 
 @screenshot_failure_cls
 class BaseRigboardTest(AutoLoginTest):
@@ -233,8 +231,7 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.set_option(self.client.name, True)
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
-        print("Language: " + self.driver.execute_script("return window.navigator.userLanguage || window.navigator.language;"), file=sys.stderr)
-
+        
         self.page.name = "Access Validation Test"
 
         self.page.start_date = datetime.date(2020, 1, 1)
