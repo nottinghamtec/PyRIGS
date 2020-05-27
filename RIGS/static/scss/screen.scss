@@ -2,7 +2,17 @@
     @import "custom-variables";
     @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
     background: #222;
-    color: white;
+    color: $gray-100;
+    .form-control {
+        background: #121416;
+        color: $gray-100;
+        border: black !important;
+    }
+    .btn-light {
+        background: #121416 !important;
+        color: $gray-100 !important;
+        border: black !important;
+    }
 }
 @import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
