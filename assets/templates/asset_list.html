@@ -36,11 +36,12 @@
       <button id="filter-submit" type="submit" class="btn btn-secondary">Filter</button>
   </div>
 </form>
-
 <div class="row">
     <div class="col px-0">
         <a href="{% url 'asset_create' %}" class="btn btn-success float-right my-3">New <span class="fas fa-plus"></span></a>
     </div>
+</div>
+<div class="row">
     {% include 'partials/asset_list_table.html' %}
 </div>
 {% if is_paginated %}

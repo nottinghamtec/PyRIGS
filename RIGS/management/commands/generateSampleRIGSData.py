@@ -173,7 +173,8 @@ class Command(BaseCommand):
                           "add_venue", "change_venue", "view_venue",
                           "add_asset", "change_asset", "delete_asset",
                           "asset_finance", "view_asset", "view_supplier", "asset_finance",
-                          "add_supplier"]
+                          "add_supplier", "view_cable_type", "change_cable_type", 
+                          "add_cable_type"]
         financePerms = keyholderPerms + ["add_invoice", "change_invoice", "view_invoice",
                                          "add_payment", "change_payment", "delete_payment"]
 

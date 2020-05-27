@@ -7,7 +7,12 @@
 <div class="page-header">
     <h1>Cable Type List</h1>
 </div>
-
+<div class="row">
+    <div class="col px-0">
+        <a href="{% url 'cable_type_create' %}" class="btn btn-success float-right my-3">New <span class="fas fa-plus"></span></a>
+    </div>
+</div>
+<div class="row">
 <table class="table table-striped">
   <thead>
     <tr>
@@ -24,18 +29,19 @@
       <td>{{ item.circuits }}</td>
       <td>{{ item.cores }}</td>
       <td>
-        <a href="{% url 'cable_type_detail' item.pk %}" class="btn btn-primary"><span class="fas fas-eye-open"></span> View</a>
-        <a href="{% url 'cable_type_update' item.pk %}" class="btn btn-warning"><span class="fas fas-edit"></span> Edit</a>
+        <a href="{% url 'cable_type_detail' item.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View</a>
+        <a href="{% url 'cable_type_update' item.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span> Edit</a>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-
+</div>
+<div class="row">
 {% if is_paginated %}
 <div class="text-center">
   {% paginator %}
 </div>
 {% endif %}
-
+</div>
 {% endblock %}

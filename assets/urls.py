@@ -22,10 +22,10 @@ urlpatterns = [
     path('activity', permission_required_with_403('assets.view_asset')
          (views.ActivityTable.as_view()), name='asset_activity_table'),
 
-    path('cabletype/list/', permission_required_with_403('assets.view_cable_type')(views.CableTypeList.as_view()), name='cable_type_list'),
+    path('cabletype/list/', views.CableTypeList.as_view(), name='cable_type_list'),
     path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),
     path('cabletype/<int:pk>/update/', permission_required_with_403('assets.change_cable_type')(views.CableTypeUpdate.as_view()), name='cable_type_update'),
-    path('cabletype/<int:pk>/detail/', permission_required_with_403('assets.view_cable_type')(views.CableTypeDetail.as_view()), name='cable_type_detail'),
+    path('cabletype/<int:pk>/detail/', views.CableTypeDetail.as_view(), name='cable_type_detail'),
 
     path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
     path('asset/id/<str:pk>/embed/',
