@@ -232,6 +232,7 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.set_option(self.client.name, True)
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
+        print(self.driver.execute_script("return window.navigator.userLanguage || window.navigator.language;"))
 
         self.page.name = "Access Validation Test"
 
