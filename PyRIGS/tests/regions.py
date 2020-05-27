@@ -143,7 +143,7 @@ class DateTimePicker(Region):
         self.root.clear()
 
         date = value.date().strftime("%d%m%Y")
-        time = value.time().strftime("%H%M")
+        time = value.time().strftime("%H:%M")
 
         self.root.send_keys(date)
         self.root.send_keys(Keys.TAB)
