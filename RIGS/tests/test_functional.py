@@ -23,6 +23,7 @@ from django.test.client import Client
 from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
+import sys
 
 
 @screenshot_failure_cls
@@ -119,7 +120,7 @@ class TestEventCreate(BaseRigboardTest):
 
         self.page.name = "Test Rig"
         self.page.start_date = datetime.date(2015, 1, 1)
-        self.page.start_time = datetime.time(10)
+        self.page.start_time = datetime.time(10, 00)
         self.page.end_date = datetime.date(2015, 1, 10)
         self.page.access_at = datetime.datetime(2015, 1, 1, 9)
         self.page.dry_hire = True
@@ -210,8 +211,8 @@ class TestEventCreate(BaseRigboardTest):
         self.page.name = "Test Date Validation"
         # end time before start
         self.page.start_date = datetime.date(2020, 1, 1)
-        self.page.start_time = datetime.time(10)
-        self.page.end_time = datetime.time(9)
+        self.page.start_time = datetime.time(10, 00)
+        self.page.end_time = datetime.time(9, 00)
 
         # Expected to fail
         self.page.submit()
@@ -219,7 +220,7 @@ class TestEventCreate(BaseRigboardTest):
         self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
 
         # Fix it
-        self.page.end_time = datetime.time(23)
+        self.page.end_time = datetime.time(23, 00)
 
         # Should work
         self.page.submit()
