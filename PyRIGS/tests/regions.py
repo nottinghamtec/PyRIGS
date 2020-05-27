@@ -28,6 +28,7 @@ def get_time_format():
     # If system is 12hr FIXME Hack on the CI...
     if timezone.now().strftime("%p") or os.environ.get('CI', False):
         time_format = "%I:%M %p"
+    print(time_format)
     return time_format
 
 
@@ -157,6 +158,7 @@ class DateTimePicker(Region):
 
         date = value.date().strftime("%d%m%Y")
         time = value.time().strftime(get_time_format())
+        print(time)
 
         self.root.send_keys(date)
         self.root.send_keys(Keys.TAB)
