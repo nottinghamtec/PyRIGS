@@ -6,6 +6,11 @@ import os
 import pytz
 from datetime import date, time, datetime, timedelta
 from django.conf import settings
+import imgurpython
+import PyRIGS.settings
+import sys
+import pathlib
+import inspect
 
 
 def create_datetime(year, month, day, hour, min):
@@ -45,6 +50,40 @@ class AutoLoginTest(BaseTest):
         self.profile.save()
         loginPage = pages.LoginPage(self.driver, self.live_server_url).open()
         loginPage.login("EventTest", "EventTestPassword")
+
+
+def screenshot_failure(func):
+    def wrapper_func(self, *args, **kwargs):
+        try:
+            func(self, *args, **kwargs)
+        except Exception as e:
+            screenshot_name = func.__module__ + "." + func.__qualname__
+            screenshot_file = "screenshots/"+func.__qualname__+".png"
+            if not pathlib.Path("screenshots").is_dir():
+                os.mkdir("screenshots")
+            self.driver.save_screenshot(screenshot_file)
+
+            if settings.IMGUR_UPLOAD_CLIENT_ID != "":
+                config = {
+                    'album': None,
+                    'name': screenshot_name,
+                    'title': screenshot_name,
+                    'description': ""
+                }
+                client = imgurpython.ImgurClient(settings.IMGUR_UPLOAD_CLIENT_ID, settings.IMGUR_UPLOAD_CLIENT_SECRET)
+                image = client.upload_from_path(screenshot_file, config=config)
+                print("Error in test {} is at url {}".format(screenshot_name, image['link']), file=sys.stderr)
+            else:
+                print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
+            raise e
+    return wrapper_func
+
+
+def screenshot_failure_cls(cls):
+    for attr in cls.__dict__:
+        if callable(getattr(cls, attr)) and attr.startswith("test"):
+            setattr(cls, attr, screenshot_failure(getattr(cls, attr)))
+    return cls
 
 
 # Checks if animation is done

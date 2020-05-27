@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from urllib.parse import urlparse
-from PyRIGS.tests.base import BaseTest, AutoLoginTest
+from PyRIGS.tests.base import BaseTest, AutoLoginTest, screenshot_failure_cls
 from RIGS import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.support import expected_conditions as EC
@@ -25,6 +25,7 @@ from django.http import HttpResponseBadRequest
 from django.conf import settings
 
 
+@screenshot_failure_cls
 class BaseRigboardTest(AutoLoginTest):
     def setUp(self):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
@@ -40,6 +41,7 @@ class BaseRigboardTest(AutoLoginTest):
         self.assertTrue(self.page.is_expanded)
 
 
+@screenshot_failure_cls
 class TestRigboard(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -101,6 +103,7 @@ class TestRigboard(BaseRigboardTest):
         # Ideally get a response object to assert 200 on
 
 
+@screenshot_failure_cls
 class TestEventCreate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -329,6 +332,7 @@ class TestEventCreate(BaseRigboardTest):
         pass
 
 
+@screenshot_failure_cls
 class TestEventDuplicate(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -428,6 +432,7 @@ class TestEventDuplicate(BaseRigboardTest):
         self.assertNotIn("Test Item 3", table.text)
 
 
+@screenshot_failure_cls
 class TestEventEdit(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -488,6 +493,7 @@ class TestEventEdit(BaseRigboardTest):
         self.assertIn("Test Item 3", table.text)
 
 
+@screenshot_failure_cls
 class TestEventDetail(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -524,6 +530,7 @@ class TestEventDetail(BaseRigboardTest):
         self.assertEqual(self.client.phone, None)
 
 
+@screenshot_failure_cls
 class TestCalendar(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -709,6 +716,7 @@ class TestCalendar(BaseRigboardTest):
                 # Wow - that was a lot of tests
 
 
+@screenshot_failure_cls
 class ClientEventAuthorisationTest(TestCase):
     auth_data = {
         'name': 'Test ABC',
@@ -815,6 +823,7 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
 
 
+@screenshot_failure_cls
 class TECEventAuthorisationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
