@@ -7,8 +7,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 import datetime
-import os
-
 
 def parse_bool_from_string(string):
     # Used to convert from attribute strings to boolean values, written after I found this:
