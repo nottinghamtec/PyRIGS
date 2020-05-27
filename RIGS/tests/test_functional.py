@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from urllib.parse import urlparse
-from PyRIGS.tests.base import BaseTest, AutoLoginTest
+from PyRIGS.tests.base import BaseTest, AutoLoginTest, screenshot_failure_cls
 from RIGS import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.support import expected_conditions as EC
