@@ -13,13 +13,15 @@ from RIGS import models
 
 # Override the django form defaults to use the HTML date/time/datetime UI elements
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
-forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
-forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
+forms.TimeField.widget = forms.TimeInput(attrs={'type': 'time'}, format='%H:%M')
+forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%d %H:%M')
 
 
 # Events Shit
+
+
 class EventForm(forms.ModelForm):
-    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)
+    datetime_input_formats = list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
 

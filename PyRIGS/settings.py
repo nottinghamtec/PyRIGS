@@ -206,6 +206,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Need to allow seconds as datetime-local input type spits out a time that has seconds
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)

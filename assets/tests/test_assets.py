@@ -16,6 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from PyRIGS.tests.base import animation_is_finished
 import datetime
 from django.utils import timezone
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 @screenshot_failure_cls
@@ -134,6 +135,8 @@ class TestAssetForm(AutoLoginTest):
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
         self.page.purchase_price = "12.99"
         self.page.salvage_value = "99.12"
+        # FIXME Scroll down to make failure screenshot more useful...
+        ActionChains(self.driver).move_to_element(self.driver.find_element_by_class_name('btn-success')).perform()
         self.page.date_acquired = acquired = datetime.date(2020, 5, 20)
 
         self.page.parent_selector.toggle()

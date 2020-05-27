@@ -1,4 +1,5 @@
 from pypom import Region
+from django.utils import timezone
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
@@ -16,6 +17,17 @@ def parse_bool_from_string(string):
         return True
     else:
         return False
+
+# 12-Hour vs 24-Hour Time. Affects widget display
+
+
+def get_time_format():
+    # Default
+    time_format = "%H:%M"
+    # If system is 12hr
+    if timezone.now().strftime("%p"):
+        time_format = "%I:%M %p"
+    return time_format
 
 
 class BootstrapSelectElement(Region):
@@ -127,23 +139,23 @@ class DatePicker(Region):
 class TimePicker(Region):
     @property
     def value(self):
-        return datetime.datetime.strptime(self.root.get_attribute("value"), "%H:%M")
+        return datetime.datetime.strptime(self.root.get_attribute("value"), get_time_format())
 
     def set_value(self, value):
         self.root.clear()
-        self.root.send_keys(value.strftime("%H:%M"))
+        self.root.send_keys(value.strftime(get_time_format()))
 
 
 class DateTimePicker(Region):
     @property
     def value(self):
-        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d %H:%M")
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d " + get_time_format())
 
     def set_value(self, value):
         self.root.clear()
 
         date = value.date().strftime("%d%m%Y")
-        time = value.time().strftime("%H%M")
+        time = value.time().strftime(get_time_format())
 
         self.root.send_keys(date)
         self.root.send_keys(Keys.TAB)
