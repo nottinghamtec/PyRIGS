@@ -24,6 +24,7 @@ from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 
+
 @screenshot_failure_cls
 class BaseRigboardTest(AutoLoginTest):
     def setUp(self):
@@ -231,7 +232,7 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.set_option(self.client.name, True)
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
-        
+
         self.page.name = "Access Validation Test"
 
         self.page.start_date = datetime.date(2020, 1, 1)
