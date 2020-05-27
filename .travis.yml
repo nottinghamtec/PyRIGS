@@ -8,6 +8,8 @@ addons:
   
 before_install:
   - export TZ=Europe/London
+  - export LANG=en_GB.UTF-8
+  - export LC_ALL=en_GB.UTF-8
 
 install:
   - |
