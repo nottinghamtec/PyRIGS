@@ -17,6 +17,8 @@ forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
 forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
 
 # Events Shit
+
+
 class EventForm(forms.ModelForm):
     datetime_input_formats = list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)

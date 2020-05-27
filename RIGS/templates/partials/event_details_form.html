@@ -1,4 +1,6 @@
 {% load widget_tweaks %}
+{% load l10n %}
+
 <div class="col-md-6 my-3">
     <div class="card card-default form-hws form-non_rig">
         <div class="card-header">Event Details</div>
@@ -39,6 +41,7 @@
                         </div>
                     </div>
                 </div>
+                {% localize off %}
                 <div class="form-group">
                     <label for="{{ form.start_date.id_for_label }}"
                            class="col-sm-4 control-label">{{ form.start_date.label }}</label>
@@ -98,6 +101,7 @@
                         </div>
                     </div>
                 </div>
+                {% endlocalize %}
 
                 {# Status is needed on all events types and it looks good here in the form #}
                 <div class="form-group" data-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
