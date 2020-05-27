@@ -8,6 +8,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 import datetime
 
+
 def parse_bool_from_string(string):
     # Used to convert from attribute strings to boolean values, written after I found this:
     # >>> bool("false")
@@ -23,8 +24,8 @@ def parse_bool_from_string(string):
 def get_time_format():
     # Default
     time_format = "%H:%M"
-    # If system is 12hr FIXME Hack on the CI...
-    if timezone.now().strftime("%p") or os.environ.get('CI', False):
+    # If system is 12hr
+    if timezone.now().strftime("%p"):
         time_format = "%I:%M %p"
     return time_format
 
