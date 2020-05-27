@@ -23,7 +23,6 @@ from django.test.client import Client
 from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
-import sys
 
 
 @screenshot_failure_cls
