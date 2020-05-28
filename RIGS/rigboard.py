@@ -92,25 +92,17 @@ class EventRADetail(generic.DetailView):
         epk = self.kwargs.get(self.pk_url_kwarg)
         event = models.Event.objects.get(pk=epk)
         ra, created = models.RiskAssessment.objects.get_or_create(event=event)
-
-        ra.event = event
-        
-        if created:
-            ra.created = timezone.now()
-            
         return ra
-    
+
+
 class EventRAEdit(generic.UpdateView):
     model = models.RiskAssessment
     template_name = 'risk_assessment_form.html'
     form_class = forms.EventRiskAssessmentForm
-    
+
     def get_success_url(self):
-        ra = self.get_object()
-        ra.completed_by = self.request.user
-        ra.last_edited = timezone.now()
-        ra.save()
-        return super().get_success_url()
+        return reverse_lazy('event_ra', kwargs={'pk': self.object.event.pk })
+
 
 class EventCreate(generic.CreateView):
     model = models.Event

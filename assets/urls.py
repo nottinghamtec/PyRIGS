@@ -30,7 +30,7 @@ urlpatterns = [
     path('asset/search/', views.AssetSearch.as_view(), name='asset_search_json'),
     path('asset/id/<str:pk>/embed/',
          xframe_options_exempt(
-                               login_required(login_url='/user/login/embed/')(views.AssetEmbed.as_view())),
+             login_required(login_url='/user/login/embed/')(views.AssetEmbed.as_view())),
          name='asset_embed'),
     path('asset/id/<str:pk>/oembed_json/',
          views.AssetOembed.as_view(),

@@ -84,10 +84,6 @@ urlpatterns = [
          name='event_oembed'),
     path('event/<int:pk>/print/', permission_required_with_403('RIGS.view_event')(rigboard.EventPrint.as_view()),
          name='event_print'),
-    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(rigboard.EventRADetail.as_view()),
-         name='event_ra'),
-    path('event/<int:pk>/ra/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
-         name='event_ra_edit'),
     path('event/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
          name='event_update'),
     path('event/<int:pk>/duplicate/', permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
@@ -95,6 +91,13 @@ urlpatterns = [
     path('event/<int:pk>/history/',
          permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
          name='event_history', kwargs={'model': models.Event}),
+    # Event H&S
+    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(rigboard.EventRADetail.as_view()),
+         name='event_ra'),
+    path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
+         name='event_ra_edit'),
+    path('event/ra/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
+         name='ra_history', kwargs={'model': models.RiskAssessment}),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
