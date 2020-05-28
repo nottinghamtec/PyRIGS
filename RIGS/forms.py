@@ -156,12 +156,16 @@ class EventAuthorisationRequestForm(forms.Form):
 
 
 class EventRiskAssessmentForm(forms.ModelForm):
-    forms.BooleanField.widget = forms.RadioSelect(choices=[
-            (True, 'Yes'),
-            (False, 'No')             
-        ], attrs={'class':'custom-control-input'})
-    
+    def __init__(self, *args, **kwargs):
+        super(EventRiskAssessmentForm, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if field.__class__ == forms.BooleanField:
+                field.widget = forms.RadioSelect(choices=[
+        (True, 'Yes'),
+        (False, 'No')
+    ], attrs={'class': 'custom-control-input'})
+
     class Meta:
         model = models.RiskAssessment
         fields = '__all__'
-        exclude = ['event', 'completed_by']
+        exclude = ['event']
