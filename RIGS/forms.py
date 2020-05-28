@@ -161,9 +161,9 @@ class EventRiskAssessmentForm(forms.ModelForm):
         for name, field in self.fields.items():
             if field.__class__ == forms.BooleanField:
                 field.widget = forms.RadioSelect(choices=[
-        (True, 'Yes'),
-        (False, 'No')
-    ], attrs={'class': 'custom-control-input'})
+                    (True, 'Yes'),
+                    (False, 'No')
+                ], attrs={'class': 'custom-control-input'})
 
     class Meta:
         model = models.RiskAssessment

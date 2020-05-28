@@ -325,7 +325,7 @@ class Event(models.Model, RevisionMixin):
     auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(null=True, blank=True)
-    
+
     # Calculated values
     """
     EX Vat
@@ -573,38 +573,38 @@ class Payment(models.Model):
 class RiskAssessment(models.Model):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     # General
-    nonstandard_equipment = models.BooleanField(default=False)
-    nonstandard_use = models.BooleanField(default=False)
-    contractors = models.BooleanField(default=False)
-    other_companies = models.BooleanField(default=False)
-    crew_fatigue = models.BooleanField(default=False)
-    general_notes = models.TextField(blank=True, null=True)
+    nonstandard_equipment = models.BooleanField(default=False, help_text="Does the event require any hired in equipment or use of equipment that is not covered by TEC's standard risk assessments and method statements?")
+    nonstandard_use = models.BooleanField(default=False, help_text="Are TEC using their equipment in a way that is abnormal?<br><small>i.e. Not covered by TECs standard health and safety documentation</small>")
+    contractors = models.BooleanField(default=False, help_text="Are you using any external contractors?")
+    other_companies = models.BooleanField(default=False, help_text="Are TEC working with any other companies on site?")
+    crew_fatigue = models.BooleanField(default=False, help_text="Is crew fatigue likely to be a risk at any point during this event?")
+    general_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Power
-    big_power = models.BooleanField(default=False)
+    big_power = models.BooleanField(default=False, help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
-                                  verbose_name="Power MIC", on_delete=models.CASCADE)
-    generators = models.BooleanField(default=False)
-    other_companies_power = models.BooleanField(default=False)
-    nonstandard_equipment_power = models.BooleanField(default=False)
-    multiple_electrical_environments = models.BooleanField(default=False)
-    power_notes = models.TextField(blank=True, null=True)
+                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+    generators = models.BooleanField(default=False, help_text="Will generators be used?")
+    other_companies_power = models.BooleanField(default=False, help_text="Will TEC be supplying power to any other companies?")
+    nonstandard_equipment_power = models.BooleanField(default=False, help_text="Does the power plan require the use of any power equipment (distros, dimmers, motor controllers, etc.) that does not belong to TEC?")
+    multiple_electrical_environments = models.BooleanField(default=False, help_text="Will the electrical installation occupy more than one electrical environment?")
+    power_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Sound
-    noise_monitoring = models.BooleanField(default=False)
-    sound_notes = models.TextField(blank=True, null=True)
+    noise_monitoring = models.BooleanField(default=False, help_text="Does the event require noise monitoring or any non-standard procedures in order to comply with health and safety legislation or site rules?")
+    sound_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Site
-    known_venue = models.BooleanField(default=False)
-    safe_loading = models.BooleanField(default=False)
-    safe_storage = models.BooleanField(default=False)
-    area_outside_of_control = models.BooleanField(default=False)
-    barrier_required = models.BooleanField(default=False)
-    nonstandard_emergency_procedure = models.BooleanField(default=False)
+    known_venue = models.BooleanField(default=False, help_text="Is the event in a venue that you and/or TEC have experience working in?")
+    safe_loading = models.BooleanField(default=False, help_text="Is there a safe load in/out?<br><small>e.g. sufficient lighting, flat, not in a crowded area etc.</small>")
+    safe_storage = models.BooleanField(default=False, help_text="Are there areas to safely store equipment?")
+    area_outside_of_control = models.BooleanField(default=False, help_text="Is any part of the work area out of TEC's direct control or openly accessible during the build or breakdown period?")
+    barrier_required = models.BooleanField(default=False, help_text="Is there a requirement for TEC to provide any barrier for security or protection of persons/equipment?")
+    nonstandard_emergency_procedure = models.BooleanField(default=False, help_text="Does the emergency procedure for the event differ from TEC's standard procedures?")
 
     # Structures
-    special_structures = models.BooleanField(default=False)
-    persons_responsible_structures = models.TextField(blank=True, null=True)
-    suspended_structures = models.BooleanField(default=False)
+    special_structures = models.BooleanField(default=False, help_text="Does the event require use of winch stands, motors, MPT Towers, or staging?")
+    persons_responsible_structures = models.TextField(blank=True, null=True, help_text="Who are the persons on site responsible for their use?")
+    suspended_structures = models.BooleanField(default=False, help_text="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?")
 
     # Blimey that was a lot of options

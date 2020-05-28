@@ -111,3 +111,8 @@ def orderby(request, field, attr):
         dict_[field] = attr
 
     return dict_.urlencode()
+
+
+@register.filter
+def help_text(obj, field):
+    return obj._meta.get_field(field).help_text

@@ -101,7 +101,7 @@ class EventRAEdit(generic.UpdateView):
     form_class = forms.EventRiskAssessmentForm
 
     def get_success_url(self):
-        return reverse_lazy('event_ra', kwargs={'pk': self.object.event.pk })
+        return reverse_lazy('event_ra', kwargs={'pk': self.object.event.pk})
 
 
 class EventCreate(generic.CreateView):
