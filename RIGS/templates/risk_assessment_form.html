@@ -1,0 +1,131 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}{% if object.pk %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/bootstrap-select.js' %}"></script>
+    <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/jquery-ui.js' %}"></script><!--TODO optimise--->
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-sm-offset-1 col-sm-10">
+        <h3>{% if object.pk %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}</h3>
+        <form role="form" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">General</div>
+                        <div class="card-body">
+                            <p><strong>If the answer is yes to any of the below, you must consult a supervisor and make sure all activities planned to be undertaken are sufficiently covered by health and safety documentation</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_equipment label="Does the event require any hired in equipment or use of equipment that is not covered by TEC's standard risk assessments and method statements?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_use label="Are TEC using their equipment in a way that is abnormal?" note="i.e. Not covered by TECs standard health and safety documentation" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.contractors label="Are you using any external contractors?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.other_companies label="Are TEC working with any other companies on site?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.crew_fatigue label="Is crew fatigue likely to be a risk at any point during this event?" %}
+                            
+                            <label for="{{ form.general_notes.id_for_label }}">Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?</label>
+                            {% render_field form.general_notes class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Power</div>
+                        <div class="card-body">
+                            {% include 'partials/yes_no_radio.html' with formitem=form.big_power label="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?" %}
+                            <label for="{{ form.power_mic.id_for_label }}"
+                                class="col-sm-8 control-label">Who is the Power MIC?</label>
+                            <div class="col-sm-8">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    {% if power_mic %}
+                                        <option value="{{form.power_mic.value}}" selected="selected" >{{ power_mic.name }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <p class="pt-4"><strong>If the answer is yes to any of the below questions you must consult a power supervisor</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.generators label="Will generators be used?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.other_companies_power label="Will TEC be supplying power to any other companies?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_equipment_power label="Does the power plan require the use of any power equipment (distros, dimmers, motor controllers, etc.) that does not belong to TEC?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.multiple_electrical_environments label="Will the electrical installation occupy more than one electrical environment?" %}
+                            <label for="{{ form.power_notes.id_for_label }}">Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?</label>
+                            {% render_field form.power_notes class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Sound</div>
+                        <div class="card-body">
+                            <p><strong>If yes, consult a supervisor of sound and make sure an appropriate noise monitoring plan and risk assessment is drawn up</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.noise_monitoring label="Does the event require noise monitoring or any non-standard procedures in order to comply with health and safety legislation or site rules?" %}
+                            <label for="{{ form.sound_notes.id_for_label }}">Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?</label>
+                            {% render_field form.sound_notes class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Site Details</div>
+                        <div class="card-body">
+                            <p><strong>If no to any of the below, a site visit normally should be conducted and an assessment of the venue completed and added to TEC's records</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.known_venue label="Is the event in a venue that you and/or TEC have experience working in?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.safe_loading label="Is there a safe load in/out?" note="e.g. sufficient lighting, flat, not in a crowded area etc." %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.safe_storage label="Are there areas to safely store equipment?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.area_outside_of_control label="Is any part of the work area out of TEC's direct control or openly accessible during the build or breakdown period?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.barrier_required label="Is there a requirement for TEC to provide any barrier for security or protection of persons/equipment?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_emergency_procedure label="Does the emergency procedure for the event differ from TEC's standard procedures?" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Structures</div>
+                        <div class="card-body">
+                            {% include 'partials/yes_no_radio.html' with formitem=form.special_structures label="Does the event require use of winch stands, motors, MPT Towers, or staging?" %}
+                            <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3">Who are the persons on site responsible for their use?</label>
+                            {% render_field form.persons_responsible_structures class+="form-control mb-3" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures label="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" title="Save"><i
+                                class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

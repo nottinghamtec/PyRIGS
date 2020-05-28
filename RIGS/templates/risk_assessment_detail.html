@@ -1,0 +1,31 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
+
+{% block content %}
+<div class="row my-3 py-3">
+    <div class="col-sm-12">
+            <h3>Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
+            <div class="col-sm">
+            <div class="card card-default mb-3">
+                <div class="card-header">Meta Details</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Created</dt>
+                        <dd class="col-sm-6">
+                            {{ object.created }}
+                        </dd>
+                        <dt class="col-sm-6">By</dt>
+                        <dd class="col-sm-6">
+                            {{ object.completed_by.name }}
+                        </dd>
+                        <dt class="col-sm-6">Last Edited</dt>
+                        <dd class="col-sm-6">
+                            {{ object.last_edited }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

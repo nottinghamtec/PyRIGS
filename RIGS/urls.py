@@ -84,8 +84,10 @@ urlpatterns = [
          name='event_oembed'),
     path('event/<int:pk>/print/', permission_required_with_403('RIGS.view_event')(rigboard.EventPrint.as_view()),
          name='event_print'),
-    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(rigboard.EventRA.as_view()),
+    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(rigboard.EventRADetail.as_view()),
          name='event_ra'),
+    path('event/<int:pk>/ra/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
+         name='event_ra_edit'),
     path('event/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventUpdate.as_view()),
          name='event_update'),
     path('event/<int:pk>/duplicate/', permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
@@ -137,8 +139,6 @@ urlpatterns = [
     url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
         name="ics_calendar"),
 
-    # Risk assessment API
-    path('log_risk_assessment/', rigboard.LogRiskAssessment.as_view(), name='log_risk_assessment'),
 
     # Legacy URLs
     path('rig/show/<int:pk>/', RedirectView.as_view(permanent=True, pattern_name='event_detail')),

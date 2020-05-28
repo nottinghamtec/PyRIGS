@@ -153,3 +153,15 @@ class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
 
 class EventAuthorisationRequestForm(forms.Form):
     email = forms.EmailField(required=True, label='Authoriser Email')
+
+
+class EventRiskAssessmentForm(forms.ModelForm):
+    forms.BooleanField.widget = forms.RadioSelect(choices=[
+            (True, 'Yes'),
+            (False, 'No')             
+        ], attrs={'class':'custom-control-input'})
+    
+    class Meta:
+        model = models.RiskAssessment
+        fields = '__all__'
+        exclude = ['event', 'completed_by']

@@ -327,7 +327,7 @@ class Event(models.Model, RevisionMixin):
     auth_request_to = models.EmailField(null=True, blank=True)
 
     # Risk assessment info
-    risk_assessment_edit_url = models.CharField(verbose_name="risk assessment", max_length=255, blank=True, null=True)
+    risk_assessment = models.ForeignKey('RiskAssessment', null=True, blank=True, on_delete=models.CASCADE)
 
     # Calculated values
     """
@@ -570,3 +570,48 @@ class Payment(models.Model):
 
     def __str__(self):
         return "%s: %d" % (self.get_method_display(), self.amount)
+
+
+@reversion.register
+class RiskAssessment(models.Model):
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='completer', blank=True, null=True,
+                            verbose_name="Completed By", on_delete=models.CASCADE)
+    created = models.DateTimeField(blank=True, null=True)
+    last_edited = models.DateTimeField(blank=True, null=True)
+    
+    # General
+    nonstandard_equipment = models.BooleanField(default=False)
+    nonstandard_use = models.BooleanField(default=False)
+    contractors = models.BooleanField(default=False)
+    other_companies = models.BooleanField(default=False)
+    crew_fatigue = models.BooleanField(default=False)
+    general_notes = models.TextField(blank=True, null=True)
+    
+    # Power
+    big_power = models.BooleanField(default=False)
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
+                            verbose_name="Power MIC", on_delete=models.CASCADE)
+    generators = models.BooleanField(default=False)
+    other_companies_power = models.BooleanField(default=False)
+    nonstandard_equipment_power = models.BooleanField(default=False)
+    multiple_electrical_environments = models.BooleanField(default=False)
+    power_notes = models.TextField(blank=True, null=True)
+    
+    # Sound
+    noise_monitoring = models.BooleanField(default=False)
+    sound_notes = models.TextField(blank=True, null=True)
+    
+    # Site
+    known_venue = models.BooleanField(default=False)
+    safe_loading = models.BooleanField(default=False)
+    safe_storage = models.BooleanField(default=False)
+    area_outside_of_control = models.BooleanField(default=False)
+    barrier_required = models.BooleanField(default=False)
+    nonstandard_emergency_procedure = models.BooleanField(default=False)
+    
+    # Structures
+    special_structures = models.BooleanField(default=False)
+    persons_responsible_structures = models.TextField(blank=True, null=True)
+    suspended_structures = models.BooleanField(default=False)
+    
+    # Blimey that was a lot of options

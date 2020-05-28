@@ -8,6 +8,7 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.views import generic
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
@@ -17,6 +18,7 @@ from django.http import HttpResponse
 from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.contrib import messages
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from z3c.rml import rml2pdf
@@ -82,25 +84,33 @@ class EventEmbed(EventDetail):
     template_name = 'event_embed.html'
 
 
-class EventRA(generic.base.RedirectView):
-    permanent = False
+class EventRADetail(generic.DetailView):
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_detail.html'
 
-    def get_redirect_url(self, *args, **kwargs):
-        event = get_object_or_404(models.Event, pk=kwargs['pk'])
+    def get_object(self, queryset=None):
+        epk = self.kwargs.get(self.pk_url_kwarg)
+        event = models.Event.objects.get(pk=epk)
+        ra, created = models.RiskAssessment.objects.get_or_create(event=event)
 
-        if event.risk_assessment_edit_url:
-            return event.risk_assessment_edit_url
-
-        params = {
-            'entry.708610078': f'N{event.pk:05}',
-            'entry.905899507': event.name,
-            'entry.139491562': event.venue.name if event.venue else '',
-            'entry.1689826056': event.start_date.strftime('%Y-%m-%d') + (
-                (' - ' + event.end_date.strftime('%Y-%m-%d')) if event.end_date else ''),
-            'entry.902421165': event.mic.name if event.mic else ''
-        }
-        return settings.RISK_ASSESSMENT_URL + "?" + urllib.parse.urlencode(params)
-
+        ra.event = event
+        
+        if created:
+            ra.created = timezone.now()
+            
+        return ra
+    
+class EventRAEdit(generic.UpdateView):
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_form.html'
+    form_class = forms.EventRiskAssessmentForm
+    
+    def get_success_url(self):
+        ra = self.get_object()
+        ra.completed_by = self.request.user
+        ra.last_edited = timezone.now()
+        ra.save()
+        return super().get_success_url()
 
 class EventCreate(generic.CreateView):
     model = models.Event
@@ -437,27 +447,3 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
-
-
-@method_decorator(csrf_exempt, name='dispatch')
-class LogRiskAssessment(generic.View):
-    http_method_names = ["post"]
-
-    def post(self, request, **kwargs):
-        data = request.POST
-        shared_secret = data.get("secret")
-        edit_url = data.get("editUrl")
-        rig_number = data.get("rigNum")
-        if shared_secret is None or edit_url is None or rig_number is None:
-            return HttpResponse(status=422)
-
-        if shared_secret != settings.RISK_ASSESSMENT_SECRET:
-            return HttpResponse(status=403)
-
-        rig_number = int(re.sub("[^0-9]", "", rig_number))
-
-        event = get_object_or_404(models.Event, pk=rig_number)
-        event.risk_assessment_edit_url = edit_url
-        event.save()
-
-        return HttpResponse(status=200)
