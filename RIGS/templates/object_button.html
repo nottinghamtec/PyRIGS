@@ -1,4 +1,0 @@
-{% load to_class_name from filters %}
-{# pass in variable "object" to this template #}
-
-<a title="{% if  object.is_rig == False  %}Non-rig{% elif object.dry_hire %}Dry Hire{% elif object.is_rig %}Rig{%else%}{{object|to_class_name}}{% endif %} | '{{object.name}}'" href="{{ object.get_absolute_url }}">{% if  object.is_rig == False  %}Non-rig{% elif object.dry_hire %}Dry Hire{% elif object.is_rig %}Rig{%else%}{{object|to_class_name}}{% endif %} | '{{ object.activity_feed_string|default:object.name }}'</a>

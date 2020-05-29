@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from django.views import generic
 from reversion.models import Version, VersionQuerySet
 from RIGS import models
+from assets import models as asset_models
 
 logger = logging.getLogger('tec.pyrigs')
 
@@ -23,8 +24,6 @@ class FieldComparison(object):
     def display_value(self, value):
         if isinstance(self.field, IntegerField) and self.field.choices is not None and len(self.field.choices) > 0:
             return [x[1] for x in self.field.choices if x[0] == value][0]
-        if self.field.name == "risk_assessment_edit_url":
-            return "completed" if value else ""
         return value
 
     @property
@@ -159,6 +158,7 @@ class ModelComparison(object):
 
 
 class RIGSVersionManager(VersionQuerySet):
+    # TODO Rework this so its possible to define from the other apps
     def get_for_multiple_models(self, model_array):
         content_types = []
         for model in model_array:
@@ -225,7 +225,7 @@ class ActivityTable(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models(
-            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
+            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment])
         return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
@@ -235,6 +235,7 @@ class ActivityTable(generic.ListView):
         return context
 
 
+# Appears on homepage
 class ActivityFeed(generic.ListView):
     model = RIGSVersion
     template_name = "activity_feed_data.html"
@@ -242,7 +243,7 @@ class ActivityFeed(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models(
-            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation])
+            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, asset_models.Asset, asset_models.Supplier])
         return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):

@@ -608,3 +608,6 @@ class RiskAssessment(models.Model):
     suspended_structures = models.BooleanField(default=False, help_text="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?")
 
     # Blimey that was a lot of options
+
+    def __str__(self):
+        return "%i: %s" % (self.pk, self.event)
