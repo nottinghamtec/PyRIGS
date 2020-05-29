@@ -96,7 +96,7 @@ urlpatterns = [
          name='event_ra'),
     path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
          name='event_ra_edit'),
-    path('event/ra/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(rigboard.EventRAEdit.as_view()),
+    path('event/ra/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
          name='ra_history', kwargs={'model': models.RiskAssessment}),
 
     # Finance
