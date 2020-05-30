@@ -609,6 +609,11 @@ class RiskAssessment(models.Model):
 
     # Blimey that was a lot of options
 
+    # created = models.DateTimeField(auto_now_add=True)
+    # reviewed_at = models.DateTimeField()
+    # reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+    #                              verbose_name="Reviewer", on_delete=models.CASCADE)
+
     @property
     def activity_feed_string(self):
         return str(self.event)

@@ -439,3 +439,9 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
+
+
+class EventRiskAssessmentList(generic.ListView):
+    paginate_by = 20
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_table.html'

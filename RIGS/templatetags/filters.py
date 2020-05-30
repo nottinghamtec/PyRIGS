@@ -116,3 +116,8 @@ def orderby(request, field, attr):
 @register.filter
 def help_text(obj, field):
     return obj._meta.get_field(field).help_text
+
+
+@register.filter
+def verbose_name(obj, field):
+    return obj._meta.get_field(field).verbose_name
