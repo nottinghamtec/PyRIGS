@@ -609,5 +609,9 @@ class RiskAssessment(models.Model):
 
     # Blimey that was a lot of options
 
+    @property
+    def activity_feed_string(self):
+        return str(self.event)
+
     def __str__(self):
-        return "%i: %s" % (self.pk, self.event)
+        return "%i - %s" % (self.pk, self.event)
