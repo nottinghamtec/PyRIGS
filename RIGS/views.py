@@ -21,12 +21,17 @@ from assets import models as asset_models
 from functools import reduce
 
 from PyRIGS.views import GenericListView
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 
 """
 Displays the current rig count along with a few other bits and pieces
 """
 
+# Disable browser based caching
 
+
+@method_decorator(never_cache, name='dispatch')
 class Index(generic.TemplateView):
     template_name = 'index.html'
 

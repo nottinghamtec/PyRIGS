@@ -150,6 +150,14 @@ LOGGING = {
     }
 }
 
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+    }
+}
+
 RAVEN_CONFIG = {
     'dsn': os.environ.get('RAVEN_DSN'),
     # If you are using git, you can also automatically configure the

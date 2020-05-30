@@ -10,6 +10,7 @@ from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.cache import cache
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
@@ -18,6 +19,7 @@ from premailer import Premailer
 from z3c.rml import rml2pdf
 
 from RIGS import models
+from versioning.versioning import models_for_feed
 
 
 def send_eventauthorisation_success_email(instance):
@@ -138,3 +140,13 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 
 
 user_activated.connect(send_admin_awaiting_approval_email)
+
+# TODO Move
+
+
+def update_cache(sender, instance, created, **kwargs):
+    cache.clear()
+
+
+for model in models_for_feed():
+    post_save.connect(update_cache, sender=model)

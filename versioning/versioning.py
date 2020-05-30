@@ -235,6 +235,10 @@ class ActivityTable(generic.ListView):
         return context
 
 
+def models_for_feed():
+    return [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, asset_models.Asset, asset_models.Supplier]
+
+
 # Appears on homepage
 class ActivityFeed(generic.ListView):
     model = RIGSVersion
@@ -243,7 +247,7 @@ class ActivityFeed(generic.ListView):
 
     def get_queryset(self):
         versions = RIGSVersion.objects.get_for_multiple_models(
-            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, asset_models.Asset, asset_models.Supplier])
+            models_for_feed())
         return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):

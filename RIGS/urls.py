@@ -7,6 +7,7 @@ from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
 from RIGS import finance, ical, models, rigboard, views
 from versioning import versioning
+from django.views.decorators.cache import cache_page
 
 urlpatterns = [
     path('', login_required(views.Index.as_view()), name='index'),
@@ -68,7 +69,7 @@ urlpatterns = [
     path('rigboard/activity/', permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
          name='activity_table'),
     path('rigboard/activity/feed/',
-         permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view()),
+         cache_page(60 * 10)(permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view())),
          name='activity_feed'),
 
     path('event/<int:pk>/', has_oembed(oembed_view="event_oembed")(rigboard.EventDetail.as_view()),
