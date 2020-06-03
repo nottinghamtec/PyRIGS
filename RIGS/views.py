@@ -180,6 +180,7 @@ class VenueCreate(generic.CreateView):
 
 
 class VenueUpdate(generic.UpdateView):
+    template_name = 'venue_form.html'
     model = models.Venue
     fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
 

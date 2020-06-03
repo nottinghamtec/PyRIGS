@@ -1,6 +1,5 @@
-{% load help_text from filters %}
 <label for="{{ formitem.id_for_label }}"
-                                class="col-sm-8 control-label">{{ object|help_text:formitem.name|safe }}</label>
+                                class="col-sm-8 control-label">{{ formitem.help_text|safe }}</label>
 <div class="col-4 pb-3">
     {% for radio in formitem %}
         <div class="custom-control custom-radio">

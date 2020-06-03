@@ -84,26 +84,6 @@ class EventEmbed(EventDetail):
     template_name = 'event_embed.html'
 
 
-class EventRADetail(generic.DetailView):
-    model = models.RiskAssessment
-    template_name = 'risk_assessment_detail.html'
-
-    def get_object(self, queryset=None):
-        epk = self.kwargs.get(self.pk_url_kwarg)
-        event = models.Event.objects.get(pk=epk)
-        ra, created = models.RiskAssessment.objects.get_or_create(event=event)
-        return ra
-
-
-class EventRAEdit(generic.UpdateView):
-    model = models.RiskAssessment
-    template_name = 'risk_assessment_form.html'
-    form_class = forms.EventRiskAssessmentForm
-
-    def get_success_url(self):
-        return reverse_lazy('event_ra', kwargs={'pk': self.object.event.pk})
-
-
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
@@ -439,6 +419,60 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
+
+
+class EventRiskAssessmentCreate(generic.CreateView):
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_form.html'
+    form_class = forms.EventRiskAssessmentForm
+
+    def get(self, *args, **kwargs):
+        epk = kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+
+        # Check if RA exists
+        ra = models.RiskAssessment.objects.filter(event=event).first()
+
+        if ra is not None:
+            return HttpResponseRedirect(reverse_lazy('ra_edit', kwargs={'pk': ra.pk}))
+
+        return super(EventRiskAssessmentCreate, self).get(self)
+
+    def get_form(self, **kwargs):
+        form = super(EventRiskAssessmentCreate, self).get_form(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        form.instance.event = event
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super(EventRiskAssessmentCreate, self).get_context_data(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        context['event'] = event
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
+
+
+class EventRiskAssessmentEdit(generic.UpdateView):
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_form.html'
+    form_class = forms.EventRiskAssessmentForm
+
+    def get_success_url(self):
+        return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super(EventRiskAssessmentEdit, self).get_context_data(**kwargs)
+        context['edit'] = True
+        return context
+
+
+class EventRiskAssessmentDetail(generic.DetailView):
+    model = models.RiskAssessment
+    template_name = 'risk_assessment_detail.html'
 
 
 class EventRiskAssessmentList(generic.ListView):

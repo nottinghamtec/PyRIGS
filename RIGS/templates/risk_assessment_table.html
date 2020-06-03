@@ -18,7 +18,7 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Event</th>
-                            <th scope="col" class="text-truncate">{{ object_list.0|verbose_name:'nonstandard_equipment'|title }}</th>
+                            <th scope="col" class="">{{ object_list.0|verbose_name:'nonstandard_equipment'|title }}</th>
                             <th scope="col">{{ object_list.0|verbose_name:'nonstandard_use'|title }}</th>
                             <th scope="col">{{ object_list.0|verbose_name:'contractors'|title }}</th>
                             <th scope="col">{{ object_list.0|verbose_name:'other_companies'|title }}</th>
@@ -47,7 +47,7 @@
                     <tbody>
                     {% for object in object_list %}
                     <tr>
-                        <th scope="row">{{ object.event }}</th>
+                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
                         <td class="{% if object.nonstandard_equipment%}bg-danger text-white{%endif%}">{{object.nonstandard_equipment|yesno|title}}</td>
                         <td class="{% if object.nonstandard_use%}bg-danger text-white{%endif%}">{{object.nonstandard_use|yesno|title}}</td>
                         <td class="{% if object.contractors%}bg-danger text-white{%endif%}">{{object.contractors|yesno|title}}</td>
