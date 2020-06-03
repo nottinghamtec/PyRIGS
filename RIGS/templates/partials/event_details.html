@@ -10,6 +10,12 @@
                     </a>
                 {% endif %}
             </dd>
+            {% if object.venue %}
+            <dt class="col-sm-6">Venue Notes</dt>
+            <dd class="col-sm-6">
+                {{ object.venue.notes }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%} 
+            </dd>
+            {% endif %}
 
             {% if event.is_rig %}
                 <dt class="col-sm-6">Event MIC</dt>
