@@ -3,16 +3,6 @@
             class="fas fa-edit"></span> <span
             class="hidden-xs">Edit</span></a>
     {% if event.is_rig %}
-        {% if not event.dry_hire %}
-            <a href="{% url 'event_ra' event.pk %}" class="btn
-                {% if event.risk_assessment_edit_url %}
-                    btn-success
-                {% else %}
-                    btn-warning
-                {% endif %}
-            "><i class="fas fa-paperclip"></i> <span
-                class="hidden-xs">RA</span></a>
-        {% endif %}
         <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-primary"><i
                 class="fas fa-print"></i> <span
                 class="hidden-xs">Print</span></a>

@@ -72,6 +72,11 @@
     <div class="col-sm">
         {% include 'partials/event_details.html' %}
     </div>
+    {% if event.is_rig and not event.dry_hire %}
+    <div class="col-sm-12 py-3">
+        {% include 'partials/hs_details.html' %}
+    <div>
+    {% endif %}
     {% if event.is_rig and event.internal and perms.RIGS.view_event %}
     <div class="col-sm-12 py-3">
         { include 'partials/auth_details.html' %}
