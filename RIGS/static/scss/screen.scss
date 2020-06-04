@@ -8,10 +8,13 @@
         color: $gray-100;
         border: black !important;
     }
-    .btn-light {
+    .btn-light, .popover-header {
         background: #121416 !important;
         color: $gray-100 !important;
         border: black !important;
+    }
+    a {
+        color: $blue;
     }
 }
 @import "custom-variables";

@@ -224,6 +224,7 @@ class EventArchive(generic.ListView):
 
         context['start'] = self.request.GET.get('start', None)
         context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
+        context['statuses'] = models.Event.EVENT_STATUS_CHOICES
         return context
 
     def get_queryset(self):
@@ -262,6 +263,11 @@ class EventArchive(generic.ListView):
                 pass
 
             filter &= qfilter
+
+        status = self.request.GET.getlist('status', "")
+
+        if len(status) > 0:
+            filter &= Q(status__in=status)
 
         qs = self.model.objects.filter(filter).order_by('-start_date')
 

@@ -121,3 +121,8 @@ def help_text(obj, field):
 @register.filter
 def verbose_name(obj, field):
     return obj._meta.get_field(field).verbose_name
+
+
+@register.filter
+def get_list(dictionary, key):
+    return dictionary.getlist(key)
