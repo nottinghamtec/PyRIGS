@@ -21,6 +21,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
@@ -370,7 +371,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         email = form.cleaned_data['email']
         event = self.object
         event.auth_request_by = self.request.user
-        event.auth_request_at = datetime.datetime.now()
+        event.auth_request_at = timezone.now()
         event.auth_request_to = email
         event.save()
 
