@@ -157,6 +157,11 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+# Tests lock up SQLite otherwise
+if DEBUG or CI:
+    CACHES['default'] = {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+    }
 
 RAVEN_CONFIG = {
     'dsn': os.environ.get('RAVEN_DSN'),
