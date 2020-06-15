@@ -137,4 +137,3 @@ $("#item-table tbody").sortable({
 
     }
 });
-
