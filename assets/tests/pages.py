@@ -13,7 +13,7 @@ class AssetList(BasePage):
     URL_TEMPLATE = '/assets/asset/list'
 
     _asset_item_locator = (By.CLASS_NAME, 'assetRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _search_text_locator = (By.ID, 'id_q')
     _status_select_locator = (By.CSS_SELECTOR, 'div#status-group>div.bootstrap-select')
     _category_select_locator = (By.CSS_SELECTOR, 'div#category-group>div.bootstrap-select')
     _go_button_locator = (By.ID, 'id_search')
@@ -178,7 +178,7 @@ class SupplierEdit(SupplierForm):
 class AssetAuditList(AssetList):
     URL_TEMPLATE = reverse('asset_audit_list')
 
-    _search_text_locator = (By.ID, 'id_query')
+    _search_text_locator = (By.ID, 'id_q')
     _go_button_locator = (By.ID, 'searchButton')
     _modal_locator = (By.ID, 'modal')
     _errors_selector = (By.CLASS_NAME, "alert-danger")

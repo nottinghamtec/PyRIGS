@@ -17,7 +17,7 @@
         $('#searchButton').click(function (e) {
              e.preventDefault();
              var url = "{% url 'asset_audit' None %}";
-             var id = $("#{{form.query.id_for_label}}").val();
+             var id = $("#{{form.q.id_for_label}}").val();
              url = url.replace('None', id);
              $.ajax({
                 url: url,
@@ -57,9 +57,9 @@
 <h3>Audit Asset:</h3>
 <form id="asset-search-form" class="form-horizontal" method="POST">
   <div class="input-group input-group-lg" style="width=auto;">
-    {% render_field form.query|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
+    {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
     <div class="input-group-append">
-        <label for="query" class="sr-only">Asset ID:</label>
+        <label for="q" class="sr-only">Asset ID:</label>
         <a id="searchButton" class="btn btn-primary" class="submit" type="submit">Search</a>
     </div>
   </div>
