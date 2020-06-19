@@ -12,8 +12,6 @@ from django.views.decorators.cache import cache_page
 urlpatterns = [
     path('', login_required(views.Index.as_view()), name='index'),
 
-    path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
-
     # People
     path('people/', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
          name='person_list'),

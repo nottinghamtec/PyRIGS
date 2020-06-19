@@ -41,20 +41,6 @@ class Index(generic.TemplateView):
         return context
 
 
-"""
-Called from a modal window (e.g. when an item is submitted to an event/invoice).
-May optionally also include some javascript in a success message to cause a load of
-the new information onto the page.
-"""
-
-
-class CloseModal(generic.TemplateView):
-    template_name = 'closemodal.html'
-
-    def get_context_data(self, **kwargs):
-        return {'messages': messages.get_messages(self.request)}
-
-
 class PersonList(GenericListView):
     template_name = 'person_list.html'
     model = models.Person
