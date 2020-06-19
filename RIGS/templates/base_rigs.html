@@ -72,9 +72,12 @@
         <a href="{% url 'search_help' %}" class="nav-link modal-href btn-sm"><span class="fas fa-question-circle"></span></a>
     </form>
 {% endif %}
-{% include 'partials/navbar_user.html' %}
-</li>
 {% endblock %}
+
+{% block titleelements_right %}
+{% include 'partials/navbar_user.html' %}
+{% endblock %}
+
 {% block js %}
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/popover.js' %}"></script>
