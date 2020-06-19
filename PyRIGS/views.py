@@ -159,3 +159,7 @@ class GenericListView(generic.ListView):
         if orderBy != "":
             object_list = object_list.order_by(orderBy)
         return object_list
+
+
+class SearchHelp(generic.TemplateView):
+    template_name = 'search_help.html'

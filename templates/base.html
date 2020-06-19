@@ -28,16 +28,6 @@
     {% endblock %}
 
     {% block extra-head %}{% endblock %}
-    <script>
-    document.body.addEventListener('keydown', function(e) {
-        if(e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
-            var target = e.target;
-            if(target.form) {
-                target.form.submit();
-            }
-        }
-    });
-    </script>
 </head>
 
 <body>
@@ -132,6 +122,16 @@
     });
 </script>
 <script src="{% static 'js/dark-mode-switch.min.js' %}"></script>
+<script>
+    document.body.addEventListener('keydown', function(e) {
+        if(e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
+            var target = e.target;
+            if(target.form) {
+                target.form.submit();
+            }
+        }
+    });
+</script>
 {% block js %}
 {% endblock %}
 </body>

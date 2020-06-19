@@ -23,6 +23,8 @@ urlpatterns = [
     path('api/<str:model>/<int:pk>/', login_required(views.SecureAPIRequest.as_view()),
          name="api_secure"),
 
+    path('search_help/', views.SearchHelp.as_view(), name='search_help'),
+
     path('admin/', admin.site.urls),
 ]
 

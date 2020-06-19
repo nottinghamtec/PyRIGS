@@ -29,7 +29,7 @@ class AssetAuditForm(AssetForm):
 
 
 class AssetSearchForm(forms.Form):
-    query = forms.CharField(required=False)
+    q = forms.CharField(required=False)
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
     status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
 

@@ -41,7 +41,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
             return self.model.objects.none()
 
         # TODO Feedback to user when search fails
-        query_string = form.cleaned_data['query'] or ""
+        query_string = form.cleaned_data['q'] or ""
         if len(query_string) == 0:
             queryset = self.model.objects.all()
         elif len(query_string) >= 3:

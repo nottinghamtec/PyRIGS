@@ -41,10 +41,6 @@ class Index(generic.TemplateView):
         return context
 
 
-class SearchHelp(generic.TemplateView):
-    template_name = 'search_help.html'
-
-
 """
 Called from a modal window (e.g. when an item is submitted to an event/invoice).
 May optionally also include some javascript in a success message to cause a load of

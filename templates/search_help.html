@@ -26,7 +26,7 @@
                 <p>Events are sorted in reverse <span class="badge badge-dark">start_date</span> order (most recent events at the top)</p>
               </div>
               <div class="card-header">
-                <h3 class="card-title">Searching People/Organisations/Venues</h3>
+                <h3 class="card-title">Searching People/Organisations/Venues/Suppliers</h3>
               </div>
               <div class="card-body">
                 <p>
@@ -54,7 +54,21 @@
                 <p>Entering a raw integer will search by both <span class="badge badge-dark">invoice_id</span> and <span class="badge badge-dark">event_id</span></p>
                 <p>Entries are sorted in reverse <span class="badge badge-dark">invoice_date</span> order</p>
               </div>
-            {% endif %}
+              {% endif %}
+              <div class="card-header">
+                <h3 class="card-title">Searching Assets</h3>
+              </div>
+              <div class="card-body">
+                <p>
+                Searches for entire search phrase in:
+                    <span class="badge badge-dark">description</span> and
+                    <span class="badge badge-dark">serial number</span>
+                </p>
+                <p>
+                Will also attempt to exact match <span class="badge badge-dark">asset ID</span>
+                </p>
+                <p>Entries are sorted in alphanumerical order by <span class="badge badge-dark">asset ID</span></p>
+              </div>
             </div>
         </div>
     </div>

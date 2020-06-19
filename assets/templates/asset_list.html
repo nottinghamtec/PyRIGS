@@ -16,11 +16,11 @@
 
 {% block content %}
 <h1>Asset List</h1>
-<form id="asset-search-form" method="GET" class="form py-2">
-  <div class="row my-2">
+<form id="asset-search-form" method="GET" class="form">
+  <div class="row py-2">
       <div class="input-group">
-        {% render_field form.query|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
-        <label for="query" class="sr-only">Asset ID/Description/Serial Number:</label>
+        {% render_field form.q|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
+        <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
         <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search">Search</button></span>
       </div>
   </div>
@@ -49,5 +49,4 @@
   {% paginator %}
 </div>
 {% endif %}
-
 {% endblock %}

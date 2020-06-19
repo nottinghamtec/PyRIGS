@@ -13,7 +13,6 @@ urlpatterns = [
     path('', login_required(views.Index.as_view()), name='index'),
 
     path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
-    path('search_help/', views.SearchHelp.as_view(), name='search_help'),
 
     # People
     path('people/', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
