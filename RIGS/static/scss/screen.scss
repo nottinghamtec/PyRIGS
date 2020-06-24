@@ -6,13 +6,14 @@
     .dropdown-menu {
         box-shadow: 0 0.5rem 1rem black;
         color: $gray-100;
+        background: #121416;
     }
     .form-control {
         background: #121416;
         color: $gray-100;
         border: black !important;
     }
-    .btn-light, .popover-header {
+    .btn-light, .popover-header, .status {
         background: #121416 !important;
         color: $gray-100 !important;
         border: black !important;
@@ -25,6 +26,9 @@
     }
     .badge {
         color: white;
+    }
+    .input-group-text {
+        border: black;
     }
 }
 @import "custom-variables";
