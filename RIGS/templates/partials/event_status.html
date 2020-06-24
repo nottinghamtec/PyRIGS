@@ -9,9 +9,11 @@
     {% endif %}
     <!-- TODO show invoice stuff here -->
 
-    {% if event.riskassessment %}
-        <span class="badge badge-success">RA: <i class="fas fa-check"></i></span>
-    {% else %}
-        <span class="badge badge-danger">RA: <i class="fas fa-times"></i></span>
+    {% if not event.dry_hire %}
+        {% if event.riskassessment %}
+            <span class="badge badge-success">RA: <i class="fas fa-check"></i></span>
+        {% else %}
+            <span class="badge badge-danger">RA: <i class="fas fa-times"></i></span>
+        {% endif %}
     {% endif %}
 {% endif %}
