@@ -3,6 +3,10 @@
     @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
     background: #222;
     color: $gray-100;
+    .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem black;
+        color: $gray-100;
+    }
     .form-control {
         background: #121416;
         color: $gray-100;
@@ -15,6 +19,12 @@
     }
     a {
         color: $blue;
+    }
+    .btn {
+        color: white;
+    }
+    .badge {
+        color: white;
     }
 }
 @import "custom-variables";
