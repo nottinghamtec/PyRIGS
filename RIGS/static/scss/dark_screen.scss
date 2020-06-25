@@ -1,24 +1,27 @@
 [data-theme='dark'] {
     $theme-colors: (
-      "success": #678f75,
+      "success": #3AB54A,
       "warning": #FFE89B,
-      "danger": #9f4c49,
-      "info": #006b8e,
-      "primary": #4CB8F1
+      "danger": #BF1E2E,
+      "info": #25AAE2,
+      "primary": #3A52A2
     );
     @import "custom-variables";
     @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
     background: #222;
     color: $gray-100;
+    .navbar {
+        background-color: #111111 !important;
+    }
     .dropdown-menu {
         box-shadow: 0 0.5rem 1rem black;
         color: $gray-100;
         background: #121416;
     }
-    .form-control {
+    .form-control:not(.btn) {
         background-color: #121416;
         color: $gray-100;
-        border-color: #121416;
+        border-color: $gray-500;
     }
     .btn-light, .popover-header, .status {
         background-color: #121416 !important;
@@ -28,7 +31,7 @@
     a {
         color: $blue;
     }
-    .badge {
+    .badge, .btn-success {
         color: black;
     }
     .badge-dark, .badge-secondary, .btn-primary {
