@@ -43,16 +43,13 @@
                 </div>
             </div>
         </div>
-        {% include associated|safe %}
+        {% if associated %}
+            {% include associated|safe %}
+        {% endif %}
     </div>
-    <div class="row">
-        <div class="col-sm-12 py-3">
-            <div class="card">
-                <div class="card-header">Associated Events</div>
-                {% include 'event_table.html' with events=object.latest_events %}
-            </div>
-        </div>
-    </div>
+    {% if associated2 %}
+        {% include associated2|safe %}
+    {% endif %}
 
     {% if not request.is_ajax %}
         <div class="row">
