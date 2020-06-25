@@ -1,36 +1,4 @@
-[data-theme='dark'] {
-    @import "custom-variables";
-    @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
-    background: #222;
-    color: $gray-100;
-    .dropdown-menu {
-        box-shadow: 0 0.5rem 1rem black;
-        color: $gray-100;
-        background: #121416;
-    }
-    .form-control {
-        background: #121416;
-        color: $gray-100;
-        border: black !important;
-    }
-    .btn-light, .popover-header, .status {
-        background: #121416 !important;
-        color: $gray-100 !important;
-        border: black !important;
-    }
-    a {
-        color: $blue;
-    }
-    .btn {
-        color: white;
-    }
-    .badge {
-        color: white;
-    }
-    .input-group-text {
-        border: black;
-    }
-}
+@import "dark_screen";
 @import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
 
