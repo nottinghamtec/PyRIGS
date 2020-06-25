@@ -1,4 +1,11 @@
 [data-theme='dark'] {
+    $theme-colors: (
+      "success": #678f75,
+      "warning": #FFE89B,
+      "danger": #9f4c49,
+      "info": #006b8e,
+      "primary": #4CB8F1
+    );
     @import "custom-variables";
     @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
     background: #222;
@@ -9,23 +16,26 @@
         background: #121416;
     }
     .form-control {
-        background: #121416;
+        background-color: #121416;
         color: $gray-100;
-        border: black !important;
+        border-color: #121416;
     }
     .btn-light, .popover-header, .status {
-        background: #121416 !important;
+        background-color: #121416 !important;
         color: $gray-100 !important;
-        border: black !important;
+        border-color: #121416;
     }
     a {
         color: $blue;
     }
-    .btn, .badge, tr {
-        color: white;
+    .badge {
+        color: black;
+    }
+    .badge-dark, .badge-secondary, .btn-primary {
+        color: $gray-100;
     }
     .input-group-text {
-        border: black;
+        border-color: #121416;
     }
     .page-item.disabled {
         opacity: 0.5;
