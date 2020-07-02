@@ -65,8 +65,13 @@ class Profile(AbstractUser):
     def __str__(self):
         return self.name
 
-
+# TODO move to versioning - currently get import errors with that
 class RevisionMixin(object):
+    @property
+    def is_first_version(self):
+        versions = Version.objects.get_for_object(self)
+        return len(versions) == 1
+
     @property
     def current_version(self):
         version = Version.objects.get_for_object(self).select_related('revision').first()
@@ -92,6 +97,7 @@ class RevisionMixin(object):
         if version is None:
             return None
         return "V{0} | R{1}".format(version.pk, version.revision.pk)
+
 
 
 class Person(models.Model, RevisionMixin):
@@ -570,7 +576,7 @@ class Payment(models.Model):
 
 
 @reversion.register
-class RiskAssessment(models.Model):
+class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     # General
     nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by TEC's standard risk assessments and method statements?")
