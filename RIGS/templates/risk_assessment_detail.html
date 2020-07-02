@@ -36,7 +36,7 @@
                         <dd class="col-2">
                             {{ object.general_notes|default:'N/A'|linebreaks }}
                         </dd>
-                    </dl> 
+                    </dl>
                 </div>
             </div>
             <div class="card card-default mb-3">
@@ -49,7 +49,7 @@
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'power_mic' }}</dt>
                         <dd class="col-sm-6">
-                            {{ object.power_mic.name|default:'Moose' }}
+                            {{ object.power_mic.name|default:'None' }}
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
                         <dd class="col-sm-6">
@@ -72,7 +72,7 @@
                             {{ object.power_notes|default:'N/A'|linebreaks }}
                         </dd>
                     </dl>
-                </div>     
+                </div>
             </div>
             <div class="card card-default mb-3">
                 <div class="card-header">Sound</div>
@@ -97,7 +97,7 @@
                         <dd class="col-sm-6">
                             {{ object.known_venue|yesno|title }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'safe_loading' }}</dt>
+                        <dt class="col-sm-6">{{ object|help_text:'safe_loading'|safe }}</dt>
                         <dd class="col-sm-6">
                             {{ object.safe_loading.name|yesno|title }}
                         </dd>

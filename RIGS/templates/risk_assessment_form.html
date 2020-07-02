@@ -3,7 +3,7 @@
 {% load static %}
 {% load help_text from filters %}
 
-{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
+{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 
 {% block css %}
     {{ block.super }}
@@ -29,7 +29,7 @@
 
 {% block content %}
     <div class="col-sm-offset-1 col-sm-10">
-        <h3>{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}</h3>
+        <h3>{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
         {% if edit %}
         <form method="POST" action="{% url 'ra_edit' pk=object.pk %}">
         {% else %}
@@ -47,7 +47,7 @@
                             {% include 'partials/yes_no_radio.html' with formitem=form.contractors %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.other_companies %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.crew_fatigue %}
-                            
+
                             <label for="{{ form.general_notes.id_for_label }}">{{ form.general_notes.help_text }}</label>
                             {% render_field form.general_notes class+="form-control" %}
                         </div>

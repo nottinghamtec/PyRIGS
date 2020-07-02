@@ -618,5 +618,8 @@ class RiskAssessment(models.Model):
     def activity_feed_string(self):
         return str(self.event)
 
+    def get_absolute_url(self):
+        return reverse_lazy('ra_detail', kwargs={'pk': self.pk})
+
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
