@@ -164,6 +164,7 @@ class EventRiskAssessmentForm(forms.ModelForm):
                     (True, 'Yes'),
                     (False, 'No')
                 ], attrs={'class': 'custom-control-input'})
+                field.required = True
 
     class Meta:
         model = models.RiskAssessment
