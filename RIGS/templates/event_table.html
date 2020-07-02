@@ -1,104 +1,106 @@
-<div class="d-none d-md-block">
-    <div class="table-responsive">
-        <table class="table mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Event Date</th>
-                    <th scope="col">Event Details</th>
-                    <th scope="col">MIC</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for event in events %}
-            <tr {% include 'partials/event_table_colour.html' %} id="event_row">
-                <!---Number-->
-                <th scope="row" id="event_number">{{ event.pk }}</th>
-                <!--Dates-->
-                <td id="event_dates">
-                    <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
-                    {% if event.end_date and event.end_date != event.start_date %}
-                        <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
-                    {% endif %}
-                    <!---Times-->
-                    {% if not event.cancelled %}
-                        <dl class="dl-horizontal">
-                            {% if event.meet_at %}
-                                <dt>Crew meet</dt>
-                                <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
-                            {% endif %}
-                            {% if event.has_start_time %}
-                                <dt>Event starts</dt>
-                                <dd>
-                                    {{ event.start_time|date:"H:i" }}<br/>
-                                    {{ event.start_date|date:"(Y-m-d)" }}<br/>
-                                </dd>
-                            {% endif %}
-                            {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
-                                <dt>Event ends</dt>
-                                <dd>
-                                    {{ event.end_time|date:"H:i" }}<br/>
-                                    {{ event.end_date|date:"(Y-m-d)" }}
-                                </dd>
-                            {% endif %}{% endif %}
-                        </dl>
-                    {% endif %}
-                </td>
-                <!---Details-->
-                <td id="event_details">
-                    <h4>
-                        <a href="{% url 'event_detail' event.pk %}">
-                            {{ event.name }}
-                        </a>
-                        {% if event.venue %}
-                            <small>at {% if event.venue.notes %}{{ event.venue.name }} <a href="{% url 'venue_detail' event.venue.pk %}"><span class="far fa-sticky-note"></span></a>{% else %}{{ event.venue.name }}{% endif %}</small>
+{% comment %}<div class="d-none d-md-block">{% endcomment %}
+<div class="table-responsive">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Event Date</th>
+                <th scope="col">Event Details</th>
+                <th scope="col">MIC</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+        <tr {% include 'partials/event_table_colour.html' %} id="event_row">
+            <!---Number-->
+            <th scope="row" id="event_number">{{ event.pk }}</th>
+            <!--Dates-->
+            <td id="event_dates">
+                <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
+                {% if event.end_date and event.end_date != event.start_date %}
+                    <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
+                {% endif %}
+                <!---Times-->
+                {% if not event.cancelled %}
+                    <dl class="dl-horizontal">
+                        {% if event.meet_at %}
+                            <dt>Crew meet</dt>
+                            <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
                         {% endif %}
-                        {% if event.dry_hire %}
-                            <span class="badge badge-secondary">Dry Hire</span>
+                        {% if event.has_start_time %}
+                            <dt>Event starts</dt>
+                            <dd>
+                                {{ event.start_time|date:"H:i" }}<br/>
+                                {{ event.start_date|date:"(Y-m-d)" }}<br/>
+                            </dd>
                         {% endif %}
-                    </h4>
-                    {% if event.is_rig and not event.cancelled %}
-                        <h5>
-                            {{ event.person.name }}
-                            {% if event.organisation %}
-                                for {{ event.organisation.name }}
-                            {% endif %}
-                        </h5>
+                        {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
+                            <dt>Event ends</dt>
+                            <dd>
+                                {{ event.end_time|date:"H:i" }}<br/>
+                                {{ event.end_date|date:"(Y-m-d)" }}
+                            </dd>
+                        {% endif %}{% endif %}
+                    </dl>
+                {% endif %}
+            </td>
+            <!---Details-->
+            <td id="event_details">
+                <h4>
+                    <a href="{% url 'event_detail' event.pk %}">
+                        {{ event.name }}
+                    </a>
+                    {% if event.venue %}
+                        <small>at {% if event.venue.notes %}{{ event.venue.name }} <a href="{% url 'venue_detail' event.venue.pk %}"><span class="far fa-sticky-note"></span></a>{% else %}{{ event.venue.name }}{% endif %}</small>
                     {% endif %}
-                    {% if not event.cancelled and event.description %}
-                        <p>{{ event.description|linebreaksbr }}</p>
+                    {% if event.dry_hire %}
+                        <span class="badge badge-secondary">Dry Hire</span>
                     {% endif %}
-                    {% include 'partials/event_status.html' %}
-                </td>
-                <!---MIC-->
-                <td id="event_mic">
-                    {% if event.mic %}
-                        <div class="media">
-                            {% if perms.RIGS.view_profile %}
-                                <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
-                            {% endif %}
-                                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo mr-3"/>
-                            {% if perms.RIGS.view_profile %}
-                                </a>
-                            {% endif %}
-                            <div class="media-body">
-                                <p>{{ event.mic.initials }}</p>
-                            </div>
+                </h4>
+                {% if event.is_rig and not event.cancelled %}
+                    <h5>
+                        {{ event.person.name }}
+                        {% if event.organisation %}
+                            for {{ event.organisation.name }}
+                        {% endif %}
+                    </h5>
+                {% endif %}
+                {% if not event.cancelled and event.description %}
+                    <p>{{ event.description|linebreaksbr }}</p>
+                {% endif %}
+                {% include 'partials/event_status.html' %}
+            </td>
+            <!---MIC-->
+            <td id="event_mic">
+                {% if event.mic %}
+                    <div class="media">
+                        {% if perms.RIGS.view_profile %}
+                            <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                        {% endif %}
+                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo mr-3"/>
+                        {% if perms.RIGS.view_profile %}
+                            </a>
+                        {% endif %}
+                        <div class="media-body">
+                            <p>{{ event.mic.initials }}</p>
                         </div>
-                    {% elif event.is_rig %}
-                        <span class="fas fa-exclamation"></span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr class="bg-warning">
-                <td colspan="6">No events found</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </div>
+                {% elif event.is_rig %}
+                    <span class="fas fa-exclamation"></span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="bg-warning">
+            <td colspan="6">No events found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% comment %}
 </div>
 <div class="d-xs-block d-sm-block d-md-none">
     {% include 'event_table_mobile.html' %}
 </div>
+{% endcomment %}
