@@ -3,6 +3,7 @@ import hashlib
 import datetime
 import pytz
 
+from django import forms
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -615,10 +616,18 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Blimey that was a lot of options
 
-    # created = models.DateTimeField(auto_now_add=True)
     # reviewed_at = models.DateTimeField()
     # reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
     #                              verbose_name="Reviewer", on_delete=models.CASCADE)
+
+    def clean(self):
+        errdict = {}
+        for field in RiskAssessment._meta.fields:
+            if field.__class__ == forms.BooleanField and self.field is None:
+                errdict[field.name] = ["This field is required"]
+
+        if errdict != {}:  # If there was an error when validation
+            raise ValidationError(errdict)
 
     @property
     def activity_feed_string(self):

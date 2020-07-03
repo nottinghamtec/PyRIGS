@@ -163,10 +163,9 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 field.widget = forms.RadioSelect(choices=[
                     (True, 'Yes'),
                     (False, 'No')
-                ], attrs={'class': 'custom-control-input'})
-                field.required = True
+                ], attrs={'class': 'custom-control-input', 'required': 'true'})
 
     class Meta:
         model = models.RiskAssessment
         fields = '__all__'
-        exclude = ['event']
+        exclude = []

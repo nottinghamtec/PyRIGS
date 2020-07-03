@@ -3,7 +3,7 @@
 {% load static %}
 {% load help_text from filters %}
 
-{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
+{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
 
 {% block css %}
     {{ block.super }}
@@ -29,12 +29,15 @@
 
 {% block content %}
     <div class="col-sm-offset-1 col-sm-10">
-        <h3>{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
+        <h3>{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}</h3>
+        {% include 'form_errors.html' %}
         {% if edit %}
-        <form method="POST" action="{% url 'ra_edit' pk=object.pk %}">
+        <form role="form" method="POST" action="{% url 'ra_edit' pk=object.pk %}">
         {% else %}
         <form role="form" method="POST" action="{% url 'event_ra' pk=event.pk %}">
         {% endif %}
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
             {% csrf_token %}
             <div class="row">
                 <div class="col-12">
