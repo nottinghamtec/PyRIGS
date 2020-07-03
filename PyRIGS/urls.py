@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.views import LoginView
+from django.views.generic import TemplateView
 from registration.backends.default.views import RegistrationView
 from PyRIGS.decorators import permission_required_with_403
 import RIGS
@@ -35,4 +36,5 @@ if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('bootstrap/', TemplateView.as_view(template_name="bootstrap.html")),
     ] + urlpatterns

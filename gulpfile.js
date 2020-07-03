@@ -84,7 +84,7 @@ function browserSyncReload(done) {
 function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*.scss", styles);
   // TODO This prevents reload looping, but means we don't reload if new third party scripts are added
-  gulp.watch("RIGS/static/js/src/*", scripts);
+  gulp.watch("RIGS/static/js/src/**/*.js", scripts);
   gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html', 'versioning/templates/**/*.html'], browserSyncReload);
 }
 
