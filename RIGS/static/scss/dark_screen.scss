@@ -21,7 +21,6 @@
     .form-control:not(.btn) {
         background-color: #121416;
         color: $gray-100;
-        border-color: $gray-500;
     }
     .btn-light, .popover-header, .status {
         background-color: #121416 !important;
@@ -42,5 +41,24 @@
     }
     .page-item.disabled {
         opacity: 0.5;
+    }
+    .bg-light {
+        color: black;
+        background-color: $gray-200 !important;
+        border-radius: 0.2em;
+    }
+    del {
+      color: black;
+      background-color: $danger;
+      border-radius: 3px;
+    }
+    ins {
+      color: black;
+      background-color: $success;
+      border-radius: 3px;
+    }
+    pre {
+        background: $gray-600;
+        color: white;
     }
 }

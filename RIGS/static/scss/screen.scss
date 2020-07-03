@@ -64,11 +64,13 @@ textarea {
 del {
   background-color: #f2dede;
   border-radius: 3px;
+  padding: 0.1em;
 }
 
 ins {
   background-color: #dff0d8;
   border-radius: 3px;
+  padding: 0.1em;
 }
 
 .nav-link {
@@ -92,6 +94,19 @@ ins {
 
 .skip-link:focus {
   transform: translateY(45px); /* TODO Remove absolute positioning */
+}
+
+pre {
+   page-break-inside: avoid;
+    font-family: monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 1.6em;
+    max-width: 100%;
+    overflow: auto;
+    padding: 1em 1.5em;
+    display: block;
+    word-wrap: break-word;
 }
 
 svg {
