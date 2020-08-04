@@ -22,10 +22,22 @@
         background-color: #121416;
         color: $gray-100;
     }
-    .btn-light, .popover-header, .status {
+    .btn-light, .popover, .popover-header, .popover-body, .status {
         background-color: #121416 !important;
         color: $gray-100 !important;
         border-color: #121416;
+    }
+    .bs-popover-right > .arrow::after {
+        border-right-color: #121416;
+    }
+    .bs-popover-left > .arrow::after {
+        border-left-color: #121416;
+    }
+    .bs-popover-top > .arrow::after {
+        border-top-color: #121416;
+    }
+    .bs-popover-bottom > .arrow::after {
+        border-bottom-color: #121416;
     }
     a {
         color: $blue;
