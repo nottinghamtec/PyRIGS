@@ -21,24 +21,24 @@
       <div class="input-group">
         {% render_field form.q|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' style="width: 250px"%}
         <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
-        <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search">Search</button></span>
+        <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search" style="width: 6em">Search</button></span>
       </div>
   </div>
   <div class="row justify-content-end">
-      <div id="category-group" class="form-group px-2">
+      <div id="category-group" class="form-group px-2" style="margin-bottom: 0;">
         <label for="category" class="sr-only">Category</label>
         {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
       </div>
-      <div id="status-group" class="form-group px-2">
+      <div id="status-group" class="form-group px-2" style="margin-bottom: 0;">
         <label for="status" class="sr-only">Status</label>
         {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
       </div>
-      <button id="filter-submit" type="submit" class="btn btn-secondary">Filter</button>
+      <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
   </div>
 </form>
 <div class="row">
     <div class="col px-0">
-        <a href="{% url 'asset_create' %}" class="btn btn-success float-right my-3">New <span class="fas fa-plus"></span></a>
+        <a href="{% url 'asset_create' %}" class="btn btn-success float-right my-2" style="width: 6em">New <span class="fas fa-plus"></span></a>
     </div>
 </div>
 <div class="row">
