@@ -67,6 +67,8 @@ class Profile(AbstractUser):
         return self.name
 
 # TODO move to versioning - currently get import errors with that
+
+
 class RevisionMixin(object):
     @property
     def is_first_version(self):
@@ -98,7 +100,6 @@ class RevisionMixin(object):
         if version is None:
             return None
         return "V{0} | R{1}".format(version.pk, version.revision.pk)
-
 
 
 class Person(models.Model, RevisionMixin):
@@ -616,9 +617,9 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Blimey that was a lot of options
 
-    # reviewed_at = models.DateTimeField()
-    # reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-    #                              verbose_name="Reviewer", on_delete=models.CASCADE)
+    reviewed_at = models.DateTimeField(null=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                                    verbose_name="Reviewer", on_delete=models.CASCADE)
 
     def clean(self):
         errdict = {}

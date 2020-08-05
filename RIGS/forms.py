@@ -168,4 +168,4 @@ class EventRiskAssessmentForm(forms.ModelForm):
     class Meta:
         model = models.RiskAssessment
         fields = '__all__'
-        exclude = []
+        exclude = ['reviewed_at', 'reviewed_by']

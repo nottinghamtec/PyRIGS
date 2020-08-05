@@ -7,12 +7,12 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-sm-12">
+        <div class="col-12">
             <h2>Risk Assessment List</h2>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-12">
+        <div class="col-12">
             <div class="table-responsive">
                 <table class="table mb-0">
                     <thead>
@@ -44,6 +44,7 @@
                                 <th scope="col">{{ object_list.0|verbose_name:'special_structures'|title }}</th>
                                 <th scope="col">{{ object_list.0|verbose_name:'persons_responsible_structures'|title }}</th>
                                 <th scope="col">{{ object_list.0|verbose_name:'suspended_structures'|title }}</th>
+                                <th scope="col">Review</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -79,10 +80,17 @@
                         <td class="{% if object.special_structures%}bg-danger text-white{%endif%}">{{object.special_structures|yesno|title}}</td>
                         <td>{{ object.persons_responsible_structures|default:'N/A'|linebreaks }}</td>
                         <td class="{% if object.suspended_structures%}bg-danger text-white{%endif%}">{{object.suspended_structures|yesno|title}}</td>
+                        <td>
+                        {% if object.reviewed_by %}
+                        Reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a> at {{ object.reviewed_at }}
+                        {% else %}
+                        <a class="btn btn-success" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
+                        {% endif %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr class="bg-warning">
-                        <td colspan="6">Not Found</td>
+                        <td colspan="6">No risk assessments found</td>
                     </tr>
                     {% endfor %}
                     </tbody>

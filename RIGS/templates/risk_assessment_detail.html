@@ -32,8 +32,8 @@
                         <dd class="col-2">
                             {{ object.crewfatigue|yesno|title }}
                         </dd>
-                        <dt class="col-10">{{ object|help_text:'general_notes' }}</dt>
-                        <dd class="col-2">
+                        <dt class="col-12">{{ object|help_text:'general_notes' }}</dt>
+                        <dd class="col-12">
                             {{ object.general_notes|default:'N/A'|linebreaks }}
                         </dd>
                     </dl>
@@ -67,8 +67,8 @@
                         <dd class="col-sm-6">
                             {{ object.multiple_electrical_environments|yesno|title }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'power_notes' }}</dt>
-                        <dd class="col-sm-6">
+                        <dt class="col-12">{{ object|help_text:'power_notes' }}</dt>
+                        <dd class="col-12">
                             {{ object.power_notes|default:'N/A'|linebreaks }}
                         </dd>
                     </dl>
@@ -82,8 +82,8 @@
                         <dd class="col-sm-6">
                             {{ object.noise_monitoring|yesno|title }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'sound_notes' }}</dt>
-                        <dd class="col-sm-6">
+                        <dt class="col-12">{{ object|help_text:'sound_notes' }}</dt>
+                        <dd class="col-12">
                             {{ object.sound_notes|default:'N/A'|linebreaks }}
                         </dd>
                     </dl>

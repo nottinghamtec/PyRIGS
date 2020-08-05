@@ -5,7 +5,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
 from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
-from RIGS import finance, ical, models, rigboard, views
+from RIGS import finance, ical, models, rigboard, views, hs
 from versioning import versioning
 from django.views.decorators.cache import cache_page
 
@@ -89,17 +89,19 @@ urlpatterns = [
     path('event/<int:pk>/history/',
          permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
          name='event_history', kwargs={'model': models.Event}),
+
     # Event H&S
-    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(rigboard.EventRiskAssessmentCreate.as_view()),
+    path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentCreate.as_view()),
          name='event_ra'),
-    path('event/ra/<int:pk>/', permission_required_with_403('RIGS.change_event')(rigboard.EventRiskAssessmentDetail.as_view()),
+    path('event/ra/<int:pk>/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentDetail.as_view()),
          name='ra_detail'),
-    path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(rigboard.EventRiskAssessmentEdit.as_view()),
+    path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentEdit.as_view()),
          name='ra_edit'),
     path('event/ra/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
          name='ra_history', kwargs={'model': models.RiskAssessment}),
-    path('event/ra/list', permission_required_with_403('RIGS.change_event')(rigboard.EventRiskAssessmentList.as_view()),
+    path('event/ra/list', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentList.as_view()),
          name='ra_list'),
+    path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentReview.as_view()), name='ra_review'),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
