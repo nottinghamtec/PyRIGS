@@ -44,48 +44,51 @@
                                 <th scope="col">{{ object_list.0|verbose_name:'special_structures'|title }}</th>
                                 <th scope="col">{{ object_list.0|verbose_name:'persons_responsible_structures'|title }}</th>
                                 <th scope="col">{{ object_list.0|verbose_name:'suspended_structures'|title }}</th>
-                                <th scope="col">Review</th>
+                                <th scope="col"></th>
                             {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                     {% for object in object_list %}
                     <tr>
+                        {# General #}
                         <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
                         <td class="{% if object.nonstandard_equipment%}bg-danger text-white{%endif%}">{{object.nonstandard_equipment|yesno|title}}</td>
                         <td class="{% if object.nonstandard_use%}bg-danger text-white{%endif%}">{{object.nonstandard_use|yesno|title}}</td>
                         <td class="{% if object.contractors%}bg-danger text-white{%endif%}">{{object.contractors|yesno|title}}</td>
                         <td class="{% if object.other_companies%}bg-danger text-white{%endif%}">{{object.other_companies|yesno|title}}</td>
                         <td class="{% if object.crew_fatigue%}bg-danger text-white{%endif%}">{{object.crew_fatigue|yesno|title}}</td>
-                        <td>{{ object.general_notes|default:'N/A'|linebreaks }}</td>
-
+                        <td><span class="text-truncate d-inline-block">{{ object.general_notes|default:'N/A'|linebreaks }}</span></td>
+                        {# Power #}
                         <td class="{% if object.big_power%}bg-danger text-white{%endif%}">{{object.big_power|yesno|title}}</td>
                         <td>{{ object.power_mic.name|default:'N/A' }}</td>
                         <td class="{% if object.generators%}bg-danger text-white{%endif%}">{{object.generators|yesno|title}}</td>
                         <td class="{% if object.other_companies_power%}bg-danger text-white{%endif%}">{{object.other_companies_power|yesno|title}}</td>
                         <td class="{% if object.nonstandard_equipment_power%}bg-danger text-white{%endif%}">{{object.nonstandard_equipment_power|yesno|title}}</td>
                         <td class="{% if object.multiple_electrical_environments%}bg-danger text-white{%endif%}">{{object.multiple_electrical_environments|yesno|title}}</td>
-                        <td>{{ object.power_notes|default:'N/A'|linebreaks }}</td>
-
+                        <td><span class="text-truncate d-inline-block">{{ object.power_notes|default:'N/A'|linebreaks }}</span></td>
+                        {# Sound #}
                         <td class="{% if object.noise_monitoring%}bg-danger text-white{%endif%}">{{object.noise_monitoring|yesno|title}}</td>
-                        <td>{{ object.sound_notes|default:'N/A'|linebreaks }}</td>
-
+                        <td><span class="text-truncate d-inline-block">{{ object.sound_notes|default:'N/A'|linebreaks }}</span></td>
+                        {# Venue #}
                         <td class="{% if not object.known_venue%}bg-danger text-white{%endif%}">{{object.known_venue|yesno|title}}</td>
                         <td class="{% if not object.safe_loading%}bg-danger text-white{%endif%}">{{object.safe_loading|yesno|title}}</td>
                         <td class="{% if object.safe_storage%}bg-danger text-white{%endif%}">{{object.safe_storage|yesno|title}}</td>
                         <td class="{% if object.area_outside_of_control%}bg-danger text-white{%endif%}">{{object.area_outside_of_control|yesno|title}}</td>
                         <td class="{% if object.nonstandard_emergency_procedure%}bg-danger text-white{%endif%}">{{object.nonstandard_emergency_procedure|yesno|title}}</td>
                         <td class="{% if object.barrier_required%}bg-danger text-white{%endif%}">{{object.barrier_required|yesno|title}}</td>
-
+                        {# Rigging #}
                         <td class="{% if object.special_structures%}bg-danger text-white{%endif%}">{{object.special_structures|yesno|title}}</td>
                         <td>{{ object.persons_responsible_structures|default:'N/A'|linebreaks }}</td>
                         <td class="{% if object.suspended_structures%}bg-danger text-white{%endif%}">{{object.suspended_structures|yesno|title}}</td>
+                        {# Buttons #}
                         <td>
-                        {% if object.reviewed_by %}
-                        Reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a> at {{ object.reviewed_at }}
-                        {% else %}
-                        <a class="btn btn-success" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
-                        {% endif %}
+                            <a class="btn btn-primary" href="{% url 'ra_detail' object.pk %}">View</a>
+                            {% if object.reviewed_by %}
+                            Reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a> at {{ object.reviewed_at }}
+                            {% else %}
+                            <a class="btn btn-success my-3" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
