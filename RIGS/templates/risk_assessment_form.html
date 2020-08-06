@@ -67,8 +67,8 @@
                                 class="col-sm-8 control-label">{{ form.power_mic.help_text }}</label>
                             <div class="col-sm-8">
                                 <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                                    {% if power_mic %}
-                                        <option value="{{form.power_mic.value}}" selected="selected" >{{ power_mic.name }}</option>
+                                    {% if object.power_mic %}
+                                        <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
                                     {% endif %}
                                 </select>
                             </div>

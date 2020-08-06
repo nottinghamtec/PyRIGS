@@ -52,7 +52,7 @@
                     {% for object in object_list %}
                     <tr>
                         {# General #}
-                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
+                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</a></th>
                         <td class="{% if object.nonstandard_equipment%}bg-danger text-white{%endif%}">{{object.nonstandard_equipment|yesno|title}}</td>
                         <td class="{% if object.nonstandard_use%}bg-danger text-white{%endif%}">{{object.nonstandard_use|yesno|title}}</td>
                         <td class="{% if object.contractors%}bg-danger text-white{%endif%}">{{object.contractors|yesno|title}}</td>
@@ -87,7 +87,7 @@
                             {% if object.reviewed_by %}
                             Reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a> at {{ object.reviewed_at }}
                             {% else %}
-                            <a class="btn btn-success my-3" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
+                            <a class="btn btn-success my-2" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
                             {% endif %}
                         </td>
                     </tr>

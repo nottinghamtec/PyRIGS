@@ -67,7 +67,7 @@ class EventRiskAssessmentDetail(generic.DetailView):
 class EventRiskAssessmentList(generic.ListView):
     paginate_by = 20
     model = models.RiskAssessment
-    template_name = 'risk_assessment_table.html'
+    template_name = 'risk_assessment_list.html'
 
 
 class EventRiskAssessmentReview(generic.View):
@@ -75,6 +75,7 @@ class EventRiskAssessmentReview(generic.View):
         rpk = kwargs.get('pk')
         ra = models.RiskAssessment.objects.get(pk=rpk)
         with reversion.create_revision():
+            reversion.set_user(self.request.user)
             ra.reviewed_by = self.request.user
             ra.reviewed_at = timezone.now()
             ra.save()
