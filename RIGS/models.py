@@ -639,3 +639,41 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
+
+@reversion.register
+class EventChecklist(models.Model, RevisionMixin):
+    event = models.OneToOneField('Event', on_delete=models.CASCADE)
+
+    # General
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklist', blank=True, null=True,
+                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+    # TODO Tabular format
+    vehicles = models.TextField(help_text="List vehicles and their drivers")
+
+    # Safety Checks
+    safe_parking = models.BooleanField(help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")
+    safe_packing = models.BooleanField(help_text="Equipment packed away safely?<br><small>(including flightcases)</small>")
+    exits = models.BooleanField(help_text="Emergency exits clear?")
+    trip_hazard = models.BooleanField(help_text="Appropriate barriers around kit and cabling secured?")
+    warning_signs = models.BooleanField(help_text="Warning signs in place?<br><small>(strobe, smoke, power etc.)</small>")
+    ear_plugs = models.BooleanField(help_text="Ear plugs issued to crew where needed?")
+    hs_location = models.CharField(max_length=255, help_text="Location of Safety Bag/Box")
+    extinguishers_location = models.CharField(max_length=255, help_text="Location of fire extinguishers")
+
+    # Crew Record TODO
+
+    # Small Electrical Checks
+    rcds = models.BooleanField(help_text="RCDs installed where needed and tested?")
+    supply_test = models.BooleanField(help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
+    earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, etc)</small>")
+    pat = models.BooleanField(help_text="All equipment in PAT period?")
+
+    @property
+    def activity_feed_string(self):
+        return str(self.event)
+
+    def get_absolute_url(self):
+        return reverse_lazy('ec_detail', kwargs={'pk': self.pk})
+
+    def __str__(self):
+        return "%i - %s" % (self.pk, self.event)

@@ -1,0 +1,156 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
+{% load help_text from filters %}
+
+{% block content %}
+<div class="row my-3 py-3">
+    <div class="col-sm-12">
+            <h3>Event Checklist for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
+            <div class="row">
+                <div class="col-12 text-right">
+                    <a href="{% url 'ec_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
+                        class="hidden-xs">Edit</span></a>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">General</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'nonstandard_equipment' }}</dt>
+                        <dd class="col-2">
+                            {{ object.nonstandard_equipment|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'nonstandard_use'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.nonstandard_use|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'contractors' }}</dt>
+                        <dd class="col-2">
+                            {{ object.contractors|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'other_companies' }}</dt>
+                        <dd class="col-2">
+                            {{ object.othercompanies|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'crew_fatigue' }}</dt>
+                        <dd class="col-2">
+                            {{ object.crewfatigue|yesno|title }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'general_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.general_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Power</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'big_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.big_power|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'power_mic' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.power_mic.name|default:'None' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.generators|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'other_companies_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.other_companies_power|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'nonstandard_equipment_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.nonstandard_equipment_power|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'multiple_electrical_environments' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.multiple_electrical_environments|yesno|title }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'power_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.power_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Sound</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'noise_monitoring' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.noise_monitoring|yesno|title }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'sound_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.sound_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Site Details</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'known_venue' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.known_venue|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'safe_loading'|safe }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.safe_loading.name|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'safe_storage' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.safe_storage|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'area_outside_of_control' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.area_outside_of_control|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'barrier_required' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.barrier_required|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'nonstandard_emergency_procedure' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.nonstandard_emergency_procedure|yesno|title }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Structures</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'special_structures' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.special_structures|yesno|title }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'persons_responsible_structures' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'suspended_structures' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.suspended_structures|yesno|title }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 text-right">
+        <a href="{% url 'ec_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
+            class="hidden-xs">Edit</span></a>
+    </div>
+    <div class="col-12 text-right">
+        {% include 'partials/last_edited.html' with target="ec_history" %}
+    </div>
+</div>
+{% endblock %}

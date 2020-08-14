@@ -83,3 +83,55 @@ class EventRiskAssessmentReview(generic.View):
             ra.reviewed_at = timezone.now()
             ra.save()
         return HttpResponseRedirect(reverse_lazy('ra_list'))
+
+
+class EventChecklistDetail(generic.DetailView):
+    model = models.EventChecklist
+    template_name = 'event_checklist_detail.html'
+
+class EventChecklistEdit(generic.UpdateView):
+    model = models.EventChecklist
+    template_name = 'event_checklist_form.html'
+    form_class = forms.EventChecklistForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EventChecklistEdit, self).get_context_data(**kwargs)
+        pk = self.kwargs.get('pk')
+        ec = models.EventChecklist.objects.get(pk=pk)
+        context['event'] = ec.event
+        context['edit'] = True
+        return context
+
+class EventChecklistCreate(generic.CreateView):
+    model = models.EventChecklist
+    template_name = 'event_checklist_form.html'
+    form_class = forms.EventChecklistForm
+
+    def get(self, *args, **kwargs):
+        epk = kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+
+        # Check if RA exists
+        ra = models.EventChecklist.objects.filter(event=event).first()
+
+        if ra is not None:
+            return HttpResponseRedirect(reverse_lazy('ec_edit', kwargs={'pk': ra.pk}))
+
+        return super(EventChecklistCreate, self).get(self)
+
+    def get_form(self, **kwargs):
+        form = super(EventChecklistCreate, self).get_form(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        form.instance.event = event
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super(EventChecklistCreate, self).get_context_data(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        context['event'] = event
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})

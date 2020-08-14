@@ -16,6 +16,13 @@
         {% endif%}
         <hr>
         <h5>Event Checklist:</h5>
-        Coming Soon
+        {% if event.eventchecklist %}
+        <span class="fas fa-check text-success"></span> Completed <div class="btn-group"><a href="{% url 'ec_detail' event.eventchecklist.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span
+                class="hidden-xs">View</span><a href="{% url 'ec_edit' event.eventchecklist.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span> <span
+                class="hidden-xs">Edit</span></a></div>
+        {% else %}
+            <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
+                class="hidden-xs">Create Risk Assessment</span></a>
+        {% endif%}
     </div>
 </div>

@@ -103,6 +103,15 @@ urlpatterns = [
          name='ra_list'),
     path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentReview.as_view()), name='ra_review'),
 
+    path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.change_event')(hs.EventChecklistCreate.as_view()),
+         name='event_ec'),
+    path('event/checklist/<int:pk>/', permission_required_with_403('RIGS.change_event')(hs.EventChecklistDetail.as_view()),
+         name='ec_detail'),
+    path('event/checklist/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(hs.EventChecklistEdit.as_view()),
+         name='ec_edit'),
+    path('event/checklist/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
+         name='ec_history', kwargs={'model': models.EventChecklist}),
+
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
          name='invoice_list'),

@@ -1,0 +1,187 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load help_text from filters %}
+
+{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/bootstrap-select.js' %}"></script>
+    <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/jquery-ui.js' %}"></script><!--TODO optimise--->
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-sm-offset-1 col-sm-10">
+        <h3>{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}</h3>
+        {% include 'form_errors.html' %}
+        {% if edit %}
+        <form role="form" method="POST" action="{% url 'ec_edit' pk=object.pk %}">
+        {% else %}
+        <form role="form" method="POST" action="{% url 'event_ec' pk=event.pk %}">
+        {% endif %}
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Event Information</div>
+                        <div class="card-body">
+                            <dl class="col-12 row">
+                                <dt class="col-4">Event Date</dt>
+                                <dd class="col-8">{{form.event.start_date}}</dd>
+                                <dt class="col-4">Event Name</dt>
+                                <dd class="col-8">{{form.event.name}}</dd>
+                                <dt class="col-4">Client</dt>
+                                <dd class="col-8">{{form.event.person}}</dd>
+                                <dt class="col-4">Venue</dt>
+                                <dd class="col-8">{{form.event.Venue}}</dd>
+                            </dl>
+                            <label for="{{ form.power_mic.id_for_label }}"
+                                class="col-4 control-label">{{ form.power_mic.help_text }}</label>
+                            <div class="col-8">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    {% if object.power_mic %}
+                                        <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <label class="col-12 pt-3" for="{{ form.vehicles.id_for_label }}">{{ form.vehicles.help_text }}</label>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Vehicle</th>
+                                        <th scope="col">Driver</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in '012'|make_list %}
+                                    <tr>
+                                        <td><input type="text" class="form-control"/></td>
+                                        <th scope="row">
+                                            <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                {% if object.power_mic %}
+                                                    <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                        </th>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="text-right">
+                                <button class="btn btn-secondary"><span class="fas fa-plus"></span> Add Vehicle</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Safety Checks</div>
+                        <div class="card-body">
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.safe_parking %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.safe_packing %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.exits %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.trip_hazard %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.warning_signs %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.ear_plugs %}
+                            <label class="col-4 pt-3" for="{{ form.hs_location.id_for_label }}">{{ form.hs_location.help_text }}</label>
+                            {% render_field form.hs_location class+="form-control" %}
+                            <label class="col-4 pt-3" for="{{ form.extinguishers_location.id_for_label }}">{{ form.extinguishers_location.help_text }}</label>
+                            {% render_field form.extinguishers_location class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Crew Record</div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Crewmember</th>
+                                        <th scope="col">Start Time</th>
+                                        <th scope="col">Role</th>
+                                        <th scope="col">End Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in '012'|make_list %}
+                                    <tr>
+
+                                        <th scope="row">
+                                            <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                {% if object.power_mic %}
+                                                    <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                        </th>
+                                        <td><input type="time" class="form-control"/></td>
+                                        <td><input type="text" class="form-control"/></td>
+                                        <td><input type="time" class="form-control"/></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="text-right">
+                                <button class="btn btn-secondary"><span class="fas fa-plus"></span> Add Crewmember</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (aprox. 26A)</small></div>
+                        <div class="card-body">
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.rcds %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.supply_test %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
+                        <div class="card-body">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" title="Save"><i
+                                class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
