@@ -52,7 +52,7 @@
                     {% for object in object_list %}
                     <tr>
                         {# General #}
-                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</a></th>
+                        <th scope="row" class="{% if object.reviewed_by %}bg-success{%endif%}"><a href="{% url 'event_detail' object.event.pk %}">N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</a></th>
                         <td class="{% if object.nonstandard_equipment%}bg-danger text-white{%endif%}">{{object.nonstandard_equipment|yesno|title}}</td>
                         <td class="{% if object.nonstandard_use%}bg-danger text-white{%endif%}">{{object.nonstandard_use|yesno|title}}</td>
                         <td class="{% if object.contractors%}bg-danger text-white{%endif%}">{{object.contractors|yesno|title}}</td>

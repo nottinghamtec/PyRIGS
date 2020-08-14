@@ -47,7 +47,10 @@ class EventRiskAssessmentEdit(generic.UpdateView):
     form_class = forms.EventRiskAssessmentForm
 
     def get_success_url(self):
-        # TODO Invalidate review here
+        ra = self.get_object()
+        ra.reviewed_by = None
+        ra.reviewed_at = None
+        ra.save()
         return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
