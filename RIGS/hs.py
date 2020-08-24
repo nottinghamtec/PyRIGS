@@ -141,3 +141,12 @@ class EventChecklistList(generic.ListView):
     paginate_by = 20
     model = models.EventChecklist
     template_name = 'event_checklist_list.html'
+
+
+class HSList(generic.ListView):
+    paginate_by = 20
+    model = models.Event
+    template_name = 'hs_list.html'
+
+    def get_queryset(self):
+        return models.Event.objects.all().order_by('-start_date')

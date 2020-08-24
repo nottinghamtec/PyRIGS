@@ -1,0 +1,59 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+
+{% block title %}H&S Overview{% endblock %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th scope="col">Event</th>
+                <th scope="col">Dates</th>
+                <th scope="col">RA</th>
+                <th scope="col">Checklist</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in object_list %}
+        <tr id="event_row">
+            <th scope="row" id="event_number">{{ event.pk }} | {{ event.name }}</th>
+            <!--Dates-->
+            <td id="event_dates">
+                <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
+                {% if event.end_date and event.end_date != event.start_date %}
+                    <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
+                {% endif %}
+            </td>
+            <td>
+                {% if event.riskassessment %}
+                    <a class="btn btn-primary" href="{% url 'ra_detail' event.riskassessment.pk %}">View</a>
+                    {% if event.riskassessment.reviewed_by %}
+                    Reviewed by <a href="{% url 'profile_detail' event.riskassessment.reviewed_by.pk %}">{{ event.riskassessment.reviewed_by }}</a> at {{ event.riskassessment.reviewed_at }}
+                    {% else %}
+                    <a class="btn btn-success my-2" href="{% url 'ra_review' event.riskassessment.pk %}">Mark Reviewed</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'event_ra' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
+                    class="hidden-xs">Create Risk Assessment</span></a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
+                class="hidden-xs">Create Event Checklist</span></a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="bg-warning text-dark">
+            <td colspan="6">No events found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if is_paginated %}
+    <div class="row justify-content-center">
+        {% paginator %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

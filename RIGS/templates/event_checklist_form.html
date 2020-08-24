@@ -25,6 +25,38 @@
     <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script src="{% static 'js/autocompleter.js' %}"></script>
+
+    <script>
+    $(document).ready(function () {
+       {% if not object.pk %}
+            $('.form-hide').slideUp();
+       {% else %}
+            {% if object.medium_event %}
+                $('#small-event').slideUp();
+                $('#medium-event').slideDown();
+            {% else %}
+                $('#small-event').slideDown();
+                $('#medium-event').slideUp();
+            {% endif%}
+       {% endif %}
+       $('#size-selector button').on('click', function () {
+            $(this).toggleClass('active');
+            $('#size-selector button').not(this).removeClass('active');
+            if ($(this).data('event-size') == 1) {
+                $('#{{form.medium_event.auto_id}}').prop('checked', true);
+                $('#small-event').slideUp();
+                $('#medium-event').slideDown();
+            } else {
+                $('#{{form.medium_event.auto_id}}').prop('checked', false);
+                $('#small-event').slideDown();
+                $('#medium-event').slideUp();
+            }
+        });
+        $("form").submit(function( event ) {
+          $({{form.vehicles.id_for_label}}).val(JSON.stringify($('*[data-serialize]').serializeArray()));
+        });
+    });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -64,6 +96,8 @@
                                 </select>
                             </div>
                             <label class="col-12 pt-3" for="{{ form.vehicles.id_for_label }}">{{ form.vehicles.help_text }}</label>
+                            <input name="{{ form.vehicles.name }}" id="{{ form.vehicles.id_for_label }}"
+               value="{{ form.vehicles.value }}"/>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -73,13 +107,10 @@
                                 </thead>
                                 <tbody>
                                     {% for i in '012'|make_list %}
-                                    <tr>
-                                        <td><input type="text" class="form-control"/></td>
+                                    <tr id="vehicles">
+                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true"/></td>
                                         <th scope="row">
-                                            <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                                                {% if object.power_mic %}
-                                                    <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
-                                                {% endif %}
+                                            <select name="driver_{{i}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" data-serialize="true">
                                             </select>
                                         </th>
                                     </tr>
@@ -154,6 +185,18 @@
             <div class="row my-3">
                 <div class="col-12">
                     <div class="card">
+                        <div class="card-header">Event Size</div>
+                        <div class="card-body" id="size-selector">
+                            {% render_field form.medium_event style="display: none" %}
+			                <button type="button" class="btn btn-success" data-event-size="0" style="width: 10rem;">Small</button>
+			                <button type="button" class="btn btn-warning" data-event-size="1" style="width: 10rem;">Medium</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3 form-hide" id="small-event">
+                <div class="col-12">
+                    <div class="card">
                         <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (aprox. 26A)</small></div>
                         <div class="card-body">
                             {% include 'partials/checklist_checkbox.html' with formitem=form.rcds %}
@@ -164,7 +207,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row my-3">
+            <div class="row my-3 form-hide" id="medium-event">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>

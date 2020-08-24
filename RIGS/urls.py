@@ -91,6 +91,8 @@ urlpatterns = [
          name='event_history', kwargs={'model': models.Event}),
 
     # Event H&S
+    path('event/hs/', permission_required_with_403('RIGS.change_event')(hs.HSList.as_view()), name='hs_list'),
+
     path('event/<int:pk>/ra/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentCreate.as_view()),
          name='event_ra'),
     path('event/ra/<int:pk>/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentDetail.as_view()),
