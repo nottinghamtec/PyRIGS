@@ -135,3 +135,9 @@ class EventChecklistCreate(generic.CreateView):
 
     def get_success_url(self):
         return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+
+
+class EventChecklistList(generic.ListView):
+    paginate_by = 20
+    model = models.EventChecklist
+    template_name = 'event_checklist_list.html'
