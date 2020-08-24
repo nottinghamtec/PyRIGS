@@ -201,6 +201,11 @@ class InvoiceEvent(generic.View):
             invoice.invoice_date = datetime.date.today()
             messages.success(self.request, 'Invoice created successfully')
 
+        if kwargs.get('void'):
+            invoice.void = not invoice.void
+            invoice.save()
+            messages.warning(self.request, 'Invoice voided')
+
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': invoice.pk}))
 
 

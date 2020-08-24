@@ -122,6 +122,8 @@ urlpatterns = [
 
     path('event/<int:pk>/invoice/', permission_required_with_403('RIGS.add_invoice')(finance.InvoiceEvent.as_view()),
          name='invoice_event'),
+    path('event/<int:pk>/invoice/void', permission_required_with_403('RIGS.add_invoice')(finance.InvoiceEvent.as_view()),
+         name='invoice_event_void', kwargs={'void': True}),
 
     path('invoice/<int:pk>/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceDetail.as_view()),
          name='invoice_detail'),

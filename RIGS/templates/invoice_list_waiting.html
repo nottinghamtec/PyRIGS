@@ -69,12 +69,15 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'invoice_event' event.pk %}"
-                               class="btn btn-primary"
-                               data-toggle="tooltip"
-                               title="'Invoice' this event - click this when paperwork has been sent to treasury">
-                                <i class="fas fa-pound-sign"></i> Paperwork Sent
-                            </a>
+                            <div class="btn-group">
+                                <a href="{% url 'invoice_event' event.pk %}"
+                                   class="btn btn-primary">
+                                    <span class="fas fa-pound-sign"></span> Create Invoice
+                                </a>
+                                <a href="{% url 'invoice_event_void' event.pk %}"
+                                   class="btn btn-warning">& Void
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
