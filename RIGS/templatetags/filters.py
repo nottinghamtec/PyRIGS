@@ -6,6 +6,8 @@ from django.utils.text import normalize_newlines
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import SafeData, mark_safe
 from django.utils.html import escape
+from RIGS import models
+import json
 
 register = template.Library()
 
@@ -126,3 +128,19 @@ def verbose_name(obj, field):
 @register.filter
 def get_list(dictionary, key):
     return dictionary.getlist(key)
+
+
+@register.filter
+def profile_by_index(value):
+    if(value):
+        return models.Profile.objects.get(pk=int(value))
+    else:
+        return ""
+
+@register.filter
+def get_json_element(value, element):
+    return json.loads(value)[element]
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

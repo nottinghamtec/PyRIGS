@@ -1,6 +1,9 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 {% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
+{% load get_json_element from filters %}
+{% load get_item from filters %}
+{% load profile_by_index from filters %}
 
 {% block content %}
 <div class="row my-3 py-3">
@@ -16,33 +19,61 @@
                 <div class="card-header">General</div>
                 <div class="card-body">
                     <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'power_mic' }}</dt>
+                        <dd class="col-2">
+                            {{ object.power_mic.name }}
+                        </dd>
+                    </dl>
+                    <p>{{ object|help_text:'vehicles' }}</p>
+                    <ul>
+                        {% for i in object.vehicles %}
+
+                            <li>Vehicle <strong>{{ object.vehicles|get_item:i|get_item:'vehicle'|default:'none' }}</strong> driven by <strong>{{ object.vehicles|get_item:i|get_item:'driver'|profile_by_index|default:'nobody'}}</strong></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Safety Checks</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'safe_parking'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.safe_parking|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'safe_packing'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.safe_packing|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'exits'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.exits|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'trip_hazard'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.trip_hazard|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'warning_signs'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.warning_signs|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'ear_plugs'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.ear_plugs|yesno|title }}
+                        </dd>
                     </dl>
                 </div>
             </div>
             <div class="card card-default mb-3">
                 <div class="card-header">Power</div>
                 <div class="card-body">
+                    {% if object.medium_event %}
+                    <span class="badge badge-success">Small Event</span>
+                    {% else %}
+                    <span class="badge badge-warning">Medium Event</span>
+                    {% endif %}
                     <dl class="row">
                     </dl>
-                </div>
-            </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Sound</div>
-                <div class="card-body">
-                    <dl class="row">
-                    </dl>
-                </div>
-            </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Site Details</div>
-                <div class="card-body">
-                    <dl class="row">
-                    </dl>
-                </div>
-            </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Structures</div>
-                <div class="card-body">
                 </div>
             </div>
         </div>

@@ -2,6 +2,9 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load help_text from filters %}
+{% load get_json_element from filters %}
+{% load get_item from filters %}
+{% load profile_by_index from filters %}
 
 {% block title %}{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
 
@@ -53,7 +56,18 @@
             }
         });
         $("form").submit(function( event ) {
-          $({{form.vehicles.id_for_label}}).val(JSON.stringify($('*[data-serialize]').serializeArray()));
+            // Mmmm Javascript data mangling...
+            var raw = $('*[data-serialize]').serializeArray();
+            var post = raw.reduce(function (result, current) {
+                var index = current.name.split('_')[1];
+                var name = current.name.split('_')[0];
+                result[index] = result[index] || {};
+                var nested = result[index] || {};
+                nested[name] = current.value;
+                result[index] = nested;
+                return result;
+            }, {});
+            $({{form.vehicles.id_for_label}}).val(JSON.stringify(post));
         });
     });
     </script>
@@ -97,7 +111,7 @@
                             </div>
                             <label class="col-12 pt-3" for="{{ form.vehicles.id_for_label }}">{{ form.vehicles.help_text }}</label>
                             <input name="{{ form.vehicles.name }}" id="{{ form.vehicles.id_for_label }}"
-               value="{{ form.vehicles.value }}"/>
+               value="{{ form.vehicles.value }}" style="display: none"/>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -107,10 +121,13 @@
                                 </thead>
                                 <tbody>
                                     {% for i in '012'|make_list %}
-                                    <tr id="vehicles">
-                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true"/></td>
+                                    <tr id="vehicles_{{i}}">
+                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true" value="{{ form.vehicles.value|get_json_element:i|get_item:'vehicle' }}"/></td>
                                         <th scope="row">
                                             <select name="driver_{{i}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" data-serialize="true">
+                                            {% if form.vehicles.value|get_json_element:i|get_item:'driver' is not 0 %}
+                                                <option value="{{ form.vehicles.value|get_json_element:i|get_item:'driver' }}" selected="selected">{{form.vehicles.value|get_json_element:i|get_item:'driver'|profile_by_index}}</option>
+                                            {% endif %}
                                             </select>
                                         </th>
                                     </tr>
