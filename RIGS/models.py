@@ -275,9 +275,7 @@ class EventManager(models.Manager):
             (models.Q(end_date__gte=timezone.now().date(), dry_hire=False, is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Ends after
             (models.Q(dry_hire=True, start_date__gte=timezone.now().date(), is_rig=True) & ~models.Q(
-                status=Event.CANCELLED)) |  # Active dry hire
-            (models.Q(dry_hire=True, checked_in_by__isnull=True, is_rig=True) & (
-                models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED)))  # Active dry hire GT
+                status=Event.CANCELLED))  # Active dry hire
         ).count()
         return event_count
 
@@ -341,17 +339,6 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def sum_total(self):
-        # Manual querying is required for efficiency whilst maintaining floating point arithmetic
-        # if connection.vendor == 'postgresql':
-        #    sql = "SELECT SUM(quantity * cost) AS sum_total FROM \"RIGS_eventitem\" WHERE event_id=%i" % self.id
-        # else:
-        #    sql = "SELECT id, SUM(quantity * cost) AS sum_total FROM RIGS_eventitem WHERE event_id=%i" % self.id
-        # total = self.items.raw(sql)[0]
-        # if total.sum_total:
-        #    return total.sum_total
-        # total = 0.0
-        # for item in self.items.filter(cost__gt=0).extra(select="SUM(cost * quantity) AS sum"):
-        #    total += item.sum
         total = EventItem.objects.filter(event=self).aggregate(
             sum_total=models.Sum(models.F('cost') * models.F('quantity'),
                                  output_field=models.DecimalField(max_digits=10, decimal_places=2))
