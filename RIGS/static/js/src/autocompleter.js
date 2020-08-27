@@ -1,41 +1,37 @@
-$(document).ready(function() {
-clearSelectionLabel = '(no selection)';
-
 function changeSelectedValue(obj,pk,text,update_url) { //Pass in JQuery object and new parameters
     //console.log('Changing selected value');
     obj.find('option').remove();  //Remove all the available options
     obj.append(  //Add the new option
     	$("<option></option>")
-		.attr("value",pk)
-		.text(text)
-		.data('update_url',update_url)
-		);
-	obj.selectpicker('render'); //Re-render the UI
-	obj.selectpicker('refresh'); //Re-render the UI
-	obj.selectpicker('val', pk); //Set the new value to be selected
-	obj.change(); //Trigger the change function manually
+	    .attr("value",pk)
+	    .text(text)
+	    .data('update_url',update_url)
+	    );
+    obj.selectpicker('render'); //Re-render the UI
+    obj.selectpicker('refresh'); //Re-render the UI
+    obj.selectpicker('val', pk); //Set the new value to be selected
+    obj.change(); //Trigger the change function manually
 }
 
 function refreshUpdateHref(obj) {
-	//console.log('Refreshing Update URL');
+    //console.log('Refreshing Update URL');
     targetObject = $('#'+obj.attr('id')+'-update');
-	update_url = $('option:selected', obj).data('update_url');
+    update_url = $('option:selected', obj).data('update_url');
 
-	if (update_url=="") {  //Probably "clear selection" has been chosen
-	//	console.log('Trying to disable');
-		targetObject.attr('disabled', true);
-	} else {
-		targetObject.attr('href', update_url);
-		targetObject.attr('disabled', false);
-	}
+    if (update_url=="") {  //Probably "clear selection" has been chosen
+    //	console.log('Trying to disable');
+	    targetObject.attr('disabled', true);
+    } else {
+	    targetObject.attr('href', update_url);
+	    targetObject.attr('disabled', false);
+    }
 }
 
-
-$(".selectpicker").each(function() {
-
+function initPicker(obj) {
+    console.log('called!');
 	var options = {
         ajax: {
-            url: $(this).data('sourceurl'),
+            url: obj.data('sourceurl'),
             type: 'GET',
             dataType: 'json',
             // Use "{{{q}}}" as a placeholder and Ajax Bootstrap Select will
@@ -76,29 +72,32 @@ $(".selectpicker").each(function() {
         }
     };
 
-    $(this).prepend($("<option></option>")
+    obj.prepend($("<option></option>")
 		.attr("value",'')
 		.text(clearSelectionLabel)
 		.data('update_url',''));  //Add "clear selection" option
 
 
-	$(this).selectpicker().ajaxSelectPicker(options); //Initiaise selectPicker
+	obj.selectpicker().ajaxSelectPicker(options); //Initiaise selectPicker
 
-	$(this).change(function(){ //on change, update the edit button href
+	obj.change(function(){ //on change, update the edit button href
 	//	console.log('Selectbox Changed');
-		refreshUpdateHref($(this));
+		refreshUpdateHref(obj);
 	});
 
-	refreshUpdateHref($(this)); //Ensure href is correct at the beginning
+	refreshUpdateHref(obj); //Ensure href is correct at the beginning
+}
 
-});
+$(document).ready(function() {
+    clearSelectionLabel = '(no selection)';
 
-//When update/edit modal box submitted
+    $(".selectpicker").each(function(){initPicker($(this))});
+
+    //When update/edit modal box submitted
    $('#modal').on('hide.bs.modal', function (e) {
         if (modaltarget != undefined && modalobject != "") {
         	//Update the selector with new values
         	changeSelectedValue($(modaltarget),modalobject[0]['pk'],modalobject[0]['fields']['name'],modalobject[0]['update_url']);
         }
     });
-
 });

@@ -646,7 +646,7 @@ class EventChecklist(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
 
     # General
-    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklist', blank=True, null=True,
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklist',
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     vehicles = models.JSONField(help_text="List vehicles and their drivers", default=dict, null=False)
 

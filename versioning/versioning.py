@@ -234,9 +234,10 @@ class ActivityTable(generic.ListView):
 
         return context
 
-
+# TODO Defined by the model, rather than with this list
 def models_for_feed():
-    return [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, asset_models.Asset, asset_models.Supplier]
+    return [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, models.EventChecklist,
+            asset_models.Asset, asset_models.Supplier]
 
 
 # Appears on homepage

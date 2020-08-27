@@ -63,11 +63,24 @@
                 var name = current.name.split('_')[0];
                 result[index] = result[index] || {};
                 var nested = result[index] || {};
-                nested[name] = current.value;
+                if(current.value):
+                    nested[name] = current.value;
                 result[index] = nested;
                 return result;
             }, {});
             $({{form.vehicles.id_for_label}}).val(JSON.stringify(post));
+        });
+        $('#vehicle-add').on('click', function (event) {
+            event.preventDefault();
+            var newID = Number($('#vehiclest').attr('data-pk'));
+            $('#vehicles_new').clone().attr('style', "").attr('id', 'vehicles_' + newID).appendTo('#vehiclest');
+            $('#vehicles_' + newID).find('select,input').attr('name', function(){
+                return this.name.split('_')[0] + '_' + newID;
+            }).attr('data-serialize', 'true');
+            $('#vehicles_' + newID).find('select').addClass('selectpicker');
+            $('#vehicles_' + newID).find('.selectpicker').selectpicker('refresh');
+            $(".selectpicker").each(function(){initPicker($(this))});
+            $('#vehiclest').attr('data-pk', newID + 1);
         });
     });
     </script>
@@ -111,7 +124,7 @@
                             </div>
                             <label class="col-12 pt-3" for="{{ form.vehicles.id_for_label }}">{{ form.vehicles.help_text }}</label>
                             <input name="{{ form.vehicles.name }}" id="{{ form.vehicles.id_for_label }}"
-               value="{{ form.vehicles.value }}" style="display: none"/>
+               value="{{ form.vehicles.value }}"/>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -119,23 +132,32 @@
                                         <th scope="col">Driver</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {% for i in '012'|make_list %}
+                                <tbody id="vehiclest" data-pk="2">
+                                    <tr id="vehicles_new" style="display: none;">
+                                        <td><input name="vehicle_new" type="text" class="form-control"/></td>
+                                        <td>
+                                            <select name="driver_new" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {# TODO Add required to all fields on row when one is edited #}
+                                    {% for i in vehicles_length %}
                                     <tr id="vehicles_{{i}}">
-                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true" value="{{ form.vehicles.value|get_json_element:i|get_item:'vehicle' }}"/></td>
-                                        <th scope="row">
+                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true" value="{{ form.vehicles.value|get_json_element:i|get_item:'vehicle'|default:'' }}"/></td>
+                                        <td>
                                             <select name="driver_{{i}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" data-serialize="true">
                                             {% if form.vehicles.value|get_json_element:i|get_item:'driver' is not 0 %}
-                                                <option value="{{ form.vehicles.value|get_json_element:i|get_item:'driver' }}" selected="selected">{{form.vehicles.value|get_json_element:i|get_item:'driver'|profile_by_index}}</option>
+                                                <option value="{{ form.vehicles.value|get_json_element:i|get_item:'driver'|default:'0' }}" selected="selected">{{form.vehicles.value|get_json_element:i|get_item:'driver'|profile_by_index}}</option>
                                             {% endif %}
                                             </select>
-                                        </th>
+                                        </td>
+                                        {# TODO Delete functionality <td><button class="btn btn-danger" data-id='{{i}}' data-action='delete'><span class="fas fa-times"></span></button</td>#}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                             <div class="text-right">
-                                <button class="btn btn-secondary"><span class="fas fa-plus"></span> Add Vehicle</button>
+                                <button class="btn btn-secondary" id="vehicle-add"><span class="fas fa-plus"></span> Add Vehicle</button>
                             </div>
                         </div>
                     </div>
@@ -179,11 +201,6 @@
                                     <tr>
 
                                         <th scope="row">
-                                            <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                                                {% if object.power_mic %}
-                                                    <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
-                                                {% endif %}
-                                            </select>
                                         </th>
                                         <td><input type="time" class="form-control"/></td>
                                         <td><input type="text" class="form-control"/></td>
