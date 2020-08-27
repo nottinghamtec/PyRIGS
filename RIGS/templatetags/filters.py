@@ -149,3 +149,14 @@ def get_json_element(value, element):
 def get_item(dictionary, key):
     if(type(dictionary) is dict):
         return dictionary.get(key)
+
+@register.filter
+def next(alist, current_index):
+    """
+    Returns the next element of the list using the current index if it exists.
+    Otherwise returns an empty string.
+    """
+    try:
+        return alist[int(current_index) + 1] # access the next element
+    except:
+        return '' # return empty string in case of exception

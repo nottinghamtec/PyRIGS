@@ -1,3 +1,4 @@
+{% load next from filters %}
 {% comment %}<div class="d-none d-md-block">{% endcomment %}
 <div class="table-responsive">
     <table class="table mb-0">
@@ -90,9 +91,13 @@
                 {% endif %}
             </td>
         </tr>
+        {# Insert a divider between still-out dry hires and actually upcoming events #}
+        {% with next_element=events|next:forloop.counter0 %}
+            {% if event.dry_hire == True and next_element.dry_hire == False %}<tr><td colspan="4"><hr></td><tr>{%endif%}
+        {% endwith %}
         {% empty %}
         <tr class="bg-warning">
-            <td colspan="6">No events found</td>
+            <td colspan="4">No events found</td>
         </tr>
         {% endfor %}
         </tbody>
