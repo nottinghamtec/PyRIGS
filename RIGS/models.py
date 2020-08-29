@@ -473,6 +473,7 @@ class Event(models.Model, RevisionMixin):
         self.full_clean()
         super(Event, self).save(*args, **kwargs)
 
+
 class EventItem(models.Model):
     event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -633,7 +634,8 @@ class RiskAssessment(models.Model, RevisionMixin):
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
 
-@reversion.register(follow=['vehicles',])
+
+@reversion.register(follow=['vehicles', ])
 class EventChecklist(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
 

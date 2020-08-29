@@ -18,6 +18,7 @@ from versioning.versioning import RIGSVersion
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
+
 class VersionHistory(generic.ListView):
     model = RIGSVersion
     template_name = "version_history.html"
@@ -29,7 +30,7 @@ class VersionHistory(generic.ListView):
             "-revision__date_created")
 
     def get_object(self, **kwargs):
-        #Goddamit, almost got away without specific hacks
+        # Goddamit, almost got away without specific hacks
         if self.kwargs['model'].__name__ == 'Asset':
             return get_object_or_404(self.kwargs['model'], asset_id=self.kwargs['pk'])
         else:
@@ -43,11 +44,13 @@ class VersionHistory(generic.ListView):
 
         return context
 
+
 def get_models(app=None):
-    models = filter(lambda item: not hasattr(item, 'reversion_hide'),reversion.get_registered_models())
-    if app != None:
-        models = filter(lambda item: item in apps.get_app_config(app).get_models(),models)
+    models = filter(lambda item: not hasattr(item, 'reversion_hide'), reversion.get_registered_models())
+    if app is not None:
+        models = filter(lambda item: item in apps.get_app_config(app).get_models(), models)
     return models
+
 
 class ActivityTable(generic.ListView):
     model = RIGSVersion
@@ -67,7 +70,9 @@ class ActivityTable(generic.ListView):
         return context
 
 # Appears on homepage
-@method_decorator(never_cache, name='dispatch') # Disable browser based caching
+
+
+@method_decorator(never_cache, name='dispatch')  # Disable browser based caching
 class ActivityFeed(generic.ListView):
     model = RIGSVersion
     template_name = "activity_feed_data.html"

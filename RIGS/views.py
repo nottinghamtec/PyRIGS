@@ -22,6 +22,7 @@ from functools import reduce
 
 from PyRIGS.views import GenericListView
 
+
 class PersonList(GenericListView):
     template_name = 'person_list.html'
     model = models.Person

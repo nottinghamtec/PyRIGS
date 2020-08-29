@@ -22,13 +22,13 @@ for app in apps.get_app_configs():
     if appname == 'RIGS':
         appname = 'rigboard'
         urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
-                name='activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}),]
+                             name='activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
     else:
         urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
-                name=appname + '_activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}),]
+                             name=appname + '_activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
     for model in views.get_models(app.label):
         modelname = model.__name__.lower()
         urlpatterns += [
             path(appname + '/' + modelname + '/<str:pk>/history/', permission_required_with_403('{}.change_{}'.format(app.label, modelname))(views.VersionHistory.as_view()),
-                    name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname,}),
+                 name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
         ]

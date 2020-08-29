@@ -127,7 +127,7 @@ class ModelComparison(object):
             comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
 
             # Build some dicts of what we have
-             # build a list of items, key is the item_pk
+            # build a list of items, key is the item_pk
             for version in old_item_versions:  # put all the old versions in a list
                 if version.field_dict["event_id"] == int(self.new.pk):
                     compare = ModelComparison(old=version._object_version.object, **comparisonParams)

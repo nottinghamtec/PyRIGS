@@ -175,9 +175,9 @@ class EventChecklistForm(forms.ModelForm):
     items = {}
 
     def clean(self):
-        vehicles = {key:val for key, val in self.data.items()
-                   if key.startswith('vehicle')}
-        drivers = {key:val for key, val in self.data.items()
+        vehicles = {key: val for key, val in self.data.items()
+                    if key.startswith('vehicle')}
+        drivers = {key: val for key, val in self.data.items()
                    if key.startswith('driver')}
         for key in vehicles:
             pk = int(key.split('_')[1])

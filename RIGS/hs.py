@@ -89,6 +89,7 @@ class EventChecklistDetail(generic.DetailView):
     model = models.EventChecklist
     template_name = 'event_checklist_detail.html'
 
+
 class EventChecklistEdit(generic.UpdateView):
     model = models.EventChecklist
     template_name = 'event_checklist_form.html'
@@ -101,6 +102,7 @@ class EventChecklistEdit(generic.UpdateView):
         context['event'] = ec.event
         context['edit'] = True
         return context
+
 
 class EventChecklistCreate(generic.CreateView):
     model = models.EventChecklist
