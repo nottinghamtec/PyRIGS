@@ -118,30 +118,34 @@ class ModelComparison(object):
     @cached_property
     def item_changes(self):
         # Recieves two event version objects and compares their items, returns an array of ItemCompare objects
-        item_type = ContentType.objects.get_for_model(models.EventItem)
-        item_dict = {}
-        if hasattr(self.version, 'parent'):
-            old_item_versions = self.version.parent.revision.version_set.filter(content_type=item_type)
-            new_item_versions = self.version.revision.version_set.filter(content_type=item_type)
+        item_type = ContentType.objects.get_for_model(self.version.object)
+        old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
+        new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
+        comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
 
-            # Build some dicts of what we have
-            # build a list of items, key is the item_pk
-            for version in old_item_versions:  # put all the old versions in a list
-                if version.field_dict["event_id"] == int(self.new.pk):
-                    compare = ModelComparison(old=version._object_version.object, **comparisonParams)
-                    item_dict[version.object_id] = compare
+        # Build some dicts of what we have
+        item_dict = {}  # build a list of items, key is the item_pk
+        # FIXME Removing the if checks makes things REALLY slow...
+        for version in old_item_versions:  # put all the old versions in a list
+            #if version.field_dict["event_id"] == int(self.new.pk):
+            compare = ModelComparison(old=version._object_version.object, **comparisonParams)
+            item_dict[version.object_id] = compare
 
-            for version in new_item_versions:  # go through the new versions
-                if version.field_dict["event_id"] == int(self.new.pk):
-                    try:
-                        compare = item_dict[version.object_id]  # see if there's a matching old version
-                        compare.new = version._object_version.object  # then add the new version to the dictionary
-                    except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
-                        compare = ModelComparison(new=version._object_version.object, **comparisonParams)
+        for version in new_item_versions:  # go through the new versions
+            #if version.field_dict["event_id"] == int(self.new.pk):
+            try:
+                compare = item_dict[version.object_id]  # see if there's a matching old version
+                compare.new = version._object_version.object  # then add the new version to the dictionary
+            except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
+                compare = ModelComparison(new=version._object_version.object, **comparisonParams)
 
-                    item_dict[version.object_id] = compare  # update the dictionary with the changes
+            if compare.new:
+                compare.name = str(compare.new)
+            else:
+                compare.name = str(compare.old)
+
+            item_dict[version.object_id] = compare  # update the dictionary with the changes
 
         changes = []
         for (_, compare) in list(item_dict.items()):
@@ -160,7 +164,6 @@ class ModelComparison(object):
 
 
 class RIGSVersionManager(VersionQuerySet):
-    # TODO Rework this so its possible to define from the other apps
     def get_for_multiple_models(self, model_array):
         content_types = []
         for model in model_array:

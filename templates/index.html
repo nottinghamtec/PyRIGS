@@ -9,9 +9,7 @@
     <h4 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h4>
     <div class="col-sm">
         <div class="card">
-            <div class="card-header">
-                <h4 class="list-group-item-heading">Rigboard</h4>
-            </div>
+            <h4 class="card-header">Rigboard</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><i class="fas fa-list"></i> Rigboard</a>
                 <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><i class="fas fa-calendar"></i> Calendar</a>
@@ -19,9 +17,7 @@
                     <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><i class="fas fa-plus"></i> New Event</a>
                 {% endif %}
             </div>
-            <div class="card-header">
-                <h4 class="list-group-item-heading">Asset Database</h4>
-            </div>
+            <h4 class="card-header">Asset Database</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><i class="fas fa-tag"></i> Asset List </a>
                 {% if perms.assets.add_asset %}
@@ -32,9 +28,7 @@
                     <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><i class="fas fa-plus"></i> New Supplier</a>
                 {% endif %}
             </div>
-            <div class="card-header">
-                    <h4 class="list-group-item-heading">Quick Links</h4>
-            </div>
+            <h4 class="card-header">Quick Links</h4>
             <div class="list-group list-group-flush">
                     <a class="list-group-item list-group-item-action" href="https://forum.nottinghamtec.co.uk" target="_blank" rel="noopener noreferrer"><i class="fas fa-comment-alt"></i> TEC Forum</a>
                     <a class="list-group-item list-group-item-action" href="//members.nottinghamtec.co.uk/wiki" target="_blank" rel="noopener noreferrer"><i class="fas fa-pen-square"></i> TEC Wiki</a>

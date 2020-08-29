@@ -62,6 +62,16 @@
                 </div>
             </div>
             <div class="card card-default mb-3">
+                <div class="card-header">Crew Record</div>
+                <div class="card-body">
+                    <ul>
+                        {% for i in object.crew.all %}
+                            <li>{{i}}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
                 <div class="card-header">Power</div>
                 <div class="card-body">
                     {% if object.medium_event %}

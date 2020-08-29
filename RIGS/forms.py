@@ -10,6 +10,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import ReCaptchaField
 from reversion import revisions as reversion
 import simplejson
+from datetime import datetime
 
 from RIGS import models
 
@@ -172,17 +173,17 @@ class EventRiskAssessmentForm(forms.ModelForm):
 
 
 class EventChecklistForm(forms.ModelForm):
+    # Parsed from incoming form data by clean, then saved into models when the form is saved
     items = {}
 
+    # There's probably a thousand better ways to do this, but this one is mine
     def clean(self):
         vehicles = {key: val for key, val in self.data.items()
                     if key.startswith('vehicle')}
-        drivers = {key: val for key, val in self.data.items()
-                   if key.startswith('driver')}
         for key in vehicles:
             pk = int(key.split('_')[1])
             driver_key = 'driver_' + str(pk)
-            if(drivers[driver_key] == ''):
+            if(self.data[driver_key] == ''):
                 raise forms.ValidationError('Add a driver to vehicle ' + str(pk), code='vehicle_mismatch')
             else:
                 try:
@@ -191,10 +192,36 @@ class EventChecklistForm(forms.ModelForm):
                     item = models.EventChecklistVehicle()
 
                 item.vehicle = vehicles['vehicle_' + str(pk)]
-                item.driver = models.Profile.objects.get(pk=drivers['driver_' + str(pk)])
+                item.driver = models.Profile.objects.get(pk=self.data[driver_key])
+                item.full_clean('checklist')
 
                 # item does not have a database pk yet as it isn't saved
-                self.items[pk] = item
+                self.items['v' + str(pk)] = item
+
+        crewmembers = {key: val for key, val in self.data.items()
+                    if key.startswith('crewmember')}
+        other_fields = ['start','role','end']
+        for key in crewmembers:
+            pk = int(key.split('_')[1])
+
+            for field in other_fields:
+                value = self.data['{}_{}'.format(field,pk)]
+                if value == '':
+                    raise forms.ValidationError('Add a {} to crewmember {}'.format(field, pk), code='{}_mismatch'.format(field))
+
+            try:
+                item = models.EventChecklistCrew.objects.get(pk=pk)
+            except models.EventChecklistCrew.DoesNotExist:
+                item = models.EventChecklistCrew()
+
+            item.crewmember = models.Profile.objects.get(pk=self.data['crewmember_' + str(pk)])
+            item.start = self.data['start_' + str(pk)]
+            item.role = self.data['role_' + str(pk)]
+            item.end = self.data['end_' + str(pk)]
+            item.full_clean('checklist')
+
+            # item does not have a database pk yet as it isn't saved
+            self.items['c' + str(pk)] = item
 
         return super(EventChecklistForm, self).clean()
 
@@ -203,14 +230,17 @@ class EventChecklistForm(forms.ModelForm):
         if (commit):
             # Remove all existing, to be recreated from the form
             checklist.vehicles.all().delete()
-            checklist.save()
+            checklist.crew.all().delete()
 
             for key in self.items:
                 item = self.items[key]
                 reversion.add_to_revision(item)
                 # finish and save new database items
                 item.checklist = checklist
+                item.full_clean()
                 item.save()
+
+            checklist.save()
 
         self.items.clear()
 

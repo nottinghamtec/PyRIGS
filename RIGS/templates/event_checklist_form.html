@@ -35,9 +35,11 @@
             {% if object.medium_event %}
                 $('#small-event').slideUp();
                 $('#medium-event').slideDown();
+                $('#size-selector button[data-event-size=1]').addClass('active');
             {% else %}
                 $('#small-event').slideDown();
                 $('#medium-event').slideUp();
+                $('#size-selector button[data-event-size=0]').addClass('active');
             {% endif%}
        {% endif %}
        $('#size-selector button').on('click', function () {
@@ -53,24 +55,29 @@
                 $('#medium-event').slideUp();
             }
         });
-        $('#vehicle-add').on('click', function (event) {
+        $('button[data-action=add]').on('click', function (event) {
             event.preventDefault();
-            var newID = Number($('#vehiclest').attr('data-pk'));
-            $('#vehicles_new').clone().attr('style', "").attr('id', 'vehicles_' + newID).appendTo('#vehiclest');
-            $('#vehicles_' + newID).find('select,input').attr('name', function(){
-                return this.name.split('_')[0] + '_' + newID;
-            //Disabled prevents the hidden row being sent to the form
-            }).removeAttr('disabled');
-            $('#vehicles_' + newID).find('button[data-action=delete]').attr('data-id', newID);
-            $('#vehicles_' + newID).find('select').addClass('selectpicker');
-            $('#vehicles_' + newID).find('.selectpicker').selectpicker('refresh');
+            var target = $($(this).attr('data-target'));
+            var newID = Number(target.attr('data-pk'));
+            var newRow = $($(this).attr('data-clone'))
+                    .clone().attr('style', "")
+                   .attr('id', function(i, val){
+                        return val.split("_")[0] + '_' + newID;
+                   })
+                   .appendTo(target);
+            newRow.find('select,input').attr('name', function(i, val){
+                        return val.split("_")[0] + '_' + newID;
+                   })//Disabled is to prevent the hidden row being sent to the form
+                   .removeAttr('disabled');
+            newRow.find('button[data-action=delete]').attr('data-id', newID);
+            newRow.find('select').addClass('selectpicker');
+            newRow.find('.selectpicker').selectpicker('refresh');
             $(".selectpicker").each(function(){initPicker($(this))});
-            $('#vehiclest').attr('data-pk', newID - 1);
+            $(target).attr('data-pk', newID - 1);
         });
         $('button[data-action=delete]').on('click', function(event) {
            event.preventDefault();
-            console.log($(this).attr('data-id'));
-           $('#vehicles_' + $(this).attr('data-id')).remove();
+           $($(this).attr('data-target') + '_' + $(this).attr('data-id')).remove();
         });
     });
     </script>
@@ -124,11 +131,8 @@
                                 <tbody id="vehiclest" data-pk="-1">
                                     <tr id="vehicles_new" style="display: none;">
                                         <td><input type="text" class="form-control" name="vehicle_new" disabled="true"/></td>
-                                        <td>
-                                            <select class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true">
-                                            </select>
-                                        </td>
-                                        <td><button class="btn btn-danger" data-action='delete'><span class="fas fa-times"></span></button</td>
+                                        <td><select class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true"></select></td>
+                                        <td><button class="btn btn-danger" data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button</td>
                                     </tr>
                                     {# TODO Add required to all fields on row when one is edited #}
                                     {% for i in object.vehicles.all %}
@@ -141,13 +145,13 @@
                                                 {% endif %}
                                             </select>
                                         </td>
-                                        <td><button class="btn btn-danger" data-id='{{i.pk}}' data-action='delete'><span class="fas fa-times"></span></button</td>
+                                        <td><button class="btn btn-danger" data-id='{{i.pk}}' data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                             <div class="text-right">
-                                <button class="btn btn-secondary" id="vehicle-add"><span class="fas fa-plus"></span> Add Vehicle</button>
+                                <button class="btn btn-secondary" id="vehicle-add" data-action='add' data-target='#vehiclest' data-clone='#vehicles_new'><span class="fas fa-plus"></span> Add Vehicle</button>
                             </div>
                         </div>
                     </div>
@@ -184,23 +188,38 @@
                                         <th scope="col">Start Time</th>
                                         <th scope="col">Role</th>
                                         <th scope="col">End Time</th>
+                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {% for i in '012'|make_list %}
-                                    <tr>
-
-                                        <th scope="row">
-                                        </th>
-                                        <td><input type="time" class="form-control"/></td>
-                                        <td><input type="text" class="form-control"/></td>
-                                        <td><input type="time" class="form-control"/></td>
+                                <tbody id="crewmemberst" data-pk="-1">
+                                    <tr id="crew_new" style="display: none;">
+                                        <td>
+                                            <select name="crewmember_new" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" disabled="true"></select>
+                                        </td>
+                                        <td><input name="start_new" type="datetime-local" class="form-control" value="{{ i.start }}" disabled="true"/></td>
+                                        <td><input name="role_new" type="text" class="form-control" value="{{ i.role }}" disabled="true"/></td>
+                                        <td><input name="end_new" type="datetime-local" class="form-control" value="{{ i.end }}" disabled="true" /></td>
+                                        <td><button class="btn btn-danger" data-id='{{crew.pk}}' data-action='delete' data-target='#crewmember'><span class="fas fa-times"></span></button</td>
+                                    </tr>
+                                    {% for crew in object.crew.all %}
+                                    <tr id="crew_{{crew.pk}}">
+                                        <td>
+                                            <select name="crewmember_{{crew.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                {% if crew.crewmember != '' %}
+                                                    <option value="{{crew.crewmember.pk}}" selected="selected">{{ crew.crewmember.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                        </td>
+                                        <td><input name="start_{{crew.pk}}" type="datetime-local" class="form-control" value="{{ crew.start|date:'Y-m-d' }}T{{ crew.start|date:'H:i:s' }}"/></td>
+                                        <td><input name="role_{{crew.pk}}" type="text" class="form-control" value="{{ crew.role }}"/></td>
+                                        <td><input name="end_{{crew.pk}}" type="datetime-local" class="form-control" value="{{ crew.end|date:'Y-m-d' }}T{{ crew.end|date:'H:i:s' }}"/></td>
+                                        <td><button class="btn btn-danger" data-id='{{crew.pk}}' data-action='delete' data-target='#crewmember'><span class="fas fa-times"></span></button</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                             <div class="text-right">
-                                <button class="btn btn-secondary"><span class="fas fa-plus"></span> Add Crewmember</button>
+                                <button class="btn btn-secondary" data-action='add' data-target='#crewmemberst' data-clone='#crew_new'><span class="fas fa-plus"></span> Add Crewmember</button>
                             </div>
                         </div>
                     </div>

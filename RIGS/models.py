@@ -635,7 +635,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         return "%i - %s" % (self.pk, self.event)
 
 
-@reversion.register(follow=['vehicles', ])
+@reversion.register(follow=['vehicles', 'crew'])
 class EventChecklist(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
 
@@ -680,9 +680,23 @@ class EventChecklist(models.Model, RevisionMixin):
 class EventChecklistVehicle(models.Model):
     checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
     vehicle = models.CharField(max_length=255)
-    driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='drivers', on_delete=models.CASCADE)
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='vehicles', on_delete=models.CASCADE)
 
     reversion_hide = True
 
     def __str__(self):
         return "{} driven by {}".format(self.vehicle, str(self.driver))
+
+
+@reversion.register
+class EventChecklistCrew(models.Model):
+    checklist = models.ForeignKey('EventChecklist', related_name='crew', blank=True, on_delete=models.CASCADE)
+    crewmember = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='crewed', on_delete=models.CASCADE)
+    role = models.CharField(max_length=255)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+
+    reversion_hide = True
+
+    def __str__(self):
+        return "{} ({})".format(str(self.crewmember), self.role)
