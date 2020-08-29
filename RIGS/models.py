@@ -642,7 +642,6 @@ class EventChecklist(models.Model, RevisionMixin):
     # General
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklists', null=True,
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
-    #vehicles = models.JSONField(help_text="List vehicles and their drivers", default=dict, null=False)
 
     # Safety Checks
     safe_parking = models.BooleanField(help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")
@@ -654,16 +653,28 @@ class EventChecklist(models.Model, RevisionMixin):
     hs_location = models.CharField(max_length=255, help_text="Location of Safety Bag/Box")
     extinguishers_location = models.CharField(max_length=255, help_text="Location of fire extinguishers")
 
-    # Crew Record TODO
-
     # Small Electrical Checks
     rcds = models.BooleanField(help_text="RCDs installed where needed and tested?")
     supply_test = models.BooleanField(help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
-    earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, etc)</small>")
+
+    # Shared electrical checks
+    earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
     pat = models.BooleanField(help_text="All equipment in PAT period?")
 
     medium_event = models.BooleanField()
     # Medium Electrical Checks
+    source_rcd = models.BooleanField(help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
+    labelling = models.BooleanField(help_text="Appropriate and clear labelling on distribution and cabling?")
+    # First Distro
+    fd_voltage_l1 = models.IntegerField(help_text="L1 - N")
+    fd_voltage_l2 = models.IntegerField(help_text="L2 - N")
+    fd_voltage_l3 = models.IntegerField(help_text="L3 - N")
+    fd_phase_rotation = models.BooleanField(help_text="Phase Rotation<br><small>(if required)</small>")
+    fd_earth_fault = models.IntegerField(help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_pssc = models.IntegerField(help_text="Prospective Short Circuit Current")
+
+    all_rcds_tested = models.BooleanField(help_text="All circuit RCDs tested?<small>(using test button)</small>")
+    public_sockets_tested = models.BooleanField(help_text="Public/Performer accessible circuits tested?<small>(using socket tester)</small>")
 
     @property
     def activity_feed_string(self):

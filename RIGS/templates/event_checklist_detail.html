@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="row my-3 py-3">
-    <div class="col-sm-12">
+    <div class="col-12">
             <h3>Event Checklist for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
             <div class="row">
                 <div class="col-12 text-right">
@@ -13,74 +13,109 @@
                         class="hidden-xs">Edit</span></a>
                 </div>
             </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">General</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-10">{{ object|help_text:'power_mic' }}</dt>
-                        <dd class="col-2">
-                            {{ object.power_mic.name }}
-                        </dd>
-                    </dl>
-                    <p>List vehicles and their drivers</p>
-                    <ul>
-                        {% for i in object.vehicles.all %}
-                            <li>{{i}}</li>
-                        {% endfor %}
-                    </ul>
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                <div class="card card-default mb-3">
+                    <div class="card-header">General</div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-6">{{ object|help_text:'power_mic' }}</dt>
+                            <dd class="col-6">
+                                {{ object.power_mic.name }}
+                            </dd>
+                        </dl>
+                        <p>List vehicles and their drivers</p>
+                        <ul>
+                            {% for i in object.vehicles.all %}
+                                <li>{{i}}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Safety Checks</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-10">{{ object|help_text:'safe_parking'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.safe_parking|yesno|title }}
-                        </dd>
-                        <dt class="col-10">{{ object|help_text:'safe_packing'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.safe_packing|yesno|title }}
-                        </dd>
-                        <dt class="col-10">{{ object|help_text:'exits'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.exits|yesno|title }}
-                        </dd>
-                        <dt class="col-10">{{ object|help_text:'trip_hazard'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.trip_hazard|yesno|title }}
-                        </dd>
-                        <dt class="col-10">{{ object|help_text:'warning_signs'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.warning_signs|yesno|title }}
-                        </dd>
-                        <dt class="col-10">{{ object|help_text:'ear_plugs'|safe }}</dt>
-                        <dd class="col-2">
-                            {{ object.ear_plugs|yesno|title }}
-                        </dd>
-                    </dl>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="card card-default mb-3">
+                        <div class="card-header">Safety Checks</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-10">{{ object|help_text:'safe_parking'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_parking|yesno|title }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'safe_packing'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_packing|yesno|title }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'exits'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.exits|yesno|title }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'trip_hazard'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.trip_hazard|yesno|title }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'warning_signs'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.warning_signs|yesno|title }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'ear_plugs'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.ear_plugs|yesno|title }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card card-default mb-3">
                 <div class="card-header">Crew Record</div>
-                <div class="card-body">
-                    <ul>
-                        {% for i in object.crew.all %}
-                            <li>{{i}}</li>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Crewmember</th>
+                            <th scope="col">Start Time</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crewmemberst">
+                        {% for crew in object.crew.all %}
+                        <tr>
+                            <td>{{crew.crewmember}}</td>
+                            <td>{{crew.start}}</td>
+                            <td>{{crew.role}}</td>
+                            <td>{{crew.end}}</td>
+                        </tr>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </tbody>
+                </table>
             </div>
             <div class="card card-default mb-3">
                 <div class="card-header">Power</div>
                 <div class="card-body">
                     {% if object.medium_event %}
-                    <span class="badge badge-success">Small Event</span>
+                    <span class="badge badge-warning p-2 my-3">Medium Event</span>
                     {% else %}
-                    <span class="badge badge-warning">Medium Event</span>
-                    {% endif %}
+                    <span class="badge badge-success p-2 my-3">Small Event</span>
                     <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.rcds|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'supply_test'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.supply_test|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.earthing|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.pat|yesno|title }}
+                        </dd>
                     </dl>
+                    {% endif %}
                 </div>
             </div>
         </div>

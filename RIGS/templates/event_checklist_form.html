@@ -77,7 +77,12 @@
         });
         $('button[data-action=delete]').on('click', function(event) {
            event.preventDefault();
-           $($(this).attr('data-target') + '_' + $(this).attr('data-id')).remove();
+           $(this).closest('tr').remove();
+        });
+        //Somewhat rudimentary way of ensuring people fill in completely (if it hits the database validation the whole table row disappears when the page reloads...)
+        //the not is to avoid adding it to some of bootstrap-selects extra crap
+        $('#vehiclest,#crewmemberst').find("select,input[type!='search']").change(function () {
+            $(this).closest('tr').find('input,select').attr('required', 'true');
         });
     });
     </script>
@@ -255,6 +260,52 @@
                     <div class="card">
                         <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
                         <div class="card-body">
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.source_rcd %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.clear_labelling %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
+                            <hr>
+                            <p>Tests at first distro</p>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Test</th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
+                                        <th>{{object|help_text:'fd_voltage_l1'}}</th>
+                                        <th>{{object|help_text:'fd_voltage_l2'}}</th>
+                                        <th>{{object|help_text:'fd_voltage_l3'}}</th>
+                                    </tr>
+                                    <tr>
+                                       <td>{% render_field form.fd_voltage_l1 class+="form-control" %}</td>
+                                       <td>{% render_field form.fd_voltage_l2 class+="form-control" %}</td>
+                                       <td>{% render_field form.fd_voltage_l1 class+="form-control" %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{object|help_text:'fd_phase_rotation'|safe}}</th>
+                                        <td colspan="3">{% render_field form.fd_phase_rotation %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{object|help_text:'fd_earth_fault'|safe}}</th>
+                                        <td colspan="3">{% render_field form.fd_earth_fault class+="form-control" %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{object|help_text:'fd_pssc'|safe}}</th>
+                                        <td colspan="3">{% render_field form.fd_pssc class+="form-control" %}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <hr>
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
+                            {% include 'partials/ec_power_info.html' %}
                         </div>
                     </div>
                 </div>
