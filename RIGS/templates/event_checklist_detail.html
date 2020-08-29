@@ -1,8 +1,6 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
-{% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
+{% block title %}Event Checklist for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
-{% load get_json_element from filters %}
-{% load get_item from filters %}
 {% load profile_by_index from filters %}
 
 {% block content %}
@@ -24,11 +22,10 @@
                             {{ object.power_mic.name }}
                         </dd>
                     </dl>
-                    <p>{{ object|help_text:'vehicles' }}</p>
+                    <p>List vehicles and their drivers</p>
                     <ul>
-                        {% for i in object.vehicles %}
-
-                            <li>Vehicle <strong>{{ object.vehicles|get_item:i|get_item:'vehicle'|default:'none' }}</strong> driven by <strong>{{ object.vehicles|get_item:i|get_item:'driver'|profile_by_index|default:'nobody'}}</strong></li>
+                        {% for i in object.vehicles.all %}
+                            <li>{{i}}</li>
                         {% endfor %}
                     </ul>
                 </div>

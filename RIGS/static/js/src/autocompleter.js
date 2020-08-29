@@ -28,7 +28,6 @@ function refreshUpdateHref(obj) {
 }
 
 function initPicker(obj) {
-    console.log('called!');
 	var options = {
         ajax: {
             url: obj.data('sourceurl'),

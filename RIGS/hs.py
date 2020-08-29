@@ -100,7 +100,6 @@ class EventChecklistEdit(generic.UpdateView):
         ec = models.EventChecklist.objects.get(pk=pk)
         context['event'] = ec.event
         context['edit'] = True
-        context['vehicles_length'] = range(len(self.object.vehicles))
         return context
 
 class EventChecklistCreate(generic.CreateView):
@@ -132,7 +131,6 @@ class EventChecklistCreate(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
-        context['vehicles_length'] = range(2)
         return context
 
     def get_success_url(self):

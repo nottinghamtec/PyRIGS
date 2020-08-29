@@ -115,6 +115,9 @@ urlpatterns = [
          name='ec_history', kwargs={'model': models.EventChecklist}),
     path('event/checklist/list', permission_required_with_403('RIGS.change_event')(hs.EventChecklistList.as_view()),
          name='ec_list'),
+    # TEMPORARY
+    path('event/vehicle/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
+         name='vc_history', kwargs={'model': models.EventChecklistVehicle}),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),

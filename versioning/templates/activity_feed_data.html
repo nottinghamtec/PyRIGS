@@ -35,7 +35,7 @@
                     {% if version.changes.old == None %}
                         Created
                     {% else %}
-                        Changed {% include 'version_changes.html' %} in
+                        Changed {% include 'partials/version_changes.html' %} in
                     {% endif %}
 
                     {% include 'partials/object_button.html' with object=version.changes.new %}

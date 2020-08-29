@@ -1,4 +1,4 @@
-{% if version.changes.item_changes or version.changes.field_changes or version.changes.old == None %}
+{% if version.changes.anything_changed or version.changes.old == None %}
     {% for change in version.changes.field_changes %}
     	<span title="Changes to {{ change.field.verbose_name }}" class="badge badge-info p-2" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</span>
     {% endfor %}

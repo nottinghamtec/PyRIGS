@@ -137,19 +137,6 @@ def profile_by_index(value):
     else:
         return ""
 
-#TODO More sensible returns
-@register.filter
-def get_json_element(value, element):
-    try:
-        return json.loads(value)[str(element)]
-    except Exception as e:
-        return None
-
-@register.filter
-def get_item(dictionary, key):
-    if(type(dictionary) is dict):
-        return dictionary.get(key)
-
 @register.filter
 def next(alist, current_index):
     """

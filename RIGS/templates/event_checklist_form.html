@@ -2,8 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load help_text from filters %}
-{% load get_json_element from filters %}
-{% load get_item from filters %}
 {% load profile_by_index from filters %}
 
 {% block title %}{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
@@ -55,39 +53,31 @@
                 $('#medium-event').slideUp();
             }
         });
-        $("form").submit(function( event ) {
-            // Mmmm Javascript data mangling...
-            var raw = $('*[data-serialize]').serializeArray();
-            var post = raw.reduce(function (result, current) {
-                var index = current.name.split('_')[1];
-                var name = current.name.split('_')[0];
-                result[index] = result[index] || {};
-                var nested = result[index] || {};
-                if(current.value):
-                    nested[name] = current.value;
-                result[index] = nested;
-                return result;
-            }, {});
-            $({{form.vehicles.id_for_label}}).val(JSON.stringify(post));
-        });
         $('#vehicle-add').on('click', function (event) {
             event.preventDefault();
             var newID = Number($('#vehiclest').attr('data-pk'));
             $('#vehicles_new').clone().attr('style', "").attr('id', 'vehicles_' + newID).appendTo('#vehiclest');
             $('#vehicles_' + newID).find('select,input').attr('name', function(){
                 return this.name.split('_')[0] + '_' + newID;
-            }).attr('data-serialize', 'true');
+            //Disabled prevents the hidden row being sent to the form
+            }).removeAttr('disabled');
+            $('#vehicles_' + newID).find('button[data-action=delete]').attr('data-id', newID);
             $('#vehicles_' + newID).find('select').addClass('selectpicker');
             $('#vehicles_' + newID).find('.selectpicker').selectpicker('refresh');
             $(".selectpicker").each(function(){initPicker($(this))});
-            $('#vehiclest').attr('data-pk', newID + 1);
+            $('#vehiclest').attr('data-pk', newID - 1);
+        });
+        $('button[data-action=delete]').on('click', function(event) {
+           event.preventDefault();
+            console.log($(this).attr('data-id'));
+           $('#vehicles_' + $(this).attr('data-id')).remove();
         });
     });
     </script>
 {% endblock %}
 
 {% block content %}
-    <div class="col-sm-offset-1 col-sm-10">
+    <div class="col-12">
         <h3>{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}</h3>
         {% include 'form_errors.html' %}
         {% if edit %}
@@ -122,36 +112,36 @@
                                     {% endif %}
                                 </select>
                             </div>
-                            <label class="col-12 pt-3" for="{{ form.vehicles.id_for_label }}">{{ form.vehicles.help_text }}</label>
-                            <input name="{{ form.vehicles.name }}" id="{{ form.vehicles.id_for_label }}"
-               value="{{ form.vehicles.value }}"/>
+                            <p class="pt-3">List vehicles and their drivers</p>
                             <table class="table">
                                 <thead>
                                     <tr>
                                         <th scope="col">Vehicle</th>
                                         <th scope="col">Driver</th>
+                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="vehiclest" data-pk="2">
+                                <tbody id="vehiclest" data-pk="-1">
                                     <tr id="vehicles_new" style="display: none;">
-                                        <td><input name="vehicle_new" type="text" class="form-control"/></td>
+                                        <td><input type="text" class="form-control" name="vehicle_new" disabled="true"/></td>
                                         <td>
-                                            <select name="driver_new" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                            <select class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true">
                                             </select>
                                         </td>
+                                        <td><button class="btn btn-danger" data-action='delete'><span class="fas fa-times"></span></button</td>
                                     </tr>
                                     {# TODO Add required to all fields on row when one is edited #}
-                                    {% for i in vehicles_length %}
-                                    <tr id="vehicles_{{i}}">
-                                        <td><input name="vehicle_{{i}}" type="text" class="form-control" data-serialize="true" value="{{ form.vehicles.value|get_json_element:i|get_item:'vehicle'|default:'' }}"/></td>
+                                    {% for i in object.vehicles.all %}
+                                    <tr id="vehicles_{{i.pk}}">
+                                        <td><input name="vehicle_{{i.pk}}" type="text" class="form-control" value="{{ i.vehicle }}"/></td>
                                         <td>
-                                            <select name="driver_{{i}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" data-serialize="true">
-                                            {% if form.vehicles.value|get_json_element:i|get_item:'driver' is not 0 %}
-                                                <option value="{{ form.vehicles.value|get_json_element:i|get_item:'driver'|default:'0' }}" selected="selected">{{form.vehicles.value|get_json_element:i|get_item:'driver'|profile_by_index}}</option>
-                                            {% endif %}
+                                            <select name="driver_{{i.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                {% if i.driver != '' %}
+                                                    <option value="{{i.driver.pk}}" selected="selected">{{ i.driver.name }}</option>
+                                                {% endif %}
                                             </select>
                                         </td>
-                                        {# TODO Delete functionality <td><button class="btn btn-danger" data-id='{{i}}' data-action='delete'><span class="fas fa-times"></span></button</td>#}
+                                        <td><button class="btn btn-danger" data-id='{{i.pk}}' data-action='delete'><span class="fas fa-times"></span></button</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

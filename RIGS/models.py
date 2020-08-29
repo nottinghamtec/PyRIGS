@@ -505,7 +505,6 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
-@reversion.register(follow=['payment_set'])
 class Invoice(models.Model):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
@@ -627,15 +626,14 @@ class RiskAssessment(models.Model, RevisionMixin):
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
 
-@reversion.register
+@reversion.register(follow=['vehicles',])
 class EventChecklist(models.Model, RevisionMixin):
-
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
 
     # General
-    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklist',
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklists', null=True,
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
-    vehicles = models.JSONField(help_text="List vehicles and their drivers", default=dict, null=False)
+    #vehicles = models.JSONField(help_text="List vehicles and their drivers", default=dict, null=False)
 
     # Safety Checks
     safe_parking = models.BooleanField(help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")
@@ -667,3 +665,13 @@ class EventChecklist(models.Model, RevisionMixin):
 
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
+
+
+@reversion.register
+class EventChecklistVehicle(models.Model):
+    checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
+    vehicle = models.CharField(max_length=255)
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='drivers', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{} driven by {}".format(self.vehicle, str(self.driver))

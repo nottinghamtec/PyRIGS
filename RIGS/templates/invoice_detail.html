@@ -53,13 +53,13 @@
             {% endif %}
         </div>
 
-        <div class="row">
+        <div class="row py-4">
             <div class="col-sm-6">
                 <div class="card card-default">
                     <div class="card-body">
-                        <div class="pull-right">
+                        <div class="text-right py-3">
                             <a href="{% url 'payment_create' %}?invoice={{ object.pk }}"
-                               class="btn btn-default modal-href"
+                               class="btn btn-success modal-href"
                                data-target="#{{ form.person.id_for_label }}">
                                 <span class="fas fa-plus"></span> Add
                             </a>
@@ -104,7 +104,9 @@
                     </div>
                 </div>
             </div>
-            {% include 'partials/last_edited.html' with target="invoice_history" %}
+            <div class="col-12 text-right">
+                {% include 'partials/last_edited.html' with target="invoice_history" %}
+            </div>
         </div>
     </div>
 {% endblock %}

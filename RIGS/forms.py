@@ -4,9 +4,11 @@ from django.conf import settings
 from django.core import serializers
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
+from django.db import transaction
 from registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import ReCaptchaField
+from reversion import revisions as reversion
 import simplejson
 
 from RIGS import models
@@ -18,8 +20,6 @@ forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'
 
 
 # Events Shit
-
-
 class EventForm(forms.ModelForm):
     datetime_input_formats = list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
@@ -172,6 +172,50 @@ class EventRiskAssessmentForm(forms.ModelForm):
 
 
 class EventChecklistForm(forms.ModelForm):
+    items = {}
+
+    def clean(self):
+        vehicles = {key:val for key, val in self.data.items()
+                   if key.startswith('vehicle')}
+        drivers = {key:val for key, val in self.data.items()
+                   if key.startswith('driver')}
+        for key in vehicles:
+            pk = int(key.split('_')[1])
+            driver_key = 'driver_' + str(pk)
+            if(drivers[driver_key] == ''):
+                raise forms.ValidationError('Add a driver to vehicle ' + str(pk), code='vehicle_mismatch')
+            else:
+                try:
+                    item = models.EventChecklistVehicle.objects.get(pk=pk)
+                except models.EventChecklistVehicle.DoesNotExist:
+                    item = models.EventChecklistVehicle()
+
+                item.vehicle = vehicles['vehicle_' + str(pk)]
+                item.driver = models.Profile.objects.get(pk=drivers['driver_' + str(pk)])
+
+                # item does not have a database pk yet as it isn't saved
+                self.items[pk] = item
+
+        return super(EventChecklistForm, self).clean()
+
+    def save(self, commit=True):
+        checklist = super(EventChecklistForm, self).save(commit=False)
+        if (commit):
+            # Remove all existing, to be recreated from the form
+            checklist.vehicles.all().delete()
+            checklist.save()
+
+            for key in self.items:
+                item = self.items[key]
+                reversion.add_to_revision(item)
+                # finish and save new database items
+                item.checklist = checklist
+                item.save()
+
+        self.items.clear()
+
+        return checklist
+
     class Meta:
         model = models.EventChecklist
         fields = '__all__'

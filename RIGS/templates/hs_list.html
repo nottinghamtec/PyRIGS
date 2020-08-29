@@ -39,8 +39,12 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
-                class="hidden-xs">Create Event Checklist</span></a>
+                {% if event.eventchecklist %}
+                    <a class="btn btn-primary" href="{% url 'ec_detail' event.eventchecklist.pk %}">View</a>
+                {% else %}
+                    <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
+                    class="hidden-xs">Create Event Checklist</span></a>
+                {% endif %}
             </td>
         </tr>
         {% empty %}
