@@ -22,11 +22,13 @@
                         <a href="{% url 'profile_detail' pk=version.revision.user.pk %}" class="modal-href">
                         <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" />
                         </a>
+                    {% else %}
+                        <img class="media-object img-rounded" src="{% static 'imgs/pyrigs-avatar.png' %}" />
                     {% endif %}
                     </div>
                     <div class="media-body">
                     <h5>
-                        {{ version.revision.user.name }}
+                        {{ version.revision.user.name|default:'System' }}
                         <span class="ml-3"><small>{{version.revision.date_created|naturaltime}}</small></span>
                     </h5>
             {% endif %}

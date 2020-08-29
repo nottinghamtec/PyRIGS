@@ -184,6 +184,10 @@ class Asset(models.Model, RevisionMixin):
     def activity_feed_string(self):
         return str(self)
 
+    @property
+    def display_id(self):
+        return str(self.asset_id)
+
 
 @receiver(pre_save, sender=Asset)
 def pre_save_asset(sender, instance, **kwargs):

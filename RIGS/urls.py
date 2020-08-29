@@ -6,12 +6,8 @@ from django.views.generic import RedirectView
 from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
 from RIGS import finance, ical, models, rigboard, views, hs
-from versioning import versioning
-from django.views.decorators.cache import cache_page
 
 urlpatterns = [
-    path('', login_required(views.Index.as_view()), name='index'),
-
     # People
     path('people/', permission_required_with_403('RIGS.view_person')(views.PersonList.as_view()),
          name='person_list'),
@@ -19,9 +15,6 @@ urlpatterns = [
          name='person_create'),
     path('people/<int:pk>/', permission_required_with_403('RIGS.view_person')(views.PersonDetail.as_view()),
          name='person_detail'),
-    path('people/<int:pk>/history/',
-         permission_required_with_403('RIGS.view_person')(versioning.VersionHistory.as_view()),
-         name='person_history', kwargs={'model': models.Person}),
     path('people/<int:pk>/edit/', permission_required_with_403('RIGS.change_person')(views.PersonUpdate.as_view()),
          name='person_update'),
 
@@ -34,9 +27,6 @@ urlpatterns = [
     path('organisations/<int:pk>/',
          permission_required_with_403('RIGS.view_organisation')(views.OrganisationDetail.as_view()),
          name='organisation_detail'),
-    path('organisations/<int:pk>/history/',
-         permission_required_with_403('RIGS.view_organisation')(versioning.VersionHistory.as_view()),
-         name='organisation_history', kwargs={'model': models.Organisation}),
     path('organisations/<int:pk>/edit/',
          permission_required_with_403('RIGS.change_organisation')(views.OrganisationUpdate.as_view()),
          name='organisation_update'),
@@ -48,9 +38,6 @@ urlpatterns = [
          name='venue_create'),
     path('venues/<int:pk>/', permission_required_with_403('RIGS.view_venue')(views.VenueDetail.as_view()),
          name='venue_detail'),
-    path('venues/<int:pk>/history/',
-         permission_required_with_403('RIGS.view_venue')(versioning.VersionHistory.as_view()),
-         name='venue_history', kwargs={'model': models.Venue}),
     path('venues/<int:pk>/edit/', permission_required_with_403('RIGS.change_venue')(views.VenueUpdate.as_view()),
          name='venue_update'),
 
@@ -63,11 +50,7 @@ urlpatterns = [
     url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     path('rigboard/archive/', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
-    path('rigboard/activity/', permission_required_with_403('RIGS.view_event')(versioning.ActivityTable.as_view()),
-         name='activity_table'),
-    path('rigboard/activity/feed/',
-         cache_page(60 * 10)(permission_required_with_403('RIGS.view_event')(versioning.ActivityFeed.as_view())),
-         name='activity_feed'),
+
 
     path('event/<int:pk>/', has_oembed(oembed_view="event_oembed")(rigboard.EventDetail.as_view()),
          name='event_detail'),
@@ -86,9 +69,6 @@ urlpatterns = [
          name='event_update'),
     path('event/<int:pk>/duplicate/', permission_required_with_403('RIGS.add_event')(rigboard.EventDuplicate.as_view()),
          name='event_duplicate'),
-    path('event/<int:pk>/history/',
-         permission_required_with_403('RIGS.view_event')(versioning.VersionHistory.as_view()),
-         name='event_history', kwargs={'model': models.Event}),
 
     # Event H&S
     path('event/hs/', permission_required_with_403('RIGS.change_event')(hs.HSList.as_view()), name='hs_list'),
@@ -99,8 +79,6 @@ urlpatterns = [
          name='ra_detail'),
     path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentEdit.as_view()),
          name='ra_edit'),
-    path('event/ra/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
-         name='ra_history', kwargs={'model': models.RiskAssessment}),
     path('event/ra/list', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentList.as_view()),
          name='ra_list'),
     path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentReview.as_view()), name='ra_review'),
@@ -111,13 +89,8 @@ urlpatterns = [
          name='ec_detail'),
     path('event/checklist/<int:pk>/edit/', permission_required_with_403('RIGS.change_event')(hs.EventChecklistEdit.as_view()),
          name='ec_edit'),
-    path('event/checklist/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
-         name='ec_history', kwargs={'model': models.EventChecklist}),
     path('event/checklist/list', permission_required_with_403('RIGS.change_event')(hs.EventChecklistList.as_view()),
          name='ec_list'),
-    # TEMPORARY
-    path('event/vehicle/<int:pk>/history/', permission_required_with_403('RIGS.change_event')(versioning.VersionHistory.as_view()),
-         name='vc_history', kwargs={'model': models.EventChecklistVehicle}),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),
@@ -141,9 +114,6 @@ urlpatterns = [
     path('invoice/<int:pk>/delete/',
          permission_required_with_403('RIGS.change_invoice')(finance.InvoiceDelete.as_view()),
          name='invoice_delete'),
-    path('invoice/(<int:pk>/history/',
-         permission_required_with_403('RIGS.view_invoice')(versioning.VersionHistory.as_view()),
-         name='invoice_history', kwargs={'model': models.Invoice}),
 
     path('payment/create/', permission_required_with_403('RIGS.add_payment')(finance.PaymentCreate.as_view()),
          name='payment_create'),

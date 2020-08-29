@@ -14,20 +14,14 @@
     	{% for version in object_list %}
         <tr>
             <th scope="row">{{ version.revision.date_created }}</th>
-            <td><a href="{{ version.changes.new.get_absolute_url }}">{{version.changes.new|to_class_name}}
-            {% if version.changes.new.asset_id %}
-                {{ version.changes.new.asset_id }}
-            {% else %}
-                {{ version.changes.new.pk|stringformat:"05d" }}
-            {% endif %}
-            </a></td>
+            <td><a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id|default:version.changes.new.pk }} | {{version.changes.new|to_class_name}}</td>
        		<td>{{ version.pk }}|{{ version.revision.pk }}</td>
             <td>{{ version.revision.user.name|default:"System" }}</td>
             <td>
               {% if version.changes.old == None %}
                 {{version.changes.new|to_class_name}} Created
               {% else %}
-                {% include 'version_changes.html' %}
+                {% include 'partials/version_changes.html' %}
               {% endif %}
             </td>
         </tr>

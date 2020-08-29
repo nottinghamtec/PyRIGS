@@ -197,6 +197,8 @@ class VatRate(models.Model, RevisionMixin):
 
     objects = VatManager()
 
+    reversion_hide = True
+
     @property
     def as_percent(self):
         return self.rate * 100
@@ -331,6 +333,10 @@ class Event(models.Model, RevisionMixin):
     auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(null=True, blank=True)
+
+    @property
+    def display_id(self):
+        return str("N%05d" % self.pk)
 
     # Calculated values
     """
@@ -467,7 +473,6 @@ class Event(models.Model, RevisionMixin):
         self.full_clean()
         super(Event, self).save(*args, **kwargs)
 
-
 class EventItem(models.Model):
     event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -475,6 +480,8 @@ class EventItem(models.Model):
     quantity = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.IntegerField()
+
+    reversion_hide = True
 
     @property
     def total_cost(self):
@@ -672,6 +679,8 @@ class EventChecklistVehicle(models.Model):
     checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
     vehicle = models.CharField(max_length=255)
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='drivers', on_delete=models.CASCADE)
+
+    reversion_hide = True
 
     def __str__(self):
         return "{} driven by {}".format(self.vehicle, str(self.driver))

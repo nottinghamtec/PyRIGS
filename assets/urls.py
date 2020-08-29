@@ -17,10 +17,6 @@ urlpatterns = [
          (views.AssetEdit.as_view()), name='asset_update'),
     path('asset/id/<str:pk>/duplicate/', permission_required_with_403('assets.add_asset')
          (views.AssetDuplicate.as_view()), name='asset_duplicate'),
-    path('asset/id/<str:pk>/history/', permission_required_with_403('assets.view_asset')(views.AssetVersionHistory.as_view()),
-         name='asset_history', kwargs={'model': models.Asset}),
-    path('activity', permission_required_with_403('assets.view_asset')
-         (views.ActivityTable.as_view()), name='asset_activity_table'),
 
     path('cabletype/list/', views.CableTypeList.as_view(), name='cable_type_list'),
     path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),
@@ -39,14 +35,12 @@ urlpatterns = [
     path('asset/audit/', permission_required_with_403('assets.change_asset')(views.AssetAuditList.as_view()), name='asset_audit_list'),
     path('asset/id/<str:pk>/audit/', permission_required_with_403('assets.change_asset')(views.AssetAudit.as_view()), name='asset_audit'),
 
-    path('supplier/list', views.SupplierList.as_view(), name='supplier_list'),
-    path('supplier/<int:pk>', views.SupplierDetail.as_view(), name='supplier_detail'),
-    path('supplier/create', permission_required_with_403('assets.add_supplier')
+    path('supplier/list/', views.SupplierList.as_view(), name='supplier_list'),
+    path('supplier/<int:pk>/', views.SupplierDetail.as_view(), name='supplier_detail'),
+    path('supplier/create/', permission_required_with_403('assets.add_supplier')
          (views.SupplierCreate.as_view()), name='supplier_create'),
-    path('supplier/<int:pk>/edit', permission_required_with_403('assets.change_supplier')
+    path('supplier/<int:pk>/edit/', permission_required_with_403('assets.change_supplier')
          (views.SupplierUpdate.as_view()), name='supplier_update'),
-    path('supplier/<int:pk>/history/', views.SupplierVersionHistory.as_view(),
-         name='supplier_history', kwargs={'model': models.Supplier}),
 
     path('supplier/search/', views.SupplierSearch.as_view(), name='supplier_search_json'),
 ]

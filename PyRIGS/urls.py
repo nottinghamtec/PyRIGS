@@ -11,12 +11,16 @@ from registration.backends.default.views import RegistrationView
 from PyRIGS.decorators import permission_required_with_403
 import RIGS
 import users
+import versioning
 from PyRIGS import views
 
 urlpatterns = [
     path('', include('users.urls')),
+    path('', include('versioning.urls')),
     path('', include('RIGS.urls')),
     path('assets/', include('assets.urls')),
+
+    path('', login_required(views.Index.as_view()), name='index'),
 
     # API
     path('api/<str:model>/', login_required(views.SecureAPIRequest.as_view()),

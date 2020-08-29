@@ -33,7 +33,7 @@
                 <tbody>
                 {% for event in object_list %}
                     <tr {% include 'partials/event_table_colour.html' %}>
-                        <th scope="row"><a href="{% url 'event_detail' event.pk %}">N{{ event.pk|stringformat:"05d" }}</a><br>
+                        <th scope="row"><a href="{% url 'event_detail' event.pk %}">{{ event.display_id }}</a><br>
                             <span class="text-muted">{{ event.get_status_display }}</span></th>
                         <td>{{ event.start_date }}</td>
                         <td>

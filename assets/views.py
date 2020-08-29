@@ -240,43 +240,6 @@ class SupplierUpdate(generic.UpdateView):
     template_name = 'supplier_update.html'
 
 
-class SupplierVersionHistory(versioning.VersionHistory):
-    template_name = "asset_version_history.html"
-
-
-class AssetVersionHistory(versioning.VersionHistory):
-    template_name = "version_history.html"
-
-    def get_object(self, **kwargs):
-        return get_object_or_404(models.Asset, asset_id=self.kwargs['pk'])
-
-    def get_context_data(self, **kwargs):
-        context = super(AssetVersionHistory, self).get_context_data(**kwargs)
-        context['object'] = self.get_object()
-        context['id'] = self.get_object().asset_id
-        context['override'] = 'base_assets.html'
-
-        return context
-
-
-class ActivityTable(versioning.ActivityTable):
-    model = versioning.RIGSVersion
-    template_name = "activity_table.html"
-    paginate_by = 25
-
-    def get_queryset(self):
-        versions = versioning.RIGSVersion.objects.get_for_multiple_models(
-            [models.Asset, models.Supplier])
-        return versions
-
-    def get_context_data(self, **kwargs):
-        context = super(ActivityTable, self).get_context_data(**kwargs)
-        context['override'] = 'base_assets.html'
-        context['title'] = 'Asset Database'
-
-        return context
-
-
 class CableTypeList(generic.ListView):
     model = models.CableType
     template_name = 'cable_type_list.html'

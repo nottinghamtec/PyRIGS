@@ -11,6 +11,8 @@ from django.views import generic
 from reversion.models import Version, VersionQuerySet
 from RIGS import models
 from assets import models as asset_models
+from django.apps import apps
+from reversion import revisions as reversion
 
 logger = logging.getLogger('tec.pyrigs')
 
@@ -195,78 +197,3 @@ class RIGSVersion(Version):
             new=self._object_version.object,
             old=self.parent._object_version.object if self.parent else None
         )
-
-
-class VersionHistory(generic.ListView):
-    model = RIGSVersion
-    template_name = "version_history.html"
-    paginate_by = 25
-
-    def get_queryset(self, **kwargs):
-        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision",
-                                                                                    "revision__user").all().order_by(
-            "-revision__date_created")
-
-    def get_object(self, **kwargs):
-        return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
-
-    def get_context_data(self, **kwargs):
-        context = super(VersionHistory, self).get_context_data(**kwargs)
-        context['object'] = self.get_object()
-        context['id'] = self.get_object().pk
-
-        return context
-
-
-class ActivityTable(generic.ListView):
-    model = RIGSVersion
-    template_name = "activity_table.html"
-    paginate_by = 25
-
-    def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(
-            [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment])
-        return versions.order_by("-revision__date_created")
-
-    def get_context_data(self, **kwargs):
-        context = super(ActivityTable, self).get_context_data(**kwargs)
-        context['title'] = 'Rigboard'
-
-        return context
-
-# TODO Defined by the model, rather than with this list
-def models_for_feed():
-    return [models.Event, models.Venue, models.Person, models.Organisation, models.EventAuthorisation, models.RiskAssessment, models.EventChecklist,
-            asset_models.Asset, asset_models.Supplier]
-
-
-# Appears on homepage
-class ActivityFeed(generic.ListView):
-    model = RIGSVersion
-    template_name = "activity_feed_data.html"
-    paginate_by = 25
-
-    def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(
-            models_for_feed())
-        return versions.order_by("-revision__date_created")
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(ActivityFeed, self).get_context_data(**kwargs)
-
-        maxTimeDelta = datetime.timedelta(hours=1)
-
-        items = []
-
-        for thisVersion in context['object_list']:
-            thisVersion.withPrevious = False
-            if len(items) >= 1:
-                timeDiff = items[-1].revision.date_created - thisVersion.revision.date_created
-                timeTogether = timeDiff < maxTimeDelta
-                sameUser = thisVersion.revision.user_id == items[-1].revision.user_id
-                thisVersion.withPrevious = timeTogether & sameUser
-
-            items.append(thisVersion)
-
-        return context
