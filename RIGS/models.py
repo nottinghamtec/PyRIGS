@@ -654,8 +654,8 @@ class EventChecklist(models.Model, RevisionMixin):
     extinguishers_location = models.CharField(max_length=255, help_text="Location of fire extinguishers")
 
     # Small Electrical Checks
-    rcds = models.BooleanField(help_text="RCDs installed where needed and tested?")
-    supply_test = models.BooleanField(help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
+    rcds = models.BooleanField(blank=True,null=True,help_text="RCDs installed where needed and tested?")
+    supply_test = models.BooleanField(blank=True,null=True,help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
 
     # Shared electrical checks
     earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
@@ -663,18 +663,27 @@ class EventChecklist(models.Model, RevisionMixin):
 
     medium_event = models.BooleanField()
     # Medium Electrical Checks
-    source_rcd = models.BooleanField(help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
-    labelling = models.BooleanField(help_text="Appropriate and clear labelling on distribution and cabling?")
+    source_rcd = models.BooleanField(blank=True,null=True,help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
+    labelling = models.BooleanField(blank=True,null=True, help_text="Appropriate and clear labelling on distribution and cabling?")
     # First Distro
-    fd_voltage_l1 = models.IntegerField(verbose_name="First Distro Voltage L1-N", help_text="L1 - N")
-    fd_voltage_l2 = models.IntegerField(verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
-    fd_voltage_l3 = models.IntegerField(verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
-    fd_phase_rotation = models.BooleanField(verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.IntegerField(verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    fd_pssc = models.IntegerField(verbose_name="PSCC", help_text="Prospective Short Circuit Current")
+    fd_voltage_l1 = models.IntegerField(blank=True,null=True, verbose_name="First Distro Voltage L1-N", help_text="L1 - N")
+    fd_voltage_l2 = models.IntegerField(blank=True,null=True,verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
+    fd_voltage_l3 = models.IntegerField(blank=True,null=True,verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
+    fd_phase_rotation = models.BooleanField(blank=True,null=True,verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
+    fd_earth_fault = models.IntegerField(blank=True,null=True,verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_pssc = models.IntegerField(blank=True,null=True,verbose_name="PSCC", help_text="Prospective Short Circuit Current")
 
-    all_rcds_tested = models.BooleanField(help_text="All circuit RCDs tested?<small>(using test button)</small>")
-    public_sockets_tested = models.BooleanField(help_text="Public/Performer accessible circuits tested?<small>(using socket tester)</small>")
+    all_rcds_tested = models.BooleanField(blank=True,null=True,help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
+    public_sockets_tested = models.BooleanField(blank=True,null=True,help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
+
+    def clean(self):
+        errdict = {}
+        if self.earthing == None or self.pat == None:
+            raise ValidationError('Fill out the electrical checks')
+        if self.medium_event and (self.source_rcd == None or self.labelling == None or self.all_rcds_tested == None or self.public_sockets_tested == None):
+            raise ValidationError('Fill out the medium event electrical checks')
+        elif self.rcds == None or self.supply_test == None:
+            raise ValidationError('Fill out the small event electrical checks')
 
     @property
     def activity_feed_string(self):

@@ -91,12 +91,75 @@
                 </table>
             </div>
             <div class="card card-default mb-3">
-                <div class="card-header">Power</div>
+                <div class="card-header">Power {% if object.medium_event %}<span class="badge badge-warning p-2 my-3">Medium Event</span>{%else%}<span class="badge badge-success p-2 my-3">Small Event</span>{%endif%}</div>
                 <div class="card-body">
                     {% if object.medium_event %}
-                    <span class="badge badge-warning p-2 my-3">Medium Event</span>
+                    <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'source_rcd'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.source_rcd|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'labelling'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.labelling|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.earthing|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.pat|yesno|title }}
+                        </dd>
+                    </dl>
+                    <hr>
+                    <p>Tests at first distro</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center">Test</th>
+                                <th scope="col" colspan="3" class="text-center">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
+                                <th>{{ object|help_text:'fd_voltage_l1' }}</th>
+                                <th>{{ object|help_text:'fd_voltage_l2' }}</th>
+                                <th>{{ object|help_text:'fd_voltage_l3' }}</th>
+                            </tr>
+                            <tr>
+                               <td>{{ object.fd_voltage_l1 }}</td>
+                               <td>{{ object.fd_voltage_l2 }}</td>
+                               <td>{{ object.fd_voltage_l3 }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'fd_phase_rotation'|safe }}</th>
+                                <td colspan="3">{{ object.fd_phase_rotation|yesno|title }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'fd_earth_fault'|safe}}</th>
+                                <td colspan="3">{{ object.fd_earth_fault }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'fd_pssc'}}</th>
+                                <td colspan="3">{{ object.fd_pssc }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'all_rcds_tested'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.all_rcds_tested|yesno|title }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'public_sockets_tested'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.public_sockets_tested|yesno|title }}
+                        </dd>
+                    </dl>
+                    {% include 'partials/ec_power_info.html' %}
                     {% else %}
-                    <span class="badge badge-success p-2 my-3">Small Event</span>
                     <dl class="row">
                         <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
                         <dd class="col-2">
@@ -119,13 +182,13 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-12 text-right">
-        <a href="{% url 'ec_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
-            class="hidden-xs">Edit</span></a>
-    </div>
-    <div class="col-12 text-right">
-        {% include 'partials/last_edited.html' with target="eventchecklist_history" %}
+        <div class="col-12 text-right">
+            <a href="{% url 'ec_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
+                class="hidden-xs">Edit</span></a>
+        </div>
+        <div class="col-12 text-right">
+            {% include 'partials/last_edited.html' with target="eventchecklist_history" %}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -49,10 +49,14 @@
                 $('#{{form.medium_event.auto_id}}').prop('checked', true);
                 $('#small-event').slideUp();
                 $('#medium-event').slideDown();
+                //$('#medium-event').find('select,input').attr('required', 'true');
+                //$('#small-event').find('select,input').removeAttr('required');
             } else {
                 $('#{{form.medium_event.auto_id}}').prop('checked', false);
                 $('#small-event').slideDown();
                 $('#medium-event').slideUp();
+                //('#small-event').find('select,input').attr('required', 'true');
+                //('#medium-event').find('select,input').removeAttr('required');
             }
         });
         $('button[data-action=add]').on('click', function (event) {
@@ -118,7 +122,7 @@
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col-4 control-label">{{ form.power_mic.help_text }}</label>
                             <div class="col-8">
-                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
                                     {% if object.power_mic %}
                                         <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
                                     {% endif %}
@@ -261,27 +265,24 @@
                         <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
                         <div class="card-body">
                             {% include 'partials/checklist_checkbox.html' with formitem=form.source_rcd %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.clear_labelling %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.labelling %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
                             <hr>
                             <p>Tests at first distro</p>
-                            <table class="table">
+                            <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th scope="col">Test</th>
-                                        <th scope="col"></th>
-                                        <th scope="col"></th>
-                                        <th scope="col"></th>
+                                        <th scope="col" class="text-center">Test</th>
+                                        <th scope="col" colspan="3" class="text-center">Value</th>
                                     </tr>
-
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
-                                        <th>{{object|help_text:'fd_voltage_l1'}}</th>
-                                        <th>{{object|help_text:'fd_voltage_l2'}}</th>
-                                        <th>{{object|help_text:'fd_voltage_l3'}}</th>
+                                        <th>{{ form.fd_voltage_l1.help_text }}</th>
+                                        <th>{{ form.fd_voltage_l2.help_text }}</th>
+                                        <th>{{ form.fd_voltage_l3.help_text }}</th>
                                     </tr>
                                     <tr>
                                        <td>{% render_field form.fd_voltage_l1 class+="form-control" %}</td>
@@ -289,15 +290,15 @@
                                        <td>{% render_field form.fd_voltage_l3 class+="form-control" %}</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{object|help_text:'fd_phase_rotation'|safe}}</th>
-                                        <td colspan="3">{% render_field form.fd_phase_rotation %}</td>
+                                        <th scope="row">{{form.fd_phase_rotation.help_text|safe}}</th>
+                                        <td colspan="3">{% include 'partials/checklist_checkbox.html' with formitem=form.fd_phase_rotation %}</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{object|help_text:'fd_earth_fault'|safe}}</th>
+                                        <th scope="row">{{form.fd_earth_fault.help_text|safe}}</th>
                                         <td colspan="3">{% render_field form.fd_earth_fault class+="form-control" %}</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">{{object|help_text:'fd_pssc'|safe}}</th>
+                                        <th scope="row">{{form.fd_pssc.help_text|safe}}</th>
                                         <td colspan="3">{% render_field form.fd_pssc class+="form-control" %}</td>
                                     </tr>
                                 </tbody>

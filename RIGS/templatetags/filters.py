@@ -114,10 +114,11 @@ def orderby(request, field, attr):
 
     return dict_.urlencode()
 
-
+# Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 @register.filter
 def help_text(obj, field):
-    return obj._meta.get_field(field).help_text
+    if hasattr(obj, '_meta'):
+        return obj._meta.get_field(field).help_text
 
 
 @register.filter

@@ -173,6 +173,12 @@ class EventRiskAssessmentForm(forms.ModelForm):
 
 
 class EventChecklistForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EventChecklistForm, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if field.__class__ == forms.NullBooleanField:
+                # Only display yes/no to user, the 'none' is only ever set in the background
+                field.widget = forms.CheckboxInput()
     # Parsed from incoming form data by clean, then saved into models when the form is saved
     items = {}
 
@@ -231,6 +237,7 @@ class EventChecklistForm(forms.ModelForm):
             # Remove all existing, to be recreated from the form
             checklist.vehicles.all().delete()
             checklist.crew.all().delete()
+            checklist.save()
 
             for key in self.items:
                 item = self.items[key]
@@ -239,8 +246,6 @@ class EventChecklistForm(forms.ModelForm):
                 item.checklist = checklist
                 item.full_clean()
                 item.save()
-
-            checklist.save()
 
         self.items.clear()
 

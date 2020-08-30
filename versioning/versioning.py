@@ -117,17 +117,17 @@ class ModelComparison(object):
 
     @cached_property
     def item_changes(self):
-        # Recieves two event version objects and compares their items, returns an array of ItemCompare objects
         item_type = ContentType.objects.get_for_model(self.version.object)
         old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
         new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)
 
-        comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
+        comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
 
         # Build some dicts of what we have
         item_dict = {}  # build a list of items, key is the item_pk
         # FIXME Removing the if checks makes things REALLY slow...
         for version in old_item_versions:  # put all the old versions in a list
+            print(version)
             # if version.field_dict["event_id"] == int(self.new.pk):
             compare = ModelComparison(old=version._object_version.object, **comparisonParams)
             item_dict[version.object_id] = compare
@@ -179,6 +179,7 @@ class RIGSVersion(Version):
 
     objects = RIGSVersionManager.as_manager()
 
+    # Gets the most recent previous version
     @cached_property
     def parent(self):
         thisId = self.object_id
