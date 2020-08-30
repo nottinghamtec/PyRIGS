@@ -128,12 +128,12 @@ class ModelComparison(object):
         item_dict = {}  # build a list of items, key is the item_pk
         # FIXME Removing the if checks makes things REALLY slow...
         for version in old_item_versions:  # put all the old versions in a list
-            #if version.field_dict["event_id"] == int(self.new.pk):
+            # if version.field_dict["event_id"] == int(self.new.pk):
             compare = ModelComparison(old=version._object_version.object, **comparisonParams)
             item_dict[version.object_id] = compare
 
         for version in new_item_versions:  # go through the new versions
-            #if version.field_dict["event_id"] == int(self.new.pk):
+            # if version.field_dict["event_id"] == int(self.new.pk):
             try:
                 compare = item_dict[version.object_id]  # see if there's a matching old version
                 compare.new = version._object_version.object  # then add the new version to the dictionary

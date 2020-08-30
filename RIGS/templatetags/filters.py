@@ -137,6 +137,7 @@ def profile_by_index(value):
     else:
         return ""
 
+
 @register.filter
 def next(alist, current_index):
     """
@@ -144,6 +145,6 @@ def next(alist, current_index):
     Otherwise returns an empty string.
     """
     try:
-        return alist[int(current_index) + 1] # access the next element
-    except:
-        return '' # return empty string in case of exception
+        return alist[int(current_index) + 1]  # access the next element
+    except BaseException:
+        return ''  # return empty string in case of exception

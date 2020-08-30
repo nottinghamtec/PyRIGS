@@ -199,13 +199,13 @@ class EventChecklistForm(forms.ModelForm):
                 self.items['v' + str(pk)] = item
 
         crewmembers = {key: val for key, val in self.data.items()
-                    if key.startswith('crewmember')}
-        other_fields = ['start','role','end']
+                       if key.startswith('crewmember')}
+        other_fields = ['start', 'role', 'end']
         for key in crewmembers:
             pk = int(key.split('_')[1])
 
             for field in other_fields:
-                value = self.data['{}_{}'.format(field,pk)]
+                value = self.data['{}_{}'.format(field, pk)]
                 if value == '':
                     raise forms.ValidationError('Add a {} to crewmember {}'.format(field, pk), code='{}_mismatch'.format(field))
 

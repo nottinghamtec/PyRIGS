@@ -96,16 +96,11 @@
             </div>
 
             <div class="col-sm-6">
-                <div class="card card-default">
-                    <div class="card-body">
-                        {% with object.event as object %}
-                            {% include 'item_table.html' %}
-                        {% endwith %}
-                    </div>
+                <div class="card">
+                    {% with object.event as object %}
+                        {% include 'item_table.html' %}
+                    {% endwith %}
                 </div>
-            </div>
-            <div class="col-12 text-right">
-                {% include 'partials/last_edited.html' with target="invoice_history" %}
             </div>
         </div>
     </div>

@@ -230,6 +230,7 @@ class PaymentCreate(generic.CreateView):
 
 class PaymentDelete(generic.DeleteView):
     model = models.Payment
+    template_name = 'payment_confirm_delete.html'
 
     def get_success_url(self):
         return self.request.POST.get('next')

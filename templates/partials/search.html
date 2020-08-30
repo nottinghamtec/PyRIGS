@@ -4,7 +4,7 @@
         <div class="input-group-prepend">
             <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." value="{{ request.GET.q }}" />
         </div>
-        <select id="search-options" class="custom-select form-control">
+        <select id="search-options" class="custom-select form-control" style="border-top-right-radius: 0px; border-bottom-right-radius: 0px;">
           <option selected data-action="{% url 'event_archive' %}" href="#">Events</option>
           <option data-action="{% url 'person_list' %}" href="#">People</option>
           <option data-action="{% url 'organisation_list' %}" href="#">Organisations</option>
@@ -16,7 +16,7 @@
           <option data-action="{% url 'supplier_list' %}" href="#">Suppliers</option>
         </select>
     </div>
-    <button class="btn btn-primary form-control form-control-sm btn-sm">Search</button>
+    <button class="btn btn-primary form-control form-control-sm btn-sm" style="border-top-left-radius: 0px;border-bottom-left-radius: 0px;">Search</button>
     <a href="{% url 'search_help' %}" class="nav-link modal-href btn-sm"><span class="fas fa-question-circle"></span></a>
 </form>
 {% endif %}

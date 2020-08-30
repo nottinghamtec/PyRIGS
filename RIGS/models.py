@@ -666,12 +666,12 @@ class EventChecklist(models.Model, RevisionMixin):
     source_rcd = models.BooleanField(help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
     labelling = models.BooleanField(help_text="Appropriate and clear labelling on distribution and cabling?")
     # First Distro
-    fd_voltage_l1 = models.IntegerField(help_text="L1 - N")
-    fd_voltage_l2 = models.IntegerField(help_text="L2 - N")
-    fd_voltage_l3 = models.IntegerField(help_text="L3 - N")
-    fd_phase_rotation = models.BooleanField(help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.IntegerField(help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    fd_pssc = models.IntegerField(help_text="Prospective Short Circuit Current")
+    fd_voltage_l1 = models.IntegerField(verbose_name="First Distro Voltage L1-N", help_text="L1 - N")
+    fd_voltage_l2 = models.IntegerField(verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
+    fd_voltage_l3 = models.IntegerField(verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
+    fd_phase_rotation = models.BooleanField(verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
+    fd_earth_fault = models.IntegerField(verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_pssc = models.IntegerField(verbose_name="PSCC", help_text="Prospective Short Circuit Current")
 
     all_rcds_tested = models.BooleanField(help_text="All circuit RCDs tested?<small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(help_text="Public/Performer accessible circuits tested?<small>(using socket tester)</small>")
