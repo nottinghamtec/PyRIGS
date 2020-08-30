@@ -79,7 +79,7 @@
             $(".selectpicker").each(function(){initPicker($(this))});
             $(target).attr('data-pk', newID - 1);
         });
-        $('button[data-action=delete]').on('click', function(event) {
+        $(document).on('click', 'button[data-action=delete]', function(event) {
            event.preventDefault();
            $(this).closest('tr').remove();
         });
@@ -111,13 +111,13 @@
                         <div class="card-body">
                             <dl class="col-12 row">
                                 <dt class="col-4">Event Date</dt>
-                                <dd class="col-8">{{form.event.start_date}}</dd>
+                                <dd class="col-8">{{ event.start_date}}{%if event.end_date %}-{{ event.end_date}}{%endif%}</dd>
                                 <dt class="col-4">Event Name</dt>
-                                <dd class="col-8">{{form.event.name}}</dd>
+                                <dd class="col-8">{{ event.name }}</dd>
                                 <dt class="col-4">Client</dt>
-                                <dd class="col-8">{{form.event.person}}</dd>
+                                <dd class="col-8">{{ event.person }}</dd>
                                 <dt class="col-4">Venue</dt>
-                                <dd class="col-8">{{form.event.Venue}}</dd>
+                                <dd class="col-8">{{ event.venue }}</dd>
                             </dl>
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col-4 control-label">{{ form.power_mic.help_text }}</label>
@@ -143,7 +143,6 @@
                                         <td><select class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true"></select></td>
                                         <td><button class="btn btn-danger" data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button</td>
                                     </tr>
-                                    {# TODO Add required to all fields on row when one is edited #}
                                     {% for i in object.vehicles.all %}
                                     <tr id="vehicles_{{i.pk}}">
                                         <td><input name="vehicle_{{i.pk}}" type="text" class="form-control" value="{{ i.vehicle }}"/></td>
@@ -300,6 +299,44 @@
                                     <tr>
                                         <th scope="row">{{form.fd_pssc.help_text|safe}}</th>
                                         <td colspan="3">{% render_field form.fd_pssc class+="form-control" %}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <hr>
+                            <p>Tests at 'Worst Case' points (at least 1 point required)</p>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="text-center">Test</th>
+                                        <th scope="col" class="text-center">Point 1</th>
+                                        <th scope="col" class="text-center">Point 2</th>
+                                        <th scope="col" class="text-center">Point 3</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">{{form.w1_description.help_text|safe}}</th>
+                                        <td>{% render_field form.w1_description class+="form-control" %}</td>
+                                        <td>{% render_field form.w2_description class+="form-control" %}</td>
+                                        <td>{% render_field form.w3_description class+="form-control" %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{form.w1_polarity.help_text|safe}}</th>
+                                        <td>{% render_field form.w1_polarity %}</td>
+                                        <td>{% render_field form.w2_polarity %}</td>
+                                        <td>{% render_field form.w3_polarity %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{form.w1_voltage.help_text|safe}}</th>
+                                        <td>{% render_field form.w1_voltage class+="form-control" %}</td>
+                                        <td>{% render_field form.w2_voltage class+="form-control" %}</td>
+                                        <td>{% render_field form.w3_voltage class+="form-control" %}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">{{form.w1_earth_fault.help_text|safe}}</th>
+                                        <td>{% render_field form.w1_earth_fault class+="form-control" %}</td>
+                                        <td>{% render_field form.w2_earth_fault class+="form-control" %}</td>
+                                        <td>{% render_field form.w3_earth_fault class+="form-control" %}</td>
                                     </tr>
                                 </tbody>
                             </table>

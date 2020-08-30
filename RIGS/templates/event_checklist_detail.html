@@ -2,6 +2,7 @@
 {% block title %}Event Checklist for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
 {% load profile_by_index from filters %}
+{% load yesnoi from filters %}
 
 {% block content %}
 <div class="row my-3 py-3">
@@ -40,27 +41,27 @@
                             <dl class="row">
                                 <dt class="col-10">{{ object|help_text:'safe_parking'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.safe_parking|yesno|title }}
+                                    {{ object.safe_parking|yesnoi }}
                                 </dd>
                                 <dt class="col-10">{{ object|help_text:'safe_packing'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.safe_packing|yesno|title }}
+                                    {{ object.safe_packing|yesnoi }}
                                 </dd>
                                 <dt class="col-10">{{ object|help_text:'exits'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.exits|yesno|title }}
+                                    {{ object.exits|yesnoi }}
                                 </dd>
                                 <dt class="col-10">{{ object|help_text:'trip_hazard'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.trip_hazard|yesno|title }}
+                                    {{ object.trip_hazard|yesnoi }}
                                 </dd>
                                 <dt class="col-10">{{ object|help_text:'warning_signs'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.warning_signs|yesno|title }}
+                                    {{ object.warning_signs|yesnoi }}
                                 </dd>
                                 <dt class="col-10">{{ object|help_text:'ear_plugs'|safe }}</dt>
                                 <dd class="col-2">
-                                    {{ object.ear_plugs|yesno|title }}
+                                    {{ object.ear_plugs|yesnoi }}
                                 </dd>
                             </dl>
                         </div>
@@ -97,19 +98,19 @@
                     <dl class="row">
                         <dt class="col-10">{{ object|help_text:'source_rcd'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.source_rcd|yesno|title }}
+                            {{ object.source_rcd|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'labelling'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.labelling|yesno|title }}
+                            {{ object.labelling|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.earthing|yesno|title }}
+                            {{ object.earthing|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.pat|yesno|title }}
+                            {{ object.pat|yesnoi }}
                         </dd>
                     </dl>
                     <hr>
@@ -135,7 +136,7 @@
                             </tr>
                             <tr>
                                 <th scope="row">{{ object|help_text:'fd_phase_rotation'|safe }}</th>
-                                <td colspan="3">{{ object.fd_phase_rotation|yesno|title }}</td>
+                                <td colspan="3">{{ object.fd_phase_rotation|yesnoi }}</td>
                             </tr>
                             <tr>
                                 <th scope="row">{{ object|help_text:'fd_earth_fault'|safe}}</th>
@@ -148,34 +149,73 @@
                         </tbody>
                     </table>
                     <hr>
+                    <p>Tests at 'Worst Case' points (at least 1 point required)</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center">Test</th>
+                                <th scope="col" class="text-center">Point 1</th>
+                                <th scope="col" class="text-center">Point 2</th>
+                                <th scope="col" class="text-center">Point 3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'w1_description'|safe}}</th>
+                                <td>{{ object.w1_description }}</td>
+                                <td>{{ object.w2_description|default:'' }}</td>
+                                <td>{{ object.w3_description|default:'' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'w1_polarity'|safe}}</th>
+                                <td>{{ object.w1_polarity|yesnoi }}</td>
+                                <td>{{ object.w2_polarity|default:''|yesnoi }}</td>
+                                <td>{{ object.w3_polarity|default:''|yesnoi }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'w1_voltage'|safe}}</th>
+                                <td>{{ object.w1_voltage }}</td>
+                                <td>{{ object.w2_voltage|default:'' }}</td>
+                                <td>{{ object.w3_voltage|default:'' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ object|help_text:'w1_earth_fault'|safe}}</th>
+                                <td>{{ object.w1_earth_fault }}</td>
+                                <td>{{ object.w2_earth_fault|default:'' }}</td>
+                                <td>{{ object.w3_earth_fault|default:'' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
                     <dl class="row">
                         <dt class="col-10">{{ object|help_text:'all_rcds_tested'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.all_rcds_tested|yesno|title }}
+                            {{ object.all_rcds_tested|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'public_sockets_tested'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.public_sockets_tested|yesno|title }}
+                            {{ object.public_sockets_tested|yesnoi }}
                         </dd>
                     </dl>
+                    <hr>
                     {% include 'partials/ec_power_info.html' %}
                     {% else %}
                     <dl class="row">
                         <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.rcds|yesno|title }}
+                            {{ object.rcds|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'supply_test'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.supply_test|yesno|title }}
+                            {{ object.supply_test|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.earthing|yesno|title }}
+                            {{ object.earthing|yesnoi }}
                         </dd>
                         <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
                         <dd class="col-2">
-                            {{ object.pat|yesno|title }}
+                            {{ object.pat|yesnoi }}
                         </dd>
                     </dl>
                     {% endif %}

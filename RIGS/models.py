@@ -672,6 +672,19 @@ class EventChecklist(models.Model, RevisionMixin):
     fd_phase_rotation = models.BooleanField(blank=True,null=True,verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
     fd_earth_fault = models.IntegerField(blank=True,null=True,verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     fd_pssc = models.IntegerField(blank=True,null=True,verbose_name="PSCC", help_text="Prospective Short Circuit Current")
+    #Worst case points
+    w1_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
+    w1_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
+    w1_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
+    w1_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w2_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
+    w2_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
+    w2_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
+    w2_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w3_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
+    w3_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
+    w3_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
+    w3_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
 
     all_rcds_tested = models.BooleanField(blank=True,null=True,help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True,null=True,help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
@@ -679,11 +692,21 @@ class EventChecklist(models.Model, RevisionMixin):
     def clean(self):
         errdict = {}
         if self.earthing == None or self.pat == None:
-            raise ValidationError('Fill out the electrical checks')
-        if self.medium_event and (self.source_rcd == None or self.labelling == None or self.all_rcds_tested == None or self.public_sockets_tested == None):
-            raise ValidationError('Fill out the medium event electrical checks')
-        elif self.rcds == None or self.supply_test == None:
-            raise ValidationError('Fill out the small event electrical checks')
+            errdict['earthing'] = 'Fill out the electrical checks'
+
+        if not self.medium_event and (self.rcds == None or self.supply_test == None):
+            errdict['rcds'] = 'Fill out the small event electrical checks'
+
+        if self.medium_event:
+            if self.source_rcd == None or self.labelling == None or self.all_rcds_tested == None or self.public_sockets_tested == None:
+                errdict['source_rcd'] = 'Fill out the medium event electrical checks'
+
+            if self.w1_description == None or self.w1_polarity == None or self.w1_voltage == None or self.w1_earth_fault == None:
+                errdict['w1_description'] = 'Fully complete at least the first worst case point'
+
+        if errdict != {}:  # If there was an error when validation
+            raise ValidationError(errdict)
+
 
     @property
     def activity_feed_string(self):

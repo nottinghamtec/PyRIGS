@@ -8,6 +8,7 @@ from django.utils.safestring import SafeData, mark_safe
 from django.utils.html import escape
 from RIGS import models
 import json
+from django.template.defaultfilters import yesno, title
 
 register = template.Library()
 
@@ -115,6 +116,8 @@ def orderby(request, field, attr):
     return dict_.urlencode()
 
 # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
+
+
 @register.filter
 def help_text(obj, field):
     if hasattr(obj, '_meta'):
@@ -149,3 +152,16 @@ def next(alist, current_index):
         return alist[int(current_index) + 1]  # access the next element
     except BaseException:
         return ''  # return empty string in case of exception
+
+
+@register.filter(needs_autoescape=True)
+def yesnoi(boolean, invert=False, autoescape=True):
+    value = yesno(boolean)
+    value = title(value)
+    if invert:
+        boolean = not boolean
+    if boolean:
+        value += ' <span class="fas fa-check-square" style="color: green;"></span>'
+    else:
+        value += ' <span class="fas fa-exclamation" style="color: red;"></span>'
+    return mark_safe(value)
