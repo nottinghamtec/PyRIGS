@@ -95,6 +95,13 @@ class EventChecklistEdit(generic.UpdateView):
     template_name = 'event_checklist_form.html'
     form_class = forms.EventChecklistForm
 
+    def get_success_url(self):
+        ec = self.get_object()
+        ec.reviewed_by = None
+        ec.reviewed_at = None
+        ec.save()
+        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+
     def get_context_data(self, **kwargs):
         context = super(EventChecklistEdit, self).get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
@@ -143,6 +150,18 @@ class EventChecklistList(generic.ListView):
     paginate_by = 20
     model = models.EventChecklist
     template_name = 'event_checklist_list.html'
+
+
+class EventChecklistReview(generic.View):
+    def get(self, *args, **kwargs):
+        rpk = kwargs.get('pk')
+        ec = models.RiskAssessment.objects.get(pk=rpk)
+        with reversion.create_revision():
+            reversion.set_user(self.request.user)
+            ec.reviewed_by = self.request.user
+            ec.reviewed_at = timezone.now()
+            ec.save()
+        return HttpResponseRedirect(reverse_lazy('ec_list'))
 
 
 class HSList(generic.ListView):

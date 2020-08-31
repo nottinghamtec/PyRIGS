@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import datetime
 import pytz
 
 from django import forms
@@ -571,6 +570,14 @@ class Payment(models.Model):
         return "%s: %d" % (self.get_method_display(), self.amount)
 
 
+# Probably shouldn't be doing HTML at the python level but hey...they say not to do logic in templates! :P
+def get_review_string(obj, review_link):
+    if obj.reviewed_by:
+                return "<span class='badge badge-success py-2'>Reviewed by <a href='{}'>{}</a> at {}</span>".format(reverse_lazy('profile_detail', kwargs={'pk': obj.reviewed_by.pk}), obj.reviewed_by, obj.reviewed_at.strftime("%d/%m/%Y %H:%M"))
+    else:
+        return "<a class='btn btn-success my-2' href='{}'>Mark Reviewed</a>".format(reverse_lazy(review_link, kwargs={'pk': obj.pk}))
+
+
 @reversion.register
 class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -615,6 +622,12 @@ class RiskAssessment(models.Model, RevisionMixin):
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['event']
+        permissions = [
+            ('riskassessment_review', 'Can review RAs')
+        ]
+
     def clean(self):
         errdict = {}
         for field in RiskAssessment._meta.fields:
@@ -623,6 +636,10 @@ class RiskAssessment(models.Model, RevisionMixin):
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
+
+    @property
+    def review_string(self):
+        return get_review_string(self, 'ra_review')
 
     @property
     def activity_feed_string(self):
@@ -689,6 +706,16 @@ class EventChecklist(models.Model, RevisionMixin):
     all_rcds_tested = models.BooleanField(blank=True,null=True,help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True,null=True,help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
 
+    reviewed_at = models.DateTimeField(null=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                                    verbose_name="Reviewer", on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['event']
+        permissions = [
+            ('eventchecklist_review', 'Can review ECs')
+        ]
+
     def clean(self):
         errdict = {}
         if self.earthing == None or self.pat == None:
@@ -707,6 +734,9 @@ class EventChecklist(models.Model, RevisionMixin):
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
 
+    @property
+    def review_string(self):
+        return get_review_string(self, 'ec_review')
 
     @property
     def activity_feed_string(self):
@@ -720,7 +750,7 @@ class EventChecklist(models.Model, RevisionMixin):
 
 
 @reversion.register
-class EventChecklistVehicle(models.Model):
+class EventChecklistVehicle(models.Model, RevisionMixin):
     checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
     vehicle = models.CharField(max_length=255)
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='vehicles', on_delete=models.CASCADE)
@@ -732,7 +762,7 @@ class EventChecklistVehicle(models.Model):
 
 
 @reversion.register
-class EventChecklistCrew(models.Model):
+class EventChecklistCrew(models.Model, RevisionMixin):
     checklist = models.ForeignKey('EventChecklist', related_name='crew', blank=True, on_delete=models.CASCADE)
     crewmember = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='crewed', on_delete=models.CASCADE)
     role = models.CharField(max_length=255)

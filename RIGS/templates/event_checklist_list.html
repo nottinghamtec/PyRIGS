@@ -46,11 +46,7 @@
                         {# Buttons #}
                         <td>
                             <a class="btn btn-primary" href="{% url 'ra_detail' object.pk %}">View</a>
-                            {% if object.reviewed_by %}
-                            Reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a> at {{ object.reviewed_at }}
-                            {% else %}
-                            <a class="btn btn-success my-2" href="{% url 'ra_review' object.pk %}">Mark Reviewed</a>
-                            {% endif %}
+                            {{ object.review_string|safe }}
                         </td>
                     </tr>
                     {% empty %}

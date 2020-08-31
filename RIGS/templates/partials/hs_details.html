@@ -6,23 +6,9 @@
     <div class="card-header">Health &amp; Safety Details</div>
     <div class="card-body">
         <h5>Risk Assessment:</h5>
-        {% if event.riskassessment %}
-            <span class="fas fa-check text-success"></span> Completed <div class="btn-group"><a href="{% url 'ra_detail' event.riskassessment.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span
-                class="hidden-xs">View</span><a href="{% url 'ra_edit' event.riskassessment.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span> <span
-                class="hidden-xs">Edit</span></a></div>
-        {% else %}
-            <a href="{% url 'event_ra' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
-                class="hidden-xs">Create Risk Assessment</span></a>
-        {% endif%}
+        {% include 'partials/hs_status.html' with event=event object=event.riskassessment view='ra_detail' edit='ra_edit' create='event_ra' %}
         <hr>
         <h5>Event Checklist:</h5>
-        {% if event.eventchecklist %}
-        <span class="fas fa-check text-success"></span> Completed <div class="btn-group"><a href="{% url 'ec_detail' event.eventchecklist.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span
-                class="hidden-xs">View</span><a href="{% url 'ec_edit' event.eventchecklist.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span> <span
-                class="hidden-xs">Edit</span></a></div>
-        {% else %}
-            <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
-                class="hidden-xs">Create Event Checklist</span></a>
-        {% endif%}
+        {% include 'partials/hs_status.html' with event=event object=event.eventchecklist view='ec_detail' edit='ec_edit' create='event_ec' %}
     </div>
 </div>

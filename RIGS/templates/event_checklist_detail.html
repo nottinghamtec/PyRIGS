@@ -225,6 +225,7 @@
         <div class="col-12 text-right">
             <a href="{% url 'ec_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
                 class="hidden-xs">Edit</span></a>
+            {{ object.review_string|safe }}
         </div>
         <div class="col-12 text-right">
             {% include 'partials/last_edited.html' with target="eventchecklist_history" %}

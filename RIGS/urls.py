@@ -81,7 +81,7 @@ urlpatterns = [
          name='ra_edit'),
     path('event/ra/list', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentList.as_view()),
          name='ra_list'),
-    path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.change_event')(hs.EventRiskAssessmentReview.as_view()), name='ra_review'),
+    path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.review_riskassessment')(hs.EventRiskAssessmentReview.as_view()), name='ra_review'),
 
     path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.change_event')(hs.EventChecklistCreate.as_view()),
          name='event_ec'),
@@ -91,6 +91,7 @@ urlpatterns = [
          name='ec_edit'),
     path('event/checklist/list', permission_required_with_403('RIGS.change_event')(hs.EventChecklistList.as_view()),
          name='ec_list'),
+    path('event/checklist/<int:pk>/review/', permission_required_with_403('RIGS.review_eventchecklist')(hs.EventChecklistReview.as_view()), name='ec_review'),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(finance.InvoiceIndex.as_view()),

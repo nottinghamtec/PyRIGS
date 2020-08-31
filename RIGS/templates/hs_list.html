@@ -17,35 +17,16 @@
         <tbody>
         {% for event in object_list %}
         <tr id="event_row">
-            <th scope="row" id="event_number">{{ event.pk }} | {{ event.name }}</th>
+            <th scope="row" id="event_number"><a href="{% url 'event_detail' event.pk %}">{{ event }}</a></th>
             <!--Dates-->
             <td id="event_dates">
-                <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
+                <span><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></span>
                 {% if event.end_date and event.end_date != event.start_date %}
-                    <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
+                    <br><span><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></span>
                 {% endif %}
             </td>
-            <td>
-                {% if event.riskassessment %}
-                    <a class="btn btn-primary" href="{% url 'ra_detail' event.riskassessment.pk %}">View</a>
-                    {% if event.riskassessment.reviewed_by %}
-                    Reviewed by <a href="{% url 'profile_detail' event.riskassessment.reviewed_by.pk %}">{{ event.riskassessment.reviewed_by }}</a> at {{ event.riskassessment.reviewed_at }}
-                    {% else %}
-                    <a class="btn btn-success my-2" href="{% url 'ra_review' event.riskassessment.pk %}">Mark Reviewed</a>
-                    {% endif %}
-                {% else %}
-                    <a href="{% url 'event_ra' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
-                    class="hidden-xs">Create Risk Assessment</span></a>
-                {% endif %}
-            </td>
-            <td>
-                {% if event.eventchecklist %}
-                    <a class="btn btn-primary" href="{% url 'ec_detail' event.eventchecklist.pk %}">View</a>
-                {% else %}
-                    <a href="{% url 'event_ec' event.pk %}" class="btn btn-success"><span class="fas fa-paperclip"></span> <span
-                    class="hidden-xs">Create Event Checklist</span></a>
-                {% endif %}
-            </td>
+            <td>{% include 'partials/hs_status.html' with event=event object=event.riskassessment view='ra_detail' edit='ra_edit' create='event_ra' %}</td>
+            <td>{% include 'partials/hs_status.html' with event=event object=event.eventchecklist view='ec_detail' edit='ec_edit' create='event_ec' %}</td>
         </tr>
         {% empty %}
         <tr class="bg-warning text-dark">

@@ -125,3 +125,13 @@ class VenueAdmin(AssociateAdmin):
 class OrganisationAdmin(AssociateAdmin):
     list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
     merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
+
+
+@admin.register(models.RiskAssessment)
+class RiskAssessmentAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+
+
+@admin.register(models.EventChecklist)
+class EventChecklistAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
