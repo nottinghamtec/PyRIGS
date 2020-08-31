@@ -12,7 +12,7 @@
         </thead>
         <tbody>
         {% for event in events %}
-        <tr {% include 'partials/event_table_colour.html' %} id="event_row">
+        <tr class="{{event.status_color}}" id="event_row">
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates-->

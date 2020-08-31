@@ -378,7 +378,10 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def authorised(self):
-        return not self.internal and self.purchase_order or self.authorisation.amount == self.total
+        if self.internal:
+            return self.authorisation.amount == self.total
+        else:
+            return bool(self.purchase_order)
 
     @property
     def has_start_time(self):
@@ -443,6 +446,17 @@ class Event(models.Model, RevisionMixin):
     @property
     def internal(self):
         return self.organisation and self.organisation.union_account
+
+    @property
+    def status_color(self):
+        if self.cancelled:
+            return "text-muted table-secondary"
+        elif not self.is_rig:
+            return "table-info"
+        elif self.authorised and self.mic and (self.dry_hire or self.riskassessment):
+            return "table-success"
+        else:
+            return "table-warning"
 
     objects = EventManager()
 

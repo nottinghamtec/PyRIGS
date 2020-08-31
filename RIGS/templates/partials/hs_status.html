@@ -2,8 +2,8 @@
 {% if object.pk != None %}
 {#<span class="badge badge-success my-3"><span class="fas fa-check"></span> Completed</span><br/>#}
 <div class="btn-group">
-    <a href="{% url view object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span class="hidden-xs">View</span>
-    <a href="{% url edit object.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span><span class="hidden-xs">Edit</span></a>
+    <a href="{% url view object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span class="hidden-xs"> View</span>
+    <a href="{% url edit object.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span><span class="hidden-xs"> Edit</span></a>
 </div>
 {{ object.review_string|safe }}
 {% else %}
