@@ -254,3 +254,4 @@ class EventChecklistForm(forms.ModelForm):
     class Meta:
         model = models.EventChecklist
         fields = '__all__'
+        exclude = ['reviewed_at', 'reviewed_by']

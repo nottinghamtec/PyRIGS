@@ -69,7 +69,7 @@ class FieldComparison(object):
 
 
 class ModelComparison(object):
-    def __init__(self, old=None, new=None, version=None, excluded_keys=[]):
+    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=[]):
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:
             self.fields = old._meta.get_fields()
@@ -80,6 +80,7 @@ class ModelComparison(object):
         self.new = new
         self.excluded_keys = excluded_keys
         self.version = version
+        self.follow = follow
 
     @cached_property
     def revision(self):
@@ -117,42 +118,41 @@ class ModelComparison(object):
 
     @cached_property
     def item_changes(self):
-        item_type = ContentType.objects.get_for_model(self.version.object)
-        old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
-        new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)
+        if self.follow:
+            item_type = ContentType.objects.get_for_model(self.version.object)
+            old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
+            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)
 
-        comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
 
-        # Build some dicts of what we have
-        item_dict = {}  # build a list of items, key is the item_pk
-        # FIXME Removing the if checks makes things REALLY slow...
-        for version in old_item_versions:  # put all the old versions in a list
-            print(version)
-            # if version.field_dict["event_id"] == int(self.new.pk):
-            compare = ModelComparison(old=version._object_version.object, **comparisonParams)
-            item_dict[version.object_id] = compare
+            # Build some dicts of what we have
+            item_dict = {}  # build a list of items, key is the item_pk
+            for version in old_item_versions:  # put all the old versions in a list
+                # if version.field_dict["event_id"] == int(self.new.pk):
+                compare = ModelComparison(old=version._object_version.object, **comparisonParams)
+                item_dict[version.object_id] = compare
 
-        for version in new_item_versions:  # go through the new versions
-            # if version.field_dict["event_id"] == int(self.new.pk):
-            try:
-                compare = item_dict[version.object_id]  # see if there's a matching old version
-                compare.new = version._object_version.object  # then add the new version to the dictionary
-            except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
-                compare = ModelComparison(new=version._object_version.object, **comparisonParams)
+            for version in new_item_versions:  # go through the new versions
+                # if version.field_dict["event_id"] == int(self.new.pk):
+                try:
+                    compare = item_dict[version.object_id]  # see if there's a matching old version
+                    compare.new = version._object_version.object  # then add the new version to the dictionary
+                except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
+                    compare = ModelComparison(new=version._object_version.object, **comparisonParams)
 
-            if compare.new:
-                compare.name = str(compare.new)
-            else:
-                compare.name = str(compare.old)
+                if compare.new:
+                    compare.name = str(compare.new)
+                else:
+                    compare.name = str(compare.old)
 
-            item_dict[version.object_id] = compare  # update the dictionary with the changes
+                item_dict[version.object_id] = compare  # update the dictionary with the changes
 
-        changes = []
-        for (_, compare) in list(item_dict.items()):
-            if compare.fields_changed:
-                changes.append(compare)
+            changes = []
+            for (_, compare) in list(item_dict.items()):
+                if compare.fields_changed:
+                    changes.append(compare)
 
-        return changes
+            return changes
 
     @cached_property
     def items_changed(self):
@@ -199,5 +199,6 @@ class RIGSVersion(Version):
         return ModelComparison(
             version=self,
             new=self._object_version.object,
-            old=self.parent._object_version.object if self.parent else None
+            old=self.parent._object_version.object if self.parent else None,
+            follow=True
         )

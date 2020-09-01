@@ -382,7 +382,7 @@ class EventAuthorisationTestCase(TestCase):
                                         order=1)
 
     def test_event_property(self):
-        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authorisation@model.test.case",
                                                          name="Test Auth 1", amount=self.event.total - 1,
                                                          sent_by=self.profile)
         self.assertFalse(self.event.authorised)
@@ -392,7 +392,7 @@ class EventAuthorisationTestCase(TestCase):
 
     def test_last_edited(self):
         with reversion.create_revision():
-            auth = models.EventAuthorisation.objects.create(event=self.event, email="authroisation@model.test.case",
+            auth = models.EventAuthorisation.objects.create(event=self.event, email="authorisation@model.test.case",
                                                             name="Test Auth", amount=self.event.total,
                                                             sent_by=self.profile)
         self.assertIsNotNone(auth.last_edited_at)

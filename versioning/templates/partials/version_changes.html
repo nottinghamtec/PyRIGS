@@ -8,7 +8,7 @@
             {% for change in itemchange.field_changes %}
                   <li class="list-group-item">
                     <p>{{ change.field.verbose_name|title }}:</p>
-                    <div class="dont-break-out">{% include 'partials/version_changes_change.html' with change=itemchange %}</div>
+                    <div class="dont-break-out">{% include 'partials/version_changes_change.html' with change=change %}</div>
                   </li>
             {% endfor %}
             </ul>
