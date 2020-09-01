@@ -1,4 +1,5 @@
 {% load next from filters %}
+{% load namewithnotes from filters %}
 {% comment %}<div class="d-none d-md-block">{% endcomment %}
 <div class="table-responsive">
     <table class="table mb-0">
@@ -52,7 +53,7 @@
                         {{ event.name }}
                     </a>
                     {% if event.venue %}
-                        <small>at {% if event.venue.notes %}{{ event.venue.name }} <a href="{% url 'venue_detail' event.venue.pk %}"><span class="far fa-sticky-note"></span></a>{% else %}{{ event.venue.name }}{% endif %}</small>
+                        <small>at {{ event.venue|namewithnotes:'venue_detail' }}</small>
                     {% endif %}
                     {% if event.dry_hire %}
                         <span class="badge badge-secondary">Dry Hire</span>

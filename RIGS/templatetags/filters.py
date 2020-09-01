@@ -9,6 +9,7 @@ from django.utils.html import escape
 from RIGS import models
 import json
 from django.template.defaultfilters import yesno, title
+from django.urls import reverse_lazy
 
 register = template.Library()
 
@@ -168,5 +169,14 @@ def yesnoi(boolean, invert=False, autoescape=True):
 
 
 @register.filter
+@stringfilter
 def title_spaced(string):
     return title(string).replace('_', ' ')
+
+
+@register.filter(needs_autoescape=True)
+def namewithnotes(obj, url, autoescape=True):
+    if hasattr(obj, 'notes') and obj.notes is not None and len(obj.notes) > 0:
+        return mark_safe(obj.name + " <a href='{}'><span class='far fa-sticky-note'></span></a>".format(reverse_lazy(url, kwargs={'pk': obj.pk})))
+    else:
+        return obj.name
