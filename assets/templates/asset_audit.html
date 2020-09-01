@@ -11,11 +11,8 @@
         }
         $('#id_date_acquired').val([date.getFullYear(), ('0' + (date.getMonth()+1)).slice(-2), ('0' + date.getDate()).slice(-2)].join('-'));
   }
-  function setLength(length) {
-      $('#id_length').val(length);
-  }
-  function setCSA(CSA) {
-      $('#id_csa').val(CSA);
+  function setFieldValue(ID, CSA) {
+      $('#' + String(ID)).val(CSA);
   }
   function checkIfCableHidden() {
     if (document.getElementById("id_is_cable").checked) {
@@ -30,105 +27,63 @@
   {% include 'form_errors.html' %}
   {% csrf_token %}
   <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
-  <div class="form-group">
-    <label for="{{ form.asset_id.id_for_label }}" class="col-sm-2 control-label">Asset ID</label>
-    <div class="col-sm-10">
-      {% render_field form.asset_id|add_class:'form-control' value=object.asset_idz %}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.asset_id col="col-6" %}
   </div>
-  <div class="form-group">
-    <label for="{{ form.description.id_for_label }}" class="col-sm-2 control-label">Description</label>
-    <div class="col-sm-10">
-      {% render_field form.description|add_class:'form-control' value=object.description %}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.description col="col-6" %}
   </div>
-  <div class="form-group">
-    <label for="{{ form.category.id_for_label }}" class="col-sm-2 control-label">Category</label>
-    <div class="col-sm-10">
-      {% render_field form.category|add_class:'form-control'%}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.category col="col-6" %}
   </div>
-  <div class="form-group">
-    <label for="{{ form.status.id_for_label }}" class="col-sm-2 control-label">Status</label>
-    <div class="col-sm-10">
-      {% render_field form.status|add_class:'form-control'%}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.status col="col-6" %}
   </div>
-  <div class="form-group">
-    <label for="{{ form.serial_number.id_for_label }}" class="col-sm-2 control-label">Serial Number</label>
-    <div class="col-sm-10">
-      {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.serial_number col="col-6" %}
   </div>
-  <div class="form-group">
-    <label for="{{ form.date_acquired.id_for_label }}" class="col-sm-2 control-label">Date Acquired</label>
-    <div class="col-sm-6">
-      {% render_field form.date_acquired|add_class:'form-control' value=object.date_acquired %}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.date_acquired col="col-6" %}
     <div class="col-sm-4">
-        <btn class="btn btn-default" onclick="setAcquired(true);" tabindex="-1">Today</btn>
-        <btn class="btn btn-default" onclick="setAcquired(false);" tabindex="-1">Unknown</btn>
+        <btn class="btn btn-info" onclick="setAcquired(true);" tabindex="-1">Today</btn>
+        <btn class="btn btn-warning" onclick="setAcquired(false);" tabindex="-1">Unknown</btn>
     </div>
   </div>
-  <div class="form-group">
-    <label for="{{ form.date_sold.id_for_label }}" class="col-sm-2 control-label">Date Sold</label>
-    <div class="col-sm-6">
-      {% render_field form.date_sold|add_class:'form-control' value=object.date_sold %}
-    </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.date_sold col="col-6" %}
   </div>
-  <div class="form-group">
-      <label for="{{ form.salvage_value.id_for_label }}" class="col-sm-2 control-label">Salvage Value</label>
-      <div class="col-sm-10">
-          <div class="input-group">
-            <span class="input-group-addon">£</span>
-            {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
-          </div>
-      </div>
+  <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.salvage_value col="col-6" prepend="£" %}
   </div>
   <hr>
-  <div class="form-group">
-    <label for="{{ form.is_cable.id_for_label }}" class="col-sm-2 control-label">Cable?</label>
-    <div class="col-sm-10">
+  <div class="form-group form-row">
+    <label for="{{ form.is_cable.id_for_label }}" class="col-2">Cable?</label>
+    <div class="col-6">
       {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %}
     </div>
   </div>
   <div id="cable-table">
-    <div class="form-group">
-      <label for="{{ form.cable_type.id_for_label }}" class="col-sm-2 control-label">Cable Type</label>
-      <div class="col-sm-10">
-        {% render_field form.cable_type|add_class:'form-control' %}
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.cable_type col="col-6" %}
+    </div>
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.length append=form.length.help_text col="col-6" %}
+      <div class="col-4">
+        <btn class="btn btn-danger" onclick="setFieldValue('{{ form.length.id_for_label }}','5');" tabindex="-1">5{{ form.length.help_text }}</btn>
+        <btn class="btn btn-success" onclick="setFieldValue('{{ form.length.id_for_label }}','10');" tabindex="-1">10{{ form.length.help_text }}</btn>
+        <btn class="btn btn-info" onclick="setFieldValue('{{ form.length.id_for_label }}','20');" tabindex="-1">20{{ form.length.help_text }}</btn>
       </div>
     </div>
-    <div class="form-group">
-      <label for="{{ form.length.id_for_label }}" class="col-sm-2 control-label">Length</label>
-      <div class="col-sm-6">
-        <div class="input-group">
-          {% render_field form.length|add_class:'form-control' %}
-          <span class="input-group-addon">{{ form.length.help_text }}</span>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <btn class="btn btn-danger" onclick="setLength('5');" tabindex="-1">5{{ form.length.help_text }}</btn>
-        <btn class="btn btn-success" onclick="setLength('10');" tabindex="-1">10{{ form.length.help_text }}</btn>
-        <btn class="btn btn-info" onclick="setLength('20');" tabindex="-1">20{{ form.length.help_text }}</btn>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="{{ form.csa.id_for_label }}" class="col-sm-2 control-label">Cross Sectional Area</label>
-      <div class="col-sm-6">
-        <div class="input-group">
-          {% render_field form.csa|add_class:'form-control' value=object.csa %}
-          <span class="input-group-addon">{{ form.csa.help_text }}</span>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <btn class="btn btn-default" onclick="setCSA('1.5');" tabindex="-1">1.5{{ form.csa.help_text }}</btn>
-        <btn class="btn btn-default" onclick="setCSA('2.5');" tabindex="-1">2.5{{ form.csa.help_text }}</btn>
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.csa append=form.csa.help_text title='CSA' col="col-6" %}
+      <div class="col-4">
+        <btn class="btn btn-secondary" onclick="setFieldValue('{{ form.csa.id_for_label }}', '1.5');" tabindex="-1">1.5{{ form.csa.help_text }}</btn>
+        <btn class="btn btn-secondary" onclick="setFieldValue('{{ form.csa.id_for_label }}', '2.5');" tabindex="-1">2.5{{ form.csa.help_text }}</btn>
       </div>
     </div>
   </div>
   {% if not request.is_ajax %}
-    <div class="form-group pull-right">
+    <div class="form-group form-row pull-right">
         <button class="btn btn-success" type="submit" form="asset_audit_form" id="id_mark_audited">Mark Audited</button>
     </div>
   {% endif %}
@@ -136,7 +91,7 @@
 {% endblock %}
 
 {% block footer %}
-<div class="form-group">
+<div class="form-group form-row">
   <button class="btn btn-success pull-right" type="submit" form="asset_audit_form" onclick="onAuditClick({{form.asset_id.value}});" id="id_mark_audited">Mark Audited</button>
 </div>
 {% endblock %}

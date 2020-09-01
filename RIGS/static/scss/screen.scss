@@ -158,3 +158,8 @@ html.embedded {
     max-width: 3em;
   }
 }
+
+(input,select)[required]::after {
+    content: '*';
+    color: red;
+}

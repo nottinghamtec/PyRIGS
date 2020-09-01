@@ -165,3 +165,7 @@ def yesnoi(boolean, invert=False, autoescape=True):
     else:
         value += ' <span class="fas fa-exclamation" style="color: red;"></span>'
     return mark_safe(value)
+
+@register.filter
+def title_spaced(string):
+    return title(string).replace('_', ' ')
