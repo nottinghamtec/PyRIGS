@@ -101,8 +101,8 @@ class EventTestCase(TestCase):
         self.assertEqual(models.Event.objects.count(), 18, "Incorrect number of events, check setup")
 
     def test_rig_count(self):
-        # by my count this is 7
-        self.assertEqual(models.Event.objects.rig_count(), 8)
+        # Changed to not include unreturned dry hires in rig count
+        self.assertEqual(models.Event.objects.rig_count(), 7)
 
     def test_current_events(self):
         current_events = models.Event.objects.current_events()
@@ -374,8 +374,8 @@ class EventAuthorisationTestCase(TestCase):
             is_superuser=True  # lazily grant all permissions
         )[0]
         self.person = models.Person.objects.create(name='Authorisation Test Person')
-        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
-        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
+        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=True)
+        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person, organisation=self.organisation,
                                                  start_date=date.today())
         # Add some items
         models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,

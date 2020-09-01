@@ -443,9 +443,10 @@ class Event(models.Model, RevisionMixin):
         else:
             return endDate
 
+
     @property
     def internal(self):
-        return self.organisation and self.organisation.union_account
+        return bool(self.organisation and self.organisation.union_account)
 
     @property
     def status_color(self):
@@ -453,7 +454,7 @@ class Event(models.Model, RevisionMixin):
             return "text-muted table-secondary"
         elif not self.is_rig:
             return "table-info"
-        elif self.authorised and self.mic and (self.dry_hire or self.riskassessment):
+        elif self.mic and (self.dry_hire or self.riskassessment) and self.authorised:
             return "table-success"
         else:
             return "table-warning"
@@ -587,7 +588,7 @@ class Payment(models.Model):
 # Probably shouldn't be doing HTML at the python level but hey...they say not to do logic in templates! :P
 def get_review_string(obj, review_link):
     if obj.reviewed_by:
-                return "<span class='badge badge-success py-2'>Reviewed by <a href='{}'>{}</a> at {}</span>".format(reverse_lazy('profile_detail', kwargs={'pk': obj.reviewed_by.pk}), obj.reviewed_by, obj.reviewed_at.strftime("%d/%m/%Y %H:%M"))
+        return "<span class='badge badge-success py-2'>Reviewed by <a href='{}'>{}</a> at {}</span>".format(reverse_lazy('profile_detail', kwargs={'pk': obj.reviewed_by.pk}), obj.reviewed_by, obj.reviewed_at.strftime("%d/%m/%Y %H:%M"))
     else:
         return "<a class='btn btn-success my-2' href='{}'>Mark Reviewed</a>".format(reverse_lazy(review_link, kwargs={'pk': obj.pk}))
 
@@ -685,8 +686,8 @@ class EventChecklist(models.Model, RevisionMixin):
     extinguishers_location = models.CharField(max_length=255, help_text="Location of fire extinguishers")
 
     # Small Electrical Checks
-    rcds = models.BooleanField(blank=True,null=True,help_text="RCDs installed where needed and tested?")
-    supply_test = models.BooleanField(blank=True,null=True,help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
+    rcds = models.BooleanField(blank=True, null=True, help_text="RCDs installed where needed and tested?")
+    supply_test = models.BooleanField(blank=True, null=True, help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
 
     # Shared electrical checks
     earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
@@ -694,31 +695,31 @@ class EventChecklist(models.Model, RevisionMixin):
 
     medium_event = models.BooleanField()
     # Medium Electrical Checks
-    source_rcd = models.BooleanField(blank=True,null=True,help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
-    labelling = models.BooleanField(blank=True,null=True, help_text="Appropriate and clear labelling on distribution and cabling?")
+    source_rcd = models.BooleanField(blank=True, null=True, help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
+    labelling = models.BooleanField(blank=True, null=True, help_text="Appropriate and clear labelling on distribution and cabling?")
     # First Distro
-    fd_voltage_l1 = models.IntegerField(blank=True,null=True, verbose_name="First Distro Voltage L1-N", help_text="L1 - N")
-    fd_voltage_l2 = models.IntegerField(blank=True,null=True,verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
-    fd_voltage_l3 = models.IntegerField(blank=True,null=True,verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
-    fd_phase_rotation = models.BooleanField(blank=True,null=True,verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.IntegerField(blank=True,null=True,verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    fd_pssc = models.IntegerField(blank=True,null=True,verbose_name="PSCC", help_text="Prospective Short Circuit Current")
-    #Worst case points
-    w1_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
-    w1_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
-    w1_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
-    w1_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    w2_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
-    w2_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
-    w2_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
-    w2_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    w3_description = models.CharField(blank=True,null=True,max_length=255, help_text="Description")
-    w3_polarity = models.BooleanField(blank=True,null=True,help_text="Polarity Checked?")
-    w3_voltage = models.IntegerField(blank=True,null=True,help_text="Voltage")
-    w3_earth_fault = models.IntegerField(blank=True,null=True,help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_voltage_l1 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L1-N", help_text="L1 - N")
+    fd_voltage_l2 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
+    fd_voltage_l3 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
+    fd_phase_rotation = models.BooleanField(blank=True, null=True, verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
+    fd_earth_fault = models.IntegerField(blank=True, null=True, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text="Prospective Short Circuit Current")
+    # Worst case points
+    w1_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w1_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
+    w1_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
+    w1_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w2_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w2_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
+    w2_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
+    w2_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w3_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w3_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
+    w3_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
+    w3_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
 
-    all_rcds_tested = models.BooleanField(blank=True,null=True,help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
-    public_sockets_tested = models.BooleanField(blank=True,null=True,help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
+    all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
+    public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
 
     reviewed_at = models.DateTimeField(null=True)
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
@@ -732,17 +733,17 @@ class EventChecklist(models.Model, RevisionMixin):
 
     def clean(self):
         errdict = {}
-        if self.earthing == None or self.pat == None:
+        if self.earthing is None or self.pat is None:
             errdict['earthing'] = 'Fill out the electrical checks'
 
-        if not self.medium_event and (self.rcds == None or self.supply_test == None):
+        if not self.medium_event and (self.rcds is None or self.supply_test is None):
             errdict['rcds'] = 'Fill out the small event electrical checks'
 
         if self.medium_event:
-            if self.source_rcd == None or self.labelling == None or self.all_rcds_tested == None or self.public_sockets_tested == None:
+            if self.source_rcd is None or self.labelling is None or self.all_rcds_tested is None or self.public_sockets_tested is None:
                 errdict['source_rcd'] = 'Fill out the medium event electrical checks'
 
-            if self.w1_description == None or self.w1_polarity == None or self.w1_voltage == None or self.w1_earth_fault == None:
+            if self.w1_description is None or self.w1_polarity is None or self.w1_voltage is None or self.w1_earth_fault is None:
                 errdict['w1_description'] = 'Fully complete at least the first worst case point'
 
         if errdict != {}:  # If there was an error when validation

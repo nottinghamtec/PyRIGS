@@ -177,14 +177,14 @@ class Command(BaseCommand):
                           "asset_finance", "view_asset", "view_supplier", "asset_finance",
                           "add_supplier", "view_cabletype", "change_cabletype",
                           "add_cabletype", "view_eventchecklist", "change_eventchecklist",
-                            "add_eventchecklist", "view_riskassessment", "change_riskassessment",
-                            "add_riskassessment", "add_eventchecklistcrew", "change_eventchecklistcrew",
-                            "delete_eventchecklistcrew", "view_eventchecklistcrew", "add_eventchecklistvehicle",
-                            "change_eventchecklistvehicle",
-                            "delete_eventchecklistvehicle", "view_eventchecklistvehicle", ]
+                          "add_eventchecklist", "view_riskassessment", "change_riskassessment",
+                          "add_riskassessment", "add_eventchecklistcrew", "change_eventchecklistcrew",
+                          "delete_eventchecklistcrew", "view_eventchecklistcrew", "add_eventchecklistvehicle",
+                          "change_eventchecklistvehicle",
+                          "delete_eventchecklistvehicle", "view_eventchecklistvehicle", ]
         financePerms = keyholderPerms + ["add_invoice", "change_invoice", "view_invoice",
                                          "add_payment", "change_payment", "delete_payment"]
-        hsPerms = keyHolderPerms + [ "review_riskassessment", "review_eventchecklist" ]
+        hsPerms = keyholderPerms + ["review_riskassessment", "review_eventchecklist"]
 
         for permId in keyholderPerms:
             self.keyholder_group.permissions.add(Permission.objects.get(codename=permId))
@@ -226,8 +226,8 @@ class Command(BaseCommand):
         financeUser.save()
 
         hsUser = models.Profile.objects.create(username="hs", first_name="HS", last_name="User",
-                                                    initials="HSU",
-                                                    email="hsuser@example.com", is_active=True)
+                                               initials="HSU",
+                                               email="hsuser@example.com", is_active=True)
         hsUser.groups.add(self.hs_group)
         hsUser.groups.add(self.keyholder_group)
         hsUser.set_password('hs')

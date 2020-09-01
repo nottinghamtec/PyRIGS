@@ -118,7 +118,7 @@ class ModelComparison(object):
 
     @cached_property
     def item_changes(self):
-        if self.follow:
+        if self.follow and self.version.object is not None:
             item_type = ContentType.objects.get_for_model(self.version.object)
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)

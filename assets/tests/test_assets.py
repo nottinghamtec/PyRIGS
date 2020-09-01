@@ -592,7 +592,7 @@ class TestVersioningViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_activity_table_loads_successfully(self):
-        request_url = reverse('asset_activity_table')
+        request_url = reverse('assets_activity_table')
 
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
