@@ -25,8 +25,8 @@
                     <br><span><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></span>
                 {% endif %}
             </td>
-            <td>{% include 'partials/hs_status.html' with event=event object=event.riskassessment view='ra_detail' edit='ra_edit' create='event_ra' %}</td>
-            <td>{% include 'partials/hs_status.html' with event=event object=event.eventchecklist view='ec_detail' edit='ec_edit' create='event_ec' %}</td>
+            <td>{% include 'partials/hs_status.html' with event=event object=event.riskassessment view='ra_detail' edit='ra_edit' create='event_ra' review='ra_review' perm=perms.RIGS.review_riskassessment %}</td>
+            <td>{% include 'partials/hs_status.html' with event=event object=event.eventchecklist view='ec_detail' edit='ec_edit' create='event_ec' review='ec_review' perm=perms.RIGS.review_eventchecklist %}</td>
         </tr>
         {% empty %}
         <tr class="bg-warning text-dark">

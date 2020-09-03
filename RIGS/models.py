@@ -465,7 +465,7 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return str(self.pk) + ": " + self.name
+        return self.display_id + ": " + self.name
 
     def clean(self):
         if self.end_date and self.start_date > self.end_date:
@@ -585,14 +585,6 @@ class Payment(models.Model):
         return "%s: %d" % (self.get_method_display(), self.amount)
 
 
-# Probably shouldn't be doing HTML at the python level but hey...they say not to do logic in templates! :P
-def get_review_string(obj, review_link):
-    if obj.reviewed_by:
-        return "<span class='badge badge-success py-2'>Reviewed by <a href='{}'>{}</a> at {}</span>".format(reverse_lazy('profile_detail', kwargs={'pk': obj.reviewed_by.pk}), obj.reviewed_by, obj.reviewed_at.strftime("%d/%m/%Y %H:%M"))
-    else:
-        return "<a class='btn btn-success my-2' href='{}'>Mark Reviewed</a>".format(reverse_lazy(review_link, kwargs={'pk': obj.pk}))
-
-
 @reversion.register
 class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -637,10 +629,14 @@ class RiskAssessment(models.Model, RevisionMixin):
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
 
+    inverted_fields = ['nonstandard_equipment','nonstandard_use', 'contractors', 'other_companies', 'crew_fatigue', 'big_power',
+                        'generators', 'other_companies_power', 'nonstandard_equipment_power','multiple_electrical_environments','noise_monitoring'
+                        'special_structures', 'suspended_structures']
+
     class Meta:
         ordering = ['event']
         permissions = [
-            ('riskassessment_review', 'Can review RAs')
+            ('review_riskassessment', 'Review Risk Assessments')
         ]
 
     def clean(self):
@@ -651,10 +647,6 @@ class RiskAssessment(models.Model, RevisionMixin):
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
-
-    @property
-    def review_string(self):
-        return get_review_string(self, 'ra_review')
 
     @property
     def activity_feed_string(self):
@@ -725,10 +717,12 @@ class EventChecklist(models.Model, RevisionMixin):
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
 
+    inverted_fields = []
+
     class Meta:
         ordering = ['event']
         permissions = [
-            ('eventchecklist_review', 'Can review ECs')
+            ('review_eventchecklist', 'Review Event Checklists')
         ]
 
     def clean(self):
@@ -748,10 +742,6 @@ class EventChecklist(models.Model, RevisionMixin):
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
-
-    @property
-    def review_string(self):
-        return get_review_string(self, 'ec_review')
 
     @property
     def activity_feed_string(self):

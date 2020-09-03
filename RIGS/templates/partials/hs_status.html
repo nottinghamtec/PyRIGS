@@ -1,12 +1,14 @@
-{% load to_class_name from filters %}
 {% if object.pk != None %}
-{#<span class="badge badge-success my-3"><span class="fas fa-check"></span> Completed</span><br/>#}
-<div class="btn-group">
-    <a href="{% url view object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span class="hidden-xs"> View</span>
-    <a href="{% url edit object.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span><span class="hidden-xs"> Edit</span></a>
-</div>
-{{ object.review_string|safe }}
-{% else %}
+    <div class="btn-group">
+        <a href="{% url view object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> <span class="hidden-xs"> View</span>
+        <a href="{% url edit object.pk %}" class="btn btn-warning"><span class="fas fa-edit"></span><span class="hidden-xs"> Edit</span></a>
+    </div>
+    {% if object.reviewed_by %}
+    <span class='badge badge-success py-2'>Reviewed by <a href='{% url 'profile_detail' object.reviewed_by.pk %}'>{{object.reviewed_by}}</a> at {{object.reviewed_at}}</span>
+    {% elif perm %}
+    <a class='btn btn-success my-2' href='{% url review object.pk %}'>Mark Reviewed</a>
+    {% endif %}
+{% elif event != None %}
 <a href="{% url create event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
             class="hidden-xs">Create</span></a>
 {% endif %}

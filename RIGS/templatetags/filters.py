@@ -8,7 +8,7 @@ from django.utils.safestring import SafeData, mark_safe
 from django.utils.html import escape
 from RIGS import models
 import json
-from django.template.defaultfilters import yesno, title
+from django.template.defaultfilters import yesno, title, truncatewords
 from django.urls import reverse_lazy
 
 register = template.Library()
@@ -119,6 +119,15 @@ def orderby(request, field, attr):
 # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 
 
+@register.filter(needs_autoescape=True)
+def get_field(obj, field, autoescape=True):
+    value = getattr(obj, field)
+    if(type(value)==bool):
+        value = yesnoi(value, field in obj.inverted_fields)
+    elif(type(value)==str):
+        value = truncatewords(value, 20)
+    return mark_safe(value)
+
 @register.filter
 def help_text(obj, field):
     if hasattr(obj, '_meta'):
@@ -127,8 +136,8 @@ def help_text(obj, field):
 
 @register.filter
 def verbose_name(obj, field):
-    return obj._meta.get_field(field).verbose_name
-
+    if hasattr(obj._meta.get_field(field), 'verbose_name'):
+        return obj._meta.get_field(field).verbose_name
 
 @register.filter
 def get_list(dictionary, key):
@@ -157,8 +166,7 @@ def next(alist, current_index):
 
 @register.filter(needs_autoescape=True)
 def yesnoi(boolean, invert=False, autoescape=True):
-    value = yesno(boolean)
-    value = title(value)
+    value = title(yesno(boolean))
     if invert:
         boolean = not boolean
     if boolean:

@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from reversion import revisions as reversion
+from django.db.models import AutoField, ManyToOneRel
 
 
 class EventRiskAssessmentCreate(generic.CreateView):
@@ -70,7 +71,17 @@ class EventRiskAssessmentDetail(generic.DetailView):
 class EventRiskAssessmentList(generic.ListView):
     paginate_by = 20
     model = models.RiskAssessment
-    template_name = 'risk_assessment_list.html'
+    template_name = 'hs_object_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(EventRiskAssessmentList, self).get_context_data(**kwargs)
+        context['title'] = 'Risk Assessment'
+        context['view'] = 'ra_detail'
+        context['edit'] = 'ra_edit'
+        context['review'] = 'ra_review'
+        context['perm'] = 'perms.RIGS.review_riskassessment'
+        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created ]
+        return context
 
 
 class EventRiskAssessmentReview(generic.View):
@@ -149,7 +160,17 @@ class EventChecklistCreate(generic.CreateView):
 class EventChecklistList(generic.ListView):
     paginate_by = 20
     model = models.EventChecklist
-    template_name = 'event_checklist_list.html'
+    template_name = 'hs_object_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(EventChecklistList, self).get_context_data(**kwargs)
+        context['title'] = 'Event Checklist'
+        context['view'] = 'ec_detail'
+        context['edit'] = 'ec_edit'
+        context['review'] = 'ec_review'
+        context['perm'] = 'perms.RIGS.review_eventchecklist'
+        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created ]
+        return context
 
 
 class EventChecklistReview(generic.View):
