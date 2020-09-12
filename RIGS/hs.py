@@ -80,7 +80,7 @@ class EventRiskAssessmentList(generic.ListView):
         context['edit'] = 'ra_edit'
         context['review'] = 'ra_review'
         context['perm'] = 'perms.RIGS.review_riskassessment'
-        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created ]
+        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
         return context
 
 
@@ -169,7 +169,7 @@ class EventChecklistList(generic.ListView):
         context['edit'] = 'ec_edit'
         context['review'] = 'ec_review'
         context['perm'] = 'perms.RIGS.review_eventchecklist'
-        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created ]
+        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
         return context
 
 

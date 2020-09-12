@@ -122,11 +122,12 @@ def orderby(request, field, attr):
 @register.filter(needs_autoescape=True)
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
-    if(type(value)==bool):
+    if(isinstance(value, bool)):
         value = yesnoi(value, field in obj.inverted_fields)
-    elif(type(value)==str):
+    elif(isinstance(value, str)):
         value = truncatewords(value, 20)
     return mark_safe(value)
+
 
 @register.filter
 def help_text(obj, field):
@@ -138,6 +139,7 @@ def help_text(obj, field):
 def verbose_name(obj, field):
     if hasattr(obj._meta.get_field(field), 'verbose_name'):
         return obj._meta.get_field(field).verbose_name
+
 
 @register.filter
 def get_list(dictionary, key):
