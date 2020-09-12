@@ -152,18 +152,6 @@ def profile_by_index(value):
         return ""
 
 
-@register.filter
-def next(alist, current_index):
-    """
-    Returns the next element of the list using the current index if it exists.
-    Otherwise returns an empty string.
-    """
-    try:
-        return alist[int(current_index) + 1]  # access the next element
-    except BaseException:
-        return ''  # return empty string in case of exception
-
-
 @register.filter(needs_autoescape=True)
 def yesnoi(boolean, invert=False, autoescape=True):
     value = title(yesno(boolean))

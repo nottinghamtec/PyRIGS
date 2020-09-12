@@ -716,7 +716,6 @@ class TestCalendar(BaseRigboardTest):
                 # Wow - that was a lot of tests
 
 
-@screenshot_failure_cls
 class ClientEventAuthorisationTest(TestCase):
     auth_data = {
         'name': 'Test ABC',

@@ -17,6 +17,7 @@ from PyRIGS.tests.base import animation_is_finished
 import datetime
 from django.utils import timezone
 from selenium.webdriver.common.action_chains import ActionChains
+from django.test import tag
 
 
 @screenshot_failure_cls
@@ -346,7 +347,6 @@ class TestAssetAudit(AutoLoginTest):
         self.assertIn("Asset with that ID does not exist!", self.page.error.text)
 
 
-@screenshot_failure_cls
 class TestSupplierValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -369,7 +369,6 @@ class TestSupplierValidation(TestCase):
         self.assertFormError(response, 'form', 'name', 'This field is required.')
 
 
-@screenshot_failure_cls
 class Test404(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -388,8 +387,6 @@ class Test404(TestCase):
             self.assertEqual(response.status_code, 404)
 
 
-# @tag('slow') TODO: req. Django 3.0
-@screenshot_failure_cls
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -460,7 +457,6 @@ class TestAccessLevels(TestCase):
     # def test_finance_access(self): Level not used in assets currently
 
 
-@screenshot_failure_cls
 class TestFormValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -529,7 +525,6 @@ class TestFormValidation(TestCase):
         self.assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
 
 
-@screenshot_failure_cls
 class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def test_generate_sample_data(self):
@@ -554,7 +549,6 @@ class TestSampleDataGenerator(TestCase):
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'deleteSampleData')
 
 
-@screenshot_failure_cls
 class TestVersioningViews(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -598,7 +592,6 @@ class TestVersioningViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-@screenshot_failure_cls
 class TestEmbeddedViews(TestCase):
     @classmethod
     def setUpTestData(cls):
