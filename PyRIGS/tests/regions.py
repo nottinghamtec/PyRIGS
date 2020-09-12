@@ -126,6 +126,22 @@ class CheckBox(Region):
             self.toggle()
 
 
+class RadioSelect(Region): # Currently only works for yes/no radio selects
+    def set_value(self, value):
+        if value:
+            value = "0"
+        else:
+            value = "1"
+        self.find_element(By.XPATH, "//label[@for='{}_{}']".format(self.root.get_attribute("id"), value)).click()
+
+    @property
+    def value(self):
+        try:
+            return parse_bool_from_string(self.find_element(By.CSS_SELECTOR, '.custom-control-input:checked').get_attribute("value").lower())
+        except:
+            return None
+
+
 class DatePicker(Region):
     @property
     def value(self):

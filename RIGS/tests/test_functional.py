@@ -23,6 +23,7 @@ from django.test.client import Client
 from django.core import mail, signing
 from django.http import HttpResponseBadRequest
 from django.conf import settings
+from selenium.common.exceptions import NoSuchElementException
 
 
 @screenshot_failure_cls
@@ -809,7 +810,6 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
 
 
-@screenshot_failure_cls
 class TECEventAuthorisationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -866,3 +866,82 @@ class TECEventAuthorisationTest(TestCase):
         self.assertEqual(self.event.auth_request_by, self.profile)
         self.assertEqual(self.event.auth_request_to, 'client@functional.test')
         self.assertIsNotNone(self.event.auth_request_at)
+
+
+
+@screenshot_failure_cls
+class TestHealthAndSafety(BaseRigboardTest):
+    def setUp(self):
+        super().setUp()
+        self.profile = models.Profile.objects.get_or_create(
+            first_name='Test',
+            last_name='TEC User',
+            username='eventauthtest',
+            email='teccie@functional.test',
+            is_superuser=True  # lazily grant all permissions
+        )[0]
+        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
+                                                     start_date=date.today() + timedelta(days=6),
+                                                     description="start future no end",
+                                                     purchase_order='TESTPO',
+                                                     person=self.client,
+                                                     auth_request_by=self.profile,
+                                                     auth_request_at=base.create_datetime(2015, 0o6, 0o4, 10, 00),
+                                                     auth_request_to="some@email.address")
+
+        item1 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 1",
+            cost="10.00",
+            quantity="1",
+            order=1
+        ).save()
+        item2 = models.EventItem(
+            event=self.testEvent,
+            name="Test Item 2",
+            description="Foo",
+            cost="9.72",
+            quantity="3",
+            order=2,
+        ).save()
+        self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+
+    def test_ra_creation(self):
+        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+
+        # Check there are no defaults
+        self.assertIsNone(self.page.nonstandard_equipment)
+
+        # No database side validation, only HTML5.
+
+        self.page.nonstandard_equipment = False
+        self.page.nonstandard_use = False
+        self.page.contractors = False
+        self.page.other_companies = False
+        self.page.crew_fatigue = False
+        self.page.general_notes = "There are no notes."
+        self.page.big_power = False
+        self.page.power_mic.search(self.profile.name)
+        self.page.power_mic.set_option(self.profile.name, True)
+        # TODO This should not be necessary, normally closes automatically
+        self.page.power_mic.toggle()
+        self.assertFalse(self.page.power_mic.is_open)
+        self.page.generators = False
+        self.page.other_companies_power = False
+        self.page.nonstandard_equipment_power = False
+        self.page.multiple_electrical_environments = False
+        self.page.power_notes = "Remember to bring some power"
+        self.page.noise_monitoring = False
+        self.page.sound_notes = "Loud, but not too loud"
+        self.page.known_venue = True
+        self.page.safe_loading = True
+        self.page.safe_storage = True
+        self.page.area_outside_of_control = False
+        self.page.barrier_required = False
+        self.page.nonstandard_emergency_procedure = False
+        self.page.special_structures = False
+        self.page.persons_responsible_structures = "Nobody and her cat, She"
+        self.page.suspended_structures = False
+
+        self.page.submit()
+        self.assertTrue(self.page.success)

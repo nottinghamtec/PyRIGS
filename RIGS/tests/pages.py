@@ -162,6 +162,47 @@ class CreateEvent(FormPage):
         return '/create' not in self.driver.current_url
 
 
+class CreateRiskAssessment(FormPage):
+    URL_TEMPLATE = 'event/{event_id}/ra/'
+
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
+    _power_mic_selector = (By.CSS_SELECTOR, ".bootstrap-select")
+
+    form_items = {
+        'nonstandard_equipment': (regions.RadioSelect, (By.ID, 'id_nonstandard_equipment')),
+        'nonstandard_use': (regions.RadioSelect, (By.ID, 'id_nonstandard_use')),
+        'contractors': (regions.RadioSelect, (By.ID, 'id_contractors')),
+        'other_companies': (regions.RadioSelect, (By.ID, 'id_other_companies')),
+        'crew_fatigue': (regions.RadioSelect, (By.ID, 'id_crew_fatigue')),
+        'general_notes': (regions.TextBox, (By.ID, 'id_general_notes')),
+        'big_power': (regions.RadioSelect, (By.ID, 'id_big_power')),
+        #'power_mic': (regions.RadioSelect, (By.ID, 'id_power_mic')),
+        'generators': (regions.RadioSelect, (By.ID, 'id_generators')),
+        'other_companies_power': (regions.RadioSelect, (By.ID, 'id_other_companies_power')),
+        'nonstandard_equipment_power': (regions.RadioSelect, (By.ID, 'id_nonstandard_equipment_power')),
+        'multiple_electrical_environments': (regions.RadioSelect, (By.ID, 'id_multiple_electrical_environments')),
+        'power_notes': (regions.TextBox, (By.ID, 'id_power_notes')),
+        'noise_monitoring': (regions.RadioSelect, (By.ID, 'id_noise_monitoring')),
+        'sound_notes': (regions.TextBox, (By.ID, 'id_sound_notes')),
+        'known_venue': (regions.RadioSelect, (By.ID, 'id_known_venue')),
+        'safe_loading': (regions.RadioSelect, (By.ID, 'id_safe_loading')),
+        'safe_storage': (regions.RadioSelect, (By.ID, 'id_safe_storage')),
+        'area_outside_of_control': (regions.RadioSelect, (By.ID, 'id_area_outside_of_control')),
+        'barrier_required': (regions.RadioSelect, (By.ID, 'id_barrier_required')),
+        'nonstandard_emergency_procedure': (regions.RadioSelect, (By.ID, 'id_nonstandard_emergency_procedure')),
+        'special_structures': (regions.RadioSelect, (By.ID, 'id_special_structures')),
+        'persons_responsible_structures': (regions.TextBox, (By.ID, 'id_persons_responsible_structures')),
+        'suspended_structures': (regions.RadioSelect, (By.ID, 'id_suspended_structures')),
+    }
+
+    @property
+    def power_mic(self):
+        return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
+
+    @property
+    def success(self):
+        return '/event/ra' in self.driver.current_url
+
 class DuplicateEvent(CreateEvent):
     URL_TEMPLATE = 'event/{event_id}/duplicate'
     _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
