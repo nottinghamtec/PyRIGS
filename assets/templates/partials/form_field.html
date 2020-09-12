@@ -17,6 +17,6 @@
   {% endif %}
 </div>
 {% else %}
-{% render_field field|add_class:'form-control'|add_class:col %}
+{% render_field field|add_class:'form-control' class+=col %}
 {% endif %}
 {% endspaceless %}
