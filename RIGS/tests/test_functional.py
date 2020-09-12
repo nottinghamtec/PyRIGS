@@ -736,7 +736,7 @@ class ClientEventAuthorisationTest(TestCase):
         self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
         client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
-        organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)
+        organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=True)
         self.event = models.Event.objects.create(
             name='Authorisation Test',
             start_date=date.today(),
@@ -759,9 +759,11 @@ class ClientEventAuthorisationTest(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.event.organisation.name)
 
-    def test_generic_validation(self):
+    def test_validation(self):
         response = self.client.get(self.url)
         self.assertContains(response, "Terms of Hire")
+        self.assertContains(response, "Account code")
+        self.assertContains(response, "University ID")
 
         response = self.client.post(self.url)
         self.assertContains(response, "This field is required.", 5)
@@ -780,21 +782,6 @@ class ClientEventAuthorisationTest(TestCase):
         self.event.refresh_from_db()
         self.assertTrue(self.event.authorised)
         self.assertEqual(self.event.authorisation.email, "authemail@function.test")
-
-    def test_internal_validation(self):
-        self.event.organisation.union_account = True
-        self.event.organisation.save()
-
-        response = self.client.get(self.url)
-        self.assertContains(response, "Account code")
-        self.assertContains(response, "University ID")
-
-        response = self.client.post(self.url)
-        self.assertContains(response, "This field is required.", 5)
-
-        data = self.auth_data
-        response = self.client.post(self.url, data)
-        self.assertContains(response, "Your event has been authorised.")
 
     def test_duplicate_warning(self):
         auth = models.EventAuthorisation.objects.create(event=self.event, name='Test ABC', email='dupe@functional.test',
