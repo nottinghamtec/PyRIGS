@@ -451,10 +451,12 @@ class Event(models.Model, RevisionMixin):
     @property
     def status_color(self):
         if self.cancelled:
-            return "text-muted table-secondary"
+            return "table-secondary"
         elif not self.is_rig:
             return "table-info"
-        elif self.mic and (self.dry_hire or self.riskassessment) and self.authorised:
+        elif not self.mic:
+            return "table-danger"
+        elif self.confirmed and self.authorised and (self.dry_hire or self.riskassessment):
             return "table-success"
         else:
             return "table-warning"
@@ -636,7 +638,7 @@ class RiskAssessment(models.Model, RevisionMixin):
     class Meta:
         ordering = ['event']
         permissions = [
-            ('review_riskassessment', 'Review Risk Assessments')
+            ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
     def clean(self):
@@ -722,7 +724,7 @@ class EventChecklist(models.Model, RevisionMixin):
     class Meta:
         ordering = ['event']
         permissions = [
-            ('review_eventchecklist', 'Review Event Checklists')
+            ('review_eventchecklist', 'Can review Event Checklists')
         ]
 
     def clean(self):

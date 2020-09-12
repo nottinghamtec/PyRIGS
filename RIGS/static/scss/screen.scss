@@ -114,11 +114,6 @@ svg {
     white-space: no-wrap;
 }
 
-input[required]::after,select[required]::after {
-    content: '*';
-    color: red;
-}
-
 html.embedded {
   display: flex;
   flex-direction: column;

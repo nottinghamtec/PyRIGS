@@ -1,7 +1,6 @@
-{% load next from filters %}
 {% load namewithnotes from filters %}
 {% comment %}<div class="d-none d-md-block">{% endcomment %}
-<div class="table-responsive">
+<div class="table-responsive" style="overflow: hidden;">
     <table class="table mb-0">
         <thead>
             <tr>
@@ -16,34 +15,22 @@
         <tr class="{{event.status_color}}" id="event_row">
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
-            <!--Dates-->
+            <!--Dates & Times-->
             <td id="event_dates">
                 <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
+                {% if event.has_start_time %}
+                    <p>Start Time: {{ event.start_time|date:"H:i" }}</p>
+                {% endif %}
                 {% if event.end_date and event.end_date != event.start_date %}
                     <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
+                    {% if event.has_end_time%}
+                       <p>End Time: {{ event.end_time|date:"H:i" }}</p>
+                    {% endif %}
                 {% endif %}
-                <!---Times-->
                 {% if not event.cancelled %}
-                    <dl class="dl-horizontal">
-                        {% if event.meet_at %}
-                            <dt>Crew meet</dt>
-                            <dd>{{ event.meet_at|date:"H:i" }}<br/>{{ event.meet_at|date:"(Y-m-d)" }}</dd>
-                        {% endif %}
-                        {% if event.has_start_time %}
-                            <dt>Event starts</dt>
-                            <dd>
-                                {{ event.start_time|date:"H:i" }}<br/>
-                                {{ event.start_date|date:"(Y-m-d)" }}<br/>
-                            </dd>
-                        {% endif %}
-                        {% if event.has_end_time%}{% if event.start_date != event.end_date or event.start_time != event.end_time %}
-                            <dt>Event ends</dt>
-                            <dd>
-                                {{ event.end_time|date:"H:i" }}<br/>
-                                {{ event.end_date|date:"(Y-m-d)" }}
-                            </dd>
-                        {% endif %}{% endif %}
-                    </dl>
+                    {% if event.meet_at %}
+                        <p>Crew meet: {{ event.meet_at|date:"H:i" }} {{ event.meet_at|date:"(Y-m-d)" }}</p>
+                    {% endif %}
                 {% endif %}
             </td>
             <!---Details-->
@@ -92,10 +79,6 @@
                 {% endif %}
             </td>
         </tr>
-        {# Insert a divider between still-out dry hires and actually upcoming events #}
-        {% with next_element=events|next:forloop.counter0 %}
-            {% if event.dry_hire == True and next_element.dry_hire == False %}<tr><td colspan="4"><hr></td><tr>{%endif%}
-        {% endwith %}
         {% empty %}
         <tr class="bg-warning">
             <td colspan="4">No events found</td>
