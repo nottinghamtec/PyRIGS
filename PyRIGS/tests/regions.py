@@ -6,6 +6,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 import datetime
 
 
@@ -126,7 +127,7 @@ class CheckBox(Region):
             self.toggle()
 
 
-class RadioSelect(Region): # Currently only works for yes/no radio selects
+class RadioSelect(Region):  # Currently only works for yes/no radio selects
     def set_value(self, value):
         if value:
             value = "0"
@@ -138,7 +139,7 @@ class RadioSelect(Region): # Currently only works for yes/no radio selects
     def value(self):
         try:
             return parse_bool_from_string(self.find_element(By.CSS_SELECTOR, '.custom-control-input:checked').get_attribute("value").lower())
-        except:
+        except NoSuchElementException:
             return None
 
 

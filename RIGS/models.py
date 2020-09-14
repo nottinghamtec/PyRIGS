@@ -728,6 +728,10 @@ class EventChecklist(models.Model, RevisionMixin):
 
     def clean(self):
         errdict = {}
+
+        if self.power_mic is None:
+            errdict["power_mic"] = ["You must select a Power MIC"]
+
         if self.earthing is None or self.pat is None:
             errdict['earthing'] = 'Fill out the electrical checks'
 

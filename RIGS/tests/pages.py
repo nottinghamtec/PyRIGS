@@ -162,6 +162,24 @@ class CreateEvent(FormPage):
         return '/create' not in self.driver.current_url
 
 
+class DuplicateEvent(CreateEvent):
+    URL_TEMPLATE = 'event/{event_id}/duplicate'
+    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
+
+    @property
+    def success(self):
+        return '/duplicate' not in self.driver.current_url
+
+
+class EditEvent(CreateEvent):
+    URL_TEMPLATE = 'event/{event_id}/edit'
+    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
+
+    @property
+    def success(self):
+        return '/edit' not in self.driver.current_url
+
+
 class CreateRiskAssessment(FormPage):
     URL_TEMPLATE = 'event/{event_id}/ra/'
 
@@ -176,7 +194,6 @@ class CreateRiskAssessment(FormPage):
         'crew_fatigue': (regions.RadioSelect, (By.ID, 'id_crew_fatigue')),
         'general_notes': (regions.TextBox, (By.ID, 'id_general_notes')),
         'big_power': (regions.RadioSelect, (By.ID, 'id_big_power')),
-        #'power_mic': (regions.RadioSelect, (By.ID, 'id_power_mic')),
         'generators': (regions.RadioSelect, (By.ID, 'id_generators')),
         'other_companies_power': (regions.RadioSelect, (By.ID, 'id_other_companies_power')),
         'nonstandard_equipment_power': (regions.RadioSelect, (By.ID, 'id_nonstandard_equipment_power')),
@@ -203,22 +220,48 @@ class CreateRiskAssessment(FormPage):
     def success(self):
         return '/event/ra' in self.driver.current_url
 
-class DuplicateEvent(CreateEvent):
-    URL_TEMPLATE = 'event/{event_id}/duplicate'
-    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
 
-    @property
-    def success(self):
-        return '/duplicate' not in self.driver.current_url
-
-
-class EditEvent(CreateEvent):
-    URL_TEMPLATE = 'event/{event_id}/edit'
-    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
+class EditRiskAssessment(CreateRiskAssessment):
+    URL_TEMPLATE = 'event/ra/{pk}/edit'
 
     @property
     def success(self):
         return '/edit' not in self.driver.current_url
+
+
+class CreateEventChecklist(FormPage):
+    URL_TEMPLATE = 'event/{event_id}/checklist'
+
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
+    _power_mic_selector = (By.CSS_SELECTOR, ".bootstrap-select")
+    _add_vehicle_locator = (By.XPATH, "//button[contains(., 'Vehicle')]")
+    _add_crew_locator = (By.XPATH, "//button[contains(., 'Crew')]")
+
+    form_items = {
+        'safe_parking': (regions.CheckBox, (By.ID, 'id_safe_parking')),
+        'safe_packing': (regions.CheckBox, (By.ID, 'id_safe_packing')),
+        'exits': (regions.CheckBox, (By.ID, 'id_exits')),
+        'trip_hazard': (regions.CheckBox, (By.ID, 'id_trip_hazard')),
+        'warning_signs': (regions.CheckBox, (By.ID, 'id_warning_signs')),
+        'ear_plugs': (regions.CheckBox, (By.ID, 'id_ear_plugs')),
+        'hs_location': (regions.TextBox, (By.ID, 'id_hs_location')),
+        'extinguishers_location': (regions.TextBox, (By.ID, 'id_extinguishers_location')),
+        'rcds': (regions.CheckBox, (By.ID, 'id_rcds')),
+        'supply_test': (regions.CheckBox, (By.ID, 'id_supply_test')),
+        'earthing': (regions.CheckBox, (By.ID, 'id_earthing')),
+        'pat': (regions.CheckBox, (By.ID, 'id_pat')),
+    }
+
+    def select_size(self, size):
+        self.find_element(By.XPATH, '//button[.="{}"]'.format(size)).click()
+
+    @property
+    def power_mic(self):
+        return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
+
+    @property
+    def success(self):
+        return '{event_id}' not in self.driver.current_url
 
 
 class GenericList(BasePage):

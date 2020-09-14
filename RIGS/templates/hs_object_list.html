@@ -20,9 +20,11 @@
                         <tr>
                             <th scope="col">Event</th>
                             {# mmm hax #}
-                            {% for field in fields %}
-                                <th scope="col">{{ object_list.0|verbose_name:field|title }}</th>
-                            {% endfor %}
+                            {% if object_list.0 != None %}
+                                {% for field in fields %}
+                                    <th scope="col">{{ object_list.0|verbose_name:field|title }}</th>
+                                {% endfor %}
+                            {% endif %}
                             <th scope="col"></th>
                         </tr>
                     </thead>
