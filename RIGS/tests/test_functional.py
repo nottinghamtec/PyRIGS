@@ -13,6 +13,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from PyRIGS.tests.base import animation_is_finished
 from PyRIGS.tests import base
+from PyRIGS.tests import regions as base_regions
 from RIGS.tests import regions
 import datetime
 from datetime import date, time, timedelta
@@ -974,6 +975,8 @@ class TestHealthAndSafety(BaseRigboardTest):
 
         self.page.select_size('Small')
         self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
+        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
         self.page.earthing = True
         self.page.rcds = True
         self.page.supply_test = True
@@ -981,3 +984,97 @@ class TestHealthAndSafety(BaseRigboardTest):
 
         self.page.submit()
         self.assertTrue(self.page.success)
+
+    def test_ec_create_medium(self):
+        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+
+        self.page.safe_parking = True
+        self.page.safe_packing = True
+        self.page.exits = True
+        self.page.trip_hazard = True
+        self.page.warning_signs = True
+        self.page.ear_plugs = True
+        self.page.hs_location = "Death Valley"
+        self.page.extinguishers_location = "With the rest of the fire"
+        # If we do this first the search fails, for ... reasons
+        self.page.power_mic.search(self.profile.name)
+        self.page.power_mic.toggle()
+        self.assertFalse(self.page.power_mic.is_open)
+
+        self.page.select_size('Medium')
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
+        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
+        self.page.earthing_m = True
+        self.page.pat_m = True
+        self.page.source_rcd = True
+        self.page.labelling = True
+        self.page.fd_voltage_l1 = 240
+        self.page.fd_voltage_l2 = 235
+        self.page.fd_voltage_l3 = 0
+        self.page.fd_phase_rotation = True
+        self.page.fd_earth_fault = 666
+        self.page.fd_pssc = 1984
+        self.page.w1_description = "In the carpark, by the bins"
+        self.page.w1_polarity = True
+        self.page.w1_voltage = 240
+        self.page.w1_earth_fault = 333
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+    def test_ec_create_extras(self):
+        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        self.page.add_vehicle()
+        self.page.add_crew()
+
+        self.page.safe_parking = True
+        self.page.safe_packing = True
+        self.page.exits = True
+        self.page.trip_hazard = True
+        self.page.warning_signs = True
+        self.page.ear_plugs = True
+        self.page.hs_location = "The Moon"
+        self.page.extinguishers_location = "With the rest of the fire"
+        # If we do this first the search fails, for ... reasons
+        self.page.power_mic.search(self.profile.name)
+        self.page.power_mic.toggle()
+        self.assertFalse(self.page.power_mic.is_open)
+
+        vehicle_name = 'Brian'
+        self.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
+        driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '(//*[contains(@class,"bootstrap-select")])[2]'))
+        driver.search(self.profile.name)
+        driver.toggle()
+
+        crew = self.profile
+        role = "MIC"
+        crew_select = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '(//*[contains(@class,"bootstrap-select")])[3]'))
+        start_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="start_-1"]'))
+        end_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="end_-1"]'))
+
+        start_time.set_value(datetime.datetime(2015, 1, 1, 9, 0))
+        # TODO Validation of end before start
+        end_time.set_value(datetime.datetime(2015, 1, 1, 10, 30))
+        crew_select.search(crew.name)
+        crew_select.toggle()
+        self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
+
+        self.page.select_size('Small')
+        self.wait.until(animation_is_finished())
+        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
+        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
+        self.page.earthing = True
+        self.page.rcds = True
+        self.page.supply_test = True
+        self.page.pat = True
+
+        self.page.submit()
+        self.assertTrue(self.page.success)
+
+        checklist = models.EventChecklist.objects.get(event=self.testEvent.pk)
+        vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
+        self.assertEqual(vehicle_name, vehicle.vehicle)
+        crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
+        self.assertEqual(crew.pk, crew_obj.crewmember.pk)
+        self.assertEqual(role, crew_obj.role)

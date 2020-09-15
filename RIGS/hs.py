@@ -176,7 +176,7 @@ class EventChecklistList(generic.ListView):
 class EventChecklistReview(generic.View):
     def get(self, *args, **kwargs):
         rpk = kwargs.get('pk')
-        ec = models.RiskAssessment.objects.get(pk=rpk)
+        ec = models.EventChecklist.objects.get(pk=rpk)
         with reversion.create_revision():
             reversion.set_user(self.request.user)
             ec.reviewed_by = self.request.user

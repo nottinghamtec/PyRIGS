@@ -640,14 +640,14 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
-    def clean(self):
+    """def clean(self):
         errdict = {}
         for field in RiskAssessment._meta.fields:
             if field.__class__ == forms.BooleanField and self.field is None:
                 errdict[field.name] = ["This field is required"]
 
         if errdict != {}:  # If there was an error when validation
-            raise ValidationError(errdict)
+            raise ValidationError(errdict)"""
 
     @property
     def activity_feed_string(self):

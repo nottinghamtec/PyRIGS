@@ -250,10 +250,30 @@ class CreateEventChecklist(FormPage):
         'supply_test': (regions.CheckBox, (By.ID, 'id_supply_test')),
         'earthing': (regions.CheckBox, (By.ID, 'id_earthing')),
         'pat': (regions.CheckBox, (By.ID, 'id_pat')),
+        'earthing_m': (regions.CheckBox, (By.XPATH, '(//*[@id="id_earthing"])[2]')),
+        'pat_m': (regions.CheckBox, (By.XPATH, '(//*[@id="id_pat"])[2]')),
+        'source_rcd': (regions.CheckBox, (By.ID, 'id_source_rcd')),
+        'labelling': (regions.CheckBox, (By.ID, 'id_labelling')),
+        'fd_voltage_l1': (regions.TextBox, (By.ID, 'id_fd_voltage_l1')),
+        'fd_voltage_l2': (regions.TextBox, (By.ID, 'id_fd_voltage_l2')),
+        'fd_voltage_l3': (regions.TextBox, (By.ID, 'id_fd_voltage_l3')),
+        'fd_phase_rotation': (regions.CheckBox, (By.ID, 'id_fd_phase_rotation')),
+        'fd_earth_fault': (regions.TextBox, (By.ID, 'id_fd_earth_fault')),
+        'fd_pssc': (regions.TextBox, (By.ID, 'id_fd_pssc')),
+        'w1_description': (regions.TextBox, (By.ID, 'id_w1_description')),
+        'w1_polarity': (regions.CheckBox, (By.ID, 'id_w1_polarity')),
+        'w1_voltage': (regions.TextBox, (By.ID, 'id_w1_voltage')),
+        'w1_earth_fault': (regions.TextBox, (By.ID, 'id_w1_earth_fault')),
     }
 
     def select_size(self, size):
         self.find_element(By.XPATH, '//button[.="{}"]'.format(size)).click()
+
+    def add_vehicle(self):
+        self.find_element(*self._add_vehicle_locator).click()
+
+    def add_crew(self):
+        self.find_element(*self._add_crew_locator).click()
 
     @property
     def power_mic(self):

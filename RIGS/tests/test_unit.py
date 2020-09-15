@@ -5,6 +5,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils import timezone
 
 from RIGS import models
 from reversion import revisions as reversion
@@ -455,3 +456,105 @@ class TestSearchLogic(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, self.venues[1].address)
         self.assertNotContains(response, self.venues[2].address)
+
+
+class TestHSLogic(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
+                                                    is_active=True, is_staff=True)
+
+        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+
+        cls.events = {
+            1: models.Event.objects.create(name="TE E1", start_date=date.today(),
+                                           description="This is an event description\nthat for a very specific reason spans two lines."),
+            2: models.Event.objects.create(name="TE E2", start_date=date.today()),
+        }
+
+        cls.ras = {
+            1: models.RiskAssessment.objects.create(event=cls.events[1],
+                                                    nonstandard_equipment=False,
+                                                    nonstandard_use=False,
+                                                    contractors=False,
+                                                    other_companies=False,
+                                                    crew_fatigue=False,
+                                                    big_power=False,
+                                                    power_mic=cls.profile,
+                                                    generators=False,
+                                                    other_companies_power=False,
+                                                    nonstandard_equipment_power=False,
+                                                    multiple_electrical_environments=False,
+                                                    noise_monitoring=False,
+                                                    known_venue=True,
+                                                    safe_loading=True,
+                                                    safe_storage=True,
+                                                    area_outside_of_control=True,
+                                                    barrier_required=True,
+                                                    nonstandard_emergency_procedure=True,
+                                                    special_structures=False,
+                                                    suspended_structures=False),
+        }
+
+        cls.checklists = {
+            1: models.EventChecklist.objects.create(event=cls.events[1],
+                                                    power_mic=cls.profile,
+                                                    safe_parking=False,
+                                                    safe_packing=False,
+                                                    exits=False,
+                                                    trip_hazard=False,
+                                                    warning_signs=False,
+                                                    ear_plugs=False,
+                                                    hs_location="Locked away safely",
+                                                    extinguishers_location="Somewhere, I forgot",
+                                                    earthing=False,
+                                                    pat=False,
+                                                    medium_event=False
+                                                    ),
+        }
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_list(self):
+        request_url = reverse('hs_list')
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, self.events[1].name)
+        self.assertContains(response, self.events[2].name)
+        self.assertContains(response, 'Create')
+
+    def test_ra_review(self):
+        request_url = reverse('ra_review', kwargs={'pk': self.ras[1].pk})
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, 'Reviewed by')
+        self.assertContains(response, self.profile.name)
+        ra = models.RiskAssessment.objects.get(event=self.events[1])
+        self.assertEqual(timezone.now().date(), ra.reviewed_at.date())
+        self.assertEqual(timezone.now().hour, ra.reviewed_at.hour)
+        self.assertEqual(timezone.now().minute, ra.reviewed_at.minute)
+
+    def test_checklist_review(self):
+        request_url = reverse('ec_review', kwargs={'pk': self.checklists[1].pk})
+        response = self.client.get(request_url, follow=True)
+        self.assertContains(response, 'Reviewed by')
+        self.assertContains(response, self.profile.name)
+        checklist = models.EventChecklist.objects.get(event=self.events[1])
+        self.assertEqual(timezone.now().date(), checklist.reviewed_at.date())
+        self.assertEqual(timezone.now().hour, checklist.reviewed_at.hour)
+        self.assertEqual(timezone.now().minute, checklist.reviewed_at.minute)
+
+    def test_ra_redirect(self):
+        request_url = reverse('event_ra', kwargs={'pk': self.events[1].pk})
+        expected_url = reverse('ra_edit', kwargs={'pk': self.ras[1].pk})
+
+        response = self.client.get(request_url, follow=True)
+        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
+
+    def test_checklist_redirect(self):
+        request_url = reverse('event_ec', kwargs={'pk': self.events[1].pk})
+        expected_url = reverse('ec_edit', kwargs={'pk': self.checklists[1].pk})
+
+        response = self.client.get(request_url, follow=True)
+        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
