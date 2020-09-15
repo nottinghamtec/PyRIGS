@@ -158,7 +158,7 @@ CACHES = {
     }
 }
 # Tests lock up SQLite otherwise
-if DEBUG or CI:
+if DEBUG or STAGING:
     CACHES['default'] = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
     }
