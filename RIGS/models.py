@@ -781,5 +781,9 @@ class EventChecklistCrew(models.Model, RevisionMixin):
 
     reversion_hide = True
 
+    def clean(self):
+        if self.start > self.end:
+            raise ValidationError('Unless you\'ve invented time travel, crew can\'t finish before they have started.')
+
     def __str__(self):
         return "{} ({})".format(str(self.crewmember), self.role)

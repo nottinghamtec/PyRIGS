@@ -11,6 +11,7 @@ from captcha.fields import ReCaptchaField
 from reversion import revisions as reversion
 import simplejson
 from datetime import datetime
+from django.utils import timezone
 
 from RIGS import models
 
@@ -182,6 +183,13 @@ class EventChecklistForm(forms.ModelForm):
     # Parsed from incoming form data by clean, then saved into models when the form is saved
     items = {}
 
+    # Two possible formats
+    def parsedatetime(self, date_string):
+        try:
+            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S'))
+        except ValueError:
+            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M'))
+
     # There's probably a thousand better ways to do this, but this one is mine
     def clean(self):
         vehicles = {key: val for key, val in self.data.items()
@@ -221,9 +229,9 @@ class EventChecklistForm(forms.ModelForm):
                 item = models.EventChecklistCrew()
 
             item.crewmember = models.Profile.objects.get(pk=self.data['crewmember_' + str(pk)])
-            item.start = self.data['start_' + str(pk)]
+            item.start = self.parsedatetime(self.data['start_' + str(pk)])
             item.role = self.data['role_' + str(pk)]
-            item.end = self.data['end_' + str(pk)]
+            item.end = self.parsedatetime(self.data['end_' + str(pk)])
             item.full_clean('checklist')
 
             # item does not have a database pk yet as it isn't saved

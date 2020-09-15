@@ -150,18 +150,15 @@
         {# New rig buttons #}
         {% if not object.pk %}
             <div class="col-sm-12">
-                <div class="card row align-items-center">
-                    <div class="card-body" id="is_rig-selector">
+                <div class="card text-center" id="is_rig-selector">
+                    <div class="card-body">
 			            <span data-toggle="tooltip"
                               title="Anything that involves TEC kit, crew, or otherwise us providing a service to anyone.">
-				            <button type="button" class="btn btn-primary" data-is_rig="1" style="width: 10rem;">Rig</button>
+				            <button type="button" class="btn btn-primary w-25" data-is_rig="1">Rig</button>
 			            </span>
 			            <span data-toggle="tooltip"
                               title="Things that aren't service-based, like training, meetings and site visits.">
-				            <button type="button" class="btn btn-info" data-is_rig="0" style="width: 10rem;">Non-Rig</button>
-			            </span>
-                        <span data-toggle="tooltip" title="Coming soon...">
-				            <button type="button" class="btn btn-warning" data-is_rig="-1" style="width: 10rem;">Subhire</button>
+				            <button type="button" class="btn btn-info w-25" data-is_rig="0">Non-Rig</button>
 			            </span>
                     </div>
                 </div>

@@ -330,9 +330,6 @@ class TestEventCreate(BaseRigboardTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-    def test_subhire_creation(self):
-        pass
-
 
 @screenshot_failure_cls
 class TestEventDuplicate(BaseRigboardTest):
@@ -1053,9 +1050,9 @@ class TestHealthAndSafety(BaseRigboardTest):
         start_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="start_-1"]'))
         end_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="end_-1"]'))
 
-        start_time.set_value(datetime.datetime(2015, 1, 1, 9, 0))
+        start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
         # TODO Validation of end before start
-        end_time.set_value(datetime.datetime(2015, 1, 1, 10, 30))
+        end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
         crew_select.search(crew.name)
         crew_select.toggle()
         self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
