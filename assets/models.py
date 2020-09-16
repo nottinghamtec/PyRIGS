@@ -126,6 +126,8 @@ class Asset(models.Model, RevisionMixin):
     asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
+    reversion_perm = 'assets.asset_finance'
+
     def get_available_asset_id(wanted_prefix=""):
         sql = """
         SELECT a.asset_id_number+1

@@ -16,19 +16,29 @@ urlpatterns = [
          name='activity_feed'),
 ]
 
+# Well except this specific hack for legacy URLs...if only the RIGS app had been named 'rigboard'!
 for app in apps.get_app_configs():
     appname = str(app.label)
-    # Well except this specific hack for legacy URLs...if only the RIGS app had been named 'rigboard'!
+
     if appname == 'RIGS':
         appname = 'rigboard'
-        urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
-                             name='activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
+        table_name = 'activity_table'
     else:
-        urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
-                             name=appname + '_activity_table', kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
-    for model in views.get_models(app.label):
+        table_name = appname + '_activity_table'
+
+    # TODO Permissions
+    urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
+                         name=table_name, kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
+
+    for model in views.get_models(app=app.label):
         modelname = model.__name__.lower()
-        urlpatterns += [
-            path(appname + '/' + modelname + '/<str:pk>/history/', permission_required_with_403('{}.change_{}'.format(app.label, modelname))(views.VersionHistory.as_view()),
-                 name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
-        ]
+        if appname == 'rigboard':
+            urlpatterns += [
+                path('{}/<str:pk>/history/'.format(modelname), permission_required_with_403('{}.change_{}'.format(app.label, modelname))(views.VersionHistory.as_view()),
+                     name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
+            ]
+        else:
+            urlpatterns += [
+                path('{}/{}/<str:pk>/history/'.format(appname, modelname), permission_required_with_403('{}.change_{}'.format(app.label, modelname))(views.VersionHistory.as_view()),
+                     name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
+            ]

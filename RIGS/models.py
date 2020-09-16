@@ -489,7 +489,8 @@ class Event(models.Model, RevisionMixin):
         super(Event, self).save(*args, **kwargs)
 
 
-class EventItem(models.Model):
+@reversion.register
+class EventItem(models.Model, RevisionMixin):
     event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -528,10 +529,13 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
 
 
-class Invoice(models.Model):
+@reversion.register(follow=['payment_set'])
+class Invoice(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now_add=True)
     void = models.BooleanField(default=False)
+
+    reversion_perm = 'RIGS.view_invoice'
 
     @property
     def sum_total(self):
@@ -556,6 +560,13 @@ class Invoice(models.Model):
     def is_closed(self):
         return self.balance == 0 or self.void
 
+    def get_absolute_url(self):
+        return reverse_lazy('invoice_detail', kwargs={'pk': self.pk})
+
+    @property
+    def activity_feed_string(self):
+        return "#{} for Event {}".format(self.pk, "N%05d" % self.event.pk)
+
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
 
@@ -563,7 +574,8 @@ class Invoice(models.Model):
         ordering = ['-invoice_date']
 
 
-class Payment(models.Model):
+@reversion.register
+class Payment(models.Model, RevisionMixin):
     CASH = 'C'
     INTERNAL = 'I'
     EXTERNAL = 'E'
@@ -581,6 +593,8 @@ class Payment(models.Model):
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
     method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)
+
+    reversion_hide = True
 
     def __str__(self):
         return "%s: %d" % (self.get_method_display(), self.amount)

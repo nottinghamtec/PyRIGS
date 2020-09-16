@@ -19,8 +19,8 @@ from reversion import revisions as reversion
 admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
-admin.site.register(models.Invoice)
-admin.site.register(models.Payment)
+admin.site.register(models.Invoice, VersionAdmin)
+admin.site.register(models.Payment, VersionAdmin)
 
 
 def approve_user(modeladmin, request, queryset):

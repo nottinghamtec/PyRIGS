@@ -52,13 +52,21 @@ def get_models(app=None):
     return models
 
 
+# TODO Default filter of having permission to view associated object
+def filter_models(models, user):
+    if user is not None:
+        models = filter(lambda model: not hasattr(model, 'reversion_perm') or user.has_perm(model.reversion_perm), models)
+
+    return models
+
+
 class ActivityTable(generic.ListView):
     model = RIGSVersion
     template_name = "activity_table.html"
     paginate_by = 25
 
     def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(self.kwargs['models'])
+        versions = RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs['models'], self.request.user))
         return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
@@ -69,17 +77,15 @@ class ActivityTable(generic.ListView):
 
         return context
 
-# Appears on homepage
-
 
 @method_decorator(never_cache, name='dispatch')  # Disable browser based caching
-class ActivityFeed(generic.ListView):
+class ActivityFeed(generic.ListView):  # Appears on homepage
     model = RIGSVersion
     template_name = "activity_feed_data.html"
     paginate_by = 25
 
     def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(get_models())
+        versions = RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user))
         return versions.order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
