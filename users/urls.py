@@ -11,8 +11,6 @@ from PyRIGS.decorators import permission_required_with_403
 from users import regbackend, forms, views
 
 urlpatterns = [
-    path('user/', include('django.contrib.auth.urls')),
-    path('user/', include('registration.backends.default.urls')),
     path('user/register/', RegistrationView.as_view(form_class=forms.ProfileRegistrationFormUniqueEmail),
          name="registration_register"),
     path('user/login/', LoginView.as_view(authentication_form=forms.CheckApprovedForm), name='login'),
@@ -23,7 +21,9 @@ urlpatterns = [
     path('user/reset_api_key', login_required(views.ResetApiKey.as_view(permanent=False)),
          name='reset_api_key'),
     path('user/', login_required(views.ProfileDetail.as_view()), name='profile_detail'),
-    path('user/<pk>/',
+    path('user/<int:pk>/',
          permission_required_with_403('RIGS.view_profile')(views.ProfileDetail.as_view()),
          name='profile_detail'),
+    path('user/', include('django.contrib.auth.urls')),
+    path('user/', include('registration.backends.default.urls')),
 ]

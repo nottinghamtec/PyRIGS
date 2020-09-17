@@ -28,6 +28,8 @@ DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
 STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
+CI = bool(int(os.environ.get('CI'))) if os.environ.get('CI') else False
+
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
 if STAGING:
@@ -158,7 +160,7 @@ CACHES = {
     }
 }
 # Tests lock up SQLite otherwise
-if DEBUG or STAGING:
+if DEBUG or STAGING or CI:
     CACHES['default'] = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
     }

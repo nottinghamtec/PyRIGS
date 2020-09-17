@@ -15,7 +15,6 @@ import versioning
 from PyRIGS import views
 
 urlpatterns = [
-    path('', include('users.urls')),
     path('', include('versioning.urls')),
     path('', include('RIGS.urls')),
     path('assets/', include('assets.urls')),
@@ -30,6 +29,8 @@ urlpatterns = [
 
     path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
     path('search_help/', views.SearchHelp.as_view(), name='search_help'),
+
+    path('', include('users.urls')),
 
     path('admin/', admin.site.urls),
 ]

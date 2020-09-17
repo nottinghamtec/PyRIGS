@@ -549,49 +549,6 @@ class TestSampleDataGenerator(TestCase):
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'deleteSampleData')
 
 
-class TestVersioningViews(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = rigsmodels.Profile.objects.create(username="VersionTest", email="version@test.com", is_superuser=True, is_active=True, is_staff=True)
-
-        working = models.AssetStatus.objects.create(name="Working", should_show=True)
-        broken = models.AssetStatus.objects.create(name="Broken", should_show=False)
-        general = models.AssetCategory.objects.create(name="General")
-        lighting = models.AssetCategory.objects.create(name="Lighting")
-
-        cls.assets = {}
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1] = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=datetime.date(1991, 12, 26))
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[2] = models.Asset.objects.create(asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=datetime.date(2015, 1, 1))
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1].status = working
-            cls.assets[1].save()
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-    def test_history_loads_successfully(self):
-        request_url = reverse('asset_history', kwargs={'pk': self.assets[1].asset_id})
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-    def test_activity_table_loads_successfully(self):
-        request_url = reverse('assets_activity_table')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-
 class TestEmbeddedViews(TestCase):
     @classmethod
     def setUpTestData(cls):
