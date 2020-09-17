@@ -1,12 +1,12 @@
-import pytz
 from reversion import revisions as reversion
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from RIGS import models
+from assets import models as amodels
 from versioning import versioning
-from datetime import date, timedelta, datetime, time
+from datetime import date,timedelta, datetime, time
 from decimal import *
 from PyRIGS.tests.base import create_browser
 
@@ -221,20 +221,20 @@ class TestVersioningViews(TestCase):
             cls.events[1].description = "A test description"
             cls.events[1].save()
 
-        working = models.AssetStatus.objects.create(name="Working", should_show=True)
-        broken = models.AssetStatus.objects.create(name="Broken", should_show=False)
-        general = models.AssetCategory.objects.create(name="General")
-        lighting = models.AssetCategory.objects.create(name="Lighting")
+        working = amodels.AssetStatus.objects.create(name="Working", should_show=True)
+        broken = amodels.AssetStatus.objects.create(name="Broken", should_show=False)
+        general = amodels.AssetCategory.objects.create(name="General")
+        lighting = amodels.AssetCategory.objects.create(name="Lighting")
 
         cls.assets = {}
 
         with reversion.create_revision():
             reversion.set_user(cls.profile)
-            cls.assets[1] = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=datetime.date(1991, 12, 26))
+            cls.assets[1] = amodels.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=date.today())
 
         with reversion.create_revision():
             reversion.set_user(cls.profile)
-            cls.assets[2] = models.Asset.objects.create(asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=datetime.date(2015, 1, 1))
+            cls.assets[2] = amodels.Asset.objects.create(asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=date.today())
 
         with reversion.create_revision():
             reversion.set_user(cls.profile)
@@ -246,8 +246,13 @@ class TestVersioningViews(TestCase):
         self.profile.save()
         self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
 
-    def test_event_history_loads_successfully(self):
+    def test_history_loads_successfully(self):
         request_url = reverse('event_history', kwargs={'pk': self.events[1].pk})
+
+        response = self.client.get(request_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        request_url = reverse('asset_history', kwargs={'pk': self.assets[1].asset_id})
 
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
@@ -265,12 +270,6 @@ class TestVersioningViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
         request_url = reverse('assets_activity_table')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-     def test_asset_history_loads_successfully(self):
-        request_url = reverse('asset_history', kwargs={'pk': self.assets[1].asset_id})
 
         response = self.client.get(request_url, follow=True)
         self.assertEqual(response.status_code, 200)
