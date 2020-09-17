@@ -6,7 +6,7 @@ from django.urls import reverse
 from RIGS import models
 from assets import models as amodels
 from versioning import versioning
-from datetime import date,timedelta, datetime, time
+from datetime import date, timedelta, datetime, time
 from decimal import *
 from PyRIGS.tests.base import create_browser
 
