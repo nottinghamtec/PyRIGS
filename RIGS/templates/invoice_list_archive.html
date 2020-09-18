@@ -13,11 +13,10 @@ All Invoices
 {% endblock %}
 
 {% block search %}
-<div class="col-sm-3 col-sm-offset-9">
-	<form class="form form-horizontal col-sm-12">
+<div class="col-md-6">
+	<form class="form form-horizontal">
 	    <div class="form-group">
-	        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-	               class="form-control"/>
+	        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}" class="form-control"/>
 	    </div>
 	</form>
 </div>
