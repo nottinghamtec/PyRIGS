@@ -2,13 +2,11 @@
 {% if form.errors %}
 	<div class="alert alert-danger alert-dismissable">
 		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-		<dl class="dl-horizontal">
+		<dl class="row">
 			{% with form|nice_errors as qq %}
 				{% for error_name,desc in qq.items %}
-				<span>
-					<dt>{{error_name}}</dt>
-					<dd>{{desc}}</dd>
-				</span>
+				<dt class="col-4">{{error_name}}</dt>
+				<dd class="col-8">{{desc}}</dd>
 				{% endfor %}
 			{% endwith %}
 		</dl>
