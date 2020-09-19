@@ -142,7 +142,9 @@
                 {% endif %}
             </h2>
         </div>
-        {% include 'form_errors.html' %}
+        <div class="col-12">
+            {% include 'form_errors.html' %}
+        </div>
         {% render_field form.is_rig style="display: none" %}
         <input type="hidden" name="{{ form.items_json.name }}" id="{{ form.items_json.id_for_label }}"
                value="{{ form.items_json.value }}"/>

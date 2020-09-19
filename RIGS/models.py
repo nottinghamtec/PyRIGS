@@ -469,19 +469,23 @@ class Event(models.Model, RevisionMixin):
         return self.display_id + ": " + self.name
 
     def clean(self):
+        errdict = {}
         if self.end_date and self.start_date > self.end_date:
-            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+            errdict['end_date'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
 
         startEndSameDay = not self.end_date or self.end_date == self.start_date
         hasStartAndEnd = self.has_start_time and self.has_end_time
         if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
-            raise ValidationError('Unless you\'ve invented time travel, the event can\'t finish before it has started.')
+            errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
 
         if self.access_at is not None:
             if self.access_at.date() > self.start_date:
-                raise ValidationError('Regardless of what some clients might think, access time cannot be after the event has started.')
+                errdict['access_at'] = ['Regardless of what some clients might think, access time cannot be after the event has started.']
             elif self.start_time is not None and self.start_date == self.access_at.date() and self.access_at.time() > self.start_time:
-                raise ValidationError('Regardless of what some clients might think, access time cannot be after the event has started.')
+                errdict['access_at'] = ['Regardless of what some clients might think, access time cannot be after the event has started.']
+
+        if errdict != {}:  # If there was an error when validation
+            raise ValidationError(errdict)
 
     def save(self, *args, **kwargs):
         """Call :meth:`full_clean` before saving."""
