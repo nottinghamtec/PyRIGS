@@ -190,7 +190,7 @@ class TestEventCreate(BaseRigboardTest):
         # Expected to fail
         self.page.submit()
         self.assertFalse(self.page.success)
-        self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
+        self.assertIn("Unless you've invented time travel, the event can't finish before it has started.", self.page.errors["End date"])
         self.wait.until(animation_is_finished())
 
         # Fix it
@@ -200,7 +200,6 @@ class TestEventCreate(BaseRigboardTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-    # TODO Seperated because of the way submit checks erroring
     def test_date_validation_2(self):
         self.select_event_type("Rig")
 
@@ -209,7 +208,6 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 
-        self.page.name = "Test Date Validation"
         # end time before start
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.start_time = datetime.time(10, 00)
@@ -218,7 +216,7 @@ class TestEventCreate(BaseRigboardTest):
         # Expected to fail
         self.page.submit()
         self.assertFalse(self.page.success)
-        self.assertIn("can't finish before it has started", self.page.errors["General form errors"][0])
+        self.assertIn("Unless you've invented time travel, the event can't finish before it has started.", self.page.errors["End time"])
 
         # Fix it
         self.page.end_time = datetime.time(23, 00)
@@ -227,15 +225,8 @@ class TestEventCreate(BaseRigboardTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-    def test_access_validation(self):
+        self.page = pages.CreateEvent(self.driver, self.live_server_url).open()
         self.select_event_type("Rig")
-
-        self.page.person_selector.search(self.client.name)
-        self.page.person_selector.set_option(self.client.name, True)
-        self.page.person_selector.toggle()
-        self.assertFalse(self.page.person_selector.is_open)
-
-        self.page.name = "Access Validation Test"
 
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.access_at = datetime.datetime(2020, 1, 5, 10)
@@ -243,7 +234,7 @@ class TestEventCreate(BaseRigboardTest):
         self.page.submit()
         self.assertFalse(self.page.success)
         self.assertTrue(self.page.errors is not None)
-        self.assertIn("access time cannot be after the event has started.", self.page.errors["General form errors"][0])
+        self.assertIn("Regardless of what some clients might think, access time cannot be after the event has started.", self.page.errors["Access at"])
 
         # Fix it
         self.page.access_at = datetime.datetime(2020, 1, 1, 10)

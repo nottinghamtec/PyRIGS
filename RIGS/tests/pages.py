@@ -17,7 +17,7 @@ class Index(BasePage):
 class Rigboard(BasePage):
     URL_TEMPLATE = reverse('rigboard')
 
-    _add_item_selector = (By.CSS_SELECTOR, 'a.btn:nth-child(2)')
+    _add_item_selector = (By.XPATH, "//a[contains(@class, 'btn-success') and contains(., 'New')]")
     _event_row_locator = (By.ID, 'event_row')
 
     def add(self):
@@ -86,11 +86,9 @@ class CreateEvent(FormPage):
     URL_TEMPLATE = reverse('event_create')
 
     _is_rig_selector = (By.ID, 'is_rig-selector')
-    _bottom_save_selector = (By.XPATH, '//*[@id="main"]/form/div/div[6]/div/button')
     _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
-    # TODO The ID is now no longer on the highest level element on the selector, annoyingly
-    _person_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
-    _venue_selector_selector = (By.XPATH, '//*[@id="main"]/form/div/div[3]/div[1]/div[2]/div[1]/div/div/div[1]/div')
+    _person_selector_selector = (By.XPATH, '//*[@id="id_person"]/..')
+    _venue_selector_selector = (By.XPATH, '//*[@id="id_venue"]/..')
     _mic_selector_selector = (By.XPATH, '//*[@id="form-hws"]/div[7]/div[1]/div/div')
 
     _add_person_selector = (By.XPATH, '//a[@data-target="#id_person" and contains(@href, "add")]')
@@ -118,7 +116,7 @@ class CreateEvent(FormPage):
     }
 
     def select_event_type(self, type_name):
-        self.find_element(By.XPATH, '//button[.="' + type_name + '"]').click()
+        self.find_element(By.XPATH, '//button[.="{}"]'.format(type_name)).click()
 
     def item_row(self, ID):
         return rigs_regions.ItemRow(self, self.find_element(By.ID, "item-" + ID))
@@ -133,7 +131,7 @@ class CreateEvent(FormPage):
 
     @property
     def is_expanded(self):
-        return self.find_element(*self._bottom_save_selector).is_displayed()
+        return self.find_element(*self._submit_locator).is_displayed()
 
     @property
     def person_selector(self):
@@ -164,7 +162,6 @@ class CreateEvent(FormPage):
 
 class DuplicateEvent(CreateEvent):
     URL_TEMPLATE = 'event/{event_id}/duplicate'
-    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
 
     @property
     def success(self):
@@ -173,7 +170,6 @@ class DuplicateEvent(CreateEvent):
 
 class EditEvent(CreateEvent):
     URL_TEMPLATE = 'event/{event_id}/edit'
-    _submit_locator = (By.XPATH, '/html/body/div[1]/form/div/div[5]/div/button')
 
     @property
     def success(self):

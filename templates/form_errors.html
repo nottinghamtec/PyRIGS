@@ -5,8 +5,10 @@
 		<dl class="row">
 			{% with form|nice_errors as qq %}
 				{% for error_name,desc in qq.items %}
-				<dt class="col-4">{{error_name}}</dt>
-				<dd class="col-8">{{desc}}</dd>
+                <span>
+				    <dt class="col-4">{{error_name}}</dt>
+				    <dd class="col-8">{{desc}}</dd>
+                </span>
 				{% endfor %}
 			{% endwith %}
 		</dl>

@@ -85,7 +85,7 @@
         });
         //Somewhat rudimentary way of ensuring people fill in completely (if it hits the database validation the whole table row disappears when the page reloads...)
         //the not is to avoid adding it to some of bootstrap-selects extra crap
-        $('#vehiclest,#crewmemberst').find("select,input").not(':input[type=search]').change(function () {
+        $('#vehiclest,#crewmemberst').on('change', 'select,input', function () {
             $(this).closest('tr').find("select,input").not(':input[type=search]').attr('required', 'true');
         });
     });
