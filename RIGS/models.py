@@ -680,6 +680,10 @@ class RiskAssessment(models.Model, RevisionMixin):
 
 @reversion.register(follow=['vehicles', 'crew'])
 class EventChecklist(models.Model, RevisionMixin):
+    SMALL = (0, 'Small')
+    MEDIUM = (1, 'Medium')
+    LARGE = (2, 'Large')
+    SIZES = (SMALL, MEDIUM, LARGE)
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
 
     # General
@@ -704,7 +708,7 @@ class EventChecklist(models.Model, RevisionMixin):
     earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
     pat = models.BooleanField(help_text="All equipment in PAT period?")
 
-    medium_event = models.BooleanField()
+    event_size = models.IntegerField(choices=SIZES)
     # Medium Electrical Checks
     source_rcd = models.BooleanField(blank=True, null=True, help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
     labelling = models.BooleanField(blank=True, null=True, help_text="Appropriate and clear labelling on distribution and cabling?")
@@ -753,10 +757,10 @@ class EventChecklist(models.Model, RevisionMixin):
         if self.earthing is None or self.pat is None:
             errdict['earthing'] = 'Fill out the electrical checks'
 
-        if not self.medium_event and (self.rcds is None or self.supply_test is None):
+        if self.event_size == 0 and (self.rcds is None or self.supply_test is None):
             errdict['rcds'] = 'Fill out the small event electrical checks'
 
-        if self.medium_event:
+        if self.event_size == 1:
             if self.source_rcd is None or self.labelling is None or self.all_rcds_tested is None or self.public_sockets_tested is None:
                 errdict['source_rcd'] = 'Fill out the medium event electrical checks'
 

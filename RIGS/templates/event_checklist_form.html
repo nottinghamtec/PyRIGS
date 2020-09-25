@@ -32,31 +32,28 @@
        {% if not object.pk %}
             $('.form-hide').slideUp();
        {% else %}
-            {% if object.medium_event %}
-                $('#small-event').slideUp();
-                $('#medium-event').slideDown();
-                $('#size-selector button[data-event-size=1]').addClass('active');
-            {% else %}
-                $('#small-event').slideDown();
-                $('#medium-event').slideUp();
-                $('#size-selector button[data-event-size=0]').addClass('active');
-            {% endif%}
+            $('#size-selector button[data-event-size={{object.event_size}}]').addClass('active');
+            for(i = 0; i < 3; i++) {
+                if(i == {{object.event_size}}) {
+                    $('#size-{{object.event_size}}').slideDown();
+                }
+                else {
+                    $('#size-' + i).slideUp();
+                }
+            }
        {% endif %}
        $('#size-selector button').on('click', function () {
+            $('#{{form.event_size.auto_id}}').val($(this).data('event-size'))
             $(this).toggleClass('active');
             $('#size-selector button').not(this).removeClass('active');
-            if ($(this).data('event-size') == 1) {
-                $('#{{form.medium_event.auto_id}}').prop('checked', true);
-                $('#small-event').slideUp();
-                $('#medium-event').slideDown();
-                //$('#medium-event').find('select,input').attr('required', 'true');
-                //$('#small-event').find('select,input').removeAttr('required');
-            } else {
-                $('#{{form.medium_event.auto_id}}').prop('checked', false);
-                $('#small-event').slideDown();
-                $('#medium-event').slideUp();
-                //('#small-event').find('select,input').attr('required', 'true');
-                //('#medium-event').find('select,input').removeAttr('required');
+            $('#size-' + $(this).data('event-size')).slideDown();
+            for(i = 0; i < 3; i++) {
+                if(i == $(this).data('event-size')) {
+                    $('#size-' + $(this).data('event-size')).slideDown();
+                }
+                else {
+                    $('#size-' + i).slideUp();
+                }
             }
         });
         $('button[data-action=add]').on('click', function (event) {
@@ -238,14 +235,15 @@
                     <div class="card">
                         <div class="card-header">Event Size</div>
                         <div class="card-body" id="size-selector">
-                            {% render_field form.medium_event style="display: none" %}
+                            {% render_field form.event_size style="display: none;" %}
 			                <button type="button" class="btn btn-success" data-event-size="0" style="width: 10rem;">Small</button>
 			                <button type="button" class="btn btn-warning" data-event-size="1" style="width: 10rem;">Medium</button>
+                            <button type="button" class="btn btn-danger" data-event-size="2" style="width: 10rem;">Large</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row my-3 form-hide" id="small-event">
+            <div class="row my-3 form-hide" id="size-0">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (aprox. 26A)</small></div>
@@ -258,7 +256,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row my-3 form-hide" id="medium-event">
+            <div class="row my-3 form-hide" id="size-1">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
@@ -344,6 +342,16 @@
                             {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
                             {% include 'partials/ec_power_info.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3 form-hide" id="size-2">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Electrical Checks <small>for ‘Large’ TEC Events</div>
+                        <div class="card-body">
+                            <p>Outside the scope of this assessment. Carry on.</p>
                         </div>
                     </div>
                 </div>
