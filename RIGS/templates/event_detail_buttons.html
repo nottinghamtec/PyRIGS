@@ -1,5 +1,5 @@
 <div class="btn-group py-3">
-    <a href="{% url 'event_update' event.pk %}" class="btn btn-secondary"><span
+    <a href="{% url 'event_update' event.pk %}" class="btn btn-warning"><span
             class="fas fa-edit"></span> <span
             class="hidden-xs">Edit</span></a>
     {% if event.is_rig %}
@@ -7,7 +7,7 @@
                 class="fas fa-print"></i> <span
                 class="hidden-xs">Print</span></a>
     {% endif %}
-    <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-secondary" title="Duplicate Rig"><span
+    <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-info" title="Duplicate Rig"><span
             class="fas fa-copy"></span> <span
             class="hidden-xs">Duplicate</span></a>
     {% if event.is_rig %}
@@ -19,6 +19,8 @@
                         btn-warning
                     {% elif event.auth_request_to %}
                         btn-info
+                    {% else %}
+                        btn-secondary
                     {% endif %}
                     "
                href="{% url 'event_authorise_request' object.pk %}">

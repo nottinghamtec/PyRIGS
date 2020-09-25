@@ -208,6 +208,8 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.toggle()
         self.assertFalse(self.page.person_selector.is_open)
 
+        self.page.name = "Test Date Validation 2"
+
         # end time before start
         self.page.start_date = datetime.date(2020, 1, 1)
         self.page.start_time = datetime.time(10, 00)

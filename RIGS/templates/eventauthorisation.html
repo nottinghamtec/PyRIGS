@@ -1,0 +1,48 @@
+{% extends 'base_client.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        $('form').on('submit', function () {
+            $('#loading-modal').modal({
+                backdrop: 'static',
+                show: true
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block title %}
+    {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %} | {{ event.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="page-header my-3">
+        <h1>
+            {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %}
+            | {{ event.name }} {% if event.dry_hire %}<span class="badge badge-secondary align-top">Dry Hire</span>{% endif %}
+        </h1>
+    </div>
+
+    <div class="row my-3">
+        {% include 'partials/client_eventdetails.html' %}
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-12">
+            <div class="card">
+            {% with object=event %}
+                {% include 'item_table.html' %}
+            {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    {% block authorisation %}
+    {% endblock %}
+{% endblock %}
