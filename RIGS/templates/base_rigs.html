@@ -30,6 +30,18 @@
         {% endif %}
        </div>
     </li>
+    {% if perms.RIGS.view_riskassessment %}
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        H&S
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownHS">
+        <a class="dropdown-item" href="{% url 'hs_list' %}">Overview</a>
+        <a class="dropdown-item" href="{% url 'ra_list' %}">Risk Assessments</a>
+        <a class="dropdown-item" href="{% url 'ec_list' %}">Event Checklists</a>
+      </div>
+    </li>
+    {% endif %}
     {% if perms.RIGS.view_invoice %}
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -52,18 +64,6 @@
     {% endif %}
     {% if perms.RIGS.view_venue %}
     <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
-    {% endif %}
-    {% if perms.RIGS.view_riskassessment %}
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        H&S
-      </a>
-      <div class="dropdown-menu" aria-labelledby="navbarDropdownHS">
-        <a class="dropdown-item" href="{% url 'hs_list' %}">Overview</a>
-        <a class="dropdown-item" href="{% url 'ra_list' %}">Risk Assessments</a>
-        <a class="dropdown-item" href="{% url 'ec_list' %}">Event Checklists</a>
-      </div>
-    </li>
     {% endif %}
 {% endif %}
 {% endblock %}
