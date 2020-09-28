@@ -9,23 +9,21 @@
 </div>
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-md-6 mb-3">
     {% include 'partials/asset_detail_form.html' %}
     </div>
-</div>
-<div class="row">
     {% if perms.assets.asset_finance %}
-    <div class="col-md-6 py-3">
+    <div class="col-md-6 mb-3">
       {% include 'partials/purchasedetails_form.html' %}
     </div>
     {% endif %}
-    <div class="col-md-6 py-3" {% if not object.is_cable %}hidden="true"{% endif %} id="cable-table">
+    <div class="col-md-4 mb-3" {% if not object.is_cable %}hidden="true"{% endif %} id="cable-table">
       {% include 'partials/cable_form.html' %}
     </div>
-    <div class="col-md-4 py-3">
+    <div class="col-md-4 mb-3">
       {% include 'partials/parent_form.html' %}
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
       {% include 'partials/audit_details.html' %}
     </div>
 </div>
