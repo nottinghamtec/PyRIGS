@@ -1,67 +1,64 @@
 {% load url_replace from filters %}
 {% load orderby from filters %}
 {% load paginator from filters %}
-<div class="row justify-content-end py-3">
-    <form class="form-inline pr-3">
+<div class="row justify-content-end">
+    <form class="form-inline">
         {% csrf_token %}
-        <div class="input-group pull-right">
+        <div class="input-group">
             <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
                    class="form-control"/>
-            <span class="input-group-append"><button type="submit" class="btn btn-primary" id="id_search">Search</button></span>
+            <span class="input-group-append"><button type="submit" class="btn btn-info" id="id_search">Search</button></span>
         </div>
     </form>
-    <a href="{% url create %}" class="btn btn-success">New <span
+</div>
+<div class="row justify-content-end py-3">
+    <a href="{% url create %}" class="btn btn-primary">New <span
             class="fas fa-plus"></span></a>
 </div>
-    <div class="d-none d-md-block">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></td>
-                        <th scope="col">Email</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Notes</th>
-                        {% if union_account %} {#TODO#}
-                        <th scope="col">Union Account</th>
-                        {% endif %}
-                        <th scope="col">Quick Links</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for object in object_list %}
-                    <tr id="row_item">
-                        <th scope="row" class="align-middle">{{ object.pk }}</th>
-                        <td class="align-middle" id="cell_name">{{ object.name }}</td>
-                        <td class="align-middle">{{ object.email }}</td>
-                        <td class="align-middle">{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
-                        <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>
-                        {% if union_account %}
-                        <td>{{ object.union_account|yesno|capfirst }}</td>
-                        {% endif %}
-                        <td>
-                            <div class="btn-group d-flex" role="group">
-                                <a href="{% url detail object.pk %}" class="btn btn-primary btn-sm modal-href">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                                <a href="{% url edit object.pk %}" class="btn btn-warning btn-sm"><i
-                                        class="fas fa-edit"></i> Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-                {% empty %}
-                <tr class="table-warning">
-                    <td colspan="6" class="text-center">Nothing found</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="d-xs-block d-sm-block d-md-none">
-    {% include 'partials/generic_list_mobile.html' %}
-    </div>
+<div class="row">
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></td>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Notes</th>
+                {% if union_account %} {#TODO#}
+                <th scope="col">Union Account</th>
+                {% endif %}
+                <th scope="col">Quick Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for object in object_list %}
+            <tr id="row_item">
+                <th scope="row" class="align-middle" id="cell_name">{{ object.name }}</th>
+                <td class="align-middle">{{ object.email }}</td>
+                <td class="align-middle">{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
+                <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>
+                {% if union_account %}
+                <td>{{ object.union_account|yesno|capfirst }}</td>
+                {% endif %}
+                <td>
+                    <div class="btn-group d-flex" role="group">
+                        <a href="{% url detail object.pk %}" class="btn btn-primary btn-sm modal-href">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{% url edit object.pk %}" class="btn btn-warning btn-sm"><i
+                                class="fas fa-edit"></i> Edit</a>
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+        <tr class="table-warning">
+            <td colspan="6" class="text-center">Nothing found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
 {% if is_paginated %}
 <div class="row justify-content-center">
         {% paginator %}
