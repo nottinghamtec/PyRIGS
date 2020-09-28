@@ -1,4 +1,6 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% load linkornone from filters %}
+
 {% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
 
 {% block content %}
@@ -32,13 +34,9 @@
                             {% endif %}
                         </dd>
                         <dt class="col-sm-6">Email</dt>
-                        <dd class="col-sm-6">
-                            <a href="mailto:{{object.person.email}}" target="_blank">
-                                <span class="overflow-ellipsis">{{ object.person.email }}</span>
-                            </a>
-                        </dd>
+                        <dd class="col-sm-6">{{ object.person.email|linkornone:'mailto' }}</dd>
                         <dt class="col-sm-6">Phone Number</dt>
-                        <dd class="col-sm-6"><a href="tel:{{object.person.phone}}">{{ object.person.phone }}</a></dd>
+                        <dd class="col-sm-6">{{ object.person.phone|linkornone:'tel' }}</a></dd>
                     </dl>
                 </div>
             </div>
@@ -55,12 +53,10 @@
                                     </a>
                                 {% endif %}
                             </dd>
+                            <dt class="col-sm-6">Email</dt>
+                            <dd class="col-sm-6">{{ object.organisation.email|linkornone:'mailto' }}</dd>
                             <dt class="col-sm-6">Phone Number</dt>
-                            <dd class="col-sm-6">
-                                <a href="tel:{{object.person.phone}}">
-                                    {{ object.organisation.phone }}
-                                </a>
-                            </dd>
+                            <dd class="col-sm-6">{{ object.organisation.phone|linkornone:'tel' }}</a></dd>
                             <dt class="col-sm-6">Has SU Account</dt>
                             <dd class="col-sm-6">{{ event.organisation.union_account|yesno|capfirst }}</dd>
                         </dl>

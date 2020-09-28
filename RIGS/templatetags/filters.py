@@ -178,3 +178,11 @@ def namewithnotes(obj, url, autoescape=True):
         return mark_safe(obj.name + " <a href='{}'><span class='far fa-sticky-note'></span></a>".format(reverse_lazy(url, kwargs={'pk': obj.pk})))
     else:
         return obj.name
+
+
+@register.filter(needs_autoescape=True)
+def linkornone(attr, namespace, autoescape=True):
+    if attr is not None:
+        return mark_safe("<a href='{}://{}' target='_blank'><span class='overflow-ellipsis'>{}</span></a>".format(namespace, attr, str(attr)))
+    else:
+        return "None"

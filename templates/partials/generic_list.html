@@ -1,6 +1,7 @@
 {% load url_replace from filters %}
 {% load orderby from filters %}
 {% load paginator from filters %}
+{% load linkornone from filters %}
 <div class="row justify-content-end">
     <form class="form-inline">
         {% csrf_token %}
@@ -34,8 +35,8 @@
         {% for object in object_list %}
             <tr id="row_item">
                 <th scope="row" class="align-middle" id="cell_name">{{ object.name }}</th>
-                <td class="align-middle">{{ object.email }}</td>
-                <td class="align-middle">{% if object.phone %}<a href="tel:{{ object.phone }}">{%endif%}{{ object.phone }}{% if object.phone %}</a>{%endif%}</td>
+                <td class="align-middle">{{ object.email|linkornone:'mailto' }}</td>
+                <td class="align-middle">{{ object.phone|linkornone:'tel' }}</td>
                 <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>
                 {% if union_account %}
                 <td>{{ object.union_account|yesno|capfirst }}</td>
