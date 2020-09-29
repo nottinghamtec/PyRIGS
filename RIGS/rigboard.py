@@ -95,7 +95,7 @@ class EventCreate(generic.CreateView):
         context['currentVAT'] = models.VatRate.objects.current_rate()
 
         form = context['form']
-        if re.search(r'"-\d+"', form['items_json'].value()):
+        if hasattr(form, 'items_json') and re.search(r'"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.

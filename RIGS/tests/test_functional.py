@@ -120,17 +120,23 @@ class TestEventCreate(BaseRigboardTest):
         self.assertFalse(self.page.person_selector.is_open)
 
         self.page.name = "Test Rig"
-        self.page.start_date = datetime.date(2015, 1, 1)
-        self.page.start_time = datetime.time(10, 00)
-        self.page.end_date = datetime.date(2015, 1, 10)
-        self.page.access_at = datetime.datetime(2015, 1, 1, 9)
+
+        # Both dates, no times, end before start
+        self.page.start_date = datetime.date(2020, 1, 10)
+        self.page.end_date = datetime.date(2020, 1, 1)
+        # Expected to fail
+        self.page.submit()
+        self.assertFalse(self.page.success)
+        self.assertIn("Unless you've invented time travel, the event can't finish before it has started.", self.page.errors["End date"])
+        self.wait.until(animation_is_finished())
+
+        self.page.access_at = datetime.datetime(2020, 1, 1, 9)
         self.page.dry_hire = True
         self.page.status = "Booked"
         self.page.collected_by = "Fred"
         self.page.po = "1234"
         self.page.notes = "A note!"
 
-        # TODO Test validation with some wrong data
         self.page.submit()
         self.assertTrue(self.page.success)
 
@@ -173,77 +179,6 @@ class TestEventCreate(BaseRigboardTest):
         self.page.person_selector.toggle()
 
         # TODO
-
-    # TODO Convert the below three tests into non-live tests and use only one wrong data in the above test to check error display
-    def test_date_validation(self):
-        self.select_event_type("Rig")
-
-        self.page.person_selector.search(self.client.name)
-        self.page.person_selector.set_option(self.client.name, True)
-        self.page.person_selector.toggle()
-        self.assertFalse(self.page.person_selector.is_open)
-
-        self.page.name = "Test Date Validation"
-        # Both dates, no times, end before start
-        self.page.start_date = datetime.date(2020, 1, 10)
-        self.page.end_date = datetime.date(2020, 1, 1)
-        # Expected to fail
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.assertIn("Unless you've invented time travel, the event can't finish before it has started.", self.page.errors["End date"])
-        self.wait.until(animation_is_finished())
-
-        # Fix it
-        self.page.end_date = datetime.date(2020, 1, 11)
-
-        # Should work
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-    def test_date_validation_2(self):
-        self.select_event_type("Rig")
-
-        self.page.person_selector.search(self.client.name)
-        self.page.person_selector.set_option(self.client.name, True)
-        self.page.person_selector.toggle()
-        self.assertFalse(self.page.person_selector.is_open)
-
-        self.page.name = "Test Date Validation 2"
-
-        # end time before start
-        self.page.start_date = datetime.date(2020, 1, 1)
-        self.page.start_time = datetime.time(10, 00)
-        self.page.end_time = datetime.time(9, 00)
-
-        # Expected to fail
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.assertIn("Unless you've invented time travel, the event can't finish before it has started.", self.page.errors["End time"])
-
-        # Fix it
-        self.page.end_time = datetime.time(23, 00)
-
-        # Should work
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-        self.page = pages.CreateEvent(self.driver, self.live_server_url).open()
-        self.select_event_type("Rig")
-
-        self.page.start_date = datetime.date(2020, 1, 1)
-        self.page.access_at = datetime.datetime(2020, 1, 5, 10)
-
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.assertTrue(self.page.errors is not None)
-        self.assertIn("Regardless of what some clients might think, access time cannot be after the event has started.", self.page.errors["Access at"])
-
-        # Fix it
-        self.page.access_at = datetime.datetime(2020, 1, 1, 10)
-
-        # Should work
-        self.page.submit()
-        self.assertTrue(self.page.success)
 
     def test_event_item_creation(self):
         self.select_event_type("Rig")
@@ -322,6 +257,25 @@ class TestEventCreate(BaseRigboardTest):
 
         self.page.submit()
         self.assertTrue(self.page.success)
+
+
+class TestEventValidation(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+        cls.profile = models.Profile.objects.create(username="EventValidationTest", email="EVT@test.com", is_superuser=True, is_active=True, is_staff=True)
+
+    def setUp(self):
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
+
+    def test_create(self):
+        url = reverse('event_create')
+        # end time before start access after start
+        response = self.client.post(url, {'start_date': datetime.date(2020, 1, 1), 'start_time': datetime.time(10, 00), 'end_time': datetime.time(9, 00), 'access_at': datetime.datetime(2020, 1, 5, 10)})
+        self.assertFormError(response, 'form', 'end_time', "Unless you've invented time travel, the event can't finish before it has started.")
+        self.assertFormError(response, 'form', 'access_at', "Regardless of what some clients might think, access time cannot be after the event has started.")
 
 
 @screenshot_failure_cls
