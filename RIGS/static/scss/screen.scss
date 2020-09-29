@@ -96,6 +96,10 @@ ins {
   transform: translateY(45px); /* TODO Remove absolute positioning */
 }
 
+.errorlist > li {
+    list-style-type: none;
+}
+
 pre {
     page-break-inside: avoid;
     font-family: monospace;
