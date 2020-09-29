@@ -19,8 +19,9 @@
     {% endif %}
     <br>
     {% if not event.dry_hire %}
-        {% if event.eventchecklist %}
-            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span>{%if event.eventchecklist.reviewed_by%}<span class="fas fa-check"></span>{%endif%}</span>
+        {% if event.hs_done %}
+            {# TODO Display status of all checklists #}
+            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span></span>
         {% else %}
             <span class="badge badge-danger">Checklist: <span class="fas fa-times"></span></span>
         {% endif %}

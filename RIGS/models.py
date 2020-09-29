@@ -384,6 +384,10 @@ class Event(models.Model, RevisionMixin):
             return bool(self.purchase_order)
 
     @property
+    def hs_done(self):
+        return self.riskassessment is not None and len(self.checklists.all()) > 0
+
+    @property
     def has_start_time(self):
         return self.start_time is not None
 
@@ -684,31 +688,31 @@ class EventChecklist(models.Model, RevisionMixin):
     MEDIUM = (1, 'Medium')
     LARGE = (2, 'Large')
     SIZES = (SMALL, MEDIUM, LARGE)
-    event = models.OneToOneField('Event', on_delete=models.CASCADE)
+    event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
     # General
-    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checklists', null=True,
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
 
     # Safety Checks
-    safe_parking = models.BooleanField(help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")
-    safe_packing = models.BooleanField(help_text="Equipment packed away safely?<br><small>(including flightcases)</small>")
-    exits = models.BooleanField(help_text="Emergency exits clear?")
-    trip_hazard = models.BooleanField(help_text="Appropriate barriers around kit and cabling secured?")
-    warning_signs = models.BooleanField(help_text="Warning signs in place?<br><small>(strobe, smoke, power etc.)</small>")
-    ear_plugs = models.BooleanField(help_text="Ear plugs issued to crew where needed?")
-    hs_location = models.CharField(max_length=255, help_text="Location of Safety Bag/Box")
-    extinguishers_location = models.CharField(max_length=255, help_text="Location of fire extinguishers")
+    safe_parking = models.BooleanField(blank=True, null=True, help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")
+    safe_packing = models.BooleanField(blank=True, null=True, help_text="Equipment packed away safely?<br><small>(including flightcases)</small>")
+    exits = models.BooleanField(blank=True, null=True, help_text="Emergency exits clear?")
+    trip_hazard = models.BooleanField(blank=True, null=True, help_text="Appropriate barriers around kit and cabling secured?")
+    warning_signs = models.BooleanField(blank=True, help_text="Warning signs in place?<br><small>(strobe, smoke, power etc.)</small>")
+    ear_plugs = models.BooleanField(blank=True, null=True, help_text="Ear plugs issued to crew where needed?")
+    hs_location = models.CharField(blank=True, null=True, max_length=255, help_text="Location of Safety Bag/Box")
+    extinguishers_location = models.CharField(blank=True, null=True, max_length=255, help_text="Location of fire extinguishers")
 
     # Small Electrical Checks
     rcds = models.BooleanField(blank=True, null=True, help_text="RCDs installed where needed and tested?")
     supply_test = models.BooleanField(blank=True, null=True, help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
 
     # Shared electrical checks
-    earthing = models.BooleanField(help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
-    pat = models.BooleanField(help_text="All equipment in PAT period?")
+    earthing = models.BooleanField(blank=True, null=True, help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
+    pat = models.BooleanField(blank=True, null=True, help_text="All equipment in PAT period?")
 
-    event_size = models.IntegerField(choices=SIZES)
+    event_size = models.IntegerField(blank=True, null=True, choices=SIZES)
     # Medium Electrical Checks
     source_rcd = models.BooleanField(blank=True, null=True, help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
     labelling = models.BooleanField(blank=True, null=True, help_text="Appropriate and clear labelling on distribution and cabling?")
@@ -748,7 +752,7 @@ class EventChecklist(models.Model, RevisionMixin):
             ('review_eventchecklist', 'Can review Event Checklists')
         ]
 
-    def clean(self):
+    """def clean(self):
         errdict = {}
 
         if self.power_mic is None:
@@ -768,7 +772,7 @@ class EventChecklist(models.Model, RevisionMixin):
                 errdict['w1_description'] = 'Fully complete at least the first worst case point'
 
         if errdict != {}:  # If there was an error when validation
-            raise ValidationError(errdict)
+            raise ValidationError(errdict)"""
 
     @property
     def activity_feed_string(self):

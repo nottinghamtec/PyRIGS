@@ -127,7 +127,7 @@ class EventChecklistCreate(generic.CreateView):
     template_name = 'event_checklist_form.html'
     form_class = forms.EventChecklistForm
 
-    def get(self, *args, **kwargs):
+    """def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
 
@@ -137,7 +137,7 @@ class EventChecklistCreate(generic.CreateView):
         if ra is not None:
             return HttpResponseRedirect(reverse_lazy('ec_edit', kwargs={'pk': ra.pk}))
 
-        return super(EventChecklistCreate, self).get(self)
+        return super(EventChecklistCreate, self).get(self)"""
 
     def get_form(self, **kwargs):
         form = super(EventChecklistCreate, self).get_form(**kwargs)

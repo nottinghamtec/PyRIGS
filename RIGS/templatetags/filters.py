@@ -202,4 +202,8 @@ def button(url, pk, type, clazz=None, icon=None, text=None):
         clazz = "btn-info"
         icon = "fa-copy"
         text = "Duplicate"
+    elif type == 'view':
+        clazz = "btn-primary"
+        icon = "fa-eye"
+        text = "View"
     return {'target': url, 'id': pk, 'class': clazz, 'icon': icon, 'text': text}
