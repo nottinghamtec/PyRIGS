@@ -186,3 +186,20 @@ def linkornone(attr, namespace, autoescape=True):
         return mark_safe("<a href='{}://{}' target='_blank'><span class='overflow-ellipsis'>{}</span></a>".format(namespace, attr, str(attr)))
     else:
         return "None"
+
+
+@register.inclusion_tag('button.html')
+def button(url, pk, type, clazz=None, icon=None, text=None):
+    if type == 'edit':
+        clazz = "btn-warning"
+        icon = "fa-edit"
+        text = "Edit"
+    elif type == 'print':
+        clazz = "btn-primary"
+        icon = "fa-print"
+        text = "Print"
+    elif type == 'duplicate':
+        clazz = "btn-info"
+        icon = "fa-copy"
+        text = "Duplicate"
+    return {'target': url, 'id': pk, 'class': clazz, 'icon': icon, 'text': text}

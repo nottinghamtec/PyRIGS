@@ -1,15 +1,10 @@
+{% load button from filters %}
 <div class="btn-group py-3">
-    <a href="{% url 'event_update' event.pk %}" class="btn btn-warning"><span
-            class="fas fa-edit"></span> <span
-            class="hidden-xs">Edit</span></a>
+    {% button 'event_update' event.pk 'edit' %}
     {% if event.is_rig %}
-        <a href="{% url 'event_print' event.pk %}" target="_blank" class="btn btn-primary"><i
-                class="fas fa-print"></i> <span
-                class="hidden-xs">Print</span></a>
+    {% button 'event_print' event.pk 'print' %}
     {% endif %}
-    <a href="{% url 'event_duplicate' event.pk %}" class="btn btn-info" title="Duplicate Rig"><span
-            class="fas fa-copy"></span> <span
-            class="hidden-xs">Duplicate</span></a>
+    {% button 'event_duplicate' event.pk 'duplicate' %}
     {% if event.is_rig %}
         {% if event.internal %}
             <a class="btn item-add modal-href event-authorise-request
