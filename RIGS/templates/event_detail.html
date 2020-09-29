@@ -21,12 +21,13 @@
     {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
         <div class="col-sm">
+            {% if event.person %}
             <div class="card card-default mb-3">
                 <div class="card-header">Contact Details</div>
                 <div class="card-body">
                     <dl class="row">
                         <dt class="col-sm-6">Person</dt>
-                        <dd class="col-sm-6"
+                        <dd class="col-sm-6">
                             {% if object.person %}
                                 <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
                                     {{ object.person }}
@@ -40,6 +41,7 @@
                     </dl>
                 </div>
             </div>
+            {% endif %}
             {% if event.organisation %}
                 <div class="card card-default">
                     <div class="card-header">Organisation</div>
