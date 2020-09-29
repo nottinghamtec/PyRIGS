@@ -129,7 +129,7 @@ class EventUpdate(generic.UpdateView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        if not hasattr(context, 'duplicate'):
+        if hasattr(context, 'duplicate') and not context['duplicate']:
             # If this event has already been emailed to a client, show a warning
             if self.object.auth_request_at is not None:
                 messages.info(self.request,
@@ -137,7 +137,7 @@ class EventUpdate(generic.UpdateView):
 
             if hasattr(self.object, 'authorised'):
                 messages.warning(self.request,
-                                 'This event has already been authorised by client, any changes to price will require reauthorisation.')
+                                 'This event has already been authorised by the client, any changes to the price will require reauthorisation.')
         return super(EventUpdate, self).render_to_response(context, **response_kwargs)
 
     def get_success_url(self):
