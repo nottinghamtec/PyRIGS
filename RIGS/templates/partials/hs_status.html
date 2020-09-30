@@ -1,8 +1,8 @@
 {% load button from filters %}
 {% if object.pk != None %}
     <div class="btn-group">
-        {% button view object.pk 'view' %}
-        {% button edit object.pk 'edit' %}
+        {% button 'view' view object.pk %}
+        {% button 'edit' edit object.pk %}
     </div>
     {% if object.reviewed_by %}
     <span class='badge badge-success py-2'>Reviewed by <a href='{% url 'profile_detail' object.reviewed_by.pk %}'>{{object.reviewed_by}}</a> at {{object.reviewed_at}}</span>

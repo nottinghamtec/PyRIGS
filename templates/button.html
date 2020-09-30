@@ -1,1 +1,5 @@
+{% if submit %}
+<button type="submit" class="btn {{ class }}" title="{{ text }}"><span class="fas {{ icon }}"></span> <span class="hidden-xs">{{ text }}</span></button>
+{% else %}
 <a href="{% url target id %}" class="btn {{ class }}" target="_blank"><span class="fas {{ icon }}"></span> <span class="hidden-xs">{{ text }}</span></a>
+{% endif %}

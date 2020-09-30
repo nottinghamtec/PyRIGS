@@ -189,7 +189,7 @@ def linkornone(attr, namespace, autoescape=True):
 
 
 @register.inclusion_tag('button.html')
-def button(url, pk, type, clazz=None, icon=None, text=None):
+def button(type, url=None, pk=None, clazz=None, icon=None, text=None):
     if type == 'edit':
         clazz = "btn-warning"
         icon = "fa-edit"
@@ -206,4 +206,6 @@ def button(url, pk, type, clazz=None, icon=None, text=None):
         clazz = "btn-primary"
         icon = "fa-eye"
         text = "View"
+    elif type == 'submit':
+        return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save'}
     return {'target': url, 'id': pk, 'class': clazz, 'icon': icon, 'text': text}

@@ -3,6 +3,7 @@
 {% load static %}
 {% load help_text from filters %}
 {% load profile_by_index from filters %}
+{% load button from filters %}
 
 {% block title %}{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
 
@@ -362,11 +363,7 @@
             </div>
             <div class="row mt-3">
                 <div class="col-sm-12 text-right">
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-primary" title="Save"><i
-                                class="fas fa-save"></i> Save
-                        </button>
-                    </div>
+                    {% button 'submit' %}
                 </div>
             </div>
         </form>

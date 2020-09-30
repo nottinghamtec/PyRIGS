@@ -1,10 +1,10 @@
 {% load button from filters %}
 <div class="btn-group py-3">
-    {% button 'event_update' event.pk 'edit' %}
+    {% button 'edit' 'event_update' event.pk %}
     {% if event.is_rig %}
-    {% button 'event_print' event.pk 'print' %}
+    {% button 'print' 'event_print' event.pk %}
     {% endif %}
-    {% button 'event_duplicate' event.pk 'duplicate' %}
+    {% button 'duplicate' 'event_duplicate' event.pk %}
     {% if event.is_rig %}
         {% if event.internal %}
             <a class="btn item-add modal-href event-authorise-request
