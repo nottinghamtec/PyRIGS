@@ -509,7 +509,7 @@ class TestHSLogic(TestCase):
                                                     extinguishers_location="Somewhere, I forgot",
                                                     earthing=False,
                                                     pat=False,
-                                                    medium_event=False
+                                                    event_size=0
                                                     ),
         }
 
@@ -548,13 +548,6 @@ class TestHSLogic(TestCase):
     def test_ra_redirect(self):
         request_url = reverse('event_ra', kwargs={'pk': self.events[1].pk})
         expected_url = reverse('ra_edit', kwargs={'pk': self.ras[1].pk})
-
-        response = self.client.get(request_url, follow=True)
-        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
-
-    def test_checklist_redirect(self):
-        request_url = reverse('event_ec', kwargs={'pk': self.events[1].pk})
-        expected_url = reverse('ec_edit', kwargs={'pk': self.checklists[1].pk})
 
         response = self.client.get(request_url, follow=True)
         self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)

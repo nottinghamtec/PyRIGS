@@ -272,6 +272,10 @@ class CreateEventChecklist(FormPage):
         self.find_element(*self._add_crew_locator).click()
 
     @property
+    def bottom(self):
+        return self.find_element(*self._submit_locator)
+
+    @property
     def power_mic(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
 
