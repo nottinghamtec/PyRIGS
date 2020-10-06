@@ -824,7 +824,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
         driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '(//*[contains(@class,"bootstrap-select")])[2]'))
         driver.search(self.profile.name)
-        driver.toggle()
+        # driver.toggle()
 
         crew = self.profile
         role = "MIC"
@@ -836,7 +836,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         # TODO Validation of end before start
         end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
         crew_select.search(crew.name)
-        crew_select.toggle()
+        # crew_select.toggle()
         self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
 
         self.page.select_size('Small')
