@@ -1,5 +1,7 @@
 {% if submit %}
-<button type="submit" class="btn {{ class }}" title="{{ text }}"><span class="fas {{ icon }}"></span> <span class="d-none d-sm-block">{{ text }}</span></button>
+<button type="submit" class="btn {{ class }}" title="{{ text }}"><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></button>
+{% elif id %}
+<a href="{% url target id %}" class="btn {{ class }}"><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></a>
 {% else %}
-<a href="{% url target id %}" class="btn {{ class }}"><span class="fas {{ icon }}"></span> <span class="d-none d-sm-block">{{ text }}</span></a>
+<a href="{% url target %}" class="btn {{ class }}"><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></a>
 {% endif %}

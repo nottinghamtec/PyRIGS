@@ -206,6 +206,10 @@ def button(type, url=None, pk=None, clazz=None, icon=None, text=None):
         clazz = "btn-primary"
         icon = "fa-eye"
         text = "View"
+    elif type == 'new':
+        clazz = "btn-primary"
+        icon = "fa-plus"
+        text = "New"
     elif type == 'submit':
         return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save'}
     return {'target': url, 'id': pk, 'class': clazz, 'icon': icon, 'text': text}

@@ -1,4 +1,5 @@
 {% extends 'base_rigs.html' %}
+{% load button from filters %}
 
 {% block title %}Rigboard{% endblock %}
 
@@ -9,12 +10,11 @@
     <div class="col-sm-12 col-md">
         Key: <span class="table-success mr-1 px-2">Ready</span><span class="table-warning mr-1 px-2">Action Required</span><span class="table-danger mr-1 px-2">Needs MIC</span><span class="table-secondary mr-1 px-2">Cancelled</span><span class="table-info px-2">Non-Rig</span>
     </div>
-
+    {% if perms.RIGS.add_event %}
     <div class="col text-right">
-        {% if perms.RIGS.add_event %}
-        <a href="{% url 'event_create' %}" class="btn btn-success">New <i class="fas fa-plus"></i></a>
-        {% endif %}
+        {% button 'new' 'event_create' None %}
     </div>
+    {% endif %}
 </div>
 
 {% include 'event_table.html' %}
