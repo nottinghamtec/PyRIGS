@@ -15,27 +15,26 @@
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->
-            <td id="event_dates" class="text-nowrap">
-                <div>Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
+            <td id="event_dates">
+                <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
                 {% if event.has_start_time %}
-                    {{ event.start_time|date:"H:i" }}</div>
-                {% else %}
-                    </div>
+                    {{ event.start_time|date:"H:i" }}
                 {% endif %}
-                {% if event.end_date and event.end_date != event.start_date %}
-                    <div>End: <strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>
+                </span>
+                {% if event.end_date %}
+                    <br>
+                    <span class="text-nowrap">End: {% if event.end_date != event.start_date %}<strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>{% endif %}
                     {% if event.has_end_time %}
-                       {{ event.end_time|date:"H:i" }}</div>
-                {% else %}
-                    </div>
+                       {{ event.end_time|date:"H:i" }}
                     {% endif %}
+                    </span>
                 {% endif %}
                 {% if not event.cancelled %}
                     {% if event.meet_at %}
-                        <div>Crew meet: {{ event.meet_at|date:"H:i" }} {{ event.meet_at|date:"(d/m/Y)" }}</div>
+                        <br><span>Crew meet: <strong>{{ event.meet_at|date:"H:i" }}</strong> {{ event.meet_at|date:"(d/m/Y)" }}</span>
                     {% endif %}
                     {% if event.access_at %}
-                        <div>Access at: {{ event.access_at|date:"H:i" }} {{ event.access_at|date:"(d/m/Y)" }}</div>
+                        <br><span>Access at: <strong>{{ event.access_at|date:"H:i" }}</strong> {{ event.access_at|date:"(d/m/Y)" }}</span>
                     {% endif %}
                 {% endif %}
             </td>
