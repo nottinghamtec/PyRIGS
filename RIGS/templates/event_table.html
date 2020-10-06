@@ -4,7 +4,7 @@
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Event Date</th>
+                <th scope="col">Dates & Times</th>
                 <th scope="col">Event Details</th>
                 <th scope="col">MIC</th>
             </tr>
@@ -15,25 +15,32 @@
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->
-            <td id="event_dates">
-                <div><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></div>
+            <td id="event_dates" class="text-nowrap">
+                <div>Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
                 {% if event.has_start_time %}
-                    <p>Start Time: {{ event.start_time|date:"H:i" }}</p>
+                    {{ event.start_time|date:"H:i" }}</div>
+                {% else %}
+                    </div>
                 {% endif %}
                 {% if event.end_date and event.end_date != event.start_date %}
-                    <div><strong>{{ event.end_date|date:"D d/m/Y"  }}</strong></div>
-                    {% if event.has_end_time%}
-                       <p>End Time: {{ event.end_time|date:"H:i" }}</p>
+                    <div>End: <strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>
+                    {% if event.has_end_time %}
+                       {{ event.end_time|date:"H:i" }}</div>
+                {% else %}
+                    </div>
                     {% endif %}
                 {% endif %}
                 {% if not event.cancelled %}
                     {% if event.meet_at %}
-                        <p>Crew meet: {{ event.meet_at|date:"H:i" }} {{ event.meet_at|date:"(Y-m-d)" }}</p>
+                        <div>Crew meet: {{ event.meet_at|date:"H:i" }} {{ event.meet_at|date:"(d/m/Y)" }}</div>
+                    {% endif %}
+                    {% if event.access_at %}
+                        <div>Access at: {{ event.access_at|date:"H:i" }} {{ event.access_at|date:"(d/m/Y)" }}</div>
                     {% endif %}
                 {% endif %}
             </td>
             <!---Details-->
-            <td id="event_details">
+            <td id="event_details" class="w-100">
                 <h4>
                     <a href="{% url 'event_detail' event.pk %}">
                         {{ event.name }}
@@ -59,20 +66,16 @@
                 {% include 'partials/event_status.html' %}
             </td>
             <!---MIC-->
-            <td id="event_mic">
+            <td id="event_mic" class="text-nowrap">
                 {% if event.mic %}
-                    <div class="media">
-                        {% if perms.RIGS.view_profile %}
-                            <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
-                        {% endif %}
-                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo mr-3"/>
-                        {% if perms.RIGS.view_profile %}
-                            </a>
-                        {% endif %}
-                        <div class="media-body">
-                            <p>{{ event.mic.initials }}</p>
-                        </div>
-                    </div>
+                    {% if perms.RIGS.view_profile %}
+                        <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                    {% endif %}
+                        <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                        {{ event.mic }}
+                    {% if perms.RIGS.view_profile %}
+                        </a>
+                    {% endif %}
                 {% elif event.is_rig %}
                     <span class="fas fa-exclamation"></span>
                 {% endif %}
