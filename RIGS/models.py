@@ -281,7 +281,7 @@ class EventManager(models.Manager):
         return event_count
 
 
-@reversion.register(follow=['items'])
+@reversion.register(follow=['items'], ignore_duplicates=True)  # TODO Would be better to find why duplicates are created...
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
     PROVISIONAL = 0
