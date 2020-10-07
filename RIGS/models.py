@@ -281,7 +281,7 @@ class EventManager(models.Manager):
         return event_count
 
 
-@reversion.register(follow=['items'])#, ignore_duplicates=True)  # TODO Would be better to find why duplicates are created...
+@reversion.register(follow=['items'])
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
     PROVISIONAL = 0
@@ -532,8 +532,6 @@ class EventAuthorisation(models.Model, RevisionMixin):
     account_code = models.CharField(max_length=50, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
     sent_by = models.ForeignKey('Profile', on_delete=models.CASCADE)
-
-    #reversion_perm = 'RIGS.view_eventauthorisation'
 
     def get_absolute_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
