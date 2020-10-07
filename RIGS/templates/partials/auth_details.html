@@ -8,8 +8,8 @@
     {% endif %}
     ">
     <div class="card-header">Client Authorisation</div>
-    <div class="card-body">
-        <dl class="col-sm-6">
+    <div class="card-body row">
+        <dl class="col-md-6">
             <dt>Authorisation Request</dt>
             <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
 
@@ -22,8 +22,8 @@
             <dt>To</dt>
             <dd>{{ object.auth_request_to }}</dd>
         </dl>
-        <dd class="visible-xs">&nbsp;</dd>
-        <dl class="col-sm-6">
+        <dd class="d-block d-sm-none">&nbsp;</dd>
+        <dl class="col-md-6">
             <dt>Authorised</dt>
             <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
 
