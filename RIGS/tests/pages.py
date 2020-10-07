@@ -17,7 +17,7 @@ class Index(BasePage):
 class Rigboard(BasePage):
     URL_TEMPLATE = reverse('rigboard')
 
-    _add_item_selector = (By.XPATH, "//a[contains(., 'New')]")
+    _add_item_selector = (By.XPATH, "//a[contains(@class,'btn-primary') and contains(., 'New')]")
     _event_row_locator = (By.ID, 'event_row')
 
     def add(self):
