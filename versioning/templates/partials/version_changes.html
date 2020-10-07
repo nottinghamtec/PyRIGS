@@ -1,4 +1,4 @@
-{% if version.changes.anything_changed or version.changes.old == None %}
+{% if version.changes.anything_changed %}
     {% for change in version.changes.field_changes %}
     	<span title="Changes to {{ change.field.verbose_name }}" class="badge badge-info p-2" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "partials/version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</span>
     {% endfor %}
@@ -7,8 +7,9 @@
             <ul class="list-group list-group-flush">
             {% for change in itemchange.field_changes %}
                   <li class="list-group-item">
-                    <p>{{ change.field.verbose_name|title }}:</p>
-                    <div class="dont-break-out">{% include 'partials/version_changes_change.html' with change=change %}</div>
+                    <div class="dont-break-out">
+                    {{ change.field.verbose_name|title }}:
+                    {% include 'partials/version_changes_change.html' with change=change %}</div>
                   </li>
             {% endfor %}
             </ul>

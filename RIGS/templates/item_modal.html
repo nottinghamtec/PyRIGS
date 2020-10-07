@@ -3,6 +3,9 @@
         <div class="modal-content">
             <div class="modal-header">
                  <h4>{{ object.name|default:"New Event" }}</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <form id="item-form">
                 <div class="modal-body">

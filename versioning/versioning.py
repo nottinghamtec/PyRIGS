@@ -4,7 +4,7 @@ import logging
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import EmailField, IntegerField, TextField
+from django.db.models import EmailField, IntegerField, TextField, CharField
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views import generic
@@ -24,8 +24,11 @@ class FieldComparison(object):
         self._new = new
 
     def display_value(self, value):
-        if isinstance(self.field, IntegerField) and self.field.choices is not None and len(self.field.choices) > 0:
-            return [x[1] for x in self.field.choices if x[0] == value][0]
+        if (isinstance(self.field, IntegerField) or isinstance(self.field, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
+            choice = [x[1] for x in self.field.choices if x[0] == value]
+            # TODO This defensive piece should not be necessary?
+            if len(choice) > 0:
+                return choice[0]
         return value
 
     @property
@@ -91,24 +94,21 @@ class ModelComparison(object):
         changes = []
         for field in self.fields:
             field_name = field.name
+            if field_name not in self.excluded_keys:  # if we're excluding this field, skip over it
+                try:
+                    oldValue = getattr(self.old, field_name, None)
+                except ObjectDoesNotExist:
+                    oldValue = None
 
-            if field_name in self.excluded_keys:
-                continue  # if we're excluding this field, skip over it
+                try:
+                    newValue = getattr(self.new, field_name, None)
+                except ObjectDoesNotExist:
+                    newValue = None
 
-            try:
-                oldValue = getattr(self.old, field_name, None)
-            except ObjectDoesNotExist:
-                oldValue = None
-
-            try:
-                newValue = getattr(self.new, field_name, None)
-            except ObjectDoesNotExist:
-                newValue = None
-
-            bothBlank = (not oldValue) and (not newValue)
-            if oldValue != newValue and not bothBlank:
-                comparison = FieldComparison(field, oldValue, newValue)
-                changes.append(comparison)
+                bothBlank = (not oldValue) and (not newValue)
+                if oldValue != newValue and not bothBlank:
+                    comparison = FieldComparison(field, oldValue, newValue)
+                    changes.append(comparison)
 
         return changes
 
@@ -121,19 +121,17 @@ class ModelComparison(object):
         if self.follow and self.version.object is not None:
             item_type = ContentType.objects.get_for_model(self.version.object)
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
-            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type)
+            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(models.EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'invoice']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
             for version in old_item_versions:  # put all the old versions in a list
-                # if version.field_dict["event_id"] == int(self.new.pk):
                 compare = ModelComparison(old=version._object_version.object, **comparisonParams)
                 item_dict[version.object_id] = compare
 
             for version in new_item_versions:  # go through the new versions
-                # if version.field_dict["event_id"] == int(self.new.pk):
                 try:
                     compare = item_dict[version.object_id]  # see if there's a matching old version
                     compare.new = version._object_version.object  # then add the new version to the dictionary
@@ -141,9 +139,15 @@ class ModelComparison(object):
                     compare = ModelComparison(new=version._object_version.object, **comparisonParams)
 
                 if compare.new:
-                    compare.name = str(compare.new)
+                    if(hasattr(compare.new, 'activity_feed_string')):
+                        compare.name = compare.new.activity_feed_string
+                    else:
+                        compare.name = str(compare.new)
                 else:
-                    compare.name = str(compare.old)
+                    if(hasattr(compare.old, 'activity_feed_string')):
+                        compare.name = compare.old.activity_feed_string
+                    else:
+                        compare.name = str(compare.old)
 
                 item_dict[version.object_id] = compare  # update the dictionary with the changes
 
@@ -156,7 +160,7 @@ class ModelComparison(object):
 
     @cached_property
     def items_changed(self):
-        return len(self.item_changes) > 0
+        return self.item_changes is not None and len(self.item_changes) > 0
 
     @cached_property
     def anything_changed(self):

@@ -19,7 +19,7 @@
             <td>{{ version.revision.user.name|default:"System" }}</td>
             <td>
               {% if version.changes.old == None %}
-                {{version.changes.new|to_class_name}} Created
+                Created {{version.changes.new|to_class_name}}
               {% else %}
                 {% include 'partials/version_changes.html' %}
               {% endif %}

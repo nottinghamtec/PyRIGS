@@ -219,7 +219,7 @@ class Command(BaseCommand):
 
         financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User",
                                                     initials="FU",
-                                                    email="financeuser@example.com", is_active=True)
+                                                    email="financeuser@example.com", is_active=True, is_approved=True)
         financeUser.groups.add(self.finance_group)
         financeUser.groups.add(self.keyholder_group)
         financeUser.set_password('finance')
@@ -227,7 +227,7 @@ class Command(BaseCommand):
 
         hsUser = models.Profile.objects.create(username="hs", first_name="HS", last_name="User",
                                                initials="HSU",
-                                               email="hsuser@example.com", is_active=True)
+                                               email="hsuser@example.com", is_active=True, is_approved=True)
         hsUser.groups.add(self.hs_group)
         hsUser.groups.add(self.keyholder_group)
         hsUser.set_password('hs')
@@ -235,13 +235,13 @@ class Command(BaseCommand):
 
         keyholderUser = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User",
                                                       initials="KU",
-                                                      email="keyholderuser@example.com", is_active=True)
+                                                      email="keyholderuser@example.com", is_active=True, is_approved=True)
         keyholderUser.groups.add(self.keyholder_group)
         keyholderUser.set_password('keyholder')
         keyholderUser.save()
 
         basicUser = models.Profile.objects.create(username="basic", first_name="Basic", last_name="User", initials="BU",
-                                                  email="basicuser@example.com", is_active=True)
+                                                  email="basicuser@example.com", is_active=True, is_approved=True)
         basicUser.set_password('basic')
         basicUser.save()
 

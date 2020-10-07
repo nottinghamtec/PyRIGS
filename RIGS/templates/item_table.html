@@ -26,7 +26,7 @@
 				{% include 'item_row.html' %}
 			{% endfor %}
 		</tbody>
-        {% if perms.RIGS.view_event %}
+        {% if auth or perms.RIGS.view_event %}
 		<tfoot>
 			<tr>
 				<td rowspan="3" colspan="2"></td>

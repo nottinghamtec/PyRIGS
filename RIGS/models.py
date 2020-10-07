@@ -518,6 +518,10 @@ class EventItem(models.Model, RevisionMixin):
     def __str__(self):
         return str(self.event.pk) + "." + str(self.order) + ": " + self.event.name + " | " + self.name
 
+    @property
+    def activity_feed_string(self):
+        return str("item {}".format(self.name))
+
 
 @reversion.register
 class EventAuthorisation(models.Model, RevisionMixin):
@@ -529,12 +533,14 @@ class EventAuthorisation(models.Model, RevisionMixin):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
     sent_by = models.ForeignKey('Profile', on_delete=models.CASCADE)
 
+    #reversion_perm = 'RIGS.view_eventauthorisation'
+
     def get_absolute_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
 
     @property
     def activity_feed_string(self):
-        return str("N%05d" % self.event.pk + ' (requested by ' + self.sent_by.initials + ')')
+        return "{} (requested by {})".format(self.event.display_id, self.sent_by.initials)
 
 
 @reversion.register(follow=['payment_set'])
@@ -606,6 +612,10 @@ class Payment(models.Model, RevisionMixin):
 
     def __str__(self):
         return "%s: %d" % (self.get_method_display(), self.amount)
+
+    @property
+    def activity_feed_string(self):
+        return str("payment at £{}".format(self.amount))
 
 
 @reversion.register

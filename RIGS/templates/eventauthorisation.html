@@ -36,7 +36,7 @@
     <div class="row mb-3">
         <div class="col-sm-12">
             <div class="card">
-            {% with object=event %}
+            {% with object=event auth=True %}
                 {% include 'item_table.html' %}
             {% endwith %}
             </div>
