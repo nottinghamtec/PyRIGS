@@ -20,7 +20,7 @@ from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
 
-from PyRIGS.views import GenericListView
+from PyRIGS.views import GenericListView,GenericDetailView
 
 
 class PersonList(GenericListView):
@@ -35,9 +35,17 @@ class PersonList(GenericListView):
         return context
 
 
-class PersonDetail(generic.DetailView):
-    template_name = 'person_detail.html'
+class PersonDetail(GenericDetailView):
     model = models.Person
+
+    def get_context_data(self, **kwargs):
+        context = super(PersonDetail, self).get_context_data(**kwargs)
+        context['history_link'] = 'person_history'
+        context['detail_link'] = 'person_detail'
+        context['update_link'] = 'person_update'
+        context['associated'] ='partials/associated_organisations.html'
+        context['associated2'] ='partials/associated_events.html'
+        return context
 
 
 class PersonCreate(generic.CreateView):
@@ -87,10 +95,17 @@ class OrganisationList(GenericListView):
         context['union_account'] = True
         return context
 
-class OrganisationDetail(generic.DetailView):
-    template_name = 'organisation_detail.html'
+class OrganisationDetail(GenericDetailView):
     model = models.Organisation
 
+    def get_context_data(self, **kwargs):
+        context = super(OrganisationDetail, self).get_context_data(**kwargs)
+        context['history_link'] = 'organisation_history'
+        context['detail_link'] = 'organisation_detail'
+        context['update_link'] = 'organisation_update'
+        context['associated'] ='partials/associated_people.html'
+        context['associated2'] ='partials/associated_events.html'
+        return context
 
 class OrganisationCreate(generic.CreateView):
     template_name = 'organisation_form.html'
@@ -139,9 +154,16 @@ class VenueList(GenericListView):
         return context
 
 
-class VenueDetail(generic.DetailView):
-    template_name = 'venue_detail.html'
+class VenueDetail(GenericDetailView):
     model = models.Venue
+
+    def get_context_data(self, **kwargs):
+        context = super(VenueDetail, self).get_context_data(**kwargs)
+        context['history_link'] = 'venue_history'
+        context['detail_link'] = 'venue_detail'
+        context['update_link'] = 'venue_update'
+        context['associated2'] = 'partials/associated_events.html'
+        return context
 
 
 class VenueCreate(generic.CreateView):

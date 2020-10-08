@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from versioning import versioning
-from PyRIGS.views import GenericListView
+from PyRIGS.views import GenericListView, GenericDetailView
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -214,6 +214,10 @@ class SupplierList(GenericListView):
         context['create'] = 'supplier_create'
         context['edit'] = 'supplier_update'
         context['detail'] = 'supplier_detail'
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
         return context
 
 
@@ -228,9 +232,21 @@ class SupplierSearch(SupplierList):
         return JsonResponse(result, safe=False)
 
 
-class SupplierDetail(generic.DetailView):
+class SupplierDetail(GenericDetailView):
     model = models.Supplier
-    template_name = 'supplier_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierDetail, self).get_context_data(**kwargs)
+        context['history_link'] = 'supplier_history'
+        context['update_link'] = 'supplier_update'
+        context['detail_link'] = 'supplier_detail'
+        context['associated'] = 'partials/associated_assets.html'
+        context['associated2'] = ''
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        return context
 
 
 class SupplierCreate(generic.CreateView):

@@ -155,7 +155,7 @@ class GenericListView(generic.ListView):
     paginate_by = 20
 
     def get_context_data(self, **kwargs):
-        context = super(generic.ListView, self).get_context_data(**kwargs)
+        context = super(GenericListView, self).get_context_data(**kwargs)
         context['page_title'] = self.model.__name__ + "s"
         if self.request.is_ajax():
             context['override'] = "base_ajax.html"
@@ -181,6 +181,17 @@ class GenericListView(generic.ListView):
         if orderBy != "":
             object_list = object_list.order_by(orderBy)
         return object_list
+
+
+class GenericDetailView(generic.DetailView):
+    template_name = "generic_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GenericDetailView, self).get_context_data(**kwargs)
+        context['page_title'] = "{} | {}".format(self.model.__name__, self.object.name)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        return context
 
 
 class SearchHelp(generic.TemplateView):

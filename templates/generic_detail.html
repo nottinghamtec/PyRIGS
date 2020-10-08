@@ -1,15 +1,9 @@
-{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% extends override|default:"base_rigs.html" %}
 {% load widget_tweaks %}
-
-{% block title %}{{ type }} | {{ object.name }}{% endblock %}
+{% load button from filters %}
 
 {% block content %}
     <div class="row">
-        {% if not request.is_ajax %}
-            <div class="col-sm-12">
-                <h1>{{ type }} | {{ object.name }}</h1>
-            </div>
-        {% endif %}
         <div class="col">
             <div class="card border-info">
                 <div class="card-header">{{ type }} Details</div>
@@ -52,11 +46,10 @@
     {% endif %}
 
     {% if not request.is_ajax %}
-        <div class="row">
+        <div class="row py-2">
             <div class="col-sm-12 text-right">
                 <div class="btn-group">
-                    <a href="{% url update_link object.pk %}" class="btn btn-warning"><span
-                        class="fas fa-edit"></span> Edit</a>
+                    {% button 'edit' update_link object.pk %}
                 </div>
                 {% include 'partials/last_edited.html' with target=history_link %}
             </div>
@@ -65,13 +58,12 @@
 {% endblock %}
 {% if request.is_ajax %}
     {% block footer %}
-        <div class="row">
+        <div class="row py-2">
             <div class="col-sm-12 text-right">
                 <div class="btn-group btn-page">
                     <a href="{% url detail_link object.pk %}" class="btn btn-primary"><span
                         class="fas fa-eye"></span> Open Page</a>
-                    <a href="{% url update_link object.pk %}" class="btn btn-warning"><span
-                        class="fas fa-edit"></span> Edit</a>
+                    {% button 'edit' update_link object.pk %}
                 </div>
                 {% include 'partials/last_edited.html' with target=history_link %}
             </div>

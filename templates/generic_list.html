@@ -7,8 +7,8 @@
 
 {% block content %}
 <div class="row">
-    <div class="col text-right">
-        <form class="form-inline">
+    <div class="col">
+        <form class="form-inline justify-content-end">
             {% csrf_token %}
             <div class="input-group">
                 <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
