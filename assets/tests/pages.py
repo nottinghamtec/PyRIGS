@@ -124,7 +124,7 @@ class SupplierList(BasePage):
     URL_TEMPLATE = reverse('supplier_list')
 
     _supplier_item_locator = (By.ID, 'row_item')
-    _search_text_locator = (By.XPATH, '//*[@id="main"]/div[2]/form/div/input')
+    _search_text_locator = (By.ID, 'id_search_text')
     _go_button_locator = (By.ID, 'id_search')
 
     class SupplierListRow(Region):

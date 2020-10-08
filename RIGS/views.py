@@ -20,7 +20,7 @@ from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
 
-from PyRIGS.views import GenericListView,GenericDetailView
+from PyRIGS.views import GenericListView, GenericDetailView
 
 
 class PersonList(GenericListView):
@@ -43,8 +43,8 @@ class PersonDetail(GenericDetailView):
         context['history_link'] = 'person_history'
         context['detail_link'] = 'person_detail'
         context['update_link'] = 'person_update'
-        context['associated'] ='partials/associated_organisations.html'
-        context['associated2'] ='partials/associated_events.html'
+        context['associated'] = 'partials/associated_organisations.html'
+        context['associated2'] = 'partials/associated_events.html'
         return context
 
 
@@ -95,6 +95,7 @@ class OrganisationList(GenericListView):
         context['union_account'] = True
         return context
 
+
 class OrganisationDetail(GenericDetailView):
     model = models.Organisation
 
@@ -103,9 +104,10 @@ class OrganisationDetail(GenericDetailView):
         context['history_link'] = 'organisation_history'
         context['detail_link'] = 'organisation_detail'
         context['update_link'] = 'organisation_update'
-        context['associated'] ='partials/associated_people.html'
-        context['associated2'] ='partials/associated_events.html'
+        context['associated'] = 'partials/associated_people.html'
+        context['associated2'] = 'partials/associated_events.html'
         return context
+
 
 class OrganisationCreate(generic.CreateView):
     template_name = 'organisation_form.html'

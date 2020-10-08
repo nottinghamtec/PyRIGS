@@ -473,7 +473,7 @@ class Event(models.Model, RevisionMixin):
         return reverse_lazy('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return self.display_id + ": " + self.name
+        return "{}: {}".format(self.display_id, self.name)
 
     def clean(self):
         errdict = {}
