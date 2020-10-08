@@ -100,6 +100,11 @@ class EventChecklistDetail(generic.DetailView):
     model = models.EventChecklist
     template_name = 'event_checklist_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(EventChecklistDetail, self).get_context_data(**kwargs)
+        context['page_title'] = "Event Checklist for Event {} {}".format(self.object.event.display_id, self.object.event.name)
+        return context
+
 
 class EventChecklistEdit(generic.UpdateView):
     model = models.EventChecklist
@@ -126,18 +131,6 @@ class EventChecklistCreate(generic.CreateView):
     model = models.EventChecklist
     template_name = 'event_checklist_form.html'
     form_class = forms.EventChecklistForm
-
-    """def get(self, *args, **kwargs):
-        epk = kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-
-        # Check if RA exists
-        ra = models.EventChecklist.objects.filter(event=event).first()
-
-        if ra is not None:
-            return HttpResponseRedirect(reverse_lazy('ec_edit', kwargs={'pk': ra.pk}))
-
-        return super(EventChecklistCreate, self).get(self)"""
 
     def get_form(self, **kwargs):
         form = super(EventChecklistCreate, self).get_form(**kwargs)
@@ -192,3 +185,8 @@ class HSList(generic.ListView):
 
     def get_queryset(self):
         return models.Event.objects.all().order_by('-start_date')
+
+    def get_context_data(self, **kwargs):
+        context = super(HSList, self).get_context_data(**kwargs)
+        context['page_title'] = 'H&S Overview'
+        return context

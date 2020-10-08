@@ -64,10 +64,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
         context["form"] = self.form
-
         context["categories"] = models.AssetCategory.objects.all()
-
         context["statuses"] = models.AssetStatus.objects.all()
+        context["page_title"] = "Asset List"
         return context
 
 
@@ -208,8 +207,14 @@ class AssetAudit(AssetEdit):
 
 class SupplierList(GenericListView):
     model = models.Supplier
-    template_name = 'supplier_list.html'
     ordering = ['name']
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierList, self).get_context_data(**kwargs)
+        context['create'] = 'supplier_create'
+        context['edit'] = 'supplier_update'
+        context['detail'] = 'supplier_detail'
+        return context
 
 
 class SupplierSearch(SupplierList):

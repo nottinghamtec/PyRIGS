@@ -1,14 +1,15 @@
+{% load url_replace from filters %}
 {% if is_paginated %}
-    {% load url_replace from filters %}
+<div class="row justify-content-center pt-3">
     <nav>
-	    <ul class="pagination">
-		    {% if has_previous %}
-			    <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' previous %}">&lsaquo;&lsaquo;</a></li>
-		    {% else %}
-			    <li class="page-item disabled">
+        <ul class="pagination">
+	        {% if has_previous %}
+		        <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' previous %}">&lsaquo;&lsaquo;</a></li>
+	        {% else %}
+		        <li class="page-item disabled">
                     <span class="page-link" aria-hidden="true">&lsaquo;&lsaquo;</span>
                 </li>
-		    {% endif %}
+	        {% endif %}
 
             {% if show_first %}
                 <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' first %}" class="prev">{{ first }}</a></li>
@@ -37,4 +38,5 @@
             {% endif %}
         </ul>
     </nav>
+</div>
 {% endif %}

@@ -188,28 +188,30 @@ def linkornone(attr, namespace, autoescape=True):
         return "None"
 
 
-@register.inclusion_tag('button.html')
-def button(type, url=None, pk=None, clazz=None, icon=None, text=None):
+@register.inclusion_tag('partials/button.html')
+def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style=None):
     if type == 'edit':
-        clazz = "btn-warning"
+        clazz += " btn-warning "
         icon = "fa-edit"
         text = "Edit"
     elif type == 'print':
-        clazz = "btn-primary"
+        clazz += " btn-primary "
         icon = "fa-print"
         text = "Print"
     elif type == 'duplicate':
-        clazz = "btn-info"
+        clazz += " btn-info "
         icon = "fa-copy"
         text = "Duplicate"
     elif type == 'view':
-        clazz = "btn-primary"
+        clazz += " btn-primary "
         icon = "fa-eye"
-        text = "View"
+        text = "View " + text
     elif type == 'new':
-        clazz = "btn-primary"
+        clazz += " btn-primary "
         icon = "fa-plus"
         text = "New"
+    elif type == 'search':
+        return {'submit': True, 'class': 'btn-info', 'icon': 'fa-search', 'text': 'Search', 'id': id, 'style': style}
     elif type == 'submit':
-        return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save'}
-    return {'target': url, 'id': pk, 'class': clazz, 'icon': icon, 'text': text}
+        return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save', 'id': id, 'style': style}
+    return {'target': url, 'pk': pk, 'class': clazz, 'icon': icon, 'text': text, 'id': id, 'style': style}

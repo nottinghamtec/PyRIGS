@@ -24,8 +24,15 @@ from PyRIGS.views import GenericListView
 
 
 class PersonList(GenericListView):
-    template_name = 'person_list.html'
     model = models.Person
+
+    def get_context_data(self, **kwargs):
+        context = super(PersonList, self).get_context_data(**kwargs)
+        context['page_title'] = "People"
+        context['create'] = 'person_create'
+        context['edit'] = 'person_update'
+        context['detail'] = 'person_detail'
+        return context
 
 
 class PersonDetail(generic.DetailView):
@@ -70,9 +77,15 @@ class PersonUpdate(generic.UpdateView):
 
 
 class OrganisationList(GenericListView):
-    template_name = 'organisation_list.html'
     model = models.Organisation
 
+    def get_context_data(self, **kwargs):
+        context = super(OrganisationList, self).get_context_data(**kwargs)
+        context['create'] = 'organisation_create'
+        context['edit'] = 'organisation_update'
+        context['detail'] = 'organisation_detail'
+        context['union_account'] = True
+        return context
 
 class OrganisationDetail(generic.DetailView):
     template_name = 'organisation_detail.html'
@@ -116,8 +129,14 @@ class OrganisationUpdate(generic.UpdateView):
 
 
 class VenueList(GenericListView):
-    template_name = "venue_list.html"
     model = models.Venue
+
+    def get_context_data(self, **kwargs):
+        context = super(VenueList, self).get_context_data(**kwargs)
+        context['create'] = 'venue_create'
+        context['edit'] = 'venue_update'
+        context['detail'] = 'venue_detail'
+        return context
 
 
 class VenueDetail(generic.DetailView):

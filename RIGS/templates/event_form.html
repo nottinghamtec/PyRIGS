@@ -4,12 +4,6 @@
 {% load static %}
 {% load multiply from filters %}
 
-{% block title %}
-    {% if object.pk %}
-        Event {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
-    {% else %}New Event{% endif %}
-{% endblock %}
-
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
@@ -131,17 +125,6 @@
 <form class="form-horizontal itemised_form" role="form" method="POST">
     {% csrf_token %}
     <div class="row">
-        <div class="col-sm-12">
-            <h2>
-                {% if duplicate %}
-                    Duplicate of Event N{{ object.pk|stringformat:"05d" }}
-                {% elif object.pk %}
-                    Event N{{ object.pk|stringformat:"05d" }}
-                {% else %}
-                    New Event
-                {% endif %}
-            </h2>
-        </div>
         <div class="col-12">
             {% include 'form_errors.html' %}
         </div>

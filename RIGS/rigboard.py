@@ -44,6 +44,7 @@ class RigboardIndex(generic.TemplateView):
 
         # call out method to get current events
         context['events'] = models.Event.objects.current_events()
+        context['page_title'] = "Rigboard"
         return context
 
 
@@ -91,6 +92,7 @@ class EventCreate(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
+        context['page_title'] = "New Event"
         context['edit'] = True
         context['currentVAT'] = models.VatRate.objects.current_rate()
 
@@ -116,6 +118,7 @@ class EventUpdate(generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(EventUpdate, self).get_context_data(**kwargs)
+        context['page_title'] = "Event {}".format(self.object.display_id)
         context['edit'] = True
 
         form = context['form']
@@ -170,6 +173,7 @@ class EventDuplicate(EventUpdate):
 
     def get_context_data(self, **kwargs):
         context = super(EventDuplicate, self).get_context_data(**kwargs)
+        context['page_title'] = "Duplicate of Event {}".format(self.object.display_id)
         context["duplicate"] = True
         return context
 
@@ -225,6 +229,7 @@ class EventArchive(generic.ListView):
         context['start'] = self.request.GET.get('start', None)
         context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
         context['statuses'] = models.Event.EVENT_STATUS_CHOICES
+        context['page_title'] = 'Event Archive'
         return context
 
     def get_queryset(self):

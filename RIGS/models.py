@@ -335,7 +335,10 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def display_id(self):
-        return str("N%05d" % self.pk)
+        if self.is_rig:
+            return str("N%05d" % self.pk)
+        else:
+            return self.pk
 
     # Calculated values
     """
@@ -670,15 +673,6 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
-    """def clean(self):
-        errdict = {}
-        for field in RiskAssessment._meta.fields:
-            if field.__class__ == forms.BooleanField and self.field is None:
-                errdict[field.name] = ["This field is required"]
-
-        if errdict != {}:  # If there was an error when validation
-            raise ValidationError(errdict)"""
-
     @property
     def activity_feed_string(self):
         return str(self.event)
@@ -759,28 +753,6 @@ class EventChecklist(models.Model, RevisionMixin):
         permissions = [
             ('review_eventchecklist', 'Can review Event Checklists')
         ]
-
-    """def clean(self):
-        errdict = {}
-
-        if self.power_mic is None:
-            errdict["power_mic"] = ["You must select a Power MIC"]
-
-        if self.earthing is None or self.pat is None:
-            errdict['earthing'] = 'Fill out the electrical checks'
-
-        if self.event_size == 0 and (self.rcds is None or self.supply_test is None):
-            errdict['rcds'] = 'Fill out the small event electrical checks'
-
-        if self.event_size == 1:
-            if self.source_rcd is None or self.labelling is None or self.all_rcds_tested is None or self.public_sockets_tested is None:
-                errdict['source_rcd'] = 'Fill out the medium event electrical checks'
-
-            if self.w1_description is None or self.w1_polarity is None or self.w1_voltage is None or self.w1_earth_fault is None:
-                errdict['w1_description'] = 'Fully complete at least the first worst case point'
-
-        if errdict != {}:  # If there was an error when validation
-            raise ValidationError(errdict)"""
 
     @property
     def activity_feed_string(self):

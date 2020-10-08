@@ -7,7 +7,7 @@
         xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
         lang="{% firstof LANGUAGE_CODE 'en' %}">
 <head>
-    <title>{% block title %}{% endblock %} | Rig Information Gathering System</title>
+    <title>{{page_title}}{% block title %}{% endblock %} | Rig Information Gathering System</title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -70,7 +70,7 @@
             {% endfor %}
         {% endif %}
     {% endblock %}
-
+    {% if page_title %}<h2>{{page_title}}</h2>{% endif %}
     {% block content %}{% endblock %}
 </div>
 

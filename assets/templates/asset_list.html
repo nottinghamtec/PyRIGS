@@ -1,6 +1,6 @@
 {% extends 'base_assets.html' %}
-{% block title %}Asset List{% endblock %}
 {% load paginator from filters %}
+{% load button from filters %}
 {% load widget_tweaks %}
 {% load static %}
 
@@ -15,34 +15,35 @@
 {% endblock %}
 
 {% block content %}
-<h1>Asset List</h1>
-<div class="row justify-content-end">
-    <form id="asset-search-form" method="GET" class="form-inline">
-          <div class="input-group px-1">
-            {% render_field form.q|add_class:'form-control' placeholder='Search by Asset ID/Desc/Serial' %}
-            <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
-            <span class="input-group-append"><button type="submit" class="btn btn-info" id="id_search" style="width: 6em">Search</button></span>
-          </div>
-          <div id="category-group" class="form-group px-1" style="margin-bottom: 0;">
-            <label for="category" class="sr-only">Category</label>
-            {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
-          </div>
-          <div id="status-group" class="form-group px-1" style="margin-bottom: 0;">
-            <label for="status" class="sr-only">Status</label>
-            {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
-          </div>
-          <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
-    </form>
+<div class="row">
+    <div class="col">
+        <form id="asset-search-form" method="GET" class="form-inline justify-content-end">
+              <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
+                {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
+                <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
+                <span class="input-group-append">{% button 'search' id="id_search" style="width: 6em" %}</span>
+              </div>
+              <div id="category-group" class="form-group px-1" style="margin-bottom: 0;">
+                <label for="category" class="sr-only">Category</label>
+                {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+              </div>
+              <div id="status-group" class="form-group px-1" style="margin-bottom: 0;">
+                <label for="status" class="sr-only">Status</label>
+                {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+              </div>
+              <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
+        </form>
+    </div>
 </div>
-<div class="row justify-content-end">
-    <a href="{% url 'asset_create' %}" class="btn btn-primary my-2" style="width: 6em">New <span class="fas fa-plus"></span></a>
+<div class="row my-2">
+    <div class="col text-right">
+    {% button 'new' 'asset_create' style="width: 6em" %}
+    </div>
 </div>
 <div class="row">
+    <div class="col">
     {% include 'partials/asset_list_table.html' %}
+    </div>
 </div>
-{% if is_paginated %}
-<div class="text-center">
-  {% paginator %}
-</div>
-{% endif %}
+{% paginator %}
 {% endblock %}

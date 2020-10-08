@@ -151,7 +151,15 @@ class SecureAPIRequest(generic.View):
 
 
 class GenericListView(generic.ListView):
+    template_name = 'generic_list.html'
     paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super(generic.ListView, self).get_context_data(**kwargs)
+        context['page_title'] = self.model.__name__ + "s"
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        return context
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")

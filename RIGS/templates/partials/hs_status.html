@@ -4,11 +4,7 @@
         {% button 'view' view object.pk %}
         {% button 'edit' edit object.pk %}
     </div>
-    {% if object.reviewed_by %}
-    <span class='badge badge-success py-2'>Reviewed by <a href='{% url 'profile_detail' object.reviewed_by.pk %}'>{{object.reviewed_by}}</a> at {{object.reviewed_at}}</span>
-    {% elif perm %}
-    <a class='btn btn-success my-2' href='{% url review object.pk %}'>Mark Reviewed</a>
-    {% endif %}
+    {% include 'partials/review_status.html' %}
 {% elif event != None %}
 <a href="{% url create event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
             class="hidden-xs">Create</span></a>
