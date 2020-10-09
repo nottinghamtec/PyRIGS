@@ -9,6 +9,7 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
     <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/flatpickr.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
@@ -25,6 +26,8 @@
     <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script src="{% static 'js/autocompleter.js' %}"></script>
+
+    {% include 'partials/datetime-fix.html' %}
 
     <script>
         function setTime23Hours() {
@@ -45,11 +48,9 @@
 
         $(document).ready(function () {
             {% if not object.pk and not form.errors %}
-
                 $('.form-hws').slideUp(function () {
                     $('.form-is_rig').slideUp();
                 });
-
             {% elif not object.pk and form.errors %}
                 if ($('#{{form.is_rig.auto_id}}').attr('checked') != 'checked') {
                     $('.form-is_rig').hide();
@@ -73,45 +74,7 @@
                     }
                 });
             {% endif %}
-
-            function supportsDate() {
-                //return false; //for development
-                var input = document.createElement('input');
-                input.setAttribute('type','date');
-                var notADateValue = 'not-a-date';
-                input.setAttribute('value', notADateValue);
-                return !(input.value === notADateValue);
-            }
-            if(supportsDate()){
-                //Good, we'll use the browser implementation
-            }else{
-                //Rubbish browser - do JQuery backup
-                $('<link>')
-                  .appendTo('head')
-                  .attr({type : 'text/css', rel : 'stylesheet'})
-                  .attr('href', '{% static "css/bootstrap-datetimepicker.min.css" %}');
-                $.when(
-                    $.getScript( "{% static "js/moment.js" %}" ),
-                    $.getScript( "{% static "js/bootstrap-datetimepicker.js" %}" ),
-                    $.Deferred(function( deferred ){
-                        $( deferred.resolve );
-                    })
-                ).done(function(){
-                    $('input[type=date]').attr('type','text').datetimepicker({
-                        format: 'YYYY-MM-DD',
-                    });
-                    $('input[type=time]').attr('type','text').datetimepicker({
-                        format: 'HH:mm',
-                    });
-                    $('input[type=datetime-local]').attr('type','text').datetimepicker({
-                        format: 'YYYY-MM-DD[T]HH:mm',
-                        sideBySide: true,
-                    });
-                });
-
-            }
         });
-
         $(document).ready(function () {
             setupItemTable($("#{{ form.items_json.id_for_label }}").val());
         });

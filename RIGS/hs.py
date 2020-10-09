@@ -124,6 +124,7 @@ class EventChecklistEdit(generic.UpdateView):
         ec = models.EventChecklist.objects.get(pk=pk)
         context['event'] = ec.event
         context['edit'] = True
+        context['page_title'] = 'Edit Event Checklist for Event {}'.format(ec.event.display_id)
         return context
 
 
@@ -144,6 +145,7 @@ class EventChecklistCreate(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
+        context['page_title'] = 'Create Event Checklist for Event {}'.format(event.display_id)
         return context
 
     def get_success_url(self):

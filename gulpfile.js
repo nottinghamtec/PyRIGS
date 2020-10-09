@@ -23,9 +23,8 @@ function styles(done) {
                     'node_modules/fullcalendar/dist/fullcalendar.print.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    //'node_modules/@forevolve/bootstrap-dark/dist/css/bootstrap-dark.css',
+                    'node_modules/flatpickr/dist/flatpickr.css',
                     'node_modules/@activix/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css'])
-    //.pipe(_if('**/bootstrap-dark.css', rename({basename:'dark-mode'})))
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(postcss([ autoprefixer() ]))
@@ -51,6 +50,7 @@ function scripts() {
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/bootstrap/js/dist/alert.js',
 
+                    'node_modules/flatpickr/dist/flatpickr.min.js',
                     'node_modules/@fortawesome/fontawesome-free/js/all.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/dist/fullcalendar.js',

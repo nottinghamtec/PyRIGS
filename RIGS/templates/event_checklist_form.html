@@ -5,8 +5,6 @@
 {% load profile_by_index from filters %}
 {% load button from filters %}
 
-{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
-
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
@@ -27,6 +25,8 @@
     <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script src="{% static 'js/autocompleter.js' %}"></script>
+
+    {% include 'partials/datetime-fix.html' %}
 
     <script>
     $(document).ready(function () {
@@ -75,6 +75,7 @@
             newRow.find('select').addClass('selectpicker');
             newRow.find('.selectpicker').selectpicker('refresh');
             $(".selectpicker").each(function(){initPicker($(this))});
+            initDatetime();
             $(target).attr('data-pk', newID - 1);
         });
         $(document).on('click', 'button[data-action=delete]', function(event) {
@@ -92,7 +93,6 @@
 
 {% block content %}
     <div class="col-12">
-        <h3>{% if edit %}Edit{% else %}Create{% endif %} Event Checklist for Event N{{ event.pk|stringformat:"05d" }}</h3>
         {% include 'form_errors.html' %}
         {% if edit %}
         <form role="form" method="POST" action="{% url 'ec_edit' pk=object.pk %}">
