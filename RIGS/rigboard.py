@@ -153,7 +153,7 @@ class EventDuplicate(EventUpdate):
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None  # Remove old PO
-        new.status = new.PROVISIONAL # Return status to provisional
+        new.status = new.PROVISIONAL  # Return status to provisional
 
         # Clear checked in by if it's a dry hire
         if new.dry_hire is True:
