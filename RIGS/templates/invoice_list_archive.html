@@ -1,23 +1,7 @@
 {% extends 'invoice_list.html' %}
 
-{% block title %}
-Invoice Archive
-{% endblock %}
-
-{% block heading %}
-All Invoices
-{% endblock %}
-
-{% block description %}
-<p>This page displays all invoices: outstanding, paid, and void</p>
-{% endblock %}
-
 {% block search %}
-<div class="col-md-6">
-	<form class="form form-horizontal">
-	    <div class="form-group">
-	        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}" class="form-control"/>
-	    </div>
-	</form>
+<div class="py-3">
+{% include 'partials/list_search.html' %}
 </div>
 {% endblock %}

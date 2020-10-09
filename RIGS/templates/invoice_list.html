@@ -1,16 +1,14 @@
 {% extends 'base_rigs.html' %}
 {% load paginator from filters %}
+{% load button from filters %}
 {% load static %}
-
-{% block title %}Invoices{% endblock %}
 
 {% block content %}
     <div class="col-sm-12">
-        <h2>{% block heading %}Invoices{% endblock %}</h2>
-        {% block description %}{% endblock %}
+        {{ description }}
         {% block search %}{% endblock %}
         <div class="table-responsive">
-            <table class="table table-hover table-bordered table-sm">
+            <table class="table table-hover table-sm">
                 <thead>
                     <tr>
                         <th scope="col">Invoice #</th>
@@ -51,7 +49,7 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <a href="{% url 'invoice_detail' invoice.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span></a>
+                            {% button 'view' url='invoice_detail' pk=invoice.pk %}
                         </td>
                     </tr>
                 {% endfor %}

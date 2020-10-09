@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from versioning import versioning
-from PyRIGS.views import GenericListView, GenericDetailView
+from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -249,16 +249,20 @@ class SupplierDetail(GenericDetailView):
         return context
 
 
-class SupplierCreate(generic.CreateView):
+class SupplierCreate(GenericCreateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
-    template_name = 'supplier_update.html'
+
+    def get_success_url(self):
+        return self.get_close_url('supplier_update', 'supplier_detail')
 
 
-class SupplierUpdate(generic.UpdateView):
+class SupplierUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
-    template_name = 'supplier_update.html'
+
+    def get_success_url(self):
+        return self.get_close_url('supplier_update', 'supplier_detail')
 
 
 class CableTypeList(generic.ListView):

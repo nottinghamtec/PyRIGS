@@ -20,7 +20,7 @@ from RIGS import models, forms
 from assets import models as asset_models
 from functools import reduce
 
-from PyRIGS.views import GenericListView, GenericDetailView
+from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
 
 
 class PersonList(GenericListView):
@@ -48,40 +48,20 @@ class PersonDetail(GenericDetailView):
         return context
 
 
-class PersonCreate(generic.CreateView):
-    template_name = 'person_form.html'
+class PersonCreate(GenericCreateView, ModalURLMixin):
     model = models.Person
     fields = ['name', 'phone', 'email', 'address', 'notes']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('person_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('person_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('person_update', 'person_detail')
 
 
-class PersonUpdate(generic.UpdateView):
-    template_name = 'person_form.html'
+class PersonUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Person
     fields = ['name', 'phone', 'email', 'address', 'notes']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('person_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('person_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('person_update', 'person_detail')
 
 
 class OrganisationList(GenericListView):
@@ -109,40 +89,20 @@ class OrganisationDetail(GenericDetailView):
         return context
 
 
-class OrganisationCreate(generic.CreateView):
-    template_name = 'organisation_form.html'
+class OrganisationCreate(GenericCreateView, ModalURLMixin):
     model = models.Organisation
     fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('organisation_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('organisation_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('organisation_update', 'organisation_detail')
 
 
-class OrganisationUpdate(generic.UpdateView):
-    template_name = 'organisation_form.html'
+class OrganisationUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Organisation
     fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('organisation_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('organisation_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('organisation_update', 'organisation_detail')
 
 
 class VenueList(GenericListView):
@@ -168,37 +128,17 @@ class VenueDetail(GenericDetailView):
         return context
 
 
-class VenueCreate(generic.CreateView):
-    template_name = 'venue_form.html'
+class VenueCreate(GenericCreateView, ModalURLMixin):
     model = models.Venue
     fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('venue_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('venue_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('venue_update', 'venue_detail')
 
 
-class VenueUpdate(generic.UpdateView):
-    template_name = 'venue_form.html'
+class VenueUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Venue
     fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
 
     def get_success_url(self):
-        if self.request.is_ajax():
-            url = reverse_lazy('closemodal')
-            update_url = str(reverse_lazy('venue_update', kwargs={'pk': self.object.pk}))
-            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
-        else:
-            url = reverse_lazy('venue_detail', kwargs={
-                'pk': self.object.pk,
-            })
-        return url
+        return self.get_close_url('venue_update', 'venue_detail')

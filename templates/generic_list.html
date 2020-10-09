@@ -6,18 +6,7 @@
 {% load button from filters %}
 
 {% block content %}
-<div class="row">
-    <div class="col">
-        <form class="form-inline justify-content-end">
-            {% csrf_token %}
-            <div class="input-group">
-                <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
-                       class="form-control" id="id_search_text"/>
-                <span class="input-group-append">{% button 'search' id="id_search" %}</span>
-            </div>
-        </form>
-    </div>
-</div>
+{% include 'partials/list_search.html' %}
 <div class="row py-3">
     <div class="col text-right">
         {% button 'new' url=create %}

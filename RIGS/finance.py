@@ -25,15 +25,15 @@ forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
-    template_name = 'invoice_list_active.html'
+    template_name = 'invoice_list.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceIndex, self).get_context_data(**kwargs)
         total = 0
         for i in context['object_list']:
             total += i.balance
-        context['total'] = total
-        context['count'] = len(list(context['object_list']))
+        context['page_title'] = "Outstanding Invoices ({} Events, £{:.2f})".format(len(list(context['object_list'])), total)
+        context['description'] = "Paperwork for these events has been sent to treasury, but the full balance has not yet appeared on a ledger"
         return context
 
     def get_queryset(self):
@@ -130,6 +130,12 @@ class InvoiceArchive(generic.ListView):
     template_name = 'invoice_list_archive.html'
     paginate_by = 25
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceArchive, self).get_context_data(**kwargs)
+        context['page_title'] = "Invoice Archive"
+        context['description'] = "This page displays all invoices: outstanding, paid, and void"
+        return context
+
     def get_queryset(self):
         q = self.request.GET.get('q', "")
 
@@ -169,8 +175,7 @@ class InvoiceWaiting(generic.ListView):
         total = 0
         for obj in self.get_objects():
             total += obj.sum_total
-        context['total'] = total
-        context['count'] = len(self.get_objects())
+        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(self.get_objects()), total)
         return context
 
     def get_queryset(self):

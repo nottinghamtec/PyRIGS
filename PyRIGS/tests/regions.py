@@ -216,7 +216,7 @@ class ErrorPage(Region):
 
 class Modal(Region):
     _submit_locator = (By.CSS_SELECTOR, '.btn-primary')
-    _header_selector = (By.TAG_NAME, 'h3')
+    _header_selector = (By.TAG_NAME, 'h4')
 
     form_items = {
         'name': (TextBox, (By.ID, 'id_name'))

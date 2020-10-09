@@ -70,7 +70,9 @@
             {% endfor %}
         {% endif %}
     {% endblock %}
-    {% if page_title and not request.is_ajax %}<h2>{{page_title}}</h2>{% endif %}
+    {% if page_title and not request.is_ajax %}
+    <h2>{{page_title}}</h2>
+    {% endif %}
     {% block content %}{% endblock %}
 </div>
 

@@ -150,6 +150,20 @@ class SecureAPIRequest(generic.View):
         return HttpResponse(model)
 
 
+class ModalURLMixin:
+    def get_close_url(self, update, detail):
+        if self.request.is_ajax():
+            url = reverse_lazy('closemodal')
+            update_url = str(reverse_lazy(update, kwargs={'pk': self.object.pk}))
+            messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
+            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
+        else:
+            url = reverse_lazy(detail, kwargs={
+                'pk': self.object.pk,
+            })
+        return url
+
+
 class GenericListView(generic.ListView):
     template_name = 'generic_list.html'
     paginate_by = 20
@@ -189,6 +203,28 @@ class GenericDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(GenericDetailView, self).get_context_data(**kwargs)
         context['page_title'] = "{} | {}".format(self.model.__name__, self.object.name)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        return context
+
+
+class GenericUpdateView(generic.UpdateView):
+    template_name = "generic_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GenericUpdateView, self).get_context_data(**kwargs)
+        context['page_title'] = "Edit {}".format(self.model.__name__)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        return context
+
+
+class GenericCreateView(generic.CreateView):
+    template_name = "generic_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GenericCreateView, self).get_context_data(**kwargs)
+        context['page_title'] = "Create {}".format(self.model.__name__)
         if self.request.is_ajax():
             context['override'] = "base_ajax.html"
         return context

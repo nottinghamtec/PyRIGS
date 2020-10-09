@@ -152,7 +152,7 @@ class TestEventCreate(BaseRigboardTest):
         # animation_is_finished doesn't work for whatever reason...
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertTrue(modal.is_open)
-        self.assertIn("Add Person", modal.header)
+        self.assertIn("Create Person", modal.header)
 
         # Fill person form out and submit
         person_name = "Test Person"
@@ -171,7 +171,7 @@ class TestEventCreate(BaseRigboardTest):
         modal = self.page.add_person()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertTrue(modal.is_open)
-        self.assertIn("Add Person", modal.header)
+        self.assertIn("Create Person", modal.header)
 
         person_name = "Test Person 2"
         modal.name = person_name
