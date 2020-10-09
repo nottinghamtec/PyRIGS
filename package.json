@@ -11,7 +11,7 @@
     "ajax-bootstrap-select": "^1.4.5",
     "autocompleter": "^6.0.3",
     "autoprefixer": "^9.8.0",
-    "bootstrap": "^4.5.0",
+    "bootstrap": "^4.5.2",
     "bootstrap-select": "^1.13.17",
     "dark-mode-switch": "^1.0.0",
     "fullcalendar": "^3.10.2",
@@ -25,7 +25,7 @@
     "raven-js": "^3.27.2"
   },
   "devDependencies": {
-    "browser-sync": "^2.26.7",
+    "browser-sync": "^2.26.12",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
     "gulp-flatten": "^0.4.0",
