@@ -1,27 +1,20 @@
 {% extends 'base_rigs.html' %}
-
-{% block title %}Invoice {{ object.pk }}{% endblock %}
+{% load button from filters %}
 
 {% block content %}
     <div class="col-sm-12">
-        <div class="row">
-            <div class="col-sm-8">
-                <h2>Invoice {{ object.pk }} ({{ object.invoice_date|date:"d/m/Y"}})</h2>
-            </div>
-
+        <div class="row justify-content-end py-3">
             <div class="col-sm-4 text-right">
                 <div class="btn-group btn-page">
-                <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
-                    <span class="fas fa-times"></span> <span
-                            class="hidden-xs">Delete</span>
-                </a>
-                <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
-                    <span class="fas fa-ban"></span> <span
-                            class="hidden-xs">Void</span>
-                </a>
-                <a href="{% url 'invoice_print' object.pk %}" target="_blank" title="Print Invoice" class="btn btn-primary"><span
-                            class="fas fa-print"></span> <span
-                            class="hidden-xs">Print</span></a>
+                    <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
+                        <span class="fas fa-times"></span> <span
+                                class="hidden-xs">Delete</span>
+                    </a>
+                    <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
+                        <span class="fas fa-ban"></span> <span
+                                class="hidden-xs">Void</span>
+                    </a>
+                    {% button 'print' url='invoice_print' pk=object.pk %}
                 </div>
             </div>
         </div>

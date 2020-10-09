@@ -195,6 +195,7 @@ class EventPrint(generic.View):
             },
             'quote': True,
             'current_user': request.user,
+            'filename': 'Event {} {} {}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
         }
 
         rml = template.render(context)
@@ -209,10 +210,7 @@ class EventPrint(generic.View):
         merger.write(merged)
 
         response = HttpResponse(content_type='application/pdf')
-
-        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
-
-        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
+        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
         response.write(merged.getvalue())
         return response
 

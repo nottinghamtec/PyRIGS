@@ -580,10 +580,14 @@ class Invoice(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return "#{} for Event {}".format(self.pk, "N%05d" % self.event.pk)
+        return "#{} for Event {}".format(self.display_id, "N%05d" % self.event.pk)
 
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
+
+    @property
+    def display_id(self):
+        return "{:05d}".format(self.pk)
 
     class Meta:
         ordering = ['-invoice_date']

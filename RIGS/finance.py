@@ -57,6 +57,11 @@ class InvoiceDetail(generic.DetailView):
     model = models.Invoice
     template_name = 'invoice_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceDetail, self).get_context_data(**kwargs)
+        context['page_title'] = "Invoice {} ({})".format(self.object.display_id, self.object.invoice_date.strftime("%d/%m/%Y"))
+        return context
+
 
 class InvoicePrint(generic.View):
     def get(self, request, pk):
@@ -74,6 +79,7 @@ class InvoicePrint(generic.View):
             },
             'invoice': invoice,
             'current_user': request.user,
+            'filename': 'Invoice {} for {} {}.pdf'.format(invoice.display_id, object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name))
         }
 
         rml = template.render(context)
@@ -82,11 +88,8 @@ class InvoicePrint(generic.View):
 
         pdfData = buffer.read()
 
-        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
-
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (
-            invoice.pk, invoice.event.pk, escapedEventName)
+        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
         response.write(pdfData)
         return response
 
