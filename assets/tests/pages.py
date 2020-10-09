@@ -68,7 +68,6 @@ class AssetList(BasePage):
 class AssetForm(FormPage):
     _purchased_from_select_locator = (By.CSS_SELECTOR, 'div#purchased-from-group>div.bootstrap-select')
     _parent_select_locator = (By.CSS_SELECTOR, 'div#parent-group>div.bootstrap-select')
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -114,6 +113,7 @@ class AssetCreate(AssetForm):
 
 class AssetDuplicate(AssetForm):
     URL_TEMPLATE = '/assets/asset/id/{asset_id}/duplicate'
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Duplicate')]")
 
     @property
     def success(self):
@@ -152,7 +152,6 @@ class SupplierList(BasePage):
 
 
 class SupplierForm(FormPage):
-    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
     form_items = {
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }

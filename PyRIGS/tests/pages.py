@@ -31,6 +31,7 @@ class BasePage(Page):
 
 class FormPage(BasePage):
     _errors_selector = (By.CLASS_NAME, "alert-danger")
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
 
     def remove_all_required(self):
         self.driver.execute_script(
