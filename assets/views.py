@@ -191,6 +191,11 @@ class AssetAuditList(AssetList):
         self.form = forms.AssetSearchForm(data={})
         return self.model.objects.filter(Q(last_audited_at__isnull=True))
 
+    def get_context_data(self, **kwargs):
+        context = super(AssetAuditList, self).get_context_data(**kwargs)
+        context['page_title'] = "Asset Audit List"
+        return context
+
 
 class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
@@ -253,6 +258,14 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
 
+    def get_context_data(self, **kwargs):
+        context = super(SupplierCreate, self).get_context_data(**kwargs)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        return context
+
     def get_success_url(self):
         return self.get_close_url('supplier_update', 'supplier_detail')
 
@@ -260,6 +273,14 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
 class SupplierUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierUpdate, self).get_context_data(**kwargs)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        return context
 
     def get_success_url(self):
         return self.get_close_url('supplier_update', 'supplier_detail')

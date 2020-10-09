@@ -152,7 +152,7 @@ class SupplierList(BasePage):
 
 
 class SupplierForm(FormPage):
-    _submit_locator = (By.CLASS_NAME, 'btn-primary')
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
     form_items = {
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }
