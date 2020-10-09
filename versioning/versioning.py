@@ -4,7 +4,7 @@ import logging
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import EmailField, IntegerField, TextField, CharField
+from django.db.models import EmailField, IntegerField, TextField, CharField, BooleanField
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views import generic
@@ -29,6 +29,11 @@ class FieldComparison(object):
             # TODO This defensive piece should not be necessary?
             if len(choice) > 0:
                 return choice[0]
+        if isinstance(self.field, BooleanField):
+            if value:
+                return "&#10003;"
+            else:
+                return "&#10007"
         return value
 
     @property
