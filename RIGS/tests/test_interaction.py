@@ -662,6 +662,30 @@ class TestHealthAndSafety(BaseRigboardTest):
                                                      description="start future no end",
                                                      purchase_order='TESTPO',
                                                      person=self.client)
+        self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
+                                                      start_date=date.today() + timedelta(days=6),
+                                                      description="start future no end",
+                                                      purchase_order='TESTPO',
+                                                      person=self.client)
+        self.testRA = models.RiskAssessment.objects.create(event=self.testEvent2, supervisor_consulted=False, nonstandard_equipment=False,
+                                                           nonstandard_use=False,
+                                                           contractors=False,
+                                                           other_companies=False,
+                                                           crew_fatigue=False,
+                                                           big_power=False,
+                                                           generators=False,
+                                                           other_companies_power=False,
+                                                           nonstandard_equipment_power=False,
+                                                           multiple_electrical_environments=False,
+                                                           noise_monitoring=False,
+                                                           known_venue=True,
+                                                           safe_loading=True,
+                                                           safe_storage=True,
+                                                           area_outside_of_control=False,
+                                                           barrier_required=False,
+                                                           nonstandard_emergency_procedure=False,
+                                                           special_structures=False,
+                                                           suspended_structures=False)
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     # TODO Can I loop through all the boolean fields and test them at once?
@@ -700,8 +724,12 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.nonstandard_emergency_procedure = False
         self.page.special_structures = False
         self.page.persons_responsible_structures = "Nobody and her cat, She"
-        self.page.suspended_structures = False
 
+        self.page.suspended_structures = True
+        self.page.submit()
+        self.assertFalse(self.page.success)
+
+        self.page.suspended_structures = False
         self.page.submit()
         self.assertTrue(self.page.success)
 
@@ -710,27 +738,16 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.assertIn('edit', self.driver.current_url)
 
     def test_ra_edit(self):
-        # Create assessment to edit
-        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        self.page.nonstandard_equipment = False
-        self.page.nonstandard_use = False
-        self.page.contractors = False
-        self.page.other_companies = False
-        self.page.crew_fatigue = False
-        self.page.general_notes = "There are no notes."
-        self.page.big_power = False
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-        self.page.remove_all_required()
-        self.page.submit()
-        self.page = pages.EditRiskAssessment(self.driver, self.live_server_url, pk=models.RiskAssessment.objects.get(event=self.testEvent.pk).pk).open()
+        self.page = pages.EditRiskAssessment(self.driver, self.live_server_url, pk=self.testRA.pk).open()
         self.page.nonstandard_equipment = nse = True
         self.page.general_notes = gn = "There are some notes, but I've not written them here as that would be helpful"
         self.page.submit()
+        self.assertFalse(self.page.success)
+        self.page.supervisor_consulted = True
+        self.page.submit()
         self.assertTrue(self.page.success)
         # Check that data is right
-        ra = models.RiskAssessment.objects.get(event=self.testEvent.pk)
+        ra = models.RiskAssessment.objects.get(pk=self.testRA.pk)
         self.assertEqual(ra.general_notes, gn)
         self.assertEqual(ra.nonstandard_equipment, nse)
 

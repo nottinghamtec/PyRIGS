@@ -36,6 +36,7 @@ class EventRiskAssessmentCreate(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
+        context['page_title'] = 'Create Risk Assessment for Event {}'.format(event.display_id)
         return context
 
     def get_success_url(self):
@@ -60,6 +61,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         ra = models.RiskAssessment.objects.get(pk=rpk)
         context['event'] = ra.event
         context['edit'] = True
+        context['page_title'] = 'Edit Risk Assessment for Event {}'.format(ra.event.display_id)
         return context
 
 

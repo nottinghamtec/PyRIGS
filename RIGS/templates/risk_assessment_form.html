@@ -2,8 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load help_text from filters %}
-
-{% block title %}{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}{% endblock %}
+{% load nice_errors from filters %}
 
 {% block css %}
     {{ block.super }}
@@ -28,13 +27,34 @@
 {% endblock %}
 
 {% block content %}
-    <div class="col-sm-offset-1 col-sm-10">
-        <h3>{% if edit %}Edit{% else %}Create{% endif %} Risk Assessment for Event N{{ event.pk|stringformat:"05d" }}</h3>
-        {% include 'form_errors.html' %}
+    <div class="col">
+        {% if form.errors %}
+        <div class="alert alert-danger alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <dl>
+	            {% with form|nice_errors as qq %}
+		            {% for error_name,desc in qq.items %}
+                    {% if error_name == 'General form errors' %}
+                    {{ form.non_field_errors.0|safe }}
+                    <div class="text-right">
+                        {% render_field form.supervisor_consulted class+="form-check-input" form="form" %}<label class="form-check-label" for="{{ form.supervisor_consulted.id_for_label}}">Please confirm you've done so.</label><br>
+                        <button class="btn btn-primary mt-2" type="submit" form="form"><span class="fas fa-thumbs-up"></span> Confirm</button>
+                    </div>
+                    {% else %}
+                    <span class="row">
+		                <dt class="col-4">{{error_name}}</dt>
+		                <dd class="col-8">{{desc}}</dd>
+                    </span>
+                    {% endif %}
+		            {% endfor %}
+	            {% endwith %}
+            </dl>
+        </div>
+        {% endif %}
         {% if edit %}
-        <form role="form" method="POST" action="{% url 'ra_edit' pk=object.pk %}">
+        <form role="form" method="POST" action="{% url 'ra_edit' pk=object.pk %}" id="form">
         {% else %}
-        <form role="form" method="POST" action="{% url 'event_ra' pk=event.pk %}">
+        <form role="form" method="POST" action="{% url 'event_ra' pk=event.pk %}" id="form">
         {% endif %}
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>

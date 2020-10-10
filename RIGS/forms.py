@@ -161,11 +161,22 @@ class EventRiskAssessmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventRiskAssessmentForm, self).__init__(*args, **kwargs)
         for name, field in self.fields.items():
-            if field.__class__ == forms.BooleanField:
+            if str(name) == 'supervisor_consulted':
+                field.widget = forms.CheckboxInput()
+            elif field.__class__ == forms.BooleanField:
                 field.widget = forms.RadioSelect(choices=[
                     (True, 'Yes'),
                     (False, 'No')
                 ], attrs={'class': 'custom-control-input', 'required': 'true'})
+
+    def clean(self):
+        unexpected_values = []
+        for field, value in models.RiskAssessment.expected_values.items():
+            if self.cleaned_data.get(field) != value:
+                unexpected_values.append("<li>{}</li>".format(self._meta.model._meta.get_field(field).help_text))
+        if len(unexpected_values) > 0 and not self.cleaned_data.get('supervisor_consulted'):
+            raise forms.ValidationError("Your answers to these questions: <ul>{}</ul> require consulting with a supervisor.".format(''.join([str(elem) for elem in unexpected_values])), code='unusual_answers')
+        return super(EventRiskAssessmentForm, self).clean()
 
     class Meta:
         model = models.RiskAssessment

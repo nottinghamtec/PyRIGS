@@ -34,8 +34,8 @@ def to_class_name(value):
     return value.__class__.__name__
 
 
-@register.filter
-def nice_errors(form, non_field_msg='General form errors'):
+@register.filter(needs_autoescape=True)
+def nice_errors(form, non_field_msg='General form errors', autoescape=True):
     nice_errors = ErrorDict()
     if isinstance(form, forms.BaseForm):
         for field, errors in list(form.errors.items()):
@@ -123,7 +123,7 @@ def orderby(request, field, attr):
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
     if(isinstance(value, bool)):
-        value = yesnoi(value, field in obj.inverted_fields)
+        value = yesnoi(value)
     elif(isinstance(value, str)):
         value = truncatewords(value, 20)
     return mark_safe(value)

@@ -667,9 +667,29 @@ class RiskAssessment(models.Model, RevisionMixin):
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
 
-    inverted_fields = ['nonstandard_equipment', 'nonstandard_use', 'contractors', 'other_companies', 'crew_fatigue', 'big_power',
-                       'generators', 'other_companies_power', 'nonstandard_equipment_power', 'multiple_electrical_environments', 'noise_monitoring'
-                       'special_structures', 'suspended_structures']
+    supervisor_consulted = models.BooleanField(null=True)
+
+    expected_values = {
+        'nonstandard_equipment': False,
+        'nonstandard_use': False,
+        'contractors': False,
+        'other_companies': False,
+        'crew_fatigue': False,
+        'big_power': False,
+        'generators': False,
+        'other_companies_power': False,
+        'nonstandard_equipment_power': False,
+        'multiple_electrical_environments': False,
+        'noise_monitoring': False,
+        'known_venue': True,
+        'safe_loading': True,
+        'safe_storage': True,
+        'area_outside_of_control': False,
+        'barrier_required': False,
+        'nonstandard_emergency_procedure': False,
+        'special_structures': False,
+        'suspended_structures': False,
+    }
 
     class Meta:
         ordering = ['event']
