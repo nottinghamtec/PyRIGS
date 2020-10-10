@@ -187,12 +187,18 @@ class EventRiskAssessmentForm(forms.ModelForm):
 class EventChecklistForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventChecklistForm, self).__init__(*args, **kwargs)
+        self.fields['date'].widget.format = '%Y-%m-%d'
         for name, field in self.fields.items():
             if field.__class__ == forms.NullBooleanField:
                 # Only display yes/no to user, the 'none' is only ever set in the background
                 field.widget = forms.CheckboxInput()
     # Parsed from incoming form data by clean, then saved into models when the form is saved
     items = {}
+
+    related_models = {
+        'venue': models.Venue,
+        'power_mic': models.Profile,
+    }
 
     # Two possible formats
     def parsedatetime(self, date_string):

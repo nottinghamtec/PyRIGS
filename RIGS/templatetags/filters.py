@@ -47,6 +47,7 @@ def nice_errors(form, non_field_msg='General form errors', autoescape=True):
     return nice_errors
 
 
+@register.inclusion_tag('pagination.html', takes_context=True)
 def paginator(context, adjacent_pages=3):
     """
     To be used in conjunction with the object_list generic view.
@@ -90,9 +91,6 @@ def paginator(context, adjacent_pages=3):
     return dict
 
 
-register.inclusion_tag('pagination.html', takes_context=True)(paginator)
-
-
 @register.simple_tag
 def url_replace(request, field, value):
     dict_ = request.GET.copy()
@@ -123,7 +121,7 @@ def orderby(request, field, attr):
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
     if(isinstance(value, bool)):
-        value = yesnoi(value)
+        value = yesnoi(value, field in obj.inverted_fields)
     elif(isinstance(value, str)):
         value = truncatewords(value, 20)
     return mark_safe(value)

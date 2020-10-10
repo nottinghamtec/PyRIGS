@@ -690,6 +690,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         'special_structures': False,
         'suspended_structures': False,
     }
+    #inverted_fields = filter(lambda key,value: value, expected_values.items())
 
     class Meta:
         ordering = ['event']
@@ -719,6 +720,8 @@ class EventChecklist(models.Model, RevisionMixin):
     # General
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+    venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
+    date = models.DateField()
 
     # Safety Checks
     safe_parking = models.BooleanField(blank=True, null=True, help_text="Vehicles parked safely?<br><small>(does not obstruct venue access)</small>")

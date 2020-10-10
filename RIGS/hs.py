@@ -127,6 +127,12 @@ class EventChecklistEdit(generic.UpdateView):
         context['event'] = ec.event
         context['edit'] = True
         context['page_title'] = 'Edit Event Checklist for Event {}'.format(ec.event.display_id)
+        form = context['form']
+        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+        for field, model in form.related_models.items():
+            value = form[field].value()
+            if value is not None and value != '':
+                context[field] = model.objects.get(pk=value)
         return context
 
 

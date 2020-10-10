@@ -30,7 +30,7 @@
             {% include 'partials/hs_status.html' with event=event object=checklist view='ec_detail' edit='ec_edit' create='event_ec' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
             <br>
             {% endfor %}
-            <a href="{% url 'event_ec' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
+            <a href="{% url 'event_ec' event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
             class="hidden-xs">Create</span></a>
             </td>
         </tr>
