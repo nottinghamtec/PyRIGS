@@ -690,7 +690,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         'special_structures': False,
         'suspended_structures': False,
     }
-    #inverted_fields = filter(lambda key,value: value, expected_values.items())
+    inverted_fields = {key: value for (key, value) in expected_values.items() if not value}.keys()
 
     class Meta:
         ordering = ['event']
