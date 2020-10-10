@@ -128,7 +128,7 @@ class ModelComparison(object):
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(models.EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk

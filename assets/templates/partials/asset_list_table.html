@@ -24,8 +24,8 @@
                     <div class="btn-group" role="group">
                         {% button 'view' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
                         {% if perms.assets.change_asset %}
-                            {% button 'edit' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
-                            {% button 'duplicate' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
+                            {% button 'edit' url='asset_update' pk=item.asset_id clazz="btn-sm" %}
+                            {% button 'duplicate' url='asset_duplicate' pk=item.asset_id clazz="btn-sm" %}
                         {% endif %}
                     </div>
                     {% endif %}

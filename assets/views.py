@@ -297,6 +297,11 @@ class CableTypeDetail(generic.DetailView):
     model = models.CableType
     template_name = 'cable_type_form.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeDetail, self).get_context_data(**kwargs)
+        context["page_title"] = "Cable Type {}".format(str(self.object))
+        return context
+
 
 class CableTypeCreate(generic.CreateView):
     model = models.CableType
@@ -306,6 +311,7 @@ class CableTypeCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(CableTypeCreate, self).get_context_data(**kwargs)
         context["create"] = True
+        context["page_title"] = "Create Cable Type"
 
         return context
 
@@ -321,6 +327,7 @@ class CableTypeUpdate(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(CableTypeUpdate, self).get_context_data(**kwargs)
         context["edit"] = True
+        context["page_title"] = "Edit Cable Type"
 
         return context
 
