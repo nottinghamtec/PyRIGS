@@ -465,10 +465,12 @@ class TestHSLogic(TestCase):
                                                     is_active=True, is_staff=True)
 
         cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+        cls.venue = models.Venue.objects.create(name="Venue 1")
 
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today(),
-                                           description="This is an event description\nthat for a very specific reason spans two lines."),
+                                           description="This is an event description\nthat for a very specific reason spans two lines.",
+                                           venue=cls.venue),
             2: models.Event.objects.create(name="TE E2", start_date=date.today()),
         }
 
@@ -509,8 +511,9 @@ class TestHSLogic(TestCase):
                                                     extinguishers_location="Somewhere, I forgot",
                                                     earthing=False,
                                                     pat=False,
-                                                    event_size=0
-                                                    ),
+                                                    event_size=0,
+                                                    date=timezone.now(),
+                                                    venue=cls.venue),
         }
 
     def setUp(self):

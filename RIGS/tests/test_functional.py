@@ -19,43 +19,23 @@ from RIGS.tests import regions
 from . import pages
 
 
-class TestEventValidation(TestCase):
+class BaseCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-        cls.profile = models.Profile.objects.create(username="EventValidationTest", email="EVT@test.com", is_superuser=True, is_active=True, is_staff=True)
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-    def test_create(self):
-        url = reverse('event_create')
-        # end time before start access after start
-        response = self.client.post(url, {'start_date': datetime.date(2020, 1, 1), 'start_time': datetime.time(10, 00), 'end_time': datetime.time(9, 00), 'access_at': datetime.datetime(2020, 1, 5, 10)})
-        self.assertFormError(response, 'form', 'end_time', "Unless you've invented time travel, the event can't finish before it has started.")
-        self.assertFormError(response, 'form', 'access_at', "Regardless of what some clients might think, access time cannot be after the event has started.")
-
-
-class ClientEventAuthorisationTest(TestCase):
-    auth_data = {
-        'name': 'Test ABC',
-        'po': '1234ABCZXY',
-        'account_code': 'ABC TEST 12345',
-        'uni_id': 1234567890,
-        'tos': True
-    }
-
-    def setUp(self):
-        self.profile = models.Profile.objects.get_or_create(
+        cls.profile = models.Profile.objects.get_or_create(
             first_name='Test',
             last_name='TEC User',
             username='eventauthtest',
             email='teccie@functional.test',
             is_superuser=True  # lazily grant all permissions
         )[0]
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+
+    def setUp(self):
+        super().setUp()
+        self.profile.set_password('testuser')
+        self.profile.save()
+        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
         venue = models.Venue.objects.create(name='Authorisation Test Venue')
         client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
         organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=True)
@@ -66,6 +46,28 @@ class ClientEventAuthorisationTest(TestCase):
             person=client,
             organisation=organisation,
         )
+
+
+class TestEventValidation(BaseCase):
+    def test_create(self):
+        url = reverse('event_create')
+        # end time before start access after start
+        response = self.client.post(url, {'start_date': datetime.date(2020, 1, 1), 'start_time': datetime.time(10, 00), 'end_time': datetime.time(9, 00), 'access_at': datetime.datetime(2020, 1, 5, 10)})
+        self.assertFormError(response, 'form', 'end_time', "Unless you've invented time travel, the event can't finish before it has started.")
+        self.assertFormError(response, 'form', 'access_at', "Regardless of what some clients might think, access time cannot be after the event has started.")
+
+
+class ClientEventAuthorisationTest(BaseCase):
+    auth_data = {
+        'name': 'Test ABC',
+        'po': '1234ABCZXY',
+        'account_code': 'ABC TEST 12345',
+        'uni_id': 1234567890,
+        'tos': True
+    }
+
+    def setUp(self):
+        super().setUp()
         self.hmac = signing.dumps({'pk': self.event.pk, 'email': 'authemail@function.test',
                                    'sent_by': self.profile.pk})
         self.url = reverse('event_authorise', kwargs={'pk': self.event.pk, 'hmac': self.hmac})
@@ -131,45 +133,22 @@ class ClientEventAuthorisationTest(TestCase):
         self.assertEqual(mail.outbox[1].to, [settings.AUTHORISATION_NOTIFICATION_ADDRESS])
 
 
-class TECEventAuthorisationTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.get_or_create(
-            first_name='Test',
-            last_name='TEC User',
-            username='eventauthtest',
-            email='teccie@nottinghamtec.co.uk',
-            is_superuser=True  # lazily grant all permissions
-        )[0]
-        cls.profile.set_password('eventauthtest123')
-        cls.profile.save()
-
+class TECEventAuthorisationTest(BaseCase):
     def setUp(self):
-        self.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-        venue = models.Venue.objects.create(name='Authorisation Test Venue')
-        client = models.Person.objects.create(name='Authorisation Test Person', email='authorisation@functional.test')
-        organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=False)
-        self.event = models.Event.objects.create(
-            name='Authorisation Test',
-            start_date=date.today(),
-            venue=venue,
-            person=client,
-            organisation=organisation,
-        )
+        super().setUp()
         self.url = reverse('event_authorise_request', kwargs={'pk': self.event.pk})
 
     def test_email_check(self):
         self.profile.email = 'teccie@someotherdomain.com'
         self.profile.save()
 
-        self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))
-
         response = self.client.post(self.url)
 
         self.assertContains(response, 'must have an @nottinghamtec.co.uk email address')
 
     def test_request_send(self):
-        self.assertTrue(self.client.login(username=self.profile.username, password='eventauthtest123'))
+        self.profile.email = 'teccie@nottinghamtec.co.uk'
+        self.profile.save()
         response = self.client.post(self.url)
         self.assertContains(response, 'This field is required.')
 

@@ -230,7 +230,7 @@ class CreateEventChecklist(FormPage):
     URL_TEMPLATE = 'event/{event_id}/checklist'
 
     _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
-    _power_mic_selector = (By.CSS_SELECTOR, ".bootstrap-select")
+    _power_mic_selector = (By.XPATH, "//div[@id='id_power_mic-group']//div[contains(@class, 'bootstrap-select')]")
     _add_vehicle_locator = (By.XPATH, "//button[contains(., 'Vehicle')]")
     _add_crew_locator = (By.XPATH, "//button[contains(., 'Crew')]")
 

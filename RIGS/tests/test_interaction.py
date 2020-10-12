@@ -657,11 +657,14 @@ class TestHealthAndSafety(BaseRigboardTest):
             email='teccie@functional.test',
             is_superuser=True  # lazily grant all permissions
         )[0]
+        self.venue = models.Venue.objects.create(name="Venue 1")
+
         self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
                                                      start_date=date.today() + timedelta(days=6),
                                                      description="start future no end",
                                                      purchase_order='TESTPO',
-                                                     person=self.client)
+                                                     person=self.client,
+                                                     venue=self.venue)
         self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
                                                       start_date=date.today() + timedelta(days=6),
                                                       description="start future no end",
@@ -839,21 +842,19 @@ class TestHealthAndSafety(BaseRigboardTest):
 
         vehicle_name = 'Brian'
         self.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
-        driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '(//*[contains(@class,"bootstrap-select")])[2]'))
+        driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="vehicles_-1"]//div[contains(@class, "bootstrap-select")]'))
         driver.search(self.profile.name)
-        # driver.toggle()
 
         crew = self.profile
         role = "MIC"
-        crew_select = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '(//*[contains(@class,"bootstrap-select")])[3]'))
+        crew_select = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]'))
         start_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="start_-1"]'))
         end_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="end_-1"]'))
 
         start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
-        # TODO Validation of end before start
+        # TODO Test validation of end before start
         end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
         crew_select.search(crew.name)
-        # crew_select.toggle()
         self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
 
         self.page.select_size('Small')
