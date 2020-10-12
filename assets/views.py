@@ -252,6 +252,7 @@ class SupplierDetail(GenericDetailView):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
+        context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
         return context
 
 

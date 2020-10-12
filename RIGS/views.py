@@ -46,6 +46,7 @@ class PersonDetail(GenericDetailView):
         context['update_link'] = 'person_update'
         context['associated'] = 'partials/associated_organisations.html'
         context['associated2'] = 'partials/associated_events.html'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_person')
         return context
 
 
@@ -88,6 +89,7 @@ class OrganisationDetail(GenericDetailView):
         context['update_link'] = 'organisation_update'
         context['associated'] = 'partials/associated_people.html'
         context['associated2'] = 'partials/associated_events.html'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_organisation')
         return context
 
 
@@ -128,6 +130,7 @@ class VenueDetail(GenericDetailView):
         context['detail_link'] = 'venue_detail'
         context['update_link'] = 'venue_update'
         context['associated2'] = 'partials/associated_events.html'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_venue')
         return context
 
 

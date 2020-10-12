@@ -48,9 +48,11 @@
     {% if not request.is_ajax %}
         <div class="row py-2">
             <div class="col-sm-12 text-right">
+                {% if can_edit %}
                 <div class="btn-group">
                     {% button 'edit' update_link object.pk %}
                 </div>
+                {% endif %}
                 {% include 'partials/last_edited.html' with target=history_link %}
             </div>
         </div>
@@ -63,7 +65,9 @@
                 <div class="btn-group btn-page">
                     <a href="{% url detail_link object.pk %}" class="btn btn-primary"><span
                         class="fas fa-eye"></span> Open Page</a>
+                    {% if can_edit %}
                     {% button 'edit' update_link object.pk %}
+                    {% endif %}
                 </div>
                 {% include 'partials/last_edited.html' with target=history_link %}
             </div>
