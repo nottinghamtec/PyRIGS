@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 <div class="col-md-6 mt-3">
-    <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3">
+    <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3" style="display: none;">
         <div class="card-header">Contact Details</div>
         <div class="card-body">
             <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
@@ -58,7 +58,7 @@
             </div>
         </div>
     </div>
-    <div class="card form-hws form-non_rig mb-3">
+    <div class="card form-hws form-non_rig mb-3" style="display: none;">
         <div class="card-header">Event Description</div>
         <div class="card-body">
             <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
