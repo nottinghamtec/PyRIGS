@@ -41,7 +41,9 @@
                         <td>
                             <div class="btn-group d-flex" role="group">
                                 {% button 'view' url=detail pk=object.pk clazz="btn-sm modal-href" %}
+                                {% if can_edit %}
                                 {% button 'edit' url=edit pk=object.pk clazz="btn-sm modal-href" %}
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

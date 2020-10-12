@@ -218,6 +218,7 @@ class SupplierList(GenericListView):
         context = super(SupplierList, self).get_context_data(**kwargs)
         context['create'] = 'supplier_create'
         context['edit'] = 'supplier_update'
+        context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
         context['detail'] = 'supplier_detail'
         if self.request.is_ajax():
             context['override'] = "base_ajax.html"

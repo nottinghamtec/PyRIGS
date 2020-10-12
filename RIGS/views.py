@@ -31,6 +31,7 @@ class PersonList(GenericListView):
         context['page_title'] = "People"
         context['create'] = 'person_create'
         context['edit'] = 'person_update'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_person')
         context['detail'] = 'person_detail'
         return context
 
@@ -71,6 +72,7 @@ class OrganisationList(GenericListView):
         context = super(OrganisationList, self).get_context_data(**kwargs)
         context['create'] = 'organisation_create'
         context['edit'] = 'organisation_update'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_organisation')
         context['detail'] = 'organisation_detail'
         context['union_account'] = True
         return context
@@ -112,6 +114,7 @@ class VenueList(GenericListView):
         context = super(VenueList, self).get_context_data(**kwargs)
         context['create'] = 'venue_create'
         context['edit'] = 'venue_update'
+        context['can_edit'] = self.request.user.has_perm('RIGS.change_venue')
         context['detail'] = 'venue_detail'
         return context
 
