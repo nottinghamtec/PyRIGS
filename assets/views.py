@@ -15,6 +15,7 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from versioning import versioning
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
+from itertools import chain
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -64,6 +65,8 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
         context["form"] = self.form
+        context["category_filters"] = self.form.cleaned_data['category']
+        context["status_filters"] = self.form.cleaned_data['status']
         context["categories"] = models.AssetCategory.objects.all()
         context["statuses"] = models.AssetStatus.objects.all()
         context["page_title"] = "Asset List"

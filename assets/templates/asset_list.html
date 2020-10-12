@@ -14,6 +14,48 @@
     <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
 {% endblock %}
 
+{% block js %}
+    <script>
+        //Get querystring value
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+        //Function used to remove querystring
+        function removeQString(key) {
+	        var urlValue=document.location.href;
+
+	        //Get query string value
+	        var searchUrl=location.search;
+
+	        if(key!="") {
+		        oldValue = getParameterByName(key);
+		        removeVal=key+"="+oldValue;
+		        if(searchUrl.indexOf('?'+removeVal+'&')!= "-1") {
+			        urlValue=urlValue.replace('?'+removeVal+'&','?');
+		        }
+		        else if(searchUrl.indexOf('&'+removeVal+'&')!= "-1") {
+			        urlValue=urlValue.replace('&'+removeVal+'&','&');
+		        }
+		        else if(searchUrl.indexOf('?'+removeVal)!= "-1") {
+			        urlValue=urlValue.replace('?'+removeVal,'');
+		        }
+		        else if(searchUrl.indexOf('&'+removeVal)!= "-1") {
+			        urlValue=urlValue.replace('&'+removeVal,'');
+		        }
+	        }
+	        else {
+		        var searchUrl=location.search;
+		        urlValue=urlValue.replace(searchUrl,'');
+	        }
+	        history.pushState({state:1, rand: Math.random()}, '', urlValue);
+            window.location.reload(true);
+        }
+    </script>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col">
@@ -40,8 +82,18 @@
     {% button 'new' 'asset_create' style="width: 6em" %}
     </div>
 </div>
+<div class="row my-2">
+    <div class="col bg-dark rounded pt-3">
+        {# TODO Gotta be a cleaner way to do this... #}
+        <p><span class="ml-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('category', '{{filter.id}}')"></span>
+</button></span>{%endfor%}{% for filter in status_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('status', '{{filter.id}}')"></span>
+</button></span>{%endfor%}</p>
+    </div>
+</div>
 <div class="row">
-    <div class="col">
+    <div class="col px-0">
     {% include 'partials/asset_list_table.html' %}
     </div>
 </div>
