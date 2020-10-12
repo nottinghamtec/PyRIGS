@@ -174,7 +174,7 @@ class Command(BaseCommand):
                           "add_person", "change_person", "view_person", "view_profile",
                           "add_venue", "change_venue", "view_venue",
                           "add_asset", "change_asset", "delete_asset",
-                          "view_asset", "view_supplier", "asset_finance",
+                          "view_asset", "view_supplier", "change_supplier", "asset_finance",
                           "add_supplier", "view_cabletype", "change_cabletype",
                           "add_cabletype", "view_eventchecklist", "change_eventchecklist",
                           "add_eventchecklist", "view_riskassessment", "change_riskassessment",
