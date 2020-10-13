@@ -2,7 +2,7 @@
 {% load l10n %}
 
 <div class="col-md-6 my-3">
-    <div class="card card-default form-hws form-non_rig" style="display: none;">
+    <div class="card card-default form-hws form-non_rig" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
         <div class="card-header">Event Details</div>
         <div class="card-body">
             <div id="form-hws">

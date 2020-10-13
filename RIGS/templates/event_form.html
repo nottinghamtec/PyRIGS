@@ -128,7 +128,7 @@
 
         {# Notes and item shit #}
         <div class="col-sm-12">
-            <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}" style="display: none;">
+            <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
                 <div class="card-body">
                     <div class="col-sm-12">
                         <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
@@ -140,7 +140,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 text-right form-hws form-non_rig my-3" style="display: none;">
+        <div class="col-sm-12 text-right form-hws form-non_rig my-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
             {% button 'submit' %}
         </div>
     </div>

@@ -26,8 +26,8 @@ def create_browser():
     options.add_argument("--disk-cache-size=0")
     # God Save The Queen
     options.add_argument("--lang=en_GB")
+    options.add_argument("--headless")
     if os.environ.get('CI', False):
-        options.add_argument("--headless")
         options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(options=options)
     return driver
