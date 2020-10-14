@@ -23,8 +23,7 @@ function styles(done) {
                     'node_modules/fullcalendar/dist/fullcalendar.print.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/flatpickr/dist/flatpickr.css',
-                    'node_modules/@activix/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css'])
+                    'node_modules/flatpickr/dist/flatpickr.css'])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(postcss([ autoprefixer() ]))
@@ -57,8 +56,7 @@ function scripts() {
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
                     'node_modules/konami/konami.js',
-                    'node_modules/dark-mode-switch/dark-mode-switch.min.js',
-                    'node_modules/@activix/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js'])
+                    'node_modules/dark-mode-switch/dark-mode-switch.min.js'])
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest('RIGS/static/js'))

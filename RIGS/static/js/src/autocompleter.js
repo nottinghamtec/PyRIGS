@@ -19,11 +19,12 @@ function refreshUpdateHref(obj) {
     update_url = $('option:selected', obj).data('update_url');
 
     if (update_url=="") {  //Probably "clear selection" has been chosen
-    //	console.log('Trying to disable');
-	    targetObject.attr('disabled', true);
+        //console.log('Trying to disable');
+        targetObject.removeAttr('href');
+	    targetObject.addClass('disabled');
     } else {
-	    targetObject.attr('href', update_url);
-	    targetObject.attr('disabled', false);
+	    targetObject.prop('href', update_url);
+	    targetObject.removeClass('disabled');
     }
 }
 
@@ -78,9 +79,8 @@ function initPicker(obj) {
 
 
 	obj.selectpicker().ajaxSelectPicker(options); //Initiaise selectPicker
-
 	obj.change(function(){ //on change, update the edit button href
-	//	console.log('Selectbox Changed');
+		//console.log('Selectbox Changed');
 		refreshUpdateHref(obj);
 	});
 
