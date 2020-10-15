@@ -1,4 +1,6 @@
 {% load namewithnotes from filters %}
+{% load cache %}
+{% cache None event_table request.user %}
 <div class="table-responsive">
     <table class="table mb-0">
         <thead>
@@ -102,3 +104,4 @@
         </tbody>
     </table>
 </div>
+{% endcache %}

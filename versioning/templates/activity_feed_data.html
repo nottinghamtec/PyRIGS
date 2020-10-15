@@ -4,8 +4,10 @@
 {% load humanize %}
 {% load paginator from filters %}
 {% load to_class_name from filters %}
+{% load cache %}
 
 {% block content %}
+{% cache None feed_data request.user %}
 <div class="list-group-item">
     <div class="media">
     {% for version in object_list %}
@@ -48,4 +50,5 @@
     </div>
     </div>
 </div>
+{% endcache %}
 {% endblock %}

@@ -7,12 +7,11 @@ from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
 from RIGS import finance, ical, models, rigboard, views, hs
 from versioning import views
-from django.views.decorators.cache import cache_page
 from django.apps import apps
 
 urlpatterns = [
     path('rigboard/activity/feed/',
-         cache_page(60 * 10)(permission_required_with_403('RIGS.view_event')(views.ActivityFeed.as_view())),
+         permission_required_with_403('RIGS.view_event')(views.ActivityFeed.as_view()),
          name='activity_feed'),
 ]
 

@@ -141,8 +141,6 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 
 user_activated.connect(send_admin_awaiting_approval_email)
 
-# TODO Move
-
 
 def update_cache(sender, instance, created, **kwargs):
     cache.clear()

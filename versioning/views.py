@@ -15,7 +15,7 @@ from django.apps import apps
 from reversion import revisions as reversion
 from versioning.versioning import RIGSVersion
 
-from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import never_cache, cache_page
 from django.utils.decorators import method_decorator
 
 
@@ -78,7 +78,6 @@ class ActivityTable(generic.ListView):
         return context
 
 
-@method_decorator(never_cache, name='dispatch')  # Disable browser based caching
 class ActivityFeed(generic.ListView):  # Appears on homepage
     model = RIGSVersion
     template_name = "activity_feed_data.html"
