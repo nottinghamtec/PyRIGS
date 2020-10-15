@@ -1,3 +1,4 @@
+{% load namewithnotes from filters %}
 <div class="card card-info">
     <div class="card-header">Event Info</div>
     <div class="card-body">
@@ -6,14 +7,14 @@
             <dd class="col-sm-6">
                 {% if object.venue %}
                     <a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">
-                        {{ object.venue }}
+                        {{ object.venue|namewithnotes:'venue_detail' }}
                     </a>
                 {% endif %}
             </dd>
             {% if object.venue %}
             <dt class="col-sm-6">Venue Notes</dt>
             <dd class="col-sm-6">
-                {{ object.venue.notes }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%} 
+                {{ object.venue.notes }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%}
             </dd>
             {% endif %}
 

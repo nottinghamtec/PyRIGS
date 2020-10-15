@@ -1,5 +1,6 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 {% load linkornone from filters %}
+{% load namewithnotes from filters %}
 
 {% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
 
@@ -30,7 +31,7 @@
                         <dd class="col-sm-6">
                             {% if object.person %}
                                 <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
-                                    {{ object.person }}
+                                    {{ object.person|namewithnotes:'person_detail' }}
                                 </a>
                             {% endif %}
                         </dd>
@@ -51,7 +52,7 @@
                             <dd class="col-sm-6">
                                 {% if object.organisation %}
                                     <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
-                                        {{ object.organisation }}
+                                        {{ object.organisation|namewithnotes:'organisation_detail' }}
                                     </a>
                                 {% endif %}
                             </dd>
