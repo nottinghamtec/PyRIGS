@@ -11,7 +11,21 @@
         </thead>
         <tbody>
         {% for event in events %}
-        <tr class="{{event.status_color}}" id="event_row">
+        <tr class="{% if event.cancelled %}
+                    table-secondary
+                    {% elif not event.is_rig %}
+                    table-info
+                    {% elif not event.mic %}
+                    table-danger
+                    {% elif event.confirmed and event.authorised %}
+                        {% if self.dry_hire or self.riskassessment %}
+                            table-success
+                        {% else %}
+                            table-warning
+                        {% endif %}
+                    {% else %}
+                    table-warning
+                    {% endif %}" id="event_row">
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->

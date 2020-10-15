@@ -380,13 +380,6 @@ class Event(models.Model, RevisionMixin):
         return (self.status == self.BOOKED or self.status == self.CONFIRMED)
 
     @property
-    def authorised(self):
-        if self.internal:
-            return self.authorisation.amount == self.total
-        else:
-            return bool(self.purchase_order)
-
-    @property
     def hs_done(self):
         return self.riskassessment is not None and len(self.checklists.all()) > 0
 
@@ -455,17 +448,11 @@ class Event(models.Model, RevisionMixin):
         return bool(self.organisation and self.organisation.union_account)
 
     @property
-    def status_color(self):
-        if self.cancelled:
-            return "table-secondary"
-        elif not self.is_rig:
-            return "table-info"
-        elif not self.mic:
-            return "table-danger"
-        elif self.confirmed and self.authorised and (self.dry_hire or self.riskassessment):
-            return "table-success"
+    def authorised(self):
+        if self.internal:
+            return self.authorisation.amount == self.total
         else:
-            return "table-warning"
+            return bool(self.purchase_order)
 
     objects = EventManager()
 
