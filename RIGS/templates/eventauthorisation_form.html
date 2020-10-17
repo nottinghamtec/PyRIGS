@@ -11,7 +11,7 @@
             <div class="card-header" id="eventauth">Event Authorisation</div>
 
             <div class="card-body">
-                <form class="form-horizontal itemised_form" role="form" method="POST" action="#eventauth">
+                <form class=" itemised_form" role="form" method="POST" action="#eventauth">
                     {% csrf_token %}
                     {% include 'form_errors.html' %}
                     <div class="row">
@@ -29,7 +29,7 @@
                             <div class="col-sm-12 form-group" data-toggle="tooltip"
                                  title="Your name as the person authorising the event.">
                                 <label for="{{ form.name.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.name.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.name.label }}</label>
 
                                 <div class="col-sm-8">
                                     {% render_field form.name class+="form-control" %}
@@ -39,7 +39,7 @@
                             <div class="col-sm-12 form-group" data-toggle="tooltip"
                                  title="Your Student ID or Staff username as the person authorising the event.">
                                 <label for="{{ form.uni_id.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.uni_id.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.uni_id.label }}</label>
                                 <div class="col-sm-8">
                                     {% render_field form.uni_id class+="form-control" %}
                                 </div>
@@ -50,7 +50,7 @@
                             <div class="col-sm-12 form-group" data-toggle="tooltip"
                                  title="The Students' Union account code you wish this event to be charged to.">
                                 <label for="{{ form.account_code.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.account_code.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.account_code.label }}</label>
                                 <div class="col-sm-8">
                                     {% render_field form.account_code class+="form-control" %}
                                 </div>
@@ -59,7 +59,7 @@
                             <div class="col-sm-12 form-group" data-toggle="tooltip"
                                  title="The full amount chargable for this event as displayed above, including VAT.">
                                 <label for="{{ form.amount.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.amount.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.amount.label }}</label>
                                 <div class="col-sm-8">
                                     {% render_field form.amount class+="form-control" %}
                                 </div>

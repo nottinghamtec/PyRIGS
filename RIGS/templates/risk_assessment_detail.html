@@ -142,7 +142,7 @@
     </div>
     <div class="col-12 text-right">
         <a href="{% url 'ra_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
-            class="hidden-xs">Edit</span></a>
+            class="d-none d-sm-inline">Edit</span></a>
         <a href="{% url 'event_detail' object.event.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View Event</a>
         {{ object.review_string|safe }}
         {% include 'partials/last_edited.html' with target="riskassessment_history" %}

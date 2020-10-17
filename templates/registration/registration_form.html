@@ -13,10 +13,10 @@
     {% endif %}
 
     <div class="col-sm-8 col-sm-offset-2">
-        <form action="" method="post" class="form-horizontal" role="form">{% csrf_token %}
+        <form action="" method="post" class="" role="form">{% csrf_token %}
             {% for field in form %}
             	<div class="form-group">
-            		<label for="{{ field.id_for_label }}" class="control-label col-sm-4">{{ field.label }}</label>
+            		<label for="{{ field.id_for_label }}" class="col-form-label col-sm-4">{{ field.label }}</label>
             		<div class="controls col-sm-8">
             			{% render_field field class+="form-control" placeholder=field.label %}
             		</div>

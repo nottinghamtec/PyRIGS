@@ -92,7 +92,7 @@
 
 {% block content %}
 {% include 'item_modal.html' %}
-<form class="form-horizontal itemised_form" role="form" method="POST">
+<form class=" itemised_form" role="form" method="POST">
     {% csrf_token %}
     <div class="row">
         <div class="col-12">
@@ -127,7 +127,7 @@
                 <div class="card-body">
                     <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
                         <label for="{{ form.person.id_for_label }}"
-                               class="col-sm-4 control-label">{{ form.person.label }}</label>
+                               class="col-sm-4 col-form-label">{{ form.person.label }}</label>
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-9 col-md-7 col-lg-8">
@@ -153,7 +153,7 @@
                     </div>
                     <div class="form-group" data-toggle="tooltip" title="The client organisation, leave blank if client is an individual">
                         <label for="{{ form.organisation.id_for_label }}"
-                               class="col-sm-4 control-label">{{ form.organisation.label }}</label>
+                               class="col-sm-4 col-form-label">{{ form.organisation.label }}</label>
 
                         <div class="col-sm-8">
                             <div class="row">
@@ -185,7 +185,7 @@
                 <div class="card-body">
                     <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
                         <label for="{{ form.description.id_for_label }}"
-                               class="col-sm-4 control-label">{{ form.description.label }}</label>
+                               class="col-sm-4 col-form-label">{{ form.description.label }}</label>
 
                         <div class="col-sm-8">
                             {% render_field form.description class+="form-control" %}
@@ -203,7 +203,7 @@
                     <div id="form-hws">
                         <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
                             <label for="{{ form.name.id_for_label }}"
-                                   class="col-sm-4 control-label">{{ form.name.label }}</label>
+                                   class="col-sm-4 col-form-label">{{ form.name.label }}</label>
 
                             <div class="col-sm-8">
                                 {% render_field form.name class+="form-control" %}
@@ -211,7 +211,7 @@
                         </div>
                         <div class="form-group" data-toggle="tooltip" title="The venue for the rig, leave blank if unknown (e.g. for a dry hire)">
                             <label for="{{ form.venue.id_for_label }}"
-                                   class="col-sm-4 control-label">{{ form.venue.label }}</label>
+                                   class="col-sm-4 col-form-label">{{ form.venue.label }}</label>
 
                             <div class="col-sm-8">
                                 <div class="row">
@@ -238,7 +238,7 @@
                         </div>
                         <div class="form-group">
                             <label for="{{ form.start_date.id_for_label }}"
-                                   class="col-sm-4 control-label">{{ form.start_date.label }}</label>
+                                   class="col-sm-4 col-form-label">{{ form.start_date.label }}</label>
 
                             <div class="col-sm-8">
                                 <div class="row">
@@ -253,7 +253,7 @@
                         </div>
                         <div class="form-group">
                             <label for="{{ form.end_date.id_for_label }}"
-                                   class="col-sm-4 control-label">{{ form.end_date.label }}</label>
+                                   class="col-sm-4 col-form-label">{{ form.end_date.label }}</label>
 
                             <div class="col-sm-8">
                                 <div class="row">
@@ -271,14 +271,14 @@
                         <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
                             <div class="form-group" data-toggle="tooltip" title="The date/time at which TEC have access to the venue">
                                 <label for="{{ form.access_at.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.access_at.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.access_at.label }}</label>
                                 <div class="col-sm-8">
                                     {% render_field form.access_at class+="form-control" step="60" %}
                                 </div>
                             </div>
                             <div class="form-group" data-toggle="tooltip" title="The date/time at which crew should meet for this event">
                                 <label for="{{ form.meet_at.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.meet_at.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.meet_at.label }}</label>
 
                                 <div class="col-sm-8">
                                     {% render_field form.meet_at class+="form-control" step="60" %}
@@ -298,7 +298,7 @@
                         {# Status is needed on all events types and it looks good here in the form #}
                         <div class="form-group" data-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
                             <label for="{{ form.status.id_for_label }}"
-                                   class="col-sm-4 control-label">{{ form.status.label }}</label>
+                                   class="col-sm-4 col-form-label">{{ form.status.label }}</label>
 
                             <div class="col-sm-8">
                                 {% render_field form.status class+="form-control" %}
@@ -308,7 +308,7 @@
                         <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
                             <div class="form-group" data-toggle="tooltip" title="The Member in Charge of this event">
                                 <label for="{{ form.mic.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.mic.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.mic.label }}</label>
 
                                 <div class="col-sm-8">
                                     <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
@@ -322,7 +322,7 @@
                             {% if object.dry_hire %}
                                 <div class="form-group" data-toggle="tooltip" title="The person who checked-in this dry hire">
                                     <label for="{{ form.checked_in_by.id_for_label }}"
-                                           class="col-sm-4 control-label">{{ form.checked_in_by.label }}</label>
+                                           class="col-sm-4 col-form-label">{{ form.checked_in_by.label }}</label>
 
                                     <div class="col-sm-8">
                                          <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
@@ -336,7 +336,7 @@
 
                             <div class="form-group" data-toggle="tooltip" title="The student ID of the client who collected the dry-hire">
                                 <label for="{{ form.collector.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.collector.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.collector.label }}</label>
 
                                 <div class="col-sm-8">
                                     {% render_field form.collector class+="form-control" %}
@@ -345,7 +345,7 @@
 
                             <div class="form-group" data-toggle="tooltip" title="The purchase order number (for external clients)">
                                 <label for="{{ form.purchase_order.id_for_label }}"
-                                       class="col-sm-4 control-label">{{ form.purchase_order.label }}</label>
+                                       class="col-sm-4 col-form-label">{{ form.purchase_order.label }}</label>
 
                                 <div class="col-sm-8">
                                     {% render_field form.purchase_order class+="form-control" %}

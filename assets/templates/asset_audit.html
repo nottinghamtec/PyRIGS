@@ -23,7 +23,7 @@
   }
   checkIfCableHidden();
 </script>
-<form class="form-horizontal" method="POST" id="asset_audit_form" action="{{ form.action|default:request.path }}">
+<form class="" method="POST" id="asset_audit_form" action="{{ form.action|default:request.path }}">
   {% include 'form_errors.html' %}
   {% csrf_token %}
   <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>

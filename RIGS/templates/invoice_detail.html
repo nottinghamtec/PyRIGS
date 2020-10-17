@@ -8,11 +8,11 @@
                 <div class="btn-group btn-page">
                     <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
                         <span class="fas fa-times"></span> <span
-                                class="hidden-xs">Delete</span>
+                                class="d-none d-sm-inline">Delete</span>
                     </a>
                     <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
                         <span class="fas fa-ban"></span> <span
-                                class="hidden-xs">Void</span>
+                                class="d-none d-sm-inline">Void</span>
                     </a>
                     {% button 'print' url='invoice_print' pk=object.pk %}
                 </div>

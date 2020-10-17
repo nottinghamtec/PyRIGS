@@ -84,7 +84,7 @@
                         <div class="card-body">
                             {% include 'partials/yes_no_radio.html' with formitem=form.big_power %}
                             <label for="{{ form.power_mic.id_for_label }}"
-                                class="col-sm-8 control-label">{{ form.power_mic.help_text }}</label>
+                                class="col-sm-8 col-form-label">{{ form.power_mic.help_text }}</label>
                             <div class="col-sm-8">
                                 <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                     {% if object.power_mic %}

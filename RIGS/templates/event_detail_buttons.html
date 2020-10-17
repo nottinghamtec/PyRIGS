@@ -20,7 +20,7 @@
                     "
                href="{% url 'event_authorise_request' object.pk %}">
                 <i class="fas fa-paper-plane"></i>
-                <span class="hidden-xs">
+                <span class="d-none d-sm-inline">
                     {% if event.authorised %}
                         Authorised
                     {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
@@ -45,7 +45,7 @@
                         {% endif %}
                         " title="Invoice Rig"><span
                     class="fas fa-pound-sign"></span>
-                <span class="hidden-xs">Invoice</span></a>
+                <span class="d-none d-sm-inline">Invoice</span></a>
         {% endif %}
     {% endif %}
 </div>
