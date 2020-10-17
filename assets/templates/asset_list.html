@@ -83,7 +83,7 @@
     </div>
 </div>
 <div class="row my-2">
-    <div class="col bg-dark rounded pt-3">
+    <div class="col bg-dark text-white rounded pt-3">
         {# TODO Gotta be a cleaner way to do this... #}
         <p><span class="ml-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
   <span aria-hidden="true" class="fas fa-times" onclick="removeQString('category', '{{filter.id}}')"></span>

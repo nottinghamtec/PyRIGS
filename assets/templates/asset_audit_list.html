@@ -49,14 +49,16 @@
 	<span>Asset with that ID does not exist!</span>
 </div>
 
-<h3>Audit Asset:</h3>
-<form id="asset-search-form" class=" mb-3" method="POST">
-  <div class="input-group input-group-lg" style="width=auto;">
-    {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
-    <div class="input-group-append">
-        <label for="q" class="sr-only">Asset ID:</label>
-        <a id="searchButton" class="btn btn-primary" class="submit" type="submit">Search</a>
-    </div>
+<form id="asset-search-form" class="mb-3" method="POST">
+  <div class="form-group form-row">
+      <h3>Audit Asset:</h3>
+      <div class="input-group input-group-lg">
+        {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID' autofocus="true" %}
+        <div class="input-group-append">
+            <label for="q" class="sr-only">Asset ID:</label>
+            <a id="searchButton" class="btn btn-primary" class="submit" type="submit">Search</a>
+        </div>
+      </div>
   </div>
 </form>
 
