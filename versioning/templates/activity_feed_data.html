@@ -22,10 +22,10 @@
                     <div class="align-self-start mr-3">
                     {% if version.revision.user %}
                         <a href="{% url 'profile_detail' pk=version.revision.user.pk %}" class="modal-href">
-                        <img class="media-object img-rounded" src="{{ version.revision.user.profile_picture}}" />
+                        <img class="media-object rounded" src="{{ version.revision.user.profile_picture}}" />
                         </a>
                     {% else %}
-                        <img class="media-object img-rounded" src="{% static 'imgs/pyrigs-avatar.png' %}" />
+                        <img class="media-object rounded" src="{% static 'imgs/pyrigs-avatar.png' %}" />
                     {% endif %}
                     </div>
                     <div class="media-body">
