@@ -1,15 +1,12 @@
 {% extends 'base_assets.html' %}
-{% block title %}Supplier List{% endblock %}
 {% load paginator from filters %}
+{% load button from filters %}
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Cable Type List</h1>
-</div>
-<div class="row">
-    <div class="col px-0">
-        <a href="{% url 'cable_type_create' %}" class="btn btn-success float-right my-3">New <span class="fas fa-plus"></span></a>
+<div class="row my-2">
+    <div class="col text-right pr-0">
+    {% button 'new' 'cable_type_create' %}
     </div>
 </div>
 <div class="row">

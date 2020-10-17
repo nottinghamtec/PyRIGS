@@ -102,6 +102,11 @@ class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     model = models.Asset
     template_name = 'asset_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Asset {}".format(self.object.display_id)
+        return context
+
 
 class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
     template_name = 'asset_form.html'
@@ -297,6 +302,11 @@ class CableTypeList(generic.ListView):
     template_name = 'cable_type_list.html'
     paginate_by = 40
     # ordering = ['__str__']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Cable Type List"
+        return context
 
 
 class CableTypeDetail(generic.DetailView):

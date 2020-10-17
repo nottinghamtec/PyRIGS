@@ -1,13 +1,7 @@
 {% extends 'base_assets.html' %}
 {% load widget_tweaks %}
-{% block title %}Asset {{ object.asset_id }}{% endblock %}
 
 {% block content %}
-
-<div class="page-header">
-  <h1>Asset: {{ object.asset_id }}</h1>
-</div>
-
 <div class="row">
     <div class="col-md-6 mb-3">
     {% include 'partials/asset_detail_form.html' %}

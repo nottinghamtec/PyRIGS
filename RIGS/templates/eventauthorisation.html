@@ -17,18 +17,7 @@
     </script>
 {% endblock %}
 
-{% block title %}
-    {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %} | {{ event.name }}
-{% endblock %}
-
 {% block content %}
-    <div class="page-header my-3">
-        <h1>
-            {% if event.is_rig %}N{{ event.pk|stringformat:"05d" }}{% else %}{{ event.pk }}{% endif %}
-            | {{ event.name }} {% if event.dry_hire %}<span class="badge badge-secondary align-top">Dry Hire</span>{% endif %}
-        </h1>
-    </div>
-
     <div class="row my-3">
         {% include 'partials/client_eventdetails.html' %}
     </div>

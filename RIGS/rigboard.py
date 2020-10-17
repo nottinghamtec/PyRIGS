@@ -310,8 +310,10 @@ class EventAuthorise(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(EventAuthorise, self).get_context_data(**kwargs)
         context['event'] = self.event
-
         context['tos_url'] = settings.TERMS_OF_HIRE_URL
+        context['page_title'] = "{}: {}".format(self.event.display_id, self.event.name)
+        if self.event.dry_hire:
+            context['page_title'] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
         return context
 
     def get(self, request, *args, **kwargs):
