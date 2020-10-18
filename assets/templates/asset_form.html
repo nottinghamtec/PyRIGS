@@ -2,8 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 
-{% block title %}Asset {{ object.asset_id }}{% endblock %}
-
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
     <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
@@ -14,11 +12,13 @@
     <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
     <script src="{% static 'js/autocompleter.js' %}"></script>
     <script>
+        const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
+        dur = matches ? 0 : 500;
         function checkIfCableHidden() {
-          if (document.getElementById("id_is_cable").checked) {
-            document.getElementById("cable-table").hidden = false;
+          if ($("#id_is_cable").prop('checked')) {
+            $("#cable-table").slideDown(dur);
           } else {
-            document.getElementById("cable-table").hidden = true;
+            $("#cable-table").slideUp(dur);
           }
         }
         checkIfCableHidden();
@@ -71,15 +71,6 @@
 {% endblock %}
 
 {% block content %}
-<h1>
-  {% if edit and object %}
-      Edit Asset: {{ object.asset_id }}
-  {% elif duplicate %}
-      Duplication of Asset: {{ previous_asset_id }}
-  {% else %}
-      Create Asset
-  {% endif %}
-</h1>
 {% if duplicate %}
     <form method="POST" id="asset_update_form" action="{% url 'asset_duplicate' pk=previous_asset_id %}">
 {% elif edit %}
@@ -90,24 +81,24 @@
         {% include 'form_errors.html' %}
         {% csrf_token %}
         <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
-        <div class="row pt-4">
+        <div class="row pt-2">
           <div class="col-sm-12">
             {% include 'partials/asset_detail_form.html' %}
           </div>
         </div>
-        <div class="row pt-4">
-          <div class="col-md-6">
+        <div class="row pt-2">
+          <div class="col-12 col-sm">
             {% include 'partials/purchasedetails_form.html' %}
           </div>
-          <div class="col-md-6" hidden="true" id="cable-table">
+          <div class="col-12 col-sm-6 col-md-4" id="cable-table">
             {% include 'partials/cable_form.html' %}
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             {% include 'partials/parent_form.html' %}
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-12">
             {% include 'partials/asset_buttons.html' %}
           </div>
         </div>

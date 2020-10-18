@@ -117,7 +117,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         context = super().get_context_data(**kwargs)
         context["edit"] = True
         context["connectors"] = models.Connector.objects.all()
-
+        context["page_title"] = "Edit Asset: {}".format(self.object.display_id)
         return context
 
     def get_success_url(self):
@@ -140,7 +140,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
         context = super(AssetCreate, self).get_context_data(**kwargs)
         context["create"] = True
         context["connectors"] = models.Connector.objects.all()
-
+        context["page_title"] = "Create Asset"
         return context
 
     def get_initial(self, *args, **kwargs):
@@ -165,6 +165,7 @@ class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
         context["create"] = None
         context["duplicate"] = True
         context['previous_asset_id'] = self.get_object().asset_id
+        context["page_title"] = "Duplication of Asset: {}".format(context['previous_asset_id'])
         return context
 
 

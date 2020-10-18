@@ -2,6 +2,16 @@
 @import "custom-variables";
 @import "node_modules/bootstrap/scss/bootstrap";
 
+@media screen and
+  (prefers-reduced-motion: reduce),
+  (update: slow) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 #content {
   padding: 40px 15px;
 }
