@@ -12,18 +12,22 @@
   }
 }
 
-.fc-content {
-    color: black;
+.fc-event-main {
+    color: black !important;
 }
 
-.fc-agendaDay-view {
-    .fc-content {
+.fc-daygrid-dot-event {
+    color: black !important;
+}
+
+.fc-timeGridDay-view {
+    .fc-event-main {
         font-size: large !important;
     }
 }
 
-.fc-agendaWeek-view {
-    .fc-content {
+.fc-timeGridWeek-view {
+    .fc-event-main {
         font-size: 0.9rem;
     }
 }

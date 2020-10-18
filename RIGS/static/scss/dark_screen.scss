@@ -63,8 +63,12 @@
         background-color: $gray-200 !important;
         border-radius: 0.2em;
     }
-    .fc-today {
-        padding: 0 !important;
+    .fc-day-today {
+        background-color: transparent !important;
+        border: 0.2em solid $info !important;
+    }
+    .fc-daygrid-dot-event {
+        color: white !important;
     }
     .table {
         border-collapse: separate !important;

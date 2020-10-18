@@ -4,13 +4,12 @@
 {% block title %}Calendar{% endblock %}
 
 {% block css %}
-<link href="{% static "css/fullcalendar.css" %}" rel='stylesheet' />
-<link href="{% static "css/fullcalendar.print.css" %}" rel='stylesheet' media='print' />
+<link href="{% static 'css/main.min.css' %}" rel='stylesheet' />
 {% endblock %}
 
 {% block js %}
     <script src="{% static 'js/moment.js' %}"></script>
-    <script src="{% static 'js/fullcalendar.js' %}"></script>
+    <script src="{% static 'js/main.min.js' %}"></script>
     <script>
         function getUrlVars() {
             var vars = {};
@@ -20,58 +19,49 @@
             return vars;
         }
 
-        $(document).ready(function() {
+        viewToUrl = {
+            'timeGridWeek':'week',
+            'timeGridDay':'day',
+            'dayGridMonth':'month'
+        }
+        viewFromUrl = {
+            'week':'timeGridWeek',
+            'day':'timeGridDay',
+            'month':'dayGridMonth'
+        }
+        var calendar; //Need to access it from jquery ready
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
 
-            viewToUrl = {
-                'agendaWeek':'week',
-                'agendaDay':'day',
-                'month':'month'
-            }
-            viewFromUrl = {
-                'week':'agendaWeek',
-                'day':'agendaDay',
-                'month':'month'
-            }
-
-            $('#calendar').fullCalendar({
-                themeSystem: 'bootstrap4',
-                editable: false,
-                eventLimit: true, // allow "more" link when too many events
-                firstDay: 1,
-                aspectRatio: 1.5,
-                timeFormat: 'HH:mm',
-                views: {
-                    basic: {
-                        // options apply to basicWeek and basicDay views
-                    },
-                    agenda: {
-                        // options apply to agendaWeek and agendaDay views
-                    },
-                    week: {
-                        columnFormat:'ddd D/M'
-                    },
-                    day: {
-                        // options apply to basicDay and agendaDay views
-                    }
-                },
-                header:false,
-
-                events: function(start_moment, end_moment, timezone, callback) {
-
+            calendar = new FullCalendar.Calendar(calendarEl, {
+              themeSystem: 'bootstrap',
+              //defaultView: 'dayGridMonth', This is now default
+              aspectRatio: 1.5,
+              eventTimeFormat: {
+                'hour': '2-digit',
+                'minute': '2-digit',
+                'hour12': false
+              },
+              //nowIndicator: true,
+              //firstDay: 1,
+              headerToolbar: false,
+              editable: false,
+              dayMaxEventRows: true, // allow "more" link when too many events
+              events: function(fetchInfo, successCallback, failureCallback) {
                     $.ajax({
                         url: '/api/event',
                         dataType: 'json',
                         data: {
-                            start: moment(start_moment).format("YYYY-MM-DD[T]HH:mm:ss"),
-                            end: moment(end_moment).format("YYYY-MM-DD[T]HH:mm:ss")
+                            start: moment(fetchInfo.startStr).format("YYYY-MM-DD[T]HH:mm:ss"),
+                            end: moment(fetchInfo.endStr).format("YYYY-MM-DD[T]HH:mm:ss")
                         },
                         success: function(doc) {
                             var events = [];
-                            colours = {'Provisional': '#f0ad4e',
-                                'Confirmed': '#5cb85c' ,
-                                'Booked': '#5cb85c' ,
+                            colours = {'Provisional': '#FFE89B',
+                                'Confirmed': '#3AB54A' ,
+                                'Booked': '#3AB54A' ,
                                 'Cancelled': 'grey' ,
-                                'non-rig': '#5bc0de'
+                                'non-rig': '#25AAE2'
                             };
                             $(doc).each(function() {
                                 end = $(this).attr('latest')
@@ -92,20 +82,19 @@
                                 }else{
                                     thisEvent['color'] = colours['non-rig'];
                                 }
-
                                 events.push(thisEvent);
                             });
-                            callback(events);
+                            successCallback(events);
                         }
                     });
                 },
-
-                viewRender: function(view, element){
+                datesSet: function(info) {
+                    var view = info.view;
                     // Set the title of the view
                     $('#calendar-header').text(view.title);
 
                     // Enable/Disable "Today" button as required
-                    if(moment().isBetween(view.intervalStart, view.intervalEnd)){
+                    if(moment().isBetween(view.currentStart, view.currentEnd)){
                         //Today is within the current view
                         $('#today-button').prop('disabled', true);
                     }else{
@@ -113,74 +102,63 @@
                     }
 
                     // Set active view select button
-                    switch(view.name){
-                        case 'month':
+                    switch(view.type){
+                        case 'dayGridMonth':
                             $('#month-button').addClass('active');
                             $('#week-button').removeClass('active');
                             $('#day-button').removeClass('active');
                             break;
 
-                        case 'agendaWeek':
+                        case 'timeGridWeek':
                             $('#month-button').removeClass('active');
                             $('#week-button').addClass('active');
                             $('#day-button').removeClass('active');
                             break;
 
-                        case 'agendaDay':
+                        case 'timeGridDay':
                             $('#month-button').removeClass('active');
                             $('#week-button').removeClass('active');
                             $('#day-button').addClass('active');
                             break;
                     }
-                    history.replaceState(null,null,'{% url 'web_calendar' %}'+viewToUrl[view.name]+'/'+view.intervalStart.format('YYYY-MM-DD')+'/');
+                    history.replaceState(null,null,"{% url 'web_calendar' %}"+viewToUrl[view.type]+'/'+moment(view.currentStart).format('YYYY-MM-DD')+'/');
                 }
-
-
-
             });
-
+            calendar.render();
+        });
+        $(document).ready(function() {
             // set some button listeners
-
-            $('#next-button').click(function(){ $('#calendar').fullCalendar('next') });
-            $('#prev-button').click(function(){ $('#calendar').fullCalendar('prev') });
-            $('#today-button').click(function(){ $('#calendar').fullCalendar('today') });
-
-            $('#month-button').click(function(){ $('#calendar').fullCalendar('changeView','month') });
-            $('#week-button').click(function(){ $('#calendar').fullCalendar('changeView','agendaWeek') });
-            $('#day-button').click(function(){ $('#calendar').fullCalendar('changeView','agendaDay') });
-
+            $('#next-button').click(function(){ calendar.next(); });
+            $('#prev-button').click(function(){ calendar.prev(); });
+            $('#today-button').click(function(){ calendar.today(); });
+            $('#month-button').click(function(){ calendar.changeView('dayGridMonth'); });
+            $('#week-button').click(function(){ calendar.changeView('timeGridWeek'); });
+            $('#day-button').click(function(){ calendar.changeView('timeGridDay'); });
             $('#go-to-date-input').change(function(){
-                if( moment($('#go-to-date-input').val()).isValid() ){
+                if(moment($('#go-to-date-input').val()).isValid()){
                     $('#go-to-date-button').prop('disabled', false);
-                }else{
+                } else{
                     $('#go-to-date-button').prop('disabled', true);
                 }
-
             });
-
             $('#go-to-date-button').click(function(){
-                day = moment($('#go-to-date-input').val()) ;
+                day = moment($('#go-to-date-input').val());
                 if(day.isValid()){
-                    $('#calendar').fullCalendar( 'gotoDate', day);
-                }else{
+                    calendar.gotoDate(day.format("YYYY-MM-DD"));
+                } else{
                     alert('Invalid Date');
                 }
             });
-
-
             // Go to the initial settings, if they're valid
             view = viewFromUrl['{{view}}'];
-            $('#calendar').fullCalendar( 'changeView', view);
-
+            calendar.changeView(view);
             day = moment('{{date}}');
             if(day.isValid()){
-                $('#calendar').fullCalendar( 'gotoDate', day);
-            }else{
+                calendar.gotoDate(day.format("YYYY-MM-DD"));
+            } else{
                 console.log('Supplied date is invalid - using default')
             }
-
         });
-
     </script>
 {% endblock %}
 
