@@ -66,6 +66,30 @@
     .fc-today {
         padding: 0 !important;
     }
+    .table {
+        border-collapse: separate !important;
+        border-spacing: 0;
+    }
+    .table tr th {
+      border-right: 0 !important;
+    }
+    .table tr td {
+      border-left: 0 !important;
+    }
+    .table tr td:not(:last-child) {
+        border-right: 0 !important;
+    }
+    @each $color, $value in $theme-colors {
+        .table-#{$color} {
+            > td,th {
+                border: 0.3em solid theme-color-level($color, -6) !important;
+            }
+            > * {
+                color: white !important;
+                background-color: #222 !important;
+            }
+        }
+    }
     del {
       color: black;
       background-color: $danger;

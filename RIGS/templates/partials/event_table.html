@@ -2,7 +2,7 @@
 {% load cache %}
 {% cache None event_table request.user %}
 <div class="table-responsive">
-    <table class="table mb-0">
+    <table class="table mb-0" id="event_table">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -29,7 +29,7 @@
                     table-warning
                     {% endif %}" id="event_row">
             <!---Number-->
-            <th scope="row" id="event_number"></th>
+            <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->
             <td id="event_dates">
                 <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
