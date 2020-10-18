@@ -12,6 +12,22 @@
   }
 }
 
+.fc-content {
+    color: black;
+}
+
+.fc-agendaDay-view {
+    .fc-content {
+        font-size: large !important;
+    }
+}
+
+.fc-agendaWeek-view {
+    .fc-content {
+        font-size: 0.9rem;
+    }
+}
+
 #content {
   padding: 40px 15px;
 }

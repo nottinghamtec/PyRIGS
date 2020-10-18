@@ -10,34 +10,35 @@
     @import 'node_modules/@forevolve/bootstrap-dark/scss/bootstrap-dark.scss';
     background: #222;
     color: $gray-100;
+    $darktheme: #121416;
     .navbar {
         background-color: #111111 !important;
     }
     .dropdown-menu {
         box-shadow: 0 0.5rem 1rem black;
         color: $gray-100;
-        background: #121416;
+        background: $darktheme;
     }
     .form-control:not(.btn) {
-        background-color: #121416;
+        background-color: $darktheme;
         color: $gray-100;
     }
     .btn-light, .popover, .popover-header, .popover-body, .status {
-        background-color: #121416 !important;
+        background-color: $darktheme !important;
         color: $gray-100 !important;
-        border-color: #121416;
+        border-color: $darktheme;
     }
     .bs-popover-right > .arrow::after {
-        border-right-color: #121416;
+        border-right-color: $darktheme;
     }
     .bs-popover-left > .arrow::after {
-        border-left-color: #121416;
+        border-left-color: $darktheme;
     }
     .bs-popover-top > .arrow::after {
-        border-top-color: #121416;
+        border-top-color: $darktheme;
     }
     .bs-popover-bottom > .arrow::after {
-        border-bottom-color: #121416;
+        border-bottom-color: $darktheme;
     }
     a {
         color: $blue;
@@ -49,7 +50,7 @@
         color: $gray-100;
     }
     .input-group-text {
-        border-color: #121416;
+        border-color: $darktheme;
     }
     .btn-secondary, .btn-info {
         color: white;
@@ -61,6 +62,9 @@
         color: black;
         background-color: $gray-200 !important;
         border-radius: 0.2em;
+    }
+    .fc-today {
+        padding: 0 !important;
     }
     del {
       color: black;
