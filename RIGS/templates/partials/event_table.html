@@ -20,7 +20,7 @@
                     {% elif not event.mic %}
                     table-danger
                     {% elif event.confirmed and event.authorised %}
-                        {% if self.dry_hire or self.riskassessment %}
+                        {% if event.dry_hire or event.riskassessment %}
                             table-success
                         {% else %}
                             table-warning
@@ -29,7 +29,7 @@
                     table-warning
                     {% endif %}" id="event_row">
             <!---Number-->
-            <th scope="row" id="event_number">{{ event.display_id }}</th>
+            <th scope="row" id="event_number"></th>
             <!--Dates & Times-->
             <td id="event_dates">
                 <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
