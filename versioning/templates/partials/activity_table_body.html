@@ -20,6 +20,8 @@
             <td>
               {% if version.changes.old == None %}
                 Created {{version.changes.new|to_class_name}}
+              {% elif version.changes.new == None %}
+                Deleted {{version.changes.old|to_class_name}}
               {% else %}
                 {% include 'partials/version_changes.html' %}
               {% endif %}

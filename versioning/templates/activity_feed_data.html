@@ -35,17 +35,13 @@
                     </h5>
             {% endif %}
                     <p>
-                    <small>
                     {% if version.changes.old == None %}
                         Created
                     {% else %}
                         Changed {% include 'partials/version_changes.html' %} in
                     {% endif %}
-
                     {% include 'partials/object_button.html' with object=version.changes.new %}
-                    </small>
                     </p>
-
     {% endfor %}
     </div>
     </div>

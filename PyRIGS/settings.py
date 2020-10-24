@@ -153,10 +153,16 @@ LOGGING = {
 }
 
 # Tests lock up SQLite otherwise
-if DEBUG or STAGING or CI:
+if STAGING or CI:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+        }
+    }
+elif DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
         }
     }
 else:

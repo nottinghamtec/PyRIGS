@@ -114,7 +114,6 @@ class ModelComparison(object):
                 if oldValue != newValue and not bothBlank:
                     comparison = FieldComparison(field, oldValue, newValue)
                     changes.append(comparison)
-
         return changes
 
     @cached_property
@@ -143,17 +142,6 @@ class ModelComparison(object):
                 except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
                     compare = ModelComparison(new=version._object_version.object, **comparisonParams)
 
-                if compare.new:
-                    if(hasattr(compare.new, 'activity_feed_string')):
-                        compare.name = compare.new.activity_feed_string
-                    else:
-                        compare.name = str(compare.new)
-                else:
-                    if(hasattr(compare.old, 'activity_feed_string')):
-                        compare.name = compare.old.activity_feed_string
-                    else:
-                        compare.name = str(compare.old)
-
                 item_dict[version.object_id] = compare  # update the dictionary with the changes
 
             changes = []
@@ -162,6 +150,19 @@ class ModelComparison(object):
                     changes.append(compare)
 
             return changes
+
+    @cached_property
+    def name(self):
+        if self.new:
+            if(hasattr(self.new, 'activity_feed_string')):
+                return self.new.activity_feed_string
+            else:
+                return str(compare.new)
+        else:
+            if(hasattr(self.old, 'activity_feed_string')):
+                return self.old.activity_feed_string
+            elif str(self.old):
+                return str(self.old)
 
     @cached_property
     def items_changed(self):
