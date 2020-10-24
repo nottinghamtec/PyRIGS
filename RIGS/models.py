@@ -636,9 +636,9 @@ class RiskAssessment(models.Model, RevisionMixin):
     sound_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Site
-    known_venue = models.BooleanField(help_text="Is the event in a venue that you and/or TEC have experience working in?")
-    safe_loading = models.BooleanField(help_text="Is there a safe load in/out?<br><small>e.g. sufficient lighting, flat, not in a crowded area etc.</small>")
-    safe_storage = models.BooleanField(help_text="Are there areas to safely store equipment?")
+    known_venue = models.BooleanField(help_text="Is this venue new to you (the MIC) or new to TEC?")
+    safe_loading = models.BooleanField(help_text="Are there any issues preventing a safe load in or out? (e.g. sufficient lighting, flat, not in a crowded area etc.)")
+    safe_storage = models.BooleanField(help_text="Are there any problems with safe and secure equipment storage?")
     area_outside_of_control = models.BooleanField(help_text="Is any part of the work area out of TEC's direct control or openly accessible during the build or breakdown period?")
     barrier_required = models.BooleanField(help_text="Is there a requirement for TEC to provide any barrier for security or protection of persons/equipment?")
     nonstandard_emergency_procedure = models.BooleanField(help_text="Does the emergency procedure for the event differ from TEC's standard procedures?")
@@ -668,9 +668,9 @@ class RiskAssessment(models.Model, RevisionMixin):
         'nonstandard_equipment_power': False,
         'multiple_electrical_environments': False,
         'noise_monitoring': False,
-        'known_venue': True,
-        'safe_loading': True,
-        'safe_storage': True,
+        'known_venue': False,
+        'safe_loading': False,
+        'safe_storage': False,
         'area_outside_of_control': False,
         'barrier_required': False,
         'nonstandard_emergency_procedure': False,
