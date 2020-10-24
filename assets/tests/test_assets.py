@@ -171,6 +171,7 @@ class TestAssetForm(AutoLoginTest):
         self.page.is_cable = True
 
         self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
+        self.wait.until(animation_is_finished())
         self.page.cable_type = "IEC → IEC"
         self.page.socket = "IEC"
         self.page.length = 10
