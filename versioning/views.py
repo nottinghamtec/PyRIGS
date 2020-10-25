@@ -14,6 +14,7 @@ from assets import models as asset_models
 from django.apps import apps
 from reversion import revisions as reversion
 from versioning.versioning import RIGSVersion
+from django.template.defaultfilters import title
 
 from django.views.decorators.cache import never_cache, cache_page
 from django.utils.decorators import method_decorator
@@ -49,14 +50,14 @@ def get_models(app=None):
     models = filter(lambda item: not hasattr(item, 'reversion_hide'), reversion.get_registered_models())
     if app is not None:
         models = filter(lambda item: item in apps.get_app_config(app).get_models(), models)
-    return models
+    # Don't allow modifying original list!
+    return list(models).copy()
 
 
 # TODO Default filter of having permission to view associated object
 def filter_models(models, user):
     if user is not None:
         models = filter(lambda model: not hasattr(model, 'reversion_perm') or user.has_perm(model.reversion_perm), models)
-
     return models
 
 
@@ -66,12 +67,11 @@ class ActivityTable(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs['models'], self.request.user))
-        return versions.order_by("-revision__date_created")
+        return RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs.get('models'), self.request.user)).order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
         context = super(ActivityTable, self).get_context_data(**kwargs)
-        context['title'] = self.kwargs['app']
+        context['page_title'] = "{} Activity Stream".format(title(self.kwargs['app']))
         if self.kwargs['app'] != 'rigboard':
             context['override'] = 'base_{}.html'.format(self.kwargs['app'])
 
@@ -84,8 +84,7 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
     paginate_by = 25
 
     def get_queryset(self):
-        versions = RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user))
-        return versions.order_by("-revision__date_created")
+        return RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user)).order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

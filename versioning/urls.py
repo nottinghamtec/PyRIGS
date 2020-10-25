@@ -25,8 +25,8 @@ for app in apps.get_app_configs():
     else:
         table_name = appname + '_activity_table'
 
-    # TODO Permissions
-    urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.view_event')(views.ActivityTable.as_view()),
+    # TODO Proper Permissions
+    urlpatterns += [path(appname + '/activity/', permission_required_with_403('RIGS.add_event')(views.ActivityTable.as_view()),
                          name=table_name, kwargs={'app': appname, 'models': views.get_models(app.label)}), ]
 
     for model in views.get_models(app=app.label):
