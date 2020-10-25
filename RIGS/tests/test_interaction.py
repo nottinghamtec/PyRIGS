@@ -719,9 +719,9 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.power_notes = "Remember to bring some power"
         self.page.noise_monitoring = False
         self.page.sound_notes = "Loud, but not too loud"
-        self.page.known_venue = True
-        self.page.safe_loading = True
-        self.page.safe_storage = True
+        self.page.known_venue = False
+        self.page.safe_loading = False
+        self.page.safe_storage = False
         self.page.area_outside_of_control = False
         self.page.barrier_required = False
         self.page.nonstandard_emergency_procedure = False
