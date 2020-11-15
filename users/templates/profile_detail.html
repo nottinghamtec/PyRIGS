@@ -1,8 +1,12 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 
-{% block title %}RIGS Profile {{object.pk}}{% endblock %}
+{% load static %}
+{% load linkornone from filters %}
 
 {% block js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script src="{% static 'js/popover.js' %}"></script>
+    <script src="{% static 'js/clipboard.min.js' %}"></script>
     <script>
         $(document).ready(function() {
         	$('#urlParamForm').change(function(){
@@ -25,18 +29,23 @@
 
 			$('#urlParamForm').change(); //Do the initial setting
      	});
- 	</script>
 
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function(e) {
+            $(e.trigger).popover('show');
+            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            e.clearSelection();
+        });
+ 	</script>
 {% endblock %}
 
 {% block content %}
-<h3>Profile: {{object.name}}</h3>
-{% if not request.is_ajax %}
+{% if not request.is_ajax and object.pk == user.pk %}
 <div class="row py-3">
-	{% if object.pk == user.pk %}
-	<div>
+	<div class="col text-right">
 	    <div class="btn-group">
-	        <a href="{% url 'profile_update_self' %}" class="btn btn-light">
+	        <a href="{% url 'profile_update_self' %}" class="btn btn-warning">
 				Edit Profile <i class="fas fa-edit"></i>
 			</a>
 			<a href="{% url 'password_change' %}" class="btn btn-light">
@@ -44,11 +53,10 @@
 			</a>
 	    </div>
 	</div>
-	{% endif %}
 </div>
 {% endif %}
 <div class="row">
-    <div class="col">
+    <div class="col-12">
         <div class="card">
             <div class="row no-gutters">
                 <div class="col-md-3">
@@ -76,7 +84,7 @@
 	                        <dd class="col-7">{{object.initials}}</dd>
 
 	                        <dt class="col-5">Phone</dt>
-	                        <dd class="col-7">{% if object.phone %}}<a href="tel:{{ object.phone }}">{% endif %}{{object.phone}}{% if object.phone %}}</a>{% endif %}</dd>
+	                        <dd class="col-7">{{object.phone|linkornone:'tel'}}</dd>
                         </dl>
                     </div>
                 </div>
@@ -84,44 +92,44 @@
         </div>
     </div>
     {% if not request.is_ajax and object.pk == user.pk %}
-    <div class="col">
+    <div class="col-12 my-2">
         <div class="card">
+            <div class="card-header">Personal iCal Details</div>
             <div class="card-body">
-		        <h4>Personal iCal Details</h4>
 		        <dl class="row">
 			        <dt class="col-4">API Key</dt>
-			        <dd class="col-5">
+			        <dd class="col-8">
 				        {% if user.api_key %}
-					        {{user.api_key}}
+					        <code id="api-key">{{user.api_key}}</code>
+                            <button class="btn btn-secondary align-middle" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
 				        {% else %}
 					        No API Key Generated
 				        {% endif %}
-			        </dd>
-                    <a href="{% url 'reset_api_key' %}" class="btn btn-secondary col-3">
+                        <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle">
 				        {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
 				        <span class="fas fa-redo"></span>
-			        </a>
-
-			        <dt class="col-4">Calendar Options</dt>
+			            </a>
+			        </dd>
+   			        <dt class="col-4">Calendar Options</dt>
 			        <dd class="col-8">
 				        <form id="urlParamForm">
-					        <div class="form-group d-flex flex-wrap">
-						        <label class="checkbox-inline mr-3">
+					        <div class="form-group d-flex flex-column flex-lg-row">
+						        <label class="checkbox-inline mr-lg-2">
 						          <input type="checkbox" value="rig" data-default="true" checked> Rigs
 						        </label>
-						        <label class="checkbox-inline mx-3">
+						        <label class="checkbox-inline mx-lg-2">
 						          <input type="checkbox" value="non-rig" data-default="true" checked> Non-Rigs
 						        </label>
-						        <label class="checkbox-inline mx-3">
+						        <label class="checkbox-inline mx-lg-2">
 						          <input type="checkbox" value="dry-hire" data-default="true" checked> Dry-Hires
 						        </label>
-						        <label class="checkbox-inline mx-3">
+						        <label class="checkbox-inline mx-lg-2">
 						          <input type="checkbox" value="cancelled" data-default="false" > Cancelled
 						        </label>
-						        <label class="checkbox-inline mx-3">
+						        <label class="checkbox-inline mx-lg-2">
 						          <input type="checkbox" value="provisional" data-default="true" checked> Provisional
 						        </label>
-						        <label class="checkbox-inline mx-3">
+						        <label class="checkbox-inline ml-lg-2">
 						          <input type="checkbox" value="confirmed" data-default="true" checked> Confirmed/Booked
 						        </label>
 					        </div>
@@ -130,9 +138,11 @@
 			        <dt class="col-4">Calendar URL</dt>
 			        <dd class="col-8">
 				        {% if user.api_key %}
-					        <pre id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></pre>
+					        <code id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></code>
+                            <button class="btn btn-secondary align-middle" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                            <br>
 					        <small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
-					        To sync from google calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
+					        To sync from Google Calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
 				        {% else %}
 					        <pre>No API Key Generated</pre>
 				        {% endif %}

@@ -53,6 +53,11 @@ class ProfileDetail(generic.DetailView):
 
         return self.model.objects.filter(pk=pk)
 
+    def get_context_data(self, **kwargs):
+        context = super(ProfileDetail, self).get_context_data(**kwargs)
+        context['page_title'] = "Profile: {}".format(self.object)
+        return context
+
 
 class ProfileUpdateSelf(generic.UpdateView):
     template_name = "profile_form.html"

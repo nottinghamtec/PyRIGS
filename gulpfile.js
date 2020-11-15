@@ -48,6 +48,7 @@ function scripts() {
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/bootstrap/js/dist/alert.js',
 
+                    'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/flatpickr/dist/flatpickr.min.js',
                     'node_modules/@fortawesome/fontawesome-free/js/all.js',
                     'node_modules/moment/moment.js',
