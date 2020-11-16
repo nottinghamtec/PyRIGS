@@ -103,7 +103,7 @@
 					        <code id="api-key">{{user.api_key}}</code>
                             <button class="btn btn-secondary align-middle" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
 				        {% else %}
-					        No API Key Generated
+					        <span id="api-key">No API Key Generated</span>
 				        {% endif %}
                         <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle">
 				        {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}

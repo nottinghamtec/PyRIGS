@@ -52,6 +52,10 @@
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
                         <dd class="col-sm-6">
+                            {{ object.outside|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'outside' }}</dt>
+                        <dd class="col-sm-6">
                             {{ object.generators|yesnoi:'invert' }}
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'other_companies_power' }}</dt>
@@ -94,15 +98,15 @@
                     <dl class="row">
                         <dt class="col-sm-6">{{ object|help_text:'known_venue' }}</dt>
                         <dd class="col-sm-6">
-                            {{ object.known_venue|yesnoi }}
+                            {{ object.known_venue|yesnoi:'invert' }}
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'safe_loading'|safe }}</dt>
                         <dd class="col-sm-6">
-                            {{ object.safe_loading|yesnoi }}
+                            {{ object.safe_loading|yesnoi:'invert' }}
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'safe_storage' }}</dt>
                         <dd class="col-sm-6">
-                            {{ object.safe_storage|yesnoi }}
+                            {{ object.safe_storage|yesnoi:'invert' }}
                         </dd>
                         <dt class="col-sm-6">{{ object|help_text:'area_outside_of_control' }}</dt>
                         <dd class="col-sm-6">
@@ -127,13 +131,13 @@
                         <dd class="col-sm-6">
                             {{ object.special_structures|yesnoi:'invert' }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'persons_responsible_structures' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
-                        </dd>
                         <dt class="col-sm-6">{{ object|help_text:'suspended_structures' }}</dt>
                         <dd class="col-sm-6">
                             {{ object.suspended_structures|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'persons_responsible_structures' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
                         </dd>
                     </dl>
                 </div>

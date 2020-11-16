@@ -83,6 +83,7 @@
                         <div class="card-header">Power</div>
                         <div class="card-body">
                             {% include 'partials/yes_no_radio.html' with formitem=form.big_power %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.outside %}
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col-sm-8 col-form-label">{{ form.power_mic.help_text }}</label>
                             <div class="col-sm-8">
@@ -108,7 +109,7 @@
                     <div class="card">
                         <div class="card-header">Sound</div>
                         <div class="card-body">
-                            <p><strong>If yes, consult a supervisor of sound and make sure an appropriate noise monitoring plan and risk assessment is drawn up</strong></p>
+                            <p><strong>If yes, consult a supervisor of sound</strong></p>
                             {% include 'partials/yes_no_radio.html' with formitem=form.noise_monitoring %}
                             <label for="{{ form.sound_notes.id_for_label }}">{{ form.sound_notes.help_text }}</label>
                             {% render_field form.sound_notes class+="form-control" %}
@@ -121,7 +122,7 @@
                     <div class="card">
                         <div class="card-header">Site Details</div>
                         <div class="card-body">
-                            <p><strong>If YES to any of the below, a site visit must be conducted, and an assessment of the venue completed and added to TEC’s records</strong></p>
+                            <p><strong>If yes to any of the below, a site visit must be conducted, and an assessment of the venue completed and added to TEC’s records</strong></p>
                             {% include 'partials/yes_no_radio.html' with formitem=form.known_venue %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.safe_loading %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.safe_storage %}
@@ -138,9 +139,9 @@
                         <div class="card-header">Structures</div>
                         <div class="card-body">
                             {% include 'partials/yes_no_radio.html' with formitem=form.special_structures %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures %}
                             <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3">{{ form.persons_responsible_structures.help_text }}</label>
                             {% render_field form.persons_responsible_structures class+="form-control mb-3" %}
-                            {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures %}
                         </div>
                     </div>
                 </div>

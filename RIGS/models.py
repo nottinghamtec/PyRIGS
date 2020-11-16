@@ -614,15 +614,17 @@ class Payment(models.Model, RevisionMixin):
 class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     # General
-    nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by TEC's standard risk assessments and method statements?")
+    nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by <a href='https://nottinghamtec.sharepoint.com/:f:/g/HealthAndSafety/Eo4xED_DrqFFsfYIjKzMZIIB6Gm_ZfR-a8l84RnzxtBjrA?e=Bf0Haw'>TEC's standard risk assessments and method statements?</a>")
     nonstandard_use = models.BooleanField(help_text="Are TEC using their equipment in a way that is abnormal?<br><small>i.e. Not covered by TECs standard health and safety documentation</small>")
-    contractors = models.BooleanField(help_text="Are you using any external contractors?")
-    other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?")
+    contractors = models.BooleanField(help_text="Are you using any external contractors?<small>i.e. Freelancers/Crewing Companies</small>")
+    other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?<small>e.g. TEC is providing the lighting while another company does sound</small>")
     crew_fatigue = models.BooleanField(help_text="Is crew fatigue likely to be a risk at any point during this event?")
     general_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Power
     big_power = models.BooleanField(help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
+    outside = models.BooleanField(help_text="Is the event outdoors?")
+    # If yes to the above two, you must answer...
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     generators = models.BooleanField(help_text="Will generators be used?")
@@ -645,8 +647,8 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Structures
     special_structures = models.BooleanField(help_text="Does the event require use of winch stands, motors, MPT Towers, or staging?")
-    persons_responsible_structures = models.TextField(blank=True, null=True, help_text="Who are the persons on site responsible for their use?")
     suspended_structures = models.BooleanField(help_text="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?")
+    persons_responsible_structures = models.TextField(blank=True, null=True, help_text="Who are the persons on site responsible for their use?")
 
     # Blimey that was a lot of options
 

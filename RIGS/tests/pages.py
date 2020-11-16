@@ -290,7 +290,7 @@ class GenericList(BasePage):
 class UserPage(BasePage):
     URL_TEMPLATE = 'user/'
 
-    _api_key_selector = (By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/div/dl/dd[1]')
+    _api_key_selector = (By.ID, 'api-key')
     _cal_url_selector = (By.ID, 'cal-url')
     _generation_button_selector = (By.LINK_TEXT, 'Generate API Key')
 
