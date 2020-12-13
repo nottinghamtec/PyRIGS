@@ -688,7 +688,8 @@ class TestHealthAndSafety(BaseRigboardTest):
                                                            barrier_required=False,
                                                            nonstandard_emergency_procedure=False,
                                                            special_structures=False,
-                                                           suspended_structures=False)
+                                                           suspended_structures=False,
+                                                           outside=False)
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     # TODO Can I loop through all the boolean fields and test them at once?
@@ -707,6 +708,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.crew_fatigue = False
         self.page.general_notes = "There are no notes."
         self.page.big_power = False
+        self.page.outside = False
         self.page.power_mic.search(self.profile.name)
         self.page.power_mic.set_option(self.profile.name, True)
         # TODO This should not be necessary, normally closes automatically

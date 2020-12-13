@@ -614,7 +614,8 @@ class Payment(models.Model, RevisionMixin):
 class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     # General
-    nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by <a href='https://nottinghamtec.sharepoint.com/:f:/g/HealthAndSafety/Eo4xED_DrqFFsfYIjKzMZIIB6Gm_ZfR-a8l84RnzxtBjrA?e=Bf0Haw'>TEC's standard risk assessments and method statements?</a>")
+    nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by <a href='https://nottinghamtec.sharepoint.com/:f:/g/HealthAndSafety/Eo4xED_DrqFFsfYIjKzMZIIB6Gm_ZfR-a8l84RnzxtBjrA?e=Bf0Haw'>"
+                                                          "TEC's standard risk assessments and method statements?</a>")
     nonstandard_use = models.BooleanField(help_text="Are TEC using their equipment in a way that is abnormal?<br><small>i.e. Not covered by TECs standard health and safety documentation</small>")
     contractors = models.BooleanField(help_text="Are you using any external contractors?<small>i.e. Freelancers/Crewing Companies</small>")
     other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?<small>e.g. TEC is providing the lighting while another company does sound</small>")

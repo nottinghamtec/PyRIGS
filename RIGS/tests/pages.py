@@ -207,6 +207,7 @@ class CreateRiskAssessment(FormPage):
         'persons_responsible_structures': (regions.TextBox, (By.ID, 'id_persons_responsible_structures')),
         'suspended_structures': (regions.RadioSelect, (By.ID, 'id_suspended_structures')),
         'supervisor_consulted': (regions.CheckBox, (By.ID, 'id_supervisor_consulted')),
+        'outside': (regions.CheckBox, (By.ID, 'id_outside')),
     }
 
     @property

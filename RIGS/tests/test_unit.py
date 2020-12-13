@@ -495,7 +495,8 @@ class TestHSLogic(TestCase):
                                                     barrier_required=True,
                                                     nonstandard_emergency_procedure=True,
                                                     special_structures=False,
-                                                    suspended_structures=False),
+                                                    suspended_structures=False,
+                                                    outside=False),
         }
 
         cls.checklists = {
