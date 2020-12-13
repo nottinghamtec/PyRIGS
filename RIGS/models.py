@@ -622,6 +622,11 @@ def validate_url(value):
 
 @reversion.register
 class RiskAssessment(models.Model, RevisionMixin):
+    SMALL = (0, 'Small')
+    MEDIUM = (1, 'Medium')
+    LARGE = (2, 'Large')
+    SIZES = (SMALL, MEDIUM, LARGE)
+
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
     # General
     nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by <a href='https://nottinghamtec.sharepoint.com/:f:/g/HealthAndSafety/Eo4xED_DrqFFsfYIjKzMZIIB6Gm_ZfR-a8l84RnzxtBjrA?e=Bf0Haw'>"
@@ -633,6 +638,7 @@ class RiskAssessment(models.Model, RevisionMixin):
     general_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Power
+    event_size = models.IntegerField(blank=True, null=True, choices=SIZES)
     big_power = models.BooleanField(help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
     outside = models.BooleanField(help_text="Is the event outdoors?")
     # If yes to the above two, you must answer...
@@ -694,6 +700,19 @@ class RiskAssessment(models.Model, RevisionMixin):
     }
     inverted_fields = {key: value for (key, value) in expected_values.items() if not value}.keys()
 
+    def clean(self):
+        # Check for idiots
+        if not self.outside and self.generators:
+            raise forms.ValidationError("Engage brain, please. <strong>No generators indoors!(!)</strong>")
+        # Confirm event size
+        if self.outside:
+            self.event_size = self.LARGE[0]
+        # Check all except generators, since generators entails outside and hence LARGE
+        elif self.big_power or self.other_companies_power or self.nonstandard_equipment_power or self.multiple_electrical_environments:
+            self.event_size = self.MEDIUM[0]
+        else:
+            self.event_size = self.SMALL[0]
+
     class Meta:
         ordering = ['event']
         permissions = [
@@ -713,10 +732,6 @@ class RiskAssessment(models.Model, RevisionMixin):
 
 @reversion.register(follow=['vehicles', 'crew'])
 class EventChecklist(models.Model, RevisionMixin):
-    SMALL = (0, 'Small')
-    MEDIUM = (1, 'Medium')
-    LARGE = (2, 'Large')
-    SIZES = (SMALL, MEDIUM, LARGE)
     event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
     # General
@@ -743,7 +758,6 @@ class EventChecklist(models.Model, RevisionMixin):
     earthing = models.BooleanField(blank=True, null=True, help_text="Equipment appropriately earthed?<br><small>(truss, stage, generators etc)</small>")
     pat = models.BooleanField(blank=True, null=True, help_text="All equipment in PAT period?")
 
-    event_size = models.IntegerField(blank=True, null=True, choices=SIZES)
     # Medium Electrical Checks
     source_rcd = models.BooleanField(blank=True, null=True, help_text="Source RCD protected?<br><small>(if cable is more than 3m long) </small>")
     labelling = models.BooleanField(blank=True, null=True, help_text="Appropriate and clear labelling on distribution and cabling?")

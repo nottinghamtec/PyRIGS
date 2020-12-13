@@ -170,6 +170,7 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 ], attrs={'class': 'custom-control-input', 'required': 'true'})
 
     def clean(self):
+        # Check expected values
         unexpected_values = []
         for field, value in models.RiskAssessment.expected_values.items():
             if self.cleaned_data.get(field) != value:
