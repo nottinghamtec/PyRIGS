@@ -179,9 +179,11 @@ def namewithnotes(obj, url, autoescape=True):
 
 
 @register.filter(needs_autoescape=True)
-def linkornone(attr, namespace, autoescape=True):
+def linkornone(attr, namespace=None, autoescape=True):
     if attr is not None:
-        return mark_safe("<a href='{}://{}' target='_blank'><span class='overflow-ellipsis'>{}</span></a>".format(namespace, attr, str(attr)))
+        if namespace is not None:
+            attr = namespace + "://" + attr
+        return mark_safe("<a href='{}' target='_blank'><span class='overflow-ellipsis'>{}</span></a>".format(attr, str(attr)))
     else:
         return "None"
 

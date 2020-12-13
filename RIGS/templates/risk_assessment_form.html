@@ -100,6 +100,8 @@
                             {% include 'partials/yes_no_radio.html' with formitem=form.multiple_electrical_environments %}
                             <label for="{{ form.power_notes.id_for_label }}">{{ form.power_notes.help_text }}</label>
                             {% render_field form.power_notes class+="form-control" %}
+                            <label for="{{ form.power_plan.id_for_label }}" class="mt-2">{{ form.power_plan.help_text|safe }}</label>
+                            {% render_field form.power_plan class+="form-control" %}
                         </div>
                     </div>
                 </div>
@@ -142,6 +144,8 @@
                             {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures %}
                             <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3">{{ form.persons_responsible_structures.help_text }}</label>
                             {% render_field form.persons_responsible_structures class+="form-control mb-3" %}
+                            <label for="{{ form.rigging_plan.id_for_label }}"  class="mt-2">{{ form.rigging_plan.help_text|safe }}</label>
+                            {% render_field form.rigging_plan class+="form-control" %}
                         </div>
                     </div>
                 </div>

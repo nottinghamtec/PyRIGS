@@ -19,6 +19,8 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.urls import reverse_lazy
 
+from urllib.parse import urlparse
+
 
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
@@ -610,6 +612,14 @@ class Payment(models.Model, RevisionMixin):
         return str("payment at £{}".format(self.amount))
 
 
+def validate_url(value):
+    if not value:
+        return  # Required error is done the field
+    obj = urlparse(value)
+    if not obj.hostname in ('nottinghamtec.sharepoint.com'):
+        raise ValidationError('URL must point to a location on the TEC Sharepoint')
+
+
 @reversion.register
 class RiskAssessment(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -617,8 +627,8 @@ class RiskAssessment(models.Model, RevisionMixin):
     nonstandard_equipment = models.BooleanField(help_text="Does the event require any hired in equipment or use of equipment that is not covered by <a href='https://nottinghamtec.sharepoint.com/:f:/g/HealthAndSafety/Eo4xED_DrqFFsfYIjKzMZIIB6Gm_ZfR-a8l84RnzxtBjrA?e=Bf0Haw'>"
                                                           "TEC's standard risk assessments and method statements?</a>")
     nonstandard_use = models.BooleanField(help_text="Are TEC using their equipment in a way that is abnormal?<br><small>i.e. Not covered by TECs standard health and safety documentation</small>")
-    contractors = models.BooleanField(help_text="Are you using any external contractors?<small>i.e. Freelancers/Crewing Companies</small>")
-    other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?<small>e.g. TEC is providing the lighting while another company does sound</small>")
+    contractors = models.BooleanField(help_text="Are you using any external contractors?<br><small>i.e. Freelancers/Crewing Companies</small>")
+    other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?<br><small>e.g. TEC is providing the lighting while another company does sound</small>")
     crew_fatigue = models.BooleanField(help_text="Is crew fatigue likely to be a risk at any point during this event?")
     general_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
@@ -633,6 +643,7 @@ class RiskAssessment(models.Model, RevisionMixin):
     nonstandard_equipment_power = models.BooleanField(help_text="Does the power plan require the use of any power equipment (distros, dimmers, motor controllers, etc.) that does not belong to TEC?")
     multiple_electrical_environments = models.BooleanField(help_text="Will the electrical installation occupy more than one electrical environment?")
     power_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
+    power_plan = models.URLField(blank=True, null=True, help_text="Upload your power plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
 
     # Sound
     noise_monitoring = models.BooleanField(help_text="Does the event require noise monitoring or any non-standard procedures in order to comply with health and safety legislation or site rules?")
@@ -650,6 +661,7 @@ class RiskAssessment(models.Model, RevisionMixin):
     special_structures = models.BooleanField(help_text="Does the event require use of winch stands, motors, MPT Towers, or staging?")
     suspended_structures = models.BooleanField(help_text="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?")
     persons_responsible_structures = models.TextField(blank=True, null=True, help_text="Who are the persons on site responsible for their use?")
+    rigging_plan = models.URLField(blank=True, null=True, help_text="Upload your rigging plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
 
     # Blimey that was a lot of options
 

@@ -2,6 +2,7 @@
 {% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
 {% load yesnoi from filters %}
+{% load linkornone from filters %}
 
 {% block content %}
 <div class="row py-3">
@@ -11,7 +12,7 @@
                 <div class="card-header">General</div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-10">{{ object|help_text:'nonstandard_equipment' }}</dt>
+                        <dt class="col-10">{{ object|help_text:'nonstandard_equipment'|safe }}</dt>
                         <dd class="col-2">
                             {{ object.nonstandard_equipment|yesnoi:'invert' }}
                         </dd>
@@ -19,11 +20,11 @@
                         <dd class="col-2">
                             {{ object.nonstandard_use|yesnoi:'invert' }}
                         </dd>
-                        <dt class="col-10">{{ object|help_text:'contractors' }}</dt>
+                        <dt class="col-10">{{ object|help_text:'contractors'|safe }}</dt>
                         <dd class="col-2">
                             {{ object.contractors|yesnoi:'invert' }}
                         </dd>
-                        <dt class="col-10">{{ object|help_text:'other_companies' }}</dt>
+                        <dt class="col-10">{{ object|help_text:'other_companies'|safe }}</dt>
                         <dd class="col-2">
                             {{ object.other_companies|yesnoi:'invert' }}
                         </dd>
@@ -73,6 +74,10 @@
                         <dt class="col-12">{{ object|help_text:'power_notes' }}</dt>
                         <dd class="col-12">
                             {{ object.power_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                        <dt class="col-6">{{ object|help_text:'power_plan'|safe }}</dt>
+                        <dd class="col-6">
+                            {{ object.power_plan|linkornone }}
                         </dd>
                     </dl>
                 </div>
@@ -138,6 +143,10 @@
                         <dt class="col-sm-6">{{ object|help_text:'persons_responsible_structures' }}</dt>
                         <dd class="col-sm-6">
                             {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
+                        </dd>
+                        <dt class="col-6">{{ object|help_text:'rigging_plan'|safe }}</dt>
+                        <dd class="col-6">
+                            {{ object.rigging_plan|linkornone }}
                         </dd>
                     </dl>
                 </div>
