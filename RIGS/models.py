@@ -640,10 +640,10 @@ class RiskAssessment(models.Model, RevisionMixin):
     # Power
     event_size = models.IntegerField(blank=True, null=True, choices=SIZES)
     big_power = models.BooleanField(help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
-    outside = models.BooleanField(help_text="Is the event outdoors?")
     # If yes to the above two, you must answer...
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
-                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC? (if yes to the above question, this person <em>must</em> be a Power Technician or Power Supervisor)")
+    outside = models.BooleanField(help_text="Is the event outdoors?")    
     generators = models.BooleanField(help_text="Will generators be used?")
     other_companies_power = models.BooleanField(help_text="Will TEC be supplying power to any other companies?")
     nonstandard_equipment_power = models.BooleanField(help_text="Does the power plan require the use of any power equipment (distros, dimmers, motor controllers, etc.) that does not belong to TEC?")
@@ -704,11 +704,10 @@ class RiskAssessment(models.Model, RevisionMixin):
         # Check for idiots
         if not self.outside and self.generators:
             raise forms.ValidationError("Engage brain, please. <strong>No generators indoors!(!)</strong>")
-        # Confirm event size
-        if self.outside:
+        # Confirm event size. Check all except generators, since generators entails outside
+        if self.outside or self.other_companies_power or self.nonstandard_equipment_power or self.multiple_electrical_environments:
             self.event_size = self.LARGE[0]
-        # Check all except generators, since generators entails outside and hence LARGE
-        elif self.big_power or self.other_companies_power or self.nonstandard_equipment_power or self.multiple_electrical_environments:
+        elif self.big_power:
             self.event_size = self.MEDIUM[0]
         else:
             self.event_size = self.SMALL[0]

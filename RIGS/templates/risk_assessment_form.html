@@ -24,6 +24,24 @@
     <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script src="{% static 'js/autocompleter.js' %}"></script>
+
+    <script>
+        function parseBool(str) {
+            if (str.toLowerCase() == 'true') {
+                return true
+            }
+            else {
+                return false
+            }
+        }
+        $('input[type=radio][name=big_power]').change(function() {
+            $('#{{ form.power_mic.id_for_label }}').prop('required', parseBool(this.value));
+        });
+        $('input[type=radio][name=outside], input[type=radio][name=generators], input[type=radio][name=other_companies_power], input[type=radio][name=nonstandard_equipment_power], input[type=radio][name=multiple_electrical_environments]').change(function() {
+            $('#{{ form.power_notes.id_for_label }}').prop('required', parseBool(this.value));
+            $('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -83,17 +101,17 @@
                         <div class="card-header">Power</div>
                         <div class="card-body">
                             {% include 'partials/yes_no_radio.html' with formitem=form.big_power %}
-                            {% include 'partials/yes_no_radio.html' with formitem=form.outside %}
                             <label for="{{ form.power_mic.id_for_label }}"
-                                class="col-sm-8 col-form-label">{{ form.power_mic.help_text }}</label>
-                            <div class="col-sm-8">
+                                class="col col-form-label">{{ form.power_mic.help_text|safe }}</label>
+                            <div class="col-6">
                                 <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                     {% if object.power_mic %}
                                         <option value="{{object.power_mic.pk}}" selected="selected">{{ object.power_mic.name }}</option>
                                     {% endif %}
                                 </select>
                             </div>
-                            <p class="pt-4"><strong>If the answer is yes to any of the below questions you must consult a power supervisor</strong></p>
+                            <p class="pt-4"><strong>If the answer is yes to any of the below questions this is a Large Event and you <em>must</em> consult a power supervisor</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.outside %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.generators label="Will generators be used?" %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.other_companies_power %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_equipment_power %}
