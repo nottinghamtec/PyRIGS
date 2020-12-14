@@ -104,15 +104,10 @@
     </div>
 </div>
 <div class="card  mb-3">
-    <div class="card-header">Power {% if object.event_size == 2 %}
-                                    <span class="badge badge-danger p-2 my-3">Large Event</span>
-                                   {% elif object.event_size == 1 %}
-                                    <span class="badge badge-warning p-2 my-3">Medium Event</span>
-                                   {%else%}<span class="badge badge-success p-2 my-3">Small Event</span>
-                                   {%endif%}</div>
-    {% if object.event_size != 2 %}
+    <div class="card-header">Power {% include 'partials/event_size.html' with object=object.event.riskassessment %}</div>
+    {% if object.event.riskassessment.event_size != 2 %}
     <div class="card-body">
-        {% if object.event_size == 1 %}
+        {% if object.event.riskassessment.event_size == 1 %}
         <dl class="row">
             <dt class="col-10">{{ object|help_text:'source_rcd'|safe }}</dt>
             <dd class="col-2">

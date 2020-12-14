@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from reversion import revisions as reversion
 from django.db.models import AutoField, ManyToOneRel
-
+from django.contrib import messages
 
 class EventRiskAssessmentCreate(generic.CreateView):
     model = models.RiskAssessment
@@ -140,6 +140,20 @@ class EventChecklistCreate(generic.CreateView):
     model = models.EventChecklist
     template_name = 'event_checklist_form.html'
     form_class = forms.EventChecklistForm
+
+    # From both business logic and programming POVs, RAs must exist before ECs!
+    def get(self, *args, **kwargs):
+        epk = kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+
+        # Check if RA exists
+        ra = models.RiskAssessment.objects.filter(event=event).first()
+
+        if ra is None:
+            messages.error(self.request, 'A Risk Assessment must exist prior to creating any Event Checklists for {}! Please create one now.'.format(event))
+            return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
+
+        return super(EventChecklistCreate, self).get(self)
 
     def get_form(self, **kwargs):
         form = super(EventChecklistCreate, self).get_form(**kwargs)

@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 from django.conf import settings
 import simplejson
-from django.contrib import messages
 import datetime
 import pytz
 import operator
