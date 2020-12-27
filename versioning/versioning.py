@@ -157,7 +157,7 @@ class ModelComparison(object):
             if(hasattr(self.new, 'activity_feed_string')):
                 return self.new.activity_feed_string
             else:
-                return str(compare.new)
+                return str(self.new)
         else:
             if(hasattr(self.old, 'activity_feed_string')):
                 return self.old.activity_feed_string
