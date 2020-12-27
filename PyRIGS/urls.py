@@ -7,7 +7,6 @@ from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
-from registration.backends.default.views import RegistrationView
 from PyRIGS.decorators import permission_required_with_403
 import RIGS
 import users

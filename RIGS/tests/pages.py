@@ -190,6 +190,7 @@ class CreateRiskAssessment(FormPage):
         'crew_fatigue': (regions.RadioSelect, (By.ID, 'id_crew_fatigue')),
         'general_notes': (regions.TextBox, (By.ID, 'id_general_notes')),
         'big_power': (regions.RadioSelect, (By.ID, 'id_big_power')),
+        'outside': (regions.RadioSelect, (By.ID, 'id_outside')),
         'generators': (regions.RadioSelect, (By.ID, 'id_generators')),
         'other_companies_power': (regions.RadioSelect, (By.ID, 'id_other_companies_power')),
         'nonstandard_equipment_power': (regions.RadioSelect, (By.ID, 'id_nonstandard_equipment_power')),
@@ -207,7 +208,7 @@ class CreateRiskAssessment(FormPage):
         'persons_responsible_structures': (regions.TextBox, (By.ID, 'id_persons_responsible_structures')),
         'suspended_structures': (regions.RadioSelect, (By.ID, 'id_suspended_structures')),
         'supervisor_consulted': (regions.CheckBox, (By.ID, 'id_supervisor_consulted')),
-        'outside': (regions.CheckBox, (By.ID, 'id_outside')),
+        'rigging_plan': (regions.TextBox, (By.ID, 'id_rigging_plan')),
     }
 
     @property
@@ -248,8 +249,6 @@ class CreateEventChecklist(FormPage):
         'supply_test': (regions.CheckBox, (By.ID, 'id_supply_test')),
         'earthing': (regions.CheckBox, (By.ID, 'id_earthing')),
         'pat': (regions.CheckBox, (By.ID, 'id_pat')),
-        'earthing_m': (regions.CheckBox, (By.XPATH, '(//*[@id="id_earthing"])[2]')),
-        'pat_m': (regions.CheckBox, (By.XPATH, '(//*[@id="id_pat"])[2]')),
         'source_rcd': (regions.CheckBox, (By.ID, 'id_source_rcd')),
         'labelling': (regions.CheckBox, (By.ID, 'id_labelling')),
         'fd_voltage_l1': (regions.TextBox, (By.ID, 'id_fd_voltage_l1')),
@@ -263,9 +262,6 @@ class CreateEventChecklist(FormPage):
         'w1_voltage': (regions.TextBox, (By.ID, 'id_w1_voltage')),
         'w1_earth_fault': (regions.TextBox, (By.ID, 'id_w1_earth_fault')),
     }
-
-    def select_size(self, size):
-        self.find_element(By.XPATH, '//button[.="{}"]'.format(size)).click()
 
     def add_vehicle(self):
         self.find_element(*self._add_vehicle_locator).click()

@@ -669,7 +669,14 @@ class TestHealthAndSafety(BaseRigboardTest):
                                                       start_date=date.today() + timedelta(days=6),
                                                       description="start future no end",
                                                       purchase_order='TESTPO',
-                                                      person=self.client)
+                                                      person=self.client,
+                                                      venue=self.venue)
+        self.testEvent3 = models.Event.objects.create(name="TE E3", status=models.Event.PROVISIONAL,
+                                                      start_date=date.today() + timedelta(days=6),
+                                                      description="start future no end",
+                                                      purchase_order='TESTPO',
+                                                      person=self.client,
+                                                      venue=self.venue)
         self.testRA = models.RiskAssessment.objects.create(event=self.testEvent2, supervisor_consulted=False, nonstandard_equipment=False,
                                                            nonstandard_use=False,
                                                            contractors=False,
@@ -690,6 +697,26 @@ class TestHealthAndSafety(BaseRigboardTest):
                                                            special_structures=False,
                                                            suspended_structures=False,
                                                            outside=False)
+        self.testRA2 = models.RiskAssessment.objects.create(event=self.testEvent3, supervisor_consulted=False, nonstandard_equipment=False,
+                                                            nonstandard_use=False,
+                                                            contractors=False,
+                                                            other_companies=False,
+                                                            crew_fatigue=False,
+                                                            big_power=True,
+                                                            generators=False,
+                                                            other_companies_power=False,
+                                                            nonstandard_equipment_power=False,
+                                                            multiple_electrical_environments=False,
+                                                            noise_monitoring=False,
+                                                            known_venue=True,
+                                                            safe_loading=True,
+                                                            safe_storage=True,
+                                                            area_outside_of_control=False,
+                                                            barrier_required=False,
+                                                            nonstandard_emergency_procedure=False,
+                                                            special_structures=False,
+                                                            suspended_structures=False,
+                                                            outside=False)
         self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
     # TODO Can I loop through all the boolean fields and test them at once?
@@ -728,9 +755,11 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.barrier_required = False
         self.page.nonstandard_emergency_procedure = False
         self.page.special_structures = False
-        self.page.persons_responsible_structures = "Nobody and her cat, She"
+        # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
         self.page.suspended_structures = True
+        # TODO Test for this proper
+        self.page.rigging_plan = "https://nottinghamtec.sharepoint.com/test/"
         self.page.submit()
         self.assertFalse(self.page.success)
 
@@ -757,7 +786,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.assertEqual(ra.nonstandard_equipment, nse)
 
     def test_ec_create_small(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent2.pk).open()
 
         self.page.safe_parking = True
         self.page.safe_packing = True
@@ -772,10 +801,9 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.power_mic.toggle()
         self.assertFalse(self.page.power_mic.is_open)
 
-        self.page.select_size('Small')
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
-        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
+        # Gotta scroll to make the button clickable
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
         self.page.earthing = True
         self.page.rcds = True
         self.page.supply_test = True
@@ -785,7 +813,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.assertTrue(self.page.success)
 
     def test_ec_create_medium(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent3.pk).open()
 
         self.page.safe_parking = True
         self.page.safe_packing = True
@@ -800,12 +828,11 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.power_mic.toggle()
         self.assertFalse(self.page.power_mic.is_open)
 
-        self.page.select_size('Medium')
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
-        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
-        self.page.earthing_m = True
-        self.page.pat_m = True
+        # Gotta scroll to make the button clickable
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        self.page.earthing = True
+        self.page.pat = True
         self.page.source_rcd = True
         self.page.labelling = True
         self.page.fd_voltage_l1 = 240
@@ -819,13 +846,12 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.w1_voltage = 240
         self.page.w1_earth_fault = 333
 
-        # Gotta scroll to make the button clickable
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         self.page.submit()
         self.assertTrue(self.page.success)
 
     def test_ec_create_extras(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+        eid = self.testEvent2.pk
+        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=eid).open()
         self.page.add_vehicle()
         self.page.add_crew()
 
@@ -859,10 +885,6 @@ class TestHealthAndSafety(BaseRigboardTest):
         crew_select.search(crew.name)
         self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
 
-        self.page.select_size('Small')
-        self.wait.until(animation_is_finished())
-        self.assertFalse(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[2]').is_displayed())
-        self.assertTrue(self.driver.find_element(By.XPATH, '(//*[@id="id_earthing"])[1]').is_displayed())
         self.page.earthing = True
         self.page.rcds = True
         self.page.supply_test = True
@@ -871,7 +893,7 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-        checklist = models.EventChecklist.objects.get(event=self.testEvent.pk)
+        checklist = models.EventChecklist.objects.get(event=eid)
         vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
         self.assertEqual(vehicle_name, vehicle.vehicle)
         crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)

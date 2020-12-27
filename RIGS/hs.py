@@ -7,6 +7,7 @@ from reversion import revisions as reversion
 from django.db.models import AutoField, ManyToOneRel
 from django.contrib import messages
 
+
 class EventRiskAssessmentCreate(generic.CreateView):
     model = models.RiskAssessment
     template_name = 'risk_assessment_form.html'

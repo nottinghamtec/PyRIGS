@@ -41,6 +41,14 @@
             $('#{{ form.power_notes.id_for_label }}').prop('required', parseBool(this.value));
             $('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
         });
+        $('input[type=radio][name=special_structures]').change(function() {
+            $('#{{ form.persons_responsible_structures.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
+            $('label[for={{ form.persons_responsible_structures.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        });
+        $('input[type=radio][name=suspended_structures]').change(function() {
+            $('#{{ form.rigging_plan.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
+            $('label[for={{ form.rigging_plan.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        });
     </script>
 {% endblock %}
 
@@ -110,7 +118,7 @@
                                     {% endif %}
                                 </select>
                             </div>
-                            <p class="pt-4"><strong>If the answer is yes to any of the below questions this is a Large Event and you <em>must</em> consult a power supervisor</strong></p>
+                            <p class="pt-4"><strong>If the answer is yes to ANY of the below questions this is a Large Event and you <em>must</em> consult a power supervisor</strong></p>
                             {% include 'partials/yes_no_radio.html' with formitem=form.outside %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.generators label="Will generators be used?" %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.other_companies_power %}
@@ -159,11 +167,11 @@
                         <div class="card-header">Structures</div>
                         <div class="card-body">
                             {% include 'partials/yes_no_radio.html' with formitem=form.special_structures %}
+                            <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3" hidden="true">{{ form.persons_responsible_structures.help_text }}</label>
+                            {% render_field form.persons_responsible_structures class+="form-control mb-3" hidden="true" %}
                             {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures %}
-                            <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3">{{ form.persons_responsible_structures.help_text }}</label>
-                            {% render_field form.persons_responsible_structures class+="form-control mb-3" %}
-                            <label for="{{ form.rigging_plan.id_for_label }}"  class="mt-2">{{ form.rigging_plan.help_text|safe }}</label>
-                            {% render_field form.rigging_plan class+="form-control" %}
+                            <label for="{{ form.rigging_plan.id_for_label }}" class="mt-2" hidden="true">{{ form.rigging_plan.help_text|safe }}</label>
+                            {% render_field form.rigging_plan class+="form-control" hidden="true" %}
                         </div>
                     </div>
                 </div>

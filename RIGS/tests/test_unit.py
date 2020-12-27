@@ -512,7 +512,6 @@ class TestHSLogic(TestCase):
                                                     extinguishers_location="Somewhere, I forgot",
                                                     earthing=False,
                                                     pat=False,
-                                                    event_size=0,
                                                     date=timezone.now(),
                                                     venue=cls.venue),
         }
