@@ -578,7 +578,9 @@ class TestCalendar(BaseRigboardTest):
                             specialEvent.start_date.strftime('%Y%m%d') + 'T' + specialEvent.start_time.strftime(
                                 '%H%M%S'))
         self.assertContains(response,
-                            specialEvent.end_date.strftime('%Y%m%d') + 'T' + specialEvent.end_time.strftime('%H%M%S'))
+                            specialEvent.end_date.strftime('%Y%m%d'))
+        self.assertContains(response,
+                            specialEvent.end_time.strftime('%H%M%S'))
 
         # Only non rigs
         self.page.toggle_filter('rig')
