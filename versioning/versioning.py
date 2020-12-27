@@ -153,16 +153,12 @@ class ModelComparison(object):
 
     @cached_property
     def name(self):
-        if self.new:
-            if(hasattr(self.new, 'activity_feed_string')):
-                return self.new.activity_feed_string
-            else:
-                return str(self.new)
+        obj = self.new if self.new else self.old
+
+        if(hasattr(obj, 'activity_feed_string')):
+            return obj.activity_feed_string
         else:
-            if(hasattr(self.old, 'activity_feed_string')):
-                return self.old.activity_feed_string
-            elif str(self.old):
-                return str(self.old)
+            return str(obj)
 
     @cached_property
     def items_changed(self):

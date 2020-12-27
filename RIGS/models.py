@@ -609,7 +609,7 @@ class Payment(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return str("payment at £{}".format(self.amount))
+        return str("payment of £{}".format(self.amount))
 
 
 def validate_url(value):
