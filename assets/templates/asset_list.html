@@ -58,7 +58,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col">
+    <div class="col px-0">
         <form id="asset-search-form" method="GET" class="form-inline justify-content-end">
               <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
                 {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
@@ -78,7 +78,7 @@
     </div>
 </div>
 <div class="row my-2">
-    <div class="col text-right">
+    <div class="col text-right px-0">
     {% button 'new' 'asset_create' style="width: 6em" %}
     </div>
 </div>
