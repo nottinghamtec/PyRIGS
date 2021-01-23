@@ -57,7 +57,8 @@
                         },
                         success: function(doc) {
                             var events = [];
-                            colours = {'Provisional': '#FFE89B',
+                            colours = {
+                                'Provisional': '#FFE89B',
                                 'Confirmed': '#3AB54A' ,
                                 'Booked': '#3AB54A' ,
                                 'Cancelled': 'grey' ,
@@ -149,6 +150,7 @@
                     alert('Invalid Date');
                 }
             });
+            {% if view and date %}
             // Go to the initial settings, if they're valid
             view = viewFromUrl['{{view}}'];
             calendar.changeView(view);
@@ -158,6 +160,7 @@
             } else{
                 console.log('Supplied date is invalid - using default')
             }
+            {% endif %}
         });
     </script>
 {% endblock %}
