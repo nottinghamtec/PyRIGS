@@ -1,0 +1,18 @@
+{% extends 'base_rigs.html' %}
+{% load button from filters %}
+
+{% block content %}
+<div class="row align-items-center justify-content-between py-2">
+    <div class="col-sm-12 col-md">
+        Key: <span class="table-success mr-1 px-2">Ready</span><span class="table-warning mr-1 px-2">Action Required</span><span class="table-danger mr-1 px-2">Needs MIC</span><span class="table-secondary mr-1 px-2">Cancelled</span><span class="table-info px-2">Non-Rig</span>
+    </div>
+    {% if perms.RIGS.add_event %}
+    <div class="col text-right">
+        {% button 'new' 'event_create' %}
+    </div>
+    {% endif %}
+</div>
+
+{% include 'partials/event_table.html' %}
+
+{% endblock %}

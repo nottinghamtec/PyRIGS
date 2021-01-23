@@ -1,0 +1,30 @@
+<tr id="item-{{item.pk}}" data-pk="{{item.pk}}" class="item_row">
+	<th scope="row">
+		<span class="name">{{ item.name }}</span>
+        <div class="item-description">
+            <em class="description">{{item.description|linebreaksbr}}</em>
+        </div>
+	</th>
+    {% if perms.RIGS.view_event %}
+	<td>£&nbsp;<span class="cost">{{item.cost|floatformat:2}}</span></td>
+    {% endif %}
+	<td class="quantity">{{item.quantity}}</td>
+    {% if perms.RIGS.view_event %}
+	<td>£&nbsp;<span class="sub-total" data-subtotal="{{item.total_cost}}">{{item.total_cost|floatformat:2}}</span></td>
+    {% endif %}
+	{% if edit %}
+    <td class="vert-align text-right">
+        <div class="btn-group" role="group" aria-label="Action buttons">
+	        <button type="button" class="item-edit btn btn-sm btn-warning"
+			        data-pk="{{item.pk}}"
+			        data-toggle="modal" data-target="#itemModal">
+		        <span class="fas fa-edit"></span>
+	        </button>
+	        <button type="button" class="item-delete btn btn-sm btn-danger"
+			        data-pk="{{item.pk}}">
+		        <span class="fas fa-times-circle"></span>
+	        </button>
+        </div>
+    </td>
+	{% endif %}
+</tr>

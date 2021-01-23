@@ -1,202 +1,178 @@
 /*!
- * FullCalendar v2.3.1 Print Stylesheet
- * Docs & License: http://fullcalendar.io/
- * (c) 2015 Adam Shaw
+ * FullCalendar v3.10.2
+ * Docs & License: https://fullcalendar.io/
+ * (c) 2019 Adam Shaw
  */
-
+/*!
+ * FullCalendar v3.10.2 Print Stylesheet
+ * Docs & License: https://fullcalendar.io/
+ * (c) 2019 Adam Shaw
+ */
 /*
  * Include this stylesheet on your page to get a more printer-friendly calendar.
  * When including this stylesheet, use the media='print' attribute of the <link> tag.
  * Make sure to include this stylesheet IN ADDITION to the regular fullcalendar.css.
  */
-
 .fc {
-	max-width: 100% !important;
-}
-
+  max-width: 100% !important; }
 
 /* Global Event Restyling
 --------------------------------------------------------------------------------------------------*/
-
 .fc-event {
-	background: #fff !important;
-	color: #000 !important;
-	page-break-inside: avoid;
-}
+  background: #fff !important;
+  color: #000 !important;
+  page-break-inside: avoid; }
 
 .fc-event .fc-resizer {
-	display: none;
-}
-
+  display: none; }
 
 /* Table & Day-Row Restyling
 --------------------------------------------------------------------------------------------------*/
-
-th,
-td,
-hr,
-thead,
-tbody,
+.fc th,
+.fc td,
+.fc hr,
+.fc thead,
+.fc tbody,
 .fc-row {
-	border-color: #ccc !important;
-	background: #fff !important;
-}
+  border-color: #ccc !important;
+  background: #fff !important; }
 
-/* kill the overlaid, absolutely-positioned common components */
+/* kill the overlaid, absolutely-positioned components */
+/* common... */
 .fc-bg,
 .fc-bgevent-skeleton,
 .fc-highlight-skeleton,
-.fc-helper-skeleton {
-	display: none;
-}
+.fc-helper-skeleton,
+.fc-bgevent-container,
+.fc-business-container,
+.fc-highlight-container,
+.fc-helper-container {
+  display: none; }
 
 /* don't force a min-height on rows (for DayGrid) */
 .fc tbody .fc-row {
-	height: auto !important; /* undo height that JS set in distributeHeight */
-	min-height: 0 !important; /* undo the min-height from each view's specific stylesheet */
-}
+  height: auto !important;
+  /* undo height that JS set in distributeHeight */
+  min-height: 0 !important;
+  /* undo the min-height from each view's specific stylesheet */ }
 
 .fc tbody .fc-row .fc-content-skeleton {
-	position: static; /* undo .fc-rigid */
-	padding-bottom: 0 !important; /* use a more border-friendly method for this... */
-}
+  position: static;
+  /* undo .fc-rigid */
+  padding-bottom: 0 !important;
+  /* use a more border-friendly method for this... */ }
 
-.fc tbody .fc-row .fc-content-skeleton tbody tr:last-child td { /* only works in newer browsers */
-	padding-bottom: 1em; /* ...gives space within the skeleton. also ensures min height in a way */
-}
+.fc tbody .fc-row .fc-content-skeleton tbody tr:last-child td {
+  /* only works in newer browsers */
+  padding-bottom: 1em;
+  /* ...gives space within the skeleton. also ensures min height in a way */ }
 
 .fc tbody .fc-row .fc-content-skeleton table {
-	/* provides a min-height for the row, but only effective for IE, which exaggerates this value,
-	   making it look more like 3em. for other browers, it will already be this tall */
-	height: 1em;
-}
-
+  /* provides a min-height for the row, but only effective for IE, which exaggerates this value,
+     making it look more like 3em. for other browers, it will already be this tall */
+  height: 1em; }
 
 /* Undo month-view event limiting. Display all events and hide the "more" links
 --------------------------------------------------------------------------------------------------*/
-
 .fc-more-cell,
 .fc-more {
-	display: none !important;
-}
+  display: none !important; }
 
 .fc tr.fc-limited {
-	display: table-row !important;
-}
+  display: table-row !important; }
 
 .fc td.fc-limited {
-	display: table-cell !important;
-}
+  display: table-cell !important; }
 
 .fc-popover {
-	display: none; /* never display the "more.." popover in print mode */
-}
-
+  display: none;
+  /* never display the "more.." popover in print mode */ }
 
 /* TimeGrid Restyling
 --------------------------------------------------------------------------------------------------*/
-
 /* undo the min-height 100% trick used to fill the container's height */
 .fc-time-grid {
-	min-height: 0 !important;
-}
+  min-height: 0 !important; }
 
 /* don't display the side axis at all ("all-day" and time cells) */
 .fc-agenda-view .fc-axis {
-	display: none;
-}
+  display: none; }
 
 /* don't display the horizontal lines */
 .fc-slats,
-.fc-time-grid hr { /* this hr is used when height is underused and needs to be filled */
-	display: none !important; /* important overrides inline declaration */
-}
+.fc-time-grid hr {
+  /* this hr is used when height is underused and needs to be filled */
+  display: none !important;
+  /* important overrides inline declaration */ }
 
 /* let the container that holds the events be naturally positioned and create real height */
 .fc-time-grid .fc-content-skeleton {
-	position: static;
-}
+  position: static; }
 
 /* in case there are no events, we still want some height */
 .fc-time-grid .fc-content-skeleton table {
-	height: 4em;
-}
+  height: 4em; }
 
 /* kill the horizontal spacing made by the event container. event margins will be done below */
 .fc-time-grid .fc-event-container {
-	margin: 0 !important;
-}
-
+  margin: 0 !important; }
 
 /* TimeGrid *Event* Restyling
 --------------------------------------------------------------------------------------------------*/
-
 /* naturally position events, vertically stacking them */
 .fc-time-grid .fc-event {
-	position: static !important;
-	margin: 3px 2px !important;
-}
+  position: static !important;
+  margin: 3px 2px !important; }
 
 /* for events that continue to a future day, give the bottom border back */
 .fc-time-grid .fc-event.fc-not-end {
-	border-bottom-width: 1px !important;
-}
+  border-bottom-width: 1px !important; }
 
 /* indicate the event continues via "..." text */
 .fc-time-grid .fc-event.fc-not-end:after {
-	content: "...";
-}
+  content: "..."; }
 
 /* for events that are continuations from previous days, give the top border back */
 .fc-time-grid .fc-event.fc-not-start {
-	border-top-width: 1px !important;
-}
+  border-top-width: 1px !important; }
 
 /* indicate the event is a continuation via "..." text */
 .fc-time-grid .fc-event.fc-not-start:before {
-	content: "...";
-}
+  content: "..."; }
 
 /* time */
-
 /* undo a previous declaration and let the time text span to a second line */
 .fc-time-grid .fc-event .fc-time {
-	white-space: normal !important;
-}
+  white-space: normal !important; }
 
 /* hide the the time that is normally displayed... */
 .fc-time-grid .fc-event .fc-time span {
-	display: none;
-}
+  display: none; }
 
 /* ...replace it with a more verbose version (includes AM/PM) stored in an html attribute */
 .fc-time-grid .fc-event .fc-time:after {
-	content: attr(data-full);
-}
-
+  content: attr(data-full); }
 
 /* Vertical Scroller & Containers
 --------------------------------------------------------------------------------------------------*/
-
 /* kill the scrollbars and allow natural height */
 .fc-scroller,
-.fc-day-grid-container,    /* these divs might be assigned height, which we need to cleared */
-.fc-time-grid-container {  /* */
-	overflow: visible !important;
-	height: auto !important;
-}
+.fc-day-grid-container,
+.fc-time-grid-container {
+  /* */
+  overflow: visible !important;
+  height: auto !important; }
 
 /* kill the horizontal border/padding used to compensate for scrollbars */
 .fc-row {
-	border: 0 !important;
-	margin: 0 !important;
-}
-
+  border: 0 !important;
+  margin: 0 !important; }
 
 /* Button Controls
 --------------------------------------------------------------------------------------------------*/
-
 .fc-button-group,
 .fc button {
-	display: none; /* don't display any button-related controls */
-}
+  display: none;
+  /* don't display any button-related controls */ }
+
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImZ1bGxjYWxlbmRhci5wcmludC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7RUFJRTtBQUNGOzs7O0VBSUU7QUFDRjs7OztFQUlFO0FBQ0Y7RUFDRSwwQkFBMEIsRUFBQTs7QUFFNUI7bUdBQ21HO0FBQ25HO0VBQ0UsMkJBQTJCO0VBQzNCLHNCQUFzQjtFQUN0Qix3QkFBd0IsRUFBQTs7QUFFMUI7RUFDRSxhQUFhLEVBQUE7O0FBRWY7bUdBQ21HO0FBQ25HOzs7Ozs7RUFNRSw2QkFBNkI7RUFDN0IsMkJBQTJCLEVBQUE7O0FBRTdCLHdEQUFBO0FBQ0EsY0FBQTtBQUNBOzs7Ozs7OztFQVFFLGFBQWEsRUFBQTs7QUFFZixtREFBQTtBQUNBO0VBQ0UsdUJBQXVCO0VBQ3ZCLGdEQUFBO0VBQ0Esd0JBQXdCO0VBQ3hCLDZEQUFBLEVBQThEOztBQUVoRTtFQUNFLGdCQUFnQjtFQUNoQixtQkFBQTtFQUNBLDRCQUE0QjtFQUM1QixrREFBQSxFQUFtRDs7QUFFckQ7RUFDRSxpQ0FBQTtFQUNBLG1CQUFtQjtFQUNuQix5RUFBQSxFQUEwRTs7QUFFNUU7RUFDRTtvRkFDa0Y7RUFDbEYsV0FBVyxFQUFBOztBQUViO21HQUNtRztBQUNuRzs7RUFFRSx3QkFBd0IsRUFBQTs7QUFFMUI7RUFDRSw2QkFBNkIsRUFBQTs7QUFFL0I7RUFDRSw4QkFBOEIsRUFBQTs7QUFFaEM7RUFDRSxhQUFhO0VBQ2IscURBQUEsRUFBc0Q7O0FBRXhEO21HQUNtRztBQUNuRyx1RUFBQTtBQUNBO0VBQ0Usd0JBQXdCLEVBQUE7O0FBRTFCLGtFQUFBO0FBQ0E7RUFDRSxhQUFhLEVBQUE7O0FBRWYsdUNBQUE7QUFDQTs7RUFFRSxvRUFBQTtFQUNBLHdCQUF3QjtFQUN4QiwyQ0FBQSxFQUE0Qzs7QUFFOUMsMkZBQUE7QUFDQTtFQUNFLGdCQUFnQixFQUFBOztBQUVsQiwyREFBQTtBQUNBO0VBQ0UsV0FBVyxFQUFBOztBQUViLDhGQUFBO0FBQ0E7RUFDRSxvQkFBb0IsRUFBQTs7QUFFdEI7bUdBQ21HO0FBQ25HLHdEQUFBO0FBQ0E7RUFDRSwyQkFBMkI7RUFDM0IsMEJBQTBCLEVBQUE7O0FBRTVCLDBFQUFBO0FBQ0E7RUFDRSxtQ0FBbUMsRUFBQTs7QUFFckMsZ0RBQUE7QUFDQTtFQUNFLGNBQWMsRUFBQTs7QUFFaEIsbUZBQUE7QUFDQTtFQUNFLGdDQUFnQyxFQUFBOztBQUVsQyx3REFBQTtBQUNBO0VBQ0UsY0FBYyxFQUFBOztBQUVoQixTQUFBO0FBQ0EsNEVBQUE7QUFDQTtFQUNFLDhCQUE4QixFQUFBOztBQUVoQyxvREFBQTtBQUNBO0VBQ0UsYUFBYSxFQUFBOztBQUVmLDJGQUFBO0FBQ0E7RUFDRSx3QkFBd0IsRUFBQTs7QUFFMUI7bUdBQ21HO0FBQ25HLGlEQUFBO0FBQ0E7OztFQUdFLElBQUE7RUFDQSw0QkFBNEI7RUFDNUIsdUJBQXVCLEVBQUE7O0FBRXpCLHlFQUFBO0FBQ0E7RUFDRSxvQkFBb0I7RUFDcEIsb0JBQW9CLEVBQUE7O0FBRXRCO21HQUNtRztBQUNuRzs7RUFFRSxhQUFhO0VBQ2IsOENBQUEsRUFBK0MiLCJmaWxlIjoiZnVsbGNhbGVuZGFyLnByaW50LmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIVxuICogRnVsbENhbGVuZGFyIHYzLjEwLjJcbiAqIERvY3MgJiBMaWNlbnNlOiBodHRwczovL2Z1bGxjYWxlbmRhci5pby9cbiAqIChjKSAyMDE5IEFkYW0gU2hhd1xuICovXG4vKiFcbiAqIEZ1bGxDYWxlbmRhciB2My4xMC4yIFByaW50IFN0eWxlc2hlZXRcbiAqIERvY3MgJiBMaWNlbnNlOiBodHRwczovL2Z1bGxjYWxlbmRhci5pby9cbiAqIChjKSAyMDE5IEFkYW0gU2hhd1xuICovXG4vKlxuICogSW5jbHVkZSB0aGlzIHN0eWxlc2hlZXQgb24geW91ciBwYWdlIHRvIGdldCBhIG1vcmUgcHJpbnRlci1mcmllbmRseSBjYWxlbmRhci5cbiAqIFdoZW4gaW5jbHVkaW5nIHRoaXMgc3R5bGVzaGVldCwgdXNlIHRoZSBtZWRpYT0ncHJpbnQnIGF0dHJpYnV0ZSBvZiB0aGUgPGxpbms+IHRhZy5cbiAqIE1ha2Ugc3VyZSB0byBpbmNsdWRlIHRoaXMgc3R5bGVzaGVldCBJTiBBRERJVElPTiB0byB0aGUgcmVndWxhciBmdWxsY2FsZW5kYXIuY3NzLlxuICovXG4uZmMge1xuICBtYXgtd2lkdGg6IDEwMCUgIWltcG9ydGFudDsgfVxuXG4vKiBHbG9iYWwgRXZlbnQgUmVzdHlsaW5nXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSovXG4uZmMtZXZlbnQge1xuICBiYWNrZ3JvdW5kOiAjZmZmICFpbXBvcnRhbnQ7XG4gIGNvbG9yOiAjMDAwICFpbXBvcnRhbnQ7XG4gIHBhZ2UtYnJlYWstaW5zaWRlOiBhdm9pZDsgfVxuXG4uZmMtZXZlbnQgLmZjLXJlc2l6ZXIge1xuICBkaXNwbGF5OiBub25lOyB9XG5cbi8qIFRhYmxlICYgRGF5LVJvdyBSZXN0eWxpbmdcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKi9cbi5mYyB0aCxcbi5mYyB0ZCxcbi5mYyBocixcbi5mYyB0aGVhZCxcbi5mYyB0Ym9keSxcbi5mYy1yb3cge1xuICBib3JkZXItY29sb3I6ICNjY2MgIWltcG9ydGFudDtcbiAgYmFja2dyb3VuZDogI2ZmZiAhaW1wb3J0YW50OyB9XG5cbi8qIGtpbGwgdGhlIG92ZXJsYWlkLCBhYnNvbHV0ZWx5LXBvc2l0aW9uZWQgY29tcG9uZW50cyAqL1xuLyogY29tbW9uLi4uICovXG4uZmMtYmcsXG4uZmMtYmdldmVudC1za2VsZXRvbixcbi5mYy1oaWdobGlnaHQtc2tlbGV0b24sXG4uZmMtaGVscGVyLXNrZWxldG9uLFxuLmZjLWJnZXZlbnQtY29udGFpbmVyLFxuLmZjLWJ1c2luZXNzLWNvbnRhaW5lcixcbi5mYy1oaWdobGlnaHQtY29udGFpbmVyLFxuLmZjLWhlbHBlci1jb250YWluZXIge1xuICBkaXNwbGF5OiBub25lOyB9XG5cbi8qIGRvbid0IGZvcmNlIGEgbWluLWhlaWdodCBvbiByb3dzIChmb3IgRGF5R3JpZCkgKi9cbi5mYyB0Ym9keSAuZmMtcm93IHtcbiAgaGVpZ2h0OiBhdXRvICFpbXBvcnRhbnQ7XG4gIC8qIHVuZG8gaGVpZ2h0IHRoYXQgSlMgc2V0IGluIGRpc3RyaWJ1dGVIZWlnaHQgKi9cbiAgbWluLWhlaWdodDogMCAhaW1wb3J0YW50O1xuICAvKiB1bmRvIHRoZSBtaW4taGVpZ2h0IGZyb20gZWFjaCB2aWV3J3Mgc3BlY2lmaWMgc3R5bGVzaGVldCAqLyB9XG5cbi5mYyB0Ym9keSAuZmMtcm93IC5mYy1jb250ZW50LXNrZWxldG9uIHtcbiAgcG9zaXRpb246IHN0YXRpYztcbiAgLyogdW5kbyAuZmMtcmlnaWQgKi9cbiAgcGFkZGluZy1ib3R0b206IDAgIWltcG9ydGFudDtcbiAgLyogdXNlIGEgbW9yZSBib3JkZXItZnJpZW5kbHkgbWV0aG9kIGZvciB0aGlzLi4uICovIH1cblxuLmZjIHRib2R5IC5mYy1yb3cgLmZjLWNvbnRlbnQtc2tlbGV0b24gdGJvZHkgdHI6bGFzdC1jaGlsZCB0ZCB7XG4gIC8qIG9ubHkgd29ya3MgaW4gbmV3ZXIgYnJvd3NlcnMgKi9cbiAgcGFkZGluZy1ib3R0b206IDFlbTtcbiAgLyogLi4uZ2l2ZXMgc3BhY2Ugd2l0aGluIHRoZSBza2VsZXRvbi4gYWxzbyBlbnN1cmVzIG1pbiBoZWlnaHQgaW4gYSB3YXkgKi8gfVxuXG4uZmMgdGJvZHkgLmZjLXJvdyAuZmMtY29udGVudC1za2VsZXRvbiB0YWJsZSB7XG4gIC8qIHByb3ZpZGVzIGEgbWluLWhlaWdodCBmb3IgdGhlIHJvdywgYnV0IG9ubHkgZWZmZWN0aXZlIGZvciBJRSwgd2hpY2ggZXhhZ2dlcmF0ZXMgdGhpcyB2YWx1ZSxcbiAgICAgbWFraW5nIGl0IGxvb2sgbW9yZSBsaWtlIDNlbS4gZm9yIG90aGVyIGJyb3dlcnMsIGl0IHdpbGwgYWxyZWFkeSBiZSB0aGlzIHRhbGwgKi9cbiAgaGVpZ2h0OiAxZW07IH1cblxuLyogVW5kbyBtb250aC12aWV3IGV2ZW50IGxpbWl0aW5nLiBEaXNwbGF5IGFsbCBldmVudHMgYW5kIGhpZGUgdGhlIFwibW9yZVwiIGxpbmtzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSovXG4uZmMtbW9yZS1jZWxsLFxuLmZjLW1vcmUge1xuICBkaXNwbGF5OiBub25lICFpbXBvcnRhbnQ7IH1cblxuLmZjIHRyLmZjLWxpbWl0ZWQge1xuICBkaXNwbGF5OiB0YWJsZS1yb3cgIWltcG9ydGFudDsgfVxuXG4uZmMgdGQuZmMtbGltaXRlZCB7XG4gIGRpc3BsYXk6IHRhYmxlLWNlbGwgIWltcG9ydGFudDsgfVxuXG4uZmMtcG9wb3ZlciB7XG4gIGRpc3BsYXk6IG5vbmU7XG4gIC8qIG5ldmVyIGRpc3BsYXkgdGhlIFwibW9yZS4uXCIgcG9wb3ZlciBpbiBwcmludCBtb2RlICovIH1cblxuLyogVGltZUdyaWQgUmVzdHlsaW5nXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSovXG4vKiB1bmRvIHRoZSBtaW4taGVpZ2h0IDEwMCUgdHJpY2sgdXNlZCB0byBmaWxsIHRoZSBjb250YWluZXIncyBoZWlnaHQgKi9cbi5mYy10aW1lLWdyaWQge1xuICBtaW4taGVpZ2h0OiAwICFpbXBvcnRhbnQ7IH1cblxuLyogZG9uJ3QgZGlzcGxheSB0aGUgc2lkZSBheGlzIGF0IGFsbCAoXCJhbGwtZGF5XCIgYW5kIHRpbWUgY2VsbHMpICovXG4uZmMtYWdlbmRhLXZpZXcgLmZjLWF4aXMge1xuICBkaXNwbGF5OiBub25lOyB9XG5cbi8qIGRvbid0IGRpc3BsYXkgdGhlIGhvcml6b250YWwgbGluZXMgKi9cbi5mYy1zbGF0cyxcbi5mYy10aW1lLWdyaWQgaHIge1xuICAvKiB0aGlzIGhyIGlzIHVzZWQgd2hlbiBoZWlnaHQgaXMgdW5kZXJ1c2VkIGFuZCBuZWVkcyB0byBiZSBmaWxsZWQgKi9cbiAgZGlzcGxheTogbm9uZSAhaW1wb3J0YW50O1xuICAvKiBpbXBvcnRhbnQgb3ZlcnJpZGVzIGlubGluZSBkZWNsYXJhdGlvbiAqLyB9XG5cbi8qIGxldCB0aGUgY29udGFpbmVyIHRoYXQgaG9sZHMgdGhlIGV2ZW50cyBiZSBuYXR1cmFsbHkgcG9zaXRpb25lZCBhbmQgY3JlYXRlIHJlYWwgaGVpZ2h0ICovXG4uZmMtdGltZS1ncmlkIC5mYy1jb250ZW50LXNrZWxldG9uIHtcbiAgcG9zaXRpb246IHN0YXRpYzsgfVxuXG4vKiBpbiBjYXNlIHRoZXJlIGFyZSBubyBldmVudHMsIHdlIHN0aWxsIHdhbnQgc29tZSBoZWlnaHQgKi9cbi5mYy10aW1lLWdyaWQgLmZjLWNvbnRlbnQtc2tlbGV0b24gdGFibGUge1xuICBoZWlnaHQ6IDRlbTsgfVxuXG4vKiBraWxsIHRoZSBob3Jpem9udGFsIHNwYWNpbmcgbWFkZSBieSB0aGUgZXZlbnQgY29udGFpbmVyLiBldmVudCBtYXJnaW5zIHdpbGwgYmUgZG9uZSBiZWxvdyAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQtY29udGFpbmVyIHtcbiAgbWFyZ2luOiAwICFpbXBvcnRhbnQ7IH1cblxuLyogVGltZUdyaWQgKkV2ZW50KiBSZXN0eWxpbmdcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKi9cbi8qIG5hdHVyYWxseSBwb3NpdGlvbiBldmVudHMsIHZlcnRpY2FsbHkgc3RhY2tpbmcgdGhlbSAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQge1xuICBwb3NpdGlvbjogc3RhdGljICFpbXBvcnRhbnQ7XG4gIG1hcmdpbjogM3B4IDJweCAhaW1wb3J0YW50OyB9XG5cbi8qIGZvciBldmVudHMgdGhhdCBjb250aW51ZSB0byBhIGZ1dHVyZSBkYXksIGdpdmUgdGhlIGJvdHRvbSBib3JkZXIgYmFjayAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQuZmMtbm90LWVuZCB7XG4gIGJvcmRlci1ib3R0b20td2lkdGg6IDFweCAhaW1wb3J0YW50OyB9XG5cbi8qIGluZGljYXRlIHRoZSBldmVudCBjb250aW51ZXMgdmlhIFwiLi4uXCIgdGV4dCAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQuZmMtbm90LWVuZDphZnRlciB7XG4gIGNvbnRlbnQ6IFwiLi4uXCI7IH1cblxuLyogZm9yIGV2ZW50cyB0aGF0IGFyZSBjb250aW51YXRpb25zIGZyb20gcHJldmlvdXMgZGF5cywgZ2l2ZSB0aGUgdG9wIGJvcmRlciBiYWNrICovXG4uZmMtdGltZS1ncmlkIC5mYy1ldmVudC5mYy1ub3Qtc3RhcnQge1xuICBib3JkZXItdG9wLXdpZHRoOiAxcHggIWltcG9ydGFudDsgfVxuXG4vKiBpbmRpY2F0ZSB0aGUgZXZlbnQgaXMgYSBjb250aW51YXRpb24gdmlhIFwiLi4uXCIgdGV4dCAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQuZmMtbm90LXN0YXJ0OmJlZm9yZSB7XG4gIGNvbnRlbnQ6IFwiLi4uXCI7IH1cblxuLyogdGltZSAqL1xuLyogdW5kbyBhIHByZXZpb3VzIGRlY2xhcmF0aW9uIGFuZCBsZXQgdGhlIHRpbWUgdGV4dCBzcGFuIHRvIGEgc2Vjb25kIGxpbmUgKi9cbi5mYy10aW1lLWdyaWQgLmZjLWV2ZW50IC5mYy10aW1lIHtcbiAgd2hpdGUtc3BhY2U6IG5vcm1hbCAhaW1wb3J0YW50OyB9XG5cbi8qIGhpZGUgdGhlIHRoZSB0aW1lIHRoYXQgaXMgbm9ybWFsbHkgZGlzcGxheWVkLi4uICovXG4uZmMtdGltZS1ncmlkIC5mYy1ldmVudCAuZmMtdGltZSBzcGFuIHtcbiAgZGlzcGxheTogbm9uZTsgfVxuXG4vKiAuLi5yZXBsYWNlIGl0IHdpdGggYSBtb3JlIHZlcmJvc2UgdmVyc2lvbiAoaW5jbHVkZXMgQU0vUE0pIHN0b3JlZCBpbiBhbiBodG1sIGF0dHJpYnV0ZSAqL1xuLmZjLXRpbWUtZ3JpZCAuZmMtZXZlbnQgLmZjLXRpbWU6YWZ0ZXIge1xuICBjb250ZW50OiBhdHRyKGRhdGEtZnVsbCk7IH1cblxuLyogVmVydGljYWwgU2Nyb2xsZXIgJiBDb250YWluZXJzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSovXG4vKiBraWxsIHRoZSBzY3JvbGxiYXJzIGFuZCBhbGxvdyBuYXR1cmFsIGhlaWdodCAqL1xuLmZjLXNjcm9sbGVyLFxuLmZjLWRheS1ncmlkLWNvbnRhaW5lcixcbi5mYy10aW1lLWdyaWQtY29udGFpbmVyIHtcbiAgLyogKi9cbiAgb3ZlcmZsb3c6IHZpc2libGUgIWltcG9ydGFudDtcbiAgaGVpZ2h0OiBhdXRvICFpbXBvcnRhbnQ7IH1cblxuLyoga2lsbCB0aGUgaG9yaXpvbnRhbCBib3JkZXIvcGFkZGluZyB1c2VkIHRvIGNvbXBlbnNhdGUgZm9yIHNjcm9sbGJhcnMgKi9cbi5mYy1yb3cge1xuICBib3JkZXI6IDAgIWltcG9ydGFudDtcbiAgbWFyZ2luOiAwICFpbXBvcnRhbnQ7IH1cblxuLyogQnV0dG9uIENvbnRyb2xzXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSovXG4uZmMtYnV0dG9uLWdyb3VwLFxuLmZjIGJ1dHRvbiB7XG4gIGRpc3BsYXk6IG5vbmU7XG4gIC8qIGRvbid0IGRpc3BsYXkgYW55IGJ1dHRvbi1yZWxhdGVkIGNvbnRyb2xzICovIH1cbiJdfQ== */

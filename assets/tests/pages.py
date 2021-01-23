@@ -13,10 +13,10 @@ class AssetList(BasePage):
     URL_TEMPLATE = '/assets/asset/list'
 
     _asset_item_locator = (By.CLASS_NAME, 'assetRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _search_text_locator = (By.ID, 'id_q')
     _status_select_locator = (By.CSS_SELECTOR, 'div#status-group>div.bootstrap-select')
     _category_select_locator = (By.CSS_SELECTOR, 'div#category-group>div.bootstrap-select')
-    _go_button_locator = (By.ID, 'filter-submit')
+    _go_button_locator = (By.ID, 'id_search')
 
     class AssetListRow(Region):
         _asset_id_locator = (By.CLASS_NAME, "assetID")
@@ -68,7 +68,6 @@ class AssetList(BasePage):
 class AssetForm(FormPage):
     _purchased_from_select_locator = (By.CSS_SELECTOR, 'div#purchased-from-group>div.bootstrap-select')
     _parent_select_locator = (By.CSS_SELECTOR, 'div#parent-group>div.bootstrap-select')
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -114,6 +113,7 @@ class AssetCreate(AssetForm):
 
 class AssetDuplicate(AssetForm):
     URL_TEMPLATE = '/assets/asset/id/{asset_id}/duplicate'
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Duplicate')]")
 
     @property
     def success(self):
@@ -123,12 +123,12 @@ class AssetDuplicate(AssetForm):
 class SupplierList(BasePage):
     URL_TEMPLATE = reverse('supplier_list')
 
-    _supplier_item_locator = (By.CLASS_NAME, 'supplierRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _supplier_item_locator = (By.ID, 'row_item')
+    _search_text_locator = (By.ID, 'id_search_text')
     _go_button_locator = (By.ID, 'id_search')
 
     class SupplierListRow(Region):
-        _name_locator = (By.CLASS_NAME, "supplierName")
+        _name_locator = (By.ID, "cell_name")
 
         @property
         def name(self):
@@ -152,7 +152,6 @@ class SupplierList(BasePage):
 
 
 class SupplierForm(FormPage):
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }
@@ -178,7 +177,7 @@ class SupplierEdit(SupplierForm):
 class AssetAuditList(AssetList):
     URL_TEMPLATE = reverse('asset_audit_list')
 
-    _search_text_locator = (By.ID, 'id_query')
+    _search_text_locator = (By.ID, 'id_q')
     _go_button_locator = (By.ID, 'searchButton')
     _modal_locator = (By.ID, 'modal')
     _errors_selector = (By.CLASS_NAME, "alert-danger")

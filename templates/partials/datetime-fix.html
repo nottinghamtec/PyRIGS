@@ -1,0 +1,34 @@
+{% load static %}
+<script>
+function initDatetime() {
+    $('input[type=datetime-local]').not(':disabled').flatpickr({
+        dateFormat: 'Y-m-dTH:m',
+        enableTime: true,
+        allowInput: true,
+        altInput: true,
+        altFormat: "d/m/y H:m",
+    });
+}
+$(document).ready(function () {
+    function supportsDateTime() {
+        var input = document.createElement('input');
+        input.setAttribute('type','datetime-local');
+        return input.type !== "text";
+    }
+    //Firefox reports support for datetime-local without properly supporting it. Bah.
+    if(!supportsDateTime() || navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
+        $('<link>')
+          .appendTo('head')
+          .attr({type : 'text/css', rel : 'stylesheet'})
+          .attr('href', '{% static "css/flatpickr.css" %}');
+        $.when(
+            $.getScript( '{% static "js/flatpickr.min.js" %}' ),
+            $.Deferred(function(deferred){
+                $(deferred.resolve);
+            })
+        ).done(function(){
+            initDatetime();
+        });
+    }
+});
+</script>

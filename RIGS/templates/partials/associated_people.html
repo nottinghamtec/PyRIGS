@@ -1,0 +1,12 @@
+<div class="col-sm">
+    <div class="card">
+        <div class="card-header">Associated People</div>
+        <div class="list-group list-group-flush">
+            {% for person,count in object.persons %}
+                <a class="list-group-item list-group-item-action" href="{% url 'person_detail' person.pk %}">{{ person.pk|stringformat:"05d" }} | {{ person.name }} <span class="badge badge-secondary" title="{{count}} events with {{person.name}} for {{object.name}}">{{count}}</span></a>
+            {% empty %}
+            <div class="card-body">None</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

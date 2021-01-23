@@ -13,23 +13,27 @@ from django.db.models import Q
 from z3c.rml import rml2pdf
 from django.db.models import Q
 
+from django.db import transaction
+import reversion
+
 from RIGS import models
 
 from django import forms
+
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 
 
 class InvoiceIndex(generic.ListView):
     model = models.Invoice
-    template_name = 'RIGS/invoice_list_active.html'
+    template_name = 'invoice_list.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceIndex, self).get_context_data(**kwargs)
         total = 0
         for i in context['object_list']:
             total += i.balance
-        context['total'] = total
-        context['count'] = len(list(context['object_list']))
+        context['page_title'] = "Outstanding Invoices ({} Events, £{:.2f})".format(len(list(context['object_list'])), total)
+        context['description'] = "Paperwork for these events has been sent to treasury, but the full balance has not yet appeared on a ledger"
         return context
 
     def get_queryset(self):
@@ -51,13 +55,19 @@ class InvoiceIndex(generic.ListView):
 
 class InvoiceDetail(generic.DetailView):
     model = models.Invoice
+    template_name = 'invoice_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceDetail, self).get_context_data(**kwargs)
+        context['page_title'] = "Invoice {} ({})".format(self.object.display_id, self.object.invoice_date.strftime("%d/%m/%Y"))
+        return context
 
 
 class InvoicePrint(generic.View):
     def get(self, request, pk):
         invoice = get_object_or_404(models.Invoice, pk=pk)
         object = invoice.event
-        template = get_template('RIGS/event_print.xml')
+        template = get_template('event_print.xml')
 
         context = {
             'object': object,
@@ -69,6 +79,7 @@ class InvoicePrint(generic.View):
             },
             'invoice': invoice,
             'current_user': request.user,
+            'filename': 'Invoice {} for {} {}.pdf'.format(invoice.display_id, object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name))
         }
 
         rml = template.render(context)
@@ -77,10 +88,8 @@ class InvoicePrint(generic.View):
 
         pdfData = buffer.read()
 
-        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
-
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = "filename=Invoice %05d - N%05d | %s.pdf" % (invoice.pk, invoice.event.pk, escapedEventName)
+        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
         response.write(pdfData)
         return response
 
@@ -99,6 +108,7 @@ class InvoiceVoid(generic.View):
 
 class InvoiceDelete(generic.DeleteView):
     model = models.Invoice
+    template_name = 'invoice_confirm_delete.html'
 
     def get(self, request, pk):
         obj = self.get_object()
@@ -120,8 +130,14 @@ class InvoiceDelete(generic.DeleteView):
 
 class InvoiceArchive(generic.ListView):
     model = models.Invoice
-    template_name = 'RIGS/invoice_list_archive.html'
+    template_name = 'invoice_list_archive.html'
     paginate_by = 25
+
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceArchive, self).get_context_data(**kwargs)
+        context['page_title'] = "Invoice Archive"
+        context['description'] = "This page displays all invoices: outstanding, paid, and void"
+        return context
 
     def get_queryset(self):
         q = self.request.GET.get('q', "")
@@ -155,15 +171,14 @@ class InvoiceArchive(generic.ListView):
 class InvoiceWaiting(generic.ListView):
     model = models.Event
     paginate_by = 25
-    template_name = 'RIGS/event_invoice.html'
+    template_name = 'invoice_list_waiting.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)
         total = 0
         for obj in self.get_objects():
             total += obj.sum_total
-        context['total'] = total
-        context['count'] = len(self.get_objects())
+        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(self.get_objects()), total)
         return context
 
     def get_queryset(self):
@@ -188,7 +203,10 @@ class InvoiceWaiting(generic.ListView):
 
 
 class InvoiceEvent(generic.View):
+    @transaction.atomic()
+    @reversion.create_revision()
     def get(self, *args, **kwargs):
+        reversion.set_user(self.request.user)
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         invoice, created = models.Invoice.objects.get_or_create(event=event)
@@ -197,12 +215,18 @@ class InvoiceEvent(generic.View):
             invoice.invoice_date = datetime.date.today()
             messages.success(self.request, 'Invoice created successfully')
 
+        if kwargs.get('void'):
+            invoice.void = not invoice.void
+            invoice.save()
+            messages.warning(self.request, 'Invoice voided')
+
         return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': invoice.pk}))
 
 
 class PaymentCreate(generic.CreateView):
     model = models.Payment
     fields = ['invoice', 'date', 'amount', 'method']
+    template_name = 'payment_form.html'
 
     def get_initial(self):
         initial = super(generic.CreateView, self).get_initial()
@@ -213,6 +237,13 @@ class PaymentCreate(generic.CreateView):
         initial.update({'invoice': invoice})
         return initial
 
+    @transaction.atomic()
+    @reversion.create_revision()
+    def form_valid(self, form, *args, **kwargs):
+        reversion.add_to_revision(form.cleaned_data['invoice'])
+        reversion.set_comment("Payment added")
+        return super().form_valid(form, *args, **kwargs)
+
     def get_success_url(self):
         messages.info(self.request, "location.reload()")
         return reverse_lazy('closemodal')
@@ -220,6 +251,14 @@ class PaymentCreate(generic.CreateView):
 
 class PaymentDelete(generic.DeleteView):
     model = models.Payment
+    template_name = 'payment_confirm_delete.html'
+
+    @transaction.atomic()
+    @reversion.create_revision()
+    def delete(self, *args, **kwargs):
+        reversion.add_to_revision(self.get_object().invoice)
+        reversion.set_comment("Payment removed")
+        return super().delete(*args, **kwargs)
 
     def get_success_url(self):
         return self.request.POST.get('next')

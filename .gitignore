@@ -25,6 +25,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+node_modules/
 
 # Continer extras
 .vagrant
@@ -54,7 +55,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-db.sqlite3
 
 # Sphinx documentation
 docs/_build/
@@ -109,3 +109,4 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 .vscode/
+screenshots/

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    <meta name="google" content="notranslate">
+{% endblock %}
+
+{% block titleheader %}
+    <a class="nav navbar-brand" href="{% url 'asset_index' %}">Assets</a>
+{% endblock %}
+
+{% block titleelements %}
+<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Assets</a>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'asset_list' %}"><span class="fas fa-list"></span> List Assets</a>
+        {% if perms.assets.add_asset %}
+            <a class="dropdown-item" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> Create Asset</a>
+        {% endif %}
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{% url 'cable_type_list' %}"><span class="fas fa-list"></span> List Cable Types</a>
+        {% if perms.assets.add_cabletype %}
+        <a class="dropdown-item" href="{% url 'cable_type_create' %}"><span class="fas fa-plus"></span> Create Cable Type</a>
+        {% endif %}
+    </div>
+</li>
+<div class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Suppliers</a>
+    <ul class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'supplier_list' %}"><span class="fas fa-list"></span> List Suppliers</a>
+        {% if perms.assets.add_supplier %}
+            <a class="dropdown-item" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> Create Supplier</a>
+        {% endif %}
+    </ul>
+</div>
+{% if perms.assets.view_asset %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'assets_activity_table' %}">Recent Changes</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'asset_audit_list' %}">Audit</a></li>
+{% endif %}
+{% endblock %}
+
+{% block titleelements_right %}
+{% include 'partials/search.html' %}
+{% include 'partials/navbar_user.html' %}
+{% endblock %}

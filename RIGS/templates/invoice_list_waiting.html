@@ -1,0 +1,90 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+{% load static %}
+
+{% block js %}
+<script src="{% static "js/tooltip.js" %}"></script>
+<script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <p>These events have happened, but paperwork has not yet been sent to treasury</p>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Event #</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">Event Name</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Cost</th>
+                        <th scope="col">MIC</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for event in object_list %}
+                    <tr class="{{event.status_color}}">
+                        <th scope="row"><a href="{% url 'event_detail' event.pk %}">{{ event.display_id }}</a><br>
+                            <span class="text-muted">{{ event.get_status_display }}</span></th>
+                        <td>{{ event.start_date }}</td>
+                        <td>
+                            {{ event.name }}
+                            {% if event.is_rig and perms.RIGS.view_event and event.authorised %}
+                                <span class="fas fa-check"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if event.organisation %}
+                                {{ event.organisation.name }}
+                                <br>
+                                <span class="text-muted">{{ event.internal|yesno:'Internal,External' }}</span>
+                            {% elif event.person %}
+                                {{ event.person.name }}
+                                <br>
+                                <span class="text-muted">Individual</span>
+                            {% else %}
+                                <i class="fas fa-exclamation"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ event.sum_total|floatformat:2 }}
+                            <br />
+                            <span class="text-muted">{% if not event.internal %}{{ event.purchase_order }}{% endif %}</span>
+                        </td>
+                        <td class="text-center">
+                            {% if event.mic %}
+                                {{ event.mic.initials }}<br>
+                                <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                            {% else %}
+                                <span class="fas fa-exclamation"></span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <div class="btn-group">
+                                <a href="{% url 'invoice_event' event.pk %}"
+                                   class="btn btn-primary">
+                                    <span class="fas fa-pound-sign"></span> Create Invoice
+                                </a>
+                                <a href="{% url 'invoice_event_void' event.pk %}"
+                                   class="btn btn-warning">& Void
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        <div class="row justify-content-center">
+            {% paginator %}
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

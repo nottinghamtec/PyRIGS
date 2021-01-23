@@ -1,0 +1,44 @@
+<h5>
+<span class="badge badge-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
+{% if event.is_rig %}
+    {% if event.purchase_order %}
+        <span class="badge badge-success">PO: {{ event.purchase_order }}</span>
+    {% elif event.authorised %}
+        <span class="badge badge-success">Authorisation: Complete <span class="fas fa-check"></span></span>
+    {% else %}
+        <span class="badge badge-danger">Authorisation: <span class="fas fa-times"></span></span>
+    {% endif %}
+    {% if not event.dry_hire %}
+        {% if event.riskassessment %}
+            <span class="badge badge-success">RA: <span class="fas fa-check"></span>{%if event.riskassessment.reviewed_by%}<span class="fas fa-check"></span>{%endif%}</span>
+        {% else %}
+            <span class="badge badge-danger">RA: <span class="fas fa-times"></span></span>
+        {% endif %}
+    {% else %}
+        <span class="badge badge-secondary">RA: N/A</span>
+    {% endif %}
+    {% if not event.dry_hire %}
+        {% if event.hs_done %}
+            {# TODO Display status of all checklists #}
+            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span></span>
+        {% else %}
+            <span class="badge badge-danger">Checklist: <span class="fas fa-times"></span></span>
+        {% endif %}
+    {% else %}
+        <span class="badge badge-secondary">Checklist: N/A</span>
+    {% endif %}
+    {% if perms.RIGS.view_invoice %}
+        {% if event.invoice %}
+            {% if event.invoice.void %}
+            <span class="badge badge-secondary">Invoice: Void</span>
+            {% elif event.invoice.is_closed %}
+            <span class="badge badge-success">Invoice: Paid</span>
+            {% else %}
+            <span class="badge badge-warning">Invoice: Outstanding</span>
+            {% endif %}
+        {% else %}
+        <span class="badge badge-info">Invoice: Not Generated</span>
+        {% endif %}
+    {% endif %}
+{% endif %}
+</h5>

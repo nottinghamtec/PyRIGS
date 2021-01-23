@@ -6,18 +6,21 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from urllib.parse import urlparse
 from RIGS import models as rigsmodels
-from PyRIGS.tests.base import BaseTest, AutoLoginTest
+from PyRIGS.tests.base import BaseTest, AutoLoginTest, screenshot_failure_cls
 from assets import models, urls
 from reversion import revisions as reversion
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
-from RIGS.test_functional import animation_is_finished
+from PyRIGS.tests.base import animation_is_finished
 import datetime
 from django.utils import timezone
+from selenium.webdriver.common.action_chains import ActionChains
+from django.test import tag
 
 
+@screenshot_failure_cls
 class TestAssetList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -95,6 +98,7 @@ class TestAssetList(AutoLoginTest):
         self.assertEqual("10", assetIDs[1])
 
 
+@screenshot_failure_cls
 class TestAssetForm(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -104,6 +108,7 @@ class TestAssetForm(AutoLoginTest):
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
         self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
+        self.wait = WebDriverWait(self.driver, 5)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -119,37 +124,43 @@ class TestAssetForm(AutoLoginTest):
 
         self.page.open()
 
-        self.page.description = "Bodge Lead"
-        self.page.category = "Health & Safety"
-        self.page.status = "O.K."
-        self.page.serial_number = "0124567890-SAUSAGE"
-        self.page.comments = "This is actually a sledgehammer, not a cable..."
+        self.page.description = desc = "Bodge Lead"
+        self.page.category = cat = "Health & Safety"
+        self.page.status = status = "O.K."
+        self.page.serial_number = sn = "0124567890-SAUSAGE"
+        self.page.comments = comments = "This is actually a sledgehammer, not a cable..."
 
         self.page.purchased_from_selector.toggle()
         self.assertTrue(self.page.purchased_from_selector.is_open)
         self.page.purchased_from_selector.search(self.supplier.name[:-8])
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
-        self.assertFalse(self.page.purchased_from_selector.is_open)
         self.page.purchase_price = "12.99"
         self.page.salvage_value = "99.12"
-        self.date_acquired = "05022020"
+        self.page.date_acquired = acquired = datetime.date(2020, 5, 20)
 
         self.page.parent_selector.toggle()
         self.assertTrue(self.page.parent_selector.is_open)
-        # Searching it by ID autoselects it
         self.page.parent_selector.search(self.parent.asset_id)
         # Needed here but not earlier for whatever reason
         self.driver.implicitly_wait(1)
-        # self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
-        # Need to explicitly close as we haven't selected anything to trigger the auto close
-        self.page.parent_selector.search(Keys.ESCAPE)
-        self.assertFalse(self.page.parent_selector.is_open)
+        self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
         self.assertTrue(self.page.parent_selector.options[0].selected)
+        self.page.parent_selector.toggle()
 
         self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
 
         self.page.submit()
+        self.wait.until(animation_is_finished())
         self.assertTrue(self.page.success)
+        # Check that data is right
+        asset = models.Asset.objects.get(asset_id="9001")
+        self.assertEqual(asset.description, desc)
+        self.assertEqual(asset.category.name, cat)
+        self.assertEqual(asset.status.name, status)
+        self.assertEqual(asset.serial_number, sn)
+        self.assertEqual(asset.comments, comments)
+        # This one is important as it defaults to today's date
+        self.assertEqual(asset.date_acquired, acquired)
 
     def test_cable_create(self):
         self.page.description = "IEC -> IEC"
@@ -160,6 +171,7 @@ class TestAssetForm(AutoLoginTest):
         self.page.is_cable = True
 
         self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
+        self.wait.until(animation_is_finished())
         self.page.cable_type = "IEC → IEC"
         self.page.socket = "IEC"
         self.page.length = 10
@@ -195,6 +207,7 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(models.Asset.objects.last().description, self.parent.description)
 
 
+@screenshot_failure_cls
 class TestSupplierList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -221,6 +234,7 @@ class TestSupplierList(AutoLoginTest):
     def test_search(self):
         self.page.set_query("TEC")
         self.page.search()
+
         self.assertTrue(len(self.page.suppliers) == 1)
         self.assertEqual("TEC PA & Lighting", self.page.suppliers[0].name)
 
@@ -233,6 +247,7 @@ class TestSupplierList(AutoLoginTest):
         self.assertTrue(len(self.page.suppliers) == 0)
 
 
+@screenshot_failure_cls
 class TestSupplierCreateAndEdit(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -260,6 +275,7 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.assertTrue(self.page.success)
 
 
+@screenshot_failure_cls
 class TestAssetAudit(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -292,7 +308,7 @@ class TestAssetAudit(AutoLoginTest):
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
-        self.wait.until(animation_is_finished())
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
         # Check data is correct
@@ -309,17 +325,17 @@ class TestAssetAudit(AutoLoginTest):
     def test_audit_list(self):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
 
-        assetRow = self.page.assets[0]
-        assetRow.find_element(By.CSS_SELECTOR, "td:nth-child(5) > div:nth-child(1) > a:nth-child(1)").click()
+        asset_row = self.page.assets[0]
+        self.driver.find_element(By.XPATH, "//*[@id='asset_table_body']/tr[1]/td[4]/a").click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
-        self.assertEqual(self.page.modal.asset_id, assetRow.id)
+        self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
         # First close button is for the not found error
-        self.page.find_element(By.XPATH, '(//button[@class="close"])[2]').click()
-        self.wait.until(animation_is_finished())
+        self.page.find_element(By.XPATH, '//*[@id="modal"]/div/div/div[1]/button').click()
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
-        audited = models.Asset.objects.get(asset_id=assetRow.id)
+        audited = models.Asset.objects.get(asset_id=asset_row.id)
         self.assertEqual(None, audited.last_audited_by)
 
         # Check that a failed search works
@@ -370,7 +386,6 @@ class Test404(TestCase):
             self.assertEqual(response.status_code, 404)
 
 
-# @tag('slow') TODO: req. Django 3.0
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
@@ -531,49 +546,6 @@ class TestSampleDataGenerator(TestCase):
 
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleAssetsData')
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'deleteSampleData')
-
-
-class TestVersioningViews(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = rigsmodels.Profile.objects.create(username="VersionTest", email="version@test.com", is_superuser=True, is_active=True, is_staff=True)
-
-        working = models.AssetStatus.objects.create(name="Working", should_show=True)
-        broken = models.AssetStatus.objects.create(name="Broken", should_show=False)
-        general = models.AssetCategory.objects.create(name="General")
-        lighting = models.AssetCategory.objects.create(name="Lighting")
-
-        cls.assets = {}
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1] = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=datetime.date(1991, 12, 26))
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[2] = models.Asset.objects.create(asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=datetime.date(2015, 1, 1))
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1].status = working
-            cls.assets[1].save()
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-    def test_history_loads_successfully(self):
-        request_url = reverse('asset_history', kwargs={'pk': self.assets[1].asset_id})
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-    def test_activity_table_loads_successfully(self):
-        request_url = reverse('asset_activity_table')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
 
 
 class TestEmbeddedViews(TestCase):

@@ -6,12 +6,13 @@ import urllib.parse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.views import generic
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import get_template
 from django.conf import settings
 from django.urls import reverse
+from django.urls import reverse_lazy
 from django.core import signing
 from django.http import HttpResponse
 from django.core.exceptions import SuspiciousOperation
@@ -19,6 +20,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from z3c.rml import rml2pdf
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import simplejson
@@ -34,7 +36,7 @@ __author__ = 'ghost'
 
 
 class RigboardIndex(generic.TemplateView):
-    template_name = 'RIGS/rigboard.html'
+    template_name = 'rigboard.html'
 
     def get_context_data(self, **kwargs):
         # get super context
@@ -42,11 +44,12 @@ class RigboardIndex(generic.TemplateView):
 
         # call out method to get current events
         context['events'] = models.Event.objects.current_events()
+        context['page_title'] = "Rigboard"
         return context
 
 
 class WebCalendar(generic.TemplateView):
-    template_name = 'RIGS/calendar.html'
+    template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super(WebCalendar, self).get_context_data(**kwargs)
@@ -56,6 +59,7 @@ class WebCalendar(generic.TemplateView):
 
 
 class EventDetail(generic.DetailView):
+    template_name = 'event_detail.html'
     model = models.Event
 
 
@@ -78,39 +82,22 @@ class EventOembed(generic.View):
 
 
 class EventEmbed(EventDetail):
-    template_name = 'RIGS/event_embed.html'
-
-
-class EventRA(generic.base.RedirectView):
-    permanent = False
-
-    def get_redirect_url(self, *args, **kwargs):
-        event = get_object_or_404(models.Event, pk=kwargs['pk'])
-
-        if event.risk_assessment_edit_url:
-            return event.risk_assessment_edit_url
-
-        params = {
-            'entry.708610078': f'N{event.pk:05}',
-            'entry.905899507': event.name,
-            'entry.139491562': event.venue.name if event.venue else '',
-            'entry.1689826056': event.start_date.strftime('%Y-%m-%d') + ((' - ' + event.end_date.strftime('%Y-%m-%d')) if event.end_date else ''),
-            'entry.902421165': event.mic.name if event.mic else ''
-        }
-        return settings.RISK_ASSESSMENT_URL + "?" + urllib.parse.urlencode(params)
+    template_name = 'event_embed.html'
 
 
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
+    template_name = 'event_form.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventCreate, self).get_context_data(**kwargs)
+        context['page_title'] = "New Event"
         context['edit'] = True
         context['currentVAT'] = models.VatRate.objects.current_rate()
 
         form = context['form']
-        if re.search(r'"-\d+"', form['items_json'].value()):
+        if hasattr(form, 'items_json') and re.search(r'"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
@@ -127,9 +114,11 @@ class EventCreate(generic.CreateView):
 class EventUpdate(generic.UpdateView):
     model = models.Event
     form_class = forms.EventForm
+    template_name = 'event_form.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventUpdate, self).get_context_data(**kwargs)
+        context['page_title'] = "Event {}".format(self.object.display_id)
         context['edit'] = True
 
         form = context['form']
@@ -143,13 +132,15 @@ class EventUpdate(generic.UpdateView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        if not hasattr(context, 'duplicate'):
+        if hasattr(context, 'duplicate') and not context['duplicate']:
             # If this event has already been emailed to a client, show a warning
             if self.object.auth_request_at is not None:
-                messages.info(self.request, 'This event has already been sent to the client for authorisation, any changes you make will be visible to them immediately.')
+                messages.info(self.request,
+                              'This event has already been sent to the client for authorisation, any changes you make will be visible to them immediately.')
 
             if hasattr(self.object, 'authorised'):
-                messages.warning(self.request, 'This event has already been authorised by client, any changes to price will require reauthorisation.')
+                messages.warning(self.request,
+                                 'This event has already been authorised by the client, any changes to the price will require reauthorisation.')
         return super(EventUpdate, self).render_to_response(context, **response_kwargs)
 
     def get_success_url(self):
@@ -162,6 +153,7 @@ class EventDuplicate(EventUpdate):
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None  # Remove old PO
+        new.status = new.PROVISIONAL  # Return status to provisional
 
         # Clear checked in by if it's a dry hire
         if new.dry_hire is True:
@@ -182,6 +174,7 @@ class EventDuplicate(EventUpdate):
 
     def get_context_data(self, **kwargs):
         context = super(EventDuplicate, self).get_context_data(**kwargs)
+        context['page_title'] = "Duplicate of Event {}".format(self.object.display_id)
         context["duplicate"] = True
         return context
 
@@ -189,7 +182,7 @@ class EventDuplicate(EventUpdate):
 class EventPrint(generic.View):
     def get(self, request, pk):
         object = get_object_or_404(models.Event, pk=pk)
-        template = get_template('RIGS/event_print.xml')
+        template = get_template('event_print.xml')
 
         merger = PdfFileMerger()
 
@@ -197,12 +190,13 @@ class EventPrint(generic.View):
             'object': object,
             'fonts': {
                 'opensans': {
-                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
+                    'regular': 'static/fonts/OPENSANS-REGULAR.TTF',
+                    'bold': 'static/fonts/OPENSANS-BOLD.TTF',
                 }
             },
             'quote': True,
             'current_user': request.user,
+            'filename': 'Event {} {} {}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
         }
 
         rml = template.render(context)
@@ -217,18 +211,15 @@ class EventPrint(generic.View):
         merger.write(merged)
 
         response = HttpResponse(content_type='application/pdf')
-
-        escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
-
-        response['Content-Disposition'] = "filename=N%05d | %s.pdf" % (object.pk, escapedEventName)
+        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
         response.write(merged.getvalue())
         return response
 
 
 class EventArchive(generic.ListView):
+    template_name = "event_archive.html"
     model = models.Event
     paginate_by = 25
-    template_name = "RIGS/event_archive.html"
 
     def get_context_data(self, **kwargs):
         # get super context
@@ -236,6 +227,8 @@ class EventArchive(generic.ListView):
 
         context['start'] = self.request.GET.get('start', None)
         context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
+        context['statuses'] = models.Event.EVENT_STATUS_CHOICES
+        context['page_title'] = 'Event Archive'
         return context
 
     def get_queryset(self):
@@ -256,7 +249,7 @@ class EventArchive(generic.ListView):
 
         q = self.request.GET.get('q', "")
 
-        if q is not "":
+        if q != "":
             qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
 
             # try and parse an int
@@ -275,6 +268,11 @@ class EventArchive(generic.ListView):
 
             filter &= qfilter
 
+        status = self.request.GET.getlist('status', "")
+
+        if len(status) > 0:
+            filter &= Q(status__in=status)
+
         qs = self.model.objects.filter(filter).order_by('-start_date')
 
         # Preselect related for efficiency
@@ -287,8 +285,8 @@ class EventArchive(generic.ListView):
 
 
 class EventAuthorise(generic.UpdateView):
-    template_name = 'RIGS/eventauthorisation_form.html'
-    success_template = 'RIGS/eventauthorisation_success.html'
+    template_name = 'eventauthorisation_form.html'
+    success_template = 'eventauthorisation_success.html'
 
     def form_valid(self, form):
         self.object = form.save()
@@ -312,8 +310,10 @@ class EventAuthorise(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(EventAuthorise, self).get_context_data(**kwargs)
         context['event'] = self.event
-
         context['tos_url'] = settings.TERMS_OF_HIRE_URL
+        context['page_title'] = "{}: {}".format(self.event.display_id, self.event.name)
+        if self.event.dry_hire:
+            context['page_title'] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
         return context
 
     def get(self, request, *args, **kwargs):
@@ -351,7 +351,7 @@ class EventAuthorise(generic.UpdateView):
 class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
     model = models.Event
     form_class = forms.EventAuthorisationRequestForm
-    template_name = 'RIGS/eventauthorisation_request.html'
+    template_name = 'eventauthorisation_request.html'
 
     @method_decorator(decorators.nottinghamtec_address_required)
     def dispatch(self, *args, **kwargs):
@@ -376,7 +376,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         email = form.cleaned_data['email']
         event = self.object
         event.auth_request_by = self.request.user
-        event.auth_request_at = datetime.datetime.now()
+        event.auth_request_at = timezone.now()
         event.auth_request_to = email
         event.save()
 
@@ -396,12 +396,12 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
         msg = EmailMultiAlternatives(
             "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
-            get_template("RIGS/eventauthorisation_client_request.txt").render(context),
+            get_template("eventauthorisation_client_request.txt").render(context),
             to=[email],
             reply_to=[self.request.user.email],
         )
         css = staticfiles_storage.path('css/email.css')
-        html = premailer.Premailer(get_template("RIGS/eventauthorisation_client_request.html").render(context),
+        html = premailer.Premailer(get_template("eventauthorisation_client_request.html").render(context),
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
 
@@ -411,7 +411,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
 
 class EventAuthoriseRequestEmailPreview(generic.DetailView):
-    template_name = "RIGS/eventauthorisation_client_request.html"
+    template_name = "eventauthorisation_client_request.html"
     model = models.Event
 
     def render_to_response(self, context, **response_kwargs):
@@ -431,27 +431,3 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         })
         context['to_name'] = self.request.GET.get('to_name', None)
         return context
-
-
-@method_decorator(csrf_exempt, name='dispatch')
-class LogRiskAssessment(generic.View):
-    http_method_names = ["post"]
-
-    def post(self, request, **kwargs):
-        data = request.POST
-        shared_secret = data.get("secret")
-        edit_url = data.get("editUrl")
-        rig_number = data.get("rigNum")
-        if shared_secret is None or edit_url is None or rig_number is None:
-            return HttpResponse(status=422)
-
-        if shared_secret != settings.RISK_ASSESSMENT_SECRET:
-            return HttpResponse(status=403)
-
-        rig_number = int(re.sub("[^0-9]", "", rig_number))
-
-        event = get_object_or_404(models.Event, pk=rig_number)
-        event.risk_assessment_edit_url = edit_url
-        event.save()
-
-        return HttpResponse(status=200)

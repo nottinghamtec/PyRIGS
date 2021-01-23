@@ -1,0 +1,7 @@
+{% if submit %}
+<button type="submit" class="btn {{ class }}" title="{{ text }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%}><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></button>
+{% elif pk %}
+<a href="{% url target pk %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%} {% if text == 'Print' %}target="_blank"{%endif%}><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></a>
+{% else %}
+<a href="{% url target %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%}><span class="fas {{ icon }}"></span> <span class="d-none d-sm-inline">{{ text }}</span></a>
+{% endif %}

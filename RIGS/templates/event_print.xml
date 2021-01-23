@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+{% load multiply from filters %}
+{% load static %}
+<!DOCTYPE document SYSTEM "rml.dtd">
+
+<document filename="{{filename}}">
+    <docinit>
+        <registerTTFont faceName="OpenSans" fileName="{{ fonts.opensans.regular }}"/>
+        <registerTTFont faceName="OpenSans-Bold" fileName="{{ fonts.opensans.bold }}"/>
+        <registerFontFamily name="OpenSans" bold="OpenSans-Bold" boldItalic="OpenSans-Bold"/>
+    </docinit>
+
+    <stylesheet>
+        <initialize>
+            <color id="LightGray" RGB="#D3D3D3"/>
+            <color id="DarkGray" RGB="#707070"/>
+        </initialize>
+
+        <paraStyle name="style.para" fontName="OpenSans" />
+        <paraStyle name="blockPara" spaceAfter="5" spaceBefore="5"/>
+        <paraStyle name="style.Heading1" fontName="OpenSans" fontSize="16" leading="18" spaceAfter="0"/>
+        <paraStyle name="style.Heading2" fontName="OpenSans-Bold" fontSize="10" spaceAfter="2"/>
+        <paraStyle name="style.Heading3" fontName="OpenSans" fontSize="10" spaceAfter="0"/>
+        <paraStyle name="center" alignment="center"/>
+        <paraStyle name="page-head" alignment="center" fontName="OpenSans-Bold" fontSize="16" leading="18" spaceAfter="0"/>
+
+        <paraStyle name="style.event_description" fontName="OpenSans" textColor="DarkGray" />
+        <paraStyle name="style.item_description" fontName="OpenSans" textColor="DarkGray" leftIndent="10" />
+        <paraStyle name="style.specific_description" fontName="OpenSans" textColor="DarkGray" fontSize="10" />
+        <paraStyle name="style.times" fontName="OpenSans"  fontSize="10" />
+        <paraStyle name="style.head_titles" fontName="OpenSans-Bold" fontSize="10" />
+        <paraStyle name="style.head_numbers" fontName="OpenSans"  fontSize="10" />
+
+        <blockTableStyle id="eventSpecifics">
+            <blockValign value="top"/>
+             <lineStyle kind="LINEAFTER" colorName="LightGrey" start="0,0" stop="1,0" thickness="1"/>
+        </blockTableStyle>
+
+        <blockTableStyle id="headLayout">
+            <blockValign value="top"/>
+
+        </blockTableStyle>
+
+        <blockTableStyle id="eventDetails">
+            <blockValign value="top"/>
+            <blockTopPadding start="0,0" stop="-1,0" length="0"/>
+            <blockLeftPadding start="0,0" stop="0,-1" length="0"/>
+        </blockTableStyle>
+
+        <blockTableStyle id="itemTable">
+            <blockValign value="top"/>
+            <lineStyle kind="LINEBELOW" colorName="LightGrey" start="0,0" stop="-1,-1" thickness="1"/>
+            {#<lineStyle kind="box" colorName="black" thickness="1" start="0,0" stop="-1,-1"/>#}
+        </blockTableStyle>
+
+        <blockTableStyle id="totalTable">
+            <blockLeftPadding start="0,0" stop="0,-1" length="0"/>
+            <lineStyle kind="LINEBELOW" colorName="LightGrey" start="-2,0" stop="-1,-1" thickness="1"/>
+            {# <lineStyle cap="default" kind="grid" colorName="black" thickness="1" start="1,0" stop="-1,-1"/> #}
+        </blockTableStyle>
+
+        <blockTableStyle id="infoTable" keepWithNext="true">
+            <blockLeftPadding start="0,0" stop="-1,-1" length="0"/>
+        </blockTableStyle>
+
+        <blockTableStyle id="paymentTable">
+            <blockBackground colorName="LightGray" start="0,1" stop="3,1"/>
+            <blockFont name="OpenSans-Bold" start="0,1" stop="0,1"/>
+            <blockFont name="OpenSans-Bold" start="2,1" stop="2,1"/>
+            <lineStyle kind="outline" colorName="black" thickness="1" start="0,1" stop="3,1"/>
+        </blockTableStyle>
+
+        <blockTableStyle id="signatureTable">
+            <blockTopPadding length="20" />
+            <blockLeftPadding start="0,0" stop="0,-1" length="0"/>
+            <lineStyle kind="linebelow" start="1,0" stop="1,0" colorName="black"/>
+            <lineStyle kind="linebelow" start="3,0" stop="3,0" colorName="black"/>
+            <lineStyle kind="linebelow" start="5,0" stop="5,0" colorName="black"/>
+        </blockTableStyle>
+    </stylesheet>
+
+    <template > {# Note: page is 595x842 points (1 point=1/72in) #}
+            <pageTemplate id="Headed" >
+                <pageGraphics>
+                    <image file="RIGS/static/imgs/paperwork/corner-tr-su.jpg" x="395" y="642" height="200" width="200"/>
+                    <image file="RIGS/static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
+
+                    {# logo positioned 42 from left, 33 from top #}
+                    <image file="RIGS/static/imgs/paperwork/tec-logo.jpg" x="42" y="719" height="90" width="84"/>
+
+                    <setFont name="OpenSans-Bold" size="22.5" leading="10"/>
+                    <drawString x="137" y="780">TEC PA &amp; Lighting</drawString>
+
+                    <setFont name="OpenSans" size="9"/>
+                    <drawString x="137" y="760">Portland Building, University Park, Nottingham, NG7 2RD</drawString>
+                    <drawString x="137" y="746">www.nottinghamtec.co.uk</drawString>
+                    <drawString x="265" y="746">info@nottinghamtec.co.uk</drawString>
+                    <drawString x="137" y="732">Phone: (0115) 846 8720</drawString>
+
+                    <setFont name="OpenSans" size="10" />
+                    <drawCenteredString x="302.5" y="38">[Page <pageNumber/> of <getName id="lastPage" default="0" />]</drawCenteredString>
+                    <setFont name="OpenSans" size="7" />
+                    <drawCenteredString x="302.5" y="26">
+                        [Paperwork generated{% if current_user %} by {{current_user.name}} |{% endif %} {% now "d/m/Y H:i" %} | {{object.current_version_id}}]
+                    </drawCenteredString>
+                </pageGraphics>
+
+                <frame id="main" x1="50" y1="65" width="495" height="645"/>
+            </pageTemplate>
+
+            <pageTemplate id="Main">
+                <pageGraphics>
+                    <image file="RIGS/static/imgs/paperwork/corner-tr.jpg" x="395" y="642" height="200" width="200"/>
+                    <image file="RIGS/static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
+
+                    <setFont name="OpenSans" size="10"/>
+                    <drawCenteredString x="302.5" y="38">[Page <pageNumber/> of <getName id="lastPage" default="0" />]</drawCenteredString>
+                    <setFont name="OpenSans" size="7" />
+                    <drawCenteredString x="302.5" y="26">
+                        [Paperwork generated{% if current_user %} by {{current_user.name}} |{% endif %} {% now "d/m/Y H:i" %} | {{object.current_version_id}}]
+                    </drawCenteredString>
+                </pageGraphics>
+                <frame id="main" x1="50" y1="65" width="495" height="727"/>
+            </pageTemplate>
+    </template>
+
+    <story firstPageTemplate="Headed">
+            {% include "event_print_page.xml" %}
+    </story>
+
+</document>

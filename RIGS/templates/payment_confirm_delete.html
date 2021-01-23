@@ -1,0 +1,21 @@
+{% extends 'base_rigs.html' %}
+
+{% block title %}Delete payment on invoice {{ object.invoice.pk }}{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h2>Delete payment on invoice {{ object.invoice.pk }}</h2>
+
+    <p>Are you sure you wish to delete a payment for £{{ object.amount|floatformat:2 }}
+        ({{ object.get_method_display }})
+        from {{ object.date }} on invoice {{ object.invoice.pk }}?</p>
+    <hr>
+    <div class="text-right">
+        <form action="{{ action_link }}" method="post">{% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'invoice_detail' object.invoice.pk %}"/>
+            <input type="submit" value="Yes" class="btn btn-danger col-sm-1"/>
+            <a href="{% url 'invoice_detail' object.invoice.pk %}" class="btn btn-success col-sm-1">No</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

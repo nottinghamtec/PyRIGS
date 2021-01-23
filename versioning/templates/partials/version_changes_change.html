@@ -1,0 +1,34 @@
+{# pass in variable "change" to this template #}
+{% if change.linebreaks and change.new and change.old %}
+    {% for diff in change.diff %}
+        {% if diff.type == "insert" %}
+            <ins class="dont-break-out">{{ diff.text|linebreaksbr }}</ins>
+        {% elif diff.type == "delete" %}
+            <del class="dont-break-out">{{diff.text|linebreaksbr}}</del>
+        {% else %}
+            <span class="dont-break-out">{{diff.text|linebreaksbr}}</span>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    {% if change.old %}
+        <del{% if change.long %} class="overflow-ellipsis"{% endif %}>
+            {% if change.linebreaks %}
+                {{change.old|linebreaksbr}}
+            {% else %}
+                {{change.old}}
+            {% endif %}
+        </del>
+    {% endif %}
+    {% if change.new and change.old %}
+        <br/>
+    {% endif %}
+    {% if change.new %}
+        <ins{% if change.long %} class="overflow-ellipsis"{% endif %}>
+            {% if change.linebreaks %}
+                {{change.new|linebreaksbr}}
+            {% else %}
+                {{change.new}}
+            {% endif %}
+        </ins>
+    {% endif %}
+{% endif %}

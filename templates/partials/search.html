@@ -1,0 +1,38 @@
+{% if user.is_authenticated %}
+<form id="searchForm" class="form-inline flex-nowrap mx-md-3 px-2 border border-light rounded" role="form" method="GET" action="{% url 'event_archive' %}">
+    <div class="input-group input-group-sm flex-nowrap">
+        <div class="input-group-prepend">
+            <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." value="{{ request.GET.q }}" />
+        </div>
+        <select id="search-options" class="custom-select form-control" style="border-top-right-radius: 0px; border-bottom-right-radius: 0px; width: 20ch;">
+          <option selected data-action="{% url 'event_archive' %}" href="#">Events</option>
+          <option data-action="{% url 'person_list' %}" href="#">People</option>
+          <option data-action="{% url 'organisation_list' %}" href="#">Organisations</option>
+          <option data-action="{% url 'venue_list' %}" href="#">Venues</option>
+          {% if perms.RIGS.view_invoice %}
+          <option data-action="{% url 'invoice_archive' %}" href="#">Invoices</option>
+          {% endif %}
+          <option data-action="{% url 'asset_list' %}" href="#">Assets</option>
+          <option data-action="{% url 'supplier_list' %}" href="#">Suppliers</option>
+        </select>
+    </div>
+    <button class="btn btn-info form-control form-control-sm btn-sm w-25" style="border-top-left-radius: 0px;border-bottom-left-radius: 0px;"><span class="fas fa-search"></span><span class="sr-only"> Search</span></button>
+    <a href="{% url 'search_help' %}" class="nav-link modal-href ml-2"><span class="fas fa-question-circle"></span></a>
+</form>
+{% endif %}
+
+{% block js %}
+<script>
+    $('#search-options').change(function(){
+      $('#searchForm').attr('action', $(this).children('option:selected').data('action'));
+    });
+    $(document).ready(function(){
+        $('#id_search_input').keypress(function (e) {
+          if (e.which == 13) {
+            $('#searchForm').attr('action', $('#search-options option').first().data('action')).submit();
+            return false;
+          }
+        });
+    });
+</script>
+{% endblock %}

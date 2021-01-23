@@ -1,0 +1,11 @@
+{% load button from filters %}
+{% if object.pk != None %}
+    <div class="btn-group">
+        {% button 'view' view object.pk %}
+        {% button 'edit' edit object.pk %}
+    </div>
+    {% include 'partials/review_status.html' %}
+{% elif event != None %}
+<a href="{% url create event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
+            class="hidden-xs">Create</span></a>
+{% endif %}

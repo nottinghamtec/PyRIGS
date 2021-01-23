@@ -1,0 +1,11 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+
+{% block title %}TEC Email Address Required{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning">
+    <h1>An error occured.</h1>
+    <p>Your RIGS account must have an @nottinghamtec.co.uk email address before you can send emails to clients.</p>
+</div>
+{% endblock %}

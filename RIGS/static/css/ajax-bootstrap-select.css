@@ -3,16 +3,16 @@
  *
  * Extends existing [Bootstrap Select] implementations by adding the ability to search via AJAX requests as you type. Originally for CROSCON.
  *
- * @version 1.3.1
+ * @version 1.4.5
  * @author Adam Heim - https://github.com/truckingsim
  * @link https://github.com/truckingsim/Ajax-Bootstrap-Select
- * @copyright 2015 Adam Heim
+ * @copyright 2019 Adam Heim
  * @license Released under the MIT license.
  *
  * Contributors:
  *   Mark Carver - https://github.com/markcarver
  *
- * Last build: 2015-01-06 8:43:11 PM EST
+ * Last build: 2019-04-23 12:18:56 PM EDT
  */
 .bootstrap-select .status {
   background: #f0f0f0;
@@ -23,5 +23,6 @@
   font-weight: 500;
   line-height: 1;
   margin-bottom: -5px;
-  padding: 10px 20px;
-}
+  padding: 10px 20px; }
+
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFqYXgtYm9vdHN0cmFwLXNlbGVjdC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFO0FBQ0Y7RUFDRSxtQkFBbUI7RUFDbkIsV0FBVztFQUNYLFdBQVc7RUFDWCxlQUFlO0VBQ2Ysa0JBQWtCO0VBQ2xCLGdCQUFnQjtFQUNoQixjQUFjO0VBQ2QsbUJBQW1CO0VBQ25CLGtCQUFrQixFQUFBIiwiZmlsZSI6ImFqYXgtYm9vdHN0cmFwLXNlbGVjdC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiFcbiAqIEFqYXggQm9vdHN0cmFwIFNlbGVjdFxuICpcbiAqIEV4dGVuZHMgZXhpc3RpbmcgW0Jvb3RzdHJhcCBTZWxlY3RdIGltcGxlbWVudGF0aW9ucyBieSBhZGRpbmcgdGhlIGFiaWxpdHkgdG8gc2VhcmNoIHZpYSBBSkFYIHJlcXVlc3RzIGFzIHlvdSB0eXBlLiBPcmlnaW5hbGx5IGZvciBDUk9TQ09OLlxuICpcbiAqIEB2ZXJzaW9uIDEuNC41XG4gKiBAYXV0aG9yIEFkYW0gSGVpbSAtIGh0dHBzOi8vZ2l0aHViLmNvbS90cnVja2luZ3NpbVxuICogQGxpbmsgaHR0cHM6Ly9naXRodWIuY29tL3RydWNraW5nc2ltL0FqYXgtQm9vdHN0cmFwLVNlbGVjdFxuICogQGNvcHlyaWdodCAyMDE5IEFkYW0gSGVpbVxuICogQGxpY2Vuc2UgUmVsZWFzZWQgdW5kZXIgdGhlIE1JVCBsaWNlbnNlLlxuICpcbiAqIENvbnRyaWJ1dG9yczpcbiAqICAgTWFyayBDYXJ2ZXIgLSBodHRwczovL2dpdGh1Yi5jb20vbWFya2NhcnZlclxuICpcbiAqIExhc3QgYnVpbGQ6IDIwMTktMDQtMjMgMTI6MTg6NTYgUE0gRURUXG4gKi9cbi5ib290c3RyYXAtc2VsZWN0IC5zdGF0dXMge1xuICBiYWNrZ3JvdW5kOiAjZjBmMGYwO1xuICBjbGVhcjogYm90aDtcbiAgY29sb3I6ICM5OTk7XG4gIGZvbnQtc2l6ZTogMTFweDtcbiAgZm9udC1zdHlsZTogaXRhbGljO1xuICBmb250LXdlaWdodDogNTAwO1xuICBsaW5lLWhlaWdodDogMTtcbiAgbWFyZ2luLWJvdHRvbTogLTVweDtcbiAgcGFkZGluZzogMTBweCAyMHB4O1xufVxuIl19 */

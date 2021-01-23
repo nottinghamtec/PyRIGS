@@ -1,0 +1,63 @@
+{% load widget_tweaks %}
+<div class="card">
+  <div class="card-header">
+    Asset Details
+  </div>
+  <div class="card-body">
+    {% if create or edit or duplicate %}
+    <div class="form-group">
+        <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
+        {% if duplicate %}
+        {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
+        {% elif object.asset_id %}
+        {% render_field form.asset_id|attr:'readonly'|add_class:'disabled_input form-control' value=object.asset_id %}
+        {% else %}
+        {% render_field form.asset_id|add_class:'form-control' %}
+        {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.description.id_for_label }}">Description</label>
+      {% render_field form.description|add_class:'form-control' value=object.description %}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.category.id_for_label }}" >Category</label>
+      {% render_field form.category|add_class:'form-control'%}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.status.id_for_label }}" >Status</label>
+      {% render_field form.status|add_class:'form-control'%}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
+      {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
+        {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %}
+    </div>
+    <!---TODO: Lower default number of lines in comments box-->
+    <div class="form-group">
+      <label for="{{ form.comments.id_for_label }}">Comments</label>
+      {% render_field form.comments|add_class:'form-control' %}
+    </div>
+    {% else %}
+    <dt>Asset ID</dt>
+    <dd>{{ object.asset_id }}</dd>
+
+    <dt>Description</dt>
+    <dd style="overflow-wrap: break-word;">{{ object.description }}</dd>
+
+    <dt>Category</dt>
+    <dd>{{ object.category }}</dd>
+
+    <dt>Status</dt>
+    <dd>{{ object.status }}</dd>
+
+    <dt>Serial Number</dt>
+    <dd>{{ object.serial_number|default:'-' }}</dd>
+
+    <dt>Comments</dt>
+    <dd style="overflow-wrap: break-word;">{{ object.comments|default:'-'|linebreaksbr }}</dd>
+    {% endif %}
+  </div>
+</div>
