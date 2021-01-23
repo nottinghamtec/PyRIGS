@@ -33,7 +33,7 @@ icalendar==4.0.7
 idna==2.10
 imgurpython==1.1.7
 importlib-metadata==2.0.0
-lxml==4.5.2
+lxml==4.6.2
 Markdown==3.3
 msgpack==1.0.0
 packaging==20.4
