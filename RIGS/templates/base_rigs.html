@@ -36,9 +36,9 @@
         H&S
       </a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownHS">
-        <a class="dropdown-item" href="{% url 'hs_list' %}">Overview</a>
-        <a class="dropdown-item" href="{% url 'ra_list' %}">Risk Assessments</a>
-        <a class="dropdown-item" href="{% url 'ec_list' %}">Event Checklists</a>
+        <a class="dropdown-item" href="{% url 'hs_list' %}"><span class="fas fa-eye"></span> Overview</a>
+        <a class="dropdown-item" href="{% url 'ra_list' %}"><span class="fas fa-file-medical"></span> Risk Assessments</a>
+        <a class="dropdown-item" href="{% url 'ec_list' %}"><span class="fas fa-tasks"></span> Event Checklists</a>
       </div>
     </li>
     {% endif %}
