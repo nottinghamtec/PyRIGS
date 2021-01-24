@@ -8,10 +8,12 @@ on:
 
 jobs:
   build:
-
+    env:
+      IMGUR_UPLOAD_CLIENT_ID: ${{ secrets.IMGUR_UPLOAD_CLIENT_ID }}
+      IMGUR_UPLOAD_CLIENT_SECRET: ${{ secrets.IMGUR_UPLOAD_CLIENT_SECRET }}
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 1
       matrix:
         python-version: [3.8]
 
