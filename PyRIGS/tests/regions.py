@@ -1,5 +1,6 @@
 from pypom import Region
 from django.utils import timezone
+from django.conf import settings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
@@ -26,7 +27,7 @@ def get_time_format():
     # Default
     time_format = "%H:%M"
     # If system is 12hr
-    if timezone.now().strftime("%p"):
+    if timezone.now().strftime("%p") or settings.CI:
         time_format = "%I:%M %p"
     return time_format
 
