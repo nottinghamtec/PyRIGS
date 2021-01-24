@@ -24,8 +24,6 @@ def create_browser():
     # No caching, please and thank you
     options.add_argument("--aggressive-cache-discard")
     options.add_argument("--disk-cache-size=0")
-    # God Save The Queen
-    options.add_argument("--lang=en_GB")
     options.add_argument("--headless")
     if settings.CI:
         options.add_argument("--no-sandbox")
