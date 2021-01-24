@@ -25,6 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Setup Chromedriver
       run: |
+        export LANGUAGE=en_GB.UTF-8
         wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
         unzip chromedriver_linux64.zip
         export PATH=$PATH:$(pwd)
