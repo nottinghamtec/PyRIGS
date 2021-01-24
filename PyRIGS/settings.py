@@ -13,6 +13,7 @@ import os
 import raven
 import secrets
 import datetime
+from PyRIGS.tests.regions import parse_bool_from_string
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -29,7 +30,7 @@ DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
 STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
-CI = bool(os.environ.get('CI')) if os.environ.get('CI') else False
+CI = parse_bool_from_string(os.environ.get('CI')) if os.environ.get('CI') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
