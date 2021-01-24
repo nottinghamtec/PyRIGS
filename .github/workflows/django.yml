@@ -12,6 +12,7 @@ jobs:
       IMGUR_UPLOAD_CLIENT_ID: ${{ secrets.IMGUR_UPLOAD_CLIENT_ID }}
       IMGUR_UPLOAD_CLIENT_SECRET: ${{ secrets.IMGUR_UPLOAD_CLIENT_SECRET }}
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
     strategy:
       max-parallel: 1
       matrix:
