@@ -1,36 +1,42 @@
+{% load url_replace from filters %}
 {% if is_paginated %}
-    {% load url_replace from filters %}
-	<div>
-		<ul class="pagination">
-			{% if has_previous %}
-				<li><a href="?{% url_replace request 'page' previous %}" class="prev">&lsaquo;&lsaquo;</a></li>
-			{% else %}
-				<li class="disabled prev"><a href="#">&lsaquo;&lsaquo;</a></li>
-			{% endif %}
+<div class="row justify-content-center pt-3">
+    <nav>
+        <ul class="pagination">
+	        {% if has_previous %}
+		        <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' previous %}">&lsaquo;&lsaquo;</a></li>
+	        {% else %}
+		        <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&lsaquo;&lsaquo;</span>
+                </li>
+	        {% endif %}
 
             {% if show_first %}
-                <li><a href="?{% url_replace request 'page' first %}" class="prev">{{ first }}</a></li>
-                <li><span>&hellip;</span></li>
+                <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' first %}" class="prev">{{ first }}</a></li>
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
             {% endif %}
 
             {% for page in page_numbers %}
                 {% ifequal page page_obj.number %}
-                    <li class="current page active"><a href="#">{{ page }}</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">{{ page }}</a></li>
                 {% else %}
-                    <li><a href="?{% url_replace request 'page' page %}" class="page">{{ page }}</a></li>
+                    <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' page %}" class="page">{{ page }}</a></li>
                 {% endifequal %}
             {% endfor %}
 
             {% if show_last %}
-                <li><span>&hellip;</span></li>
-                <li><a href="?{% url_replace request 'page' last %}" class="prev">{{ last }}</a></li>
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' last %}" class="prev">{{ last }}</a></li>
             {% endif %}
 
             {% if has_next %}
-                <li><a href="?{% url_replace request 'page' next %}" class="next">&rsaquo;&rsaquo;</a></li>
+                <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' next %}" class="next">&rsaquo;&rsaquo;</a></li>
             {% else %}
-                <li class="disabled next"><a href="#">&rsaquo;&rsaquo;</a></li>
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&rsaquo;&rsaquo;</span>
+                </li>
             {% endif %}
-            </ul>
-	</div>
+        </ul>
+    </nav>
+</div>
 {% endif %}

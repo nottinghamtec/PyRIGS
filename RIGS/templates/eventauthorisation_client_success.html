@@ -1,0 +1,15 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+    <p>Hi {{ to_name|default:"there" }},</p>
+
+    <p>
+        Your event <b>N{{ object.event.pk|stringformat:"05d" }}</b> has been successfully authorised
+        for <b>&pound;{{ object.amount }}</b>
+        by <b>{{ object.name }}</b> as of <b>{{ object.event.last_edited_at }}</b>.
+    </p>
+
+    <p>Your event is now fully booked and payment will be processed by the finance department automatically.</p>
+
+    <p>TEC PA &amp; Lighting</p>
+{% endblock %}

@@ -4,69 +4,26 @@ from django.conf import settings
 from django.core import serializers
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
+from django.db import transaction
 from registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import ReCaptchaField
+from reversion import revisions as reversion
 import simplejson
+from datetime import datetime
+from django.utils import timezone
 
 from RIGS import models
 
 # Override the django form defaults to use the HTML date/time/datetime UI elements
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
-forms.TimeField.widget = forms.TextInput(attrs={'type': 'time'})
-forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
-
-# Registration
-
-
-class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
-    captcha = ReCaptchaField()
-
-    class Meta:
-        model = models.Profile
-        fields = ('username', 'email', 'first_name', 'last_name', 'initials')
-
-    def clean_initials(self):
-        """
-        Validate that the supplied initials are unique.
-        """
-        if models.Profile.objects.filter(initials__iexact=self.cleaned_data['initials']):
-            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
-        return self.cleaned_data['initials']
-
-
-class CheckApprovedForm(AuthenticationForm):
-    def confirm_login_allowed(self, user):
-        if user.is_approved or user.is_superuser:
-            return AuthenticationForm.confirm_login_allowed(self, user)
-        else:
-            raise forms.ValidationError("Your account hasn't been approved by an administrator yet. Please check back in a few minutes!")
-
-
-# Embedded Login form - remove the autofocus
-class EmbeddedAuthenticationForm(CheckApprovedForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.pop('autofocus', None)
-
-
-class PasswordReset(PasswordResetForm):
-    captcha = ReCaptchaField(label='Captcha')
-
-
-class ProfileCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = models.Profile
-
-
-class ProfileChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = models.Profile
+forms.TimeField.widget = forms.TimeInput(attrs={'type': 'time'}, format='%H:%M')
+forms.DateTimeField.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%d %H:%M')
 
 
 # Events Shit
 class EventForm(forms.ModelForm):
-    datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS") + list(settings.DATETIME_INPUT_FORMATS)
+    datetime_input_formats = list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
 
@@ -140,8 +97,11 @@ class EventForm(forms.ModelForm):
         return item
 
     def clean(self):
-        if self.cleaned_data.get("is_rig") and not (self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
-            raise forms.ValidationError('You haven\'t provided any client contact details. Please add a person or organisation.', code='contact')
+        if self.cleaned_data.get("is_rig") and not (
+                self.cleaned_data.get('person') or self.cleaned_data.get('organisation')):
+            raise forms.ValidationError(
+                'You haven\'t provided any client contact details. Please add a person or organisation.',
+                code='contact')
         return super(EventForm, self).clean()
 
     def save(self, commit=True):
@@ -195,3 +155,129 @@ class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
 
 class EventAuthorisationRequestForm(forms.Form):
     email = forms.EmailField(required=True, label='Authoriser Email')
+
+
+class EventRiskAssessmentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EventRiskAssessmentForm, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if str(name) == 'supervisor_consulted':
+                field.widget = forms.CheckboxInput()
+            elif field.__class__ == forms.BooleanField:
+                field.widget = forms.RadioSelect(choices=[
+                    (True, 'Yes'),
+                    (False, 'No')
+                ], attrs={'class': 'custom-control-input', 'required': 'true'})
+
+    def clean(self):
+        # Check expected values
+        unexpected_values = []
+        for field, value in models.RiskAssessment.expected_values.items():
+            if self.cleaned_data.get(field) != value:
+                unexpected_values.append("<li>{}</li>".format(self._meta.model._meta.get_field(field).help_text))
+        if len(unexpected_values) > 0 and not self.cleaned_data.get('supervisor_consulted'):
+            raise forms.ValidationError("Your answers to these questions: <ul>{}</ul> require consulting with a supervisor.".format(''.join([str(elem) for elem in unexpected_values])), code='unusual_answers')
+        return super(EventRiskAssessmentForm, self).clean()
+
+    class Meta:
+        model = models.RiskAssessment
+        fields = '__all__'
+        exclude = ['reviewed_at', 'reviewed_by']
+
+
+class EventChecklistForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EventChecklistForm, self).__init__(*args, **kwargs)
+        self.fields['date'].widget.format = '%Y-%m-%d'
+        for name, field in self.fields.items():
+            if field.__class__ == forms.NullBooleanField:
+                # Only display yes/no to user, the 'none' is only ever set in the background
+                field.widget = forms.CheckboxInput()
+    # Parsed from incoming form data by clean, then saved into models when the form is saved
+    items = {}
+
+    related_models = {
+        'venue': models.Venue,
+        'power_mic': models.Profile,
+    }
+
+    # Two possible formats
+    def parsedatetime(self, date_string):
+        try:
+            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S'))
+        except ValueError:
+            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M'))
+
+    # There's probably a thousand better ways to do this, but this one is mine
+    def clean(self):
+        vehicles = {key: val for key, val in self.data.items()
+                    if key.startswith('vehicle')}
+        for key in vehicles:
+            pk = int(key.split('_')[1])
+            driver_key = 'driver_' + str(pk)
+            if(self.data[driver_key] == ''):
+                raise forms.ValidationError('Add a driver to vehicle ' + str(pk), code='vehicle_mismatch')
+            else:
+                try:
+                    item = models.EventChecklistVehicle.objects.get(pk=pk)
+                except models.EventChecklistVehicle.DoesNotExist:
+                    item = models.EventChecklistVehicle()
+
+                item.vehicle = vehicles['vehicle_' + str(pk)]
+                item.driver = models.Profile.objects.get(pk=self.data[driver_key])
+                item.full_clean('checklist')
+
+                # item does not have a database pk yet as it isn't saved
+                self.items['v' + str(pk)] = item
+
+        crewmembers = {key: val for key, val in self.data.items()
+                       if key.startswith('crewmember')}
+        other_fields = ['start', 'role', 'end']
+        for key in crewmembers:
+            pk = int(key.split('_')[1])
+
+            for field in other_fields:
+                value = self.data['{}_{}'.format(field, pk)]
+                if value == '':
+                    raise forms.ValidationError('Add a {} to crewmember {}'.format(field, pk), code='{}_mismatch'.format(field))
+
+            try:
+                item = models.EventChecklistCrew.objects.get(pk=pk)
+            except models.EventChecklistCrew.DoesNotExist:
+                item = models.EventChecklistCrew()
+
+            item.crewmember = models.Profile.objects.get(pk=self.data['crewmember_' + str(pk)])
+            item.start = self.parsedatetime(self.data['start_' + str(pk)])
+            item.role = self.data['role_' + str(pk)]
+            item.end = self.parsedatetime(self.data['end_' + str(pk)])
+            item.full_clean('checklist')
+
+            # item does not have a database pk yet as it isn't saved
+            self.items['c' + str(pk)] = item
+
+        return super(EventChecklistForm, self).clean()
+
+    def save(self, commit=True):
+        checklist = super(EventChecklistForm, self).save(commit=False)
+        if (commit):
+            # Remove all existing, to be recreated from the form
+            checklist.vehicles.all().delete()
+            checklist.crew.all().delete()
+            checklist.save()
+
+            for key in self.items:
+                item = self.items[key]
+                reversion.add_to_revision(item)
+                # finish and save new database items
+                item.checklist = checklist
+                item.full_clean()
+                item.save()
+
+        self.items.clear()
+
+        return checklist
+
+    class Meta:
+        model = models.EventChecklist
+        fields = '__all__'
+        exclude = ['reviewed_at', 'reviewed_by']

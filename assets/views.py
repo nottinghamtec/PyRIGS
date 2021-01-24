@@ -1,20 +1,21 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.http import HttpResponse, Http404
-from django.views import generic
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy, reverse
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django.core import serializers
-from django.contrib import messages
-from assets import models, forms
-from RIGS import versioning
+import datetime
 
 import simplejson
-import datetime
+from assets import forms, models
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core import serializers
+from django.db.models import Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
+from versioning import versioning
+from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
+from itertools import chain
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -41,7 +42,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
             return self.model.objects.none()
 
         # TODO Feedback to user when search fails
-        query_string = form.cleaned_data['query'] or ""
+        query_string = form.cleaned_data['q'] or ""
         if len(query_string) == 0:
             queryset = self.model.objects.all()
         elif len(query_string) >= 3:
@@ -64,10 +65,12 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
         context["form"] = self.form
-
+        if hasattr(self.form, 'cleaned_data'):
+            context["category_filters"] = self.form.cleaned_data.get('category')
+            context["status_filters"] = self.form.cleaned_data.get('status')
         context["categories"] = models.AssetCategory.objects.all()
-
         context["statuses"] = models.AssetStatus.objects.all()
+        context["page_title"] = "Asset List"
         return context
 
 
@@ -97,19 +100,24 @@ class AssetIDUrlMixin:
 
 class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     model = models.Asset
-    template_name = 'asset_update.html'
+    template_name = 'asset_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Asset {}".format(self.object.display_id)
+        return context
 
 
 class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
-    template_name = 'asset_update.html'
+    template_name = 'asset_form.html'
     model = models.Asset
     form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['edit'] = True
+        context["edit"] = True
         context["connectors"] = models.Connector.objects.all()
-
+        context["page_title"] = "Edit Asset: {}".format(self.object.display_id)
         return context
 
     def get_success_url(self):
@@ -124,7 +132,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
 
 
 class AssetCreate(LoginRequiredMixin, generic.CreateView):
-    template_name = 'asset_create.html'
+    template_name = 'asset_form.html'
     model = models.Asset
     form_class = forms.AssetForm
 
@@ -132,7 +140,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
         context = super(AssetCreate, self).get_context_data(**kwargs)
         context["create"] = True
         context["connectors"] = models.Connector.objects.all()
-
+        context["page_title"] = "Create Asset"
         return context
 
     def get_initial(self, *args, **kwargs):
@@ -152,13 +160,12 @@ class DuplicateMixin:
 
 
 class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
-    model = models.Asset
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["create"] = None
         context["duplicate"] = True
         context['previous_asset_id'] = self.get_object().asset_id
+        context["page_title"] = "Duplication of Asset: {}".format(context['previous_asset_id'])
         return context
 
 
@@ -194,6 +201,11 @@ class AssetAuditList(AssetList):
         self.form = forms.AssetSearchForm(data={})
         return self.model.objects.filter(Q(last_audited_at__isnull=True))
 
+    def get_context_data(self, **kwargs):
+        context = super(AssetAuditList, self).get_context_data(**kwargs)
+        context['page_title'] = "Asset Audit List"
+        return context
+
 
 class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
@@ -208,34 +220,20 @@ class AssetAudit(AssetEdit):
         return super().get_success_url()
 
 
-class SupplierList(generic.ListView):
+class SupplierList(GenericListView):
     model = models.Supplier
-    template_name = 'supplier_list.html'
-    paginate_by = 40
     ordering = ['name']
-
-    def get_queryset(self):
-        if self.request.method == 'POST':
-            self.form = forms.SupplierSearchForm(data=self.request.POST)
-        elif self.request.method == 'GET':
-            self.form = forms.SupplierSearchForm(data=self.request.GET)
-        else:
-            self.form = forms.SupplierSearchForm(data={})
-        form = self.form
-        if not form.is_valid():
-            return self.model.objects.none()
-
-        query_string = form.cleaned_data['query'] or ""
-        if len(query_string) == 0:
-            queryset = self.model.objects.all()
-        else:
-            queryset = self.model.objects.filter(Q(name__icontains=query_string))
-
-        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(SupplierList, self).get_context_data(**kwargs)
-        context["form"] = self.form
+        context['create'] = 'supplier_create'
+        context['edit'] = 'supplier_update'
+        context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
+        context['detail'] = 'supplier_detail'
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
         return context
 
 
@@ -250,43 +248,54 @@ class SupplierSearch(SupplierList):
         return JsonResponse(result, safe=False)
 
 
-class SupplierDetail(generic.DetailView):
+class SupplierDetail(GenericDetailView):
     model = models.Supplier
-    template_name = 'supplier_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierDetail, self).get_context_data(**kwargs)
+        context['history_link'] = 'supplier_history'
+        context['update_link'] = 'supplier_update'
+        context['detail_link'] = 'supplier_detail'
+        context['associated'] = 'partials/associated_assets.html'
+        context['associated2'] = ''
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
+        return context
 
 
-class SupplierCreate(generic.CreateView):
+class SupplierCreate(GenericCreateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
-    template_name = 'supplier_update.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SupplierCreate, self).get_context_data(**kwargs)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        return context
+
+    def get_success_url(self):
+        return self.get_close_url('supplier_update', 'supplier_detail')
 
 
-class SupplierUpdate(generic.UpdateView):
+class SupplierUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Supplier
     form_class = forms.SupplierForm
-    template_name = 'supplier_update.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(SupplierUpdate, self).get_context_data(**kwargs)
+        if self.request.is_ajax():
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
+        return context
 
-class SupplierVersionHistory(versioning.VersionHistory):
-    template_name = "asset_version_history.html"
-
-
-class AssetVersionHistory(versioning.VersionHistory):
-    template_name = "asset_version_history.html"
-
-    def get_object(self, **kwargs):
-        return get_object_or_404(models.Asset, asset_id=self.kwargs['pk'])
-
-
-class ActivityTable(versioning.ActivityTable):
-    model = versioning.RIGSVersion
-    template_name = "asset_activity_table.html"
-    paginate_by = 25
-
-    def get_queryset(self):
-        versions = versioning.RIGSVersion.objects.get_for_multiple_models(
-            [models.Asset, models.Supplier])
-        return versions
+    def get_success_url(self):
+        return self.get_close_url('supplier_update', 'supplier_detail')
 
 
 class CableTypeList(generic.ListView):
@@ -295,10 +304,20 @@ class CableTypeList(generic.ListView):
     paginate_by = 40
     # ordering = ['__str__']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Cable Type List"
+        return context
+
 
 class CableTypeDetail(generic.DetailView):
     model = models.CableType
     template_name = 'cable_type_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(CableTypeDetail, self).get_context_data(**kwargs)
+        context["page_title"] = "Cable Type {}".format(str(self.object))
+        return context
 
 
 class CableTypeCreate(generic.CreateView):
@@ -309,6 +328,7 @@ class CableTypeCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(CableTypeCreate, self).get_context_data(**kwargs)
         context["create"] = True
+        context["page_title"] = "Create Cable Type"
 
         return context
 
@@ -324,6 +344,7 @@ class CableTypeUpdate(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(CableTypeUpdate, self).get_context_data(**kwargs)
         context["edit"] = True
+        context["page_title"] = "Edit Cable Type"
 
         return context
 

@@ -1,0 +1,19 @@
+<div class="card {% if event.hs_done %}
+                    border-success
+                {% else %}
+                    border-warning
+                {% endif %}">
+    <div class="card-header">Health &amp; Safety Details</div>
+    <div class="card-body">
+        <h5>Risk Assessment:</h5>
+        {% include 'partials/hs_status.html' with event=event object=event.riskassessment view='ra_detail' edit='ra_edit' create='event_ra' review='ra_review' perm=perms.RIGS.review_riskassessment %}
+        <hr>
+        <h5>Event Checklists:</h5>
+        {% for checklist in event.checklists.all %}
+            {% include 'partials/hs_status.html' with event=event object=checklist view='ec_detail' edit='ec_edit' create='event_ec' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
+            <br/>
+            {% endfor %}
+            <a href="{% url 'event_ec' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
+            class="hidden-xs">Create</span></a>
+    </div>
+</div>

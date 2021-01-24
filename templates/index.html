@@ -1,0 +1,47 @@
+{% extends 'base_rigs.html' %}
+{% load humanize %}
+
+{% block title %}RIGS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h1 class="col-sm-12 pb-3">R<small class="text-muted">ig</small> I<small class="text-muted">nformation</small class="text-muted"> G<small class="text-muted">athering</small> S<small class="text-muted">ystem</small></h1>
+    <h4 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h4>
+    <div class="col-sm mb-3">
+        <div class="card">
+            <h4 class="card-header">Rigboard</h4>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><i class="fas fa-list"></i> Rigboard</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><i class="fas fa-calendar"></i> Calendar</a>
+                {% if perms.RIGS.add_event %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><i class="fas fa-plus"></i> New Event</a>
+                {% endif %}
+            </div>
+            <h4 class="card-header">Asset Database</h4>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><i class="fas fa-tag"></i> Asset List </a>
+                {% if perms.assets.add_asset %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><i class="fas fa-plus"></i> New Asset</a>
+                {% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><i class="fas fa-parachute-box"></i> Supplier List </a>
+                {% if perms.assets.add_asset %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><i class="fas fa-plus"></i> New Supplier</a>
+                {% endif %}
+            </div>
+            <h4 class="card-header">Quick Links</h4>
+            <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-action" href="https://forum.nottinghamtec.co.uk" target="_blank" rel="noopener noreferrer"><i class="fas fa-comment-alt"></i> TEC Forum</a>
+                    <a class="list-group-item list-group-item-action" href="//wiki.nottinghamtec.co.uk" target="_blank" rel="noopener noreferrer"><i class="fas fa-pen-square"></i> TEC Wiki</a>
+                    {% if perms.RIGS.view_event %}
+                        <a class="list-group-item list-group-item-action" href="//members.nottinghamtec.co.uk/price" target="_blank"><i class="fas fa-pound-sign"></i> Price List</a>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if perms.RIGS.view_event %}
+    <div class="col-sm">
+        {% include 'activity_feed.html' %}
+    </div>
+    {% endif %}
+</div><!---end row--->
+{% endblock %}

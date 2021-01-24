@@ -26,8 +26,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
-
 STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+
+CI = bool(int(os.environ.get('CI'))) if os.environ.get('CI') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
@@ -45,7 +46,8 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'), ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'),
+          ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
 if DEBUG:
     ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
@@ -57,6 +59,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'versioning',
+    'users',
     'RIGS',
     'assets',
 
@@ -147,6 +152,27 @@ LOGGING = {
     }
 }
 
+# Tests lock up SQLite otherwise
+if STAGING or CI:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+        }
+    }
+elif DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+        }
+    }
+
 RAVEN_CONFIG = {
     'dsn': os.environ.get('RAVEN_DSN'),
     # If you are using git, you can also automatically configure the
@@ -164,8 +190,10 @@ LOGOUT_URL = '/user/logout/'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY',
+                                      "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY',
+                                       "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
 NOCAPTCHA = True
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
@@ -201,10 +229,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Need to allow seconds as datetime-local input type spits out a time that has seconds
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
@@ -216,7 +244,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -243,3 +271,6 @@ RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
     'RISK_ASSESSMENT_URL') else "http://example.com"
 RISK_ASSESSMENT_SECRET = os.environ.get('RISK_ASSESSMENT_SECRET') if os.environ.get(
     'RISK_ASSESSMENT_SECRET') else secrets.token_hex(15)
+
+IMGUR_UPLOAD_CLIENT_ID = os.environ.get('IMGUR_UPLOAD_CLIENT_ID', '')
+IMGUR_UPLOAD_CLIENT_SECRET = os.environ.get('IMGUR_UPLOAD_CLIENT_SECRET', '')

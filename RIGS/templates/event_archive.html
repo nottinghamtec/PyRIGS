@@ -1,0 +1,56 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+{% load get_list from filters %}
+{% load button from filters %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static 'js/bootstrap-select.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12 py-2">
+        <form class="form-inline" method="GET">
+            <div class="input-group mx-2">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Start</span>
+                </div>
+                <input type="date" name="start" id="start" value="{{ start|default_if_none:'' }}" placeholder="Start" class="form-control" />
+            </div>
+            <div class="input-group mx-2">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">End</span>
+                </div>
+                <input type="date" name="end" id="end" value="{{ end|default_if_none:'' }}" placeholder="End" class="form-control" />
+            </div>
+            <div class="input-group mx-2">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Keyword</span>
+                </div>
+                <input type="search" name="q" placeholder="Keyword" value="{{ request.GET.q }}" class="form-control" />
+            </div>
+            <select class="selectpicker pr-3" multiple data-actions-box="true" data-none-selected-text="Status" data-actions-box="true" id="status" name="status">
+                {% for status in statuses %}
+                    <option value="{{status.0}}" {% if status.0|safe in request.GET|get_list:'status' %}selected=""{% endif %}>{{status.1}}</option>
+                {% endfor %}
+            </select>
+            {% button 'search' %}
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        {% with object_list as events %}
+            {% include 'partials/event_table.html' %}
+        {% endwith %}
+    </div>
+</div>
+
+{% paginator %}
+
+{% endblock %}

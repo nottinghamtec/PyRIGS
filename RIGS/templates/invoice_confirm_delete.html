@@ -1,0 +1,20 @@
+{% extends 'base_rigs.html' %}
+
+{% block title %}Delete Invoice {{ object.invoice.pk }}{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h2>Delete Invoice {{ object.pk }}</h2>
+
+    <p>Are you sure you wish to delete invoice {{ object.pk }}?</p>
+
+    <div class="text-right">
+        <form action="{{ action_link }}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'invoice_list' %}"/>
+            <input type="submit" value="Yes" class="btn btn-danger col-sm-1"/>
+            <a href="{% url 'invoice_detail' object.pk %}" class="btn btn-success col-sm-1">No</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

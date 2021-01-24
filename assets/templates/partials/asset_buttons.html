@@ -1,28 +1,26 @@
-{% if perms.assets.change_asset %}
-    {% if edit and object %}
+{% load button from filters %}
+<div class="text-right py-2">
+    {% if create or edit and object %}
     <!--edit-->
-    <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
-    <a class="btn btn-default" href="{% url 'asset_duplicate' object.pk %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
+    {% button 'submit' %}
     {% elif duplicate %}
     <!--duplicate-->
-    <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-ok-sign"></i> Create Duplicate</button>
-    {% elif create %}
-    <!--create-->
-    <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> Save</button>
+    <button type="submit" class="btn btn-success"><i class="fas fa-tick"></i> Create Duplicate</button>
     {% else %}
     <!--detail view-->
     <div class="btn-group">
-        <a href="{% url 'asset_update' object.asset_id %}" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-        <a class="btn btn-default" href="{% url 'asset_duplicate' object.asset_id %}"><i class="glyphicon glyphicon-duplicate"></i> Duplicate</a>
-        <a type="button" class="btn btn-info" href="{% url 'asset_audit' object.asset_id %}"><i class="glyphicon glyphicon-object-align-left"></i> Audit</a>
+        {% button 'edit' url='asset_update' pk=object.asset_id %}
+        {% button 'duplicate' url='asset_duplicate' pk=object.asset_id %}
+        <a type="button" class="btn btn-info" href="{% url 'asset_audit' object.asset_id %}"><i class="fas fa-certificate"></i> Audit</a>
     </div>
     {% endif %}
     {% if create or edit or duplicate %}
     <br>
     <button type="reset" class="btn btn-link" onclick="
-    {%if duplicate%}
-    {% url 'asset_detail' previous_asset_id %}
-    {%else%}
-    history.back(){%endif%}">Cancel</button>
+    {% if duplicate %}
+        {% url 'asset_detail' previous_asset_id %}
+    {% else %}
+        history.back()
+    {% endif %}">Cancel</button>
     {% endif %}
-{% endif %}
+</div>

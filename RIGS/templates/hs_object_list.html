@@ -1,0 +1,59 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+{% load help_text from filters %}
+{% load verbose_name from filters %}
+{% load get_field from filters %}
+
+{% block title %}{{ title }} List{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <h2>{{title}} List</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Event</th>
+                            {# mmm hax #}
+                            {% if object_list.0 != None %}
+                                {% for field in fields %}
+                                    <th scope="col">{{ object_list.0|verbose_name:field|title }}</th>
+                                {% endfor %}
+                            {% endif %}
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for object in object_list %}
+                    <tr class="{% if object.reviewed_by %}table-success{%endif%}">
+                        {# General #}
+                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
+                        {% for field in fields %}
+                            <td>{{ object|get_field:field }}</td>
+                        {% endfor %}
+                        {# Buttons #}
+                        <td>
+                            {% include 'partials/hs_status.html' %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="bg-warning">
+                        <td colspan="6">Nothing found</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% if is_paginated %}
+        <div class="row justify-content-center">
+                {% paginator %}
+        </div>
+    {% endif %}
+{% endblock %}

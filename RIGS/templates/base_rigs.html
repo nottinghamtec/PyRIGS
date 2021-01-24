@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block titleheader %}
+<a class="navbar-brand" href="/">RIGS</a>
+{% endblock %}
+
+{% block titleelements %}
+{% if user.is_authenticated %}
+    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRigboard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Rigboard
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownRigboard">
+        <a class="dropdown-item" href="{% url 'rigboard' %}"><span class="fas fa-list"></span>
+                            Rigboard</a>
+        <a class="dropdown-item" href="{% url 'event_archive' %}"><span class="fas fa-book"></span>
+                            Archive</a>
+        <a class="dropdown-item" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span>
+                            Calendar</a>
+        {% if perms.RIGS.view_event %}
+        <a class="dropdown-item" href="{% url 'activity_table' %}"><span
+                                    class="fas fa-random"></span> Recent Changes</a>
+        {% endif %}
+        {% if perms.RIGS.add_event %}
+        <a class="dropdown-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span>
+                                New Event</a>
+        {% endif %}
+       </div>
+    </li>
+    {% if perms.RIGS.view_riskassessment %}
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        H&S
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownHS">
+        <a class="dropdown-item" href="{% url 'hs_list' %}"><span class="fas fa-eye"></span> Overview</a>
+        <a class="dropdown-item" href="{% url 'ra_list' %}"><span class="fas fa-file-medical"></span> Risk Assessments</a>
+        <a class="dropdown-item" href="{% url 'ec_list' %}"><span class="fas fa-tasks"></span> Event Checklists</a>
+      </div>
+    </li>
+    {% endif %}
+    {% if perms.RIGS.view_invoice %}
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Invoices
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
+        {% if perms.RIGS.add_invoice %}
+        <a class="dropdown-item" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting</a>
+        {% endif %}
+        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding</a>
+        <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
+      </div>
+    </li>
+    {% endif %}
+    {% if perms.RIGS.view_person %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'person_list' %}">People</a></li>
+    {% endif %}
+    {% if perms.RIGS.view_organisation %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'organisation_list' %}">Organisations</a></li>
+    {% endif %}
+    {% if perms.RIGS.view_venue %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'venue_list' %}">Venues</a></li>
+    {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block titleelements_right %}
+{% include 'partials/search.html' %}
+{% include 'partials/navbar_user.html' %}
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script src="{% static 'js/popover.js' %}"></script>
+<script>
+    $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+{% endblock %}

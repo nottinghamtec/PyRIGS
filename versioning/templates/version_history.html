@@ -1,0 +1,17 @@
+{% extends override|default:'base_rigs.html' %}
+{% load to_class_name from filters %}
+{% load paginator from filters %}
+
+{% block title %}{{object|to_class_name}} {{ object.display_id|default:object.pk }} - Revision History{% endblock %}
+
+{% block js %}
+{% include 'partials/version_scripts.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+    <h3><a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.display_id|default:object.pk }}</a> - Revision History</h3>
+    {% include 'partials/version_history_table.html' %}
+    <div>{% paginator %}</div>
+</div>
+{% endblock %}

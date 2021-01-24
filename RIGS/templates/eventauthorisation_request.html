@@ -1,0 +1,50 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Request Authorisation{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-warning">
+                <h1>Send authorisation request email.</h1>
+                <p>Pressing send will email the address provided. Please triple check everything before continuing.</p>
+            </div>
+
+            <div class="alert alert-info">
+                <dl class="dl-horizontal">
+                    <dt>Person Email</dt>
+                    <dd>{{ object.person.email }}</dd>
+
+                    <dt>Organisation Email</dt>
+                    <dd>{{ object.organisation.email }}</dd>
+                </dl>
+            </div>
+            <form action="{{ form.action|default:request.path }}" method="POST" id="auth-request-form">
+                {% csrf_token %}
+                {% include 'form_errors.html' %}
+                <div class="form-group row">
+                    <label class="col-sm-4 col-form-label"
+                           for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    <div class="col-sm-8">
+                        {% render_field form.email type="email" class+="form-control" %}
+                    </div>
+                </div>
+                <div class="text-right col-sm-3 offset-sm-9">
+                    <div class="form-group">
+                        <button type="submit" class="form-control btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $('#auth-request-form').on('submit', function () {
+            $('#auth-request-form button').attr('disabled', true);
+        });
+    </script>
+{% endblock %}

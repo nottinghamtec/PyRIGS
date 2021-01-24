@@ -1,17 +1,35 @@
-@import "bootstrap-compass";
-@import "bootstrap-variables";
-@import "bootstrap";
-@import "jq-ui-bootstrap/_jq-ui-bootstrap-variable-adapter";
-@import "jq-ui-bootstrap/_base";
-@import "jq-ui-bootstrap/_autocomplete";
-@import "jq-ui-bootstrap/_menu";
-@import "jq-ui-bootstrap/_tooltip";
+@import "dark_screen";
+@import "custom-variables";
+@import "node_modules/bootstrap/scss/bootstrap";
 
-@import "compass/css3/animation";
-@import "compass/css3/transform";
+@media screen and
+  (prefers-reduced-motion: reduce),
+  (update: slow) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 
-body, .pad-top {
-  padding-top: 50px;
+.fc-event-main {
+    color: black !important;
+}
+
+.fc-daygrid-dot-event {
+    color: black !important;
+}
+
+.fc-timeGridDay-view {
+    .fc-event-main {
+        font-size: large !important;
+    }
+}
+
+.fc-timeGridWeek-view {
+    .fc-event-main {
+        font-size: 0.9rem;
+    }
 }
 
 #content {
@@ -41,17 +59,13 @@ textarea {
   resize: vertical;
 }
 
-.btn-page, .btn-pad {
-  // .btn-page should be refactored out to .btn-page in the future
-  margin: 0 0 0.5em;
-}
-
 .custom-combobox {
   display: block;
 }
 
 .event-mic-photo {
   max-width: 2em;
+  border-radius: 0.25em;
 }
 
 .item-description {
@@ -78,86 +92,64 @@ textarea {
   z-index: inherit; // bug fix introduced in 52682ce
 }
 
-.panel-default {
-  .default {
-    background-color: $panel-default-heading-bg;
-  }
-}
-
 del {
   background-color: #f2dede;
   border-radius: 3px;
+  padding: 0.1em;
 }
 
 ins {
   background-color: #dff0d8;
   border-radius: 3px;
+  padding: 0.1em;
 }
 
-.loading-animation {
-  position: relative;
-  margin: 30px auto 0;
-
-  .circle {
-      background-color: rgba(0,0,0,0);
-      border: 5px solid rgba(0,183,229,0.9);
-      opacity: .9;
-      border-right: 5px solid rgba(0,0,0,0);
-      border-left: 5px solid rgba(0,0,0,0);
-      border-radius: 50px;
-      box-shadow: 0 0 35px #2187e7;
-      width: 50px;
-      height: 50px;
-      margin: 0 auto;
-      @include animation(spinPulse 1s infinite ease-in-out);
-  }
-
-  .circle1 {
-      background-color: rgba(0,0,0,0);
-      border: 5px solid rgba(0,183,229,0.9);
-      opacity: .9;
-      border-left: 5px solid rgba(0,0,0,0);
-      border-right: 5px solid rgba(0,0,0,0);
-      border-radius: 50px;
-      box-shadow: 0 0 15px #2187e7;
-      width: 30px;
-      height: 30px;
-      margin: 0 auto;
-      position: relative;
-      top: -40px;
-      @include animation(spinoffPulse 1s infinite linear);
-  }
-
-  @include keyframes(spinPulse) {
-      0% {
-          @include rotate(160deg);
-          opacity: 0;
-          box-shadow: 0 0 1px #2187e7;
-      }
-
-      50% {
-          @include rotate(145deg);
-          opacity: 1;
-      }
-
-      100% {
-          @include rotate(-320deg);
-          opacity: 0;
-      };
-  }
-
-  @include keyframes(spinoffPulse) {
-      0% {
-          @include rotate(0deg);
-      }
-
-      100% {
-          @include rotate(360deg);
-      };
-  }
+.nav-link {
+  color: $gray-400 !important;
 }
 
-html.embedded{
+.btn-light {
+    background-color: $gray-200 !important;
+}
+
+.skip-link {
+  background: $dark;
+  outline: unset;
+  height: 30px;
+  left: 50%;
+  padding: 8px;
+  position: absolute;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
+}
+
+.skip-link:focus {
+  transform: translateY(45px); /* TODO Remove absolute positioning */
+}
+
+.errorlist > li {
+    list-style-type: none;
+}
+
+pre {
+    page-break-inside: avoid;
+    font-family: monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 1.6em;
+    max-width: 100%;
+    overflow: auto;
+    padding: 1em 1.5em;
+    display: block;
+    word-wrap: break-word;
+}
+
+svg {
+    display: inline;
+    white-space: no-wrap;
+}
+
+html.embedded {
   display: flex;
   flex-direction: column;
   width: 100%;

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from RIGS import models, forms
+from users import forms as user_forms
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 from reversion.admin import VersionAdmin
@@ -18,8 +19,7 @@ from reversion import revisions as reversion
 admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
-admin.site.register(models.Invoice)
-admin.site.register(models.Payment)
+admin.site.register(models.Invoice, VersionAdmin)
 
 
 def approve_user(modeladmin, request, queryset):
@@ -48,8 +48,8 @@ class ProfileAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2'),
         }),
     )
-    form = forms.ProfileChangeForm
-    add_form = forms.ProfileCreationForm
+    form = user_forms.ProfileChangeForm
+    add_form = user_forms.ProfileCreationForm
     actions = [approve_user]
 
 
@@ -105,7 +105,7 @@ class AssociateAdmin(VersionAdmin):
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'forms': forms
             }
-            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context)
+            return TemplateResponse(request, 'admin_associate_merge.html', context)
 
 
 @admin.register(models.Person)
@@ -124,3 +124,13 @@ class VenueAdmin(AssociateAdmin):
 class OrganisationAdmin(AssociateAdmin):
     list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
     merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
+
+
+@admin.register(models.RiskAssessment)
+class RiskAssessmentAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+
+
+@admin.register(models.EventChecklist)
+class EventChecklistAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')

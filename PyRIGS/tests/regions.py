@@ -1,9 +1,12 @@
 from pypom import Region
+from django.utils import timezone
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 import datetime
 
 
@@ -16,11 +19,22 @@ def parse_bool_from_string(string):
     else:
         return False
 
+# 12-Hour vs 24-Hour Time. Affects widget display
+
+
+def get_time_format():
+    # Default
+    time_format = "%H:%M"
+    # If system is 12hr
+    if timezone.now().strftime("%p"):
+        time_format = "%I:%M %p"
+    return time_format
+
 
 class BootstrapSelectElement(Region):
     _main_button_locator = (By.CSS_SELECTOR, 'button.dropdown-toggle')
     _option_box_locator = (By.CSS_SELECTOR, 'ul.dropdown-menu')
-    _option_locator = (By.CSS_SELECTOR, 'ul.dropdown-menu.inner>li>a[role=option]')
+    _option_locator = (By.CSS_SELECTOR, 'ul.dropdown-menu.inner>li>a.dropdown-item')
     _select_all_locator = (By.CLASS_NAME, 'bs-select-all')
     _deselect_all_locator = (By.CLASS_NAME, 'bs-deselect-all')
     _search_locator = (By.CSS_SELECTOR, '.bs-searchbox>input')
@@ -32,12 +46,12 @@ class BootstrapSelectElement(Region):
 
     def toggle(self):
         original_state = self.is_open
-        return self.find_element(*self._main_button_locator).click()
         option_box = self.find_element(*self._option_box_locator)
-        if original_state:
-            self.wait.until(expected_conditions.invisibility_of_element_located(option_box))
+        if not original_state:
+            self.wait.until(expected_conditions.invisibility_of_element(option_box))
         else:
-            self.wait.until(expected_conditions.visibility_of_element_located(option_box))
+            self.wait.until(expected_conditions.visibility_of(option_box))
+        return self.find_element(*self._main_button_locator).click()
 
     def open(self):
         if not self.is_open:
@@ -55,6 +69,7 @@ class BootstrapSelectElement(Region):
 
     def search(self, query):
         search_box = self.find_element(*self._search_locator)
+        self.open()
         search_box.clear()
         search_box.send_keys(query)
         status_text = self.find_element(*self._status_locator)
@@ -112,6 +127,22 @@ class CheckBox(Region):
             self.toggle()
 
 
+class RadioSelect(Region):  # Currently only works for yes/no radio selects
+    def set_value(self, value):
+        if value:
+            value = "0"
+        else:
+            value = "1"
+        self.find_element(By.XPATH, "//label[@for='{}_{}']".format(self.root.get_attribute("id"), value)).click()
+
+    @property
+    def value(self):
+        try:
+            return parse_bool_from_string(self.find_element(By.CSS_SELECTOR, '.custom-control-input:checked').get_attribute("value").lower())
+        except NoSuchElementException:
+            return None
+
+
 class DatePicker(Region):
     @property
     def value(self):
@@ -120,6 +151,32 @@ class DatePicker(Region):
     def set_value(self, value):
         self.root.clear()
         self.root.send_keys(value.strftime("%d%m%Y"))
+
+
+class TimePicker(Region):
+    @property
+    def value(self):
+        return datetime.datetime.strptime(self.root.get_attribute("value"), get_time_format())
+
+    def set_value(self, value):
+        self.root.clear()
+        self.root.send_keys(value.strftime(get_time_format()))
+
+
+class DateTimePicker(Region):
+    @property
+    def value(self):
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d " + get_time_format())
+
+    def set_value(self, value):
+        self.root.clear()
+
+        date = value.date().strftime("%d%m%Y")
+        time = value.time().strftime(get_time_format())
+
+        self.root.send_keys(date)
+        self.root.send_keys(Keys.TAB)
+        self.root.send_keys(time)
 
 
 class SingleSelectPicker(Region):
@@ -155,3 +212,39 @@ class ErrorPage(Region):
         for error in error_items:
             errors[error.field_name] = error.errors
         return errors
+
+
+class Modal(Region):
+    _submit_locator = (By.CSS_SELECTOR, '.btn-primary')
+    _header_selector = (By.TAG_NAME, 'h4')
+
+    form_items = {
+        'name': (TextBox, (By.ID, 'id_name'))
+    }
+
+    @property
+    def header(self):
+        return self.find_element(*self._header_selector).text
+
+    @property
+    def is_open(self):
+        return self.root.is_displayed()
+
+    def submit(self):
+        self.root.find_element(*self._submit_locator).click()
+
+    def __getattr__(self, name):
+        if name in self.form_items:
+            element = self.form_items[name]
+            form_element = element[0](self, self.find_element(*element[1]))
+            return form_element.value
+        else:
+            return super().__getattribute__(name)
+
+    def __setattr__(self, name, value):
+        if name in self.form_items:
+            element = self.form_items[name]
+            form_element = element[0](self, self.find_element(*element[1]))
+            form_element.set_value(value)
+        else:
+            self.__dict__[name] = value

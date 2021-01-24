@@ -1,0 +1,6 @@
+{% load widget_tweaks %}
+{% load help_text from filters %}
+<div class="form-check">
+    {% render_field formitem class+="form-check-input" %}
+    <label class="form-check-label" for="{{ formitem.id_for_label }}">{{formitem.help_text|safe}}</label>
+</div>

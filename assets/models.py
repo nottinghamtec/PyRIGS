@@ -45,6 +45,11 @@ class Supplier(models.Model, RevisionMixin):
         ordering = ['name']
 
     name = models.CharField(max_length=80)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+
+    notes = models.TextField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('supplier_list')
@@ -121,6 +126,8 @@ class Asset(models.Model, RevisionMixin):
     asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
+    reversion_perm = 'assets.asset_finance'
+
     def get_available_asset_id(wanted_prefix=""):
         sql = """
         SELECT a.asset_id_number+1
@@ -143,7 +150,7 @@ class Asset(models.Model, RevisionMixin):
 
     def __str__(self):
         out = str(self.asset_id) + ' - ' + self.description
-        if self.is_cable:
+        if self.is_cable and self.cable_type is not None:
             out += '{} - {}m - {}'.format(self.cable_type.plug, self.length, self.cable_type.socket)
         return out
 
@@ -171,17 +178,17 @@ class Asset(models.Model, RevisionMixin):
                 errdict["csa"] = ["The CSA of a cable must be more than 0"]
             if not self.cable_type:
                 errdict["cable_type"] = ["A cable must have a type"]
-            # if not self.circuits or self.circuits <= 0:
-            #     errdict["circuits"] = ["There must be at least one circuit in a cable"]
-            # if not self.cores or self.cores <= 0:
-            #    errdict["cores"] = ["There must be at least one core in a cable"]
-            # if self.socket is None:
-            #     errdict["socket"] = ["A cable must have a socket"]
-            # if self.plug is None:
-            #    errdict["plug"] = ["A cable must have a plug"]
 
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
+
+    @property
+    def activity_feed_string(self):
+        return str(self)
+
+    @property
+    def display_id(self):
+        return str(self.asset_id)
 
 
 @receiver(pre_save, sender=Asset)

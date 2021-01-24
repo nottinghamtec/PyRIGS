@@ -1,0 +1,51 @@
+{% load button from filters %}
+<div class="btn-group py-3">
+    {% button 'edit' 'event_update' event.pk %}
+    {% if event.is_rig %}
+    {% button 'print' 'event_print' event.pk %}
+    {% endif %}
+    {% button 'duplicate' 'event_duplicate' event.pk %}
+    {% if event.is_rig %}
+        {% if event.internal %}
+            <a class="btn item-add modal-href event-authorise-request
+                    {% if event.authorised %}
+                        btn-success
+                    {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                        btn-warning
+                    {% elif event.auth_request_to %}
+                        btn-info
+                    {% else %}
+                        btn-secondary
+                    {% endif %}
+                    "
+               href="{% url 'event_authorise_request' object.pk %}">
+                <i class="fas fa-paper-plane"></i>
+                <span class="d-none d-sm-inline">
+                    {% if event.authorised %}
+                        Authorised
+                    {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                        Authorisation Issue
+                    {% elif event.auth_request_to %}
+                        Awaiting Authorisation
+                    {% else %}
+                        Request Authorisation
+                    {% endif %}
+                </span>
+            </a>
+        {% endif %}
+
+        {% if perms.RIGS.add_invoice %}
+            <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
+                        {% if event.invoice and event.invoice.is_closed %}
+                            btn-success
+                        {% elif event.invoice %}
+                            btn-warning
+                        {% else %}
+                            btn-danger
+                        {% endif %}
+                        " title="Invoice Rig"><span
+                    class="fas fa-pound-sign"></span>
+                <span class="d-none d-sm-inline">Invoice</span></a>
+        {% endif %}
+    {% endif %}
+</div>

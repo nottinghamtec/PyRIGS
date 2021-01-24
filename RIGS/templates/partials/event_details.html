@@ -1,0 +1,89 @@
+{% load namewithnotes from filters %}
+<div class="card card-info">
+    <div class="card-header">Event Info</div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-6">Event Venue</dt>
+            <dd class="col-sm-6">
+                {% if object.venue %}
+                    <a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">
+                        {{ object.venue|namewithnotes:'venue_detail' }}
+                    </a>
+                {% endif %}
+            </dd>
+            {% if object.venue %}
+            <dt class="col-sm-6">Venue Notes</dt>
+            <dd class="col-sm-6">
+                {{ object.venue.notes }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%}
+            </dd>
+            {% endif %}
+
+            {% if event.is_rig %}
+                <dt class="col-sm-6">Event MIC</dt>
+                <dd class="col-sm-6">
+                    {% if event.mic and perms.RIGS.view_profile %}
+                        <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                            {{ event.mic.name }}
+                        </a>
+                    {% else %}
+                        {{ event.mic.name }}
+                    {% endif %}
+                </dd>
+            {% endif %}
+
+            <dt class="col-sm-6">Status</dt>
+            <dd class="col-sm-6">{{ event.get_status_display }}</dd>
+
+            <dd class="col-sm-12">&nbsp;</dd>
+
+            {% if event.is_rig %}
+                <dt class="col-sm-6">Crew Meet</dt>
+                <dd class="col-sm-6">{{ event.meet_at|date:"D d M Y H:i"|default:"TBC" }}</dd>
+                <!---TODO<dd class="col-sm-6">{{ event.meet_info|default:"" }}</dd>--->
+
+                <dt class="col-sm-6">Access From</dt>
+                <dd class="col-sm-6">{{ event.access_at|date:"D d M Y H:i"|default:"TBC" }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-6">Event Starts</dt>
+            <dd class="col-sm-6">{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
+
+            <dt class="col-sm-6">Event Ends</dt>
+            <dd class="col-sm-6">{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
+
+            <dd class="col-sm-12">&nbsp;</dd>
+
+            <dt class="col-sm-6">Event Description</dt>
+            <dd class="dont-break-out col-sm-12">{{ event.description|linebreaksbr }}</dd>
+
+            <dd class="col-sm-12">&nbsp;</dd>
+
+            <dt class="col-sm-6">Based On</dt>
+            <dd class="col-sm-6">
+                {% if object.based_on %}
+                    <a href="{% url 'event_detail' pk=object.based_on.pk %}">
+                        {% if object.based_on.is_rig %}N{{ object.based_on.pk|stringformat:"05d" }}{% else %}
+                            {{ object.based_on.pk }}{% endif %}
+                        {{ object.based_on.name }} {% if object.based_on.mic %}by {{ object.based_on.mic.name }}{% endif %}
+                    </a>
+                {% endif %}
+            </dd>
+
+            {% if event.dry_hire %}
+                <dt class="col-sm-6">Checked In By</dt>
+                <dd class="col-sm-6">{{ object.checked_in_by.name }}</dd>
+            {% endif %}
+
+            {% if event.is_rig %}
+                <dt class="col-sm-6">Collected By</dt>
+                <dd class="col-sm-6">{{ object.collector }}</dd>
+            {% endif %}
+
+            {% if event.is_rig and not event.internal and perms.RIGS.view_event %}
+                <dd class="col-sm-12">&nbsp;</dd>
+                <dt class="col-sm-6">PO</dt>
+                <dd class="col-sm-6">{{ object.purchase_order }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>

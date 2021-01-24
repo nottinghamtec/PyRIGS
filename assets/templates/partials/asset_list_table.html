@@ -1,0 +1,41 @@
+{% load button from filters %}
+<div class="table-responsive">
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Asset ID</th>
+          <th scope="col">Description</th>
+          <th scope="col">Category</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="d-none d-sm-table-cell">Quick Links</th>
+        </tr>
+      </thead>
+      <tbody id="asset_table_body">
+        {% for item in object_list %}
+            <tr class="table-{{ item.status.display_class|default:'' }} assetRow">
+                <th scope="row" class="align-middle"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
+                <td class="assetDesc"><span class="text-truncate d-inline-block align-middle">{{ item.description }}</span></td>
+                <td class="assetCategory align-middle">{{ item.category }}</td>
+                <td class="assetStatus align-middle">{{ item.status }}</td>
+                <td class="d-none d-sm-table-cell">
+                    {% if audit %}
+                    <a type="button" class="btn btn-info btn-sm modal-href" href="{% url 'asset_audit' item.asset_id %}"><i class="fas fa-certificate"></i> Audit</a>
+                    {% else %}
+                    <div class="btn-group" role="group">
+                        {% button 'view' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
+                        {% if perms.assets.change_asset %}
+                            {% button 'edit' url='asset_update' pk=item.asset_id clazz="btn-sm" %}
+                            {% button 'duplicate' url='asset_duplicate' pk=item.asset_id clazz="btn-sm" %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Nothing found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
