@@ -23,12 +23,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
     'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
+def get_bool(value):
+    if value == '1' or value == 'true':
+        return True
+    else:
+        return False
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
+DEBUG = get_bool(os.environ.get('DEBUG')) if os.environ.get('DEBUG') else True
 
-STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+STAGING = get_bool(os.environ.get('STAGING')) if os.environ.get('STAGING') else False
 
-CI = bool(int(os.environ.get('CI'))) if os.environ.get('CI') else False
+CI = get_bool(os.environ.get('CI')) if os.environ.get('CI') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
