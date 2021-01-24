@@ -24,16 +24,17 @@ def parse_bool_from_string(string):
 def get_time_format():
     # Default
     time_format = "%H%M"
-    if settings.CI: # The CI is American
+    if settings.CI:  # The CI is American
         time_format = "%I%M%p"
     return time_format
 
 
 def get_date_format():
     date_format = "%d%m%Y"
-    if settings.CI: # And try as I might I can't stop it being so
+    if settings.CI:  # And try as I might I can't stop it being so
         date_format = "%m%d%Y"
     return date_format
+
 
 class BootstrapSelectElement(Region):
     _main_button_locator = (By.CSS_SELECTOR, 'button.dropdown-toggle')
