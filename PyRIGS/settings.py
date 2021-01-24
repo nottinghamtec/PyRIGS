@@ -25,7 +25,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
 
 
 def get_bool(value):
-    if value == '1' or value == 'true':
+    print(type(value))
+    if value == '1' or value == 'true' or value == True:
         return True
     else:
         return False
