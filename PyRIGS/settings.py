@@ -13,7 +13,7 @@ import os
 import raven
 import secrets
 import datetime
-from PyRIGS.tests.regions import parse_bool_from_string
+from envparse import env
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -21,16 +21,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
-    'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
+SECRET_KEY = env('SECRET_KEY', default='gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
+DEBUG = env('DEBUG', cast=bool, default=True)
 
-STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+STAGING = env('STAGING', cast=bool, default=False)
 
-CI = parse_bool_from_string(os.environ.get('CI')) if os.environ.get('CI') else False
+CI = env('CI', cast=bool, default=True)
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
@@ -176,10 +175,7 @@ else:
     }
 
 RAVEN_CONFIG = {
-    'dsn': os.environ.get('RAVEN_DSN'),
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    # 'release': raven.fetch_git_sha(os.path.dirname(os.path.dirname(__file__))),
+    'dsn': env('RAVEN_DSN', default=""),
 }
 
 # User system
@@ -192,10 +188,8 @@ LOGOUT_URL = '/user/logout/'
 ACCOUNT_ACTIVATION_DAYS = 7
 
 # reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY',
-                                      "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY',
-                                       "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
+RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
+RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
 NOCAPTCHA = True
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
@@ -204,13 +198,13 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = os.environ.get('EMAIL_HOST')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = bool(int(os.environ.get('EMAIL_USE_TLS', 0)))
-    EMAIL_USE_SSL = bool(int(os.environ.get('EMAIL_USE_SSL', 0)))
-    DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT', cast=int, default=25)
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = env('EMAIL_USE_TLS', cast=bool, default=False)
+    EMAIL_USE_SSL = env('EMAIL_USE_SSL', cast=bool, default=False)
+    DEFAULT_FROM_EMAIL = env('EMAIL_FROM')
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -269,10 +263,6 @@ USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
-RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
-    'RISK_ASSESSMENT_URL') else "http://example.com"
-RISK_ASSESSMENT_SECRET = os.environ.get('RISK_ASSESSMENT_SECRET') if os.environ.get(
-    'RISK_ASSESSMENT_SECRET') else secrets.token_hex(15)
 
-IMGUR_UPLOAD_CLIENT_ID = os.environ.get('IMGUR_UPLOAD_CLIENT_ID', '')
-IMGUR_UPLOAD_CLIENT_SECRET = os.environ.get('IMGUR_UPLOAD_CLIENT_SECRET', '')
+IMGUR_UPLOAD_CLIENT_ID = env('IMGUR_UPLOAD_CLIENT_ID', default="")
+IMGUR_UPLOAD_CLIENT_SECRET = env('IMGUR_UPLOAD_CLIENT_SECRET', default="")

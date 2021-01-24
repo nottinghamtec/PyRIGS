@@ -27,7 +27,7 @@ def create_browser():
     # God Save The Queen
     options.add_argument("--lang=en_GB")
     options.add_argument("--headless")
-    if os.environ.get('CI', False):
+    if settings.CI:
         options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(options=options)
     return driver
