@@ -29,7 +29,7 @@ DEBUG = env('DEBUG', cast=bool, default=True)
 
 STAGING = env('STAGING', cast=bool, default=False)
 
-CI = env('CI', cast=bool, default=True)
+CI = env('CI', cast=bool, default=False)
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
