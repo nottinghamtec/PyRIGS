@@ -24,20 +24,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
     'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
 
-def get_bool(value):
-    print(type(value))
-    if value == '1' or value == 'true' or value == True:
-        return True
-    else:
-        return False
-
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool(os.environ.get('DEBUG')) if os.environ.get('DEBUG') else True
+DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
 
-STAGING = get_bool(os.environ.get('STAGING')) if os.environ.get('STAGING') else False
+STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
 
-CI = get_bool(os.environ.get('CI')) if os.environ.get('CI') else False
+CI = bool(os.environ.get('CI')) if os.environ.get('CI') else False
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
