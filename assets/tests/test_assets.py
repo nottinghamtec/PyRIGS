@@ -136,9 +136,7 @@ class TestAssetForm(AutoLoginTest):
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
         self.page.purchase_price = "12.99"
         self.page.salvage_value = "99.12"
-        # Gotta scroll for CI to not break I think
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        acquired = datetime.date(2020, 5, 20)
+        acquired = datetime.date(2020, 5, 2)
         self.page.date_acquired = acquired
 
         self.page.parent_selector.toggle()
