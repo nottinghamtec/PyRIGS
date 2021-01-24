@@ -23,11 +23,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
     'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
 
+
 def get_bool(value):
     if value == '1' or value == 'true':
         return True
     else:
         return False
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_bool(os.environ.get('DEBUG')) if os.environ.get('DEBUG') else True
