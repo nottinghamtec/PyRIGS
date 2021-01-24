@@ -28,7 +28,7 @@ def get_time_format():
     time_format = "%H:%M"
     # If system is 12hr
     if timezone.now().strftime("%p") or settings.CI:
-        time_format = "%I:%M %p"
+        time_format = "%I%M%p"
     return time_format
 
 
