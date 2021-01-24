@@ -1,6 +1,6 @@
 from pypom import Region
 from django.utils import timezone
-from django.conf import settings
+import PyRIGS.settings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
