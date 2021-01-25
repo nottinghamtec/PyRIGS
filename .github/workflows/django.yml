@@ -55,7 +55,7 @@ jobs:
         if: ${{ matrix.parallel }}
         run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
       - name: Upload Coverage
-        run: coveralls
+        run: coveralls --service=github
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             COVERALLS_FLAG_NAME: ${{ matrix.test-group }}
