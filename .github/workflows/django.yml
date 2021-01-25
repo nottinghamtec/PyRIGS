@@ -1,0 +1,48 @@
+name: Django CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    env:
+      IMGUR_UPLOAD_CLIENT_ID: ${{ secrets.IMGUR_UPLOAD_CLIENT_ID }}
+      IMGUR_UPLOAD_CLIENT_SECRET: ${{ secrets.IMGUR_UPLOAD_CLIENT_SECRET }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup Chromedriver
+        run: |
+          wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          export PATH=$PATH:$(pwd)
+          chmod +x chromedriver
+          export PATH=$PATH:/usr/lib/chromium-browser/
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pycodestyle coverage coveralls django_coverage_plugin
+          pip install -r requirements.txt
+          python manage.py collectstatic --noinput
+      - name: Basic Checks
+        run: |
+          pycodestyle . --exclude=migrations,importer*
+          python manage.py check
+          python manage.py makemigrations --check --dry-run
+      - name: Run Tests
+        run: |
+          coverage run manage.py test --verbosity=2
+          coveralls --service=github

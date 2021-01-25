@@ -1,5 +1,5 @@
 # TEC PA & Lighting - PyRIGS #
-[![Build Status](https://travis-ci.org/nottinghamtec/PyRIGS.svg?branch=master)](https://travis-ci.org/nottinghamtec/PyRIGS)
+![Build Status](https://github.com/nottinghamtec/PyRIGS/workflows/Django%20CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/nottinghamtec/PyRIGS/badge.svg)](https://coveralls.io/github/nottinghamtec/PyRIGS)
 
 Welcome to TEC PA & Lighting's PyRIGS program. This is a reimplementation of the previous Rig Information Gathering System (RIGS) that was developed using Ruby on Rails. PyRIGS is our in house app for the centralisation of information on our events and now assets.

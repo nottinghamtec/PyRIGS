@@ -1,5 +1,6 @@
 from pypom import Region
 from django.utils import timezone
+from django.conf import settings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.remote.webelement import WebElement
@@ -19,16 +20,20 @@ def parse_bool_from_string(string):
     else:
         return False
 
-# 12-Hour vs 24-Hour Time. Affects widget display
-
 
 def get_time_format():
     # Default
-    time_format = "%H:%M"
-    # If system is 12hr
-    if timezone.now().strftime("%p"):
-        time_format = "%I:%M %p"
+    time_format = "%H%M"
+    if settings.CI:  # The CI is American
+        time_format = "%I%M%p"
     return time_format
+
+
+def get_date_format():
+    date_format = "%d%m%Y"
+    if settings.CI:  # And try as I might I can't stop it being so
+        date_format = "%m%d%Y"
+    return date_format
 
 
 class BootstrapSelectElement(Region):
@@ -150,13 +155,13 @@ class DatePicker(Region):
 
     def set_value(self, value):
         self.root.clear()
-        self.root.send_keys(value.strftime("%d%m%Y"))
+        self.root.send_keys(value.strftime(get_date_format()))
 
 
 class TimePicker(Region):
     @property
     def value(self):
-        return datetime.datetime.strptime(self.root.get_attribute("value"), get_time_format())
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%H:%M")
 
     def set_value(self, value):
         self.root.clear()
@@ -166,12 +171,12 @@ class TimePicker(Region):
 class DateTimePicker(Region):
     @property
     def value(self):
-        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d " + get_time_format())
+        return datetime.datetime.strptime(self.root.get_attribute("value"), "%Y-%m-%d %H:%M")
 
     def set_value(self, value):
         self.root.clear()
 
-        date = value.date().strftime("%d%m%Y")
+        date = value.date().strftime(get_date_format())
         time = value.time().strftime(get_time_format())
 
         self.root.send_keys(date)
