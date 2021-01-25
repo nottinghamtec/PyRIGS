@@ -6,7 +6,6 @@ import os
 import pytz
 from datetime import date, time, datetime, timedelta
 from django.conf import settings
-import imgurpython
 import PyRIGS.settings
 import sys
 import pathlib
