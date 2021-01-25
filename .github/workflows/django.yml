@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     env:
-      IMGUR_UPLOAD_CLIENT_ID: ${{ secrets.IMGUR_UPLOAD_CLIENT_ID }}
-      IMGUR_UPLOAD_CLIENT_SECRET: ${{ secrets.IMGUR_UPLOAD_CLIENT_SECRET }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
@@ -56,6 +54,12 @@ jobs:
       - name: Run Tests
         if: \!${{ matrix.parallel }}
         run: coverage run manage.py test ${{ matrix.test-group }} --verbosity=2
+      - uses: actions/upload-artifact@v2
+        if: failure() # Screenshots only make sense for the non-parallel, i.e. interaction tests anyway
+        with:
+            name: failure-screenshots ${{ matrix.test-group }}
+            path: screenshots/
+            retention-days: 5
       - name: Run Tests (Parallel)
         if: ${{ matrix.parallel }}
         run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2

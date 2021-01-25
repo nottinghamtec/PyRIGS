@@ -62,19 +62,7 @@ def screenshot_failure(func):
             if not pathlib.Path("screenshots").is_dir():
                 os.mkdir("screenshots")
             self.driver.save_screenshot(screenshot_file)
-
-            if settings.IMGUR_UPLOAD_CLIENT_ID != "":
-                config = {
-                    'album': None,
-                    'name': screenshot_name,
-                    'title': screenshot_name,
-                    'description': ""
-                }
-                client = imgurpython.ImgurClient(settings.IMGUR_UPLOAD_CLIENT_ID, settings.IMGUR_UPLOAD_CLIENT_SECRET)
-                image = client.upload_from_path(screenshot_file, config=config)
-                print("Error in test {} is at url {}".format(screenshot_name, image['link']), file=sys.stderr)
-            else:
-                print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
+            print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
             raise e
     return wrapper_func
 

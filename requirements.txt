@@ -30,7 +30,6 @@ envparse==0.2.0
 gunicorn==20.0.4
 icalendar==4.0.7
 idna==2.10
-imgurpython==1.1.7
 importlib-metadata==3.4.0
 lxml==4.6.2
 Markdown==3.3.3
