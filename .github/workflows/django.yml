@@ -43,6 +43,6 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        run: coverage run python manage.py test --verbosity=2
+        run: coverage run manage.py test --verbosity=2
       - name: Upload coverage data to coveralls.io
         run: coveralls
