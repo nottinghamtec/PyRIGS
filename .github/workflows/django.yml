@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Setup Chromedriver
-        if: !${{ matrix.parallel }}
+        if: \!${{ matrix.parallel }}
         run: |
           wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
@@ -49,18 +49,18 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Run Tests
-         if: !${{ matrix.parallel }}
-         run: coverage run manage.py test ${{ matrix.test-group }} --verbosity=2
+        if: \!${{ matrix.parallel }}
+        run: coverage run manage.py test ${{ matrix.test-group }} --verbosity=2
       - name: Run Tests (Parallel)
-         if: ${{ matrix.parallel }}
-         run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
+        if: ${{ matrix.parallel }}
+        run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
       - name: Upload Coverage
         run: coveralls
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             COVERALLS_FLAG_NAME: ${{ matrix.test-group }}
             COVERALLS_PARALLEL: true
-   coveralls:
+  coveralls:
     name: Indicate completion to coveralls.io
     needs: build
     runs-on: ubuntu-latest
