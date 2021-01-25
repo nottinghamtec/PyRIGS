@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         test-group: ["RIGS.tests.test_unit", "RIGS.tests.test_models", "RIGS.tests.test_functional", "versioning.tests.test_versioning", "users.tests.test_users"]
-        parallel: true
+        parallel: [true]
         include:
             - test-group: "assets.tests.test_assets"
               parallel: false
