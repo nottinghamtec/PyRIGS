@@ -45,4 +45,4 @@ jobs:
       - name: Run Tests
         run: |
           coverage run manage.py test --verbosity=2
-          COVERALLS_SERVICE_NAME=github-actions coveralls
+          coveralls --service=github
