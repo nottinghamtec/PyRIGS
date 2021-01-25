@@ -14,9 +14,16 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
-    container: python:3-slim
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.8]
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Setup Chromedriver
         run: |
           wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
