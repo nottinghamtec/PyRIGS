@@ -645,7 +645,18 @@ class TestCalendar(BaseRigboardTest):
             else:
                 self.assertNotContains(response, "TE E" + str(test) + " ")
 
-                # Wow - that was a lot of tests
+    def test_calendar_buttons(self):  # If FullCalendar fails to load for whatever reason, the buttons don't work
+        self.page = pages.CalendarPage(self.driver, self.live_server_url).open()
+        self.assertIn(timezone.now().strftime("%Y-%m"), self.driver.current_url)
+
+        target_date = datetime.date(2020, 1, 1)
+        self.page.target_date.set_value(target_date)
+        self.page.go()
+        self.assertIn(self.page.target_date.value.strftime("%Y-%m"), self.driver.current_url)
+
+        self.page.next()
+        target_date += datetime.timedelta(days=32)
+        self.assertIn(target_date.strftime("%m"), self.driver.current_url)
 
 
 @screenshot_failure_cls

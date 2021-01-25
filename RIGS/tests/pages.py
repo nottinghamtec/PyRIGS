@@ -304,3 +304,43 @@ class UserPage(BasePage):
 
     def generate_key(self):
         self.find_element(*self._generation_button_selector).click()
+
+
+class CalendarPage(BasePage):
+    URL_TEMPLATE = 'rigboard/calendar'
+
+    _go_locator = (By.ID, 'go-to-date-button')
+
+    _today_selector = (By.ID, 'today-button')
+
+    _prev_selector = (By.ID, 'prev-button')
+    _next_selector = (By.ID, 'next-button')
+
+    _month_selector = (By.ID, 'month-button')
+    _week_selector = (By.ID, 'week-button')
+    _day_selector = (By.ID, 'day-button')
+
+    def go(self):
+        return self.find_element(*self._go_locator).click()
+
+    @property
+    def target_date(self):
+        return regions.DatePicker(self, self.find_element(By.ID, 'go-to-date-input'))
+
+    def today(self):
+        return self.find_element(*self._today_selector).click()
+
+    def prev(self):
+        return self.find_element(*self._prev_selector).click()
+
+    def next(self):
+        return self.find_element(*self._next_selector).click()
+
+    def month(self):
+        return self.find_element(*self._month_selector).click()
+
+    def week(self):
+        return self.find_element(*self._week_selector).click()
+
+    def day(self):
+        return self.find_element(*self._day_selector).click()
