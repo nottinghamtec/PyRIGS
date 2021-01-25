@@ -29,6 +29,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
+      - name: Cache python deps
+        uses: actions/cache@v2
+        with:
+            path: ${{ env.pythonLocation }}
+            key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}
       - name: Setup Chromedriver
         if: \!${{ matrix.parallel }}
         run: |
@@ -41,7 +46,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pycodestyle coverage coveralls django_coverage_plugin
-          pip install -r requirements.txt
+          pip install --upgrade --upgrade-strategy eager -r requirements.txt
           python manage.py collectstatic --noinput
       - name: Basic Checks
         run: |
