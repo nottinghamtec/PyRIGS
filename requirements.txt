@@ -8,8 +8,6 @@ certifi==2020.6.20
 chardet==3.0.4
 configparser==5.0.1
 contextlib2==0.6.0.post1
-coverage==5.3
-coveralls==3.0.0
 cssselect==1.1.0
 cssutils==1.0.2
 diff-match-patch==20200713
