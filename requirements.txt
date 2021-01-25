@@ -36,7 +36,7 @@ lxml==4.6.2
 Markdown==3.3.3
 msgpack==1.0.2
 packaging==20.8
-pep517==0.9.10
+pep517==0.9.1
 Pillow==8.1.0
 pluggy==0.13.1
 premailer==3.7.0
