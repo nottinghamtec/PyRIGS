@@ -300,14 +300,13 @@ class TestAssetAudit(AutoLoginTest):
         mdl.remove_all_required()
         mdl.description = ""
         mdl.submit()
-        # self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.wait.until(animation_is_finished())
-        # self.assertTrue(self.driver.find_element_by_id('modal').is_displayed())
         self.assertIn("This field is required.", mdl.errors["Description"])
         # Now do it properly
         new_desc = "A BIG hammer"
         mdl.description = new_desc
         mdl.submit()
+        submit_time = timezone.now()
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
@@ -316,9 +315,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(audited.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
-        self.assertEqual(timezone.now().date(), audited.last_audited_at.date())
-        self.assertEqual(timezone.now().hour, audited.last_audited_at.hour)
-        self.assertEqual(timezone.now().minute, audited.last_audited_at.minute)
+        self.assertEqual(submit_time.replace(microsecond=0), audited.last_audited_at.replace(microsecond=0))
         # Check we've removed it from the 'needing audit' list
         self.assertNotIn(asset_id, self.page.assets)
 
