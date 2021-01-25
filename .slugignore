@@ -1,7 +1,3 @@
 *.sqlite3
 *.scss
 *.md
-*.rb
-Vagrantfile
-config/vagrant/*
-config/vagrant.yml
