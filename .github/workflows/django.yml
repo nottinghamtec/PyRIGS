@@ -62,7 +62,7 @@ jobs:
             retention-days: 5
       - name: Run Tests (Parallel)
         if: ${{ matrix.parallel }}
-        run: coverage run --parallel-mode manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
+        run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
       - name: Upload Coverage
         run: coveralls --service=github
         env:
