@@ -243,6 +243,7 @@ class AssetAuditList(AssetList):
             # self.wait.until(lambda x: not self.is_displayed) TODO
 
         def close(self):
+            previous_errors = self.errors
             self.page.find_element(*self._close_selector).click()
 
         def remove_all_required(self):

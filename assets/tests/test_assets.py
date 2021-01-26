@@ -294,17 +294,16 @@ class TestAssetAudit(AutoLoginTest):
         asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
-        mdl = self.page.modal
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         # Do it wrong on purpose to check error display
-        mdl.remove_all_required()
-        mdl.description = ""
-        mdl.submit()
+        self.page.modal.remove_all_required()
+        self.page.modal.description = ""
+        self.page.modal.submit()
         self.wait.until(animation_is_finished())
-        self.assertIn("This field is required.", mdl.errors["Description"])
+        self.assertIn("This field is required.", self.page.modal.errors["Description"])
         # Now do it properly
-        mdl.description = new_desc = "A BIG hammer"
-        mdl.submit()
+        self.page.modal.description = new_desc = "A BIG hammer"
+        self.page.modal.submit()
         submit_time = timezone.now()
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
@@ -325,14 +324,14 @@ class TestAssetAudit(AutoLoginTest):
         self.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
-
         self.page.modal.close()
-        self.wait.until(animation_is_finished())
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
         self.assertEqual(None, audited.last_audited_by)
 
+    def test_audit_search(self):
         # Check that a failed search works
         self.page.set_query("NOTFOUND")
         self.page.search()
