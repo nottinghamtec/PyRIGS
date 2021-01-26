@@ -291,7 +291,7 @@ class TestAssetAudit(AutoLoginTest):
         self.wait = WebDriverWait(self.driver, 5)
 
     def test_audit_process(self):
-        selected_asset_id = "1111"
+        asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
         mdl = self.page.modal
@@ -303,15 +303,14 @@ class TestAssetAudit(AutoLoginTest):
         self.wait.until(animation_is_finished())
         self.assertIn("This field is required.", mdl.errors["Description"])
         # Now do it properly
-        new_desc = "A BIG hammer"
-        mdl.description = new_desc
+        mdl.description = new_desc = "A BIG hammer"
         mdl.submit()
         submit_time = timezone.now()
         self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
         # Check data is correct
-        audited = models.Asset.objects.get(asset_id=selected_asset_id)
+        audited = models.Asset.objects.get(asset_id=asset_id)
         self.assertEqual(audited.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
@@ -382,25 +381,28 @@ class Test404(TestCase):
             self.assertEqual(response.status_code, 404)
 
 
+# TODO refactor this for all of RIGS
 class TestAccessLevels(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         super().setUp()
         # Shortcut to create the levels - bonus side effect of testing the command (hopefully) matches production
         call_command('generateSampleData')
+        # Create an asset with ID 1 to make things easier in loops (we can always use pk=1)
+        self.category = models.AssetCategory.objects.create(name="Number One")
+        self.status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
+        models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
 
     # Nothing should be available to the unauthenticated
     def test_unauthenticated(self):
-        for url in urls.urlpatterns:
-            if url.name is not None:
-                pattern = str(url.pattern)
-                if "json" in url.name or pattern:
-                    # TODO
-                    pass
-                elif ":pk>" in pattern:
-                    request_url = reverse(url.name, kwargs={'pk': 9})
-                else:
-                    request_url = reverse(url.name)
+        for url in filter(lambda url: url.name is not None and "json" not in url.name, urls.urlpatterns):
+            pattern = str(url.pattern)
+            request_url = ""
+            if ":pk>" in pattern:
+                request_url = reverse(url.name, kwargs={'pk': 1})
+            else:
+                request_url = reverse(url.name)
+            if request_url:
                 response = self.client.get(request_url, HTTP_HOST='example.com')
                 self.assertEqual(response.status_code, 302)
                 response = self.client.get(request_url, follow=True, HTTP_HOST='example.com')
@@ -450,6 +452,19 @@ class TestAccessLevels(TestCase):
         self.assertContains(response, 'View Revision History')
 
     # def test_finance_access(self): Level not used in assets currently
+
+    def test_page_titles(self):
+        self.assertTrue(self.client.login(username="superuser", password="superuser"))
+        for url in filter(lambda url: url.name is not None and not any(s in url.name for s in ["json", "embed"]), urls.urlpatterns):
+            request_url = ""
+            if ":pk>" in str(url.pattern):
+                request_url = reverse(url.name, kwargs={'pk': "1"})
+            else:
+                request_url = reverse(url.name)
+            response = self.client.get(request_url)
+            if hasattr(response, "context_data") and "page_title" in response.context_data:
+                expected_title = response.context_data["page_title"]
+                self.assertContains(response, '<title>{} | Rig Information Gathering System</title>'.format(expected_title))
 
 
 class TestFormValidation(TestCase):
