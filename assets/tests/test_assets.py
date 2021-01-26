@@ -327,7 +327,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
         self.page.modal.close()
-        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
+        self.wait.until(animation_is_finished())
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
