@@ -395,7 +395,8 @@ class TestAccessLevels(TestCase):
 
     # Nothing should be available to the unauthenticated
     def test_unauthenticated(self):
-        for url in filter(lambda url: url.name is not None and "json" not in url.name, urls.urlpatterns):
+        self.client.logout()
+        for url in filter(lambda url: url.name is not None and "json" not in str(url), urls.urlpatterns):
             pattern = str(url.pattern)
             request_url = ""
             if ":pk>" in pattern:
@@ -403,11 +404,8 @@ class TestAccessLevels(TestCase):
             else:
                 request_url = reverse(url.name)
             if request_url:
-                response = self.client.get(request_url, HTTP_HOST='example.com')
-                self.assertEqual(response.status_code, 302)
                 response = self.client.get(request_url, follow=True, HTTP_HOST='example.com')
-                self.assertEqual(response.status_code, 200)
-                self.assertContains(response, 'login')
+                self.assertContains(response, 'Login')
 
     def test_basic_access(self):
         self.assertTrue(self.client.login(username="basic", password="basic"))
