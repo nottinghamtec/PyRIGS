@@ -58,7 +58,7 @@ jobs:
         if: failure() # Screenshots only make sense for the non-parallel, i.e. interaction tests anyway
         with:
             name: failure-screenshots ${{ matrix.test-group }}
-            path: screenshots/
+            path: screenshots/*
             retention-days: 5
       - name: Run Tests (Parallel)
         if: ${{ matrix.parallel }}
