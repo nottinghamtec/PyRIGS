@@ -326,8 +326,8 @@ class TestAssetAudit(AutoLoginTest):
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
-        # First close button is for the not found error
         self.page.modal.close()
+        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)

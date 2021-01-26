@@ -244,7 +244,6 @@ class AssetAuditList(AssetList):
 
         def close(self):
             self.page.find_element(*self._close_selector).click()
-            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
 
         def remove_all_required(self):
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
