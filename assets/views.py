@@ -211,6 +211,11 @@ class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
     form_class = forms.AssetAuditForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Audit Asset: {}".format(self.object.display_id)
+        return context
+
     def get_success_url(self):
         # TODO For some reason this doesn't stick when done in form_valid??
         asset = self.get_object()

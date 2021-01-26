@@ -1,6 +1,5 @@
 {% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
 {% load widget_tweaks %}
-{% block title %}Audit Asset {{ object.asset_id }}{% endblock %}
 
 {% block content %}
 <script>

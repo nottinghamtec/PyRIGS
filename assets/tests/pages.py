@@ -209,6 +209,8 @@ class AssetAuditList(AssetList):
         _errors_selector = (By.CLASS_NAME, "alert-danger")
         # Don't use the usual success selector - that tries and fails to hit the '10m long cable' helper button...
         _submit_locator = (By.ID, "id_mark_audited")
+        _close_selector = (By.XPATH, "//button[@data-dismiss='modal']")
+
         form_items = {
             'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
             'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -239,6 +241,10 @@ class AssetAuditList(AssetList):
             previous_errors = self.errors
             self.root.find_element(*self._submit_locator).click()
             # self.wait.until(lambda x: not self.is_displayed) TODO
+
+        def close(self):
+            self.page.find_element(*self._close_selector).click()
+            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
 
         def remove_all_required(self):
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")

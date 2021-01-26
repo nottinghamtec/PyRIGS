@@ -291,7 +291,7 @@ class TestAssetAudit(AutoLoginTest):
         self.wait = WebDriverWait(self.driver, 5)
 
     def test_audit_process(self):
-        asset_id = "1111"
+        selected_asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
         mdl = self.page.modal
@@ -311,7 +311,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
 
         # Check data is correct
-        audited = models.Asset.objects.get(asset_id="1111")
+        audited = models.Asset.objects.get(asset_id=selected_asset_id)
         self.assertEqual(audited.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
@@ -323,13 +323,12 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
 
         asset_row = self.page.assets[0]
-        self.driver.find_element(By.XPATH, "//*[@id='asset_table_body']/tr[1]/td[4]/a").click()
+        self.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
 
         # First close button is for the not found error
-        self.page.find_element(By.XPATH, '//*[@id="modal"]/div/div/div[1]/button').click()
-        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
+        self.page.modal.close()
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
