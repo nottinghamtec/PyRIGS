@@ -46,7 +46,7 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        run: coverage run -m pytest -n 8 ${{ matrix.test-group }}
+        run: coverage run -p -m pytest --cov=${{ matrix.test-group }} --cov-append -n 8 ${{ matrix.test-group }}/tests/
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -54,7 +54,7 @@ jobs:
             path: screenshots/
             retention-days: 5
       - name: Upload Coverage
-        run: coveralls --service=github
+        run: coverage combine && coveralls --service=github
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             COVERALLS_FLAG_NAME: ${{ matrix.test-group }}
