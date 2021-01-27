@@ -46,9 +46,9 @@ urlpatterns = [
     path('rigboard/calendar/', login_required()(rigboard.WebCalendar.as_view()),
          name='web_calendar'),
     re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
-        login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+            login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
-        login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
+            login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     path('rigboard/archive/', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
 
 
@@ -131,11 +131,11 @@ urlpatterns = [
          permission_required_with_403('RIGS.change_event')(rigboard.EventAuthoriseRequestEmailPreview.as_view()),
          name='event_authorise_preview'),
     re_path(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
-        name='event_authorise'),
+            name='event_authorise'),
 
     # ICS Calendar - API key authentication
     re_path(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
-        name="ics_calendar"),
+            name="ics_calendar"),
 
 
     # Legacy URLs

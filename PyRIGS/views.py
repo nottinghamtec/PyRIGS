@@ -23,10 +23,13 @@ from functools import reduce
 from django.views.decorators.cache import never_cache, cache_page
 from django.utils.decorators import method_decorator
 
+
 def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 # Displays the current rig count along with a few other bits and pieces
+
+
 class Index(generic.TemplateView):
     template_name = 'index.html'
 

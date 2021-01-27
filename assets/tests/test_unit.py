@@ -11,10 +11,12 @@ from django.test import tag
 import pytest
 from pytest_django.asserts import assertFormError, assertRedirects
 
-pytestmark = pytest.mark.django_db # TODO
+pytestmark = pytest.mark.django_db  # TODO
+
 
 def response_contains(response, needle):
     return needle in str(response.content)
+
 
 def login(client, django_user_model):
     pwd = 'testuser'
@@ -22,11 +24,13 @@ def login(client, django_user_model):
     profile = django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd, is_superuser=True, is_active=True, is_staff=True)
     assert client.login(username=usr, password=pwd)
 
+
 def create_test_asset():
     working = models.AssetStatus.objects.create(name="Working", should_show=True)
     lighting = models.AssetCategory.objects.create(name="Lighting")
     asset = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=working, category=lighting, date_acquired=datetime.date(1991, 12, 26))
     return asset
+
 
 def create_test_cable():
     category = models.AssetCategory.objects.create(name="Sound")
@@ -35,11 +39,13 @@ def create_test_cable():
     cable_type = models.CableType.objects.create(circuits=11, cores=3, plug=connector, socket=connector)
     return models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=status, category=category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, cable_type=cable_type, length=10, csa="1.5")
 
+
 def test_supplier_create(client, django_user_model):
     login(client, django_user_model)
     url = reverse('supplier_create')
     response = client.post(url)
     assertFormError(response, 'form', 'name', 'This field is required.')
+
 
 def test_supplier_edit(client, django_user_model):
     login(client, django_user_model)
@@ -47,6 +53,7 @@ def test_supplier_edit(client, django_user_model):
     url = reverse('supplier_update', kwargs={'pk': supplier.pk})
     response = client.post(url, {'name': ""})
     assertFormError(response, 'form', 'name', 'This field is required.')
+
 
 def test_404(client, django_user_model):
     login(client, django_user_model)
@@ -72,10 +79,12 @@ def test_embed_login_redirect(client, django_user_model):
     response = client.get(request_url, follow=True)
     assert len(response.redirect_chain) == 0
 
+
 def test_login_cookie_warning(client, django_user_model):
     login_url = reverse('login_embed')
     response = client.post(login_url, follow=True)
     assert "Cookies do not seem to be enabled" in str(response.content)
+
 
 def test_x_frame_headers(client, django_user_model):
     asset_url = reverse('asset_embed', kwargs={'pk': create_test_asset().asset_id})
@@ -116,8 +125,8 @@ def test_oembed(client):
     assert response.status_code == 200
     assert alt_asset_embed_url in str(response.content)
 
-@override_settings(DEBUG=True)
 
+@override_settings(DEBUG=True)
 def test_generate_sample_data(client):
     # Run the management command and check there are no exceptions
     call_command('generateSampleAssetsData')
@@ -126,8 +135,8 @@ def test_generate_sample_data(client):
     assert models.Asset.objects.all().count() > 50
     assert models.Supplier.objects.all().count() > 50
 
-@override_settings(DEBUG=True)
 
+@override_settings(DEBUG=True)
 def test_delete_sample_data(client):
     call_command('deleteSampleData')
 
@@ -166,6 +175,8 @@ def test_cable_create(client, django_user_model):
     assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
 
 # Given that validation is done at model level it *shouldn't* need retesting...gonna do it anyway!
+
+
 def test_asset_edit(client, django_user_model):
     login(client, django_user_model)
     url = reverse('asset_update', kwargs={'pk': create_test_asset().asset_id})
@@ -178,6 +189,7 @@ def test_asset_edit(client, django_user_model):
     assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
     assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
 
+
 def test_cable_edit(client, django_user_model):
     login(client, django_user_model)
     url = reverse('asset_update', kwargs={'pk': create_test_cable().asset_id})
@@ -189,6 +201,7 @@ def test_cable_edit(client, django_user_model):
     assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
     assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
 
+
 def test_asset_duplicate(client, django_user_model):
     login(client, django_user_model)
     url = reverse('asset_duplicate', kwargs={'pk': create_test_cable().asset_id})
@@ -196,6 +209,7 @@ def test_asset_duplicate(client, django_user_model):
 
     assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
     assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
+
 
 @override_settings(DEBUG=True)
 def create_asset_one():
@@ -207,6 +221,8 @@ def create_asset_one():
     return models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=status, category=category, date_acquired=datetime.date(2020, 2, 1))
 
 # Nothing should be available to the unauthenticated
+
+
 def test_unauthenticated(client):
     for url in filter(lambda url: url.name is not None and "json" not in str(url), urls.urlpatterns):
         pattern = str(url.pattern)
@@ -219,6 +235,7 @@ def test_unauthenticated(client):
             response = client.get(request_url, follow=True, HTTP_HOST='example.com')
             # TODO Check the URL here
             assert response_contains(response, 'Login')
+
 
 def test_basic_access(client):
     create_asset_one()
@@ -249,6 +266,7 @@ def test_basic_access(client):
     response = client.get(request_url, follow=True)
     assert response.status_code == 403
 
+
 def test_keyholder_access(client):
     create_asset_one()
     client.login(username="keyholder", password="keyholder")
@@ -263,6 +281,7 @@ def test_keyholder_access(client):
     response = client.get(url)
     assert response_contains(response, 'Purchase Details')
     assert response_contains(response, 'View Revision History')
+
 
 def test_page_titles(admin_client):
     for url in filter(lambda url: url.name is not None and not any(s in url.name for s in ["json", "embed"]), urls.urlpatterns):
