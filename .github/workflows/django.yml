@@ -46,7 +46,6 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        if: ${{ matrix.parallel }}
         run: coverage run -m pytest -n 8 ${{ matrix.test-group }}
       - uses: actions/upload-artifact@v2
         if: failure()
