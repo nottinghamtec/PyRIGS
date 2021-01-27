@@ -14,7 +14,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     strategy:
       matrix:
-        test-group: ["RIGS/tests/", "versioning/tests/", "users/tests/", "assets/tests/"]
+        test-group: ["RIGS", "versioning", "users", "assets"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
