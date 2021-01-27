@@ -305,6 +305,3 @@ class TestVersioningViews(TestCase):
         response = self.client.get(request_url, follow=True)
         self.assertContains(response, "Test Person")
         self.assertEqual(response.status_code, 200)
-
-
-# Functional Tests

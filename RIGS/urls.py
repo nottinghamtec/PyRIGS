@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
-from django.urls import path
+from django.urls import path, re_path
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
 from PyRIGS.decorators import (api_key_required, has_oembed,
@@ -45,9 +45,9 @@ urlpatterns = [
     path('rigboard/', login_required(rigboard.RigboardIndex.as_view()), name='rigboard'),
     path('rigboard/calendar/', login_required()(rigboard.WebCalendar.as_view()),
          name='web_calendar'),
-    url(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
+    re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
-    url(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
+    re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
         login_required()(rigboard.WebCalendar.as_view()), name='web_calendar'),
     path('rigboard/archive/', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
 
@@ -130,11 +130,11 @@ urlpatterns = [
     path('event/<int:pk>/auth/preview/',
          permission_required_with_403('RIGS.change_event')(rigboard.EventAuthoriseRequestEmailPreview.as_view()),
          name='event_authorise_preview'),
-    url(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
+    re_path(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
         name='event_authorise'),
 
     # ICS Calendar - API key authentication
-    url(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
+    re_path(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),
         name="ics_calendar"),
 
 

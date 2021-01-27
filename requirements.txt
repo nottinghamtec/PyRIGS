@@ -42,7 +42,6 @@ premailer==3.7.0
 progress==1.5
 psutil==5.8.0
 psycopg2==2.8.6
-psycopg2-binary==2.8.6
 Pygments==2.7.4
 pyparsing==2.4.7
 PyPDF2==1.26.0
@@ -50,6 +49,8 @@ PyPOM==2.2.0
 python-dateutil==2.8.1
 pytoml==0.1.21
 pytz==2020.5
+pytest_django==4.1.0
+pytest-xdist==2.2.0
 raven==6.10.0
 reportlab==3.5.60
 requests==2.25.1

@@ -23,6 +23,8 @@ from functools import reduce
 from django.views.decorators.cache import never_cache, cache_page
 from django.utils.decorators import method_decorator
 
+def is_ajax(request):
+    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 # Displays the current rig count along with a few other bits and pieces
 class Index(generic.TemplateView):
@@ -151,7 +153,7 @@ class SecureAPIRequest(generic.View):
 
 class ModalURLMixin:
     def get_close_url(self, update, detail):
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy(update, kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
@@ -170,7 +172,7 @@ class GenericListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(GenericListView, self).get_context_data(**kwargs)
         context['page_title'] = self.model.__name__ + "s"
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
 
@@ -202,7 +204,7 @@ class GenericDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(GenericDetailView, self).get_context_data(**kwargs)
         context['page_title'] = "{} | {}".format(self.model.__name__, self.object.name)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
 
@@ -213,7 +215,7 @@ class GenericUpdateView(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super(GenericUpdateView, self).get_context_data(**kwargs)
         context['page_title'] = "Edit {}".format(self.model.__name__)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
 
@@ -224,7 +226,7 @@ class GenericCreateView(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(GenericCreateView, self).get_context_data(**kwargs)
         context['page_title'] = "Create {}".format(self.model.__name__)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
 

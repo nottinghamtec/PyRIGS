@@ -14,13 +14,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     strategy:
       matrix:
-        test-group: ["RIGS.tests.test_unit RIGS.tests.test_models RIGS.tests.test_functional", "versioning.tests.test_versioning", "users.tests.test_users"]
-        parallel: [true]
-        include:
-            - test-group: "assets.tests.test_assets"
-              parallel: false
-            - test-group: "RIGS.tests.test_interaction"
-              parallel: false
+        test-group: ["RIGS/tests/", "versioning/tests/", "users/tests/", "assets/tests/"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -52,17 +46,14 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        if: \!${{ matrix.parallel }}
-        run: coverage run manage.py test ${{ matrix.test-group }} --verbosity=2
+        if: ${{ matrix.parallel }}
+        run: coverage run -m pytest -n 8 ${{ matrix.test-group }}
       - uses: actions/upload-artifact@v2
-        if: failure() # Screenshots only make sense for the non-parallel, i.e. interaction tests anyway
+        if: failure()
         with:
             name: failure-screenshots ${{ matrix.test-group }}
             path: screenshots/
             retention-days: 5
-      - name: Run Tests (Parallel)
-        if: ${{ matrix.parallel }}
-        run: coverage run manage.py test ${{ matrix.test-group }} --parallel --verbosity=2
       - name: Upload Coverage
         run: coveralls --service=github
         env:

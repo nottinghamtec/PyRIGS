@@ -14,9 +14,8 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from versioning import versioning
-from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
+from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, is_ajax
 from itertools import chain
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -121,7 +120,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy('asset_update', kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
@@ -235,7 +234,7 @@ class SupplierList(GenericListView):
         context['edit'] = 'supplier_update'
         context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
         context['detail'] = 'supplier_detail'
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -263,7 +262,7 @@ class SupplierDetail(GenericDetailView):
         context['detail_link'] = 'supplier_detail'
         context['associated'] = 'partials/associated_assets.html'
         context['associated2'] = ''
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -277,7 +276,7 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SupplierCreate, self).get_context_data(**kwargs)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -293,7 +292,7 @@ class SupplierUpdate(GenericUpdateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SupplierUpdate, self).get_context_data(**kwargs)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'

@@ -1,5 +1,5 @@
-from django.urls import path
-from django.conf.urls import include, url
+from django.urls import path, re_path
+from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
@@ -39,6 +39,6 @@ if settings.DEBUG:
 
     import debug_toolbar
     urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        re_path(r'^__debug__/', include(debug_toolbar.urls)),
         path('bootstrap/', TemplateView.as_view(template_name="bootstrap.html")),
     ] + urlpatterns
