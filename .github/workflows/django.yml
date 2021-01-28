@@ -58,6 +58,4 @@ jobs:
             path: screenshots/
             retention-days: 5
       - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: coveralls --service=github
