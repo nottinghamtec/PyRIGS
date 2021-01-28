@@ -54,7 +54,7 @@ jobs:
         env:
             CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
-            coverageCommand: coverage run -m pytest --cov=PyRIGS -n 8
+            coverageCommand: coverage run -m pytest -n 8
             coverageLocations: |
                                 ${{github.workspace}}/.coverage
       - uses: actions/upload-artifact@v2

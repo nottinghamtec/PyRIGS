@@ -1,9 +1,3 @@
 [run]
-source =
-    ./
-plugins =
-    django_coverage_plugin
-
-omit =
-    */migrations/*
-    */tests/*
+plugins = django_coverage_plugin
+omit = *migrations*, *tests*
