@@ -9,17 +9,17 @@ on:
 jobs:
   dependencies:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
     steps:
         - uses: actions/checkout@v2
         - uses: bahmutov/npm-install@v1
         - run: node node_modules/gulp/bin/gulp build
         - name: Cache gulp output
-            uses: actions/cache@v2
-            with:
+          uses: actions/cache@v2
+          with:
                 path: static/
                 key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('RIGS/static') }}
   test:
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
     needs: dependencies
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
