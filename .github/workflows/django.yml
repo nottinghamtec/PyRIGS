@@ -7,7 +7,9 @@ on:
     branches: [master]
 
 jobs:
-  dependencies:
+  build:
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    needs: dependencies
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
@@ -35,7 +37,7 @@ jobs:
       - name: Install Dependencies
         run: |
               python -m pip install --upgrade pip
-              pip install pycodestyle
+              pip install pycodestyle coverage coveralls django_coverage_plugin
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
               python manage.py collectstatic --noinput
       - name: Cache gulp output
@@ -48,43 +50,15 @@ jobs:
               pycodestyle . --exclude=migrations,node_modules
               python manage.py check
               python manage.py makemigrations --check --dry-run
-  test:
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-    needs: dependencies
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test-group: ["RIGS", "versioning", "users", "assets"]
-    steps:
-      - name: Install Dependencies
-        run: |
-              python -m pip install --upgrade pip
-              pip3 install --upgrade coverage coveralls django_coverage_plugin
       - name: Run Tests
-        run: coverage run -p -m pytest --cov=${{ matrix.test-group }} --cov-append -n 8 ${{ matrix.test-group }}/tests/
+        run: coverage run -p -m pytest -n 8
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
             name: failure-screenshots ${{ matrix.test-group }}
             path: screenshots/
             retention-days: 5
-      - name: Upload Coverage
-        run: coverage combine && coveralls --service=github
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            COVERALLS_FLAG_NAME: ${{ matrix.test-group }}
-            COVERALLS_PARALLEL: true
-  coveralls:
-    name: Indicate completion to coveralls.io
-    needs: test
-    runs-on: ubuntu-latest
-    container: python:3-slim
-    steps:
-    - name: Finished
-      run: |
-        pip3 install --upgrade coveralls
-        coveralls --service=github --finish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
