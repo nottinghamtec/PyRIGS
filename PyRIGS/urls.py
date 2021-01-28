@@ -1,16 +1,11 @@
-from django.urls import path, re_path
+from django.conf import settings
 from django.conf.urls import include
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.views.decorators.clickjacking import xframe_options_exempt
-from django.contrib.auth.views import LoginView
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path, re_path
 from django.views.generic import TemplateView
-from PyRIGS.decorators import permission_required_with_403
-import RIGS
-import users
-import versioning
+
 from PyRIGS import views
 
 urlpatterns = [

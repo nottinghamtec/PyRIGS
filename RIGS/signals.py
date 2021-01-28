@@ -1,25 +1,24 @@
-import datetime
 import re
-import urllib.request
 import urllib.error
 import urllib.parse
+import urllib.request
 from io import BytesIO
 
-from django.db.models.signals import post_save
 from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
-from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.core.cache import cache
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.db.models.signals import post_save
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
-from registration.signals import user_activated
 from premailer import Premailer
+from registration.signals import user_activated
+from reversion import revisions as reversion
 from z3c.rml import rml2pdf
 
 from RIGS import models
-from reversion import revisions as reversion
 
 
 def send_eventauthorisation_success_email(instance):

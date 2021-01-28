@@ -1,15 +1,12 @@
+import datetime
+
+import pytest
 from django.core.management import call_command
-from assets import models
 from django.test.utils import override_settings
 from django.urls import reverse
-from urllib.parse import urlparse
-from assets import models, urls
-from reversion import revisions as reversion
-import datetime
-from django.utils import timezone
-from django.test import tag
-import pytest
 from pytest_django.asserts import assertFormError, assertRedirects
+
+from assets import models, urls
 
 pytestmark = pytest.mark.django_db  # TODO
 

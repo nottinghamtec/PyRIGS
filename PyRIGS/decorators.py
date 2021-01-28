@@ -1,6 +1,6 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 
 from RIGS import models

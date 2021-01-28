@@ -1,13 +1,9 @@
-import simplejson
 from captcha.fields import ReCaptchaField
 from django import forms
-from django.conf import settings
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        UserChangeForm, UserCreationForm)
-from django.core import serializers
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.utils import formats
 from registration.forms import RegistrationFormUniqueEmail
+
 from RIGS import models
 
 

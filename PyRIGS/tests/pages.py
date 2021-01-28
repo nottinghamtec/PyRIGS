@@ -1,8 +1,8 @@
-from pypom import Page, Region
+from pypom import Page
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver import Chrome
-from selenium.common.exceptions import NoSuchElementException
+
 from PyRIGS.tests import regions
 
 

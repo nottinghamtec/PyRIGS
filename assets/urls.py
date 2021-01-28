@@ -1,11 +1,9 @@
-from django.conf.urls import url
-from django.urls import path
-from assets import views, models
-from versioning import versioning
-
 from django.contrib.auth.decorators import login_required
+from django.urls import path
 from django.views.decorators.clickjacking import xframe_options_exempt
+
 from PyRIGS.decorators import has_oembed, permission_required_with_403
+from assets import views
 
 urlpatterns = [
     path('', login_required(views.AssetList.as_view()), name='asset_index'),

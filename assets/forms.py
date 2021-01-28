@@ -1,7 +1,7 @@
 from django import forms
+from django.db.models import Q
 
 from assets import models
-from django.db.models import Q
 
 
 class AssetForm(forms.ModelForm):

@@ -1,15 +1,15 @@
+import os
+import pathlib
+import sys
+from datetime import datetime
+
+import pytz
+from django.conf import settings
 from django.test import LiveServerTestCase
 from selenium import webdriver
+
 from RIGS import models as rigsmodels
 from . import pages
-import os
-import pytz
-from datetime import date, time, datetime, timedelta
-from django.conf import settings
-import PyRIGS.settings
-import sys
-import pathlib
-import inspect
 
 
 def create_datetime(year, month, day, hour, min):

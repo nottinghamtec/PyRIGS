@@ -2,13 +2,12 @@ from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
-from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 from RIGS import models
-from reversion import revisions as reversion
 
 
 class TestAdminMergeObjects(TestCase):

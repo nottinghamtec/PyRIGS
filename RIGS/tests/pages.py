@@ -1,13 +1,11 @@
-from pypom import Page, Region
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver import Chrome
 from django.urls import reverse
-from PyRIGS.tests import regions
-from RIGS.tests import regions as rigs_regions
-from PyRIGS.tests.pages import BasePage, FormPage
-from selenium.common.exceptions import NoSuchElementException
+from pypom import Region
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+
+from PyRIGS.tests import regions
+from PyRIGS.tests.pages import BasePage, FormPage
+from RIGS.tests import regions as rigs_regions
 
 
 class Index(BasePage):

@@ -1,22 +1,13 @@
 import datetime
-from datetime import date, time, timedelta
-from urllib.parse import urlparse
+from datetime import date
 
 from django.conf import settings
 from django.core import mail, signing
-from django.core.management import call_command
-from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django.test import TestCase
-from django.test.client import Client
-from django.test.utils import override_settings
 from django.urls import reverse
-from django.utils import timezone
-from reversion import revisions as reversion
-from RIGS import models, urls
-from RIGS.tests import regions
 
-from . import pages
+from RIGS import models
 
 
 class BaseCase(TestCase):

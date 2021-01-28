@@ -1,6 +1,6 @@
-from RIGS.models import Profile
-from users.forms import ProfileRegistrationFormUniqueEmail
 from registration.signals import user_registered
+
+from users.forms import ProfileRegistrationFormUniqueEmail
 
 
 def user_created(sender, user, request, **kwargs):

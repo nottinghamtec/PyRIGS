@@ -1,23 +1,12 @@
 import datetime
-import logging
 
-from diff_match_patch import diff_match_patch
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import EmailField, IntegerField, TextField
-from django.shortcuts import get_object_or_404
-from django.utils.functional import cached_property
-from django.views import generic
-from reversion.models import Version, VersionQuerySet
-from RIGS import models
-from assets import models as asset_models
 from django.apps import apps
-from reversion import revisions as reversion
-from versioning.versioning import RIGSVersion
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import title
+from django.views import generic
+from reversion import revisions as reversion
 
-from django.views.decorators.cache import never_cache, cache_page
-from django.utils.decorators import method_decorator
+from versioning.versioning import RIGSVersion
 
 
 class VersionHistory(generic.ListView):

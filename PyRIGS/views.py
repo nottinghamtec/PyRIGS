@@ -1,27 +1,19 @@
-from django.core.exceptions import PermissionDenied
-from django.http.response import HttpResponseRedirect
-from django.http import HttpResponse
-from django.urls import reverse_lazy, reverse, NoReverseMatch
-from django.views import generic
-from django.contrib.auth.views import LoginView
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django.core import serializers
-from django.conf import settings
-import simplejson
-from django.contrib import messages
 import datetime
-import pytz
 import operator
-from registration.views import RegistrationView
-from django.views.decorators.csrf import csrf_exempt
-
-from RIGS import models, forms
-from assets import models as asset_models
 from functools import reduce
 
-from django.views.decorators.cache import never_cache, cache_page
-from django.utils.decorators import method_decorator
+import simplejson
+from django.contrib import messages
+from django.core import serializers
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse, NoReverseMatch
+from django.views import generic
+
+from RIGS import models
+from assets import models as asset_models
 
 
 def is_ajax(request):

@@ -1,24 +1,20 @@
 import datetime
 import re
 
+import reversion
+from django import forms
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.db import transaction
+from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext
 from django.template.loader import get_template
+from django.urls import reverse_lazy
 from django.views import generic
-from django.db.models import Q
 from z3c.rml import rml2pdf
-from django.db.models import Q
-
-from django.db import transaction
-import reversion
 
 from RIGS import models
-
-from django import forms
 
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 

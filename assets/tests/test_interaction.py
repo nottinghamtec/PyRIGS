@@ -1,23 +1,14 @@
-from . import pages
-from django.core.management import call_command
-from django.test import TestCase
-from assets import models
-from django.test.utils import override_settings
-from django.urls import reverse
-from urllib.parse import urlparse
-from RIGS import models as rigsmodels
-from PyRIGS.tests.base import BaseTest, AutoLoginTest, screenshot_failure_cls
-from assets import models, urls
-from reversion import revisions as reversion
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from PyRIGS.tests.base import animation_is_finished
 import datetime
+
 from django.utils import timezone
-from selenium.webdriver.common.action_chains import ActionChains
-from django.test import tag
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls
+from PyRIGS.tests.base import animation_is_finished
+from assets import models
+from . import pages
 
 
 @screenshot_failure_cls

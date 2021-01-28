@@ -1,11 +1,12 @@
-from django.conf.urls import url
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
+
 from PyRIGS.decorators import (api_key_required, has_oembed,
                                permission_required_with_403)
-from RIGS import finance, ical, models, rigboard, views, hs
+from RIGS import finance, ical, rigboard, views, hs
 
 urlpatterns = [
     # People

@@ -1,11 +1,11 @@
-from RIGS import models, forms
-from django.views import generic
-from django.utils import timezone
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views import generic
 from reversion import revisions as reversion
-from django.db.models import AutoField, ManyToOneRel
-from django.contrib import messages
+
+from RIGS import models, forms
 
 
 class EventRiskAssessmentCreate(generic.CreateView):

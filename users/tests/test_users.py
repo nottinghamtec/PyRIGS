@@ -1,31 +1,12 @@
 import os
 import re
-from datetime import date, time, datetime, timedelta
 
-import pytz
-from django.conf import settings
-from django.core import mail, signing
-from django.db import transaction
-from django.http import HttpResponseBadRequest
-from django.test import LiveServerTestCase, TestCase
-from django.test.client import Client
-from django.urls import reverse
-from reversion import revisions as reversion
-from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver.support import expected_conditions
+from django.core import mail
+from django.test import LiveServerTestCase
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
 
-from RIGS import models
-
-from reversion import revisions as reversion
-from django.urls import reverse
-from django.core import mail, signing
 from PyRIGS.tests.base import create_browser
-from django.conf import settings
-
-import sys
+from RIGS import models
 
 
 # Functional Tests

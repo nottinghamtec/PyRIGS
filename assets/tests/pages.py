@@ -1,12 +1,11 @@
 # Collection of page object models for use within tests.
-from pypom import Page, Region
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver import Chrome
 from django.urls import reverse
+from pypom import Region
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage
-from selenium.common.exceptions import NoSuchElementException
 
 
 class AssetList(BasePage):

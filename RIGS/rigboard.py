@@ -1,36 +1,33 @@
-from io import BytesIO
-import urllib.request
-import urllib.error
-import urllib.parse
-
-from django.contrib.staticfiles.storage import staticfiles_storage
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.views import generic
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.template.loader import get_template
-from django.conf import settings
-from django.urls import reverse
-from django.urls import reverse_lazy
-from django.core import signing
-from django.http import HttpResponse
-from django.core.exceptions import SuspiciousOperation
-from django.db.models import Q
-from django.contrib import messages
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from z3c.rml import rml2pdf
-from PyPDF2 import PdfFileMerger, PdfFileReader
-import simplejson
-import premailer
-
-from RIGS import models, forms
-from PyRIGS import decorators
+import copy
 import datetime
 import re
-import copy
+import urllib.error
+import urllib.parse
+import urllib.request
+from io import BytesIO
+
+import premailer
+import simplejson
+from PyPDF2 import PdfFileMerger, PdfFileReader
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core import signing
+from django.core.exceptions import SuspiciousOperation
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.urls import reverse
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views import generic
+from z3c.rml import rml2pdf
+
+from PyRIGS import decorators
+from RIGS import models, forms
 
 __author__ = 'ghost'
 

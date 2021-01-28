@@ -1,13 +1,9 @@
-from django.conf.urls import url
-from django.contrib.auth.decorators import login_required
 from django.urls import path
-from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import RedirectView
-from PyRIGS.decorators import (api_key_required, has_oembed,
-                               permission_required_with_403)
-from RIGS import finance, ical, models, rigboard, views, hs
-from versioning import views
 from django.apps import apps
+from django.urls import path
+
+from PyRIGS.decorators import (permission_required_with_403)
+from versioning import views
 
 urlpatterns = [
     path('rigboard/activity/feed/',

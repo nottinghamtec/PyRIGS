@@ -1,17 +1,11 @@
+from datetime import datetime
+
+import simplejson
 from django import forms
-from django.utils import formats
 from django.conf import settings
 from django.core import serializers
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordResetForm
-from django.db import transaction
-from registration.forms import RegistrationFormUniqueEmail
-from django.contrib.auth.forms import AuthenticationForm
-from captcha.fields import ReCaptchaField
-from reversion import revisions as reversion
-import simplejson
-from datetime import datetime
 from django.utils import timezone
+from reversion import revisions as reversion
 
 from RIGS import models
 

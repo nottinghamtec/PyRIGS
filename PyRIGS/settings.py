@@ -8,11 +8,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import raven
 import secrets
-import datetime
+
+import raven
 from envparse import env
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))

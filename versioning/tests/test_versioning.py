@@ -1,14 +1,12 @@
-from reversion import revisions as reversion
-from django.conf import settings
-from django.core.exceptions import ValidationError
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
+from reversion import revisions as reversion
+
 from RIGS import models
 from assets import models as amodels
 from versioning import versioning
-from datetime import date, timedelta, datetime, time
-from decimal import *
-from PyRIGS.tests.base import create_browser
 
 
 # Model Tests

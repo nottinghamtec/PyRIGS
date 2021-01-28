@@ -1,25 +1,22 @@
 import datetime
 import hashlib
-import pytz
+import random
+import string
+from collections import Counter
+from decimal import Decimal
+from urllib.parse import urlparse
 
+import pytz
 from django import forms
-from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
-import string
-
-import random
-from collections import Counter
-from decimal import Decimal
-
-from django.core.exceptions import ValidationError
-from django.urls import reverse_lazy
-
-from urllib.parse import urlparse
 
 
 class Profile(AbstractUser):
