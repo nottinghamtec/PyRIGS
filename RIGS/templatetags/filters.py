@@ -66,7 +66,7 @@ def paginator(context, adjacent_pages=3):
     if endPage >= paginator.num_pages - 1:
         endPage = paginator.num_pages + 1
     page_numbers = [n for n in range(startPage, endPage)
-                    if n > 0 and n <= paginator.num_pages]
+                    if 0 < n <= paginator.num_pages]
 
     dict = {
         'request': context['request'],

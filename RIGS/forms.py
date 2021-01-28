@@ -202,7 +202,8 @@ class EventChecklistForm(forms.ModelForm):
     }
 
     # Two possible formats
-    def parsedatetime(self, date_string):
+    @staticmethod
+    def parsedatetime(date_string):
         try:
             return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S'))
         except ValueError:
