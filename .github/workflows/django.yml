@@ -50,11 +50,13 @@ jobs:
               python manage.py check
               python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        uses: paambaati/codeclimate-action@v2.2.4
+        uses: paambaati/codeclimate-action@v2.7.5
         env:
             CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
             coverageCommand: coverage run -m pytest --cov=PyRIGS -n 8
+            coverageLocations: |
+                                ${{github.workspace}}/.coverage
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
