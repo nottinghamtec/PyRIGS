@@ -1,16 +1,16 @@
-- version: 2
-- plugins:
-      csslint:
-        enabled: true
-      duplication:
-        enabled: true
-        config:
-          languages:
-          - javascript
-          - python
-      eslint:
-        enabled: true
-      fixme:
-        enabled: true
-      radon:
-        enabled: true
+version: 2
+plugins:
+  csslint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript
+      - python
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  radon:
+    enabled: true
