@@ -34,6 +34,7 @@
     "browser-sync": "^2.26.12"
   },
   "scripts": {
-    "gulp": "gulp"
+    "gulp": "gulp",
+    "build": "node node_modules/gulp/bin/gulp build"
   }
 }
