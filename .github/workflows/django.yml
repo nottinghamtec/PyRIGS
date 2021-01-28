@@ -8,16 +8,46 @@ on:
 
 jobs:
   dependencies:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@v2
-        - uses: bahmutov/npm-install@v1
-        - run: node node_modules/gulp/bin/gulp build
-        - name: Cache gulp output
-          uses: actions/cache@v2
-          with:
-                path: static/
-                key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('RIGS/static') }}
+      - uses: actions/checkout@v2
+      - uses: bahmutov/npm-install@v1
+      - run: node node_modules/gulp/bin/gulp build
+      - name: Cache gulp output
+        uses: actions/cache@v2
+        with:
+          path: static/
+          key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+            python-version: 3.9
+      - name: Cache python deps
+        uses: actions/cache@v2
+        with:
+            path: ${{ env.pythonLocation }}
+            key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}
+      - name: Setup Chromedriver
+        if: \!${{ matrix.parallel }}
+        run: |
+              wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
+              unzip chromedriver_linux64.zip
+              export PATH=$PATH:$(pwd)
+              chmod +x chromedriver
+              export PATH=$PATH:/usr/lib/chromium-browser/
+      - name: Install Dependencies
+        run: |
+              python -m pip install --upgrade pip
+              pip install pycodestyle coverage coveralls django_coverage_plugin
+              pip install --upgrade --upgrade-strategy eager -r requirements.txt
+              python manage.py collectstatic --noinput
+      - name: Basic Checks
+        run: |
+              pycodestyle . --exclude=migrations,importer*
+              python manage.py check
+              python manage.py makemigrations --check --dry-run
   test:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     needs: dependencies
@@ -28,34 +58,6 @@ jobs:
       matrix:
         test-group: ["RIGS", "versioning", "users", "assets"]
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Cache python deps
-        uses: actions/cache@v2
-        with:
-            path: ${{ env.pythonLocation }}
-            key: ${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}
-      - name: Setup Chromedriver
-        if: \!${{ matrix.parallel }}
-        run: |
-          wget https://chromedriver.storage.googleapis.com/2.36/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          export PATH=$PATH:$(pwd)
-          chmod +x chromedriver
-          export PATH=$PATH:/usr/lib/chromium-browser/
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pycodestyle coverage coveralls django_coverage_plugin
-          pip install --upgrade --upgrade-strategy eager -r requirements.txt
-          python manage.py collectstatic --noinput
-      - name: Basic Checks
-        run: |
-          pycodestyle . --exclude=migrations,importer*
-          python manage.py check
-          python manage.py makemigrations --check --dry-run
       - name: Run Tests
         run: coverage run -p -m pytest --cov=${{ matrix.test-group }} --cov-append -n 8 ${{ matrix.test-group }}/tests/
       - uses: actions/upload-artifact@v2
