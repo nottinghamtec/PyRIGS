@@ -56,7 +56,7 @@ jobs:
         with:
             coverageCommand: coverage run -m pytest -n 8
             coverageLocations: |
-                                ${{github.workspace}}/.coverage
+                                ${{github.workspace}}/.coverage:coverage.py
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
