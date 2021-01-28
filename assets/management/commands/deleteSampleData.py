@@ -3,11 +3,6 @@ from django.core.management.base import BaseCommand, CommandError
 from assets import models
 
 
-def delete_objects(model):
-    for object in model.objects.all():
-        object.delete()
-
-
 class Command(BaseCommand):
     help = 'Deletes testing sample data'
 
@@ -17,8 +12,12 @@ class Command(BaseCommand):
         if not (settings.DEBUG):
             raise CommandError('You cannot run this command in production')
 
-        delete_objects(models.AssetCategory)
-        delete_objects(models.AssetStatus)
-        delete_objects(models.Supplier)
-        delete_objects(models.Connector)
-        delete_objects(models.Asset)
+        self.delete_objects(models.AssetCategory)
+        self.delete_objects(models.AssetStatus)
+        self.delete_objects(models.Supplier)
+        self.delete_objects(models.Connector)
+        self.delete_objects(models.Asset)
+
+    def delete_objects(self, model):
+        for object in model.objects.all():
+            object.delete()

@@ -71,7 +71,7 @@ def screenshot_failure_cls(cls):
 
 
 # Checks if animation is done
-class animation_is_finished:
+class animation_is_finished():
     def __call__(self, driver):
         numberAnimating = driver.execute_script('return $(":animated").length')
         finished = numberAnimating == 0
