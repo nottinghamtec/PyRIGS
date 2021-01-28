@@ -2,7 +2,9 @@
   "name": "PyRIGS",
   "description": "",
   "scripts": {
-    "postdeploy": "python manage.py migrate && python manage.py generateSampleData"
+    "build": "node node_modules/gulp/bin/gulp build",
+    "postdeploy": "python manage.py migrate && python manage.py generateSampleData",
+    "heroku-cleanup": "rm node_modules/ pipeline/"
   },
   "stack": "heroku-20",
   "env": {
@@ -47,6 +49,9 @@
     "heroku-postgresql"
   ],
   "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
     {
       "url": "heroku/python"
     }
