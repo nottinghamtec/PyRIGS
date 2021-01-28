@@ -30,21 +30,6 @@
     {% include 'partials/datetime-fix.html' %}
 
     <script>
-        function setTime23Hours() {
-            $('#{{ form.end_time.id_for_label }}').val('23:00');
-        }
-
-        function setTime02Hours() {
-            var id_start = "{{ form.start_date.id_for_label }}";
-            var id_end_date = "{{ form.end_date.id_for_label }}";
-            var id_end_time = "{{ form.end_time.id_for_label }}";
-            if ($('#'+id_start).val() == $('#'+id_end_date).val()) {
-                var end_date = new Date($('#'+id_end_date).val());
-                end_date.setDate(end_date.getDate() + 1);
-                $('#'+id_end_date).val(end_date.getISOString());
-            }
-            $('#'+id_end_time).val('02:00');
-        }
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
         $(document).ready(function () {
             dur = matches ? 0 : 500;
@@ -53,14 +38,14 @@
                     $('.form-is_rig').slideUp(dur);
                 });
             {% elif not object.pk and form.errors %}
-                if ($('#{{form.is_rig.auto_id}}').attr('checked') != 'checked') {
+                if ($('#{{form.is_rig.auto_id}}').attr('checked') !== 'checked') {
                     $('.form-is_rig').hide();
                 }
             {% endif %}
             {% if not object.pk %}
                 $('#is_rig-selector button').on('click', function () {
                     $('.form-non_rig').slideDown(dur);
-                    if ($(this).data('is_rig') == 1) {
+                    if ($(this).data('is_rig') === 1) {
                         $('#{{form.is_rig.auto_id}}').prop('checked', true);
                         if ($('.form-non_rig').is(':hidden')) {
                             $('.form-is_rig').show();

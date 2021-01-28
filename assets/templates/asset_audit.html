@@ -14,11 +14,7 @@
       $('#' + String(ID)).val(CSA);
   }
   function checkIfCableHidden() {
-    if (document.getElementById("id_is_cable").checked) {
-      document.getElementById("cable-table").hidden = false;
-    } else {
-      document.getElementById("cable-table").hidden = true;
-    }
+    document.getElementById("cable-table").hidden = !document.getElementById("id_is_cable").checked;
   }
   checkIfCableHidden();
 </script>
