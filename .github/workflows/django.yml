@@ -45,7 +45,7 @@ jobs:
               python manage.py collectstatic --noinput
       - name: Basic Checks
         run: |
-              pycodestyle . --exclude=migrations,importer*
+              pycodestyle . --exclude=migrations,node_modules
               python manage.py check
               python manage.py makemigrations --check --dry-run
   test:
