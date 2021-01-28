@@ -72,7 +72,7 @@ jobs:
             COVERALLS_PARALLEL: true
   coveralls:
     name: Indicate completion to coveralls.io
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     container: python:3-slim
     steps:
