@@ -15,7 +15,7 @@ var spawn = require('child_process').spawn;
 sass.compiler = require('node-sass');
 
 function styles(done) {
-    return gulp.src(['RIGS/static/scss/**/*.scss',
+    return gulp.src(['pipeline/source_assets/scss/**/*.scss',
                     'node_modules/fullcalendar/main.min.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
@@ -24,12 +24,12 @@ function styles(done) {
     .pipe(sass().on('error', sass.logError))
     .pipe(postcss([ autoprefixer() ]))
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('RIGS/static/css'))
+    .pipe(gulp.dest('pipeline/built_assets/css'))
     .pipe(browsersync.stream());
 }
 
 function scripts() {
-    return gulp.src(['RIGS/static/js/src/**/*.js',
+    return gulp.src(['pipeline/source_assets/js/**/*.js',
                     'node_modules/jquery/dist/jquery.js',
                     /* JQuery Plugins */
                     'node_modules/jquery-ui-dist/jquery-ui.js',
@@ -56,7 +56,7 @@ function scripts() {
                     'node_modules/dark-mode-switch/dark-mode-switch.min.js'])
     .pipe(flatten())
     .pipe(terser())
-    .pipe(gulp.dest('RIGS/static/js'))
+    .pipe(gulp.dest('pipeline/built_assets/js'))
     .pipe(browsersync.stream());
 }
 
@@ -80,7 +80,7 @@ function watchFiles() {
   gulp.watch("RIGS/static/scss/**/*.scss", styles);
   // TODO This prevents reload looping, but means we don't reload if new third party scripts are added
   gulp.watch("RIGS/static/js/src/**/*.js", scripts);
-  gulp.watch(['templates/**/*.html', 'RIGS/templates/**/*.html', 'assets/templates/**/*.html', 'versioning/templates/**/*.html'], browserSyncReload);
+  gulp.watch("**/templates/*.html", browserSyncReload);
 }
 
 exports.build = gulp.parallel(styles, scripts);

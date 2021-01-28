@@ -16,22 +16,22 @@
     "dark-mode-switch": "^1.0.0",
     "flatpickr": "^4.6.6",
     "fullcalendar": "^5.3.2",
-    "jquery": "^3.5.1",
-    "jquery-ui-dist": "^1.12.1",
-    "konami": "^1.6.2",
-    "moment": "^2.27.0",
-    "popper.js": "^1.16.1",
-    "raven-js": "^3.27.2"
-  },
-  "devDependencies": {
-    "browser-sync": "^2.26.12",
     "gulp": "^4.0.2",
     "gulp-flatten": "^0.4.0",
     "gulp-postcss": "^8.0.0",
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^2.6.5",
-    "gulp-terser": "^1.2.0",
-    "node-sass": "^5.0.0"
+    "gulp-terser": "^1.4.1",
+    "jquery": "^3.5.1",
+    "jquery-ui-dist": "^1.12.1",
+    "konami": "^1.6.2",
+    "moment": "^2.27.0",
+    "node-sass": "^5.0.0",
+    "popper.js": "^1.16.1",
+    "raven-js": "^3.27.2"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.12"
   },
   "scripts": {
     "gulp": "gulp"
