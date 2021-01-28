@@ -15,11 +15,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: bahmutov/npm-install@v1
       - run: node node_modules/gulp/bin/gulp build
-      - name: Cache gulp output
-        uses: actions/cache@v2
-        with:
-          path: static/
-          key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -40,9 +35,14 @@ jobs:
       - name: Install Dependencies
         run: |
               python -m pip install --upgrade pip
-              pip install pycodestyle coverage coveralls django_coverage_plugin
+              pip install pycodestyle
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
               python manage.py collectstatic --noinput
+      - name: Cache gulp output
+        uses: actions/cache@v2
+        with:
+          path: static/
+          key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - name: Basic Checks
         run: |
               pycodestyle . --exclude=migrations,node_modules
@@ -58,6 +58,10 @@ jobs:
       matrix:
         test-group: ["RIGS", "versioning", "users", "assets"]
     steps:
+      - name: Install Dependencies
+        run: |
+              python -m pip install --upgrade pip
+              pip3 install --upgrade coverage coveralls django_coverage_plugin
       - name: Run Tests
         run: coverage run -p -m pytest --cov=${{ matrix.test-group }} --cov-append -n 8 ${{ matrix.test-group }}/tests/
       - uses: actions/upload-artifact@v2
