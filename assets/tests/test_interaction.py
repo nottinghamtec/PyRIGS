@@ -288,7 +288,6 @@ class TestAssetAudit(AutoLoginTest):
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
-        self.wait = WebDriverWait(self.driver, 5)
 
     def test_audit_process(self):
         asset_id = "1111"
@@ -300,6 +299,7 @@ class TestAssetAudit(AutoLoginTest):
         self.page.modal.description = ""
         self.page.modal.submit()
         self.wait.until(animation_is_finished())
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertIn("This field is required.", self.page.modal.errors["Description"])
         # Now do it properly
         self.page.modal.description = new_desc = "A BIG hammer"
