@@ -5,15 +5,12 @@ var gulp = require('gulp');
 var terser = require('gulp-terser');
 var sass = require('gulp-sass');
 var flatten = require('gulp-flatten');
-var cleanCSS = require('gulp-clean-css');
 var autoprefixer = require('autoprefixer')
 var postcss = require('gulp-postcss')
 var sourcemaps = require('gulp-sourcemaps');
 var browsersync = require('browser-sync').create();
 var { exec } = require("child_process");
 var spawn = require('child_process').spawn;
-var rename = require('gulp-rename');
-var _if = require('gulp-if');
 
 sass.compiler = require('node-sass');
 
