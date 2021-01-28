@@ -36,7 +36,7 @@ jobs:
       - name: Install Dependencies
         run: |
               python -m pip install --upgrade pip
-              pip install pycodestyle coverage coveralls django_coverage_plugin
+              pip install pycodestyle coverage coveralls django_coverage_plugin pytest-cov
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
               python manage.py collectstatic --noinput
       - name: Cache gulp output
@@ -50,7 +50,11 @@ jobs:
               python manage.py check
               python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        run: coverage run -p -m pytest -n 8
+      - uses: paambaati/codeclimate-action@v2.2.4
+        env:
+            CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+            coverageCommand: coverage run -m pytest --cov=PyRIGS -n 8
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
