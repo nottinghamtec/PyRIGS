@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.select import Select
 
+
 def parse_bool_from_string(string):
     # Used to convert from attribute strings to boolean values, written after I found this:
     # >>> bool("false")
