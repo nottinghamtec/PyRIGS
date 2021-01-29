@@ -75,7 +75,7 @@ class BootstrapSelectElement(Region):
         self.open()
         search_box.clear()
         search_box.send_keys(query)
-        self.wait.until(expected_conditions.invisibility_of_element_located(*self._status_locator))
+        self.wait.until(expected_conditions.invisibility_of_element_located(self._status_locator))
 
     @property
     def options(self):

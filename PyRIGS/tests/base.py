@@ -19,11 +19,15 @@ def create_datetime(year, month, day, hour, min):
     return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
 
 
-def create_browser(browser):
+def create_browser():
+    browser = env('BROWSER', default="chrome")
     if browser == "firefox":
         options = webdriver.FirefoxOptions()
         options.headless = True
         driver = webdriver.Firefox(options=options)
+        driver.set_window_position(0, 0)
+        # Firefox is pissy about out of bounds otherwise
+        driver.set_window_size(3840, 2160)
     else:
         options = webdriver.ChromeOptions()
         options.add_argument("--window-size=1920,1080")
@@ -37,7 +41,7 @@ def create_browser(browser):
 class BaseTest(LiveServerTestCase):
     def setUp(self):
         super().setUpClass()
-        self.driver = create_browser(env('BROWSER', default="chrome"))
+        self.driver = create_browser()
         self.wait = WebDriverWait(self.driver, 15)
 
     def tearDown(self):
