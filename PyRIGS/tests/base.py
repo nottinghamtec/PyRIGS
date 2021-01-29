@@ -11,6 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from RIGS import models as rigsmodels
 from . import pages
+from envparse import env
 
 
 def create_datetime(year, month, day, hour, min):
@@ -18,20 +19,25 @@ def create_datetime(year, month, day, hour, min):
     return tz.localize(datetime(year, month, day, hour, min)).astimezone(pytz.utc)
 
 
-def create_browser():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--headless")
-    if settings.CI:
-        options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(options=options)
+def create_browser(browser):
+    if browser == "firefox":
+        options = webdriver.FirefoxOptions()
+        options.headless = True
+        driver = webdriver.Firefox(options=options)
+    else:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--headless")
+        if settings.CI:
+            options.add_argument("--no-sandbox")
+        driver = webdriver.Chrome(options=options)
     return driver
 
 
 class BaseTest(LiveServerTestCase):
     def setUp(self):
         super().setUpClass()
-        self.driver = create_browser()
+        self.driver = create_browser(env('BROWSER', default="chrome"))
         self.wait = WebDriverWait(self.driver, 15)
 
     def tearDown(self):
@@ -75,4 +81,3 @@ def screenshot_failure_cls(cls):
 
 def assert_times_equal(first_time, second_time):
     assert first_time.replace(microsecond=0) == second_time.replace(microsecond=0)
-
