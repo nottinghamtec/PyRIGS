@@ -44,6 +44,7 @@ class FormPage(BasePage):
         submit = self.find_element(*self._submit_locator)
         ActionChains(self.driver).move_to_element(submit).perform()
         submit.click()
+        self.wait.until(animation_is_finished())
         self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
     @property
@@ -73,3 +74,13 @@ class LoginPage(BasePage):
         password_element.send_keys(password)
 
         self.find_element(*self._submit_locator).click()
+
+
+class animation_is_finished():
+    def __call__(self, driver):
+        number_animating = driver.execute_script('return $(":animated").length')
+        finished = number_animating == 0
+        if finished:
+            import time
+            time.sleep(0.1)
+        return finished

@@ -4,9 +4,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from pytest_django.asserts import assertRedirects
 
+from PyRIGS.tests.base import assert_times_equal, response_contains
 from RIGS import models
 
 
@@ -353,203 +355,105 @@ class TestSampleDataGenerator(TestCase):
         self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleRIGSData')
 
 
-class TestSearchLogic(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
-                                                    is_active=True, is_staff=True)
-
-        cls.persons = {
-            1: models.Person.objects.create(name="Right Person", phone="1234"),
-            2: models.Person.objects.create(name="Wrong Person", phone="5678"),
-        }
-
-        cls.organisations = {
-            1: models.Organisation.objects.create(name="Right Organisation", email="test@example.com"),
-            2: models.Organisation.objects.create(name="Wrong Organisation", email="check@fake.co.uk"),
-        }
-
-        cls.venues = {
-            1: models.Venue.objects.create(name="Right Venue", address="1 Test Street, EX1"),
-            2: models.Venue.objects.create(name="Wrong Venue", address="2 Check Way, TS2"),
-        }
-
-        cls.events = {
-            1: models.Event.objects.create(name="Right Event", start_date=date.today(), person=cls.persons[1],
-                                           organisation=cls.organisations[1], venue=cls.venues[1]),
-            2: models.Event.objects.create(name="Wrong Event", start_date=date.today(), person=cls.persons[2],
-                                           organisation=cls.organisations[2], venue=cls.venues[2]),
-        }
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-    def test_event_search(self):
-        # Test search by name
-        request_url = "%s?q=%s" % (reverse('event_archive'), self.events[1].name)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.events[1].name)
-        self.assertNotContains(response, self.events[2].name)
-
-        # Test search by ID
-        request_url = "%s?q=%s" % (reverse('event_archive'), self.events[1].pk)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.events[1].name)
-        self.assertNotContains(response, self.events[2].name)
-
-    def test_people_search(self):
-        # Test search by name
-        request_url = "%s?q=%s" % (reverse('person_list'), self.persons[1].name)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.persons[1].name)
-        self.assertNotContains(response, self.persons[2].name)
-
-        # Test search by ID
-        request_url = "%s?q=%s" % (reverse('person_list'), self.persons[1].pk)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.persons[1].name)
-        self.assertNotContains(response, self.persons[2].name)
-
-        # Test search by phone
-        request_url = "%s?q=%s" % (reverse('person_list'), self.persons[1].phone)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.persons[1].name)
-        self.assertNotContains(response, self.persons[2].name)
-
-    def test_organisation_search(self):
-        # Test search by name
-        request_url = "%s?q=%s" % (reverse('organisation_list'), self.organisations[1].name)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.organisations[1].name)
-        self.assertNotContains(response, self.organisations[2].name)
-
-        # Test search by ID
-        request_url = "%s?q=%s" % (reverse('organisation_list'), self.organisations[1].pk)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.organisations[1].name)
-        self.assertNotContains(response, self.organisations[2].name)
-
-        # Test search by email
-        request_url = "%s?q=%s" % (reverse('organisation_list'), self.organisations[1].email)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.organisations[1].email)
-        self.assertNotContains(response, self.organisations[2].email)
-
-    def test_venue_search(self):
-        # Test search by name
-        request_url = "%s?q=%s" % (reverse('venue_list'), self.venues[1].name)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.venues[1].name)
-        self.assertNotContains(response, self.venues[2].name)
-
-        # Test search by ID
-        request_url = "%s?q=%s" % (reverse('venue_list'), self.venues[1].pk)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.venues[1].name)
-        self.assertNotContains(response, self.venues[2].name)
-
-        # Test search by address
-        request_url = "%s?q=%s" % (reverse('venue_list'), self.venues[1].address)
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.venues[1].address)
-        self.assertNotContains(response, self.venues[2].address)
+def search(client, url, found, notfound, arguments):
+    for argument in arguments:
+        query = getattr(found, argument)
+        request_url = "%s?q=%s" % (reverse_lazy(url), query)
+        response = client.get(request_url, follow=True)
+        assert response_contains(response, getattr(found, 'name'))
+        assert not response_contains(response, getattr(notfound, 'name'))
 
 
-class TestHSLogic(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
-                                                    is_active=True, is_staff=True)
+def test_search(admin_client):
+    persons = {
+        1: models.Person.objects.create(name="Right Person", phone="1234"),
+        2: models.Person.objects.create(name="Wrong Person", phone="5678"),
+    }
+    organisations = {
+        1: models.Organisation.objects.create(name="Right Organisation", email="test@example.com"),
+        2: models.Organisation.objects.create(name="Wrong Organisation", email="check@fake.co.uk"),
+    }
+    venues = {
+        1: models.Venue.objects.create(name="Right Venue", address="1 Test Street, EX1"),
+        2: models.Venue.objects.create(name="Wrong Venue", address="2 Check Way, TS2"),
+    }
+    events = {
+        1: models.Event.objects.create(name="Right Event", start_date=date.today(), venue=venues[1], person=persons[1],
+                                       organisation=organisations[1]),
+        2: models.Event.objects.create(name="Wrong Event", start_date=date.today(), venue=venues[2], person=persons[2],
+                                       organisation=organisations[2]),
+    }
+    search(admin_client, 'event_archive', events[1], events[2], ['name', 'id'])
+    search(admin_client, 'person_list', persons[1], persons[2], ['name', 'id', 'phone'])
+    search(admin_client, 'organisation_list', organisations[1], organisations[2],
+           ['name', 'id', 'email'])
+    search(admin_client, 'venue_list', venues[1], venues[2],
+           ['name', 'id', 'address'])
 
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-        cls.venue = models.Venue.objects.create(name="Venue 1")
 
-        cls.events = {
-            1: models.Event.objects.create(name="TE E1", start_date=date.today(),
-                                           description="This is an event description\nthat for a very specific reason spans two lines.",
-                                           venue=cls.venue),
-            2: models.Event.objects.create(name="TE E2", start_date=date.today()),
-        }
+def setup_for_hs():
+    models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+    venue = models.Venue.objects.create(name="Venue 1")
+    return venue, {
+        1: models.Event.objects.create(name="TE E1", start_date=date.today(),
+                                       description="This is an event description\nthat for a very specific reason spans two lines.",
+                                       venue=venue),
+        2: models.Event.objects.create(name="TE E2", start_date=date.today()),
+    }
 
-        cls.ras = {
-            1: models.RiskAssessment.objects.create(event=cls.events[1],
-                                                    nonstandard_equipment=False,
-                                                    nonstandard_use=False,
-                                                    contractors=False,
-                                                    other_companies=False,
-                                                    crew_fatigue=False,
-                                                    big_power=False,
-                                                    power_mic=cls.profile,
-                                                    generators=False,
-                                                    other_companies_power=False,
-                                                    nonstandard_equipment_power=False,
-                                                    multiple_electrical_environments=False,
-                                                    noise_monitoring=False,
-                                                    known_venue=True,
-                                                    safe_loading=True,
-                                                    safe_storage=True,
-                                                    area_outside_of_control=True,
-                                                    barrier_required=True,
-                                                    nonstandard_emergency_procedure=True,
-                                                    special_structures=False,
-                                                    suspended_structures=False,
-                                                    outside=False),
-        }
 
-        cls.checklists = {
-            1: models.EventChecklist.objects.create(event=cls.events[1],
-                                                    power_mic=cls.profile,
-                                                    safe_parking=False,
-                                                    safe_packing=False,
-                                                    exits=False,
-                                                    trip_hazard=False,
-                                                    warning_signs=False,
-                                                    ear_plugs=False,
-                                                    hs_location="Locked away safely",
-                                                    extinguishers_location="Somewhere, I forgot",
-                                                    earthing=False,
-                                                    pat=False,
-                                                    date=timezone.now(),
-                                                    venue=cls.venue),
-        }
+def create_ra(usr):
+    venue, events = setup_for_hs()
+    return models.RiskAssessment.objects.create(event=events[1], nonstandard_equipment=False, nonstandard_use=False,
+                                                contractors=False, other_companies=False, crew_fatigue=False,
+                                                big_power=False, power_mic=usr, generators=False,
+                                                other_companies_power=False, nonstandard_equipment_power=False,
+                                                multiple_electrical_environments=False, noise_monitoring=False,
+                                                known_venue=True, safe_loading=True, safe_storage=True,
+                                                area_outside_of_control=True, barrier_required=True,
+                                                nonstandard_emergency_procedure=True, special_structures=False,
+                                                suspended_structures=False, outside=False)
 
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
 
-    def test_list(self):
-        request_url = reverse('hs_list')
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, self.events[1].name)
-        self.assertContains(response, self.events[2].name)
-        self.assertContains(response, 'Create')
+def create_checklist(usr):
+    venue, events = setup_for_hs()
+    return models.EventChecklist.objects.create(event=events[1], power_mic=usr, safe_parking=False,
+                                                safe_packing=False, exits=False, trip_hazard=False, warning_signs=False,
+                                                ear_plugs=False, hs_location="Locked away safely",
+                                                extinguishers_location="Somewhere, I forgot", earthing=False, pat=False,
+                                                date=timezone.now(), venue=venue)
 
-    def test_ra_review(self):
-        request_url = reverse('ra_review', kwargs={'pk': self.ras[1].pk})
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, 'Reviewed by')
-        self.assertContains(response, self.profile.name)
-        ra = models.RiskAssessment.objects.get(event=self.events[1])
-        self.assertEqual(timezone.now().date(), ra.reviewed_at.date())
-        self.assertEqual(timezone.now().hour, ra.reviewed_at.hour)
-        self.assertEqual(timezone.now().minute, ra.reviewed_at.minute)
 
-    def test_checklist_review(self):
-        request_url = reverse('ec_review', kwargs={'pk': self.checklists[1].pk})
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, 'Reviewed by')
-        self.assertContains(response, self.profile.name)
-        checklist = models.EventChecklist.objects.get(event=self.events[1])
-        self.assertEqual(timezone.now().date(), checklist.reviewed_at.date())
-        self.assertEqual(timezone.now().hour, checklist.reviewed_at.hour)
-        self.assertEqual(timezone.now().minute, checklist.reviewed_at.minute)
+def test_list(admin_client):
+    venue, events = setup_for_hs()
+    request_url = reverse('hs_list')
+    response = admin_client.get(request_url, follow=True)
+    assert response_contains(response, events[1].name)
+    assert response_contains(response, events[2].name)
+    assert response_contains(response, 'Create')
 
-    def test_ra_redirect(self):
-        request_url = reverse('event_ra', kwargs={'pk': self.events[1].pk})
-        expected_url = reverse('ra_edit', kwargs={'pk': self.ras[1].pk})
 
-        response = self.client.get(request_url, follow=True)
-        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
+def review(client, profile, obj, request_url):
+    time = timezone.now()
+    response = client.get(reverse(request_url, kwargs={'pk': obj.pk}), follow=True)
+    obj.refresh_from_db()
+    assert response_contains(response, 'Reviewed by')
+    assert response_contains(response, profile.name)
+    assert_times_equal(time, obj.reviewed_at)
+
+
+def test_ra_review(admin_client, admin_user):
+    review(admin_client, admin_user, create_ra(admin_user), 'ra_review')
+
+
+def test_checklist_review(admin_client, admin_user):
+    review(admin_client, admin_user, create_checklist(admin_user), 'ec_review')
+
+
+def test_ra_redirect(admin_client, admin_user):
+    ra = create_ra(admin_user)
+    request_url = reverse('event_ra', kwargs={'pk': ra.event.pk})
+    expected_url = reverse('ra_edit', kwargs={'pk': ra.pk})
+
+    response = admin_client.get(request_url, follow=True)
+    assertRedirects(response, expected_url, status_code=302, target_status_code=200)

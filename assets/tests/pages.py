@@ -3,9 +3,10 @@ from django.urls import reverse
 from pypom import Region
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
 
 from PyRIGS.tests import regions
-from PyRIGS.tests.pages import BasePage, FormPage
+from PyRIGS.tests.pages import BasePage, FormPage, animation_is_finished
 
 
 class AssetList(BasePage):
@@ -196,6 +197,7 @@ class AssetAuditList(AssetList):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+        self.wait.until(animation_is_finished())
 
     @property
     def error(self):
@@ -237,13 +239,13 @@ class AssetAuditList(AssetList):
                 return None
 
         def submit(self):
-            previous_errors = self.errors
             self.root.find_element(*self._submit_locator).click()
             # self.wait.until(lambda x: not self.is_displayed) TODO
+            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
 
         def close(self):
-            previous_errors = self.errors
             self.page.find_element(*self._close_selector).click()
+            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
 
         def remove_all_required(self):
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")

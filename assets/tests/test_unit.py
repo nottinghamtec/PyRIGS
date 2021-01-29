@@ -6,19 +6,16 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects
 
+from PyRIGS.tests.base import response_contains
 from assets import models, urls
 
 pytestmark = pytest.mark.django_db  # TODO
 
 
-def response_contains(response, needle):
-    return needle in str(response.content)
-
-
 def login(client, django_user_model):
     pwd = 'testuser'
     usr = "TestUser"
-    profile = django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd, is_superuser=True, is_active=True, is_staff=True)
+    django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd, is_superuser=True, is_active=True, is_staff=True)
     assert client.login(username=usr, password=pwd)
 
 

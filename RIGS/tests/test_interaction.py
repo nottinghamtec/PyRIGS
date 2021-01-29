@@ -10,8 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from PyRIGS.tests import base
 from PyRIGS.tests import regions as base_regions
-from PyRIGS.tests.base import (AutoLoginTest, animation_is_finished,
-                               screenshot_failure_cls)
+from PyRIGS.tests.base import (AutoLoginTest, screenshot_failure_cls)
+from PyRIGS.tests.pages import animation_is_finished
 from RIGS import models
 from RIGS.tests import regions
 from . import pages

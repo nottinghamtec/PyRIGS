@@ -2,11 +2,11 @@ import datetime
 
 from django.utils import timezone
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls
-from PyRIGS.tests.base import animation_is_finished
+from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls, assert_times_equal
+from PyRIGS.tests.pages import animation_is_finished
 from assets import models
 from . import pages
 
@@ -29,10 +29,10 @@ class TestAssetList(AutoLoginTest):
 
     def test_default_statuses_applied(self):
         # Only the working stuff should be shown initially
-        assetDescriptions = list(map(lambda x: x.description, self.page.assets))
-        self.assertEqual(2, len(assetDescriptions))
-        self.assertIn("A light", assetDescriptions)
-        self.assertIn("Working Mic", assetDescriptions)
+        asset_descriptions = list(map(lambda x: x.description, self.page.assets))
+        self.assertEqual(2, len(asset_descriptions))
+        self.assertIn("A light", asset_descriptions)
+        self.assertIn("Working Mic", asset_descriptions)
 
     def test_asset_order(self):
         # Only the working stuff should be shown initially
@@ -42,11 +42,11 @@ class TestAssetList(AutoLoginTest):
 
         self.page.search()
 
-        assetIDs = list(map(lambda x: x.id, self.page.assets))
-        self.assertEqual("1", assetIDs[0])
-        self.assertEqual("2", assetIDs[1])
-        self.assertEqual("10", assetIDs[2])
-        self.assertEqual("C1", assetIDs[3])
+        asset_ids = list(map(lambda x: x.id, self.page.assets))
+        self.assertEqual("1", asset_ids[0])
+        self.assertEqual("2", asset_ids[1])
+        self.assertEqual("10", asset_ids[2])
+        self.assertEqual("C1", asset_ids[3])
 
     def test_search(self):
         self.page.set_query("10")
@@ -84,9 +84,9 @@ class TestAssetList(AutoLoginTest):
         self.assertFalse(self.page.category_selector.is_open)
         self.page.search()
         self.assertTrue(len(self.page.assets) == 2)
-        assetIDs = list(map(lambda x: x.id, self.page.assets))
-        self.assertEqual("1", assetIDs[0])
-        self.assertEqual("10", assetIDs[1])
+        asset_ids = list(map(lambda x: x.id, self.page.assets))
+        self.assertEqual("1", asset_ids[0])
+        self.assertEqual("10", asset_ids[1])
 
 
 @screenshot_failure_cls
@@ -99,7 +99,6 @@ class TestAssetForm(AutoLoginTest):
         self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
         self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
         self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
-        self.wait = WebDriverWait(self.driver, 5)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -141,7 +140,6 @@ class TestAssetForm(AutoLoginTest):
         self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
 
         self.page.submit()
-        self.wait.until(animation_is_finished())
         self.assertTrue(self.page.success)
         # Check that data is right
         asset = models.Asset.objects.get(asset_id="9001")
@@ -285,48 +283,41 @@ class TestAssetAudit(AutoLoginTest):
         asset_id = "1111"
         self.page.set_query(asset_id)
         self.page.search()
-        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
+        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
         # Do it wrong on purpose to check error display
         self.page.modal.remove_all_required()
         self.page.modal.description = ""
         self.page.modal.submit()
-        self.wait.until(animation_is_finished())
-        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
         self.assertIn("This field is required.", self.page.modal.errors["Description"])
         # Now do it properly
         self.page.modal.description = new_desc = "A BIG hammer"
         self.page.modal.submit()
         submit_time = timezone.now()
-        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
-
         # Check data is correct
         audited = models.Asset.objects.get(asset_id=asset_id)
         self.assertEqual(audited.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
-        self.assertEqual(submit_time.replace(microsecond=0), audited.last_audited_at.replace(microsecond=0))
+        assert_times_equal(submit_time, audited.last_audited_at)
         # Check we've removed it from the 'needing audit' list
         self.assertNotIn(asset_id, self.page.assets)
 
     def test_audit_list(self):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
-
         asset_row = self.page.assets[0]
         self.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
-        self.wait.until(EC.visibility_of_element_located((By.ID, 'modal')))
+        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
         self.page.modal.close()
-        self.wait.until(EC.invisibility_of_element_located((By.ID, 'modal')))
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
-        self.assertEqual(None, audited.last_audited_by)
+        assert audited.last_audited_by is None
 
     def test_audit_search(self):
         # Check that a failed search works
         self.page.set_query("NOTFOUND")
         self.page.search()
-        self.wait.until(animation_is_finished())
         self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         self.assertIn("Asset with that ID does not exist!", self.page.error.text)

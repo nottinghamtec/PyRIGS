@@ -7,6 +7,7 @@ import pytz
 from django.conf import settings
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 
 from RIGS import models as rigsmodels
 from . import pages
@@ -31,6 +32,7 @@ class BaseTest(LiveServerTestCase):
     def setUp(self):
         super().setUpClass()
         self.driver = create_browser()
+        self.wait = WebDriverWait(self.driver, 5)
 
     def tearDown(self):
         super().tearDown()
@@ -44,8 +46,8 @@ class AutoLoginTest(BaseTest):
             username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
         self.profile.set_password("EventTestPassword")
         self.profile.save()
-        loginPage = pages.LoginPage(self.driver, self.live_server_url).open()
-        loginPage.login("EventTest", "EventTestPassword")
+        login_page = pages.LoginPage(self.driver, self.live_server_url).open()
+        login_page.login("EventTest", "EventTestPassword")
 
 
 def screenshot_failure(func):
@@ -60,6 +62,7 @@ def screenshot_failure(func):
             self.driver.save_screenshot(screenshot_file)
             print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
             raise e
+
     return wrapper_func
 
 
@@ -70,12 +73,9 @@ def screenshot_failure_cls(cls):
     return cls
 
 
-# Checks if animation is done
-class animation_is_finished():
-    def __call__(self, driver):
-        numberAnimating = driver.execute_script('return $(":animated").length')
-        finished = numberAnimating == 0
-        if finished:
-            import time
-            time.sleep(0.1)
-        return finished
+def assert_times_equal(first_time, second_time):
+    assert first_time.replace(microsecond=0) == second_time.replace(microsecond=0)
+
+
+def response_contains(response, needle):
+    return str(needle) in str(response.content)
