@@ -5,4 +5,4 @@ class RIGSAppConfig(AppConfig):
     name = 'RIGS'
 
     def ready(self):
-        pass
+        import RIGS.signals
