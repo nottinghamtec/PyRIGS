@@ -32,7 +32,7 @@ class BaseTest(LiveServerTestCase):
     def setUp(self):
         super().setUpClass()
         self.driver = create_browser()
-        self.wait = WebDriverWait(self.driver, 5)
+        self.wait = WebDriverWait(self.driver, 15)
 
     def tearDown(self):
         super().tearDown()
@@ -76,6 +76,3 @@ def screenshot_failure_cls(cls):
 def assert_times_equal(first_time, second_time):
     assert first_time.replace(microsecond=0) == second_time.replace(microsecond=0)
 
-
-def response_contains(response, needle):
-    return str(needle) in str(response.content)

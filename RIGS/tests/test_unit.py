@@ -6,9 +6,9 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from pytest_django.asserts import assertRedirects
+from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
-from PyRIGS.tests.base import assert_times_equal, response_contains
+from PyRIGS.tests.base import assert_times_equal
 from RIGS import models
 
 
@@ -360,8 +360,8 @@ def search(client, url, found, notfound, arguments):
         query = getattr(found, argument)
         request_url = "%s?q=%s" % (reverse_lazy(url), query)
         response = client.get(request_url, follow=True)
-        assert response_contains(response, getattr(found, 'name'))
-        assert not response_contains(response, getattr(notfound, 'name'))
+        assertContains(response, getattr(found, 'name'))
+        assertNotContains(response, getattr(notfound, 'name'))
 
 
 def test_search(admin_client):
@@ -428,17 +428,17 @@ def test_list(admin_client):
     venue, events = setup_for_hs()
     request_url = reverse('hs_list')
     response = admin_client.get(request_url, follow=True)
-    assert response_contains(response, events[1].name)
-    assert response_contains(response, events[2].name)
-    assert response_contains(response, 'Create')
+    assertContains(response, events[1].name)
+    assertContains(response, events[2].name)
+    assertContains(response, 'Create')
 
 
 def review(client, profile, obj, request_url):
     time = timezone.now()
     response = client.get(reverse(request_url, kwargs={'pk': obj.pk}), follow=True)
     obj.refresh_from_db()
-    assert response_contains(response, 'Reviewed by')
-    assert response_contains(response, profile.name)
+    assertContains(response, 'Reviewed by')
+    assertContains(response, profile.name)
     assert_times_equal(time, obj.reviewed_at)
 
 

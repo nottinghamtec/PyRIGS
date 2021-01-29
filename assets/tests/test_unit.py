@@ -4,9 +4,8 @@ import pytest
 from django.core.management import call_command
 from django.test.utils import override_settings
 from django.urls import reverse
-from pytest_django.asserts import assertFormError, assertRedirects
+from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains
 
-from PyRIGS.tests.base import response_contains
 from assets import models, urls
 
 pytestmark = pytest.mark.django_db  # TODO
@@ -107,17 +106,17 @@ def test_oembed(client):
     # Test the meta tag is in place
     response = client.get(asset_url, follow=True, HTTP_HOST='example.com')
     assert '<link rel="alternate" type="application/json+oembed"' in str(response.content)
-    assert oembed_url in str(response.content)
+    assertContains(response, oembed_url)
 
     # Test that the JSON exists
     response = client.get(oembed_url, follow=True, HTTP_HOST='example.com')
     assert response.status_code == 200
-    assert asset_embed_url in str(response.content)
+    assertContains(response, asset_embed_url)
 
     # Should also work for non-existant
     response = client.get(alt_oembed_url, follow=True, HTTP_HOST='example.com')
     assert response.status_code == 200
-    assert alt_asset_embed_url in str(response.content)
+    assertContains(response, alt_asset_embed_url)
 
 
 @override_settings(DEBUG=True)
@@ -228,7 +227,7 @@ def test_unauthenticated(client):
         if request_url:
             response = client.get(request_url, follow=True, HTTP_HOST='example.com')
             # TODO Check the URL here
-            assert response_contains(response, 'Login')
+            assertContains(response, 'Login')
 
 
 def test_basic_access(client):
@@ -238,13 +237,13 @@ def test_basic_access(client):
     url = reverse('asset_list')
     response = client.get(url)
     # Check edit and duplicate buttons NOT shown in list
-    assert not response_contains(response, 'Edit')
-    assert not response_contains(response, 'Duplicate')
+    assertNotContains(response, 'Edit')
+    assertNotContains(response, 'Duplicate')
 
     url = reverse('asset_detail', kwargs={'pk': "9000"})
     response = client.get(url)
-    assert not response_contains(response, 'Purchase Details')
-    assert not response_contains(response, 'View Revision History')
+    assertNotContains(response, 'Purchase Details')
+    assertNotContains(response, 'View Revision History')
 
     urls = {'asset_history', 'asset_update', 'asset_duplicate'}
     for url_name in urls:
@@ -268,13 +267,13 @@ def test_keyholder_access(client):
     url = reverse('asset_list')
     response = client.get(url)
     # Check edit and duplicate buttons shown in list
-    assert response_contains(response, 'Edit')
-    assert response_contains(response, 'Duplicate')
+    assertContains(response, 'Edit')
+    assertContains(response, 'Duplicate')
 
     url = reverse('asset_detail', kwargs={'pk': "9000"})
     response = client.get(url)
-    assert response_contains(response, 'Purchase Details')
-    assert response_contains(response, 'View Revision History')
+    assertContains(response, 'Purchase Details')
+    assertContains(response, 'View Revision History')
 
 
 def test_page_titles(admin_client):
@@ -287,4 +286,4 @@ def test_page_titles(admin_client):
         response = admin_client.get(request_url)
         if hasattr(response, "context_data") and "page_title" in response.context_data:
             expected_title = response.context_data["page_title"]
-            assert response_contains(response, '<title>{} | Rig Information Gathering System</title>'.format(expected_title))
+            assertContains(response, '<title>{} | Rig Information Gathering System</title>'.format(expected_title))

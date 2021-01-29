@@ -21,10 +21,14 @@ class TestAssetList(AutoLoginTest):
         working = models.AssetStatus.objects.create(name="Working", should_show=True)
         broken = models.AssetStatus.objects.create(name="Broken", should_show=False)
 
-        models.Asset.objects.create(asset_id="1", description="Broken XLR", status=broken, category=sound, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="10", description="Working Mic", status=working, category=sound, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="2", description="A light", status=working, category=lighting, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="C1", description="The pearl", status=broken, category=lighting, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="1", description="Broken XLR", status=broken, category=sound,
+                                    date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="10", description="Working Mic", status=working, category=sound,
+                                    date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="2", description="A light", status=working, category=lighting,
+                                    date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="C1", description="The pearl", status=broken, category=lighting,
+                                    date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetList(self.driver, self.live_server_url).open()
 
     def test_default_statuses_applied(self):
@@ -96,9 +100,12 @@ class TestAssetForm(AutoLoginTest):
         self.category = models.AssetCategory.objects.create(name="Health & Safety")
         self.status = models.AssetStatus.objects.create(name="O.K.", should_show=True)
         self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
-        self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status, category=self.category, date_acquired=datetime.date(2000, 1, 1))
-        self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240, num_pins=3)
-        self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1, cores=3)
+        self.parent = models.Asset.objects.create(asset_id="9000", description="Shelf", status=self.status,
+                                                  category=self.category, date_acquired=datetime.date(2000, 1, 1))
+        self.connector = models.Connector.objects.create(description="IEC", current_rating=10, voltage_rating=240,
+                                                         num_pins=3)
+        self.cable_type = models.CableType.objects.create(plug=self.connector, socket=self.connector, circuits=1,
+                                                          cores=3)
         self.page = pages.AssetCreate(self.driver, self.live_server_url).open()
 
     def test_asset_create(self):
@@ -109,7 +116,8 @@ class TestAssetForm(AutoLoginTest):
         self.page.asset_id = "XX$X"
         self.page.submit()
         self.assertFalse(self.page.success)
-        self.assertIn("An Asset ID can only consist of letters and numbers, with a final number", self.page.errors["Asset id"])
+        self.assertIn("An Asset ID can only consist of letters and numbers, with a final number",
+                      self.page.errors["Asset id"])
         self.assertIn("This field is required.", self.page.errors["Description"])
 
         self.page.open()
@@ -271,11 +279,16 @@ class TestAssetAudit(AutoLoginTest):
         self.category = models.AssetCategory.objects.create(name="Haulage")
         self.status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
         self.supplier = models.Supplier.objects.create(name="The Bazaar")
-        self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1, voltage_rating=40, num_pins=13)
-        models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1,
+                                                         voltage_rating=40, num_pins=13)
+        models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status,
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status,
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category,
+                                    date_acquired=datetime.date(2020, 2, 1))
+        models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category,
+                                    date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
         self.wait = WebDriverWait(self.driver, 20)
 
@@ -288,12 +301,13 @@ class TestAssetAudit(AutoLoginTest):
         self.page.modal.remove_all_required()
         self.page.modal.description = ""
         self.page.modal.submit()
+        self.wait.until(animation_is_finished())
         self.assertIn("This field is required.", self.page.modal.errors["Description"])
         # Now do it properly
         self.page.modal.description = new_desc = "A BIG hammer"
         self.page.modal.submit()
+        self.wait.until(animation_is_finished())
         submit_time = timezone.now()
-        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
         # Check data is correct
         audited = models.Asset.objects.get(asset_id=asset_id)
         self.assertEqual(audited.description, new_desc)

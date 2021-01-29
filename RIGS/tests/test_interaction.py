@@ -239,7 +239,7 @@ class TestEventCreate(BaseRigboardTest):
         # Double-check we don't lose data when swapping
         self.page.select_event_type("Rig")
         self.wait.until(animation_is_finished())
-        self.assertEquals(self.page.name, rig_name)
+        self.assertEqual(self.page.name, rig_name)
         self.wait.until(animation_is_finished())
         self.page.select_event_type("Non-Rig")
 

@@ -291,7 +291,7 @@ class EventAuthorise(generic.UpdateView):
         self.template_name = self.success_template
         messages.add_message(self.request, messages.SUCCESS,
                              'Success! Your event has been authorised. ' +
-                             'You will also receive email confirmation to %s.' % (self.object.email))
+                             'You will also receive email confirmation to %s.' % self.object.email)
         return self.render_to_response(self.get_context_data())
 
     @property
