@@ -1,2 +1,2 @@
-release: python manage.py migrate
+release: rm -rf pipeline/ && python manage.py migrate
 web: gunicorn PyRIGS.wsgi --log-file -
