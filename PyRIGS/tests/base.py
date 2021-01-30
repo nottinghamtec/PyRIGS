@@ -84,4 +84,4 @@ def screenshot_failure_cls(cls):
 
 
 def assert_times_equal(first_time, second_time):
-    assert first_time.replace(microsecond=0) == second_time.replace(microsecond=0)
+    assert first_time.replace(microsecond=0, second=0) == second_time.replace(microsecond=0, second=0)
