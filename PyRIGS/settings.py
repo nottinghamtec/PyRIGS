@@ -78,6 +78,7 @@ INSTALLED_APPS = (
 MIDDLEWARE = (
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,6 +92,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
