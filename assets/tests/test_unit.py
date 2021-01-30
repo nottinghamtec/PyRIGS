@@ -213,18 +213,17 @@ def create_asset_one():
     status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
     return models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=status, category=category, date_acquired=datetime.date(2020, 2, 1))
 
-# Nothing should be available to the unauthenticated
 
-
-def test_unauthenticated(client):
+def test_unauthenticated(client):  # Nothing should be available to the unauthenticated
+    create_asset_one()
     for url in filter(lambda url: url.name is not None and "json" not in str(url), urls.urlpatterns):
         pattern = str(url.pattern)
-        request_url = ""
         if ":pk>" in pattern:
             request_url = reverse(url.name, kwargs={'pk': 1})
         else:
             request_url = reverse(url.name)
         if request_url:
+            print(request_url)
             response = client.get(request_url, follow=True, HTTP_HOST='example.com')
             # TODO Check the URL here
             assertContains(response, 'Login')

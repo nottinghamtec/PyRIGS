@@ -287,14 +287,14 @@ class TestAssetAudit(AutoLoginTest):
                                     category=self.category, date_acquired=datetime.date(2020, 2, 1))
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category,
                                     date_acquired=datetime.date(2020, 2, 1))
-        models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status, category=self.category,
-                                    date_acquired=datetime.date(2020, 2, 1))
+        self.asset = models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status,
+                                                 category=self.category,
+                                                 date_acquired=datetime.date(2020, 2, 1))
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
         self.wait = WebDriverWait(self.driver, 20)
 
-    def test_audit_process(self):
-        asset_id = "1111"
-        self.page.set_query(asset_id)
+    def test_audit_fail(self):
+        self.page.set_query(self.asset.asset_id)
         self.page.search()
         self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
         # Do it wrong on purpose to check error display
@@ -302,20 +302,26 @@ class TestAssetAudit(AutoLoginTest):
         self.page.modal.description = ""
         self.page.modal.submit()
         self.wait.until(animation_is_finished())
+        self.driver.implicitly_wait(4)
         self.assertIn("This field is required.", self.page.modal.errors["Description"])
+
+    def test_audit_success(self):
+        self.page.set_query(self.asset.asset_id)
+        self.page.search()
+        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
         # Now do it properly
         self.page.modal.description = new_desc = "A BIG hammer"
         self.page.modal.submit()
         self.wait.until(animation_is_finished())
         submit_time = timezone.now()
         # Check data is correct
-        audited = models.Asset.objects.get(asset_id=asset_id)
-        self.assertEqual(audited.description, new_desc)
+        self.asset.refresh_from_db()
+        self.assertEqual(self.asset.description, new_desc)
         # Make sure audit 'log' was filled out
-        self.assertEqual(self.profile.initials, audited.last_audited_by.initials)
-        assert_times_equal(submit_time, audited.last_audited_at)
+        self.assertEqual(self.profile.initials, self.asset.last_audited_by.initials)
+        assert_times_equal(submit_time, self.asset.last_audited_at)
         # Check we've removed it from the 'needing audit' list
-        self.assertNotIn(asset_id, self.page.assets)
+        self.assertNotIn(self.asset.asset_id, self.page.assets)
 
     def test_audit_list(self):
         self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
