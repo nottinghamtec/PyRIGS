@@ -10,12 +10,12 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     runs-on: ubuntu-latest
-    strategy:
-        matrix:
-            browser: ['chrome']
+    # strategy:
+    #    matrix:
+    #        browser: ['chrome']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      BROWSER: ${{ matrix.browser }}
+      # BROWSER: ${{ matrix.browser }}
     steps:
       - uses: actions/checkout@v2
       - uses: bahmutov/npm-install@v1
@@ -35,24 +35,13 @@ jobs:
               pip install pycodestyle coverage coveralls django_coverage_plugin pytest-cov
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
               python manage.py collectstatic --noinput
-      - name: Cache gulp output
-        uses: actions/cache@v2
-        with:
-          path: static/
-          key: static-${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - name: Basic Checks
         run: |
               pycodestyle . --exclude=migrations,node_modules
               python manage.py check
               python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        uses: paambaati/codeclimate-action@v2.7.5
-        env:
-            CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        with:
-            coverageCommand: coverage run -m pytest -n 8
-            coverageLocations: |
-                                ${{github.workspace}}/.coverage:coverage.py
+        run: coverage run -m pytest -n 8
       - uses: actions/upload-artifact@v2
         if: failure()
         with:

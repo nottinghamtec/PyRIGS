@@ -36,6 +36,6 @@
   "scripts": {
     "gulp": "gulp",
     "build": "node node_modules/gulp/bin/gulp build",
-    "heroku-cleanup": "rm -rf node_modules/ pipeline/ gulpfile.js"
+    "heroku-cleanup": "rm -rf node_modules/ pipeline/source_assets gulpfile.js"
   }
 }
