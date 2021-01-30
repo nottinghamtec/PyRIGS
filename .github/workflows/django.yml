@@ -32,7 +32,7 @@ jobs:
       - name: Install Dependencies
         run: |
               python -m pip install --upgrade pip
-              pip install pycodestyle coverage coveralls django_coverage_plugin pytest-cov
+              pip install pycodestyle coveralls django_coverage_plugin pytest-cov
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
               python manage.py collectstatic --noinput
       - name: Basic Checks
@@ -41,7 +41,7 @@ jobs:
               python manage.py check
               python manage.py makemigrations --check --dry-run
       - name: Run Tests
-        run: coverage run -m pytest -n 8
+        run: pytest --cov -n 8
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
