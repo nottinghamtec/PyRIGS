@@ -14,47 +14,14 @@
 <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden="">
 <div class="row">
     <div class="col-sm-12">
-        {% if create or edit %}
-            {% for field in form %}
-                <div class="form-group">
-                    {% include 'partials/form_field.html' with field=field %}
-                </div>
-            {% endfor %}
-            <div class="text-right">
-                {% button 'submit' %}
+        {% for field in form %}
+            <div class="form-group">
+                {% include 'partials/form_field.html' with field=field %}
             </div>
-        {% else %}
-            <div class="col">
-                <div class="card">
-                    <dl class="card-body row">
-                        <dt class="col-6">Socket</dt>
-                        <dd>{{ object.socket|default_if_none:'-' }}</dd>
-
-                        <dt class="col-6">Plug</dt>
-                        <dd>{{ object.plug|default_if_none:'-' }}</dd>
-
-                        <dt class="col-6">Circuits</dt>
-                        <dd>{{ object.circuits|default_if_none:'-' }}</dd>
-
-                        <dt class="col-6">Cores</dt>
-                        <dd>{{ object.cores|default_if_none:'-' }}</dd>
-                    </dl>
-                </div>
-            </div>
-            <div class="col mt-2 text-right">
-                {% button 'edit' url='cable_type_update' pk=object.id %}
-            </div>
-            {% cache None cable_type_assets object %}
-                <div class="col mt-2">
-                    <div class="card">
-                        <div class="card-header">Associated Assets</div>
-                        {% with object.asset_set.all as object_list %}
-                            {% include 'partials/asset_list_table.html' %}
-                        {% endwith %}
-                    </div>
-                </div>
-            {% endcache %}
-        {% endif %}
+        {% endfor %}
+        <div class="text-right">
+            {% button 'submit' %}
+        </div>
     </div>
 </div>
 </form>

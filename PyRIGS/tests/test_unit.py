@@ -58,4 +58,8 @@ def test_page_titles(admin_client):
         response = admin_client.get(request_url)
         if hasattr(response, "context_data") and "page_title" in response.context_data:
             expected_title = response.context_data["page_title"]
+            # try:
             assertInHTML('<title>{} | Rig Information Gathering System'.format(expected_title), response.content.decode())
+            print("{} | {}".format(request_url, expected_title))  # If test fails, tell me where!
+            # except:
+            #    print(response.content.decode(), file=open('output.html', 'w'))

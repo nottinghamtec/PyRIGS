@@ -314,7 +314,7 @@ class CableTypeList(generic.ListView):
 
 class CableTypeDetail(generic.DetailView):
     model = models.CableType
-    template_name = 'cable_type_form.html'
+    template_name = 'cable_type_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(CableTypeDetail, self).get_context_data(**kwargs)
