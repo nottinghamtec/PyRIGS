@@ -20,7 +20,7 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets")]:
         table_name = 'activity_table'
     else:
         table_name = appname + '_activity_table'
-        
+
     # TODO Proper Permissions
     urlpatterns += [
         path(appname + '/activity/', permission_required_with_403('RIGS.add_event')(views.ActivityTable.as_view()),

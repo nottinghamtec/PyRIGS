@@ -214,21 +214,6 @@ def create_asset_one():
     return models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=status, category=category, date_acquired=datetime.date(2020, 2, 1))
 
 
-def test_unauthenticated(client):  # Nothing should be available to the unauthenticated
-    create_asset_one()
-    for url in filter(lambda url: url.name is not None and "json" not in str(url), urls.urlpatterns):
-        pattern = str(url.pattern)
-        if ":pk>" in pattern:
-            request_url = reverse(url.name, kwargs={'pk': 1})
-        else:
-            request_url = reverse(url.name)
-        if request_url:
-            print(request_url)
-            response = client.get(request_url, follow=True, HTTP_HOST='example.com')
-            # TODO Check the URL here
-            assertContains(response, 'Login')
-
-
 def test_basic_access(client):
     create_asset_one()
     client.login(username="basic", password="basic")
