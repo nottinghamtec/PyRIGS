@@ -27,6 +27,7 @@ from django.views import generic
 from z3c.rml import rml2pdf
 
 from PyRIGS import decorators
+from PyRIGS.views import OEmbedView
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -60,26 +61,13 @@ class EventDetail(generic.DetailView):
     model = models.Event
 
 
-class EventOembed(generic.View):
-    model = models.Event
-
-    def get(self, request, pk=None):
-        embed_url = reverse('event_embed', args=[pk])
-        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
-
-        data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
-            'version': '1.0',
-            'type': 'rich',
-            'height': '250'
-        }
-
-        json = simplejson.JSONEncoderForHTML().encode(data)
-        return HttpResponse(json, content_type="application/json")
-
-
 class EventEmbed(EventDetail):
     template_name = 'event_embed.html'
+
+
+class EventOEmbed(OEmbedView):
+    model = models.Event
+    url_name = 'event_embed'
 
 
 class EventCreate(generic.CreateView):

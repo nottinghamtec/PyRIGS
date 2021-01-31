@@ -11,7 +11,7 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
-    is_ajax
+    is_ajax, OEmbedView
 from assets import forms, models
 
 
@@ -166,29 +166,15 @@ class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
         return context
 
 
-class AssetOembed(generic.View):
-    model = models.Asset
-
-    def get(self, request, pk=None):
-        embed_url = reverse('asset_embed', args=[pk])
-        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
-
-        data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
-            'version': '1.0',
-            'type': 'rich',
-            'height': '250'
-        }
-
-        json = simplejson.JSONEncoderForHTML().encode(data)
-        return HttpResponse(json, content_type="application/json")
-
-
 class AssetEmbed(AssetDetail):
     template_name = 'asset_embed.html'
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+class AssetOEmbed(OEmbedView):
+    model = models.Asset
+    url_name = 'asset_embed'
+
+
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
     hide_hidden_status = False

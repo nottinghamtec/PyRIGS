@@ -3,6 +3,7 @@ import operator
 from functools import reduce
 
 import simplejson
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
@@ -11,6 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from RIGS import models
 from assets import models as asset_models
@@ -19,10 +21,8 @@ from assets import models as asset_models
 def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
-# Displays the current rig count along with a few other bits and pieces
 
-
-class Index(generic.TemplateView):
+class Index(generic.TemplateView):  # Displays the current rig count along with a few other bits and pieces
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
@@ -230,15 +230,29 @@ class SearchHelp(generic.TemplateView):
     template_name = 'search_help.html'
 
 
-"""
-Called from a modal window (e.g. when an item is submitted to an event/invoice).
-May optionally also include some javascript in a success message to cause a load of
-the new information onto the page.
-"""
-
-
 class CloseModal(generic.TemplateView):
+    """
+    Called from a modal window (e.g. when an item is submitted to an event/invoice).
+    May optionally also include some javascript in a success message to cause a load of
+    the new information onto the page.
+    """
     template_name = 'closemodal.html'
 
     def get_context_data(self, **kwargs):
         return {'messages': messages.get_messages(self.request)}
+
+
+class OEmbedView(generic.View):
+    def get(self, request, pk=None):
+        embed_url = reverse(self.url_name, args=[pk])
+        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
+
+        data = {
+            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
+            'version': '1.0',
+            'type': 'rich',
+            'height': '250'
+        }
+
+        json = simplejson.JSONEncoderForHTML().encode(data)
+        return HttpResponse(json, content_type="application/json")

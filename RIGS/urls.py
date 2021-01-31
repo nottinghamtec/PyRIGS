@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
@@ -62,7 +61,7 @@ urlpatterns = [
     path('event/<int:pk>/embed/',
          xframe_options_exempt(login_required(login_url='/user/login/embed/')(rigboard.EventEmbed.as_view())),
          name='event_embed'),
-    path('event/<int:pk>/oembed_json/', rigboard.EventOembed.as_view(),
+    path('event/<int:pk>/oembed_json/', rigboard.EventOEmbed.as_view(),
          name='event_oembed'),
     path('event/<int:pk>/print/', permission_required_with_403('RIGS.view_event')(rigboard.EventPrint.as_view()),
          name='event_print'),
