@@ -38,7 +38,7 @@
                         <dt class="col-sm-6">Email</dt>
                         <dd class="col-sm-6">{{ object.person.email|linkornone:'mailto' }}</dd>
                         <dt class="col-sm-6">Phone Number</dt>
-                        <dd class="col-sm-6">{{ object.person.phone|linkornone:'tel' }}</a></dd>
+                        <dd class="col-sm-6">{{ object.person.phone|linkornone:'tel' }}</dd>
                     </dl>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                             <dt class="col-sm-6">Email</dt>
                             <dd class="col-sm-6">{{ object.organisation.email|linkornone:'mailto' }}</dd>
                             <dt class="col-sm-6">Phone Number</dt>
-                            <dd class="col-sm-6">{{ object.organisation.phone|linkornone:'tel' }}</a></dd>
+                            <dd class="col-sm-6">{{ object.organisation.phone|linkornone:'tel' }}</dd>
                             <dt class="col-sm-6">Has SU Account</dt>
                             <dd class="col-sm-6">{{ event.organisation.union_account|yesno|capfirst }}</dd>
                         </dl>

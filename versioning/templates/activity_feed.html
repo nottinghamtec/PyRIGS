@@ -11,8 +11,8 @@
           $('#activity_loading').slideUp(dur,function(){
               $('#activity').slideDown(dur);
           });
-          var whiteList = $.fn.tooltip.Constructor.Default.whiteList
-          whiteList.ins = []
+            const whiteList = $.fn.tooltip.Constructor.Default.whiteList;
+            whiteList.ins = []
           whiteList.del = []
           $('#activity [data-toggle="popover"]').popover({whiteList: whiteList});
         });

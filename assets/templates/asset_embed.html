@@ -2,37 +2,35 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-sm-12">
-        <a href="/assets">
-            <span class="source"> TEC Asset Database</span>
-        </a>
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="/assets">
+                <span class="source"> TEC Asset Database</span>
+            </a>
+        </div>
+        <div class="col-sm-12">
+            <h3><a href="{% url 'asset_detail' object.asset_id %}">Asset: {{ object.asset_id }} | {{ object.description }} </a></h3>
+            <h4>
+                <span class="label label-default">
+                    <strong>Category:</strong>
+                    {{ object.category }}
+                </span>
+                        &nbsp;
+                        <span class="label label-{{ object.status.display_class|default:'default' }}">
+                    <strong>Status:</strong>
+                    {{ object.status }}
+                </span>
+            </h4>
+            <dl>
+                {% if object.serial_number %}
+                    <dt>Serial Number: </dt>
+                    <dd>{{ object.serial_number }}</dd>
+                {% endif %}
+                {% if object.comments %}
+                    <dt>Comments: </dt>
+                    <dd class="dont-break-out">{{ object.comments|linebreaksbr }}<dd>
+                {% endif %}
+            </dl>
+        </div>
     </div>
-
-    <div class="col-sm-12">
-        <h3><a href="{% url 'asset_detail' object.asset_id %}">Asset: {{ object.asset_id }} | {{ object.description }} </a></h3>
-        <h4>
-        <span class="label label-default">
-            <strong>Category:</strong>
-            {{ object.category }}
-        </span>
-        &nbsp;
-        <span class="label label-{{ object.status.display_class|default:'default' }}">
-            <strong>Status:</strong>
-            {{ object.status }}
-        </span>
-        </h4>
-        <dl>
-        {% if object.serial_number %}
-            <dt>Serial Number: </dt>
-            <dd>{{ object.serial_number }}</dd>
-        {% endif %}
-        {% if object.comments %}
-            <dt>Comments: </dt>
-            <dd class="dont-break-out">{{ object.comments|linebreaksbr }}<dd>
-        {% endif %}
-        </dl>
-        </table>
-    </div>
-</div>
 {% endblock %}

@@ -9,26 +9,26 @@
     <script src="{% static 'js/clipboard.min.js' %}"></script>
     <script>
         $(document).ready(function() {
-        	$('#urlParamForm').change(function(){
-	        	url = "?";
-	        	$('#urlParamForm *').filter(':input').each(function(index, value){
-				    defaultVal = $(value).data('default');
-				    param = $(value).val();
-				    val = $(value).prop('checked');
+            $('#urlParamForm').change(function(){
+                url = "?";
+                $('#urlParamForm *').filter(':input').each(function(index, value){
+                    defaultVal = $(value).data('default');
+                    param = $(value).val();
+                    val = $(value).prop('checked');
 
-				    if(val !== defaultVal){
-					    url = url+param+"="+val+"&";
-					}
-				});
-	        	ics_url = $('#cal-url').data('url') + url.substring(0, url.length - 1);
-				$('#cal-url').text(ics_url);
+                    if(val !== defaultVal){
+                        url = url+param+"="+val+"&";
+                    }
+                });
+                ics_url = $('#cal-url').data('url') + url.substring(0, url.length - 1);
+                $('#cal-url').text(ics_url);
 
-				gcal_url = $('#gcal-link').data('url') + encodeURIComponent(url.substring(0, url.length - 1));
-				$('#gcal-link').attr('href',gcal_url);
-			});
+                gcal_url = $('#gcal-link').data('url') + encodeURIComponent(url.substring(0, url.length - 1));
+                $('#gcal-link').attr('href',gcal_url);
+            });
 
-			$('#urlParamForm').change(); //Do the initial setting
-     	});
+            $('#urlParamForm').change(); //Do the initial setting
+        });
 
         var clipboard = new ClipboardJS('.btn');
 
@@ -37,124 +37,124 @@
             window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
             e.clearSelection();
         });
- 	</script>
+    </script>
 {% endblock %}
 
 {% block content %}
-{% if not request.is_ajax and object.pk == user.pk %}
-<div class="row py-3">
-	<div class="col text-right">
-	    <div class="btn-group">
-	        <a href="{% url 'profile_update_self' %}" class="btn btn-warning">
-				Edit Profile <i class="fas fa-edit"></i>
-			</a>
-			<a href="{% url 'password_change' %}" class="btn btn-light">
-				Change Password <span class="fas fa-lock"></span>
-			</a>
-	    </div>
-	</div>
-</div>
-{% endif %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="row no-gutters">
-                <div class="col-md-3">
-                    <img src="{{object.profile_picture}}" class="card-img img-fluid" />
+    {% if not request.is_ajax and object.pk == user.pk %}
+        <div class="row py-3">
+            <div class="col text-right">
+                <div class="btn-group">
+                    <a href="{% url 'profile_update_self' %}" class="btn btn-warning">
+                        Edit Profile <span class="fas fa-edit"></span>
+                    </a>
+                    <a href="{% url 'password_change' %}" class="btn btn-light">
+                        Change Password <span class="fas fa-lock"></span>
+                    </a>
                 </div>
-                <div class="col-md-9">
-                    <div class="card-body">
-                        <dl class="row">
-	                        <dt class="col-5">First Name</dt>
-	                        <dd class="col-7">{{object.first_name}}</dd>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="row no-gutters">
+                    <div class="col-md-3">
+                        <img src="{{object.profile_picture}}" class="card-img img-fluid" />
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-5">First Name</dt>
+                                <dd class="col-7">{{object.first_name}}</dd>
 
-	                        <dt class="col-5">Last Name</dt>
-	                        <dd class="col-7">{{object.last_name}}</dd>
+                                <dt class="col-5">Last Name</dt>
+                                <dd class="col-7">{{object.last_name}}</dd>
 
-	                        <dt class="col-5">Email</dt>
-	                        <dd class="col-7">{{object.email}}</dd>
+                                <dt class="col-5">Email</dt>
+                                <dd class="col-7">{{object.email}}</dd>
 
-	                        <dt class="col-5">Last Login</dt>
-	                        <dd class="col-7">{{object.last_login|date:"d/m/Y H:i"}}</dd>
+                                <dt class="col-5">Last Login</dt>
+                                <dd class="col-7">{{object.last_login|date:"d/m/Y H:i"}}</dd>
 
-	                        <dt class="col-5">Date Joined</dt>
-	                        <dd class="col-7">{{object.date_joined|date:"d/m/Y H:i"}}</dd>
+                                <dt class="col-5">Date Joined</dt>
+                                <dd class="col-7">{{object.date_joined|date:"d/m/Y H:i"}}</dd>
 
-	                        <dt class="col-5">Initials</dt>
-	                        <dd class="col-7">{{object.initials}}</dd>
+                                <dt class="col-5">Initials</dt>
+                                <dd class="col-7">{{object.initials}}</dd>
 
-	                        <dt class="col-5">Phone</dt>
-	                        <dd class="col-7">{{object.phone|linkornone:'tel'}}</dd>
-                        </dl>
+                                <dt class="col-5">Phone</dt>
+                                <dd class="col-7">{{object.phone|linkornone:'tel'}}</dd>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% if not request.is_ajax and object.pk == user.pk %}
-    <div class="col-12 my-2">
-        <div class="card">
-            <div class="card-header">Personal iCal Details</div>
-            <div class="card-body">
-		        <dl class="row">
-			        <dt class="col-4">API Key</dt>
-			        <dd class="col-8">
-				        {% if user.api_key %}
-					        <code id="api-key">{{user.api_key}}</code>
-                            <button class="btn btn-secondary align-middle" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
-				        {% else %}
-					        <span id="api-key">No API Key Generated</span>
-				        {% endif %}
-                        <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle">
-				        {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
-				        <span class="fas fa-redo"></span>
-			            </a>
-			        </dd>
-   			        <dt class="col-4">Calendar Options</dt>
-			        <dd class="col-8">
-				        <form id="urlParamForm">
-					        <div class="form-group d-flex flex-column flex-lg-row">
-						        <label class="checkbox-inline mr-lg-2">
-						          <input type="checkbox" value="rig" data-default="true" checked> Rigs
-						        </label>
-						        <label class="checkbox-inline mx-lg-2">
-						          <input type="checkbox" value="non-rig" data-default="true" checked> Non-Rigs
-						        </label>
-						        <label class="checkbox-inline mx-lg-2">
-						          <input type="checkbox" value="dry-hire" data-default="true" checked> Dry-Hires
-						        </label>
-						        <label class="checkbox-inline mx-lg-2">
-						          <input type="checkbox" value="cancelled" data-default="false" > Cancelled
-						        </label>
-						        <label class="checkbox-inline mx-lg-2">
-						          <input type="checkbox" value="provisional" data-default="true" checked> Provisional
-						        </label>
-						        <label class="checkbox-inline ml-lg-2">
-						          <input type="checkbox" value="confirmed" data-default="true" checked> Confirmed/Booked
-						        </label>
-					        </div>
-				        </form>
-			        </dd>
-			        <dt class="col-4">Calendar URL</dt>
-			        <dd class="col-8">
-				        {% if user.api_key %}
-					        <code id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></code>
-                            <button class="btn btn-secondary align-middle" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
-                            <br>
-					        <small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
-					        To sync from Google Calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
-				        {% else %}
-					        <pre>No API Key Generated</pre>
-				        {% endif %}
-			        </dd>
-		        </dl>
+        {% if not request.is_ajax and object.pk == user.pk %}
+            <div class="col-12 my-2">
+                <div class="card">
+                    <div class="card-header">Personal iCal Details</div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-4">API Key</dt>
+                            <dd class="col-8">
+                                {% if user.api_key %}
+                                    <code id="api-key">{{user.api_key}}</code>
+                                    <button class="btn btn-secondary align-middle" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                {% else %}
+                                    <span id="api-key">No API Key Generated</span>
+                                {% endif %}
+                                <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle">
+                                    {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
+                                    <span class="fas fa-redo"></span>
+                                </a>
+                            </dd>
+                            <dt class="col-4">Calendar Options</dt>
+                            <dd class="col-8">
+                                <form id="urlParamForm">
+                                    <div class="form-group d-flex flex-column flex-lg-row">
+                                        <label class="checkbox-inline mr-lg-2">
+                                            <input type="checkbox" value="rig" data-default="true" checked> Rigs
+                                        </label>
+                                        <label class="checkbox-inline mx-lg-2">
+                                            <input type="checkbox" value="non-rig" data-default="true" checked> Non-Rigs
+                                        </label>
+                                        <label class="checkbox-inline mx-lg-2">
+                                            <input type="checkbox" value="dry-hire" data-default="true" checked> Dry-Hires
+                                        </label>
+                                        <label class="checkbox-inline mx-lg-2">
+                                            <input type="checkbox" value="cancelled" data-default="false" > Cancelled
+                                        </label>
+                                        <label class="checkbox-inline mx-lg-2">
+                                            <input type="checkbox" value="provisional" data-default="true" checked> Provisional
+                                        </label>
+                                        <label class="checkbox-inline ml-lg-2">
+                                            <input type="checkbox" value="confirmed" data-default="true" checked> Confirmed/Booked
+                                        </label>
+                                    </div>
+                                </form>
+                            </dd>
+                            <dt class="col-4">Calendar URL</dt>
+                            <dd class="col-8">
+                                {% if user.api_key %}
+                                    <code id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></code>
+                                    <button class="btn btn-secondary align-middle" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                    <br>
+                                    <small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
+                                        To sync from Google Calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>
+                                {% else %}
+                                    <pre>No API Key Generated</pre>
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-        </div>
-	</div>
-    {% endif %}
-</div>
-<h4>Events</h4>
-{% with object.latest_events as events %}
-    {% include 'partials/event_table.html' %}
-{% endwith %}
+        {% endif %}
+    </div>
+    <h4>Events</h4>
+    {% with object.latest_events as events %}
+        {% include 'partials/event_table.html' %}
+    {% endwith %}
 {% endblock %}

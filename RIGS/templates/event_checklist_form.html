@@ -32,9 +32,9 @@
     $(document).ready(function () {
         $('button[data-action=add]').on('click', function (event) {
             event.preventDefault();
-            var target = $($(this).attr('data-target'));
-            var newID = Number(target.attr('data-pk'));
-            var newRow = $($(this).attr('data-clone'))
+            let target = $($(this).attr('data-target'));
+            let newID = Number(target.attr('data-pk'));
+            let newRow = $($(this).attr('data-clone'))
                     .clone().attr('style', "")
                    .attr('id', function(i, val){
                         return val.split("_")[0] + '_' + newID;
@@ -204,7 +204,7 @@
                                             <td>
                                                 <select name="crewmember_new" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" disabled="true"></select>
                                             </td>
-                                            <td style="min-width: 15ch"><input name="start_new" type="datetime-local" class="form-control" value="{{ i.start }}" disabled="true"/></td>
+                                            <td style="min-width: 15ch"><input name="start_new" type="datetime-local" class="form-control" value="{{ i.start }}" disabled=""/></td>
                                             <td style="min-width: 15ch"><input name="role_new" type="text" class="form-control" value="{{ i.role }}" disabled="true"/></td>
                                             <td style="min-width: 15ch"><input name="end_new" type="datetime-local" class="form-control" value="{{ i.end }}" disabled="true" /></td>
                                             <td><button type="button" class="btn btn-danger btn-sm mt-1" data-id='{{crew.pk}}' data-action='delete' data-target='#crewmember'><span class="fas fa-times"></span></button></td>
@@ -240,7 +240,7 @@
             <div class="row my-3" id="size-0">
                 <div class="col-12">
                     <div class="card border-success">
-                        <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (aprox. 26A)</small></div>
+                        <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (approx. 26A)</small></div>
                         <div class="card-body">
                             {% include 'partials/checklist_checkbox.html' with formitem=form.rcds %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.supply_test %}
@@ -337,7 +337,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <hr>
+                            <hr/>
                             {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
                             {% include 'partials/ec_power_info.html' %}
