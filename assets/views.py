@@ -15,7 +15,6 @@ from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, 
 from assets import forms, models
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
@@ -28,9 +27,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         return initial
 
     def get_queryset(self):
-        if self.request.method == 'POST':
-            self.form = forms.AssetSearchForm(data=self.request.POST)
-        elif self.request.method == 'GET' and len(self.request.GET) > 0:
+        if self.request.method == 'GET' and len(self.request.GET) > 0:
             self.form = forms.AssetSearchForm(data=self.request.GET)
         else:
             self.form = forms.AssetSearchForm(data=self.get_initial())
@@ -181,7 +178,7 @@ class AssetAuditList(AssetList):
 
     # TODO Refresh this when the modal is submitted
     def get_queryset(self):
-        self.form = forms.AssetSearchForm(data={})
+        self.form = forms.AssetSearchForm(data=self.request.GET)
         return self.model.objects.filter(Q(last_audited_at__isnull=True))
 
     def get_context_data(self, **kwargs):
