@@ -4,9 +4,11 @@ import random
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 from reversion import revisions as reversion
 
 from RIGS import models
+
 
 
 class Command(BaseCommand):
@@ -343,3 +345,30 @@ class Command(BaseCommand):
                         elif random.randint(0, 2) > 1:  # 1 in 3 have been paid
                             models.Payment.objects.create(invoice=newInvoice, amount=newInvoice.balance,
                                                           date=datetime.date.today())
+            if i == 1 or random.randint(0, 5) > 0: # Event 1 and 1 in 5 have a RA
+                    models.RiskAssessment.objects.create(event=newEvent, supervisor_consulted=bool(random.getrandbits(1)), nonstandard_equipment=bool(random.getrandbits(1)),
+                                                           nonstandard_use=bool(random.getrandbits(1)),
+                                                           contractors=bool(random.getrandbits(1)),
+                                                           other_companies=bool(random.getrandbits(1)),
+                                                           crew_fatigue=bool(random.getrandbits(1)),
+                                                           big_power=bool(random.getrandbits(1)),
+                                                           generators=bool(random.getrandbits(1)),
+                                                           other_companies_power=bool(random.getrandbits(1)),
+                                                           nonstandard_equipment_power=bool(random.getrandbits(1)),
+                                                           multiple_electrical_environments=bool(random.getrandbits(1)),
+                                                           noise_monitoring=bool(random.getrandbits(1)),
+                                                           known_venue=bool(random.getrandbits(1)),
+                                                           safe_loading=bool(random.getrandbits(1)),
+                                                           safe_storage=bool(random.getrandbits(1)),
+                                                           area_outside_of_control=bool(random.getrandbits(1)),
+                                                           barrier_required=bool(random.getrandbits(1)),
+                                                           nonstandard_emergency_procedure=bool(random.getrandbits(1)),
+                                                           special_structures=bool(random.getrandbits(1)),
+                                                           suspended_structures=bool(random.getrandbits(1)),
+                                                           outside=bool(random.getrandbits(1)))
+                    if i == 0 or random.randint(0, 1) > 0: # Event 1 and 1 in 10 have a Checklist
+                        models.EventChecklist.objects.create(event=newEvent, power_mic=random.choice(self.profiles), safe_parking=bool(random.getrandbits(1)),
+                                                    safe_packing=bool(random.getrandbits(1)), exits=bool(random.getrandbits(1)), trip_hazard=bool(random.getrandbits(1)), warning_signs=bool(random.getrandbits(1)),
+                                                    ear_plugs=bool(random.getrandbits(1)), hs_location="Locked away safely",
+                                                    extinguishers_location="Somewhere, I forgot", earthing=bool(random.getrandbits(1)), pat=bool(random.getrandbits(1)),
+                                                    date=timezone.now(), venue=random.choice(self.venues))
