@@ -258,16 +258,3 @@ def test_keyholder_access(client):
     response = client.get(url)
     assertContains(response, 'Purchase Details')
     assertContains(response, 'View Revision History')
-
-
-def test_page_titles(admin_client):
-    for url in filter(lambda url: url.name is not None and not any(s in url.name for s in ["json", "embed"]), urls.urlpatterns):
-        request_url = ""
-        if ":pk>" in str(url.pattern):
-            request_url = reverse(url.name, kwargs={'pk': "1"})
-        else:
-            request_url = reverse(url.name)
-        response = admin_client.get(request_url)
-        if hasattr(response, "context_data") and "page_title" in response.context_data:
-            expected_title = response.context_data["page_title"]
-            assertContains(response, '<title>{} | Rig Information Gathering System</title>'.format(expected_title))
