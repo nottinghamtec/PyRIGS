@@ -1,16 +1,11 @@
-from django.urls import path
-from django.conf.urls import include, url
-from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views.decorators.clickjacking import xframe_options_exempt
-from django.contrib.auth.views import LoginView
+from django.conf.urls import include
+from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path
 from django.views.generic import TemplateView
-from PyRIGS.decorators import permission_required_with_403
-import RIGS
-import users
-import versioning
+
 from PyRIGS import views
 
 urlpatterns = [
@@ -27,7 +22,7 @@ urlpatterns = [
          name="api_secure"),
 
     path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
-    path('search_help/', views.SearchHelp.as_view(), name='search_help'),
+    path('search_help/', login_required(views.SearchHelp.as_view()), name='search_help'),
 
     path('', include('users.urls')),
 
@@ -39,6 +34,6 @@ if settings.DEBUG:
 
     import debug_toolbar
     urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
         path('bootstrap/', TemplateView.as_view(template_name="bootstrap.html")),
     ] + urlpatterns

@@ -1,9 +1,11 @@
 import random
+
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from reversion import revisions as reversion
-from assets import models
+
 from RIGS import models as rigsmodels
+from assets import models
 
 
 class Command(BaseCommand):

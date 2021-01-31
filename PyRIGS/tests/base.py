@@ -1,16 +1,17 @@
+import os
+import pathlib
+import sys
+from datetime import datetime
+
+import pytz
+from django.conf import settings
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+
 from RIGS import models as rigsmodels
 from . import pages
-import os
-import pytz
-from datetime import date, time, datetime, timedelta
-from django.conf import settings
-import imgurpython
-import PyRIGS.settings
-import sys
-import pathlib
-import inspect
+from envparse import env
 
 
 def create_datetime(year, month, day, hour, min):
@@ -19,15 +20,21 @@ def create_datetime(year, month, day, hour, min):
 
 
 def create_browser():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1920,1080")
-    # No caching, please and thank you
-    options.add_argument("--aggressive-cache-discard")
-    options.add_argument("--disk-cache-size=0")
-    options.add_argument("--headless")
-    if settings.CI:
-        options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(options=options)
+    browser = env('BROWSER', default="chrome")
+    if browser == "firefox":
+        options = webdriver.FirefoxOptions()
+        options.headless = True
+        driver = webdriver.Firefox(options=options)
+        driver.set_window_position(0, 0)
+        # Firefox is pissy about out of bounds otherwise
+        driver.set_window_size(3840, 2160)
+    else:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--headless")
+        if settings.CI:
+            options.add_argument("--no-sandbox")
+        driver = webdriver.Chrome(options=options)
     return driver
 
 
@@ -35,6 +42,7 @@ class BaseTest(LiveServerTestCase):
     def setUp(self):
         super().setUpClass()
         self.driver = create_browser()
+        self.wait = WebDriverWait(self.driver, 15)
 
     def tearDown(self):
         super().tearDown()
@@ -48,8 +56,8 @@ class AutoLoginTest(BaseTest):
             username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
         self.profile.set_password("EventTestPassword")
         self.profile.save()
-        loginPage = pages.LoginPage(self.driver, self.live_server_url).open()
-        loginPage.login("EventTest", "EventTestPassword")
+        login_page = pages.LoginPage(self.driver, self.live_server_url).open()
+        login_page.login("EventTest", "EventTestPassword")
 
 
 def screenshot_failure(func):
@@ -62,20 +70,9 @@ def screenshot_failure(func):
             if not pathlib.Path("screenshots").is_dir():
                 os.mkdir("screenshots")
             self.driver.save_screenshot(screenshot_file)
-
-            if settings.IMGUR_UPLOAD_CLIENT_ID != "":
-                config = {
-                    'album': None,
-                    'name': screenshot_name,
-                    'title': screenshot_name,
-                    'description': ""
-                }
-                client = imgurpython.ImgurClient(settings.IMGUR_UPLOAD_CLIENT_ID, settings.IMGUR_UPLOAD_CLIENT_SECRET)
-                image = client.upload_from_path(screenshot_file, config=config)
-                print("Error in test {} is at url {}".format(screenshot_name, image['link']), file=sys.stderr)
-            else:
-                print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
+            print("Error in test {} is at path {}".format(screenshot_name, screenshot_file), file=sys.stderr)
             raise e
+
     return wrapper_func
 
 
@@ -86,12 +83,5 @@ def screenshot_failure_cls(cls):
     return cls
 
 
-# Checks if animation is done
-class animation_is_finished():
-    def __call__(self, driver):
-        numberAnimating = driver.execute_script('return $(":animated").length')
-        finished = numberAnimating == 0
-        if finished:
-            import time
-            time.sleep(0.1)
-        return finished
+def assert_times_equal(first_time, second_time):
+    assert first_time.replace(microsecond=0, second=0) == second_time.replace(microsecond=0, second=0)

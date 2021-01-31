@@ -4,7 +4,7 @@
 {% load widget_tweaks %}
 
 {% block js %}
-    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
     <script src="{% static "js/interaction.js" %}"></script>
     <script src="{% static "js/modal.js" %}"></script>
     <script>
@@ -23,7 +23,7 @@
                 success: function(){
                     $link = $(this);
                     // Anti modal inception
-                    if ($link.parents('#modal').length == 0) {
+                    if ($link.parents('#modal').length === 0) {
                         modaltarget = $link.data('target');
                         modalobject = "";
                         $('#modal').load(url, function (e) {

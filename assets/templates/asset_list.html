@@ -30,19 +30,19 @@
 	        //Get query string value
 	        var searchUrl=location.search;
 
-	        if(key!="") {
+	        if(key!=="") {
 		        oldValue = getParameterByName(key);
 		        removeVal=key+"="+oldValue;
-		        if(searchUrl.indexOf('?'+removeVal+'&')!= "-1") {
+		        if(searchUrl.indexOf('?'+removeVal+'&')!== "-1") {
 			        urlValue=urlValue.replace('?'+removeVal+'&','?');
 		        }
-		        else if(searchUrl.indexOf('&'+removeVal+'&')!= "-1") {
+		        else if(searchUrl.indexOf('&'+removeVal+'&')!== "-1") {
 			        urlValue=urlValue.replace('&'+removeVal+'&','&');
 		        }
-		        else if(searchUrl.indexOf('?'+removeVal)!= "-1") {
+		        else if(searchUrl.indexOf('?'+removeVal)!== "-1") {
 			        urlValue=urlValue.replace('?'+removeVal,'');
 		        }
-		        else if(searchUrl.indexOf('&'+removeVal)!= "-1") {
+		        else if(searchUrl.indexOf('&'+removeVal)!== "-1") {
 			        urlValue=urlValue.replace('&'+removeVal,'');
 		        }
 	        }

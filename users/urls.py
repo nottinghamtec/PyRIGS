@@ -1,14 +1,12 @@
-from django.urls import path
-from django.conf.urls import include, url
-from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf.urls import include
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.views import LoginView
+from django.urls import path
+from django.views.decorators.clickjacking import xframe_options_exempt
 from registration.backends.default.views import RegistrationView
+
 from PyRIGS.decorators import permission_required_with_403
-from users import regbackend, forms, views
+from users import forms, views
 
 urlpatterns = [
     path('user/register/', RegistrationView.as_view(form_class=forms.ProfileRegistrationFormUniqueEmail),

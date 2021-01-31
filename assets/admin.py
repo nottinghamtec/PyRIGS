@@ -1,5 +1,6 @@
 from django.contrib import admin
 from reversion.admin import VersionAdmin
+
 from assets import models as assets
 
 

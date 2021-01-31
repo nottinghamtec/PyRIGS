@@ -1,31 +1,19 @@
 import datetime
 from datetime import date, time, timedelta
-from urllib.parse import urlparse
 
-from django.conf import settings
-from django.core import mail, signing
-from django.core.management import call_command
-from django.db import transaction
-from django.http import HttpResponseBadRequest
 from django.test.client import Client
-from django.test.utils import override_settings
-from django.urls import reverse
 from django.utils import timezone
-from PyRIGS.tests import base
-from PyRIGS.tests import regions as base_regions
-from PyRIGS.tests.base import (AutoLoginTest, BaseTest, animation_is_finished,
-                               screenshot_failure_cls)
-from reversion import revisions as reversion
-from RIGS import models, urls
-from RIGS.tests import regions
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
 
+from PyRIGS.tests import base
+from PyRIGS.tests import regions as base_regions
+from PyRIGS.tests.base import (AutoLoginTest, screenshot_failure_cls)
+from PyRIGS.tests.pages import animation_is_finished
+from RIGS import models
+from RIGS.tests import regions
 from . import pages
 
 
@@ -251,7 +239,7 @@ class TestEventCreate(BaseRigboardTest):
         # Double-check we don't lose data when swapping
         self.page.select_event_type("Rig")
         self.wait.until(animation_is_finished())
-        self.assertEquals(self.page.name, rig_name)
+        self.assertEqual(self.page.name, rig_name)
         self.wait.until(animation_is_finished())
         self.page.select_event_type("Non-Rig")
 
@@ -645,7 +633,18 @@ class TestCalendar(BaseRigboardTest):
             else:
                 self.assertNotContains(response, "TE E" + str(test) + " ")
 
-                # Wow - that was a lot of tests
+    def test_calendar_buttons(self):  # If FullCalendar fails to load for whatever reason, the buttons don't work
+        self.page = pages.CalendarPage(self.driver, self.live_server_url).open()
+        self.assertIn(timezone.now().strftime("%Y-%m"), self.driver.current_url)
+
+        target_date = datetime.date(2020, 1, 1)
+        self.page.target_date.set_value(target_date)
+        self.page.go()
+        self.assertIn(self.page.target_date.value.strftime("%Y-%m"), self.driver.current_url)
+
+        self.page.next()
+        target_date += datetime.timedelta(days=32)
+        self.assertIn(target_date.strftime("%m"), self.driver.current_url)
 
 
 @screenshot_failure_cls

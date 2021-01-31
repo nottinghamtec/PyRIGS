@@ -1,15 +1,15 @@
-from django import template
 from django import forms
+from django import template
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorDict
-from django.utils.text import normalize_newlines
 from django.template.defaultfilters import stringfilter
-from django.utils.safestring import SafeData, mark_safe
-from django.utils.html import escape
-from RIGS import models
-import json
 from django.template.defaultfilters import yesno, title, truncatewords
 from django.urls import reverse_lazy
+from django.utils.html import escape
+from django.utils.safestring import SafeData, mark_safe
+from django.utils.text import normalize_newlines
+
+from RIGS import models
 
 register = template.Library()
 

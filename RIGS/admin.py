@@ -1,19 +1,18 @@
 from django.contrib import admin
-from RIGS import models, forms
-from users import forms as user_forms
-from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import gettext_lazy as _
-from reversion.admin import VersionAdmin
-
-from django.contrib.admin import helpers
-from django.template.response import TemplateResponse
 from django.contrib import messages
-from django.db import transaction
+from django.contrib.admin import helpers
+from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Count
 from django.forms import ModelForm
-
+from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from reversion import revisions as reversion
+from reversion.admin import VersionAdmin
+
+from RIGS import models
+from users import forms as user_forms
 
 # Register your models here.
 admin.site.register(models.VatRate, VersionAdmin)

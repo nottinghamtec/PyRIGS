@@ -4,7 +4,7 @@
   "scripts": {
     "postdeploy": "python manage.py migrate && python manage.py generateSampleData"
   },
-  "stack": "heroku-18",
+  "stack": "heroku-20",
   "env": {
     "DEBUG": {
       "required": true
@@ -47,6 +47,9 @@
     "heroku-postgresql"
   ],
   "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
     {
       "url": "heroku/python"
     }

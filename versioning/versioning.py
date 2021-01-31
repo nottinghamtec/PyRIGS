@@ -1,18 +1,13 @@
-import datetime
 import logging
 
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import EmailField, IntegerField, TextField, CharField, BooleanField
-from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
-from django.views import generic
 from reversion.models import Version, VersionQuerySet
+
 from RIGS import models
-from assets import models as asset_models
-from django.apps import apps
-from reversion import revisions as reversion
 
 logger = logging.getLogger('tec.pyrigs')
 

@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 
 from RIGS import models
@@ -15,11 +16,7 @@ def get_oembed(login_url, request, oembed_view, kwargs):
     return resp
 
 
-def has_oembed(oembed_view, login_url=None):
-    if not login_url:
-        from django.conf import settings
-        login_url = settings.LOGIN_URL
-
+def has_oembed(oembed_view, login_url=settings.LOGIN_URL):
     def _dec(view_func):
         def _checklogin(request, *args, **kwargs):
             if request.user.is_authenticated:

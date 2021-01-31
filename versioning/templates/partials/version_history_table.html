@@ -1,16 +1,16 @@
 {% load to_class_name from filters %}
 <div class="table-responsive">
-	<table class="table table-striped">
+    <table class="table table-striped">
         <thead class="thead-dark">
         <tr>
-            <th scope="col">Date</td>
-            <th scope="col">Version ID</td>
-            <th scope="col">User</td>
-            <th scope="col">Changes</td>
+            <th scope="col">Date</th>
+            <th scope="col">Version ID</th>
+            <th scope="col">User</th>
+            <th scope="col">Changes</th>
         </tr>
         </thead>
         <tbody>
-        	{% for version in object_list %}
+        {% for version in object_list %}
             <tr>
                 <th scope="row">{{ version.revision.date_created }}</th>
                 <td>{{ version.pk }}|{{ version.revision.pk }}</td>
@@ -23,7 +23,7 @@
                     {% endif %}
                 </td>
             </tr>
-			{% endfor %}
+        {% endfor %}
         </tbody>
     </table>
- </div>
+</div>

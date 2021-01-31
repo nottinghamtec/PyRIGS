@@ -1,12 +1,12 @@
 # Collection of page object models for use within tests.
-from pypom import Page, Region
+from django.urls import reverse
+from pypom import Region
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver import Chrome
-from django.urls import reverse
+
 from PyRIGS.tests import regions
-from PyRIGS.tests.pages import BasePage, FormPage
-from selenium.common.exceptions import NoSuchElementException
+from PyRIGS.tests.pages import BasePage, FormPage, animation_is_finished
 
 
 class AssetList(BasePage):
@@ -190,13 +190,14 @@ class AssetAuditList(AssetList):
     def query(self):
         return self.find_element(*self._search_text_locator).text
 
-    def set_query(self, queryString):
+    def set_query(self, query):
         element = self.find_element(*self._search_text_locator)
         element.clear()
-        element.send_keys(queryString)
+        element.send_keys(query)
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+        self.wait.until(animation_is_finished())
 
     @property
     def error(self):
@@ -205,10 +206,12 @@ class AssetAuditList(AssetList):
         except NoSuchElementException:
             return None
 
-    class AssetAuditModal(Region):
+    class AssetAuditModal(regions.Modal):
         _errors_selector = (By.CLASS_NAME, "alert-danger")
         # Don't use the usual success selector - that tries and fails to hit the '10m long cable' helper button...
         _submit_locator = (By.ID, "id_mark_audited")
+        _close_selector = (By.XPATH, "//button[@data-dismiss='modal']")
+
         form_items = {
             'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
             'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -235,27 +238,10 @@ class AssetAuditList(AssetList):
             except NoSuchElementException:
                 return None
 
-        def submit(self):
-            previous_errors = self.errors
-            self.root.find_element(*self._submit_locator).click()
-            # self.wait.until(lambda x: not self.is_displayed) TODO
+        def close(self):
+            self.page.find_element(*self._close_selector).click()
+            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
 
         def remove_all_required(self):
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
             self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
-
-        def __getattr__(self, name):
-            if name in self.form_items:
-                element = self.form_items[name]
-                form_element = element[0](self, self.find_element(*element[1]))
-                return form_element.value
-            else:
-                return super().__getattribute__(name)
-
-        def __setattr__(self, name, value):
-            if name in self.form_items:
-                element = self.form_items[name]
-                form_element = element[0](self, self.find_element(*element[1]))
-                form_element.set_value(value)
-            else:
-                self.__dict__[name] = value

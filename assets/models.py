@@ -1,11 +1,10 @@
 import re
+
 from django.core.exceptions import ValidationError
 from django.db import models, connection
-from django.urls import reverse
-
 from django.db.models.signals import pre_save
 from django.dispatch.dispatcher import receiver
-
+from django.urls import reverse
 from reversion import revisions as reversion
 from reversion.models import Version
 

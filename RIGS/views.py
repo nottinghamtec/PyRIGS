@@ -1,25 +1,5 @@
-from django.core.exceptions import PermissionDenied
-from django.http.response import HttpResponseRedirect
-from django.http import HttpResponse
-from django.urls import reverse_lazy, reverse, NoReverseMatch
-from django.views import generic
-from django.contrib.auth.views import LoginView
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django.core import serializers
-from django.conf import settings
-import simplejson
-import datetime
-import pytz
-import operator
-from registration.views import RegistrationView
-from django.views.decorators.csrf import csrf_exempt
-
-from RIGS import models, forms
-from assets import models as asset_models
-from functools import reduce
-
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
+from RIGS import models
 
 
 class PersonList(GenericListView):

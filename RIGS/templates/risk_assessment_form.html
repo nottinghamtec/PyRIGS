@@ -27,12 +27,7 @@
 
     <script>
         function parseBool(str) {
-            if (str.toLowerCase() == 'true') {
-                return true
-            }
-            else {
-                return false
-            }
+            return str.toLowerCase() == 'true';
         }
         $('input[type=radio][name=big_power]').change(function() {
             $('#{{ form.power_mic.id_for_label }}').prop('required', parseBool(this.value));

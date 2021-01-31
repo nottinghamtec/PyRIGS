@@ -11,14 +11,6 @@
     <script src="{% static 'js/moment.js' %}"></script>
     <script src="{% static 'js/main.min.js' %}"></script>
     <script>
-        function getUrlVars() {
-            var vars = {};
-            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-            vars[key] = value;
-            });
-            return vars;
-        }
-
         viewToUrl = {
             'timeGridWeek':'week',
             'timeGridDay':'day',
@@ -78,7 +70,7 @@
                                     'url': $(this).attr('url')
                                 }
 
-                                if($(this).attr('is_rig')==true || $(this).attr('status') == "Cancelled"){
+                                if($(this).attr('is_rig')===true || $(this).attr('status') === "Cancelled"){
                                     thisEvent['color'] = colours[$(this).attr('status')];
                                 }else{
                                     thisEvent['color'] = colours['non-rig'];
@@ -95,31 +87,35 @@
                     $('#calendar-header').text(view.title);
 
                     // Enable/Disable "Today" button as required
+                    let $today = $('#today-button');
                     if(moment().isBetween(view.currentStart, view.currentEnd)){
                         //Today is within the current view
-                        $('#today-button').prop('disabled', true);
+                        $today.prop('disabled', true);
                     }else{
-                        $('#today-button').prop('disabled', false);
+                        $today.prop('disabled', false);
                     }
 
                     // Set active view select button
+                    let $month = $('#month-button');
+                    let $week = $('#week-button');
+                    let $day = $('#day-button');
                     switch(view.type){
                         case 'dayGridMonth':
-                            $('#month-button').addClass('active');
-                            $('#week-button').removeClass('active');
-                            $('#day-button').removeClass('active');
+                            $month.addClass('active');
+                            $week.removeClass('active');
+                            $day.removeClass('active');
                             break;
 
                         case 'timeGridWeek':
-                            $('#month-button').removeClass('active');
-                            $('#week-button').addClass('active');
-                            $('#day-button').removeClass('active');
+                            $month.removeClass('active');
+                            $week.addClass('active');
+                            $day.removeClass('active');
                             break;
 
                         case 'timeGridDay':
-                            $('#month-button').removeClass('active');
-                            $('#week-button').removeClass('active');
-                            $('#day-button').addClass('active');
+                            $month.removeClass('active');
+                            $week.removeClass('active');
+                            $day.addClass('active');
                             break;
                     }
                     history.replaceState(null,null,"{% url 'web_calendar' %}"+viewToUrl[view.type]+'/'+moment(view.currentStart).format('YYYY-MM-DD')+'/');

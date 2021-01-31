@@ -1,21 +1,18 @@
-import datetime
-
 import simplejson
-from assets import forms, models
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
-from versioning import versioning
-from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin
-from itertools import chain
+
+from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
+    is_ajax
+from assets import forms, models
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -121,7 +118,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy('asset_update', kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
@@ -211,6 +208,11 @@ class AssetAudit(AssetEdit):
     template_name = 'asset_audit.html'
     form_class = forms.AssetAuditForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Audit Asset: {}".format(self.object.display_id)
+        return context
+
     def get_success_url(self):
         # TODO For some reason this doesn't stick when done in form_valid??
         asset = self.get_object()
@@ -230,7 +232,7 @@ class SupplierList(GenericListView):
         context['edit'] = 'supplier_update'
         context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
         context['detail'] = 'supplier_detail'
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -258,7 +260,7 @@ class SupplierDetail(GenericDetailView):
         context['detail_link'] = 'supplier_detail'
         context['associated'] = 'partials/associated_assets.html'
         context['associated2'] = ''
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -272,7 +274,7 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SupplierCreate, self).get_context_data(**kwargs)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -288,7 +290,7 @@ class SupplierUpdate(GenericUpdateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SupplierUpdate, self).get_context_data(**kwargs)
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -312,7 +314,7 @@ class CableTypeList(generic.ListView):
 
 class CableTypeDetail(generic.DetailView):
     model = models.CableType
-    template_name = 'cable_type_form.html'
+    template_name = 'cable_type_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(CableTypeDetail, self).get_context_data(**kwargs)

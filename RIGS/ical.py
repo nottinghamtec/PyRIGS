@@ -1,12 +1,11 @@
-from RIGS import models, forms
-from django_ical.views import ICalFeed
-from django.db.models import Q
-from django.urls import reverse_lazy, reverse, NoReverseMatch
-from django.utils import timezone
-from django.conf import settings
-
 import datetime
+
 import pytz
+from django.conf import settings
+from django.db.models import Q
+from django_ical.views import ICalFeed
+
+from RIGS import models
 
 
 class CalendarICS(ICalFeed):

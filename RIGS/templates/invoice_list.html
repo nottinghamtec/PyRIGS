@@ -27,7 +27,7 @@
                         <span class="text-muted">{% if invoice.void %}(VOID){% elif invoice.is_closed %}(PAID){% else %}(O/S){% endif %}</span></th>
                         <td><a href="{% url 'event_detail' invoice.event.pk %}">N{{ invoice.event.pk|stringformat:"05d" }}</a>: {{ invoice.event.name }} <br>
                             <span class="text-muted">{{ invoice.event.get_status_display }}{% if not invoice.event.mic %}, No MIC{% endif %}
-                            </span></td>
+                            </span>
                         </td>
                         <td>{% if invoice.event.organisation %}
                                 {{ invoice.event.organisation.name }}

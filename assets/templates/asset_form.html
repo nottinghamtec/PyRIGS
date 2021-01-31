@@ -33,7 +33,7 @@
                 url: '{% url 'asset_search_json' %}',
                 type: "GET",
                 data: function () {
-                    var params = {
+                    let params = {
                         {% verbatim %}query: '{{{q}}}'{% endverbatim  %}
                     };
                     return params;

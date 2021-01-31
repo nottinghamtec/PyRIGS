@@ -1,14 +1,12 @@
-from pypom import Region
-from django.utils import timezone
-from django.conf import settings
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.select import Select
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 import datetime
+
+from django.conf import settings
+from pypom import Region
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.select import Select
 
 
 def parse_bool_from_string(string):
@@ -77,7 +75,6 @@ class BootstrapSelectElement(Region):
         self.open()
         search_box.clear()
         search_box.send_keys(query)
-        status_text = self.find_element(*self._status_locator)
         self.wait.until(expected_conditions.invisibility_of_element_located(self._status_locator))
 
     @property

@@ -8,11 +8,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import raven
 import secrets
-import datetime
+
+import raven
 from envparse import env
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -77,6 +78,7 @@ INSTALLED_APPS = (
 MIDDLEWARE = (
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -90,6 +92,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -235,6 +238,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_DIRS = (
     os.path.join(BASE_DIR, 'static/')
 )
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'pipeline/built_assets/'),
+]
 
 TEMPLATES = [
     {
@@ -263,6 +269,3 @@ USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
-
-IMGUR_UPLOAD_CLIENT_ID = env('IMGUR_UPLOAD_CLIENT_ID', default="")
-IMGUR_UPLOAD_CLIENT_SECRET = env('IMGUR_UPLOAD_CLIENT_SECRET', default="")
