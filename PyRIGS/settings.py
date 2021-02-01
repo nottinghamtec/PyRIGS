@@ -87,12 +87,13 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -235,12 +236,14 @@ DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-STATIC_DIRS = (
-    os.path.join(BASE_DIR, 'static/')
-)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'pipeline/built_assets/'),
+STATIC_DIRS = [
+    os.path.join(BASE_DIR, 'static/'),
 ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'pipeline/built_assets'),
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_KEEP_ONLY_HASHED_FILES=True
 
 TEMPLATES = [
     {

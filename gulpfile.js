@@ -61,7 +61,7 @@ function scripts() {
 }
 
 function browserSync(done) {
-  spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'});
+  spawn('python', ['manage.py', 'runserver', '--nostatic'], {stdio: 'inherit'});
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
     notify: true,
@@ -77,9 +77,8 @@ function browserSyncReload(done) {
 }
 
 function watchFiles() {
-  gulp.watch("RIGS/static/scss/**/*.scss", styles);
-  // TODO This prevents reload looping, but means we don't reload if new third party scripts are added
-  gulp.watch("RIGS/static/js/src/**/*.js", scripts);
+  gulp.watch("pipeline/source_assets/scss/**/*.scss", styles);
+  gulp.watch("pipeline/source_assets/js/**/*.js", scripts);
   gulp.watch("**/templates/*.html", browserSyncReload);
 }
 
