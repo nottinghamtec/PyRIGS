@@ -18,8 +18,16 @@ jobs:
       # BROWSER: ${{ matrix.browser }}
     steps:
       - uses: actions/checkout@v2
+      - name: Cache Static Files
+        id: static-cache
+        uses: actions/cache@v2
+        with:
+            path: 'static/'
+            key: ${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - uses: bahmutov/npm-install@v1
+        if: steps.static-cache.outputs.cache-hit != 'true'
       - run: node node_modules/gulp/bin/gulp build
+        if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -34,7 +42,8 @@ jobs:
               python -m pip install --upgrade pip
               pip install pycodestyle coveralls django_coverage_plugin pytest-cov
               pip install --upgrade --upgrade-strategy eager -r requirements.txt
-              python manage.py collectstatic --noinput
+      - run: python manage.py collectstatic --noinput
+        if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Basic Checks
         run: |
               pycodestyle . --exclude=migrations,node_modules
