@@ -7,8 +7,5 @@ class Command(BaseCommand):
     can_import_settings = True
 
     def handle(self, *args, **options):
-        begin = time.time()
         call_command('generateSampleRIGSData')
         call_command('generateSampleAssetsData')
-        end = time.time()
-        print(f"Total runtime of the program is {end - begin}")

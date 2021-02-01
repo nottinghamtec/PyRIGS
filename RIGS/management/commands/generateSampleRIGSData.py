@@ -221,14 +221,14 @@ class Command(BaseCommand):
             self.profiles.append(newProfile)
 
     def setupUsefulProfiles(self):
-        superUser = models.Profile(pk=10, username="superuser", first_name="Super", last_name="User",
+        superUser = models.Profile(pk=995, username="superuser", first_name="Super", last_name="User",
                                    initials="SU",
                                    email="superuser@example.com", is_superuser=True, is_active=True,
                                    is_staff=True)
         superUser.set_password('superuser')
         self.profiles.append(superUser)
 
-        financeUser = models.Profile(pk=11, username="finance", first_name="Finance", last_name="User",
+        financeUser = models.Profile(pk=996, username="finance", first_name="Finance", last_name="User",
                                      initials="FU",
                                      email="financeuser@example.com", is_active=True, is_approved=True)
         financeUser.groups.add(self.finance_group)
@@ -236,7 +236,7 @@ class Command(BaseCommand):
         financeUser.set_password('finance')
         self.profiles.append(financeUser)
 
-        hsUser = models.Profile(pk=12, username="hs", first_name="HS", last_name="User",
+        hsUser = models.Profile(pk=997, username="hs", first_name="HS", last_name="User",
                                 initials="HSU",
                                 email="hsuser@example.com", is_active=True, is_approved=True)
         hsUser.groups.add(self.hs_group)
@@ -244,14 +244,14 @@ class Command(BaseCommand):
         hsUser.set_password('hs')
         self.profiles.append(hsUser)
 
-        keyholderUser = models.Profile(pk=13, username="keyholder", first_name="Keyholder", last_name="User",
+        keyholderUser = models.Profile(pk=998, username="keyholder", first_name="Keyholder", last_name="User",
                                        initials="KU",
                                        email="keyholderuser@example.com", is_active=True, is_approved=True)
         keyholderUser.groups.add(self.keyholder_group)
         keyholderUser.set_password('keyholder')
         self.profiles.append(keyholderUser)
 
-        basicUser = models.Profile(pk=14, username="basic", first_name="Basic", last_name="User", initials="BU",
+        basicUser = models.Profile(pk=999, username="basic", first_name="Basic", last_name="User", initials="BU",
                                    email="basicuser@example.com", is_active=True, is_approved=True)
         basicUser.set_password('basic')
         self.profiles.append(basicUser)
