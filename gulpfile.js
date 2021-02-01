@@ -2,16 +2,16 @@
 
 var gulp = require('gulp');
 
-var terser = require('gulp-terser');
-var sass = require('gulp-sass');
-var flatten = require('gulp-flatten');
-var autoprefixer = require('autoprefixer')
-var postcss = require('gulp-postcss')
-var sourcemaps = require('gulp-sourcemaps');
-var browsersync = require('browser-sync').create();
-var { exec } = require("child_process");
-var spawn = require('child_process').spawn;
-var cssnano = require('cssnano');
+const terser = require('gulp-terser');
+const sass = require('gulp-sass');
+const flatten = require('gulp-flatten');
+const autoprefixer = require('autoprefixer')
+const postcss = require('gulp-postcss')
+const sourcemaps = require('gulp-sourcemaps');
+const browsersync = require('browser-sync').create();
+const { exec } = require("child_process");
+const spawn = require('child_process').spawn;
+const cssnano = require('cssnano');
 
 sass.compiler = require('node-sass');
 

@@ -18,6 +18,12 @@ class Command(BaseCommand):
     organisations = []
     venues = []
     profiles = []
+    events = []
+    event_items = []
+    invoices = []
+    payments = []
+    ras = []
+    checklists = []
 
     keyholder_group = None
     finance_group = None
@@ -36,16 +42,25 @@ class Command(BaseCommand):
             models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
 
             self.setupGenericProfiles()
+            self.setupUsefulProfiles()
+            models.Profile.objects.bulk_create(self.profiles)
 
             self.setupPeople()
+            models.Person.objects.bulk_create(self.people)
             self.setupOrganisations()
+            models.Organisation.objects.bulk_create(self.organisations)
             self.setupVenues()
+            models.Venue.objects.bulk_create(self.venues)
 
             self.setupGroups()
 
             self.setupEvents()
-
-            self.setupUsefulProfiles()
+            models.Event.objects.bulk_create(self.events)
+            models.EventItem.objects.bulk_create(self.event_items)
+            models.Invoice.objects.bulk_create(self.invoices)
+            models.Payment.objects.bulk_create(self.payments)
+            models.RiskAssessment.objects.bulk_create(self.ras)
+            models.EventChecklist.objects.bulk_create(self.checklists)
 
     def setupPeople(self):
         names = ["Regulus Black", "Sirius Black", "Lavender Brown", "Cho Chang", "Vincent Crabbe", "Vincent Crabbe",
@@ -61,24 +76,22 @@ class Command(BaseCommand):
                  "Charlie Weasley", "Fred Weasley", "George Weasley", "Ginny Weasley", "Molly Weasley", "Percy Weasley",
                  "Ron Weasley", "Dobby", "Fluffy", "Hedwig", "Moaning Myrtle", "Aragog", "Grawp"]  # noqa
         for i, name in enumerate(names):
-            with reversion.create_revision():
-                reversion.set_user(random.choice(self.profiles))
+            pk = i + 1
+            person = models.Person(pk=pk, name=name)
 
-                newPerson = models.Person.objects.create(name=name)
-                if i % 3 == 0:
-                    newPerson.email = "address@person.com"
+            if i % 3 == 0:
+                person.email = "address@person.com"
 
-                if i % 5 == 0:
-                    newPerson.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
+            if i % 5 == 0:
+                person.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
 
-                if i % 7 == 0:
-                    newPerson.address = "1 Person Test Street \n Demoton \n United States of TEC \n RMRF 567"
+            if i % 7 == 0:
+                person.address = "1 Person Test Street \n Demoton \n United States of TEC \n RMRF 567"
 
-                if i % 9 == 0:
-                    newPerson.phone = "01234 567894"
+            if i % 9 == 0:
+                person.phone = "01234 567894"
 
-                newPerson.save()
-                self.people.append(newPerson)
+            self.people.append(person)
 
     def setupOrganisations(self):
         names = ["Acme, inc.", "Widget Corp", "123 Warehousing", "Demo Company", "Smith and Co.", "Foo Bars",
@@ -108,26 +121,25 @@ class Command(BaseCommand):
                  "Klimpys", "The Krusty Krab", "Monks Diner", "Milliways", "Minuteman Cafe", "Taco Grande",
                  "Tip Top Cafe", "Moes Tavern", "Central Perk", "Chasers"]  # noqa
         for i, name in enumerate(names):
-            with reversion.create_revision():
-                reversion.set_user(random.choice(self.profiles))
-                newOrganisation = models.Organisation.objects.create(name=name)
-                if i % 2 == 0:
-                    newOrganisation.has_su_account = True
+            pk = i + 1
+            newOrganisation = models.Organisation(pk=pk, name=name)
 
-                if i % 3 == 0:
-                    newOrganisation.email = "address@organisation.com"
+            if i % 2 == 0:
+                newOrganisation.has_su_account = True
 
-                if i % 5 == 0:
-                    newOrganisation.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
+            if i % 3 == 0:
+                newOrganisation.email = "address@organisation.com"
 
-                if i % 7 == 0:
-                    newOrganisation.address = "1 Organisation Test Street \n Demoton \n United States of TEC \n RMRF 567"
+            if i % 5 == 0:
+                newOrganisation.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
 
-                if i % 9 == 0:
-                    newOrganisation.phone = "01234 567894"
+            if i % 7 == 0:
+                newOrganisation.address = "1 Organisation Test Street \n Demoton \n United States of TEC \n RMRF 567"
 
-                newOrganisation.save()
-                self.organisations.append(newOrganisation)
+            if i % 9 == 0:
+                newOrganisation.phone = "01234 567894"
+
+            self.organisations.append(newOrganisation)
 
     def setupVenues(self):
         names = ["Bear Island", "Crossroads Inn", "Deepwood Motte", "The Dreadfort", "The Eyrie", "Greywater Watch",
@@ -143,26 +155,24 @@ class Command(BaseCommand):
                  "Qohor", "The Red Waste", "Tyrosh", "Vaes Dothrak", "Valyria", "Village of the Lhazareen", "Volantis",
                  "Yunkai"]  # noqa
         for i, name in enumerate(names):
-            with reversion.create_revision():
-                reversion.set_user(random.choice(self.profiles))
-                newVenue = models.Venue.objects.create(name=name)
-                if i % 2 == 0:
-                    newVenue.three_phase_available = True
+            pk = i + 1
+            newVenue = models.Venue(pk=pk, name=name)
+            if i % 2 == 0:
+                newVenue.three_phase_available = True
 
-                if i % 3 == 0:
-                    newVenue.email = "address@venue.com"
+            if i % 3 == 0:
+                newVenue.email = "address@venue.com"
 
-                if i % 5 == 0:
-                    newVenue.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
+            if i % 5 == 0:
+                newVenue.notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
 
-                if i % 7 == 0:
-                    newVenue.address = "1 Venue Test Street \n Demoton \n United States of TEC \n RMRF 567"
+            if i % 7 == 0:
+                newVenue.address = "1 Venue Test Street \n Demoton \n United States of TEC \n RMRF 567"
 
-                if i % 9 == 0:
-                    newVenue.phone = "01234 567894"
+            if i % 9 == 0:
+                newVenue.phone = "01234 567894"
 
-                newVenue.save()
-                self.venues.append(newVenue)
+            self.venues.append(newVenue)
 
     def setupGroups(self):
         self.keyholder_group = Group.objects.create(name='Keyholders')
@@ -200,51 +210,51 @@ class Command(BaseCommand):
         names = ["Clara Oswin Oswald", "Rory Williams", "Amy Pond", "River Song", "Martha Jones", "Donna Noble",
                  "Jack Harkness", "Mickey Smith", "Rose Tyler"]
         for i, name in enumerate(names):
-            newProfile = models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0],
-                                                       last_name=name.split(" ")[-1],
-                                                       email=name.replace(" ", "") + "@example.com",
-                                                       initials="".join([j[0].upper() for j in name.split()]))
+            pk = i + 1
+            newProfile = models.Profile(pk=pk, username=name.replace(" ", ""), first_name=name.split(" ")[0],
+                                        last_name=name.split(" ")[-1],
+                                        email=name.replace(" ", "") + "@example.com",
+                                        initials="".join([j[0].upper() for j in name.split()]))
             if i % 2 == 0:
                 newProfile.phone = "01234 567894"
 
-            newProfile.save()
             self.profiles.append(newProfile)
 
     def setupUsefulProfiles(self):
-        superUser = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User",
-                                                  initials="SU",
-                                                  email="superuser@example.com", is_superuser=True, is_active=True,
-                                                  is_staff=True)
+        superUser = models.Profile(pk=10, username="superuser", first_name="Super", last_name="User",
+                                   initials="SU",
+                                   email="superuser@example.com", is_superuser=True, is_active=True,
+                                   is_staff=True)
         superUser.set_password('superuser')
-        superUser.save()
+        self.profiles.append(superUser)
 
-        financeUser = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User",
-                                                    initials="FU",
-                                                    email="financeuser@example.com", is_active=True, is_approved=True)
+        financeUser = models.Profile(pk=11, username="finance", first_name="Finance", last_name="User",
+                                     initials="FU",
+                                     email="financeuser@example.com", is_active=True, is_approved=True)
         financeUser.groups.add(self.finance_group)
         financeUser.groups.add(self.keyholder_group)
         financeUser.set_password('finance')
-        financeUser.save()
+        self.profiles.append(financeUser)
 
-        hsUser = models.Profile.objects.create(username="hs", first_name="HS", last_name="User",
-                                               initials="HSU",
-                                               email="hsuser@example.com", is_active=True, is_approved=True)
+        hsUser = models.Profile(pk=12, username="hs", first_name="HS", last_name="User",
+                                initials="HSU",
+                                email="hsuser@example.com", is_active=True, is_approved=True)
         hsUser.groups.add(self.hs_group)
         hsUser.groups.add(self.keyholder_group)
         hsUser.set_password('hs')
-        hsUser.save()
+        self.profiles.append(hsUser)
 
-        keyholderUser = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User",
-                                                      initials="KU",
-                                                      email="keyholderuser@example.com", is_active=True, is_approved=True)
+        keyholderUser = models.Profile(pk=13, username="keyholder", first_name="Keyholder", last_name="User",
+                                       initials="KU",
+                                       email="keyholderuser@example.com", is_active=True, is_approved=True)
         keyholderUser.groups.add(self.keyholder_group)
         keyholderUser.set_password('keyholder')
-        keyholderUser.save()
+        self.profiles.append(keyholderUser)
 
-        basicUser = models.Profile.objects.create(username="basic", first_name="Basic", last_name="User", initials="BU",
-                                                  email="basicuser@example.com", is_active=True, is_approved=True)
+        basicUser = models.Profile(pk=14, username="basic", first_name="Basic", last_name="User", initials="BU",
+                                   email="basicuser@example.com", is_active=True, is_approved=True)
         basicUser.set_password('basic')
-        basicUser.save()
+        self.profiles.append(basicUser)
 
     def setupEvents(self):
         names = ["Outdoor Concert", "Hall Open Mic Night", "Festival", "Weekend Event", "Magic Show", "Society Ball",
@@ -275,99 +285,106 @@ class Command(BaseCommand):
             {'name': 'Loyalty Discount', 'description': 'Have some negative moneys', 'quantity': 1, 'cost': -50.00}]
 
         dayDelta = -120  # start adding events from 4 months ago
+        item_pk = 0
 
         for i in range(150):  # Let's add 100 events
-            with reversion.create_revision():
-                reversion.set_user(random.choice(self.profiles))
+            pk = i + 1
+            name = names[i % len(names)]
 
-                name = names[i % len(names)]
+            startDate = datetime.date.today() + datetime.timedelta(days=dayDelta)
+            dayDelta = dayDelta + random.randint(0, 3)
 
-                startDate = datetime.date.today() + datetime.timedelta(days=dayDelta)
-                dayDelta = dayDelta + random.randint(0, 3)
+            newEvent = models.Event(pk=pk, name=name, start_date=startDate)
 
-                newEvent = models.Event.objects.create(name=name, start_date=startDate)
+            if random.randint(0, 2) > 1:  # 1 in 3 have a start time
+                newEvent.start_time = datetime.time(random.randint(15, 20))
+                if random.randint(0, 2) > 1:  # of those, 1 in 3 have an end time on the same day
+                    newEvent.end_time = datetime.time(random.randint(21, 23))
+                elif random.randint(0, 1) > 0:  # half of the others finish early the next day
+                    newEvent.end_date = newEvent.start_date + datetime.timedelta(days=1)
+                    newEvent.end_time = datetime.time(random.randint(0, 5))
+            elif random.randint(0, 2) > 1:  # 1 in 3 of the others finish a few days ahead
+                newEvent.end_date = newEvent.start_date + datetime.timedelta(days=random.randint(1, 4))
 
-                if random.randint(0, 2) > 1:  # 1 in 3 have a start time
-                    newEvent.start_time = datetime.time(random.randint(15, 20))
-                    if random.randint(0, 2) > 1:  # of those, 1 in 3 have an end time on the same day
-                        newEvent.end_time = datetime.time(random.randint(21, 23))
-                    elif random.randint(0, 1) > 0:  # half of the others finish early the next day
-                        newEvent.end_date = newEvent.start_date + datetime.timedelta(days=1)
-                        newEvent.end_time = datetime.time(random.randint(0, 5))
-                elif random.randint(0, 2) > 1:  # 1 in 3 of the others finish a few days ahead
-                    newEvent.end_date = newEvent.start_date + datetime.timedelta(days=random.randint(1, 4))
+            if random.randint(0, 6) > 0:  # 5 in 6 have MIC
+                newEvent.mic = random.choice(self.profiles)
 
-                if random.randint(0, 6) > 0:  # 5 in 6 have MIC
-                    newEvent.mic = random.choice(self.profiles)
+            if random.randint(0, 6) > 0:  # 5 in 6 have organisation
+                newEvent.organisation = random.choice(self.organisations)
 
-                if random.randint(0, 6) > 0:  # 5 in 6 have organisation
-                    newEvent.organisation = random.choice(self.organisations)
+            if random.randint(0, 6) > 0:  # 5 in 6 have person
+                newEvent.person = random.choice(self.people)
 
-                if random.randint(0, 6) > 0:  # 5 in 6 have person
-                    newEvent.person = random.choice(self.people)
+            if random.randint(0, 6) > 0:  # 5 in 6 have venue
+                newEvent.venue = random.choice(self.venues)
 
-                if random.randint(0, 6) > 0:  # 5 in 6 have venue
-                    newEvent.venue = random.choice(self.venues)
+            # Could have any status, equally weighted
+            newEvent.status = random.choice(
+                [models.Event.BOOKED, models.Event.CONFIRMED, models.Event.PROVISIONAL, models.Event.CANCELLED])
 
-                # Could have any status, equally weighted
-                newEvent.status = random.choice(
-                    [models.Event.BOOKED, models.Event.CONFIRMED, models.Event.PROVISIONAL, models.Event.CANCELLED])
+            newEvent.dry_hire = (random.randint(0, 7) == 0)  # 1 in 7 are dry hire
 
-                newEvent.dry_hire = (random.randint(0, 7) == 0)  # 1 in 7 are dry hire
+            if random.randint(0, 1) > 0:  # 1 in 2 have description
+                newEvent.description = random.choice(descriptions)
 
-                if random.randint(0, 1) > 0:  # 1 in 2 have description
-                    newEvent.description = random.choice(descriptions)
+            if random.randint(0, 1) > 0:  # 1 in 2 have notes
+                newEvent.notes = random.choice(notes)
 
-                if random.randint(0, 1) > 0:  # 1 in 2 have notes
-                    newEvent.notes = random.choice(notes)
+            self.events.append(newEvent)
 
-                newEvent.save()
+            # Now add some items
+            for j in range(random.randint(1, 5)):
+                itemData = itemOptions[random.randint(0, len(itemOptions) - 1)]
+                newItem = models.EventItem(pk=item_pk, event=newEvent, order=j, **itemData)
+                item_pk += 1
+                self.event_items.append(newItem)
 
-                # Now add some items
-                for j in range(random.randint(1, 5)):
-                    itemData = itemOptions[random.randint(0, len(itemOptions) - 1)]
-                    newItem = models.EventItem.objects.create(event=newEvent, order=j, **itemData)
-                    newItem.save()
+                # while newEvent.sum_total < 0:
+                #    itemData = itemOptions[random.randint(0, len(itemOptions) - 1)]
+                #    newItem = models.EventItem(pk=pk + j + 150, event=newEvent, order=j, **itemData)
+                #    self.event_items.append(newItem)
 
-                while newEvent.sum_total < 0:
-                    itemData = itemOptions[random.randint(0, len(itemOptions) - 1)]
-                    newItem = models.EventItem.objects.create(event=newEvent, order=j, **itemData)
-                    newItem.save()
-
-            with reversion.create_revision():
-                reversion.set_user(random.choice(self.profiles))
-                if newEvent.start_date < datetime.date.today():  # think about adding an invoice
-                    if random.randint(0, 2) > 0:  # 2 in 3 have had paperwork sent to treasury
-                        newInvoice = models.Invoice.objects.create(event=newEvent)
-                        if newEvent.status is models.Event.CANCELLED:  # void cancelled events
-                            newInvoice.void = True
-                        elif random.randint(0, 2) > 1:  # 1 in 3 have been paid
-                            models.Payment.objects.create(invoice=newInvoice, amount=newInvoice.balance,
-                                                          date=datetime.date.today())
+            if newEvent.start_date < datetime.date.today():  # think about adding an invoice
+                if random.randint(0, 2) > 0:  # 2 in 3 have had paperwork sent to treasury
+                    newInvoice = models.Invoice(pk=pk, event=newEvent)
+                    if newEvent.status is models.Event.CANCELLED:  # void cancelled events
+                        newInvoice.void = True
+                    elif random.randint(0, 2) > 1:  # 1 in 3 have been paid
+                        self.payments.append(models.Payment(pk=pk, invoice=newInvoice, amount=newInvoice.balance,
+                                                            date=datetime.date.today()))
+                    self.invoices.append(newInvoice)
             if i == 1 or random.randint(0, 5) > 0:  # Event 1 and 1 in 5 have a RA
-                models.RiskAssessment.objects.create(event=newEvent, supervisor_consulted=bool(random.getrandbits(1)), nonstandard_equipment=bool(random.getrandbits(1)),
-                                                     nonstandard_use=bool(random.getrandbits(1)),
-                                                     contractors=bool(random.getrandbits(1)),
-                                                     other_companies=bool(random.getrandbits(1)),
-                                                     crew_fatigue=bool(random.getrandbits(1)),
-                                                     big_power=bool(random.getrandbits(1)),
-                                                     generators=bool(random.getrandbits(1)),
-                                                     other_companies_power=bool(random.getrandbits(1)),
-                                                     nonstandard_equipment_power=bool(random.getrandbits(1)),
-                                                     multiple_electrical_environments=bool(random.getrandbits(1)),
-                                                     noise_monitoring=bool(random.getrandbits(1)),
-                                                     known_venue=bool(random.getrandbits(1)),
-                                                     safe_loading=bool(random.getrandbits(1)),
-                                                     safe_storage=bool(random.getrandbits(1)),
-                                                     area_outside_of_control=bool(random.getrandbits(1)),
-                                                     barrier_required=bool(random.getrandbits(1)),
-                                                     nonstandard_emergency_procedure=bool(random.getrandbits(1)),
-                                                     special_structures=bool(random.getrandbits(1)),
-                                                     suspended_structures=bool(random.getrandbits(1)),
-                                                     outside=bool(random.getrandbits(1)))
+                self.ras.append(
+                    models.RiskAssessment(pk=pk, event=newEvent, supervisor_consulted=bool(random.getrandbits(1)),
+                                          nonstandard_equipment=bool(random.getrandbits(1)),
+                                          nonstandard_use=bool(random.getrandbits(1)),
+                                          contractors=bool(random.getrandbits(1)),
+                                          other_companies=bool(random.getrandbits(1)),
+                                          crew_fatigue=bool(random.getrandbits(1)),
+                                          big_power=bool(random.getrandbits(1)),
+                                          generators=bool(random.getrandbits(1)),
+                                          other_companies_power=bool(random.getrandbits(1)),
+                                          nonstandard_equipment_power=bool(random.getrandbits(1)),
+                                          multiple_electrical_environments=bool(random.getrandbits(1)),
+                                          noise_monitoring=bool(random.getrandbits(1)),
+                                          known_venue=bool(random.getrandbits(1)),
+                                          safe_loading=bool(random.getrandbits(1)),
+                                          safe_storage=bool(random.getrandbits(1)),
+                                          area_outside_of_control=bool(random.getrandbits(1)),
+                                          barrier_required=bool(random.getrandbits(1)),
+                                          nonstandard_emergency_procedure=bool(random.getrandbits(1)),
+                                          special_structures=bool(random.getrandbits(1)),
+                                          suspended_structures=bool(random.getrandbits(1)),
+                                          outside=bool(random.getrandbits(1))))
                 if i == 0 or random.randint(0, 1) > 0:  # Event 1 and 1 in 10 have a Checklist
-                    models.EventChecklist.objects.create(event=newEvent, power_mic=random.choice(self.profiles), safe_parking=bool(random.getrandbits(1)),
-                                                         safe_packing=bool(random.getrandbits(1)), exits=bool(random.getrandbits(1)), trip_hazard=bool(random.getrandbits(1)), warning_signs=bool(random.getrandbits(1)),
-                                                         ear_plugs=bool(random.getrandbits(1)), hs_location="Locked away safely",
-                                                         extinguishers_location="Somewhere, I forgot", earthing=bool(random.getrandbits(1)), pat=bool(random.getrandbits(1)),
-                                                         date=timezone.now(), venue=random.choice(self.venues))
+                    self.checklists.append(
+                        models.EventChecklist(pk=pk, event=newEvent, power_mic=random.choice(self.profiles),
+                                              safe_parking=bool(random.getrandbits(1)),
+                                              safe_packing=bool(random.getrandbits(1)),
+                                              exits=bool(random.getrandbits(1)),
+                                              trip_hazard=bool(random.getrandbits(1)),
+                                              warning_signs=bool(random.getrandbits(1)),
+                                              ear_plugs=bool(random.getrandbits(1)), hs_location="Locked away safely",
+                                              extinguishers_location="Somewhere, I forgot",
+                                              earthing=bool(random.getrandbits(1)), pat=bool(random.getrandbits(1)),
+                                              date=timezone.now(), venue=random.choice(self.venues)))
