@@ -60,6 +60,14 @@ class EventDetail(generic.DetailView):
     template_name = 'event_detail.html'
     model = models.Event
 
+    def get_context_data(self, **kwargs):
+        context = super(EventDetail, self).get_context_data(**kwargs)
+        title = "{} | {}".format(self.object.display_id, self.object.name)
+        if self.object.dry_hire:
+            title += " <span class='badge badge-secondary'>Dry Hire</span>"
+        context['page_title'] = title
+        return context
+
 
 class EventEmbed(EventDetail):
     template_name = 'event_embed.html'
@@ -173,15 +181,9 @@ class EventPrint(generic.View):
 
         context = {
             'object': object,
-            'fonts': {
-                'opensans': {
-                    'regular': 'static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'static/fonts/OPENSANS-BOLD.TTF',
-                }
-            },
             'quote': True,
             'current_user': request.user,
-            'filename': 'Event {} {} {}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
+            'filename': 'Event_{}_{}_{}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
         }
 
         rml = template.render(context)

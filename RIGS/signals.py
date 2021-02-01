@@ -25,12 +25,6 @@ def send_eventauthorisation_success_email(instance):
     # Generate PDF first to prevent context conflicts
     context = {
         'object': instance.event,
-        'fonts': {
-            'opensans': {
-                'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-            }
-        },
         'receipt': True,
         'current_user': False,
     }

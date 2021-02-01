@@ -67,12 +67,6 @@ class InvoicePrint(generic.View):
 
         context = {
             'object': object,
-            'fonts': {
-                'opensans': {
-                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-                }
-            },
             'invoice': invoice,
             'current_user': request.user,
             'filename': 'Invoice {} for {} {}.pdf'.format(invoice.display_id, object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name))

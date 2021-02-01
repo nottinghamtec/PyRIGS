@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-{% load multiply from filters %}
-{% load static %}
 <!DOCTYPE document SYSTEM "rml.dtd">
 
 <document filename="{{filename}}">
     <docinit>
-        <registerTTFont faceName="OpenSans" fileName="{{ fonts.opensans.regular }}"/>
-        <registerTTFont faceName="OpenSans-Bold" fileName="{{ fonts.opensans.bold }}"/>
+        <registerTTFont faceName="OpenSans" fileName="static/fonts/OpenSans-Regular.tff"/>
+        <registerTTFont faceName="OpenSans-Bold" fileName="static/fonts/OpenSans-Bold.tff"/>
         <registerFontFamily name="OpenSans" bold="OpenSans-Bold" boldItalic="OpenSans-Bold"/>
     </docinit>
 
@@ -82,11 +80,11 @@
     <template > {# Note: page is 595x842 points (1 point=1/72in) #}
             <pageTemplate id="Headed" >
                 <pageGraphics>
-                    <image file="RIGS/static/imgs/paperwork/corner-tr-su.jpg" x="395" y="642" height="200" width="200"/>
-                    <image file="RIGS/static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
+                    <image file="static/imgs/paperwork/corner-tr-su.jpg" x="395" y="642" height="200" width="200"/>
+                    <image file="static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
 
                     {# logo positioned 42 from left, 33 from top #}
-                    <image file="RIGS/static/imgs/paperwork/tec-logo.jpg" x="42" y="719" height="90" width="84"/>
+                    <image file="static/imgs/paperwork/tec-logo.jpg" x="42" y="719" height="90" width="84"/>
 
                     <setFont name="OpenSans-Bold" size="22.5" leading="10"/>
                     <drawString x="137" y="780">TEC PA &amp; Lighting</drawString>
@@ -110,8 +108,8 @@
 
             <pageTemplate id="Main">
                 <pageGraphics>
-                    <image file="RIGS/static/imgs/paperwork/corner-tr.jpg" x="395" y="642" height="200" width="200"/>
-                    <image file="RIGS/static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
+                    <image file="static/imgs/paperwork/corner-tr.jpg" x="395" y="642" height="200" width="200"/>
+                    <image file="static/imgs/paperwork/corner-bl.jpg" x="0" y="0" height="200" width="200"/>
 
                     <setFont name="OpenSans" size="10"/>
                     <drawCenteredString x="302.5" y="38">[Page <pageNumber/> of <getName id="lastPage" default="0" />]</drawCenteredString>

@@ -233,7 +233,7 @@ USE_TZ = True
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_DIRS = [
@@ -242,8 +242,6 @@ STATIC_DIRS = [
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'pipeline/built_assets'),
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WHITENOISE_KEEP_ONLY_HASHED_FILES=True
 
 TEMPLATES = [
     {

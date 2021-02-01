@@ -2,17 +2,9 @@
 {% load linkornone from filters %}
 {% load namewithnotes from filters %}
 
-{% block title %}{% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %} | {{object.name}}{% endblock %}
-
 {% block content %}
 <div class="row my-3 py-3">
     {% if not request.is_ajax %}
-        <div class="col-sm-12">
-                <h1>
-                    {% if object.is_rig %}N{{ object.pk|stringformat:"05d" }}{% else %}{{ object.pk }}{% endif %}
-                    | {{ object.name }} {% if event.dry_hire %}<span class="badge badge-secondary">Dry Hire</span>{% endif %}
-                </h1>
-        </div>
         {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'event_detail_buttons.html' %}

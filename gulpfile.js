@@ -2,7 +2,7 @@
 
 var gulp = require('gulp');
 
-const terser = require('gulp-terser');
+const terser = require('gulp-uglify');
 const sass = require('gulp-sass');
 const flatten = require('gulp-flatten');
 const autoprefixer = require('autoprefixer')
@@ -62,7 +62,7 @@ function scripts() {
 }
 
 function browserSync(done) {
-  spawn('python', ['manage.py', 'runserver', '--nostatic'], {stdio: 'inherit'});
+  spawn('python', ['manage.py', 'runserver', '--nostatic'/*For Whitenoise, better matches prod */], {stdio: 'inherit'});
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
     notify: true,
