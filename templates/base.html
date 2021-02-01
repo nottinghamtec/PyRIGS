@@ -14,7 +14,7 @@
 
     <link rel="icon" type="image/png" href="{% static 'imgs/pyrigs-avatar.png' %}">
     <link rel="apple-touch-icon" href="{% static 'imgs/pyrigs-avatar.png' %}">
-    <link href='{% static 'fonts/OPENSANS-REGULAR.TTF' %}'>
+    <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
     {% block css %}
@@ -34,7 +34,10 @@
 <a class="skip-link" href='#main'>Skip to content</a>
 {% include "analytics.html" %}
 {% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark flex-nowrap" role="navigation">
+  <a class="navbar-brand" href="#">
+    <img src="{% static 'imgs/logo.png' %}" width="40" height="40" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings">
+  </a>
   <div class="container">
       {% block titleheader %}
       {% endblock %}
