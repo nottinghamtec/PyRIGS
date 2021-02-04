@@ -2,6 +2,7 @@ from datetime import date, timedelta, datetime, time
 from decimal import *
 
 import pytz
+import pytest
 from django.conf import settings
 from django.test import TestCase
 from reversion import revisions as reversion
@@ -9,30 +10,22 @@ from reversion import revisions as reversion
 from RIGS import models
 
 
-class ProfileTestCase(TestCase):
-    def test_str(self):
-        profile = models.Profile(first_name='Test', last_name='Case')
-        self.assertEqual(str(profile), 'Test Case')
-        profile.initials = 'TC'
-        self.assertEqual(str(profile), 'Test Case "TC"')
+def test_str():
+    profile = models.Profile(first_name='Test', last_name='Case')
+    assert str(profile) == 'Test Case'
+    profile.initials = 'TC'
+    assert str(profile) == 'Test Case "TC"'
 
 
-class VatRateTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.rates = {
-            0: models.VatRate.objects.create(start_at='2014-03-01', rate=0.20, comment='test1'),
-            1: models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2'),
-        }
+@pytest.mark.django_db
+def test_find_correct(vat_rate):
+    new_rate = models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2')
+    assert str(models.VatRate.objects.find_rate('2015-03-01')) == vat_rate
+    assert str(models.VatRate.objects.find_rate('2016-03-01')) == new_rate
 
-    def test_find_correct(self):
-        r = models.VatRate.objects.find_rate('2015-03-01')
-        self.assertEqual(r, self.rates[0])
-        r = models.VatRate.objects.find_rate('2016-03-01')
-        self.assertEqual(r, self.rates[1])
 
-    def test_percent_correct(self):
-        self.assertEqual(self.rates[0].as_percent, 20)
+def test_percent_correct(vat_rate):
+    assert vat_rate.as_percent == 20
 
 
 class EventTestCase(TestCase):
@@ -41,7 +34,6 @@ class EventTestCase(TestCase):
         cls.all_events = set(range(1, 18))
         cls.current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
         cls.not_current_events = set(cls.all_events) - set(cls.current_events)
-
         cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com")
 
@@ -331,7 +323,6 @@ class EventItemTestCase(TestCase):
 
 class EventPricingTestCase(TestCase):
     def setUp(self):
-        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
         models.VatRate.objects.create(rate=0.10, comment="TP V2", start_at=date.today() - timedelta(days=1))
         self.e1 = models.Event.objects.create(name="TP E1", start_date=date.today() - timedelta(days=2))
         self.e2 = models.Event.objects.create(name="TP E2", start_date=date.today())
@@ -364,7 +355,6 @@ class EventPricingTestCase(TestCase):
 
 class EventAuthorisationTestCase(TestCase):
     def setUp(self):
-        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
         self.profile = models.Profile.objects.get_or_create(
             first_name='Test',
             last_name='TEC User',
