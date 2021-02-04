@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls, assert_times_equal
+from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls, assert_times_almost_equal
 from PyRIGS.tests.pages import animation_is_finished
 from assets import models
 from . import pages
@@ -319,7 +319,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertEqual(self.asset.description, new_desc)
         # Make sure audit 'log' was filled out
         self.assertEqual(self.profile.initials, self.asset.last_audited_by.initials)
-        assert_times_equal(submit_time, self.asset.last_audited_at)
+        assert_times_almost_equal(submit_time, self.asset.last_audited_at)
         # Check we've removed it from the 'needing audit' list
         self.assertNotIn(self.asset.asset_id, self.page.assets)
 

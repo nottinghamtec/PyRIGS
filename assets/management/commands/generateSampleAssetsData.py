@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
     def create_assets(self):
         asset_description = ['Large cable', 'Shiny thing', 'New lights', 'Really expensive microphone', 'Box of fuse flaps', 'Expensive tool we didn\'t agree to buy', 'Cable drums', 'Boring amount of tape', 'Video stuff no one knows how to use', 'More amplifiers', 'Heatshrink']
-        pk = 9000
+        pk = 1
         for i in range(100):
             asset = models.Asset(
                 pk=pk,
@@ -89,7 +89,7 @@ class Command(BaseCommand):
 
         csas = [0.75, 1.00, 1.25, 2.5, 4]
         lengths = [1, 2, 5, 10, 15, 20, 25, 30, 50, 100]
-        pk = 200  # Offset to avoid other asset IDs
+        pk = 9000  # Offset to avoid other asset IDs
         for i in range(100):
             asset = models.Asset(
                 pk=pk,

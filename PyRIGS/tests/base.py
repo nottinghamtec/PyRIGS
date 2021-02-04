@@ -86,14 +86,14 @@ def screenshot_failure_cls(cls):
     return cls
 
 
-def assert_times_equal(first_time, second_time):
+def assert_times_almost_equal(first_time, second_time):
     assert first_time.replace(microsecond=0, second=0) == second_time.replace(microsecond=0, second=0)
 
 
 def assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, event_url, oembed_url):
     # Test the meta tag is in place
     response = client.get(event_url, follow=True, HTTP_HOST='example.com')
-    assertContains(response, '<link rel="alternate" type="application/json+oembed"')
+    assertContains(response, 'application/json+oembed')
     assertContains(response, oembed_url)
     # Test that the JSON exists
     response = client.get(oembed_url, follow=True, HTTP_HOST='example.com')
@@ -108,7 +108,8 @@ def assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, 
 def login(client, django_user_model):
     pwd = 'testuser'
     usr = 'TestUser'
-    user = django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd, is_superuser=True,
-                                          is_active=True, is_staff=True)
+    user = django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd,
+                                                 is_superuser=True,
+                                                 is_active=True, is_staff=True)
     assert client.login(username=usr, password=pwd)
     return user

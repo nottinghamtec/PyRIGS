@@ -17,17 +17,12 @@ class Command(BaseCommand):
     people = []
     organisations = []
     venues = []
-    profiles = []
     events = []
     event_items = []
     invoices = []
     payments = []
     ras = []
     checklists = []
-
-    keyholder_group = None
-    finance_group = None
-    hs_group = None
 
     def handle(self, *args, **options):
         from django.conf import settings
@@ -41,19 +36,12 @@ class Command(BaseCommand):
         with transaction.atomic():
             models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
 
-            # self.setupGenericProfiles()
-            self.setupUsefulProfiles()
-            models.Profile.objects.bulk_create(self.profiles)
-
             self.setupPeople()
             models.Person.objects.bulk_create(self.people)
             self.setupOrganisations()
             models.Organisation.objects.bulk_create(self.organisations)
             self.setupVenues()
             models.Venue.objects.bulk_create(self.venues)
-
-            self.setupGroups()
-
             self.setupEvents()
             models.Event.objects.bulk_create(self.events)
             models.EventItem.objects.bulk_create(self.event_items)
@@ -175,88 +163,6 @@ class Command(BaseCommand):
 
             self.venues.append(newVenue)
 
-    def setupGroups(self):
-        self.keyholder_group = Group.objects.create(name='Keyholders')
-        self.finance_group = Group.objects.create(name='Finance')
-        self.hs_group = Group.objects.create(name='H&S')
-
-        keyholderPerms = ["add_event", "change_event", "view_event",
-                          "add_eventitem", "change_eventitem", "delete_eventitem",
-                          "add_organisation", "change_organisation", "view_organisation",
-                          "add_person", "change_person", "view_person", "view_profile",
-                          "add_venue", "change_venue", "view_venue",
-                          "add_asset", "change_asset", "delete_asset",
-                          "view_asset", "view_supplier", "change_supplier", "asset_finance",
-                          "add_supplier", "view_cabletype", "change_cabletype",
-                          "add_cabletype", "view_eventchecklist", "change_eventchecklist",
-                          "add_eventchecklist", "view_riskassessment", "change_riskassessment",
-                          "add_riskassessment", "add_eventchecklistcrew", "change_eventchecklistcrew",
-                          "delete_eventchecklistcrew", "view_eventchecklistcrew", "add_eventchecklistvehicle",
-                          "change_eventchecklistvehicle",
-                          "delete_eventchecklistvehicle", "view_eventchecklistvehicle", ]
-        financePerms = keyholderPerms + ["add_invoice", "change_invoice", "view_invoice",
-                                         "add_payment", "change_payment", "delete_payment"]
-        hsPerms = keyholderPerms + ["review_riskassessment", "review_eventchecklist"]
-
-        for permId in keyholderPerms:
-            self.keyholder_group.permissions.add(Permission.objects.get(codename=permId))
-
-        for permId in financePerms:
-            self.finance_group.permissions.add(Permission.objects.get(codename=permId))
-
-        for permId in hsPerms:
-            self.hs_group.permissions.add(Permission.objects.get(codename=permId))
-
-    def setupGenericProfiles(self):
-        names = ["Clara Oswin Oswald", "Rory Williams", "Amy Pond", "River Song", "Martha Jones", "Donna Noble",
-                 "Jack Harkness", "Mickey Smith", "Rose Tyler"]
-        for i, name in enumerate(names):
-            pk = i + 1
-            newProfile = models.Profile(pk=pk, username=name.replace(" ", ""), first_name=name.split(" ")[0],
-                                        last_name=name.split(" ")[-1],
-                                        email=name.replace(" ", "") + "@example.com",
-                                        initials="".join([j[0].upper() for j in name.split()]))
-            if i % 2 == 0:
-                newProfile.phone = "01234 567894"
-
-            self.profiles.append(newProfile)
-
-    def setupUsefulProfiles(self):
-        superUser = models.Profile(pk=995, username="superuser", first_name="Super", last_name="User",
-                                   initials="SU",
-                                   email="superuser@example.com", is_superuser=True, is_active=True,
-                                   is_staff=True)
-        superUser.set_password('superuser')
-        self.profiles.append(superUser)
-
-        financeUser = models.Profile(pk=996, username="finance", first_name="Finance", last_name="User",
-                                     initials="FU",
-                                     email="financeuser@example.com", is_active=True, is_approved=True)
-        financeUser.groups.add(self.finance_group)
-        financeUser.groups.add(self.keyholder_group)
-        financeUser.set_password('finance')
-        self.profiles.append(financeUser)
-
-        hsUser = models.Profile(pk=997, username="hs", first_name="HS", last_name="User",
-                                initials="HSU",
-                                email="hsuser@example.com", is_active=True, is_approved=True)
-        hsUser.groups.add(self.hs_group)
-        hsUser.groups.add(self.keyholder_group)
-        hsUser.set_password('hs')
-        self.profiles.append(hsUser)
-
-        keyholderUser = models.Profile(pk=998, username="keyholder", first_name="Keyholder", last_name="User",
-                                       initials="KU",
-                                       email="keyholderuser@example.com", is_active=True, is_approved=True)
-        keyholderUser.groups.add(self.keyholder_group)
-        keyholderUser.set_password('keyholder')
-        self.profiles.append(keyholderUser)
-
-        basicUser = models.Profile(pk=999, username="basic", first_name="Basic", last_name="User", initials="BU",
-                                   email="basicuser@example.com", is_active=True, is_approved=True)
-        basicUser.set_password('basic')
-        self.profiles.append(basicUser)
-
     def setupEvents(self):
         names = ["Outdoor Concert", "Hall Open Mic Night", "Festival", "Weekend Event", "Magic Show", "Society Ball",
                  "Evening Show", "Talent Show", "Acoustic Evening", "Hire of Things", "SU Event",
@@ -308,7 +214,7 @@ class Command(BaseCommand):
                 newEvent.end_date = newEvent.start_date + datetime.timedelta(days=random.randint(1, 4))
 
             if random.randint(0, 6) > 0:  # 5 in 6 have MIC
-                newEvent.mic = random.choice(self.profiles)
+                newEvent.mic = random.choice(models.Profile.objects.all())
 
             if random.randint(0, 6) > 0:  # 5 in 6 have organisation
                 newEvent.organisation = random.choice(self.organisations)
@@ -379,7 +285,7 @@ class Command(BaseCommand):
                                           outside=bool(random.getrandbits(1))))
                 if i == 0 or random.randint(0, 1) > 0:  # Event 1 and 1 in 10 have a Checklist
                     self.checklists.append(
-                        models.EventChecklist(pk=pk, event=newEvent, power_mic=random.choice(self.profiles),
+                        models.EventChecklist(pk=pk, event=newEvent, power_mic=random.choice(models.Profile.objects.all()),
                                               safe_parking=bool(random.getrandbits(1)),
                                               safe_packing=bool(random.getrandbits(1)),
                                               exits=bool(random.getrandbits(1)),

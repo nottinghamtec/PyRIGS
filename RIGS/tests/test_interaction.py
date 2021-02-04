@@ -313,7 +313,7 @@ class TestEventDuplicate(BaseRigboardTest):
 
         self.assertFalse(newEvent.authorised)
 
-        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h1').text)
+        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h2').text)
         self.assertNotIn("Event data duplicated but not yet saved", self.page.warning)  # Check info message not visible
 
         # Check the new items are visible

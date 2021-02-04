@@ -9,7 +9,7 @@ from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
 import PyRIGS.tests.test_unit
-from PyRIGS.tests.base import assert_times_equal, assert_oembed, login
+from PyRIGS.tests.base import assert_times_almost_equal, assert_oembed, login
 from RIGS import models
 
 import pytest
@@ -262,10 +262,6 @@ class TestPrintPaperwork(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-def create_event():
-    return models.Event.objects.create(name="TE E1", start_date=date.today())
-
-
 def test_login_redirect(client, django_user_model):
     request_url = reverse('event_embed', kwargs={'pk': 1})
     expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
@@ -288,9 +284,8 @@ def test_login_cookie_warning(client):
     assertContains(response, "Cookies do not seem to be enabled")
 
 
-def test_xframe_headers(admin_client):
-    event = create_event()
-    event_url = reverse('event_embed', kwargs={'pk': event.pk})
+def test_xframe_headers(admin_client, basic_event):
+    event_url = reverse('event_embed', kwargs={'pk': basic_event.pk})
     login_url = reverse('login_embed')
 
     response = admin_client.get(event_url, follow=True)
@@ -302,11 +297,10 @@ def test_xframe_headers(admin_client):
         response._headers["X-Frame-Options"]
 
 
-def test_oembed(client):
-    event = create_event()
-    event_url = reverse('event_detail', kwargs={'pk': event.pk})
-    event_embed_url = reverse('event_embed', kwargs={'pk': event.pk})
-    oembed_url = reverse('event_oembed', kwargs={'pk': event.pk})
+def test_oembed(client, basic_event):
+    event_url = reverse('event_detail', kwargs={'pk': basic_event.pk})
+    event_embed_url = reverse('event_embed', kwargs={'pk': basic_event.pk})
+    oembed_url = reverse('event_oembed', kwargs={'pk': basic_event.pk})
 
     alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
     alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
@@ -413,7 +407,7 @@ def review(client, profile, obj, request_url):
     obj.refresh_from_db()
     assertContains(response, 'Reviewed by')
     assertContains(response, profile.name)
-    assert_times_equal(time, obj.reviewed_at)
+    assert_times_almost_equal(time, obj.reviewed_at)
 
 
 def test_ra_review(admin_client, admin_user):

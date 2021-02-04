@@ -20,8 +20,10 @@ def test_str():
 @pytest.mark.django_db
 def test_find_correct(vat_rate):
     new_rate = models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2')
-    assert str(models.VatRate.objects.find_rate('2015-03-01')) == vat_rate
-    assert str(models.VatRate.objects.find_rate('2016-03-01')) == new_rate
+    r = models.VatRate.objects.find_rate('2015-03-01')
+    assert r == vat_rate
+    r = models.VatRate.objects.find_rate('2016-03-01')
+    assert r == new_rate
 
 
 def test_percent_correct(vat_rate):

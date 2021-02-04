@@ -4,13 +4,14 @@ from django.contrib.auth.models import Group
 from assets import models
 from RIGS import models as rigsmodels
 
+
 class Command(BaseCommand):
     help = 'Deletes testing sample data'
 
     def handle(self, *args, **kwargs):
         from django.conf import settings
 
-        if not (settings.DEBUG):
+        if not settings.DEBUG:
             raise CommandError('You cannot run this command in production')
 
         self.delete_objects(models.AssetCategory)

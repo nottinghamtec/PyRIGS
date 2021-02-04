@@ -34,14 +34,12 @@ def get_request_url(url):
         print("Couldn't test url " + pattern)
 
 
-
 @pytest.fixture(scope='session')
 def django_db_setup(django_db_setup, django_db_blocker):
-   with django_db_blocker.unblock():
+    with django_db_blocker.unblock():
         from django.conf import settings
         settings.DEBUG = True
-        call_command('generateSampleRIGSData')  # We need stuff setup so we don't get 404 errors everywhere
-        create_asset_one()
+        call_command('generateSampleData')  # We need stuff setup so we don't get 404 errors everywhere
         settings.DEBUG = False
 
 
@@ -68,7 +66,17 @@ def test_page_titles(admin_client):
         if hasattr(response, "context_data") and "page_title" in response.context_data:
             expected_title = striptags(response.context_data["page_title"])
             # try:
-            assertInHTML('<title>{} | Rig Information Gathering System'.format(expected_title), response.content.decode())
+            assertInHTML('<title>{} | Rig Information Gathering System'.format(expected_title),
+                         response.content.decode())
             print("{} | {}".format(request_url, expected_title))  # If test fails, tell me where!
             # except:
             #    print(response.content.decode(), file=open('output.html', 'w'))
+
+
+@pytest.mark.django_db(transaction=True)
+def test_delete_sample_data(settings):
+    settings.DEBUG = True
+    call_command('deleteSampleData')
+
+    assert models.Asset.objects.all().count() == 0
+    assert models.Supplier.objects.all().count() == 0
