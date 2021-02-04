@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-import time
+
+from RIGS import models
 
 class Command(BaseCommand):
     help = 'Adds sample data to use for testing'
@@ -9,3 +10,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         call_command('generateSampleRIGSData')
         call_command('generateSampleAssetsData')
+        # call_command('createinitialrevisions') TODO

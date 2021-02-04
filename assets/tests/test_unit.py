@@ -2,35 +2,16 @@ import datetime
 
 import pytest
 from django.core.management import call_command
+from django.test import override_settings
 from django.test.utils import override_settings
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains
 
-from assets import models, urls
+from PyRIGS.tests.base import assert_oembed, login
 
-pytestmark = pytest.mark.django_db  # TODO
+from assets import models
 
-
-def login(client, django_user_model):
-    pwd = 'testuser'
-    usr = "TestUser"
-    django_user_model.objects.create_user(username=usr, email="TestUser@test.com", password=pwd, is_superuser=True, is_active=True, is_staff=True)
-    assert client.login(username=usr, password=pwd)
-
-
-def create_test_asset():
-    working = models.AssetStatus.objects.create(name="Working", should_show=True)
-    lighting = models.AssetCategory.objects.create(name="Lighting")
-    asset = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=working, category=lighting, date_acquired=datetime.date(1991, 12, 26))
-    return asset
-
-
-def create_test_cable():
-    category = models.AssetCategory.objects.create(name="Sound")
-    status = models.AssetStatus.objects.create(name="Broken", should_show=True)
-    connector = models.Connector.objects.create(description="16A IEC", current_rating=16, voltage_rating=240, num_pins=3)
-    cable_type = models.CableType.objects.create(circuits=11, cores=3, plug=connector, socket=connector)
-    return models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=status, category=category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, cable_type=cable_type, length=10, csa="1.5")
+pytestmark = pytest.mark.django_db
 
 
 def test_supplier_create(client, django_user_model):
@@ -103,20 +84,7 @@ def test_oembed(client):
     alt_oembed_url = reverse('asset_oembed', kwargs={'pk': 999})
     alt_asset_embed_url = reverse('asset_embed', kwargs={'pk': 999})
 
-    # Test the meta tag is in place
-    response = client.get(asset_url, follow=True, HTTP_HOST='example.com')
-    assert '<link rel="alternate" type="application/json+oembed"' in str(response.content)
-    assertContains(response, oembed_url)
-
-    # Test that the JSON exists
-    response = client.get(oembed_url, follow=True, HTTP_HOST='example.com')
-    assert response.status_code == 200
-    assertContains(response, asset_embed_url)
-
-    # Should also work for non-existant
-    response = client.get(alt_oembed_url, follow=True, HTTP_HOST='example.com')
-    assert response.status_code == 200
-    assertContains(response, alt_asset_embed_url)
+    assert_oembed(alt_asset_embed_url, alt_oembed_url, client, asset_embed_url, asset_url, oembed_url)
 
 
 @override_settings(DEBUG=True)
@@ -149,38 +117,23 @@ def test_asset_create(client, django_user_model):
     login(client, django_user_model)
     response = client.post(reverse('asset_create'), {'date_sold': '2000-01-01', 'date_acquired': '2020-01-01', 'purchase_price': '-30', 'salvage_value': '-30'})
     assertFormError(response, 'form', 'asset_id', 'This field is required.')
-    assertFormError(response, 'form', 'description', 'This field is required.')
-    assertFormError(response, 'form', 'status', 'This field is required.')
-    assertFormError(response, 'form', 'category', 'This field is required.')
-
-    assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
-    assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
-    assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+    assert_asset_form_errors(response)
 
 
 def test_cable_create(client, django_user_model):
     login(client, django_user_model)
     response = client.post(reverse('asset_create'), {'asset_id': 'X$%A', 'is_cable': True})
     assertFormError(response, 'form', 'asset_id', 'An Asset ID can only consist of letters and numbers, with a final number')
-
     assertFormError(response, 'form', 'cable_type', 'A cable must have a type')
     assertFormError(response, 'form', 'length', 'The length of a cable must be more than 0')
     assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
-
-# Given that validation is done at model level it *shouldn't* need retesting...gonna do it anyway!
 
 
 def test_asset_edit(client, django_user_model):
     login(client, django_user_model)
     url = reverse('asset_update', kwargs={'pk': create_test_asset().asset_id})
     response = client.post(url, {'date_sold': '2000-12-01', 'date_acquired': '2020-12-01', 'purchase_price': '-50', 'salvage_value': '-50', 'description': "", 'status': "", 'category': ""})
-    # assertFormError(response, 'form', 'asset_id', 'This field is required.')
-    assertFormError(response, 'form', 'description', 'This field is required.')
-    assertFormError(response, 'form', 'status', 'This field is required.')
-    assertFormError(response, 'form', 'category', 'This field is required.')
-    assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
-    assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
-    assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+    assert_asset_form_errors(response)
 
 
 def test_cable_edit(client, django_user_model):
@@ -204,17 +157,7 @@ def test_asset_duplicate(client, django_user_model):
     assertFormError(response, 'form', 'csa', 'The CSA of a cable must be more than 0')
 
 
-@override_settings(DEBUG=True)
-def create_asset_one():
-    # Shortcut to create the levels - bonus side effect of testing the command (hopefully) matches production
-    call_command('generateSampleData')
-    # Create an asset with ID 1 to make things easier in loops (we can always use pk=1)
-    category = models.AssetCategory.objects.create(name="Number One")
-    status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
-    return models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=status, category=category, date_acquired=datetime.date(2020, 2, 1))
-
-
-def test_basic_access(client):
+def test_basic_access(client, django_user_model):
     create_asset_one()
     client.login(username="basic", password="basic")
 
@@ -244,7 +187,7 @@ def test_basic_access(client):
     assert response.status_code == 403
 
 
-def test_keyholder_access(client):
+def test_keyholder_access(client, django_user_model):
     create_asset_one()
     client.login(username="keyholder", password="keyholder")
 
@@ -258,3 +201,37 @@ def test_keyholder_access(client):
     response = client.get(url)
     assertContains(response, 'Purchase Details')
     assertContains(response, 'View Revision History')
+
+
+@override_settings(DEBUG=True)
+def create_asset_one():
+    # Shortcut to create the levels - bonus side effect of testing the command (hopefully) matches production
+    call_command('generateSampleAssetsData')
+    # Create an asset with ID 1 to make things easier in loops (we can always use pk=1)
+    category = models.AssetCategory.objects.create(name="Number One")
+    status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
+    return models.Asset.objects.create(asset_id="1", description="Half Price Fish", status=status, category=category, date_acquired=datetime.date(2020, 2, 1))
+
+
+def assert_asset_form_errors(response):
+    assertFormError(response, 'form', 'description', 'This field is required.')
+    assertFormError(response, 'form', 'status', 'This field is required.')
+    assertFormError(response, 'form', 'category', 'This field is required.')
+    assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
+    assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
+    assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+
+
+def create_test_cable():
+    category = models.AssetCategory.objects.create(name="Sound")
+    status = models.AssetStatus.objects.create(name="Broken", should_show=True)
+    connector = models.Connector.objects.create(description="16A IEC", current_rating=16, voltage_rating=240, num_pins=3)
+    cable_type = models.CableType.objects.create(circuits=11, cores=3, plug=connector, socket=connector)
+    return models.Asset.objects.create(asset_id="666", description="125A -> Jack", comments="The cable from Hell...", status=status, category=category, date_acquired=datetime.date(2006, 6, 6), is_cable=True, cable_type=cable_type, length=10, csa="1.5")
+
+
+def create_test_asset():
+    working = models.AssetStatus.objects.create(name="Working", should_show=True)
+    lighting = models.AssetCategory.objects.create(name="Lighting")
+    asset = models.Asset.objects.create(asset_id="1991", description="Spaceflower", status=working, category=lighting, date_acquired=datetime.date(1991, 12, 26))
+    return asset

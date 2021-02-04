@@ -1,15 +1,12 @@
 from datetime import date
 
 from django.test import TestCase
-from django.urls import reverse
 from reversion import revisions as reversion
 
 from RIGS import models
-from assets import models as amodels
 from versioning import versioning
 
 
-# Model Tests
 class RIGSVersionTestCase(TestCase):
     def setUp(self):
         models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
@@ -41,11 +38,11 @@ class RIGSVersionTestCase(TestCase):
 
     def test_find_parent_version(self):
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
-        self.assertEqual(currentVersion._object_version.object.notes, "A new note on the event")
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        self.assertEqual(current_version._object_version.object.notes, "A new note on the event")
 
         # Check the prev version is loaded correctly
-        previousVersion = currentVersion.parent
+        previousVersion = current_version.parent
         self.assertEqual(previousVersion._object_version.object.notes, None)
 
         # Check that finding the parent of the first version fails gracefully
@@ -140,14 +137,14 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
 
-        diffs = currentVersion.changes.item_changes
+        diffs = current_version.changes.item_changes
 
         self.assertEqual(len(diffs), 1)
-        self.assertTrue(currentVersion.changes.items_changed)
-        self.assertFalse(currentVersion.changes.fields_changed)
-        self.assertTrue(currentVersion.changes.anything_changed)
+        self.assertTrue(current_version.changes.items_changed)
+        self.assertFalse(current_version.changes.fields_changed)
+        self.assertTrue(current_version.changes.anything_changed)
 
         self.assertTrue(diffs[0].old is None)
         self.assertEqual(diffs[0].new.name, "TI I1")
@@ -159,9 +156,9 @@ class RIGSVersionTestCase(TestCase):
             item1.save()
             self.event.save()
 
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
 
-        diffs = currentVersion.changes.item_changes
+        diffs = current_version.changes.item_changes
 
         self.assertEqual(len(diffs), 1)
 
@@ -169,7 +166,7 @@ class RIGSVersionTestCase(TestCase):
         self.assertEqual(diffs[0].new.name, "New Name")
 
         # Check the diff
-        self.assertEqual(currentVersion.changes.item_changes[0].field_changes[0].diff,
+        self.assertEqual(current_version.changes.item_changes[0].field_changes[0].diff,
                          [{'type': 'delete', 'text': "TI I1"},
                           {'type': 'insert', 'text': "New Name"},
                           ])
@@ -181,125 +178,14 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
 
-        diffs = currentVersion.changes.item_changes
+        diffs = current_version.changes.item_changes
 
         self.assertEqual(len(diffs), 1)
-        self.assertTrue(currentVersion.changes.items_changed)
-        self.assertFalse(currentVersion.changes.fields_changed)
-        self.assertTrue(currentVersion.changes.anything_changed)
+        self.assertTrue(current_version.changes.items_changed)
+        self.assertFalse(current_version.changes.fields_changed)
+        self.assertTrue(current_version.changes.anything_changed)
 
         self.assertEqual(diffs[0].old.name, "New Name")
         self.assertTrue(diffs[0].new is None)
-
-# Unit Tests
-
-
-class TestVersioningViews(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
-                                                    is_active=True, is_staff=True)
-
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
-        cls.events = {}
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.events[1] = models.Event.objects.create(name="TE E1", start_date=date.today())
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.events[2] = models.Event.objects.create(name="TE E2", start_date='2014-03-05')
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.events[1].description = "A test description"
-            cls.events[1].save()
-
-        working = amodels.AssetStatus.objects.create(name="Working", should_show=True)
-        broken = amodels.AssetStatus.objects.create(name="Broken", should_show=False)
-        general = amodels.AssetCategory.objects.create(name="General")
-        lighting = amodels.AssetCategory.objects.create(name="Lighting")
-
-        cls.assets = {}
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1] = amodels.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=date.today())
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[2] = amodels.Asset.objects.create(asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=date.today())
-
-        with reversion.create_revision():
-            reversion.set_user(cls.profile)
-            cls.assets[1].status = working
-            cls.assets[1].save()
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-    def test_history_loads_successfully(self):
-        request_url = reverse('event_history', kwargs={'pk': self.events[1].pk})
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        request_url = reverse('asset_history', kwargs={'pk': self.assets[1].asset_id})
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-    def test_activity_feed_loads_successfully(self):
-        request_url = reverse('activity_feed')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-    def test_activity_table_loads_successfully(self):
-        request_url = reverse('activity_table')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        request_url = reverse('assets_activity_table')
-
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-    # Some edge cases that have caused server errors in the past
-    def test_deleted_event(self):
-        request_url = reverse('activity_feed')
-
-        self.events[2].delete()
-
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, "TE E2")
-        self.assertEqual(response.status_code, 200)
-
-    def test_deleted_relation(self):
-        request_url = reverse('activity_feed')
-
-        with reversion.create_revision():
-            person = models.Person.objects.create(name="Test Person")
-        with reversion.create_revision():
-            self.events[1].person = person
-            self.events[1].save()
-
-        # Check response contains person
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, "Test Person")
-        self.assertEqual(response.status_code, 200)
-
-        # Delete person
-        person.delete()
-
-        # Check response still contains person
-        response = self.client.get(request_url, follow=True)
-        self.assertContains(response, "Test Person")
-        self.assertEqual(response.status_code, 200)

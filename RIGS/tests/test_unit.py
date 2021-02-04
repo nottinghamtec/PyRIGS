@@ -8,8 +8,13 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
-from PyRIGS.tests.base import assert_times_equal
+import PyRIGS.tests.test_unit
+from PyRIGS.tests.base import assert_times_equal, assert_oembed, login
 from RIGS import models
+
+import pytest
+
+pytestmark = pytest.mark.django_db
 
 
 class TestAdminMergeObjects(TestCase):
@@ -201,7 +206,7 @@ class TestInvoiceDelete(TestCase):
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[2].pk))
 
         # Actually delete it
-        response = self.client.post(request_url, follow=True)
+        self.client.post(request_url, follow=True)
 
         # Check the invoice is deleted
         self.assertRaises(ObjectDoesNotExist, models.Invoice.objects.get, pk=self.invoices[2].pk)
@@ -216,7 +221,7 @@ class TestInvoiceDelete(TestCase):
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
 
         # Try to actually delete it
-        response = self.client.post(request_url, follow=True)
+        self.client.post(request_url, follow=True)
 
         # Check this didn't work
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
@@ -257,102 +262,71 @@ class TestPrintPaperwork(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestEmbeddedViews(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
-                                                    is_active=True, is_staff=True)
-
-        cls.events = {
-            1: models.Event.objects.create(name="TE E1", start_date=date.today()),
-            2: models.Event.objects.create(name="TE E2", start_date=date.today())
-        }
-
-        cls.invoices = {
-            1: models.Invoice.objects.create(event=cls.events[1]),
-            2: models.Invoice.objects.create(event=cls.events[2])
-        }
-
-        cls.payments = {
-            1: models.Payment.objects.create(invoice=cls.invoices[1], date=date.today(), amount=12.34,
-                                             method=models.Payment.CASH)
-        }
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-
-    def testLoginRedirect(self):
-        request_url = reverse('event_embed', kwargs={'pk': 1})
-        expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
-
-        # Request the page and check it redirects
-        response = self.client.get(request_url, follow=True)
-        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
-
-        # Now login
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-        # And check that it no longer redirects
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(len(response.redirect_chain), 0)
-
-    def testLoginCookieWarning(self):
-        login_url = reverse('login_embed')
-        response = self.client.post(login_url, follow=True)
-        self.assertContains(response, "Cookies do not seem to be enabled")
-
-    def testXFrameHeaders(self):
-        event_url = reverse('event_embed', kwargs={'pk': 1})
-        login_url = reverse('login_embed')
-
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-        response = self.client.get(event_url, follow=True)
-        with self.assertRaises(KeyError):
-            response._headers["X-Frame-Options"]
-
-        response = self.client.get(login_url, follow=True)
-        with self.assertRaises(KeyError):
-            response._headers["X-Frame-Options"]
-
-    def testOEmbed(self):
-        event_url = reverse('event_detail', kwargs={'pk': 1})
-        event_embed_url = reverse('event_embed', kwargs={'pk': 1})
-        oembed_url = reverse('event_oembed', kwargs={'pk': 1})
-
-        alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
-        alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
-
-        # Test the meta tag is in place
-        response = self.client.get(event_url, follow=True, HTTP_HOST='example.com')
-        self.assertContains(response, '<link rel="alternate" type="application/json+oembed"')
-        self.assertContains(response, oembed_url)
-
-        # Test that the JSON exists
-        response = self.client.get(oembed_url, follow=True, HTTP_HOST='example.com')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, event_embed_url)
-
-        # Should also work for non-existant events
-        response = self.client.get(alt_oembed_url, follow=True, HTTP_HOST='example.com')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, alt_event_embed_url)
+def create_event():
+    return models.Event.objects.create(name="TE E1", start_date=date.today())
 
 
-class TestSampleDataGenerator(TestCase):
-    @override_settings(DEBUG=True)
-    def test_generate_sample_data(self):
-        # Run the management command and check there are no exceptions
-        call_command('generateSampleRIGSData')
+def test_login_redirect(client, django_user_model):
+    request_url = reverse('event_embed', kwargs={'pk': 1})
+    expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
 
-        # Check there are lots of events
-        self.assertTrue(models.Event.objects.all().count() > 100)
+    # Request the page and check it redirects
+    response = client.get(request_url, follow=True)
+    assertRedirects(response, expected_url, status_code=302, target_status_code=200)
 
-    def test_production_exception(self):
-        from django.core.management.base import CommandError
+    # Now login
+    login(client, django_user_model)
 
-        self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleRIGSData')
+    # And check that it no longer redirects
+    response = client.get(request_url, follow=True)
+    assert len(response.redirect_chain) == 0
+
+
+def test_login_cookie_warning(client):
+    login_url = reverse('login_embed')
+    response = client.post(login_url, follow=True)
+    assertContains(response, "Cookies do not seem to be enabled")
+
+
+def test_xframe_headers(admin_client):
+    event = create_event()
+    event_url = reverse('event_embed', kwargs={'pk': event.pk})
+    login_url = reverse('login_embed')
+
+    response = admin_client.get(event_url, follow=True)
+    with pytest.raises(KeyError):
+        response._headers["X-Frame-Options"]
+
+    response = admin_client.get(login_url, follow=True)
+    with pytest.raises(KeyError):
+        response._headers["X-Frame-Options"]
+
+
+def test_oembed(client):
+    event = create_event()
+    event_url = reverse('event_detail', kwargs={'pk': event.pk})
+    event_embed_url = reverse('event_embed', kwargs={'pk': event.pk})
+    oembed_url = reverse('event_oembed', kwargs={'pk': event.pk})
+
+    alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
+    alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
+
+    assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, event_url, oembed_url)
+
+
+@override_settings(DEBUG=True)
+def test_generate_sample_data():
+    # Run the management command and check there are no exceptions
+    call_command('generateSampleRIGSData')
+
+    # Check there are lots of events
+    assert models.Event.objects.all().count() > 100
+
+
+def test_production_exception():
+    from django.core.management.base import CommandError
+    with pytest.raises(CommandError):
+        call_command("generateSampleRIGSData")
 
 
 def search(client, url, found, notfound, arguments):

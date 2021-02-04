@@ -41,7 +41,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
 
-            self.setupGenericProfiles()
+            # self.setupGenericProfiles()
             self.setupUsefulProfiles()
             models.Profile.objects.bulk_create(self.profiles)
 
@@ -157,6 +157,7 @@ class Command(BaseCommand):
         for i, name in enumerate(names):
             pk = i + 1
             newVenue = models.Venue(pk=pk, name=name)
+
             if i % 2 == 0:
                 newVenue.three_phase_available = True
 

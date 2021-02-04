@@ -27,7 +27,7 @@ from django.views import generic
 from z3c.rml import rml2pdf
 
 from PyRIGS import decorators
-from PyRIGS.views import OEmbedView
+from PyRIGS.views import OEmbedView, is_ajax
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -349,7 +349,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         return self.get_object()
 
     def get_success_url(self):
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             url = reverse_lazy('closemodal')
             messages.info(self.request, "location.reload()")
         else:
