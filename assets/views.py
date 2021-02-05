@@ -38,12 +38,12 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         # TODO Feedback to user when search fails
         query_string = form.cleaned_data['q'] or ""
         if len(query_string) == 0:
-            queryset = self.model.objects.all()
+            queryset = self.model.objects.all().select_related('category', 'status')
         elif len(query_string) >= 3:
             queryset = self.model.objects.filter(
-                Q(asset_id__exact=query_string) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
+                Q(asset_id__exact=query_string) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string)).select_related('category', 'status')
         else:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query_string))
+            queryset = self.model.objects.filter(Q(asset_id__exact=query_string)).select_related('category', 'status')
 
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
