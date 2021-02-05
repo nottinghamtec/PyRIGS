@@ -10,6 +10,10 @@ from reversion import revisions as reversion
 from RIGS import models
 
 
+def assert_decimal_equality(d1, d2):
+    assert float(d1) == pytest.approx(float(d2))
+
+
 def test_str():
     profile = models.Profile(first_name='Test', last_name='Case')
     assert str(profile) == 'Test Case'
@@ -18,12 +22,12 @@ def test_str():
 
 
 @pytest.mark.django_db
-def test_find_correct():
+def test_find_correct(vat_rate):
     new_rate = models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2')
     r = models.VatRate.objects.find_rate('2015-03-01')
-    assert r == vat_rate
+    assert_decimal_equality(r.rate, vat_rate.rate)
     r = models.VatRate.objects.find_rate('2016-03-01')
-    assert r == new_rate
+    assert_decimal_equality(r.rate, new_rate.rate)
 
 
 def test_percent_correct(vat_rate):

@@ -2,10 +2,12 @@ import random
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
+from django.db import transaction
 from reversion import revisions as reversion
 
 from RIGS import models as rigsmodels
 from assets import models
+from assets.signals import split_asset_id
 
 
 class Command(BaseCommand):
@@ -26,6 +28,7 @@ class Command(BaseCommand):
 
         random.seed('Some object to see the random number generator')
 
+        # with transaction.atomic(): This is redundant since its all bulk create
         self.create_categories()
         models.AssetCategory.objects.bulk_create(self.categories)
         self.create_statuses()
@@ -57,7 +60,7 @@ class Command(BaseCommand):
 
     def create_categories(self):
         choices = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']
-        pk = 99
+        pk = models.AssetCategory.objects.count() + 10
         for cat in choices:
             self.categories.append(models.AssetCategory(pk=pk, name=cat))
             pk += 1
@@ -66,9 +69,12 @@ class Command(BaseCommand):
         asset_description = ['Large cable', 'Shiny thing', 'New lights', 'Really expensive microphone', 'Box of fuse flaps', 'Expensive tool we didn\'t agree to buy', 'Cable drums', 'Boring amount of tape', 'Video stuff no one knows how to use', 'More amplifiers', 'Heatshrink']
         pk = 1
         for i in range(100):
+            asset_search = split_asset_id(str(pk))
             asset = models.Asset(
                 pk=pk,
                 asset_id=str(pk),
+                asset_id_prefix = asset_search.group(1),
+                asset_id_number = int(asset_search.group(2)),
                 description=random.choice(asset_description),
                 category=random.choice(self.categories),
                 status=random.choice(self.statuses),
@@ -91,9 +97,13 @@ class Command(BaseCommand):
         lengths = [1, 2, 5, 10, 15, 20, 25, 30, 50, 100]
         pk = 9000  # Offset to avoid other asset IDs
         for i in range(100):
+            asset_id = random.choice(asset_prefixes) + str(pk)
+            asset_search = split_asset_id(asset_id)
             asset = models.Asset(
                 pk=pk,
-                asset_id=random.choice(asset_prefixes) + str(pk),
+                asset_id=asset_id,
+                asset_id_prefix = asset_search.group(1),
+                asset_id_number = int(asset_search.group(2)),
                 description=random.choice(asset_description),
                 category=random.choice(self.categories),
                 status=random.choice(self.statuses),
