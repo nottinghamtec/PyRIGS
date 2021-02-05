@@ -84,26 +84,6 @@ def test_oembed(client, test_asset):
     assert_oembed(alt_asset_embed_url, alt_oembed_url, client, asset_embed_url, asset_url, oembed_url)
 
 
-@pytest.mark.django_db(transaction=True)
-def test_generate_sample_data(settings):
-    settings.DEBUG = True
-    call_command('deleteSampleData')  # TODO
-    # Run the management command and check there are no exceptions
-    call_command('generateSampleAssetsData')
-
-    # Check there are lots
-    assert models.Asset.objects.all().count() > 50
-    assert models.Supplier.objects.all().count() > 50
-
-
-def test_production_exception(client):
-    from django.core.management.base import CommandError
-
-    with pytest.raises(CommandError, match=".*production"):
-        call_command('generateSampleAssetsData')
-        call_command('deleteSampleData')
-
-
 def test_asset_create(admin_client):
     response = admin_client.post(reverse('asset_create'), {'date_sold': '2000-01-01', 'date_acquired': '2020-01-01', 'purchase_price': '-30', 'salvage_value': '-30'})
     assertFormError(response, 'form', 'asset_id', 'This field is required.')
@@ -150,3 +130,23 @@ def assert_asset_form_errors(response):
     assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
     assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
     assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+
+
+def test_production_exception(client):
+    from django.core.management.base import CommandError
+
+    with pytest.raises(CommandError, match=".*production"):
+        call_command('generateSampleAssetsData')
+        call_command('deleteSampleData')
+
+
+@pytest.mark.django_db(transaction=True)
+def test_generate_sample_data(settings):
+    settings.DEBUG = True
+    print(models.AssetCategory.objects.all())
+    # Run the management command and check there are no exceptions
+    call_command('generateSampleAssetsData')
+
+    # Check there are lots
+    assert models.Asset.objects.all().count() > 50
+    assert models.Supplier.objects.all().count() > 50

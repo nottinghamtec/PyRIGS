@@ -148,7 +148,7 @@ class Asset(models.Model, RevisionMixin):
         return reverse('asset_detail', kwargs={'pk': self.asset_id})
 
     def __str__(self):
-        out = str(self.asset_id) + ' - ' + self.description
+        out = "{} | {}".format(self.asset_id, self.description)
         if self.is_cable and self.cable_type is not None:
             out += '{} - {}m - {}'.format(self.cable_type.plug, self.length, self.cable_type.socket)
         return out

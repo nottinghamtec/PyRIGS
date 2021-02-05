@@ -138,10 +138,11 @@ class TestAssetForm(AutoLoginTest):
 
         self.page.parent_selector.toggle()
         self.assertTrue(self.page.parent_selector.is_open)
-        self.page.parent_selector.search(self.parent.asset_id)
+        option = str(self.parent)
+        self.page.parent_selector.search(option)
         # Needed here but not earlier for whatever reason
         self.driver.implicitly_wait(1)
-        self.page.parent_selector.set_option(self.parent.asset_id + " | " + self.parent.description, True)
+        self.page.parent_selector.set_option(option, True)
         self.assertTrue(self.page.parent_selector.options[0].selected)
         self.page.parent_selector.toggle()
 

@@ -16,15 +16,12 @@ from django.utils import timezone
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture(scope='module')
-@pytest.mark.db(transaction=True)
-def django_db_setup(django_db_setup, django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
-    with django_db_blocker.unblock():
-        from django.conf import settings
-        settings.DEBUG = True
-        call_command('generateSampleUserData')
-        call_command('generateSampleAssetsData')
-        settings.DEBUG = False
+@pytest.fixture(scope='function', autouse=True)
+def run_sample_data(transactional_db, settings, django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
+    settings.DEBUG = True
+    call_command('generateSampleUserData')
+    call_command('generateSampleAssetsData')
+    settings.DEBUG = False  # The fixture does reset it automatically, but we need to do it before the test runs to stop the debug toolbar polluting our HTML
 
 
 def test_basic_access(client):
@@ -34,7 +31,7 @@ def test_basic_access(client):
     response = client.get(url)
     # Check edit and duplicate buttons NOT shown in list
     assertNotContains(response, 'Edit')
-    assertNotContains(response, 'Duplicate')
+    assertNotContains(response, 'Duplicate')  # If this line is randomly failing, check the debug toolbar HTML hasn't crept in
 
     url = reverse('asset_detail', kwargs={'pk': 1})
     response = client.get(url)

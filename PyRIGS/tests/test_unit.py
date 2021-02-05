@@ -34,13 +34,11 @@ def get_request_url(url):
         print("Couldn't test url " + pattern)
 
 
-@pytest.fixture(scope='module')
-def django_db_setup(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        from django.conf import settings
-        settings.DEBUG = True
-        call_command('generateSampleData')  # We need stuff setup so we don't get 404 errors everywhere
-        settings.DEBUG = False
+@pytest.fixture(scope='function', autouse=True)
+def run_sample_data(transactional_db, settings, django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
+    settings.DEBUG = True
+    call_command('generateSampleUserData')
+    call_command('generateSampleAssetsData')
 
 
 def test_unauthenticated(client):  # Nothing should be available to the unauthenticated
@@ -73,10 +71,8 @@ def test_page_titles(admin_client):
             #    print(response.content.decode(), file=open('output.html', 'w'))
 
 
-@pytest.mark.django_db(transaction=True)
 def test_delete_sample_data(settings):
     settings.DEBUG = True
     call_command('deleteSampleData')
-
     assert models.Asset.objects.all().count() == 0
     assert models.Supplier.objects.all().count() == 0
