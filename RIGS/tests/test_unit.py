@@ -22,7 +22,6 @@ class TestAdminMergeObjects(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
         cls.persons = {
             1: models.Person.objects.create(name="Person 1"),
             2: models.Person.objects.create(name="Person 2"),
@@ -173,9 +172,6 @@ class TestInvoiceDelete(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today()),
             2: models.Event.objects.create(name="TE E2", start_date=date.today())
@@ -232,9 +228,6 @@ class TestPrintPaperwork(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today(),
                                            description="This is an event description\nthat for a very specific reason spans two lines."),
@@ -308,20 +301,6 @@ def test_oembed(client, basic_event):
     assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, event_url, oembed_url)
 
 
-@override_settings(DEBUG=True)
-def test_generate_sample_data():
-    # Run the management command and check there are no exceptions
-    call_command('generateSampleRIGSData')
-
-    # Check there are lots of events
-    assert models.Event.objects.all().count() > 100
-
-
-def test_production_exception():
-    from django.core.management.base import CommandError
-    with pytest.raises(CommandError):
-        call_command("generateSampleRIGSData")
-
 
 def search(client, url, found, notfound, arguments):
     for argument in arguments:
@@ -359,45 +338,11 @@ def test_search(admin_client):
            ['name', 'id', 'address'])
 
 
-def setup_for_hs():
-    models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-    venue = models.Venue.objects.create(name="Venue 1")
-    return venue, {
-        1: models.Event.objects.create(name="TE E1", start_date=date.today(),
-                                       description="This is an event description\nthat for a very specific reason spans two lines.",
-                                       venue=venue),
-        2: models.Event.objects.create(name="TE E2", start_date=date.today()),
-    }
-
-
-def create_ra(usr):
-    venue, events = setup_for_hs()
-    return models.RiskAssessment.objects.create(event=events[1], nonstandard_equipment=False, nonstandard_use=False,
-                                                contractors=False, other_companies=False, crew_fatigue=False,
-                                                big_power=False, power_mic=usr, generators=False,
-                                                other_companies_power=False, nonstandard_equipment_power=False,
-                                                multiple_electrical_environments=False, noise_monitoring=False,
-                                                known_venue=True, safe_loading=True, safe_storage=True,
-                                                area_outside_of_control=True, barrier_required=True,
-                                                nonstandard_emergency_procedure=True, special_structures=False,
-                                                suspended_structures=False, outside=False)
-
-
-def create_checklist(usr):
-    venue, events = setup_for_hs()
-    return models.EventChecklist.objects.create(event=events[1], power_mic=usr, safe_parking=False,
-                                                safe_packing=False, exits=False, trip_hazard=False, warning_signs=False,
-                                                ear_plugs=False, hs_location="Locked away safely",
-                                                extinguishers_location="Somewhere, I forgot", earthing=False, pat=False,
-                                                date=timezone.now(), venue=venue)
-
-
-def test_list(admin_client):
-    venue, events = setup_for_hs()
+def test_hs_list(admin_client, basic_event):
     request_url = reverse('hs_list')
     response = admin_client.get(request_url, follow=True)
-    assertContains(response, events[1].name)
-    assertContains(response, events[2].name)
+    assertContains(response, basic_event.name)
+    # assertContains(response, events[2].name)
     assertContains(response, 'Create')
 
 
@@ -410,18 +355,34 @@ def review(client, profile, obj, request_url):
     assert_times_almost_equal(time, obj.reviewed_at)
 
 
-def test_ra_review(admin_client, admin_user):
-    review(admin_client, admin_user, create_ra(admin_user), 'ra_review')
+def test_ra_review(admin_client, admin_user, ra):
+    review(admin_client, admin_user, ra, 'ra_review')
 
 
-def test_checklist_review(admin_client, admin_user):
-    review(admin_client, admin_user, create_checklist(admin_user), 'ec_review')
+def test_checklist_review(admin_client, admin_user, checklist):
+    review(admin_client, admin_user, checklist, 'ec_review')
 
 
-def test_ra_redirect(admin_client, admin_user):
-    ra = create_ra(admin_user)
+def test_ra_redirect(admin_client, admin_user, ra):
     request_url = reverse('event_ra', kwargs={'pk': ra.event.pk})
     expected_url = reverse('ra_edit', kwargs={'pk': ra.pk})
 
     response = admin_client.get(request_url, follow=True)
     assertRedirects(response, expected_url, status_code=302, target_status_code=200)
+
+
+def test_production_exception():
+    from django.core.management.base import CommandError
+    with pytest.raises(CommandError):
+        call_command("generateSampleRIGSData")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_generate_sample_data(settings):
+    settings.DEBUG = True
+    # Run the management command and check there are no exceptions
+    call_command('generateSampleUserData')
+    call_command('generateSampleRIGSData')
+
+    # Check there are lots of events
+    assert models.Event.objects.all().count() > 100

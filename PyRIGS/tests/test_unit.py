@@ -1,5 +1,4 @@
 from PyRIGS import urls
-from assets.tests.test_unit import create_asset_one
 from django.core.management import call_command
 import pytest
 from django.urls import URLPattern, URLResolver, reverse
@@ -7,6 +6,7 @@ from django.urls.exceptions import NoReverseMatch
 from django.test.utils import override_settings
 from pytest_django.asserts import assertContains, assertRedirects, assertTemplateUsed, assertInHTML
 from django.template.defaultfilters import striptags
+from assets import models
 
 
 def find_urls_recursive(patterns):
@@ -34,7 +34,7 @@ def get_request_url(url):
         print("Couldn't test url " + pattern)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         from django.conf import settings

@@ -2,8 +2,6 @@ import datetime
 
 import pytest
 from django.core.management import call_command
-from django.test import override_settings
-from django.test.utils import override_settings
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains
 
@@ -89,6 +87,7 @@ def test_oembed(client, test_asset):
 @pytest.mark.django_db(transaction=True)
 def test_generate_sample_data(settings):
     settings.DEBUG = True
+    call_command('deleteSampleData')  # TODO
     # Run the management command and check there are no exceptions
     call_command('generateSampleAssetsData')
 

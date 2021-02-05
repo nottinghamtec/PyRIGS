@@ -16,7 +16,8 @@ from django.utils import timezone
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
+@pytest.mark.db(transaction=True)
 def django_db_setup(django_db_setup, django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
     with django_db_blocker.unblock():
         from django.conf import settings
