@@ -15,7 +15,7 @@ from django.utils import timezone
 
 
 @pytest.fixture(scope='class', autouse=True)
-def run_sample_data(settings, django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
+def run_sample_data(django_db_blocker):  # We need stuff setup so we don't get 404 errors everywhere
     with django_db_blocker.unblock():
         from django.conf import settings
         settings.DEBUG = True
@@ -26,6 +26,7 @@ def run_sample_data(settings, django_db_blocker):  # We need stuff setup so we d
 
 class TestAccess():
     def test_basic_access(client):
+        client.logout()
         assert client.login(username="basic", password="basic")
 
         url = reverse('asset_list')
@@ -55,6 +56,7 @@ class TestAccess():
 
 
     def test_keyholder_access(client):
+        client.logout()
         assert client.login(username="keyholder", password="keyholder")
 
         url = reverse('asset_list')
