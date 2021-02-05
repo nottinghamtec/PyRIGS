@@ -1,5 +1,4 @@
 {% load static %}
-{% load raven %}
 
 <!DOCTYPE html>
 <html
@@ -14,10 +13,6 @@
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
-
-    <script src="{% static 'js/raven.js' %}"></script>
-    <script>Raven.config('{% sentry_public_dsn %}').install()</script>
-
 </head>
 
 <body>

@@ -36,7 +36,6 @@ function scripts() {
                     'node_modules/jquery-ui-dist/jquery-ui.js',
 
                     'node_modules/popper.js/dist/umd/popper.js',
-                    'node_modules/raven-js/dist/raven.js', //TODO Upgrade to Sentry
                     /* Bootstrap Plugins */
                     'node_modules/bootstrap/js/dist/util.js',
                     'node_modules/bootstrap/js/dist/tooltip.js',
@@ -62,10 +61,9 @@ function scripts() {
 }
 
 function browserSync(done) {
-  spawn('python', ['manage.py', 'runserver', '--nostatic'/*For Whitenoise, better matches prod */], {stdio: 'inherit'});
+  spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'});
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
-    notify: true,
     port: 8001,
     proxy: 'localhost:8000'
   });

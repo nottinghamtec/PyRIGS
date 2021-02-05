@@ -13,7 +13,8 @@ import datetime
 import os
 import secrets
 
-import raven
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from envparse import env
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -71,11 +72,9 @@ INSTALLED_APPS = (
     'reversion',
     'captcha',
     'widget_tweaks',
-    'raven.contrib.django.raven_compat',
 )
 
 MIDDLEWARE = (
-    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -177,9 +176,12 @@ else:
         }
     }
 
-RAVEN_CONFIG = {
-    'dsn': env('RAVEN_DSN', default=""),
-}
+# Error/performance monitoring
+sentry_sdk.init(
+    dsn=env('SENTRY_DSN', default=""),
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+)
 
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
