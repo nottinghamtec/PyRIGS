@@ -26,6 +26,7 @@ class Profile(AbstractUser):
     is_approved = models.BooleanField(default=False)
     last_emailed = models.DateTimeField(blank=True,
                                         null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
+    dark_theme = models.BooleanField(default=False)
 
     @classmethod
     def make_api_key(cls):

@@ -7,8 +7,10 @@
         lang="{% firstof LANGUAGE_CODE 'en' %}"
         class="embedded">
 <head>
-    <base target="_blank" />
-    <!-- Open all links in a new tab, not in the iframe -->
+    <base target="_blank" /><!-- Open all links in a new tab, not in the iframe -->
+
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
 
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
@@ -34,6 +36,11 @@
         {% endblock %}
     </div>
 </div>
+<script>
+if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)')) {
+    document.body.setAttribute('data-theme', 'dark');
+}
+</script>
 {% block js %}
 {% endblock %}
 </body>

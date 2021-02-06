@@ -111,4 +111,12 @@
     .custom-control-input:focus ~ .custom-control-label::before {
         box-shadow: 0 0 0 $input-focus-width rgba($primary, 0.7) !important;
     }
+    .source {
+        color: white !important;
+    }
+    .embed_container {
+        border-color: #3853a4 !important;
+        background: #222;
+        color: $gray-100;
+    }
 }

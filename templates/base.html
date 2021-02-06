@@ -10,11 +10,14 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#3853a4">
+    <meta name="color-scheme" content="light dark">
 
     <link rel="icon" type="image/png" href="{% static 'imgs/pyrigs-avatar.png' %}">
     <link rel="apple-touch-icon" href="{% static 'imgs/pyrigs-avatar.png' %}">
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
     {% block css %}
     {% endblock %}
@@ -77,7 +80,11 @@
 </div>
 
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
-
+<script>
+if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)')) {
+    document.body.setAttribute('data-theme', 'dark');
+}
+</script>
 <script>
     Date.prototype.getISOString = function () {
         var yyyy = this.getFullYear().toString();
@@ -123,7 +130,6 @@
         easter_egg.load();
     });
 </script>
-<script src="{% static 'js/dark-mode-switch.min.js' %}"></script>
 <script>
     document.body.addEventListener('keydown', function(e) {
         if(e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
