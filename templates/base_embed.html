@@ -13,6 +13,7 @@
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
+
 </head>
 
 <body>
@@ -28,11 +29,7 @@
                 </div>
             {% endfor %}
         {% endif %}
-        <div class="col-sm-12">
-            <a href="/">
-                <span class="source"> R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></span>
-            </a>
-        </div>
+        <a href="/"><span class="source"> R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></span></a>
         {% block content %}
         {% endblock %}
     </div>
