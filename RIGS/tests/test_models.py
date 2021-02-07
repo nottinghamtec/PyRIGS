@@ -35,7 +35,7 @@ def test_percent_correct(vat_rate):
 
 
 def test_related_vatrate(basic_event, vat_rate):
-    assert vat_rate.pk == basic_event.vat_rate.pk
+    assert_decimal_equality(vat_rate.rate, basic_event.vat_rate.rate)
 
 
 class EventTest():
@@ -43,11 +43,9 @@ class EventTest():
         # Sanity check we have the expected events created
         assert models.Event.objects.count() == 18
 
-
     def test_rig_count(many_events):
         # Changed to not include unreturned dry hires in rig count
         assert models.Event.objects.rig_count() == 7
-
 
     def test_current_events(many_events):
         all_events = set(range(1, 18))
@@ -60,7 +58,6 @@ class EventTest():
 
         for eid in not_current_events:
             assert models.Event.objects.get(name="TE E%d" % eid) not in current_events
-
 
     def test_related(many_events):
         v1 = models.Venue.objects.create(name="TE V1")
@@ -83,7 +80,6 @@ class EventTest():
         v1.delete()
         v2.delete()
 
-
     def test_related_person(many_events):
         p1 = models.Person.objects.create(name="TE P1")
         p2 = models.Person.objects.create(name="TE P2")
@@ -104,7 +100,6 @@ class EventTest():
 
         p1.delete()
         p2.delete()
-
 
     def test_related_organisation(many_events):
         o1 = models.Organisation.objects.create(name="TE O1")
@@ -205,6 +200,7 @@ def test_earliest_time():
     event.start_date = date(2015, 12, 0o3)
     assert event.earliest_time == create_datetime(2015, 12, 0o3, 9, 00)
 
+
 def test_latest_time():
     event = models.Event(name="TE LT", start_date=date(2016, 0o1, 0o1))
 
@@ -218,6 +214,7 @@ def test_latest_time():
     # With end time
     event.end_time = time(23, 00)
     assert event.latest_time == create_datetime(2016, 1, 2, 23, 00)
+
 
 def test_in_bounds():
     manager = models.Event.objects

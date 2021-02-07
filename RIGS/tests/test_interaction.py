@@ -854,7 +854,6 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.submit()
         self.assertTrue(self.page.success)
 
-
     def test_ec_create_extras(self):
         eid = self.testEvent2.pk
         self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=eid).open()

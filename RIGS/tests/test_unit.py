@@ -299,7 +299,6 @@ def test_oembed(client, basic_event):
     assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, event_url, oembed_url)
 
 
-
 def search(client, url, found, notfound, arguments):
     for argument in arguments:
         query = getattr(found, argument)

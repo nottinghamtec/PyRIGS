@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
     is_ajax, OEmbedView
 from assets import forms, models
+from assets.models import get_available_asset_id
 
 
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -139,7 +140,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        initial["asset_id"] = models.Asset.get_available_asset_id()
+        initial["asset_id"] = get_available_asset_id()
         return initial
 
     def get_success_url(self):

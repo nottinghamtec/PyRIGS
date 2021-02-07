@@ -66,20 +66,23 @@ class Command(BaseCommand):
 
         for permId in hs_perms:
             self.hs_group.permissions.add(Permission.objects.get(codename=permId))
+        self.keyholder_group.save()
+        self.finance_group.save()
+        self.hs_group.save()
 
     def setup_generic_profiles(self):
         names = ["Clara Oswin Oswald", "Rory Williams", "Amy Pond", "River Song", "Martha Jones", "Donna Noble",
                  "Jack Harkness", "Mickey Smith", "Rose Tyler"]
         for i, name in enumerate(names):
-            newProfile = models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0],
-                                                       last_name=name.split(" ")[-1],
-                                                       email=name.replace(" ", "") + "@example.com",
-                                                       initials="".join([j[0].upper() for j in name.split()]))
+            new_profile = models.Profile.objects.create(username=name.replace(" ", ""), first_name=name.split(" ")[0],
+                                                        last_name=name.split(" ")[-1],
+                                                        email=name.replace(" ", "") + "@example.com",
+                                                        initials="".join([j[0].upper() for j in name.split()]))
             if i % 2 == 0:
-                newProfile.phone = "01234 567894"
+                new_profile.phone = "01234 567894"
 
-            newProfile.save()
-            self.profiles.append(newProfile)
+            new_profile.save()
+            self.profiles.append(new_profile)
 
     def setup_useful_profiles(self):
         super_user = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User",
