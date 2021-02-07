@@ -94,7 +94,6 @@ ROOT_URLCONF = 'PyRIGS.urls'
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

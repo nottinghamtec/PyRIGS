@@ -313,6 +313,7 @@ class TestAssetAudit(AutoLoginTest):
         # Now do it properly
         self.page.modal.description = new_desc = "A BIG hammer"
         self.page.modal.submit()
+        self.driver.implicitly_wait(4)
         self.wait.until(animation_is_finished())
         submit_time = timezone.now()
         # Check data is correct

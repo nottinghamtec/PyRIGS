@@ -3,19 +3,16 @@ import pytest
 from django.utils import timezone
 
 
-@pytest.fixture(autouse=True)
-def vat_rate(db):
-    return models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
-
 @pytest.fixture
 def basic_event(db):
-    return models.Event.objects.create(name="TE E1", start_date=timezone.now())
+    event = models.Event.objects.create(name="TE E1", start_date=timezone.now())
+    yield event
+    event.delete()
 
 
 @pytest.fixture
 def ra(basic_event, admin_user):
-    return models.RiskAssessment.objects.create(event=basic_event, nonstandard_equipment=False, nonstandard_use=False,
+    ra = models.RiskAssessment.objects.create(event=basic_event, nonstandard_equipment=False, nonstandard_use=False,
                                                 contractors=False, other_companies=False, crew_fatigue=False,
                                                 big_power=False, power_mic=admin_user, generators=False,
                                                 other_companies_power=False, nonstandard_equipment_power=False,
@@ -24,24 +21,30 @@ def ra(basic_event, admin_user):
                                                 area_outside_of_control=True, barrier_required=True,
                                                 nonstandard_emergency_procedure=True, special_structures=False,
                                                 suspended_structures=False, outside=False)
+    yield ra
+    ra.delete()
 
 @pytest.fixture
 def venue(db):
-    return models.Venue.objects.create(name="Venue 1")
+    venue = models.Venue.objects.create(name="Venue 1")
+    yield venue
+    venue.delete()
 
 
 @pytest.fixture  # TODO parameterise with Event sizes
 def checklist(basic_event, venue, admin_user):
-    return models.EventChecklist.objects.create(event=basic_event, power_mic=admin_user, safe_parking=False,
+    checklist = models.EventChecklist.objects.create(event=basic_event, power_mic=admin_user, safe_parking=False,
                                                 safe_packing=False, exits=False, trip_hazard=False, warning_signs=False,
                                                 ear_plugs=False, hs_location="Locked away safely",
                                                 extinguishers_location="Somewhere, I forgot", earthing=False, pat=False,
                                                 date=timezone.now(), venue=venue)
+    yield checklist
+    checklist.delete()
 
 
 @pytest.fixture
 def many_events(db, scope="class"):
-    return {
+    many_events = {
             # produce 7 normal events - 5 current
             1: models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6),
                                            description="start future no end"),
@@ -90,3 +93,6 @@ def many_events(db, scope="class"):
                                             status=models.Event.CANCELLED,
                                             description="non rig today cancelled"),
         }
+    yield many_events
+    for event in many_events:
+        event.delete()

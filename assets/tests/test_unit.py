@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.core.management import call_command
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains
 
@@ -130,23 +129,3 @@ def assert_asset_form_errors(response):
     assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
     assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
     assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
-
-
-def test_production_exception(client):
-    from django.core.management.base import CommandError
-
-    with pytest.raises(CommandError, match=".*production"):
-        call_command('generateSampleAssetsData')
-        call_command('deleteSampleData')
-
-
-@pytest.mark.django_db(transaction=True)
-def test_generate_sample_data(settings):
-    settings.DEBUG = True
-    print(models.AssetCategory.objects.all())
-    # Run the management command and check there are no exceptions
-    call_command('generateSampleAssetsData')
-
-    # Check there are lots
-    assert models.Asset.objects.all().count() > 50
-    assert models.Supplier.objects.all().count() > 50

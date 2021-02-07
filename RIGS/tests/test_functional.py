@@ -9,7 +9,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 import PyRIGS.tests.base
-import PyRIGS.tests.test_unit
 from RIGS import models
 from pytest_django.asserts import assertContains, assertNotContains, assertFormError
 
@@ -109,7 +108,7 @@ def test_duplicate_warning(client, admin_user):
     assertContains(response, 'amount has changed')
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_email_sent(admin_client, admin_user, mailoutbox):
     event = setup_event()
     auth_data, hmac, url = setup_mail(event, admin_user)

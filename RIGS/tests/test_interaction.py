@@ -652,7 +652,6 @@ class TestCalendar(BaseRigboardTest):
 
 
 @screenshot_failure_cls
-@pytest.mark.xfail(reason="Bootstrap select handling broken for some reason, pending rewrite", run=False)
 class TestHealthAndSafety(BaseRigboardTest):
     def setUp(self):
         super().setUp()
@@ -871,8 +870,8 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.hs_location = "The Moon"
         self.page.extinguishers_location = "With the rest of the fire"
         # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        # self.page.power_mic.toggle()
+        self.page.power_mic.search("Test")  # FIXME
+        self.page.power_mic.toggle()
         self.assertFalse(self.page.power_mic.is_open)
 
         vehicle_name = 'Brian'

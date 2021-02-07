@@ -1,6 +1,10 @@
 from django.conf import settings
 import django
 import pytest
+from django.core.management import call_command
+from RIGS.models import VatRate
+import random
+from django.db import connection
 
 
 def pytest_configure():
@@ -13,7 +17,6 @@ def pytest_configure():
 
 @pytest.fixture(scope='session')
 def splinter_webdriver():
-    """Override splinter webdriver name."""
     return 'chrome'
 
 
@@ -22,12 +25,8 @@ def splinter_screenshot_dir():
     return 'screenshots/'
 
 
-def _has_transactional_marker(item):
-    db_marker = item.get_closest_marker("django_db")
-    if db_marker and db_marker.kwargs.get("transaction"):
-        return 1
-    return 0
-
-
-def pytest_collection_modifyitems(items):  # Always run database-mulching tests last
-    items.sort(key=_has_transactional_marker)
+@pytest.fixture(autouse=True)  # Also enables DB access for all tests as a useful side effect
+def vat_rate(db):
+    vat_rate = VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+    yield vat_rate
+    vat_rate.delete()

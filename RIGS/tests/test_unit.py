@@ -1,14 +1,12 @@
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.management import call_command
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
-import PyRIGS.tests.test_unit
 from PyRIGS.tests.base import assert_times_almost_equal, assert_oembed, login
 from RIGS import models
 
@@ -369,20 +367,3 @@ def test_ra_redirect(admin_client, admin_user, ra):
 
     response = admin_client.get(request_url, follow=True)
     assertRedirects(response, expected_url, status_code=302, target_status_code=200)
-
-
-def test_production_exception():
-    from django.core.management.base import CommandError
-    with pytest.raises(CommandError):
-        call_command("generateSampleRIGSData")
-
-
-@pytest.mark.django_db(transaction=True)
-def test_generate_sample_data(settings):
-    settings.DEBUG = True
-    # Run the management command and check there are no exceptions
-    call_command('generateSampleUserData')
-    call_command('generateSampleRIGSData')
-
-    # Check there are lots of events
-    assert models.Event.objects.all().count() > 100
