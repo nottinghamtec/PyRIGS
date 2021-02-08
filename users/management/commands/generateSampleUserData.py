@@ -31,9 +31,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             self.setup_groups()
             self.setup_useful_profiles()
-
-            # self.setup_generic_profiles()
-            # models.Profile.objects.bulk_create(self.profiles)
+            self.setup_generic_profiles()
 
     def setup_groups(self):
         self.keyholder_group = Group.objects.create(name='Keyholders')

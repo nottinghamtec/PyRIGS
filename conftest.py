@@ -11,7 +11,8 @@ def pytest_configure():
     settings.PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',
     )
-    settings.STATICFILES_DIRS.append('static/')  # FIXME
+    settings.WHITENOISE_USE_FINDERS = True
+    settings.WHITENOISE_AUTOREFRESH = True
     django.setup()
 
 

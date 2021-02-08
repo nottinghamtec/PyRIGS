@@ -31,7 +31,6 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
             self.setup_people()
             self.setup_organisations()
             self.setup_venues()

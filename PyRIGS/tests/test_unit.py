@@ -11,6 +11,16 @@ from PyRIGS import urls
 from RIGS.models import Event
 from assets.models import Asset
 from django.db import connection
+import pytest
+from django.core.management import call_command
+from django.template.defaultfilters import striptags
+from django.urls.exceptions import NoReverseMatch
+
+from RIGS.models import Event
+from assets.models import Asset
+from django.db import connection
+from django.test import TestCase
+from django.test.utils import override_settings
 
 
 def find_urls_recursive(patterns):
@@ -38,95 +48,99 @@ def get_request_url(url):
         print("Couldn't test url " + pattern)
 
 
-@pytest.fixture(scope='module', autouse=True)
-def sample_data(django_db_blocker):
-    with django_db_blocker.unblock():
-        from django.conf import settings
-        settings.DEBUG = True
+@pytest.mark.parametrize("command", ['generateSampleAssetsData', 'generateSampleRIGSData', 'generateSampleUserData',
+                                     'deleteSampleData'])
+def test_production_exception(command):
+    from django.core.management.base import CommandError
+    with pytest.raises(CommandError, match=".*production"):
+        call_command(command)
+
+
+class TestSampleDataGenerator(TestCase):
+    @override_settings(DEBUG=True)
+    def test_sample_data(self):
         call_command('generateSampleData')
         assert Asset.objects.all().count() > 50
         assert Event.objects.all().count() > 100
-        settings.DEBUG = False
+        call_command('deleteSampleData')
+        assert Asset.objects.all().count() == 0
+        assert Event.objects.all().count() == 0
 
 
-@pytest.mark.django_db
-def test_unauthenticated(client):  # Nothing should be available to the unauthenticated
-    for url in find_urls_recursive(urls.urlpatterns):
-        request_url = get_request_url(url)
-        if request_url and 'user' not in request_url:  # User module is full of edge cases
-            response = client.get(request_url, follow=True, HTTP_HOST='example.com')
-            assertContains(response, 'Login')
-            if 'application/json+oembed' in response.content.decode():
-                assertTemplateUsed(response, 'login_redirect.html')
-            else:
-                if "embed" in str(url):
-                    expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
+class TestSampleDataGenerator(TestCase):
+    @override_settings(DEBUG=True)
+    def setUp(self):
+        call_command('generateSampleData')
+
+    def test_unauthenticated(self):  # Nothing should be available to the unauthenticated
+        for url in find_urls_recursive(urls.urlpatterns):
+            request_url = get_request_url(url)
+            if request_url and 'user' not in request_url:  # User module is full of edge cases
+                response = self.client.get(request_url, follow=True, HTTP_HOST='example.com')
+                assertContains(response, 'Login')
+                if 'application/json+oembed' in response.content.decode():
+                    assertTemplateUsed(response, 'login_redirect.html')
                 else:
-                    expected_url = "{0}?next={1}".format(reverse('login'), request_url)
-                assertRedirects(response, expected_url)
+                    if "embed" in str(url):
+                        expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
+                    else:
+                        expected_url = "{0}?next={1}".format(reverse('login'), request_url)
+                    assertRedirects(response, expected_url)
 
+    def test_page_titles(self):
+        assert self.client.login(username='superuser', password='superuser')
+        for url in filter((lambda u: "embed" not in u.name), find_urls_recursive(urls.urlpatterns)):
+            request_url = get_request_url(url)
+            response = self.client.get(request_url)
+            if hasattr(response, "context_data") and "page_title" in response.context_data:
+                expected_title = striptags(response.context_data["page_title"])
+                assertInHTML('<title>{} | Rig Information Gathering System'.format(expected_title),
+                             response.content.decode())
+                print("{} | {}".format(request_url, expected_title))  # If test fails, tell me where!
+        self.client.logout()
 
-@pytest.mark.django_db
-def test_page_titles(admin_client):
-    for url in filter((lambda u: "embed" not in u.name), find_urls_recursive(urls.urlpatterns)):
-        request_url = get_request_url(url)
-        response = admin_client.get(request_url)
-        if hasattr(response, "context_data") and "page_title" in response.context_data:
-            expected_title = striptags(response.context_data["page_title"])
-            # try:
-            assertInHTML('<title>{} | Rig Information Gathering System'.format(expected_title),
-                         response.content.decode())
-            print("{} | {}".format(request_url, expected_title))  # If test fails, tell me where!
-            # except:
-            #    print(response.content.decode(), file=open('output.html', 'w'))
+    def test_basic_access(self):
+        assert self.client.login(username="basic", password="basic")
 
+        url = reverse('asset_list')
+        response = self.client.get(url)
+        # Check edit and duplicate buttons NOT shown in list
+        assertNotContains(response, 'Edit')
+        assertNotContains(response,
+                          'Duplicate')  # If this line is randomly failing, check the debug toolbar HTML hasn't crept in
 
-@pytest.mark.django_db
-def test_basic_access(client):
-    client.logout()
-    assert client.login(username="basic", password="basic")
+        url = reverse('asset_detail', kwargs={'pk': Asset.objects.first().asset_id})
+        response = self.client.get(url)
+        assertNotContains(response, 'Purchase Details')
+        assertNotContains(response, 'View Revision History')
 
-    url = reverse('asset_list')
-    response = client.get(url)
-    # Check edit and duplicate buttons NOT shown in list
-    assertNotContains(response, 'Edit')
-    assertNotContains(response,
-                      'Duplicate')  # If this line is randomly failing, check the debug toolbar HTML hasn't crept in
+        urlz = {'asset_history', 'asset_update', 'asset_duplicate'}
+        for url_name in urlz:
+            request_url = reverse(url_name, kwargs={'pk': Asset.objects.first().asset_id})
+            response = self.client.get(request_url, follow=True)
+            assert response.status_code == 403
 
-    url = reverse('asset_detail', kwargs={'pk': Asset.objects.first().pk})
-    response = client.get(url)
-    assertNotContains(response, 'Purchase Details')
-    assertNotContains(response, 'View Revision History')
-
-    urlz = {'asset_history', 'asset_update', 'asset_duplicate'}
-    for url_name in urlz:
-        request_url = reverse(url_name, kwargs={'pk': Asset.objects.first().pk})
-        response = client.get(request_url, follow=True)
+        request_url = reverse('supplier_create')
+        response = self.client.get(request_url, follow=True)
         assert response.status_code == 403
 
-    request_url = reverse('supplier_create')
-    response = client.get(request_url, follow=True)
-    assert response.status_code == 403
-
-    request_url = reverse('supplier_update', kwargs={'pk': 1})
-    response = client.get(request_url, follow=True)
-    assert response.status_code == 403
-    client.logout()
+        request_url = reverse('supplier_update', kwargs={'pk': 1})
+        response = self.client.get(request_url, follow=True)
+        assert response.status_code == 403
+        self.client.logout()
 
 
-@pytest.mark.django_db
-def test_keyholder_access(client):
-    client.logout()
-    assert client.login(username="keyholder", password="keyholder")
+    def test_keyholder_access(self):
+        assert self.client.login(username="keyholder", password="keyholder")
 
-    url = reverse('asset_list')
-    response = client.get(url)
-    # Check edit and duplicate buttons shown in list
-    assertContains(response, 'Edit')
-    assertContains(response, 'Duplicate')
+        url = reverse('asset_list')
+        response = self.client.get(url)
+        # Check edit and duplicate buttons shown in list
+        assertContains(response, 'Edit')
+        assertContains(response, 'Duplicate')
 
-    url = reverse('asset_detail', kwargs={'pk': Asset.objects.first().pk})
-    response = client.get(url)
-    assertContains(response, 'Purchase Details')
-    assertContains(response, 'View Revision History')
-    client.logout()
+        url = reverse('asset_detail', kwargs={'pk': Asset.objects.first().asset_id})
+        response = self.client.get(url)
+        assertContains(response, 'Purchase Details')
+        assertContains(response, 'View Revision History')
+        self.client.logout()
