@@ -24,7 +24,7 @@ class Profile(AbstractUser):
     phone = models.CharField(max_length=13, null=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
     is_approved = models.BooleanField(default=False)
-     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
+    # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
 

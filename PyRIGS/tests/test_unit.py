@@ -129,7 +129,6 @@ class TestSampleDataGenerator(TestCase):
         assert response.status_code == 403
         self.client.logout()
 
-
     def test_keyholder_access(self):
         assert self.client.login(username="keyholder", password="keyholder")
 
