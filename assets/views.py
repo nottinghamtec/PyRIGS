@@ -39,12 +39,12 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         # TODO Feedback to user when search fails
         query_string = form.cleaned_data['q'] or ""
         if len(query_string) == 0:
-            queryset = self.model.objects.all().select_related('category', 'status')
+            queryset = self.model.objects.all()
         elif len(query_string) >= 3:
             queryset = self.model.objects.filter(
-                Q(asset_id__exact=query_string) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string)).select_related('category', 'status')
+                Q(asset_id__exact=query_string) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
         else:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query_string)).select_related('category', 'status')
+            queryset = self.model.objects.filter(Q(asset_id__exact=query_string))
 
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
@@ -55,7 +55,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(
                 status__in=models.AssetStatus.objects.filter(should_show=True))
 
-        return queryset
+        return queryset.select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
@@ -180,7 +180,7 @@ class AssetAuditList(AssetList):
     # TODO Refresh this when the modal is submitted
     def get_queryset(self):
         self.form = forms.AssetSearchForm(data=self.request.GET)
-        return self.model.objects.filter(Q(last_audited_at__isnull=True))
+        return self.model.objects.filter(Q(last_audited_at__isnull=True)).select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
         context = super(AssetAuditList, self).get_context_data(**kwargs)
@@ -288,7 +288,9 @@ class CableTypeList(generic.ListView):
     model = models.CableType
     template_name = 'cable_type_list.html'
     paginate_by = 40
-    # ordering = ['__str__']
+
+    def get_queryset(self):
+        return self.model.objects.select_related('plug', 'socket')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

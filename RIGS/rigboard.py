@@ -41,7 +41,7 @@ class RigboardIndex(generic.TemplateView):
         context = super(RigboardIndex, self).get_context_data(**kwargs)
 
         # call out method to get current events
-        context['events'] = models.Event.objects.current_events()
+        context['events'] = models.Event.objects.current_events().select_related('riskassessment', 'invoice').prefetch_related('checklists')
         context['page_title'] = "Rigboard"
         return context
 

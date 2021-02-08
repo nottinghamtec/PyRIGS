@@ -52,7 +52,7 @@ class Profile(AbstractUser):
 
     @property
     def latest_events(self):
-        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
 
     @classmethod
     def admins(cls):
@@ -244,7 +244,7 @@ class EventManager(models.Manager):
             (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=timezone.now())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
 
         return events
 
@@ -345,7 +345,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def sum_total(self):
-        total = EventItem.objects.filter(event=self).aggregate(
+        total = self.items.aggregate(
             sum_total=models.Sum(models.F('cost') * models.F('quantity'),
                                  output_field=models.DecimalField(max_digits=10, decimal_places=2))
         )['sum_total']
@@ -706,6 +706,10 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
+    @cached_property
+    def fields(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+
     @property
     def event_size(self):
         # Confirm event size. Check all except generators, since generators entails outside
@@ -787,6 +791,10 @@ class EventChecklist(models.Model, RevisionMixin):
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
 
     inverted_fields = []
+
+    @cached_property
+    def fields(self):
+        return [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
 
     class Meta:
         ordering = ['event']

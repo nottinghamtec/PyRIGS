@@ -166,16 +166,17 @@ class InvoiceWaiting(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)
         total = 0
-        for obj in self.get_objects():
+        objects = self.get_queryset()
+        for obj in objects:
             total += obj.sum_total
-        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(self.get_objects()), total)
+        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(objects), total)
         return context
 
     def get_queryset(self):
         return self.get_objects()
 
     def get_objects(self):
-        # @todo find a way to select items
+        # TODO find a way to select items
         events = self.model.objects.filter(
             (
                 Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
