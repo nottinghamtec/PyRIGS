@@ -52,8 +52,7 @@ function scripts() {
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
-                    'node_modules/konami/konami.js',
-                    'node_modules/dark-mode-switch/dark-mode-switch.min.js'])
+                    'node_modules/konami/konami.js'])
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest('pipeline/built_assets/js'))
