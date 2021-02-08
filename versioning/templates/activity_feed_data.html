@@ -31,7 +31,7 @@
                     <div class="media-body">
                     <h5>
                         {{ version.revision.user.name|default:'System' }}
-                        <span class="ml-3"><small>{{version.revision.date_created|naturaltime}}</small></span>
+                        <span class="float-right"><small><span class="fas fa-clock"></span> {{version.revision.date_created|naturaltime}}</small></span>
                     </h5>
             {% endif %}
                     <p>
