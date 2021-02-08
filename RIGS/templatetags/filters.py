@@ -4,7 +4,7 @@ from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorDict
 from django.template.defaultfilters import stringfilter
 from django.template.defaultfilters import yesno, title, truncatewords
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.utils.html import escape
 from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
@@ -173,7 +173,7 @@ def title_spaced(string):
 @register.filter(needs_autoescape=True)
 def namewithnotes(obj, url, autoescape=True):
     if hasattr(obj, 'notes') and obj.notes is not None and len(obj.notes) > 0:
-        return mark_safe(obj.name + " <a href='{}'><span class='far fa-sticky-note'></span></a>".format(reverse_lazy(url, kwargs={'pk': obj.pk})))
+        return mark_safe(obj.name + " <a href='{}'><span class='far fa-sticky-note'></span></a>".format(reverse(url, kwargs={'pk': obj.pk})))
     else:
         return obj.name
 

@@ -43,7 +43,7 @@ class RIGSVersionTestCase(TestCase):
 
         # Check the prev version is loaded correctly
         previousVersion = current_version.parent
-        self.assertEqual(previousVersion._object_version.object.notes, None)
+        assert previousVersion._object_version.object.notes == ''
 
         # Check that finding the parent of the first version fails gracefully
         self.assertFalse(previousVersion.parent)

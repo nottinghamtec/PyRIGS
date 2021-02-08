@@ -10,27 +10,27 @@ from RIGS.models import RevisionMixin, Profile
 
 
 class AssetCategory(models.Model):
+    name = models.CharField(max_length=80)
+
     class Meta:
         verbose_name = 'Asset Category'
         verbose_name_plural = 'Asset Categories'
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
 
     def __str__(self):
         return self.name
 
 
 class AssetStatus(models.Model):
+    name = models.CharField(max_length=80)
+    should_show = models.BooleanField(
+        default=True, help_text="Should this be shown by default in the asset list.")
+    display_class = models.CharField(max_length=80, blank=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
+
     class Meta:
         verbose_name = 'Asset Status'
         verbose_name_plural = 'Asset Statuses'
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
-    should_show = models.BooleanField(
-        default=True, help_text="Should this be shown by default in the asset list.")
-    display_class = models.CharField(max_length=80, blank=True, null=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
 
     def __str__(self):
         return self.name
@@ -38,15 +38,15 @@ class AssetStatus(models.Model):
 
 @reversion.register
 class Supplier(models.Model, RevisionMixin):
+    name = models.CharField(max_length=80)
+    phone = models.CharField(max_length=15, blank=True, default="")
+    email = models.EmailField(blank=True, default="")
+    address = models.TextField(blank=True, default="")
+
+    notes = models.TextField(blank=True, default="")
+
     class Meta:
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-
-    notes = models.TextField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('supplier_list')
@@ -65,17 +65,16 @@ class Connector(models.Model):
         return self.description
 
 
-# Things are nullable that shouldn't be because I didn't properly fix the data structure when moving this to its own model...
 class CableType(models.Model):
-    class Meta:
-        ordering = ['plug', 'socket', '-circuits']
-
     circuits = models.IntegerField(default=1)
     cores = models.IntegerField(default=3)
     plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                             related_name='plug', null=True)
+                             related_name='plug')
     socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                               related_name='socket', null=True)
+                               related_name='socket')
+
+    class Meta:
+        ordering = ['plug', 'socket', '-circuits']
 
     def __str__(self):
         if self.plug and self.socket:
@@ -104,12 +103,6 @@ def get_available_asset_id(wanted_prefix=""):
 
 @reversion.register
 class Asset(models.Model, RevisionMixin):
-    class Meta:
-        ordering = ['asset_id_prefix', 'asset_id_number']
-        permissions = [
-            ('asset_finance', 'Can see financial data for assets')
-        ]
-
     parent = models.ForeignKey(to='self', related_name='asset_parent',
                                blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=15, unique=True)
@@ -143,11 +136,17 @@ class Asset(models.Model, RevisionMixin):
 
     reversion_perm = 'assets.asset_finance'
 
-    def get_absolute_url(self):
-        return reverse('asset_detail', kwargs={'pk': self.asset_id})
+    class Meta:
+        ordering = ['asset_id_prefix', 'asset_id_number']
+        permissions = [
+            ('asset_finance', 'Can see financial data for assets')
+        ]
 
     def __str__(self):
         return "{} | {}".format(self.asset_id, self.description)
+
+    def get_absolute_url(self):
+        return reverse('asset_detail', kwargs={'pk': self.asset_id})
 
     def clean(self):
         errdict = {}

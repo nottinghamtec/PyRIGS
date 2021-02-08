@@ -311,7 +311,7 @@ class TestEventDuplicate(BaseRigboardTest):
         # TODO Rewrite when EventDetail page is implemented
         newEvent = models.Event.objects.latest('pk')
 
-        self.assertEqual(newEvent.auth_request_to, None)
+        assert newEvent.auth_request_to == ''
         self.assertEqual(newEvent.auth_request_by, None)
         self.assertEqual(newEvent.auth_request_at, None)
 
@@ -449,7 +449,7 @@ class TestEventDetail(BaseRigboardTest):
         self.assertIn("N%05d | %s" % (self.testEvent.pk, self.testEvent.name), self.page.event_name)
         self.assertEqual(self.client.name, self.page.name)
         self.assertEqual(self.client.email, self.page.email)
-        self.assertEqual(self.client.phone, None)
+        assert self.client.phone == ''
 
 
 @screenshot_failure_cls

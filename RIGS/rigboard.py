@@ -153,7 +153,7 @@ class EventDuplicate(EventUpdate):
             new.checked_in_by = None
 
         # Remove all the authorisation information from the new event
-        new.auth_request_to = None
+        new.auth_request_to = ''
         new.auth_request_by = None
         new.auth_request_at = None
 

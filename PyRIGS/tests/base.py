@@ -22,21 +22,12 @@ def create_datetime(year, month, day, hour, minute):
 
 
 def create_browser():
-    browser = env('BROWSER', default="chrome")
-    if browser == "firefox":
-        options = webdriver.FirefoxOptions()
-        options.headless = True
-        driver = webdriver.Firefox(options=options)
-        driver.set_window_position(0, 0)
-        # Firefox is pissy about out of bounds otherwise
-        driver.set_window_size(3840, 2160)
-    else:
-        options = webdriver.ChromeOptions()
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument("--headless")
-        if settings.CI:
-            options.add_argument("--no-sandbox")
-        driver = webdriver.Chrome(options=options)
+    options = webdriver.ChromeOptions()
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--headless")
+    if settings.CI:
+        options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(options=options)
     return driver
 
 
