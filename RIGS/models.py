@@ -794,7 +794,7 @@ class EventChecklist(models.Model, RevisionMixin):
 
     @cached_property
     def fields(self):
-        return [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
 
     class Meta:
         ordering = ['event']

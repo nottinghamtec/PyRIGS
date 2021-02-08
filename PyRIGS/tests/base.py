@@ -11,7 +11,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from RIGS import models as rigsmodels
 from . import pages
-from envparse import env
 
 from pytest_django.asserts import assertContains
 
