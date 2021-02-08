@@ -244,9 +244,8 @@ class EventManager(models.Manager):
             (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
             models.Q(status=Event.CANCELLED, start_date__gte=timezone.now())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
-                                                                                                 'organisation',
-                                                                                                 'venue', 'mic')
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
+
         return events
 
     def events_in_bounds(self, start, end):
