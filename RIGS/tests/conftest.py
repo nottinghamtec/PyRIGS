@@ -44,7 +44,7 @@ def checklist(basic_event, venue, admin_user):
 
 
 @pytest.fixture
-def many_events(db, scope="class"):
+def many_events(db, admin_user, scope="class"):
     many_events = {
         # produce 7 normal events - 5 current
         1: models.Event.objects.create(name="TE E1", start_date=date.today() + timedelta(days=6),
@@ -74,12 +74,12 @@ def many_events(db, scope="class"):
         10: models.Event.objects.create(name="TE E10", start_date=date.today(), dry_hire=True,
                                         description="dryhire today"),
         11: models.Event.objects.create(name="TE E11", start_date=date.today(), dry_hire=True,
-                                        checked_in_by=cls.profile,
+                                        checked_in_by=admin_user,
                                         description="dryhire today, checked in"),
         12: models.Event.objects.create(name="TE E12", start_date=date.today() - timedelta(days=1), dry_hire=True,
                                         status=models.Event.BOOKED, description="dryhire past"),
         13: models.Event.objects.create(name="TE E13", start_date=date.today() - timedelta(days=2), dry_hire=True,
-                                        checked_in_by=cls.profile, description="dryhire past checked in"),
+                                        checked_in_by=admin_user, description="dryhire past checked in"),
         14: models.Event.objects.create(name="TE E14", start_date=date.today(), dry_hire=True,
                                         status=models.Event.CANCELLED, description="dryhire today cancelled"),
 
