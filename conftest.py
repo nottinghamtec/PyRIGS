@@ -2,9 +2,12 @@ from django.conf import settings
 import django
 import pytest
 from django.core.management import call_command
-from RIGS.models import VatRate
+from RIGS.models import VatRate, Profile
 import random
 from django.db import connection
+from PyRIGS.tests import pages
+import os
+from selenium import webdriver
 
 
 def pytest_configure():
@@ -13,7 +16,32 @@ def pytest_configure():
     )
     settings.WHITENOISE_USE_FINDERS = True
     settings.WHITENOISE_AUTOREFRESH = True
+    # TODO Why do we need this, with the above options enabled?
+    settings.STATICFILES_DIRS += [
+        os.path.join(settings.BASE_DIR, 'static/'),
+    ]
     django.setup()
+
+
+@pytest.fixture
+def logged_in_browser(live_server, browser):
+    profile = Profile(
+        username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
+    profile.set_password("EventTestPassword")
+    profile.save()
+    login_page = pages.LoginPage(browser.driver, live_server.url).open()
+    login_page.login("EventTest", "EventTestPassword")
+    return browser
+
+
+@pytest.fixture(scope='session')
+def splinter_driver_kwargs():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--headless")
+    if settings.CI:
+        options.add_argument("--no-sandbox")
+    return {"options": options}
 
 
 @pytest.fixture(scope='session')

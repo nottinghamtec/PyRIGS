@@ -30,6 +30,6 @@ def test_cable(db, category, status):
 
 @pytest.fixture
 def test_asset(db, category, status):
-    asset = models.Asset.objects.create(asset_id="91991", description="Spaceflower", status=status, category=category, date_acquired=datetime.date(1991, 12, 26))
+    asset, created = models.Asset.objects.get_or_create(asset_id="91991", description="Spaceflower", status=status, category=category, date_acquired=datetime.date(1991, 12, 26))
     yield asset
     asset.delete()

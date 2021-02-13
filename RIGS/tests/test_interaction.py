@@ -651,6 +651,21 @@ class TestCalendar(BaseRigboardTest):
         self.assertIn(target_date.strftime("%m"), self.driver.current_url)
 
 
+def test_ra_edit(logged_in_browser, live_server, ra):
+    page = pages.EditRiskAssessment(logged_in_browser.driver, live_server.url, pk=ra.pk).open()
+    page.nonstandard_equipment = nse = True
+    page.general_notes = gn = "There are some notes, but I've not written them here as that would be helpful"
+    page.submit()
+    assert not page.success
+    page.supervisor_consulted = True
+    page.submit()
+    assert page.success
+    # Check that data is right
+    ra = models.RiskAssessment.objects.get(pk=ra.pk)
+    assert ra.general_notes == gn
+    assert ra.nonstandard_equipment == nse
+
+
 @screenshot_failure_cls
 class TestHealthAndSafety(BaseRigboardTest):
     def setUp(self):
@@ -775,20 +790,6 @@ class TestHealthAndSafety(BaseRigboardTest):
         # Test that we can't make another one
         self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
         self.assertIn('edit', self.driver.current_url)
-
-    def test_ra_edit(self):
-        self.page = pages.EditRiskAssessment(self.driver, self.live_server_url, pk=self.testRA.pk).open()
-        self.page.nonstandard_equipment = nse = True
-        self.page.general_notes = gn = "There are some notes, but I've not written them here as that would be helpful"
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.page.supervisor_consulted = True
-        self.page.submit()
-        self.assertTrue(self.page.success)
-        # Check that data is right
-        ra = models.RiskAssessment.objects.get(pk=self.testRA.pk)
-        self.assertEqual(ra.general_notes, gn)
-        self.assertEqual(ra.nonstandard_equipment, nse)
 
     def test_ec_create_small(self):
         self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent2.pk).open()

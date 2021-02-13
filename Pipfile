@@ -78,6 +78,7 @@ zipp = "==3.4.0"
 "zope.proxy" = "==4.3.5"
 "zope.schema" = "==6.0.1"
 sentry-sdk = "*"
+pytest-splinter = "*"
 
 [dev-packages]
 pycodestyle = "*"
