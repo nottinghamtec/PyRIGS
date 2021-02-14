@@ -24,7 +24,7 @@ def pytest_configure():
 
 
 @pytest.fixture
-def logged_in_browser(live_server, browser):
+def logged_in_browser(live_server, browser, db):
     profile, created = Profile.objects.get_or_create(
         username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
     profile.set_password("EventTestPassword")

@@ -273,13 +273,14 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.assertTrue(self.page.success)
 
 
-def test_audit_search(logged_in_browser, live_server):
+def test_audit_search(logged_in_browser, live_server, test_asset):
         page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
         # Check that a failed search works
         page.set_query("NOTFOUND")
         page.search()
         assert not logged_in_browser.find_by_id('modal').visible
         logged_in_browser.driver.implicitly_wait(4)
+        print(page.error)
         assert "Asset with that ID does not exist!" in page.error.text
 
 
