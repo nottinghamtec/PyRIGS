@@ -24,11 +24,17 @@ def pytest_configure():
 
 
 @pytest.fixture
-def logged_in_browser(live_server, browser):
+def profile(db):
     profile = Profile(
         username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
     profile.set_password("EventTestPassword")
     profile.save()
+    yield profile
+    profile.delete()
+
+
+@pytest.fixture
+def logged_in_browser(live_server, browser, profile):
     login_page = pages.LoginPage(browser.driver, live_server.url).open()
     login_page.login("EventTest", "EventTestPassword")
     return browser

@@ -26,6 +26,15 @@ def ra(basic_event, admin_user):
 
 
 @pytest.fixture
+def medium_ra(ra):
+    ra.big_power = True
+    ra.save()
+    yield ra
+    ra.big_power = False
+    ra.save()
+
+
+@pytest.fixture
 def venue(db):
     venue = models.Venue.objects.create(name="Venue 1")
     yield venue

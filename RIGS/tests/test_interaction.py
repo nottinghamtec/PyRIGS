@@ -666,6 +666,44 @@ def test_ra_edit(logged_in_browser, live_server, ra):
     assert ra.nonstandard_equipment == nse
 
 
+def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra):
+        page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=medium_ra.event.pk).open()
+
+        page.safe_parking = True
+        page.safe_packing = True
+        page.exits = True
+        page.trip_hazard = True
+        page.warning_signs = True
+        page.ear_plugs = True
+        page.hs_location = "Death Valley"
+        page.extinguishers_location = "With the rest of the fire"
+        # If we do this first the search fails, for ... reasons
+        page.power_mic.search(admin_user.name)
+        page.power_mic.toggle()
+        assert not page.power_mic.is_open
+
+        # Gotta scroll to make the button clickable
+        logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        page.earthing = True
+        page.pat = True
+        page.source_rcd = True
+        page.labelling = True
+        page.fd_voltage_l1 = 240
+        page.fd_voltage_l2 = 235
+        page.fd_voltage_l3 = 0
+        page.fd_phase_rotation = True
+        page.fd_earth_fault = 666
+        page.fd_pssc = 1984
+        page.w1_description = "In the carpark, by the bins"
+        page.w1_polarity = True
+        page.w1_voltage = 240
+        page.w1_earth_fault = 333
+
+        page.submit()
+        assert page.success
+
+
 @screenshot_failure_cls
 class TestHealthAndSafety(BaseRigboardTest):
     def setUp(self):
@@ -814,43 +852,6 @@ class TestHealthAndSafety(BaseRigboardTest):
         self.page.rcds = True
         self.page.supply_test = True
         self.page.pat = True
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-    def test_ec_create_medium(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent3.pk).open()
-
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "Death Valley"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-
-        # Gotta scroll to make the button clickable
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-        self.page.earthing = True
-        self.page.pat = True
-        self.page.source_rcd = True
-        self.page.labelling = True
-        self.page.fd_voltage_l1 = 240
-        self.page.fd_voltage_l2 = 235
-        self.page.fd_voltage_l3 = 0
-        self.page.fd_phase_rotation = True
-        self.page.fd_earth_fault = 666
-        self.page.fd_pssc = 1984
-        self.page.w1_description = "In the carpark, by the bins"
-        self.page.w1_polarity = True
-        self.page.w1_voltage = 240
-        self.page.w1_earth_fault = 333
 
         self.page.submit()
         self.assertTrue(self.page.success)

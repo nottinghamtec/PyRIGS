@@ -99,6 +99,7 @@ def get_available_asset_id(wanted_prefix=""):
             return 9000
         else:
             return row[0]
+        cursor.close()
 
 
 @reversion.register

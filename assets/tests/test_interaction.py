@@ -273,6 +273,16 @@ class TestSupplierCreateAndEdit(AutoLoginTest):
         self.assertTrue(self.page.success)
 
 
+def test_audit_search(logged_in_browser, live_server):
+        page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
+        # Check that a failed search works
+        page.set_query("NOTFOUND")
+        page.search()
+        assert not logged_in_browser.find_by_id('modal').visible
+        logged_in_browser.driver.implicitly_wait(4)
+        assert "Asset with that ID does not exist!" in page.error.text
+
+
 @screenshot_failure_cls
 class TestAssetAudit(AutoLoginTest):
     def setUp(self):
@@ -336,10 +346,3 @@ class TestAssetAudit(AutoLoginTest):
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
         assert audited.last_audited_by is None
-
-    def test_audit_search(self):
-        # Check that a failed search works
-        self.page.set_query("NOTFOUND")
-        self.page.search()
-        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
-        self.assertIn("Asset with that ID does not exist!", self.page.error.text)
