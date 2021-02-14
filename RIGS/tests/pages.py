@@ -276,6 +276,10 @@ class CreateEventChecklist(FormPage):
         return '{event_id}' not in self.driver.current_url
 
 
+class EditEventChecklist(CreateEventChecklist, **url_kwargs):
+    URL_TEMPLATE = reverse('ec_edit', url_kwargs['pk'])
+
+
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')
     _search_go_selector = (By.ID, 'id_search')

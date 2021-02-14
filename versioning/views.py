@@ -78,7 +78,7 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super(ActivityFeed, self).get_context_data(**kwargs)
-
+        context['page_title'] = "Activity Feed"
         maxTimeDelta = datetime.timedelta(hours=1)
 
         items = []

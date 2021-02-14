@@ -637,18 +637,19 @@ class TestCalendar(BaseRigboardTest):
             else:
                 self.assertNotContains(response, "TE E" + str(test) + " ")
 
-    def test_calendar_buttons(self):  # If FullCalendar fails to load for whatever reason, the buttons don't work
-        self.page = pages.CalendarPage(self.driver, self.live_server_url).open()
-        self.assertIn(timezone.now().strftime("%Y-%m"), self.driver.current_url)
 
-        target_date = datetime.date(2020, 1, 1)
-        self.page.target_date.set_value(target_date)
-        self.page.go()
-        self.assertIn(self.page.target_date.value.strftime("%Y-%m"), self.driver.current_url)
+def test_calendar_buttons(logged_in_browser, live_server):  # If FullCalendar fails to load for whatever reason, the buttons don't work
+    page = pages.CalendarPage(logged_in_browser.driver, live_server.url).open()
+    assert timezone.now().strftime("%Y-%m") in logged_in_browser.url
 
-        self.page.next()
-        target_date += datetime.timedelta(days=32)
-        self.assertIn(target_date.strftime("%m"), self.driver.current_url)
+    target_date = datetime.date(2020, 1, 1)
+    page.target_date.set_value(target_date)
+    page.go()
+    assert page.target_date.value.strftime("%Y-%m") in logged_in_browser.url
+
+    page.next()
+    target_date += datetime.timedelta(days=32)
+    assert target_date.strftime("%m") in logged_in_browser.url
 
 
 def test_ra_edit(logged_in_browser, live_server, ra):
@@ -664,6 +665,34 @@ def test_ra_edit(logged_in_browser, live_server, ra):
     ra = models.RiskAssessment.objects.get(pk=ra.pk)
     assert ra.general_notes == gn
     assert ra.nonstandard_equipment == nse
+
+
+def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
+    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
+
+    page.safe_parking = True
+    page.safe_packing = True
+    page.exits = True
+    page.trip_hazard = True
+    page.warning_signs = True
+    page.ear_plugs = True
+    page.hs_location = "The Moon"
+    page.extinguishers_location = "With the rest of the fire"
+    # If we do this first the search fails, for ... reasons
+    page.power_mic.search(admin_user.name)
+    page.power_mic.toggle()
+    assert not page.power_mic.is_open
+
+    # Gotta scroll to make the button clickable
+    logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+    page.earthing = True
+    page.rcds = True
+    page.supply_test = True
+    page.pat = True
+
+    page.submit()
+    assert page.success
 
 
 def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra):
@@ -702,6 +731,47 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
 
     page.submit()
     assert page.success
+
+
+# TODO POM Refactor
+def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
+    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    page.add_vehicle()
+
+    vehicle_name = 'Brian'
+    logged_in_browser.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
+    region = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by(By.XPATH, '//tr[@id="vehicles_-1"]//div[contains(@class, "bootstrap-select")]'))
+    region.search(profile.name)
+
+    page.submit()
+    assert page.success
+    checklist.refresh_from_db()
+
+    vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
+    assert vehicle_name == vehicle.vehicle
+
+
+def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
+    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    page.add_crew()
+    role = "MIC"
+    crew_select = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by(By.XPATH, '//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]'))
+    start_time = base_regions.DateTimePicker(page, logged_in_browser.find_by(By.XPATH, '//*[@name="start_-1"]'))
+    end_time = base_regions.DateTimePicker(page, logged_in_browser.find_by(By.XPATH, '//*[@name="end_-1"]'))
+
+    start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
+    # TODO Test validation of end before start
+    end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
+    crew_select.search(admin_user.name)
+    logged_in_browser.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
+
+    page.submit()
+    assert page.success
+    checklist.refresh_from_db()
+
+    crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
+    assert admin_user.pk == crew_obj.crewmember.pk
+    assert role == crew_obj.role
 
 
 @screenshot_failure_cls
@@ -828,81 +898,3 @@ class TestHealthAndSafety(BaseRigboardTest):
         # Test that we can't make another one
         self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
         self.assertIn('edit', self.driver.current_url)
-
-    def test_ec_create_small(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent2.pk).open()
-
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "The Moon"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-
-        # Gotta scroll to make the button clickable
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-        self.page.earthing = True
-        self.page.rcds = True
-        self.page.supply_test = True
-        self.page.pat = True
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-    def test_ec_create_extras(self):
-        eid = self.testEvent2.pk
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=eid).open()
-        self.page.add_vehicle()
-        self.page.add_crew()
-
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "The Moon"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search("Test")  # FIXME
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-
-        vehicle_name = 'Brian'
-        self.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
-        driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="vehicles_-1"]//div[contains(@class, "bootstrap-select")]'))
-        driver.search(self.profile.name)
-
-        crew = self.profile
-        role = "MIC"
-        crew_select = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]'))
-        start_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="start_-1"]'))
-        end_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="end_-1"]'))
-
-        start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
-        # TODO Test validation of end before start
-        end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
-        crew_select.search(crew.name)
-        self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
-
-        self.page.earthing = True
-        self.page.rcds = True
-        self.page.supply_test = True
-        self.page.pat = True
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-        checklist = models.EventChecklist.objects.get(event=eid)
-        vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
-        self.assertEqual(vehicle_name, vehicle.vehicle)
-        crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
-        self.assertEqual(crew.pk, crew_obj.crewmember.pk)
-        self.assertEqual(role, crew_obj.role)

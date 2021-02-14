@@ -42,7 +42,7 @@ def venue(db):
 
 
 @pytest.fixture  # TODO parameterise with Event sizes
-def checklist(basic_event, venue, admin_user):
+def checklist(basic_event, venue, admin_user, ra):
     checklist = models.EventChecklist.objects.create(event=basic_event, power_mic=admin_user, safe_parking=False,
                                                      safe_packing=False, exits=False, trip_hazard=False, warning_signs=False,
                                                      ear_plugs=False, hs_location="Locked away safely",
