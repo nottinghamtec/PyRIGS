@@ -280,8 +280,7 @@ def test_audit_search(logged_in_browser, live_server, test_asset):
     page.search()
     assert not logged_in_browser.find_by_id('modal').visible
     logged_in_browser.driver.implicitly_wait(4)
-    print(page.error)
-    assert "Asset with that ID does not exist!" in page.error.text
+    assert logged_in_browser.is_text_present("Asset with that ID does not exist!")
 
 
 @screenshot_failure_cls
