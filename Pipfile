@@ -89,6 +89,7 @@ pytest-xdist = {extras = ["psutil"], version = "==2.2.0"}
 pluggy = "*"
 pytest-splinter = "*"
 pytest = "*"
+pypom = {extras = ["splinter"], version = "*"}
 
 [requires]
 python_version = "3.9"

@@ -25,14 +25,14 @@ def pytest_configure():
 
 @pytest.fixture
 def logged_in_browser(live_server, browser, db):
-    profile, created = Profile.objects.get_or_create(
+    profile = Profile.objects.create(
         username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
     profile.set_password("EventTestPassword")
     profile.save()
     login_page = pages.LoginPage(browser.driver, live_server.url).open()
     login_page.login("EventTest", "EventTestPassword")
-    return browser
-
+    yield browser
+    profile.delete()
 
 @pytest.fixture(scope='session')
 def splinter_driver_kwargs():

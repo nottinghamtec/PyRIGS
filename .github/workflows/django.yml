@@ -10,12 +10,16 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     runs-on: ubuntu-latest
-    # strategy:
-    #    matrix:
-    #        browser: ['chrome']
+    strategy:
+      matrix:
+        python: [3.9]
+        experimental: [false]
+        include:
+          - python: 3.10.0-alpha.5
+            experimental: true
+    continue-on-error: ${{ matrix.experimental }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # BROWSER: ${{ matrix.browser }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache Static Files
@@ -31,7 +35,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-            python-version: 3.9
+            python-version: ${{ matrix.python }}
       - name: Cache python deps
         uses: actions/cache@v2
         with:

@@ -737,16 +737,14 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
 def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
     page.add_vehicle()
-
+    assert len(page.vehicles) == 1
     vehicle_name = 'Brian'
-    logged_in_browser.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
-    region = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by(By.XPATH, '//tr[@id="vehicles_-1"]//div[contains(@class, "bootstrap-select")]'))
-    region.search(profile.name)
-
+    page.vehicles[0].name = vehicle_name
+    page.vehicles[0].vehicle.search(admin_user.name)
     page.submit()
     assert page.success
+    # Check data is correct
     checklist.refresh_from_db()
-
     vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
     assert vehicle_name == vehicle.vehicle
 
@@ -755,15 +753,15 @@ def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
     page.add_crew()
     role = "MIC"
-    crew_select = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by(By.XPATH, '//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]'))
-    start_time = base_regions.DateTimePicker(page, logged_in_browser.find_by(By.XPATH, '//*[@name="start_-1"]'))
-    end_time = base_regions.DateTimePicker(page, logged_in_browser.find_by(By.XPATH, '//*[@name="end_-1"]'))
+    crew_select = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by_xpath('//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]')[0])
+    start_time = base_regions.DateTimePicker(page, logged_in_browser.find_by_xpath('//*[@name="start_-1"]')[0])
+    end_time = base_regions.DateTimePicker(page, logged_in_browser.find_by_xpath('//*[@name="end_-1"]')[0])
 
     start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
     # TODO Test validation of end before start
     end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
     crew_select.search(admin_user.name)
-    logged_in_browser.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
+    logged_in_browser.find_by_xpath('//*[@name="role_-1"]').send_keys(role)
 
     page.submit()
     assert page.success

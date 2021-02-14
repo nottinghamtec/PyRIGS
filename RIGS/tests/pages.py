@@ -276,9 +276,28 @@ class CreateEventChecklist(FormPage):
         return '{event_id}' not in self.driver.current_url
 
 
-class EditEventChecklist(CreateEventChecklist, **url_kwargs):
-    URL_TEMPLATE = reverse('ec_edit', url_kwargs['pk'])
+class EditEventChecklist(CreateEventChecklist):
+    URL_TEMPLATE = '/event/checklist/{pk}/edit'
+    _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
+    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(. 'new'))]]")
 
+    @property
+    def vehicles(self):
+        return [
+            self.VehicleRow(self, el) for el in self.find_elements(*self._vehicle_row_locator)
+        ]
+
+    class VehicleRow(Region):
+        _name_locator = ('xpath', "//input[@id[starts-with(., 'vehicle')]")
+        _select_locator = ('xpath', "//div[contains(@class, 'bootstrap-select')]")
+
+        @property
+        def name(self):
+            return regions.TextBox(self, *_name_locator)
+
+        @property
+        def vehicle(self):
+            return regions.BootstrapSelect(self, self.find_element(*self._select_locator))
 
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')
