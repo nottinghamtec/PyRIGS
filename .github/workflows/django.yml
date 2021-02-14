@@ -49,7 +49,7 @@ jobs:
               pipenv run python manage.py makemigrations --check --dry-run
               pipenv run python manage.py collectstatic --noinput
       - name: Run Tests
-        run: pipenv run pytest --cov -n 4
+        run: pipenv run pytest --cov -n auto
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
