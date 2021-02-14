@@ -667,41 +667,41 @@ def test_ra_edit(logged_in_browser, live_server, ra):
 
 
 def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra):
-        page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=medium_ra.event.pk).open()
+    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=medium_ra.event.pk).open()
 
-        page.safe_parking = True
-        page.safe_packing = True
-        page.exits = True
-        page.trip_hazard = True
-        page.warning_signs = True
-        page.ear_plugs = True
-        page.hs_location = "Death Valley"
-        page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        page.power_mic.search(admin_user.name)
-        page.power_mic.toggle()
-        assert not page.power_mic.is_open
+    page.safe_parking = True
+    page.safe_packing = True
+    page.exits = True
+    page.trip_hazard = True
+    page.warning_signs = True
+    page.ear_plugs = True
+    page.hs_location = "Death Valley"
+    page.extinguishers_location = "With the rest of the fire"
+    # If we do this first the search fails, for ... reasons
+    page.power_mic.search(admin_user.name)
+    page.power_mic.toggle()
+    assert not page.power_mic.is_open
 
-        # Gotta scroll to make the button clickable
-        logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    # Gotta scroll to make the button clickable
+    logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-        page.earthing = True
-        page.pat = True
-        page.source_rcd = True
-        page.labelling = True
-        page.fd_voltage_l1 = 240
-        page.fd_voltage_l2 = 235
-        page.fd_voltage_l3 = 0
-        page.fd_phase_rotation = True
-        page.fd_earth_fault = 666
-        page.fd_pssc = 1984
-        page.w1_description = "In the carpark, by the bins"
-        page.w1_polarity = True
-        page.w1_voltage = 240
-        page.w1_earth_fault = 333
+    page.earthing = True
+    page.pat = True
+    page.source_rcd = True
+    page.labelling = True
+    page.fd_voltage_l1 = 240
+    page.fd_voltage_l2 = 235
+    page.fd_voltage_l3 = 0
+    page.fd_phase_rotation = True
+    page.fd_earth_fault = 666
+    page.fd_pssc = 1984
+    page.w1_description = "In the carpark, by the bins"
+    page.w1_polarity = True
+    page.w1_voltage = 240
+    page.w1_earth_fault = 333
 
-        page.submit()
-        assert page.success
+    page.submit()
+    assert page.success
 
 
 @screenshot_failure_cls
