@@ -757,10 +757,10 @@ def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     start_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0))
     end_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30))
     crew = page.crew[0]
-    crew.crewmember.search(admin_user.first_name)
     crew.role.set_value(role)
     crew.start_time.set_value(start_time)
     crew.end_time.set_value(end_time)
+    crew.crewmember.search(admin_user.first_name)
     page.submit()
     assert page.success
     # Check data is correct
