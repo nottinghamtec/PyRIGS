@@ -748,29 +748,27 @@ def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist
     assert vehicle_name == vehicle.vehicle
 
 
-# FIXME
-@pytest.mark.xfail(run=False)
+# TODO Test validation of end before start
 def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
     page.add_crew()
+    assert len(page.crew) == 1
     role = "MIC"
-    crew_select = base_regions.BootstrapSelectElement(page, logged_in_browser.find_by_xpath('//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]')[0])
-    start_time = base_regions.DateTimePicker(page, logged_in_browser.find_by_xpath('//*[@name="start_-1"]')[0])
-    end_time = base_regions.DateTimePicker(page, logged_in_browser.find_by_xpath('//*[@name="end_-1"]')[0])
-
-    start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
-    # TODO Test validation of end before start
-    end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
-    crew_select.search(admin_user.name)
-    logged_in_browser.find_by_xpath('//*[@name="role_-1"]').send_keys(role)
-
+    start_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0))
+    end_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30))
+    crew = page.crew[0]
+    crew.crewmember.search(admin_user.first_name)
+    crew.role.set_value(role)
+    crew.start_time.set_value(start_time)
+    crew.end_time.set_value(end_time)
     page.submit()
     assert page.success
-    checklist.refresh_from_db()
-
+    # Check data is correct
     crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
     assert admin_user.pk == crew_obj.crewmember.pk
     assert role == crew_obj.role
+    assert start_time == crew_obj.start
+    assert end_time == crew_obj.end
 
 
 @screenshot_failure_cls

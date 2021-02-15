@@ -279,7 +279,7 @@ class CreateEventChecklist(FormPage):
 class EditEventChecklist(CreateEventChecklist):
     URL_TEMPLATE = '/event/checklist/{pk}/edit'
     _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
-    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(. 'new'))]]")
+    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(.,'new'))]]")
 
     @property
     def vehicles(self):
@@ -296,6 +296,32 @@ class EditEventChecklist(CreateEventChecklist):
         @property
         def vehicle(self):
             return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
+
+    @property
+    def crew(self):
+        return [self.CrewRow(self, el) for el in self.find_elements(*self._crew_row_locator)]
+
+    class CrewRow(Region):
+        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
+        _start_time_locator = ('xpath', ".//input[@name[starts-with(., 'start') and not(contains(.,'new'))]]")
+        _end_time_locator = ('xpath', ".//input[@name[starts-with(., 'end') and not(contains(.,'new'))]]")
+        _role_locator = ('xpath', ".//input[@name[starts-with(., 'role') and not(contains(.,'new'))]]")
+
+        @property
+        def crewmember(self):
+            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
+
+        @property
+        def start_time(self):
+            return regions.DateTimePicker(self, self.root.find_element(*self._start_time_locator))
+
+        @property
+        def end_time(self):
+            return regions.DateTimePicker(self, self.root.find_element(*self._end_time_locator))
+
+        @property
+        def role(self):
+            return regions.TextBox(self, self.root.find_element(*self._role_locator))
 
     @property
     def success(self):
