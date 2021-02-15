@@ -283,21 +283,24 @@ class EditEventChecklist(CreateEventChecklist):
 
     @property
     def vehicles(self):
-        return [
-            self.VehicleRow(self, el) for el in self.find_elements(*self._vehicle_row_locator)
-        ]
+        return [self.VehicleRow(self, el) for el in self.find_elements(*self._vehicle_row_locator)]
 
     class VehicleRow(Region):
-        _name_locator = ('xpath', "//input[@id[starts-with(., 'vehicle')]")
-        _select_locator = ('xpath', "//div[contains(@class, 'bootstrap-select')]")
+        _name_locator = ('xpath', ".//input")
+        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
 
         @property
         def name(self):
-            return regions.TextBox(self, *_name_locator)
+            return regions.TextBox(self, self.root.find_element(*self._name_locator))
 
         @property
         def vehicle(self):
-            return regions.BootstrapSelect(self, self.find_element(*self._select_locator))
+            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
+
+    @property
+    def success(self):
+        return 'edit' not in self.driver.current_url
+
 
 class GenericList(BasePage):
     _search_selector = (By.CSS_SELECTOR, 'div.input-group:nth-child(2) > input:nth-child(1)')

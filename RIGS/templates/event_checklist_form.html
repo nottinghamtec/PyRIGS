@@ -134,14 +134,14 @@
                                     <tbody id="vehiclest" data-pk="-1">
                                         <tr id="vehicles_new" style="display: none;">
                                             <td><input type="text" class="form-control" name="vehicle_new" disabled="true"/></td>
-                                            <td><select class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true"></select></td>
+                                            <td><select data-container="body" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true"></select></td>
                                             <td><button type="button" class="btn btn-danger btn-sm mt-1" data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button></td>
                                         </tr>
                                         {% for i in object.vehicles.all %}
                                         <tr id="vehicles_{{i.pk}}">
                                             <td><input name="vehicle_{{i.pk}}" type="text" class="form-control" value="{{ i.vehicle }}"/></td>
                                             <td>
-                                                <select name="driver_{{i.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                <select data-container="body" name="driver_{{i.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                                     {% if i.driver != '' %}
                                                         <option value="{{i.driver.pk}}" selected="selected">{{ i.driver.name }}</option>
                                                     {% endif %}
@@ -202,7 +202,7 @@
                                     <tbody id="crewmemberst" data-pk="-1">
                                         <tr id="crew_new" style="display: none;">
                                             <td>
-                                                <select name="crewmember_new" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" disabled="true"></select>
+                                                <select name="crewmember_new" class="form-control" data-container="body" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" disabled="true"></select>
                                             </td>
                                             <td style="min-width: 15ch"><input name="start_new" type="datetime-local" class="form-control" value="{{ i.start }}" disabled=""/></td>
                                             <td style="min-width: 15ch"><input name="role_new" type="text" class="form-control" value="{{ i.role }}" disabled="true"/></td>
@@ -212,7 +212,7 @@
                                         {% for crew in object.crew.all %}
                                         <tr id="crew_{{crew.pk}}">
                                             <td>
-                                                <select name="crewmember_{{crew.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                                <select data-container="body" name="crewmember_{{crew.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                                     {% if crew.crewmember != '' %}
                                                         <option value="{{crew.crewmember.pk}}" selected="selected">{{ crew.crewmember.name }}</option>
                                                     {% endif %}

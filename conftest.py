@@ -23,16 +23,22 @@ def pytest_configure():
     django.setup()
 
 
+@pytest.fixture # Overrides the one from pytest-django
+def admin_user(admin_user):
+    admin_user.username="EventTest"
+    admin_user.first_name="Event"
+    admin_user.last_name="Test"
+    admin_user.initials="ETU"
+    admin_user.save()
+    return admin_user
+
+
 @pytest.fixture
-def logged_in_browser(live_server, browser, db):
-    profile = Profile.objects.create(
-        username="EventTest", first_name="Event", last_name="Test", initials="ETU", is_superuser=True)
-    profile.set_password("EventTestPassword")
-    profile.save()
+def logged_in_browser(live_server, admin_user, browser, db):
     login_page = pages.LoginPage(browser.driver, live_server.url).open()
-    login_page.login("EventTest", "EventTestPassword")
+    login_page.login(admin_user.username, "password")
     yield browser
-    profile.delete()
+
 
 @pytest.fixture(scope='session')
 def splinter_driver_kwargs():
