@@ -771,127 +771,51 @@ def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     assert end_time == crew_obj.end
 
 
-@screenshot_failure_cls
-class TestHealthAndSafety(BaseRigboardTest):
-    def setUp(self):
-        super().setUp()
-        self.profile = models.Profile.objects.get_or_create(
-            first_name='Test',
-            last_name='TEC User',
-            username='eventtest',
-            email='teccie@functional.test',
-            is_superuser=True  # lazily grant all permissions
-        )[0]
-        self.venue = models.Venue.objects.create(name="Venue 1")
+# TODO Can I loop through all the boolean fields and test them at once?
+def test_ra_creation(logged_in_browser, live_server, admin_user, basic_event):
+    page = pages.CreateRiskAssessment(logged_in_browser.driver, live_server.url, event_id=basic_event.pk).open()
 
-        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
-                                                     start_date=date.today() + timedelta(days=6),
-                                                     description="start future no end",
-                                                     purchase_order='TESTPO',
-                                                     person=self.client,
-                                                     venue=self.venue)
-        self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
-                                                      start_date=date.today() + timedelta(days=6),
-                                                      description="start future no end",
-                                                      purchase_order='TESTPO',
-                                                      person=self.client,
-                                                      venue=self.venue)
-        self.testEvent3 = models.Event.objects.create(name="TE E3", status=models.Event.PROVISIONAL,
-                                                      start_date=date.today() + timedelta(days=6),
-                                                      description="start future no end",
-                                                      purchase_order='TESTPO',
-                                                      person=self.client,
-                                                      venue=self.venue)
-        self.testRA = models.RiskAssessment.objects.create(event=self.testEvent2, supervisor_consulted=False, nonstandard_equipment=False,
-                                                           nonstandard_use=False,
-                                                           contractors=False,
-                                                           other_companies=False,
-                                                           crew_fatigue=False,
-                                                           big_power=False,
-                                                           generators=False,
-                                                           other_companies_power=False,
-                                                           nonstandard_equipment_power=False,
-                                                           multiple_electrical_environments=False,
-                                                           noise_monitoring=False,
-                                                           known_venue=True,
-                                                           safe_loading=True,
-                                                           safe_storage=True,
-                                                           area_outside_of_control=False,
-                                                           barrier_required=False,
-                                                           nonstandard_emergency_procedure=False,
-                                                           special_structures=False,
-                                                           suspended_structures=False,
-                                                           outside=False)
-        self.testRA2 = models.RiskAssessment.objects.create(event=self.testEvent3, supervisor_consulted=False, nonstandard_equipment=False,
-                                                            nonstandard_use=False,
-                                                            contractors=False,
-                                                            other_companies=False,
-                                                            crew_fatigue=False,
-                                                            big_power=True,
-                                                            generators=False,
-                                                            other_companies_power=False,
-                                                            nonstandard_equipment_power=False,
-                                                            multiple_electrical_environments=False,
-                                                            noise_monitoring=False,
-                                                            known_venue=True,
-                                                            safe_loading=True,
-                                                            safe_storage=True,
-                                                            area_outside_of_control=False,
-                                                            barrier_required=False,
-                                                            nonstandard_emergency_procedure=False,
-                                                            special_structures=False,
-                                                            suspended_structures=False,
-                                                            outside=False)
-        self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+    # Check there are no defaults
+    assert page.nonstandard_equipment is None
 
-    # TODO Can I loop through all the boolean fields and test them at once?
-    def test_ra_creation(self):
-        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+    # No database side validation, only HTML5.
+    page.nonstandard_equipment = False
+    page.nonstandard_use = False
+    page.contractors = False
+    page.other_companies = False
+    page.crew_fatigue = False
+    page.general_notes = "There are no notes."
+    page.big_power = False
+    page.outside = False
+    page.power_mic.search(admin_user.first_name)
+    page.generators = False
+    page.other_companies_power = False
+    page.nonstandard_equipment_power = False
+    page.multiple_electrical_environments = False
+    page.power_notes = "Remember to bring some power"
+    page.noise_monitoring = False
+    page.sound_notes = "Loud, but not too loud"
+    page.known_venue = False
+    page.safe_loading = False
+    page.safe_storage = False
+    page.area_outside_of_control = False
+    page.barrier_required = False
+    page.nonstandard_emergency_procedure = False
+    page.special_structures = False
+    # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
-        # Check there are no defaults
-        self.assertIsNone(self.page.nonstandard_equipment)
+    page.suspended_structures = True
+    # TODO Test for this proper
+    page.rigging_plan = "https://nottinghamtec.sharepoint.com/test/"
+    page.submit()
+    assert not page.success
 
-        # No database side validation, only HTML5.
+    page.suspended_structures = False
+    page.submit()
+    assert page.success
 
-        self.page.nonstandard_equipment = False
-        self.page.nonstandard_use = False
-        self.page.contractors = False
-        self.page.other_companies = False
-        self.page.crew_fatigue = False
-        self.page.general_notes = "There are no notes."
-        self.page.big_power = False
-        self.page.outside = False
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.set_option(self.profile.name, True)
-        # TODO This should not be necessary, normally closes automatically
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-        self.page.generators = False
-        self.page.other_companies_power = False
-        self.page.nonstandard_equipment_power = False
-        self.page.multiple_electrical_environments = False
-        self.page.power_notes = "Remember to bring some power"
-        self.page.noise_monitoring = False
-        self.page.sound_notes = "Loud, but not too loud"
-        self.page.known_venue = False
-        self.page.safe_loading = False
-        self.page.safe_storage = False
-        self.page.area_outside_of_control = False
-        self.page.barrier_required = False
-        self.page.nonstandard_emergency_procedure = False
-        self.page.special_structures = False
-        # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
-        self.page.suspended_structures = True
-        # TODO Test for this proper
-        self.page.rigging_plan = "https://nottinghamtec.sharepoint.com/test/"
-        self.page.submit()
-        self.assertFalse(self.page.success)
-
-        self.page.suspended_structures = False
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-        # Test that we can't make another one
-        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        self.assertIn('edit', self.driver.current_url)
+def test_ra_no_duplicates(logged_in_browser, live_server, admin_user, ra):
+    # Test that we can't make another one
+    page = pages.CreateRiskAssessment(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
+    assert 'edit' in logged_in_browser.url
