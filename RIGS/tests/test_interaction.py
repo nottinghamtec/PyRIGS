@@ -748,8 +748,8 @@ def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist
     assert vehicle_name == vehicle.vehicle
 
 
-#FIXME
-@pytest.mark.xfail
+# FIXME
+@pytest.mark.xfail(run=False)
 def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
     page.add_crew()
