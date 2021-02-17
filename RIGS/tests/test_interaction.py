@@ -667,9 +667,7 @@ def test_ra_edit(logged_in_browser, live_server, ra):
     assert ra.nonstandard_equipment == nse
 
 
-def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
-    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
-
+def small_ec(page):
     page.safe_parking = True
     page.safe_packing = True
     page.exits = True
@@ -682,15 +680,15 @@ def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
     page.power_mic.search(admin_user.name)
     page.power_mic.toggle()
     assert not page.power_mic.is_open
-
-    # Gotta scroll to make the button clickable
-    logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
     page.earthing = True
     page.rcds = True
     page.supply_test = True
     page.pat = True
 
+
+def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
+    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
+    small_ec(page)
     page.submit()
     assert page.success
 
@@ -735,6 +733,7 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
 
 def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    small_ec(page)
     page.add_vehicle()
     assert len(page.vehicles) == 1
     vehicle_name = 'Brian'
@@ -751,6 +750,7 @@ def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist
 # TODO Test validation of end before start
 def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    small_ec(page)
     page.add_crew()
     assert len(page.crew) == 1
     role = "MIC"
@@ -815,7 +815,7 @@ def test_ra_creation(logged_in_browser, live_server, admin_user, basic_event):
     assert page.success
 
 
-def test_ra_no_duplicates(logged_in_browser, live_server, admin_user, ra):
+def test_ra_no_duplicates(logged_in_browser, live_server, ra):
     # Test that we can't make another one
     page = pages.CreateRiskAssessment(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
     assert 'edit' in logged_in_browser.url
