@@ -85,7 +85,7 @@ coveralls = "*"
 django-coverage-plugin = "*"
 pytest-cov = "*"
 pytest-django = "*"
-pytest-xdist = {extras = ["psutil"], version = "==2.2.0"}
+pytest-xdist = {extras = ["psutil"], version = "*"}
 pluggy = "*"
 pytest-splinter = "*"
 pytest = "*"
