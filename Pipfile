@@ -77,6 +77,7 @@ zipp = "~=3.4.0"
 "zope.schema" = "~=6.0.1"
 sentry-sdk = "*"
 diff-match-patch = "*"
+fontawesome-free = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"
@@ -85,11 +86,17 @@ coveralls = "*"
 django-coverage-plugin = "*"
 pytest-cov = "*"
 pytest-django = "*"
-pytest-xdist = {extras = ["psutil"], version = "*"}
 pluggy = "*"
 pytest-splinter = "*"
 pytest = "*"
-pypom = {extras = ["splinter"], version = "*"}
 
 [requires]
 python_version = "3.9"
+
+[dev-packages.pytest-xdist]
+extras = [ "psutil",]
+version = "*"
+
+[dev-packages.pypom]
+extras = [ "splinter",]
+version = "*"

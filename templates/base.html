@@ -19,6 +19,8 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
+    <link href="{% static 'fontawesome_free/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesome_free/css/solid.css' %}" rel="stylesheet" type="text/css">
     {% block css %}
     {% endblock %}
 
@@ -102,7 +104,6 @@ if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-sche
 <script src="{% static 'js/dropdown.js' %}"></script>
 <script src="{% static 'js/modal.js' %}"></script>
 <script src="{% static 'js/konami.js' %}"></script>
-<script src="{% static 'js/all.js' %}"></script> <!---FontAwesome--->
 <script>
     jQuery(document).ready(function () {
         jQuery(document).on('click', '.modal-href', function (e) {

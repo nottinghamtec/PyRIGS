@@ -47,7 +47,6 @@ function scripts() {
 
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/flatpickr/dist/flatpickr.min.js',
-                    'node_modules/@fortawesome/fontawesome-free/js/all.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',

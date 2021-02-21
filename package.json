@@ -6,7 +6,6 @@
   "license": "Custom",
   "dependencies": {
     "@forevolve/bootstrap-dark": "^1.0.0-alpha.1075",
-    "@fortawesome/fontawesome-free": "^5.13.1",
     "ajax-bootstrap-select": "^1.4.5",
     "autocompleter": "^6.0.3",
     "autoprefixer": "^9.8.0",
