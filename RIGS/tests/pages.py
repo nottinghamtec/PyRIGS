@@ -230,9 +230,11 @@ class CreateEventChecklist(FormPage):
     URL_TEMPLATE = 'event/{event_id}/checklist'
 
     _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
-    _power_mic_selector = (By.XPATH, "//div[@id='id_power_mic-group']//div[contains(@class, 'bootstrap-select')]")
+    _power_mic_selector = (By.XPATH, "//div[select[@id='id_power_mic']]")
     _add_vehicle_locator = (By.XPATH, "//button[contains(., 'Vehicle')]")
     _add_crew_locator = (By.XPATH, "//button[contains(., 'Crew')]")
+    _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
+    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(.,'new'))]]")
 
     form_items = {
         'safe_parking': (regions.CheckBox, (By.ID, 'id_safe_parking')),
@@ -270,16 +272,6 @@ class CreateEventChecklist(FormPage):
     @property
     def power_mic(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
-
-    @property
-    def success(self):
-        return '{event_id}' not in self.driver.current_url
-
-
-class EditEventChecklist(CreateEventChecklist):
-    URL_TEMPLATE = '/event/checklist/{pk}/edit'
-    _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
-    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(.,'new'))]]")
 
     @property
     def vehicles(self):
@@ -322,6 +314,14 @@ class EditEventChecklist(CreateEventChecklist):
         @property
         def role(self):
             return regions.TextBox(self, self.root.find_element(*self._role_locator))
+
+    @property
+    def success(self):
+        return '{event_id}' not in self.driver.current_url
+
+
+class EditEventChecklist(CreateEventChecklist):
+    URL_TEMPLATE = '/event/checklist/{pk}/edit'
 
     @property
     def success(self):

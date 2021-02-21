@@ -16,6 +16,7 @@ from RIGS import models
 from RIGS.tests import regions
 from . import pages
 import pytest
+import time as t
 
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -667,7 +668,7 @@ def test_ra_edit(logged_in_browser, live_server, ra):
     assert ra.nonstandard_equipment == nse
 
 
-def small_ec(page):
+def small_ec(page, admin_user):
     page.safe_parking = True
     page.safe_packing = True
     page.exits = True
@@ -688,7 +689,7 @@ def small_ec(page):
 
 def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
     page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
-    small_ec(page)
+    small_ec(page, admin_user)
     page.submit()
     assert page.success
 
@@ -733,12 +734,15 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
 
 def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
-    small_ec(page)
+    small_ec(page, admin_user)
     page.add_vehicle()
     assert len(page.vehicles) == 1
     vehicle_name = 'Brian'
     page.vehicles[0].name.set_value(vehicle_name)
+    # Appears we're moving too fast for javascript...
+    t.sleep(1)
     page.vehicles[0].vehicle.search(admin_user.first_name)
+    t.sleep(1)
     page.submit()
     assert page.success
     # Check data is correct
@@ -750,17 +754,19 @@ def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist
 # TODO Test validation of end before start
 def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
     page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
-    small_ec(page)
+    small_ec(page, admin_user)
     page.add_crew()
     assert len(page.crew) == 1
     role = "MIC"
     start_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0))
     end_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30))
     crew = page.crew[0]
+    t.sleep(2)
+    crew.crewmember.search(admin_user.first_name)
+    t.sleep(2)
     crew.role.set_value(role)
     crew.start_time.set_value(start_time)
     crew.end_time.set_value(end_time)
-    crew.crewmember.search(admin_user.first_name)
     page.submit()
     assert page.success
     # Check data is correct
