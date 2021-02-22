@@ -43,9 +43,9 @@ function scripts() {
     const dest = 'pipeline/built_assets/js';
     const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
     const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
+    const interaction = ["html5sortable.min.js", "interaction.js"]
     return gulp.src(['node_modules/jquery/dist/jquery.js',
                     /* JQuery Plugins */
-                    'node_modules/jquery-ui-dist/jquery-ui.js',
                     'node_modules/popper.js/dist/umd/popper.js',
                     /* Bootstrap Plugins */
                     'node_modules/bootstrap/js/dist/util.js',
@@ -56,6 +56,7 @@ function scripts() {
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/bootstrap/js/dist/alert.js',
 
+                    'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/flatpickr/dist/flatpickr.min.js',
                     'node_modules/moment/moment.js',
@@ -66,6 +67,7 @@ function scripts() {
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
+    .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest(dest))
