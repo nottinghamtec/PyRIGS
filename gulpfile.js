@@ -42,7 +42,7 @@ function styles(done) {
 function scripts() {
     const dest = 'pipeline/built_assets/js';
     const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
-    const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js", "autocompleter.js"]
+    const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
     return gulp.src(['node_modules/jquery/dist/jquery.js',
                     /* JQuery Plugins */
                     'node_modules/jquery-ui-dist/jquery-ui.js',

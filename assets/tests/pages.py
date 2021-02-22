@@ -17,6 +17,7 @@ class AssetList(BasePage):
     _status_select_locator = (By.CSS_SELECTOR, 'div#status-group>div.bootstrap-select')
     _category_select_locator = (By.CSS_SELECTOR, 'div#category-group>div.bootstrap-select')
     _go_button_locator = (By.ID, 'id_search')
+    _filter_button_locator = (By.ID, 'filter-submit')
 
     class AssetListRow(Region):
         _asset_id_locator = (By.CLASS_NAME, "assetID")
@@ -55,6 +56,9 @@ class AssetList(BasePage):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+
+    def filter(self):
+        self.find_element(*self._filter_button_locator).click()
 
     @property
     def status_selector(self):

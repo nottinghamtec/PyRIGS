@@ -78,7 +78,7 @@ class TestAssetList(AutoLoginTest):
         self.page.status_selector.select_all()
         self.page.status_selector.toggle()
         self.assertFalse(self.page.status_selector.is_open)
-        self.page.search()
+        self.page.filter()
         self.assertTrue(len(self.page.assets) == 4)
 
         self.page.category_selector.toggle()
@@ -86,7 +86,7 @@ class TestAssetList(AutoLoginTest):
         self.page.category_selector.set_option("Sound", True)
         self.page.category_selector.close()
         self.assertFalse(self.page.category_selector.is_open)
-        self.page.search()
+        self.page.filter()
         self.assertTrue(len(self.page.assets) == 2)
         asset_ids = list(map(lambda x: x.id, self.page.assets))
         self.assertEqual("1", asset_ids[0])
