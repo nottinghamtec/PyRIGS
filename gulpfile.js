@@ -19,6 +19,7 @@ const ignore = require('gulp-ignore');
 sass.compiler = require('node-sass');
 
 function styles(done) {
+    const bs_select = ["bootstrap-select.css", "ajax-bootstrap-select.css"]
     return gulp.src(['pipeline/source_assets/scss/**/*.scss',
                     'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
@@ -26,6 +27,7 @@ function styles(done) {
                     'node_modules/flatpickr/dist/flatpickr.css'])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
+    .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
     .pipe(postcss([ autoprefixer(), cssnano() ]))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('pipeline/built_assets/css'))
@@ -35,6 +37,7 @@ function styles(done) {
 function scripts() {
     const dest = 'pipeline/built_assets/js';
     const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
+    const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js", "autocompleter.js"]
     return gulp.src(['node_modules/jquery/dist/jquery.js',
                     /* JQuery Plugins */
                     'node_modules/jquery-ui-dist/jquery-ui.js',
@@ -57,6 +60,7 @@ function scripts() {
                     'node_modules/konami/konami.js',
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
+    .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
     .pipe(ignore.exclude(function(file) { return base_scripts.includes(file.relative);}))
     .pipe(flatten())
     .pipe(terser())
