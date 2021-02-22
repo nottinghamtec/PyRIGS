@@ -36,7 +36,7 @@
     </div>
 </div>
 <script>
-if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+if({{ request.user.dark_theme|lower|default:'false' }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
     $('<link>').appendTo('head').attr({type : 'text/css', rel : 'stylesheet'}).attr('href', '{% static "css/dark_screen.css" %}');
     document.body.setAttribute('data-theme', 'dark');
 }
