@@ -14,7 +14,6 @@ const spawn = require('child_process').spawn;
 const cssnano = require('cssnano');
 const con = require('gulp-concat');
 const gulpif = require('gulp-if');
-const ignore = require('gulp-ignore');
 
 sass.compiler = require('node-sass');
 
@@ -61,7 +60,6 @@ function scripts() {
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
-    .pipe(ignore.exclude(function(file) { return base_scripts.includes(file.relative);}))
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest(dest))

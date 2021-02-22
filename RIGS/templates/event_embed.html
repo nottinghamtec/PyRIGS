@@ -1,8 +1,9 @@
 {% extends 'base_embed.html' %}
 {% load static %}
 
-{% block js %}
-<script src="{% static 'js/all.js' %}"></script>
+{% block extra-head %}
+<link href="{% static 'fontawesome_free/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesome_free/css/solid.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block content %}

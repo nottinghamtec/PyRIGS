@@ -5,11 +5,17 @@
 {% load static %}
 
 {% block css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}" async></script>
+{% endblock %}
+
 {% block js %}
-    <script src="{% static 'js/selects.js' %}"></script>
+    {{ block.super }}
     <script>
         //Get querystring value
         function getParameterByName(name) {
