@@ -19,8 +19,6 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
-    <link href="{% static 'fontawesome_free/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesome_free/css/solid.css' %}" rel="stylesheet" type="text/css">
     {% block css %}
     {% endblock %}
 

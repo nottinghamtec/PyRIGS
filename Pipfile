@@ -77,7 +77,6 @@ zipp = "~=3.4.0"
 "zope.schema" = "~=6.0.1"
 sentry-sdk = "*"
 diff-match-patch = "*"
-fontawesome-free = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"
@@ -97,6 +96,6 @@ python_version = "3.9"
 extras = [ "psutil",]
 version = "*"
 
-[dev-packages.pypom]
+[dev-packages.PyPOM]
 extras = [ "splinter",]
 version = "*"

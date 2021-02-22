@@ -17,13 +17,19 @@ const gulpif = require('gulp-if');
 
 sass.compiler = require('node-sass');
 
+function fonts(done) {
+    return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.*')
+        .pipe(gulp.dest('pipeline/built_assets/fonts'))
+        .pipe(browsersync.stream());
+}
+
 function styles(done) {
     const bs_select = ["bootstrap-select.css", "ajax-bootstrap-select.css"]
     return gulp.src(['pipeline/source_assets/scss/**/*.scss',
                     'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/flatpickr/dist/flatpickr.css'])
+                    'node_modules/flatpickr/dist/flatpickr.css',])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
@@ -89,5 +95,5 @@ function watchFiles() {
   gulp.watch("**/templates/*.html", browserSyncReload);
 }
 
-exports.build = gulp.parallel(styles, scripts);
+exports.build = gulp.parallel(styles, scripts, fonts);
 exports.watch = gulp.parallel(watchFiles, browserSync);

@@ -72,7 +72,6 @@ INSTALLED_APPS = (
     'reversion',
     'captcha',
     'widget_tweaks',
-    'fontawesome-free',
 )
 
 MIDDLEWARE = (
