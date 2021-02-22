@@ -44,9 +44,10 @@ function scripts() {
     const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
     const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
-    return gulp.src(['node_modules/jquery/dist/jquery.js',
+    const jpop = ["jquery.min.js", "popper.min.js"]
+    return gulp.src(['node_modules/jquery/dist/jquery.min.js',
                     /* JQuery Plugins */
-                    'node_modules/popper.js/dist/umd/popper.js',
+                    'node_modules/popper.js/dist/umd/popper.min.js',
                     /* Bootstrap Plugins */
                     'node_modules/bootstrap/js/dist/util.js',
                     'node_modules/bootstrap/js/dist/tooltip.js',
@@ -68,6 +69,7 @@ function scripts() {
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
     .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
+    .pipe(gulpif(function(file) { return jpop.includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
     .pipe(terser())
     .pipe(gulp.dest(dest))
