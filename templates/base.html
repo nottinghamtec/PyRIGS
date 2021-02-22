@@ -34,7 +34,7 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark flex-nowrap" role="navigation">
   <a class="navbar-brand" href="{% if request.user.is_authenticated %}https://members.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">
-    <img src="{% static 'imgs/logo.png' %}" width="40" height="40" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings">
+    <img src="{% static 'imgs/logo.webp' %}" width="40" height="40" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings">
   </a>
   <div class="container">
       {% block titleheader %}
