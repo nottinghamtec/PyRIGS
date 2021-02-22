@@ -17,7 +17,6 @@
     <link rel="apple-touch-icon" href="{% static 'imgs/pyrigs-avatar.png' %}">
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
     {% block css %}
     {% endblock %}
@@ -80,12 +79,13 @@
 </div>
 
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
+<script src="{% static 'js/base.js' %}"></script>
 <script>
 if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    $('<link>').appendTo('head').attr({type : 'text/css', rel : 'stylesheet'}).attr('href', '{% static "css/dark_screen.css" %}');
     document.body.setAttribute('data-theme', 'dark');
 }
 </script>
-<script src="{% static 'js/base.js' %}"></script>
 {% block js %}
 {% endblock %}
 </body>

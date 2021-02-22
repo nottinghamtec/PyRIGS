@@ -10,7 +10,6 @@
     <base target="_blank" /><!-- Open all links in a new tab, not in the iframe -->
 
     <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/dark_screen.css' %}" {% if not request.user.dark_theme %}media="(prefers-color-scheme: dark)"{% endif %}>
 
     <link href="{% static 'fonts/OpenSans-Regular.tff' %}">
 
@@ -37,7 +36,8 @@
     </div>
 </div>
 <script>
-if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)')) {
+if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    $('<link>').appendTo('head').attr({type : 'text/css', rel : 'stylesheet'}).attr('href', '{% static "css/dark_screen.css" %}');
     document.body.setAttribute('data-theme', 'dark');
 }
 </script>
