@@ -87,12 +87,6 @@ if({{ request.user.dark_theme|lower }} || window.matchMedia('(prefers-color-sche
     document.body.setAttribute('data-theme', 'dark');
 }
 </script>
-<script src="{% static 'js/util.js' %}"></script>
-<script src="{% static 'js/alert.js' %}"></script>
-<script src="{% static 'js/collapse.js' %}"></script>
-<script src="{% static 'js/dropdown.js' %}"></script>
-<script src="{% static 'js/modal.js' %}"></script>
-<script src="{% static 'js/konami.js' %}"></script>
 <script src="{% static 'js/base.js' %}"></script>
 {% block js %}
 {% endblock %}

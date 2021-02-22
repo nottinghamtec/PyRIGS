@@ -12,6 +12,9 @@ const browsersync = require('browser-sync').create();
 const { exec } = require("child_process");
 const spawn = require('child_process').spawn;
 const cssnano = require('cssnano');
+const con = require('gulp-concat');
+const gulpif = require('gulp-if');
+const ignore = require('gulp-ignore');
 
 sass.compiler = require('node-sass');
 
@@ -30,11 +33,11 @@ function styles(done) {
 }
 
 function scripts() {
-    return gulp.src(['pipeline/source_assets/js/**/*.js',
-                    'node_modules/jquery/dist/jquery.js',
+    const dest = 'pipeline/built_assets/js';
+    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
+    return gulp.src(['node_modules/jquery/dist/jquery.js',
                     /* JQuery Plugins */
                     'node_modules/jquery-ui-dist/jquery-ui.js',
-
                     'node_modules/popper.js/dist/umd/popper.js',
                     /* Bootstrap Plugins */
                     'node_modules/bootstrap/js/dist/util.js',
@@ -51,10 +54,13 @@ function scripts() {
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
-                    'node_modules/konami/konami.js'])
+                    'node_modules/konami/konami.js',
+                    'pipeline/source_assets/js/**/*.js',])
+    .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
+    .pipe(ignore.exclude(function(file) { return base_scripts.includes(file.relative);}))
     .pipe(flatten())
     .pipe(terser())
-    .pipe(gulp.dest('pipeline/built_assets/js'))
+    .pipe(gulp.dest(dest))
     .pipe(browsersync.stream());
 }
 
