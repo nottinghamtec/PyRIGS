@@ -128,19 +128,18 @@ class TestAssetForm(AutoLoginTest):
         self.page.serial_number = sn = "0124567890-SAUSAGE"
         self.page.comments = comments = "This is actually a sledgehammer, not a cable..."
 
+        self.page.purchase_price = "12.99"
+        self.page.salvage_value = "99.12"
+        self.page.date_acquired = acquired = datetime.date(2020, 5, 2)
         self.page.purchased_from_selector.toggle()
         self.assertTrue(self.page.purchased_from_selector.is_open)
         self.page.purchased_from_selector.search(self.supplier.name[:-8])
         self.page.purchased_from_selector.set_option(self.supplier.name, True)
-        self.page.purchase_price = "12.99"
-        self.page.salvage_value = "99.12"
-        self.page.date_acquired = acquired = datetime.date(2020, 5, 2)
 
         self.page.parent_selector.toggle()
         self.assertTrue(self.page.parent_selector.is_open)
         option = str(self.parent)
         self.page.parent_selector.search(option)
-        # Needed here but not earlier for whatever reason
         self.driver.implicitly_wait(1)
         self.page.parent_selector.set_option(option, True)
         self.assertTrue(self.page.parent_selector.options[0].selected)
