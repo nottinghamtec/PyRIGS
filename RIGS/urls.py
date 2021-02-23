@@ -132,6 +132,8 @@ urlpatterns = [
          name='event_authorise_preview'),
     re_path(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/$', rigboard.EventAuthorise.as_view(),
             name='event_authorise'),
+    re_path(r'^event/(?P<pk>\d+)/(?P<hmac>[-:\w]+)/preview/$', rigboard.EventAuthorise.as_view(preview=True),
+            name='event_authorise_form_preview'),
 
     # ICS Calendar - API key authentication
     re_path(r'^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$', api_key_required(ical.CalendarICS()),

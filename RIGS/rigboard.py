@@ -11,7 +11,7 @@ import simplejson
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles import finders
 from django.core import signing
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
@@ -274,6 +274,7 @@ class EventArchive(generic.ListView):
 class EventAuthorise(generic.UpdateView):
     template_name = 'eventauthorisation_form.html'
     success_template = 'eventauthorisation_success.html'
+    preview = False
 
     def form_valid(self, form):
         self.object = form.save()
@@ -301,6 +302,7 @@ class EventAuthorise(generic.UpdateView):
         context['page_title'] = "{}: {}".format(self.event.display_id, self.event.name)
         if self.event.dry_hire:
             context['page_title'] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
+        context['preview'] = self.preview
         return context
 
     def get(self, request, *args, **kwargs):
@@ -387,7 +389,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             to=[email],
             reply_to=[self.request.user.email],
         )
-        css = staticfiles_storage.path('css/email.css')
+        css = finders.find('css/email.css')
         html = premailer.Premailer(get_template("eventauthorisation_client_request.html").render(context),
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
@@ -402,8 +404,7 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
     model = models.Event
 
     def render_to_response(self, context, **response_kwargs):
-        from django.contrib.staticfiles.storage import staticfiles_storage
-        css = staticfiles_storage.path('css/email.css')
+        css = finders.find('css/email.css')
         response = super(EventAuthoriseRequestEmailPreview, self).render_to_response(context, **response_kwargs)
         assert isinstance(response, HttpResponse)
         response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
@@ -417,4 +418,5 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
             'sent_by': self.request.user.pk,
         })
         context['to_name'] = self.request.GET.get('to_name', None)
+        context['target'] = 'event_authorise_form_preview'
         return context

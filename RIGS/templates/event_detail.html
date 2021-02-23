@@ -7,7 +7,7 @@
     {% if not request.is_ajax %}
         {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
-            {% include 'event_detail_buttons.html' %}
+            {% include 'partials/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}
@@ -77,7 +77,7 @@
     {% endif %}
     {% if not request.is_ajax and perms.RIGS.view_event %}
     <div class="col-sm-12 text-right">
-        {% include 'event_detail_buttons.html' %}
+        {% include 'partials/event_detail_buttons.html' %}
     </div>
     {% endif %}
     {% if event.is_rig %}
@@ -97,7 +97,7 @@
         </div>
         {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
-            {% include 'event_detail_buttons.html' %}
+            {% include 'partials/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}

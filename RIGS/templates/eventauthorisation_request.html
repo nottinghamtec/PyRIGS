@@ -30,14 +30,6 @@
                         {% render_field form.email type="email" class+="form-control" %}
                     </div>
                 </div>
-                <div class="text-right col-sm-3 offset-sm-9">
-                    <div class="form-group">
-                        <button type="submit" class="form-control btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Send
-                        </button>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
@@ -47,4 +39,15 @@
             $('#auth-request-form button').attr('disabled', true);
         });
     </script>
+{% endblock %}
+
+{% block footer %}
+<div class="form-row">
+    <div class="btn-group" role="group">
+        <a type="button" target="_blank" href="{% url 'event_authorise_preview' object.pk %}" class="btn btn-info text-nowrap"><span class="fas fa-drafting-compass"></span> Preview</a>
+        <button type="submit" class="form-control btn btn-primary" form="auth-request-form">
+            <span class="fas fa-paper-plane"></span> Send
+        </button>
+    </div>
+</div>
 {% endblock %}

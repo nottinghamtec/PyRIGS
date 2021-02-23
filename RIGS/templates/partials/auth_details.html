@@ -1,15 +1,15 @@
 <div class="card card-default
-    {% if object.authorised %}
-        card-success
+    {% if event.authorised %}
+        border-success
     {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-        card-warning
+        border-warning
     {% elif event.auth_request_to %}
-        card-info
+        border-info
     {% endif %}
     ">
     <div class="card-header">Client Authorisation</div>
     <div class="card-body row">
-        <dl class="col-md-6">
+        <dl class="col-sm-6">
             <dt>Authorisation Request</dt>
             <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
 
@@ -22,8 +22,8 @@
             <dt>To</dt>
             <dd>{{ object.auth_request_to }}</dd>
         </dl>
-        <dd class="d-block d-sm-none">&nbsp;</dd>
-        <dl class="col-md-6">
+        <dl class="col-sm-6">
+            <hr class="d-block d-sm-none">
             <dt>Authorised</dt>
             <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
 

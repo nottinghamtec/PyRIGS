@@ -1,9 +1,6 @@
 {% extends 'eventauthorisation.html' %}
 {% load widget_tweaks %}
 
-{% block js %}
-{% endblock %}
-
 {% block authorisation %}
 <div class="row">
     <div class="col-sm-12">
@@ -86,7 +83,7 @@
 
                             <div class="text-right">
                                 <div class="btn-group">
-                                    <button class="btn btn-primary btn-lg" type="submit">Authorise</button>
+                                    <button class="btn btn-primary btn-lg" type="submit" {% if preview %}disabled="" data-toggle="tooltip" title="This is only a preview!"{%endif%}>Authorise</button>
                                 </div>
                             </div>
                         </div>

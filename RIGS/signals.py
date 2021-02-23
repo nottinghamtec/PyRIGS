@@ -6,7 +6,7 @@ from io import BytesIO
 
 from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db.models.signals import post_save
@@ -63,7 +63,7 @@ def send_eventauthorisation_success_email(instance):
         reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
     )
 
-    css = staticfiles_storage.path('css/email.css')
+    css = finders.find('css/email.css')
     html = Premailer(get_template("eventauthorisation_client_success.html").render(context),
                      external_styles=css).transform()
     client_email.attach_alternative(html, 'text/html')
@@ -121,7 +121,7 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
                 to=[admin.email],
                 reply_to=[user.email],
             )
-            css = staticfiles_storage.path('css/email.css')
+            css = finders.find('css/email.css')
             html = Premailer(get_template("admin_awaiting_approval.html").render(context),
                              external_styles=css).transform()
             email.attach_alternative(html, 'text/html')

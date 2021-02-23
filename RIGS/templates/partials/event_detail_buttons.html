@@ -9,7 +9,7 @@
         {% if event.internal %}
             <a class="btn item-add modal-href event-authorise-request
                     {% if event.authorised %}
-                        btn-success
+                        btn-success active
                     {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
                         btn-warning
                     {% elif event.auth_request_to %}
@@ -19,7 +19,7 @@
                     {% endif %}
                     "
                href="{% url 'event_authorise_request' object.pk %}">
-                <i class="fas fa-paper-plane"></i>
+                <span class="fas fa-paper-plane"></span>
                 <span class="d-none d-sm-inline">
                     {% if event.authorised %}
                         Authorised

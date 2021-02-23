@@ -173,7 +173,7 @@ def title_spaced(string):
 @register.filter(needs_autoescape=True)
 def namewithnotes(obj, url, autoescape=True):
     if hasattr(obj, 'notes') and obj.notes is not None and len(obj.notes) > 0:
-        return mark_safe(obj.name + " <a href='{}'><span class='far fa-sticky-note'></span></a>".format(reverse(url, kwargs={'pk': obj.pk})))
+        return mark_safe(obj.name + " <a href='{}'><span class='fas fa-sticky-note'></span></a>".format(reverse(url, kwargs={'pk': obj.pk})))
     else:
         return obj.name
 
