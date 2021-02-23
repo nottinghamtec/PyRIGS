@@ -14,18 +14,10 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
-      - name: Cache Static Files
-        id: static-cache
-        uses: actions/cache@v2
-        with:
-            path: |
-               'static/'
-               'pipeline/built_assets'
-            key: ${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - uses: bahmutov/npm-install@v1
-        if: steps.static-cache.outputs.cache-hit != 'true'
+        # if: steps.static-cache.outputs.cache-hit != 'true'
       - run: node node_modules/gulp/bin/gulp build
-        if: steps.static-cache.outputs.cache-hit != 'true'
+        # if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
