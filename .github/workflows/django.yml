@@ -18,7 +18,9 @@ jobs:
         id: static-cache
         uses: actions/cache@v2
         with:
-            path: 'static/'
+            path: |
+               'static/'
+               'pipeline/built_assets'
             key: ${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
       - uses: bahmutov/npm-install@v1
         if: steps.static-cache.outputs.cache-hit != 'true'
