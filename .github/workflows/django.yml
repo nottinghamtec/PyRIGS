@@ -14,20 +14,18 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
-      - uses: bahmutov/npm-install@v1
-        # if: steps.static-cache.outputs.cache-hit != 'true'
-      - run: node node_modules/gulp/bin/gulp build
-        # if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
             python-version: 3.9
       - name: Cache python deps
+        id: pcache
         uses: actions/cache@v2
         with:
             path: ${{ env.pythonLocation }}
             key: ${{ env.pythonLocation }}-${{ hashFiles('Pipfile.lock') }}
       - name: Install Dependencies
+        if: steps.pcache.outputs.cache-hit != 'true'
         run: |
               python -m pip install --upgrade pip
               pip install pipenv
@@ -37,7 +35,18 @@ jobs:
               pipenv run pycodestyle . --exclude=migrations,node_modules
               pipenv run python manage.py check
               pipenv run python manage.py makemigrations --check --dry-run
-              pipenv run python manage.py collectstatic --noinput
+      - name: Cache Static Files
+        id: static-cache
+        uses: actions/cache@v2
+        with:
+            path: 'static/'
+            key: ${{ hashFiles('package-lock.json') }}-${{ hashFiles('pipeline/source_assets') }}
+      - uses: bahmutov/npm-install@v1
+        if: steps.static-cache.outputs.cache-hit != 'true'
+      - run: node node_modules/gulp/bin/gulp build
+        if: steps.static-cache.outputs.cache-hit != 'true'
+      - run: pipenv run python manage.py collectstatic --noinput
+        if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Run Tests
         run: pipenv run pytest -n auto -vv --cov
       - uses: actions/upload-artifact@v2
