@@ -230,10 +230,7 @@ DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 # Static files (CSS, JavaScript, Images)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static/'
-STATIC_DIRS = [
-    BASE_DIR / 'static/',
-]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'pipeline/built_assets',
 ]
