@@ -20,15 +20,7 @@
 
             {% if event.is_rig %}
                 <dt class="col-sm-6">Event MIC</dt>
-                <dd class="col-sm-6">
-                    {% if event.mic and perms.RIGS.view_profile %}
-                        <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
-                            {{ event.mic.name }}
-                        </a>
-                    {% else %}
-                        {{ event.mic.name }}
-                    {% endif %}
-                </dd>
+                <dd class="col-sm-6">{% include 'partials/linked_name.html' with profile=event.mic %}</dd>
             {% endif %}
 
             <dt class="col-sm-6">Status</dt>
@@ -71,7 +63,7 @@
 
             {% if event.dry_hire %}
                 <dt class="col-sm-6">Checked In By</dt>
-                <dd class="col-sm-6">{{ object.checked_in_by.name }}</dd>
+                <dd class="col-sm-6">{% include 'partials/linked_name.html' with profile=event.checked_in_by %}</dd>
             {% endif %}
 
             {% if event.is_rig %}

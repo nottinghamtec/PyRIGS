@@ -1,0 +1,7 @@
+{% if profile and perms.RIGS.view_profile %}
+    <a href="{% url 'profile_detail' profile.pk %}" class="modal-href">
+        {{ profile.name }}
+    </a>
+{% else %}
+    {{ profile.name }}
+{% endif %}
