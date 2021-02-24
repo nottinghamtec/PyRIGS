@@ -30,7 +30,7 @@ jobs:
               python -m pip install --upgrade pip
               pip install pipenv
               pipenv install -d
-        if: steps.pcache.outputs.cache-hit != 'true'
+        # if: steps.pcache.outputs.cache-hit != 'true'
       - name: Cache Static Files
         id: static-cache
         uses: actions/cache@v2
