@@ -1,14 +1,27 @@
 {% load namewithnotes from filters %}
 <style>
-.eventgrid {
+#event_table {
     display: grid;
-    grid-template-columns: 0.5fr 2fr 4fr 1fr;
-    border: solid 3px black;
+    grid-template-columns: 0.5fr 1fr 4fr 1fr;
+    column-gap: 1em;
+}
+.eventgrid {
+    display: inherit;
+    grid-column: 1/5;
+    grid-template-columns: subgrid;
     padding: 1em;
 }
+.grid-header {
+    border-bottom: 1px solid grey;
+    border-top: 1px solid grey;
+}
 @media (max-width: 600px) {
-  .eventgrid {
+  #event_table {
     grid-template-columns: 1fr;
+  }
+  .eventgrid {
+    grid-column: 1/1;
+    padding: 0.5em;
   }
   .grid-header {
     display: none;
@@ -17,13 +30,33 @@
     order: 2;
   }
 }
+@media (max-width: 900px) {
+  #event_table {
+    grid-template-columns: 0.5fr 1fr;
+    column-gap: 0.5em;
+  }
+  .eventgrid {
+    grid-column: 1/3;
+  }
+  #event_dates {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  #event_number {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  #event_mic {
+    grid-column: 2;
+  }
+}
 </style>
 <div id="event_table">
     <div class="eventgrid grid-header font-weight-bold">
-        <div>#</div>
-        <div>Dates & Times</div>
+        <div id="event_number">#</div>
+        <div id="event_dates">Dates & Times</div>
         <div>Event Details</div>
-        <div>MIC</div>
+        <div id="event_mic">MIC</div>
     </div>
     {% for event in events %}
     <div class="eventgrid {% if event.cancelled %}
@@ -95,6 +128,7 @@
         </div>
         <!---MIC-->
         <div id="event_mic" class="text-nowrap">
+            <span class="d-md-none align-middle">MIC:</span>
             {% if event.mic %}
                 {% if perms.RIGS.view_profile %}
                     <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
