@@ -20,14 +20,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cabletype',
             name='plug',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='plug', to='assets.connector'),
-            preserve_default=False,
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='plug', to='assets.connector'),
         ),
         migrations.AlterField(
             model_name='cabletype',
             name='socket',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='socket', to='assets.connector'),
-            preserve_default=False,
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='socket', to='assets.connector'),
         ),
         migrations.AlterField(
             model_name='supplier',

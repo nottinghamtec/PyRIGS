@@ -8,9 +8,9 @@ def add_default(apps, schema_editor):
     Connector = apps.get_model('assets', 'Connector')
     for cable_type in CableType.objects.all():
         if cable_type.plug is None:
-            cable_type.plug = Connector.first()
+            cable_type.plug = Connector.objects.first()
         if cable_type.socket is None:
-            cable_type.socket = Connector.first()
+            cable_type.socket = Connector.objects.first()
         cable_type.save()
 
 
