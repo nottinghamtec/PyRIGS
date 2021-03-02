@@ -1,113 +1,104 @@
 {% load namewithnotes from filters %}
-<style>
-.eventgrid {
-    display: grid;
-    grid-template-columns: 0.5fr 2fr 4fr 1fr;
-    border: solid 3px black;
-    padding: 1em;
-}
-@media (max-width: 600px) {
-  .eventgrid {
-    grid-template-columns: 1fr;
-  }
-  .grid-header {
-    display: none;
-  }
-  #event_dates {
-    order: 2;
-  }
-}
-</style>
-<div id="event_table">
-    <div class="eventgrid grid-header font-weight-bold">
-        <div>#</div>
-        <div>Dates & Times</div>
-        <div>Event Details</div>
-        <div>MIC</div>
-    </div>
-    {% for event in events %}
-    <div class="eventgrid {% if event.cancelled %}
-                    bg-secondary
+<div class="table-responsive">
+    <table class="table mb-0" id="event_table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Dates & Times</th>
+                <th scope="col">Event Details</th>
+                <th scope="col">MIC</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+        <tr class="{% if event.cancelled %}
+                    table-secondary
                     {% elif not event.is_rig %}
-                    bg-info
+                    table-info
                     {% elif not event.mic %}
-                    bg-danger
+                    table-danger
                     {% elif event.confirmed and event.authorised %}
                         {% if event.dry_hire or event.riskassessment %}
-                            bg-success
+                            table-success
                         {% else %}
-                            bg-warning
+                            table-warning
                         {% endif %}
                     {% else %}
-                    bg-warning
+                    table-warning
                     {% endif %}" {% if event.cancelled %}style="opacity: 50% !important;"{% endif %} id="event_row">
-        <!---Number-->
-        <div class="font-weight-bold d-none d-sm-block" id="event_number">{{ event.display_id }}</div>
-        <!--Dates & Times-->
-        <div id="event_dates">
-            <span class="text-nowrap attribute">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
-            {% if event.has_start_time %}
-                {{ event.start_time|date:"H:i" }}
-            {% endif %}
-            </span>
-            {% if event.end_date %}
-                <br>
-                <span class="text-nowrap">End: {% if event.end_date != event.start_date %}<strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>{% endif %}
-                {% if event.has_end_time %}
-                   {{ event.end_time|date:"H:i" }}
+            <!---Number-->
+            <th scope="row" id="event_number">{{ event.display_id }}</th>
+            <!--Dates & Times-->
+            <td id="event_dates">
+                <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}</strong>
+                {% if event.has_start_time %}
+                    {{ event.start_time|date:"H:i" }}
                 {% endif %}
                 </span>
-            {% endif %}
-            {% if not event.cancelled %}
-                {% if event.meet_at %}
-                    <br><span>Crew meet: <strong>{{ event.meet_at|date:"H:i" }}</strong> {{ event.meet_at|date:"(d/m/Y)" }}</span>
-                {% endif %}
-                {% if event.access_at %}
-                    <br><span>Access at: <strong>{{ event.access_at|date:"H:i" }}</strong> {{ event.access_at|date:"(d/m/Y)" }}</span>
-                {% endif %}
-            {% endif %}
-        </div>
-        <!---Details-->
-        <div id="event_details" class="w-100">
-            <h4>
-                <a href="{% url 'event_detail' event.pk %}">
-                    {{ event.name }}
-                </a>
-                {% if event.venue %}
-                    <small>at {{ event.venue|namewithnotes:'venue_detail' }}</small>
-                {% endif %}
-                {% if event.dry_hire %}
-                    <span class="badge badge-secondary">Dry Hire</span>
-                {% endif %}
-            </h4>
-            {% if event.is_rig and not event.cancelled %}
-                <h5>
-                    {{ event.person.name }}
-                    {% if event.organisation %}
-                        for {{ event.organisation.name }}
+                {% if event.end_date %}
+                    <br>
+                    <span class="text-nowrap">End: {% if event.end_date != event.start_date %}<strong>{{ event.end_date|date:"D d/m/Y"  }}</strong>{% endif %}
+                    {% if event.has_end_time %}
+                       {{ event.end_time|date:"H:i" }}
                     {% endif %}
-                </h5>
-            {% endif %}
-            {% if not event.cancelled and event.description %}
-                <p>{{ event.description|linebreaksbr }}</p>
-            {% endif %}
-            {% include 'partials/event_status.html' %}
-        </div>
-        <!---MIC-->
-        <div id="event_mic" class="text-nowrap">
-            {% if event.mic %}
-                {% if perms.RIGS.view_profile %}
-                    <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                    </span>
                 {% endif %}
-                    <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
-                    {{ event.mic }}
-                {% if perms.RIGS.view_profile %}
+                {% if not event.cancelled %}
+                    {% if event.meet_at %}
+                        <br><span>Crew meet: <strong>{{ event.meet_at|date:"H:i" }}</strong> {{ event.meet_at|date:"(d/m/Y)" }}</span>
+                    {% endif %}
+                    {% if event.access_at %}
+                        <br><span>Access at: <strong>{{ event.access_at|date:"H:i" }}</strong> {{ event.access_at|date:"(d/m/Y)" }}</span>
+                    {% endif %}
+                {% endif %}
+            </td>
+            <!---Details-->
+            <td id="event_details" class="w-100">
+                <h4>
+                    <a href="{% url 'event_detail' event.pk %}">
+                        {{ event.name }}
                     </a>
+                    {% if event.venue %}
+                        <small>at {{ event.venue|namewithnotes:'venue_detail' }}</small>
+                    {% endif %}
+                    {% if event.dry_hire %}
+                        <span class="badge badge-secondary">Dry Hire</span>
+                    {% endif %}
+                </h4>
+                {% if event.is_rig and not event.cancelled %}
+                    <h5>
+                        {{ event.person.name }}
+                        {% if event.organisation %}
+                            for {{ event.organisation.name }}
+                        {% endif %}
+                    </h5>
                 {% endif %}
-            {% elif event.is_rig %}
-                <span class="fas fa-exclamation"></span>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
+                {% if not event.cancelled and event.description %}
+                    <p>{{ event.description|linebreaksbr }}</p>
+                {% endif %}
+                {% include 'partials/event_status.html' %}
+            </td>
+            <!---MIC-->
+            <td id="event_mic" class="text-nowrap">
+                {% if event.mic %}
+                    {% if perms.RIGS.view_profile %}
+                        <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                    {% endif %}
+                        <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+                        {{ event.mic }}
+                    {% if perms.RIGS.view_profile %}
+                        </a>
+                    {% endif %}
+                {% elif event.is_rig %}
+                    <span class="fas fa-exclamation"></span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="bg-warning">
+            <td colspan="4">No events found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>

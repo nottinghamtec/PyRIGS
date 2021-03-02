@@ -80,7 +80,7 @@ function browserSync(done) {
   spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'});
   // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
-    notify: true,
+    notify: false,
     open: false,
     port: 8001,
     proxy: 'localhost:8000'
