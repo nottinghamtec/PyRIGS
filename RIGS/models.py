@@ -707,7 +707,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         ]
 
     @cached_property
-    def fields(self):
+    def fieldz(self):
         return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
 
     @property
@@ -799,7 +799,7 @@ class EventChecklist(models.Model, RevisionMixin):
         ]
 
     @cached_property
-    def fields(self):
+    def fieldz(self):
         return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
 
     @property
