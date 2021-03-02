@@ -312,7 +312,6 @@ class Event(models.Model, RevisionMixin):
     end_time = models.TimeField(blank=True, null=True)
     access_at = models.DateTimeField(blank=True, null=True)
     meet_at = models.DateTimeField(blank=True, null=True)
-    meet_info = models.CharField(max_length=255, blank=True, default='')
 
     # Crew management
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True,
@@ -321,8 +320,6 @@ class Event(models.Model, RevisionMixin):
                             verbose_name="MIC", on_delete=models.CASCADE)
 
     # Monies
-    payment_method = models.CharField(max_length=255, blank=True, default='')
-    payment_received = models.CharField(max_length=255, blank=True, default='')
     purchase_order = models.CharField(max_length=255, blank=True, default='', verbose_name='PO')
     collector = models.CharField(max_length=255, blank=True, default='', verbose_name='collected by')
 
