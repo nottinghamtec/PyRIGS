@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="row align-items-center justify-content-between py-2 align-middle">
-    <div class="col-sm-12 col-md align-middle d-flex flex-wrap">
-        Key: <span class="table-success mr-1 px-2 rounded">Ready</span><span class="table-warning mr-1 px-2 rounded text-nowrap">Action Required</span><span class="table-danger mr-1 px-2 rounded text-nowrap">Needs MIC</span><span class="table-secondary mr-1 px-2 rounded">Cancelled</span><span class="table-info px-2 rounded text-nowrap">Non-Rig</span>
+    <div class="col-sm-12 col-md align-middle">
+        Key: <span class="table-success mr-1 px-2 rounded">Ready</span><span class="table-warning mr-1 px-2 rounded">Action Required</span><span class="table-danger mr-1 px-2 rounded">Needs MIC</span><span class="table-secondary mr-1 px-2 rounded">Cancelled</span><span class="table-info px-2 rounded">Non-Rig</span>
     </div>
     {% if perms.RIGS.add_event %}
     <div class="col text-right">

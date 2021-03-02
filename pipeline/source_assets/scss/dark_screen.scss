@@ -93,13 +93,6 @@
                 background-color: #222 !important;
             }
         }
-        #event_table {
-            > .bg-#{$color} {
-                border: 0.3em solid theme-color-level($color, -6) !important;
-                background-color: #222 !important;
-                color: white !important;
-            }
-        }
     }
     del {
       color: black;
@@ -125,8 +118,5 @@
         border-color: #3853a4 !important;
         background: #222;
         color: $gray-100;
-    }
-    .text-muted {
-        color: #c9c9c9 !important;
     }
 }
