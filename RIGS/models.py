@@ -21,7 +21,7 @@ from reversion.models import Version
 
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
-    phone = models.CharField(max_length=13, null=True, default='')
+    phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
     is_approved = models.BooleanField(default=False)
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
@@ -792,15 +792,15 @@ class EventChecklist(models.Model, RevisionMixin):
 
     inverted_fields = []
 
-    @cached_property
-    def fields(self):
-        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
-
     class Meta:
         ordering = ['event']
         permissions = [
             ('review_eventchecklist', 'Can review Event Checklists')
         ]
+
+    @cached_property
+    def fields(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
 
     @property
     def activity_feed_string(self):
