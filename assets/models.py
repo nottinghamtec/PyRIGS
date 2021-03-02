@@ -2,8 +2,6 @@ import re
 
 from django.core.exceptions import ValidationError
 from django.db import models, connection
-from django.db.models.signals import pre_save
-from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from reversion import revisions as reversion
 from reversion.models import Version
@@ -12,27 +10,27 @@ from RIGS.models import RevisionMixin, Profile
 
 
 class AssetCategory(models.Model):
+    name = models.CharField(max_length=80)
+
     class Meta:
         verbose_name = 'Asset Category'
         verbose_name_plural = 'Asset Categories'
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
 
     def __str__(self):
         return self.name
 
 
 class AssetStatus(models.Model):
+    name = models.CharField(max_length=80)
+    should_show = models.BooleanField(
+        default=True, help_text="Should this be shown by default in the asset list.")
+    display_class = models.CharField(max_length=80, blank=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
+
     class Meta:
         verbose_name = 'Asset Status'
         verbose_name_plural = 'Asset Statuses'
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
-    should_show = models.BooleanField(
-        default=True, help_text="Should this be shown by default in the asset list.")
-    display_class = models.CharField(max_length=80, blank=True, null=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
 
     def __str__(self):
         return self.name
@@ -40,15 +38,15 @@ class AssetStatus(models.Model):
 
 @reversion.register
 class Supplier(models.Model, RevisionMixin):
+    name = models.CharField(max_length=80)
+    phone = models.CharField(max_length=15, blank=True, default="")
+    email = models.EmailField(blank=True, default="")
+    address = models.TextField(blank=True, default="")
+
+    notes = models.TextField(blank=True, default="")
+
     class Meta:
         ordering = ['name']
-
-    name = models.CharField(max_length=80)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-
-    notes = models.TextField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('supplier_list')
@@ -67,17 +65,16 @@ class Connector(models.Model):
         return self.description
 
 
-# Things are nullable that shouldn't be because I didn't properly fix the data structure when moving this to its own model...
 class CableType(models.Model):
-    class Meta:
-        ordering = ['plug', 'socket', '-circuits']
-
     circuits = models.IntegerField(default=1)
     cores = models.IntegerField(default=3)
     plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                             related_name='plug', null=True)
+                             related_name='plug')
     socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                               related_name='socket', null=True)
+                               related_name='socket')
+
+    class Meta:
+        ordering = ['plug', 'socket', '-circuits']
 
     def __str__(self):
         if self.plug and self.socket:
@@ -86,14 +83,27 @@ class CableType(models.Model):
             return "Unknown"
 
 
+def get_available_asset_id(wanted_prefix=""):
+    sql = """
+    SELECT a.asset_id_number+1
+    FROM assets_asset a
+    LEFT OUTER JOIN assets_asset b ON
+        (a.asset_id_number + 1 = b.asset_id_number AND
+        a.asset_id_prefix = b.asset_id_prefix)
+    WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = %s;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql, [9000, wanted_prefix])
+        row = cursor.fetchone()
+        if row is None or row[0] is None:
+            return 9000
+        else:
+            return row[0]
+        cursor.close()
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
-    class Meta:
-        ordering = ['asset_id_prefix', 'asset_id_number']
-        permissions = [
-            ('asset_finance', 'Can see financial data for assets')
-        ]
-
     parent = models.ForeignKey(to='self', related_name='asset_parent',
                                blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=15, unique=True)
@@ -127,31 +137,17 @@ class Asset(models.Model, RevisionMixin):
 
     reversion_perm = 'assets.asset_finance'
 
-    def get_available_asset_id(wanted_prefix=""):
-        sql = """
-        SELECT a.asset_id_number+1
-        FROM assets_asset a
-        LEFT OUTER JOIN assets_asset b ON
-            (a.asset_id_number + 1 = b.asset_id_number AND
-            a.asset_id_prefix = b.asset_id_prefix)
-        WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = %s;
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(sql, [9000, wanted_prefix])
-            row = cursor.fetchone()
-            if row is None or row[0] is None:
-                return 9000
-            else:
-                return row[0]
+    class Meta:
+        ordering = ['asset_id_prefix', 'asset_id_number']
+        permissions = [
+            ('asset_finance', 'Can see financial data for assets')
+        ]
+
+    def __str__(self):
+        return "{} | {}".format(self.asset_id, self.description)
 
     def get_absolute_url(self):
         return reverse('asset_detail', kwargs={'pk': self.asset_id})
-
-    def __str__(self):
-        out = str(self.asset_id) + ' - ' + self.description
-        if self.is_cable and self.cable_type is not None:
-            out += '{} - {}m - {}'.format(self.cable_type.plug, self.length, self.cable_type.socket)
-        return out
 
     def clean(self):
         errdict = {}
@@ -188,14 +184,3 @@ class Asset(models.Model, RevisionMixin):
     @property
     def display_id(self):
         return str(self.asset_id)
-
-
-@receiver(pre_save, sender=Asset)
-def pre_save_asset(sender, instance, **kwargs):
-    """Automatically fills in hidden members on database access"""
-    asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", instance.asset_id)
-    if asset_search is None:
-        instance.asset_id += "1"
-    asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", instance.asset_id)
-    instance.asset_id_prefix = asset_search.group(1)
-    instance.asset_id_number = int(asset_search.group(2))

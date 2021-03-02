@@ -47,7 +47,7 @@
                         <dd class="col-sm-6">
                             {{ object.big_power|yesnoi:'invert' }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'power_mic' }}</dt>
+                        <dt class="col-sm-6">{{ object|help_text:'power_mic'|safe }}</dt>
                         <dd class="col-sm-6">
                             {{ object.power_mic.name|default:'None' }}
                         </dd>

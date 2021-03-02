@@ -71,6 +71,7 @@ class BootstrapSelectElement(Region):
         self.find_element(*self._deselect_all_locator).click()
 
     def search(self, query):
+        # self.wait.until(expected_conditions.visibility_of_element_located(self._status_locator))
         search_box = self.find_element(*self._search_locator)
         self.open()
         search_box.clear()

@@ -3,6 +3,7 @@ from django.urls import path
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from PyRIGS.decorators import has_oembed, permission_required_with_403
+from PyRIGS.views import OEmbedView
 from assets import views
 
 urlpatterns = [
@@ -26,9 +27,7 @@ urlpatterns = [
          xframe_options_exempt(
              login_required(login_url='/user/login/embed/')(views.AssetEmbed.as_view())),
          name='asset_embed'),
-    path('asset/id/<str:pk>/oembed_json/',
-         views.AssetOembed.as_view(),
-         name='asset_oembed'),
+    path('asset/id/<str:pk>/oembed_json/', views.AssetOEmbed.as_view(), name='asset_oembed'),
 
     path('asset/audit/', permission_required_with_403('assets.change_asset')(views.AssetAuditList.as_view()), name='asset_audit_list'),
     path('asset/id/<str:pk>/audit/', permission_required_with_403('assets.change_asset')(views.AssetAudit.as_view()), name='asset_audit'),

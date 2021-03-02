@@ -31,7 +31,7 @@
                     <div class="media-body">
                     <h5>
                         {{ version.revision.user.name|default:'System' }}
-                        <span class="ml-3"><small>{{version.revision.date_created|naturaltime}}</small></span>
+                        <span class="float-right"><small><span class="fas fa-clock"></span> <span class="time">{{version.revision.date_created|date:"c"}}</span> ({{version.revision.date_created}})</small></span>
                     </h5>
             {% endif %}
                     <p>
@@ -47,4 +47,16 @@
     </div>
 </div>
 {% endcache %}
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function() {
+    const times = document.getElementsByClassName("time");
+    var i;
+    for(i = 0; i < times.length; i++) {
+        times[i].innerHTML = moment(times[i].innerHTML).fromNow();
+    }
+});
+</script>
 {% endblock %}

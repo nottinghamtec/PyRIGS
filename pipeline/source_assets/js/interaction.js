@@ -117,23 +117,9 @@ $('body').on('submit', '.itemised_form', function (e) {
     $('#id_items_json').val(JSON.stringify(objectitems));
 });
 
-// Return a helper with preserved width of cells
-var fixHelper = function (e, ui) {
-    ui.children().each(function () {
-        $(this).width($(this).width());
-    });
-    return ui;
-};
-
-$("#item-table tbody").sortable({
-    helper: fixHelper,
-    update: function (e, ui) {
-        info = $(this).sortable("toArray");
-        itemorder = new Array();
-        $.each(info, function (key, value) {
-            pk = $('#' + value).data('pk');
-            objectitems[pk].fields.order = key;
-        });
-
+sortable("#item-table tbody")[0].addEventListener('sortupdate', function (e) {
+    var items = e.detail.destination.items;
+    for(var i in items) {
+        objectitems[items[i].dataset.pk].fields.order = i;
     }
 });

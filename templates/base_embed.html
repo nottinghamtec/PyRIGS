@@ -1,5 +1,4 @@
 {% load static %}
-{% load raven %}
 
 <!DOCTYPE html>
 <html
@@ -8,17 +7,11 @@
         lang="{% firstof LANGUAGE_CODE 'en' %}"
         class="embedded">
 <head>
-    <base target="_blank" />
-    <!-- Open all links in a new tab, not in the iframe -->
+    <base target="_blank" /><!-- Open all links in a new tab, not in the iframe -->
 
-    <link href='{% static 'fonts/OPENSANS-REGULAR.TTF' %}'>
+    <meta name="color-scheme" content="light dark">
 
-    <link rel="stylesheet" type="text/css" href="{% static "css/screen.css" %}">
-
-    <script src="{% static 'js/jquery.js' %}"></script>
-    <script src="{% static 'js/raven.js' %}"></script>
-    <script>Raven.config('{% sentry_public_dsn %}').install()</script>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
 </head>
 
 <body>
@@ -34,11 +27,12 @@
                 </div>
             {% endfor %}
         {% endif %}
-
+        <a href="/"><span class="source"> R<small>ig</small> I<small>nformation</small> G<small>athering</small> S<small>ystem</small></span></a>
         {% block content %}
         {% endblock %}
     </div>
 </div>
+{% include 'partials/dark_theme.html' %}
 {% block js %}
 {% endblock %}
 </body>

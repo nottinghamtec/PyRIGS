@@ -42,7 +42,7 @@
                         <td>{{ invoice.event.start_date }}</td>
                         <td>{{ invoice.invoice_date }}</td>
                         <td>
-                            {{ invoice.balance|floatformat:2 }}
+                            £{{ invoice.balance|floatformat:2 }}
                             {% if not invoice.event.internal %}
                             <br />
                             <span class="text-muted">{{ invoice.event.purchase_order }}</span>

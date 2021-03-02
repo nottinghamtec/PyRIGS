@@ -21,7 +21,7 @@
                             <th scope="col">Event</th>
                             {# mmm hax #}
                             {% if object_list.0 != None %}
-                                {% for field in fields %}
+                                {% for field in object_list.0.fieldz %}
                                     <th scope="col">{{ object_list.0|verbose_name:field|title }}</th>
                                 {% endfor %}
                             {% endif %}
@@ -33,7 +33,7 @@
                     <tr class="{% if object.reviewed_by %}table-success{%endif%}">
                         {# General #}
                         <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
-                        {% for field in fields %}
+                        {% for field in object_list.0.fieldz %}
                             <td>{{ object|get_field:field }}</td>
                         {% endfor %}
                         {# Buttons #}

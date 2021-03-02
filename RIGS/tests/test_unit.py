@@ -1,15 +1,18 @@
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.management import call_command
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
-from PyRIGS.tests.base import assert_times_equal
+from PyRIGS.tests.base import assert_times_almost_equal, assert_oembed, login
 from RIGS import models
+
+import pytest
+
+pytestmark = pytest.mark.django_db
 
 
 class TestAdminMergeObjects(TestCase):
@@ -17,7 +20,6 @@ class TestAdminMergeObjects(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
         cls.persons = {
             1: models.Person.objects.create(name="Person 1"),
             2: models.Person.objects.create(name="Person 2"),
@@ -168,9 +170,6 @@ class TestInvoiceDelete(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today()),
             2: models.Event.objects.create(name="TE E2", start_date=date.today())
@@ -201,7 +200,7 @@ class TestInvoiceDelete(TestCase):
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[2].pk))
 
         # Actually delete it
-        response = self.client.post(request_url, follow=True)
+        self.client.post(request_url, follow=True)
 
         # Check the invoice is deleted
         self.assertRaises(ObjectDoesNotExist, models.Invoice.objects.get, pk=self.invoices[2].pk)
@@ -216,7 +215,7 @@ class TestInvoiceDelete(TestCase):
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
 
         # Try to actually delete it
-        response = self.client.post(request_url, follow=True)
+        self.client.post(request_url, follow=True)
 
         # Check this didn't work
         self.assertTrue(models.Invoice.objects.get(pk=self.invoices[1].pk))
@@ -227,9 +226,6 @@ class TestPrintPaperwork(TestCase):
     def setUpTestData(cls):
         cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
                                                     is_active=True, is_staff=True)
-
-        cls.vatrate = models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-
         cls.events = {
             1: models.Event.objects.create(name="TE E1", start_date=date.today(),
                                            description="This is an event description\nthat for a very specific reason spans two lines."),
@@ -257,102 +253,50 @@ class TestPrintPaperwork(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestEmbeddedViews(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.profile = models.Profile.objects.create(username="testuser1", email="1@test.com", is_superuser=True,
-                                                    is_active=True, is_staff=True)
+def test_login_redirect(client, django_user_model):
+    request_url = reverse('event_embed', kwargs={'pk': 1})
+    expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
 
-        cls.events = {
-            1: models.Event.objects.create(name="TE E1", start_date=date.today()),
-            2: models.Event.objects.create(name="TE E2", start_date=date.today())
-        }
+    # Request the page and check it redirects
+    response = client.get(request_url, follow=True)
+    assertRedirects(response, expected_url, status_code=302, target_status_code=200)
 
-        cls.invoices = {
-            1: models.Invoice.objects.create(event=cls.events[1]),
-            2: models.Invoice.objects.create(event=cls.events[2])
-        }
+    # Now login
+    login(client, django_user_model)
 
-        cls.payments = {
-            1: models.Payment.objects.create(invoice=cls.invoices[1], date=date.today(), amount=12.34,
-                                             method=models.Payment.CASH)
-        }
-
-    def setUp(self):
-        self.profile.set_password('testuser')
-        self.profile.save()
-
-    def testLoginRedirect(self):
-        request_url = reverse('event_embed', kwargs={'pk': 1})
-        expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
-
-        # Request the page and check it redirects
-        response = self.client.get(request_url, follow=True)
-        self.assertRedirects(response, expected_url, status_code=302, target_status_code=200)
-
-        # Now login
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-        # And check that it no longer redirects
-        response = self.client.get(request_url, follow=True)
-        self.assertEqual(len(response.redirect_chain), 0)
-
-    def testLoginCookieWarning(self):
-        login_url = reverse('login_embed')
-        response = self.client.post(login_url, follow=True)
-        self.assertContains(response, "Cookies do not seem to be enabled")
-
-    def testXFrameHeaders(self):
-        event_url = reverse('event_embed', kwargs={'pk': 1})
-        login_url = reverse('login_embed')
-
-        self.assertTrue(self.client.login(username=self.profile.username, password='testuser'))
-
-        response = self.client.get(event_url, follow=True)
-        with self.assertRaises(KeyError):
-            response._headers["X-Frame-Options"]
-
-        response = self.client.get(login_url, follow=True)
-        with self.assertRaises(KeyError):
-            response._headers["X-Frame-Options"]
-
-    def testOEmbed(self):
-        event_url = reverse('event_detail', kwargs={'pk': 1})
-        event_embed_url = reverse('event_embed', kwargs={'pk': 1})
-        oembed_url = reverse('event_oembed', kwargs={'pk': 1})
-
-        alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
-        alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
-
-        # Test the meta tag is in place
-        response = self.client.get(event_url, follow=True, HTTP_HOST='example.com')
-        self.assertContains(response, '<link rel="alternate" type="application/json+oembed"')
-        self.assertContains(response, oembed_url)
-
-        # Test that the JSON exists
-        response = self.client.get(oembed_url, follow=True, HTTP_HOST='example.com')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, event_embed_url)
-
-        # Should also work for non-existant events
-        response = self.client.get(alt_oembed_url, follow=True, HTTP_HOST='example.com')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, alt_event_embed_url)
+    # And check that it no longer redirects
+    response = client.get(request_url, follow=True)
+    assert len(response.redirect_chain) == 0
 
 
-class TestSampleDataGenerator(TestCase):
-    @override_settings(DEBUG=True)
-    def test_generate_sample_data(self):
-        # Run the management command and check there are no exceptions
-        call_command('generateSampleRIGSData')
+def test_login_cookie_warning(client):
+    login_url = reverse('login_embed')
+    response = client.post(login_url, follow=True)
+    assertContains(response, "Cookies do not seem to be enabled")
 
-        # Check there are lots of events
-        self.assertTrue(models.Event.objects.all().count() > 100)
 
-    def test_production_exception(self):
-        from django.core.management.base import CommandError
+def test_xframe_headers(admin_client, basic_event):
+    event_url = reverse('event_embed', kwargs={'pk': basic_event.pk})
+    login_url = reverse('login_embed')
 
-        self.assertRaisesRegex(CommandError, ".*production", call_command, 'generateSampleRIGSData')
+    response = admin_client.get(event_url, follow=True)
+    with pytest.raises(KeyError):
+        response._headers["X-Frame-Options"]
+
+    response = admin_client.get(login_url, follow=True)
+    with pytest.raises(KeyError):
+        response._headers["X-Frame-Options"]
+
+
+def test_oembed(client, basic_event):
+    event_url = reverse('event_detail', kwargs={'pk': basic_event.pk})
+    event_embed_url = reverse('event_embed', kwargs={'pk': basic_event.pk})
+    oembed_url = reverse('event_oembed', kwargs={'pk': basic_event.pk})
+
+    alt_oembed_url = reverse('event_oembed', kwargs={'pk': 999})
+    alt_event_embed_url = reverse('event_embed', kwargs={'pk': 999})
+
+    assert_oembed(alt_event_embed_url, alt_oembed_url, client, event_embed_url, event_url, oembed_url)
 
 
 def search(client, url, found, notfound, arguments):
@@ -391,45 +335,11 @@ def test_search(admin_client):
            ['name', 'id', 'address'])
 
 
-def setup_for_hs():
-    models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
-    venue = models.Venue.objects.create(name="Venue 1")
-    return venue, {
-        1: models.Event.objects.create(name="TE E1", start_date=date.today(),
-                                       description="This is an event description\nthat for a very specific reason spans two lines.",
-                                       venue=venue),
-        2: models.Event.objects.create(name="TE E2", start_date=date.today()),
-    }
-
-
-def create_ra(usr):
-    venue, events = setup_for_hs()
-    return models.RiskAssessment.objects.create(event=events[1], nonstandard_equipment=False, nonstandard_use=False,
-                                                contractors=False, other_companies=False, crew_fatigue=False,
-                                                big_power=False, power_mic=usr, generators=False,
-                                                other_companies_power=False, nonstandard_equipment_power=False,
-                                                multiple_electrical_environments=False, noise_monitoring=False,
-                                                known_venue=True, safe_loading=True, safe_storage=True,
-                                                area_outside_of_control=True, barrier_required=True,
-                                                nonstandard_emergency_procedure=True, special_structures=False,
-                                                suspended_structures=False, outside=False)
-
-
-def create_checklist(usr):
-    venue, events = setup_for_hs()
-    return models.EventChecklist.objects.create(event=events[1], power_mic=usr, safe_parking=False,
-                                                safe_packing=False, exits=False, trip_hazard=False, warning_signs=False,
-                                                ear_plugs=False, hs_location="Locked away safely",
-                                                extinguishers_location="Somewhere, I forgot", earthing=False, pat=False,
-                                                date=timezone.now(), venue=venue)
-
-
-def test_list(admin_client):
-    venue, events = setup_for_hs()
+def test_hs_list(admin_client, basic_event):
     request_url = reverse('hs_list')
     response = admin_client.get(request_url, follow=True)
-    assertContains(response, events[1].name)
-    assertContains(response, events[2].name)
+    assertContains(response, basic_event.name)
+    # assertContains(response, events[2].name)
     assertContains(response, 'Create')
 
 
@@ -439,19 +349,18 @@ def review(client, profile, obj, request_url):
     obj.refresh_from_db()
     assertContains(response, 'Reviewed by')
     assertContains(response, profile.name)
-    assert_times_equal(time, obj.reviewed_at)
+    assert_times_almost_equal(time, obj.reviewed_at)
 
 
-def test_ra_review(admin_client, admin_user):
-    review(admin_client, admin_user, create_ra(admin_user), 'ra_review')
+def test_ra_review(admin_client, admin_user, ra):
+    review(admin_client, admin_user, ra, 'ra_review')
 
 
-def test_checklist_review(admin_client, admin_user):
-    review(admin_client, admin_user, create_checklist(admin_user), 'ec_review')
+def test_checklist_review(admin_client, admin_user, checklist):
+    review(admin_client, admin_user, checklist, 'ec_review')
 
 
-def test_ra_redirect(admin_client, admin_user):
-    ra = create_ra(admin_user)
+def test_ra_redirect(admin_client, admin_user, ra):
     request_url = reverse('event_ra', kwargs={'pk': ra.event.pk})
     expected_url = reverse('ra_edit', kwargs={'pk': ra.pk})
 

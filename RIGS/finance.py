@@ -10,7 +10,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views import generic
 from z3c.rml import rml2pdf
 
@@ -67,12 +67,6 @@ class InvoicePrint(generic.View):
 
         context = {
             'object': object,
-            'fonts': {
-                'opensans': {
-                    'regular': 'RIGS/static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'RIGS/static/fonts/OPENSANS-BOLD.TTF',
-                }
-            },
             'invoice': invoice,
             'current_user': request.user,
             'filename': 'Invoice {} for {} {}.pdf'.format(invoice.display_id, object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name))
@@ -98,8 +92,8 @@ class InvoiceVoid(generic.View):
         object.save()
 
         if object.void:
-            return HttpResponseRedirect(reverse_lazy('invoice_list'))
-        return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': object.pk}))
+            return HttpResponseRedirect(reverse('invoice_list'))
+        return HttpResponseRedirect(reverse('invoice_detail', kwargs={'pk': object.pk}))
 
 
 class InvoiceDelete(generic.DeleteView):
@@ -110,14 +104,14 @@ class InvoiceDelete(generic.DeleteView):
         obj = self.get_object()
         if obj.payment_set.all().count() > 0:
             messages.info(self.request, 'To delete an invoice, delete the payments first.')
-            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+            return HttpResponseRedirect(reverse('invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).get(pk)
 
     def post(self, request, pk):
         obj = self.get_object()
         if obj.payment_set.all().count() > 0:
             messages.info(self.request, 'To delete an invoice, delete the payments first.')
-            return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': obj.pk}))
+            return HttpResponseRedirect(reverse('invoice_detail', kwargs={'pk': obj.pk}))
         return super(InvoiceDelete, self).post(pk)
 
     def get_success_url(self):
@@ -172,16 +166,17 @@ class InvoiceWaiting(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(InvoiceWaiting, self).get_context_data(**kwargs)
         total = 0
-        for obj in self.get_objects():
+        objects = self.get_queryset()
+        for obj in objects:
             total += obj.sum_total
-        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(self.get_objects()), total)
+        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(objects), total)
         return context
 
     def get_queryset(self):
         return self.get_objects()
 
     def get_objects(self):
-        # @todo find a way to select items
+        # TODO find a way to select items
         events = self.model.objects.filter(
             (
                 Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
@@ -216,7 +211,7 @@ class InvoiceEvent(generic.View):
             invoice.save()
             messages.warning(self.request, 'Invoice voided')
 
-        return HttpResponseRedirect(reverse_lazy('invoice_detail', kwargs={'pk': invoice.pk}))
+        return HttpResponseRedirect(reverse('invoice_detail', kwargs={'pk': invoice.pk}))
 
 
 class PaymentCreate(generic.CreateView):
@@ -242,7 +237,7 @@ class PaymentCreate(generic.CreateView):
 
     def get_success_url(self):
         messages.info(self.request, "location.reload()")
-        return reverse_lazy('closemodal')
+        return reverse('closemodal')
 
 
 class PaymentDelete(generic.DeleteView):

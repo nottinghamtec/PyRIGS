@@ -15,6 +15,11 @@ from PyRIGS.tests.pages import animation_is_finished
 from RIGS import models
 from RIGS.tests import regions
 from . import pages
+import pytest
+import time as t
+
+
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @screenshot_failure_cls
@@ -307,13 +312,13 @@ class TestEventDuplicate(BaseRigboardTest):
         # TODO Rewrite when EventDetail page is implemented
         newEvent = models.Event.objects.latest('pk')
 
-        self.assertEqual(newEvent.auth_request_to, None)
+        assert newEvent.auth_request_to == ''
         self.assertEqual(newEvent.auth_request_by, None)
         self.assertEqual(newEvent.auth_request_at, None)
 
         self.assertFalse(newEvent.authorised)
 
-        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h1').text)
+        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h2').text)
         self.assertNotIn("Event data duplicated but not yet saved", self.page.warning)  # Check info message not visible
 
         # Check the new items are visible
@@ -445,7 +450,7 @@ class TestEventDetail(BaseRigboardTest):
         self.assertIn("N%05d | %s" % (self.testEvent.pk, self.testEvent.name), self.page.event_name)
         self.assertEqual(self.client.name, self.page.name)
         self.assertEqual(self.client.email, self.page.email)
-        self.assertEqual(self.client.phone, None)
+        assert self.client.phone == ''
 
 
 @screenshot_failure_cls
@@ -633,270 +638,190 @@ class TestCalendar(BaseRigboardTest):
             else:
                 self.assertNotContains(response, "TE E" + str(test) + " ")
 
-    def test_calendar_buttons(self):  # If FullCalendar fails to load for whatever reason, the buttons don't work
-        self.page = pages.CalendarPage(self.driver, self.live_server_url).open()
-        self.assertIn(timezone.now().strftime("%Y-%m"), self.driver.current_url)
 
-        target_date = datetime.date(2020, 1, 1)
-        self.page.target_date.set_value(target_date)
-        self.page.go()
-        self.assertIn(self.page.target_date.value.strftime("%Y-%m"), self.driver.current_url)
+def test_calendar_buttons(logged_in_browser, live_server):  # If FullCalendar fails to load for whatever reason, the buttons don't work
+    page = pages.CalendarPage(logged_in_browser.driver, live_server.url).open()
+    assert timezone.now().strftime("%Y-%m") in logged_in_browser.url
 
-        self.page.next()
-        target_date += datetime.timedelta(days=32)
-        self.assertIn(target_date.strftime("%m"), self.driver.current_url)
+    target_date = datetime.date(2020, 1, 1)
+    page.target_date.set_value(target_date)
+    page.go()
+    assert page.target_date.value.strftime("%Y-%m") in logged_in_browser.url
+
+    page.next()
+    target_date += datetime.timedelta(days=32)
+    assert target_date.strftime("%m") in logged_in_browser.url
 
 
-@screenshot_failure_cls
-class TestHealthAndSafety(BaseRigboardTest):
-    def setUp(self):
-        super().setUp()
-        self.profile = models.Profile.objects.get_or_create(
-            first_name='Test',
-            last_name='TEC User',
-            username='eventtest',
-            email='teccie@functional.test',
-            is_superuser=True  # lazily grant all permissions
-        )[0]
-        self.venue = models.Venue.objects.create(name="Venue 1")
+def test_ra_edit(logged_in_browser, live_server, ra):
+    page = pages.EditRiskAssessment(logged_in_browser.driver, live_server.url, pk=ra.pk).open()
+    page.nonstandard_equipment = nse = True
+    page.general_notes = gn = "There are some notes, but I've not written them here as that would be helpful"
+    page.submit()
+    assert not page.success
+    page.supervisor_consulted = True
+    page.submit()
+    assert page.success
+    # Check that data is right
+    ra = models.RiskAssessment.objects.get(pk=ra.pk)
+    assert ra.general_notes == gn
+    assert ra.nonstandard_equipment == nse
 
-        self.testEvent = models.Event.objects.create(name="TE E1", status=models.Event.PROVISIONAL,
-                                                     start_date=date.today() + timedelta(days=6),
-                                                     description="start future no end",
-                                                     purchase_order='TESTPO',
-                                                     person=self.client,
-                                                     venue=self.venue)
-        self.testEvent2 = models.Event.objects.create(name="TE E2", status=models.Event.PROVISIONAL,
-                                                      start_date=date.today() + timedelta(days=6),
-                                                      description="start future no end",
-                                                      purchase_order='TESTPO',
-                                                      person=self.client,
-                                                      venue=self.venue)
-        self.testEvent3 = models.Event.objects.create(name="TE E3", status=models.Event.PROVISIONAL,
-                                                      start_date=date.today() + timedelta(days=6),
-                                                      description="start future no end",
-                                                      purchase_order='TESTPO',
-                                                      person=self.client,
-                                                      venue=self.venue)
-        self.testRA = models.RiskAssessment.objects.create(event=self.testEvent2, supervisor_consulted=False, nonstandard_equipment=False,
-                                                           nonstandard_use=False,
-                                                           contractors=False,
-                                                           other_companies=False,
-                                                           crew_fatigue=False,
-                                                           big_power=False,
-                                                           generators=False,
-                                                           other_companies_power=False,
-                                                           nonstandard_equipment_power=False,
-                                                           multiple_electrical_environments=False,
-                                                           noise_monitoring=False,
-                                                           known_venue=True,
-                                                           safe_loading=True,
-                                                           safe_storage=True,
-                                                           area_outside_of_control=False,
-                                                           barrier_required=False,
-                                                           nonstandard_emergency_procedure=False,
-                                                           special_structures=False,
-                                                           suspended_structures=False,
-                                                           outside=False)
-        self.testRA2 = models.RiskAssessment.objects.create(event=self.testEvent3, supervisor_consulted=False, nonstandard_equipment=False,
-                                                            nonstandard_use=False,
-                                                            contractors=False,
-                                                            other_companies=False,
-                                                            crew_fatigue=False,
-                                                            big_power=True,
-                                                            generators=False,
-                                                            other_companies_power=False,
-                                                            nonstandard_equipment_power=False,
-                                                            multiple_electrical_environments=False,
-                                                            noise_monitoring=False,
-                                                            known_venue=True,
-                                                            safe_loading=True,
-                                                            safe_storage=True,
-                                                            area_outside_of_control=False,
-                                                            barrier_required=False,
-                                                            nonstandard_emergency_procedure=False,
-                                                            special_structures=False,
-                                                            suspended_structures=False,
-                                                            outside=False)
-        self.page = pages.EventDetail(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
 
-    # TODO Can I loop through all the boolean fields and test them at once?
-    def test_ra_creation(self):
-        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
+def small_ec(page, admin_user):
+    page.safe_parking = True
+    page.safe_packing = True
+    page.exits = True
+    page.trip_hazard = True
+    page.warning_signs = True
+    page.ear_plugs = True
+    page.hs_location = "The Moon"
+    page.extinguishers_location = "With the rest of the fire"
+    # If we do this first the search fails, for ... reasons
+    page.power_mic.search(admin_user.name)
+    page.power_mic.toggle()
+    assert not page.power_mic.is_open
+    page.earthing = True
+    page.rcds = True
+    page.supply_test = True
+    page.pat = True
 
-        # Check there are no defaults
-        self.assertIsNone(self.page.nonstandard_equipment)
 
-        # No database side validation, only HTML5.
+def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
+    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
+    small_ec(page, admin_user)
+    page.submit()
+    assert page.success
 
-        self.page.nonstandard_equipment = False
-        self.page.nonstandard_use = False
-        self.page.contractors = False
-        self.page.other_companies = False
-        self.page.crew_fatigue = False
-        self.page.general_notes = "There are no notes."
-        self.page.big_power = False
-        self.page.outside = False
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.set_option(self.profile.name, True)
-        # TODO This should not be necessary, normally closes automatically
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
-        self.page.generators = False
-        self.page.other_companies_power = False
-        self.page.nonstandard_equipment_power = False
-        self.page.multiple_electrical_environments = False
-        self.page.power_notes = "Remember to bring some power"
-        self.page.noise_monitoring = False
-        self.page.sound_notes = "Loud, but not too loud"
-        self.page.known_venue = False
-        self.page.safe_loading = False
-        self.page.safe_storage = False
-        self.page.area_outside_of_control = False
-        self.page.barrier_required = False
-        self.page.nonstandard_emergency_procedure = False
-        self.page.special_structures = False
-        # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
-        self.page.suspended_structures = True
-        # TODO Test for this proper
-        self.page.rigging_plan = "https://nottinghamtec.sharepoint.com/test/"
-        self.page.submit()
-        self.assertFalse(self.page.success)
+def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra):
+    page = pages.CreateEventChecklist(logged_in_browser.driver, live_server.url, event_id=medium_ra.event.pk).open()
 
-        self.page.suspended_structures = False
-        self.page.submit()
-        self.assertTrue(self.page.success)
+    page.safe_parking = True
+    page.safe_packing = True
+    page.exits = True
+    page.trip_hazard = True
+    page.warning_signs = True
+    page.ear_plugs = True
+    page.hs_location = "Death Valley"
+    page.extinguishers_location = "With the rest of the fire"
+    # If we do this first the search fails, for ... reasons
+    page.power_mic.search(admin_user.name)
+    page.power_mic.toggle()
+    assert not page.power_mic.is_open
 
-        # Test that we can't make another one
-        self.page = pages.CreateRiskAssessment(self.driver, self.live_server_url, event_id=self.testEvent.pk).open()
-        self.assertIn('edit', self.driver.current_url)
+    # Gotta scroll to make the button clickable
+    logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-    def test_ra_edit(self):
-        self.page = pages.EditRiskAssessment(self.driver, self.live_server_url, pk=self.testRA.pk).open()
-        self.page.nonstandard_equipment = nse = True
-        self.page.general_notes = gn = "There are some notes, but I've not written them here as that would be helpful"
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.page.supervisor_consulted = True
-        self.page.submit()
-        self.assertTrue(self.page.success)
-        # Check that data is right
-        ra = models.RiskAssessment.objects.get(pk=self.testRA.pk)
-        self.assertEqual(ra.general_notes, gn)
-        self.assertEqual(ra.nonstandard_equipment, nse)
+    page.earthing = True
+    page.pat = True
+    page.source_rcd = True
+    page.labelling = True
+    page.fd_voltage_l1 = 240
+    page.fd_voltage_l2 = 235
+    page.fd_voltage_l3 = 0
+    page.fd_phase_rotation = True
+    page.fd_earth_fault = 666
+    page.fd_pssc = 1984
+    page.w1_description = "In the carpark, by the bins"
+    page.w1_polarity = True
+    page.w1_voltage = 240
+    page.w1_earth_fault = 333
 
-    def test_ec_create_small(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent2.pk).open()
+    page.submit()
+    assert page.success
 
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "The Moon"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
 
-        # Gotta scroll to make the button clickable
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
+    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    small_ec(page, admin_user)
+    page.add_vehicle()
+    assert len(page.vehicles) == 1
+    vehicle_name = 'Brian'
+    page.vehicles[0].name.set_value(vehicle_name)
+    # Appears we're moving too fast for javascript...
+    t.sleep(1)
+    page.vehicles[0].vehicle.search(admin_user.first_name)
+    t.sleep(1)
+    page.submit()
+    assert page.success
+    # Check data is correct
+    checklist.refresh_from_db()
+    vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
+    assert vehicle_name == vehicle.vehicle
 
-        self.page.earthing = True
-        self.page.rcds = True
-        self.page.supply_test = True
-        self.page.pat = True
 
-        self.page.submit()
-        self.assertTrue(self.page.success)
+# TODO Test validation of end before start
+def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
+    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
+    small_ec(page, admin_user)
+    page.add_crew()
+    assert len(page.crew) == 1
+    role = "MIC"
+    start_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0))
+    end_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30))
+    crew = page.crew[0]
+    t.sleep(2)
+    crew.crewmember.search(admin_user.first_name)
+    t.sleep(2)
+    crew.role.set_value(role)
+    crew.start_time.set_value(start_time)
+    crew.end_time.set_value(end_time)
+    page.submit()
+    assert page.success
+    # Check data is correct
+    crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
+    assert admin_user.pk == crew_obj.crewmember.pk
+    assert role == crew_obj.role
+    assert start_time == crew_obj.start
+    assert end_time == crew_obj.end
 
-    def test_ec_create_medium(self):
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=self.testEvent3.pk).open()
 
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "Death Valley"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
+# TODO Can I loop through all the boolean fields and test them at once?
+def test_ra_creation(logged_in_browser, live_server, admin_user, basic_event):
+    page = pages.CreateRiskAssessment(logged_in_browser.driver, live_server.url, event_id=basic_event.pk).open()
 
-        # Gotta scroll to make the button clickable
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    # Check there are no defaults
+    assert page.nonstandard_equipment is None
 
-        self.page.earthing = True
-        self.page.pat = True
-        self.page.source_rcd = True
-        self.page.labelling = True
-        self.page.fd_voltage_l1 = 240
-        self.page.fd_voltage_l2 = 235
-        self.page.fd_voltage_l3 = 0
-        self.page.fd_phase_rotation = True
-        self.page.fd_earth_fault = 666
-        self.page.fd_pssc = 1984
-        self.page.w1_description = "In the carpark, by the bins"
-        self.page.w1_polarity = True
-        self.page.w1_voltage = 240
-        self.page.w1_earth_fault = 333
+    # No database side validation, only HTML5.
+    page.nonstandard_equipment = False
+    page.nonstandard_use = False
+    page.contractors = False
+    page.other_companies = False
+    page.crew_fatigue = False
+    page.general_notes = "There are no notes."
+    page.big_power = False
+    page.outside = False
+    page.power_mic.search(admin_user.first_name)
+    page.generators = False
+    page.other_companies_power = False
+    page.nonstandard_equipment_power = False
+    page.multiple_electrical_environments = False
+    page.power_notes = "Remember to bring some power"
+    page.noise_monitoring = False
+    page.sound_notes = "Loud, but not too loud"
+    page.known_venue = False
+    page.safe_loading = False
+    page.safe_storage = False
+    page.area_outside_of_control = False
+    page.barrier_required = False
+    page.nonstandard_emergency_procedure = False
+    page.special_structures = False
+    # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
-        self.page.submit()
-        self.assertTrue(self.page.success)
+    page.suspended_structures = True
+    # TODO Test for this proper
+    page.rigging_plan = "https://nottinghamtec.sharepoint.com/test/"
+    page.submit()
+    assert not page.success
 
-    def test_ec_create_extras(self):
-        eid = self.testEvent2.pk
-        self.page = pages.CreateEventChecklist(self.driver, self.live_server_url, event_id=eid).open()
-        self.page.add_vehicle()
-        self.page.add_crew()
+    page.suspended_structures = False
+    page.submit()
+    assert page.success
 
-        self.page.safe_parking = True
-        self.page.safe_packing = True
-        self.page.exits = True
-        self.page.trip_hazard = True
-        self.page.warning_signs = True
-        self.page.ear_plugs = True
-        self.page.hs_location = "The Moon"
-        self.page.extinguishers_location = "With the rest of the fire"
-        # If we do this first the search fails, for ... reasons
-        self.page.power_mic.search(self.profile.name)
-        self.page.power_mic.toggle()
-        self.assertFalse(self.page.power_mic.is_open)
 
-        vehicle_name = 'Brian'
-        self.driver.find_element(By.XPATH, '//*[@name="vehicle_-1"]').send_keys(vehicle_name)
-        driver = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="vehicles_-1"]//div[contains(@class, "bootstrap-select")]'))
-        driver.search(self.profile.name)
-
-        crew = self.profile
-        role = "MIC"
-        crew_select = base_regions.BootstrapSelectElement(self.page, self.driver.find_element(By.XPATH, '//tr[@id="crew_-1"]//div[contains(@class, "bootstrap-select")]'))
-        start_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="start_-1"]'))
-        end_time = base_regions.DateTimePicker(self.page, self.driver.find_element(By.XPATH, '//*[@name="end_-1"]'))
-
-        start_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0)))
-        # TODO Test validation of end before start
-        end_time.set_value(timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30)))
-        crew_select.search(crew.name)
-        self.driver.find_element(By.XPATH, '//*[@name="role_-1"]').send_keys(role)
-
-        self.page.earthing = True
-        self.page.rcds = True
-        self.page.supply_test = True
-        self.page.pat = True
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-        checklist = models.EventChecklist.objects.get(event=eid)
-        vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
-        self.assertEqual(vehicle_name, vehicle.vehicle)
-        crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
-        self.assertEqual(crew.pk, crew_obj.crewmember.pk)
-        self.assertEqual(role, crew_obj.role)
+def test_ra_no_duplicates(logged_in_browser, live_server, ra):
+    # Test that we can't make another one
+    page = pages.CreateRiskAssessment(logged_in_browser.driver, live_server.url, event_id=ra.event.pk).open()
+    assert 'edit' in logged_in_browser.url

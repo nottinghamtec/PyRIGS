@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
@@ -21,11 +21,12 @@ from reversion.models import Version
 
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
-    phone = models.CharField(max_length=13, null=True, blank=True)
-    api_key = models.CharField(max_length=40, blank=True, editable=False, null=True)
+    phone = models.CharField(max_length=13, blank=True, default='')
+    api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
     is_approved = models.BooleanField(default=False)
-    last_emailed = models.DateTimeField(blank=True,
-                                        null=True)  # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
+    # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
+    last_emailed = models.DateTimeField(blank=True, null=True)
+    dark_theme = models.BooleanField(default=False)
 
     @classmethod
     def make_api_key(cls):
@@ -51,7 +52,7 @@ class Profile(AbstractUser):
 
     @property
     def latest_events(self):
-        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
+        return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
 
     @classmethod
     def admins(cls):
@@ -102,12 +103,12 @@ class RevisionMixin(object):
 
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
 
-    address = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, default='')
 
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, default='')
 
     def __str__(self):
         string = self.name
@@ -133,17 +134,17 @@ class Person(models.Model, RevisionMixin):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
-        return reverse_lazy('person_detail', kwargs={'pk': self.pk})
+        return reverse('person_detail', kwargs={'pk': self.pk})
 
 
 class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
 
-    address = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, default='')
 
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, default='')
     union_account = models.BooleanField(default=False)
 
     def __str__(self):
@@ -170,7 +171,7 @@ class Organisation(models.Model, RevisionMixin):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
-        return reverse_lazy('organisation_detail', kwargs={'pk': self.pk})
+        return reverse('organisation_detail', kwargs={'pk': self.pk})
 
 
 class VatManager(models.Manager):
@@ -178,7 +179,6 @@ class VatManager(models.Manager):
         return self.find_rate(timezone.now())
 
     def find_rate(self, date):
-        # return self.filter(startAt__lte=date).latest()
         try:
             return self.filter(start_at__lte=date).latest()
         except VatRate.DoesNotExist:
@@ -211,12 +211,12 @@ class VatRate(models.Model, RevisionMixin):
 
 class Venue(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
     three_phase_available = models.BooleanField(default=False)
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, default='')
 
-    address = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, default='')
 
     def __str__(self):
         string = self.name
@@ -229,24 +229,23 @@ class Venue(models.Model, RevisionMixin):
         return self.event_set.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic')
 
     def get_absolute_url(self):
-        return reverse_lazy('venue_detail', kwargs={'pk': self.pk})
+        return reverse('venue_detail', kwargs={'pk': self.pk})
 
 
 class EventManager(models.Manager):
     def current_events(self):
         events = self.filter(
-            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False) & ~models.Q(
+            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True, dry_hire=False) & ~models.Q(
                 status=Event.CANCELLED)) |  # Starts after with no end
             (models.Q(end_date__gte=timezone.now().date(), dry_hire=False) & ~models.Q(
                 status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=timezone.now().date()) & ~models.Q(
+            (models.Q(dry_hire=True, start_date__gte=timezone.now()) & ~models.Q(
                 status=Event.CANCELLED)) |  # Active dry hire
             (models.Q(dry_hire=True, checked_in_by__isnull=True) & (
                 models.Q(status=Event.BOOKED) | models.Q(status=Event.CONFIRMED))) |  # Active dry hire GT
-            models.Q(status=Event.CANCELLED, start_date__gte=timezone.now().date())  # Canceled but not started
-        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person',
-                                                                                                 'organisation',
-                                                                                                 'venue', 'mic')
+            models.Q(status=Event.CANCELLED, start_date__gte=timezone.now())  # Canceled but not started
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time', 'meet_at').select_related('person', 'organisation', 'venue', 'mic')
+
         return events
 
     def events_in_bounds(self, start, end):
@@ -269,12 +268,12 @@ class EventManager(models.Manager):
 
     def rig_count(self):
         event_count = self.filter(
-            (models.Q(start_date__gte=timezone.now().date(), end_date__isnull=True, dry_hire=False,
+            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True, dry_hire=False,
                       is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=timezone.now().date(), dry_hire=False, is_rig=True) & ~models.Q(
+            (models.Q(end_date__gte=timezone.now(), dry_hire=False, is_rig=True) & ~models.Q(
                 status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=timezone.now().date(), is_rig=True) & ~models.Q(
+            (models.Q(dry_hire=True, start_date__gte=timezone.now(), is_rig=True) & ~models.Q(
                 status=Event.CANCELLED))  # Active dry hire
         ).count()
         return event_count
@@ -298,8 +297,8 @@ class Event(models.Model, RevisionMixin):
     person = models.ForeignKey('Person', null=True, blank=True, on_delete=models.CASCADE)
     organisation = models.ForeignKey('Organisation', blank=True, null=True, on_delete=models.CASCADE)
     venue = models.ForeignKey('Venue', blank=True, null=True, on_delete=models.CASCADE)
-    description = models.TextField(blank=True, null=True)
-    notes = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, default='')
+    notes = models.TextField(blank=True, default='')
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
     dry_hire = models.BooleanField(default=False)
     is_rig = models.BooleanField(default=True)
@@ -313,7 +312,7 @@ class Event(models.Model, RevisionMixin):
     end_time = models.TimeField(blank=True, null=True)
     access_at = models.DateTimeField(blank=True, null=True)
     meet_at = models.DateTimeField(blank=True, null=True)
-    meet_info = models.CharField(max_length=255, blank=True, null=True)
+    meet_info = models.CharField(max_length=255, blank=True, default='')
 
     # Crew management
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True,
@@ -322,15 +321,15 @@ class Event(models.Model, RevisionMixin):
                             verbose_name="MIC", on_delete=models.CASCADE)
 
     # Monies
-    payment_method = models.CharField(max_length=255, blank=True, null=True)
-    payment_received = models.CharField(max_length=255, blank=True, null=True)
-    purchase_order = models.CharField(max_length=255, blank=True, null=True, verbose_name='PO')
-    collector = models.CharField(max_length=255, blank=True, null=True, verbose_name='collected by')
+    payment_method = models.CharField(max_length=255, blank=True, default='')
+    payment_received = models.CharField(max_length=255, blank=True, default='')
+    purchase_order = models.CharField(max_length=255, blank=True, default='', verbose_name='PO')
+    collector = models.CharField(max_length=255, blank=True, default='', verbose_name='collected by')
 
     # Authorisation request details
     auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
     auth_request_at = models.DateTimeField(null=True, blank=True)
-    auth_request_to = models.EmailField(null=True, blank=True)
+    auth_request_to = models.EmailField(blank=True, default='')
 
     @property
     def display_id(self):
@@ -346,7 +345,7 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def sum_total(self):
-        total = EventItem.objects.filter(event=self).aggregate(
+        total = self.items.aggregate(
             sum_total=models.Sum(models.F('cost') * models.F('quantity'),
                                  output_field=models.DecimalField(max_digits=10, decimal_places=2))
         )['sum_total']
@@ -456,7 +455,7 @@ class Event(models.Model, RevisionMixin):
     objects = EventManager()
 
     def get_absolute_url(self):
-        return reverse_lazy('event_detail', kwargs={'pk': self.pk})
+        return reverse('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return "{}: {}".format(self.display_id, self.name)
@@ -490,7 +489,7 @@ class Event(models.Model, RevisionMixin):
 class EventItem(models.Model, RevisionMixin):
     event = models.ForeignKey('Event', related_name='items', blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, default='')
     quantity = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.IntegerField()
@@ -505,7 +504,7 @@ class EventItem(models.Model, RevisionMixin):
         ordering = ['order']
 
     def __str__(self):
-        return str(self.event.pk) + "." + str(self.order) + ": " + self.event.name + " | " + self.name
+        return "{}.{}: {} | {}".format(self.event_id, self.order, self.event.name, self.name)
 
     @property
     def activity_feed_string(self):
@@ -517,13 +516,13 @@ class EventAuthorisation(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', related_name='authorisation', on_delete=models.CASCADE)
     email = models.EmailField()
     name = models.CharField(max_length=255)
-    uni_id = models.CharField(max_length=10, blank=True, null=True, verbose_name="University ID")
-    account_code = models.CharField(max_length=50, blank=True, null=True)
+    uni_id = models.CharField(max_length=10, blank=True, default='', verbose_name="University ID")
+    account_code = models.CharField(max_length=50, default='', blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="authorisation amount")
     sent_by = models.ForeignKey('Profile', on_delete=models.CASCADE)
 
     def get_absolute_url(self):
-        return reverse_lazy('event_detail', kwargs={'pk': self.event.pk})
+        return reverse('event_detail', kwargs={'pk': self.event_id})
 
     @property
     def activity_feed_string(self):
@@ -562,11 +561,11 @@ class Invoice(models.Model, RevisionMixin):
         return self.balance == 0 or self.void
 
     def get_absolute_url(self):
-        return reverse_lazy('invoice_detail', kwargs={'pk': self.pk})
+        return reverse('invoice_detail', kwargs={'pk': self.pk})
 
     @property
     def activity_feed_string(self):
-        return "#{} for Event {}".format(self.display_id, "N%05d" % self.event.pk)
+        return "#{} for Event {}".format(self.display_id, self.event.display_id)
 
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
@@ -597,7 +596,7 @@ class Payment(models.Model, RevisionMixin):
     invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE)
     date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Please use ex. VAT')
-    method = models.CharField(max_length=2, choices=METHODS, null=True, blank=True)
+    method = models.CharField(max_length=2, choices=METHODS, default='', blank=True)
 
     reversion_hide = True
 
@@ -632,10 +631,9 @@ class RiskAssessment(models.Model, RevisionMixin):
     contractors = models.BooleanField(help_text="Are you using any external contractors?<br><small>i.e. Freelancers/Crewing Companies</small>")
     other_companies = models.BooleanField(help_text="Are TEC working with any other companies on site?<br><small>e.g. TEC is providing the lighting while another company does sound</small>")
     crew_fatigue = models.BooleanField(help_text="Is crew fatigue likely to be a risk at any point during this event?")
-    general_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
+    general_notes = models.TextField(blank=True, default='', help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Power
-    # event_size = models.IntegerField(blank=True, null=True, choices=SIZES)
     big_power = models.BooleanField(help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
     # If yes to the above two, you must answer...
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
@@ -645,12 +643,12 @@ class RiskAssessment(models.Model, RevisionMixin):
     other_companies_power = models.BooleanField(help_text="Will TEC be supplying power to any other companies?")
     nonstandard_equipment_power = models.BooleanField(help_text="Does the power plan require the use of any power equipment (distros, dimmers, motor controllers, etc.) that does not belong to TEC?")
     multiple_electrical_environments = models.BooleanField(help_text="Will the electrical installation occupy more than one electrical environment?")
-    power_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
-    power_plan = models.URLField(blank=True, null=True, help_text="Upload your power plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
+    power_notes = models.TextField(blank=True, default='', help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
+    power_plan = models.URLField(blank=True, default='', help_text="Upload your power plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
 
     # Sound
     noise_monitoring = models.BooleanField(help_text="Does the event require noise monitoring or any non-standard procedures in order to comply with health and safety legislation or site rules?")
-    sound_notes = models.TextField(blank=True, null=True, help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
+    sound_notes = models.TextField(blank=True, default='', help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Site
     known_venue = models.BooleanField(help_text="Is this venue new to you (the MIC) or new to TEC?")
@@ -663,8 +661,8 @@ class RiskAssessment(models.Model, RevisionMixin):
     # Structures
     special_structures = models.BooleanField(help_text="Does the event require use of winch stands, motors, MPT Towers, or staging?")
     suspended_structures = models.BooleanField(help_text="Are any structures (excluding projector screens and IWBs) being suspended from TEC's structures?")
-    persons_responsible_structures = models.TextField(blank=True, null=True, help_text="Who are the persons on site responsible for their use?")
-    rigging_plan = models.URLField(blank=True, null=True, help_text="Upload your rigging plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
+    persons_responsible_structures = models.TextField(blank=True, default='', help_text="Who are the persons on site responsible for their use?")
+    rigging_plan = models.URLField(blank=True, default='', help_text="Upload your rigging plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
 
     # Blimey that was a lot of options
 
@@ -708,6 +706,10 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
+    @cached_property
+    def fieldz(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+
     @property
     def event_size(self):
         # Confirm event size. Check all except generators, since generators entails outside
@@ -723,7 +725,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         return str(self.event)
 
     def get_absolute_url(self):
-        return reverse_lazy('ra_detail', kwargs={'pk': self.pk})
+        return reverse('ra_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)
@@ -746,8 +748,8 @@ class EventChecklist(models.Model, RevisionMixin):
     trip_hazard = models.BooleanField(blank=True, null=True, help_text="Appropriate barriers around kit and cabling secured?")
     warning_signs = models.BooleanField(blank=True, help_text="Warning signs in place?<br><small>(strobe, smoke, power etc.)</small>")
     ear_plugs = models.BooleanField(blank=True, null=True, help_text="Ear plugs issued to crew where needed?")
-    hs_location = models.CharField(blank=True, null=True, max_length=255, help_text="Location of Safety Bag/Box")
-    extinguishers_location = models.CharField(blank=True, null=True, max_length=255, help_text="Location of fire extinguishers")
+    hs_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of Safety Bag/Box")
+    extinguishers_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of fire extinguishers")
 
     # Small Electrical Checks
     rcds = models.BooleanField(blank=True, null=True, help_text="RCDs installed where needed and tested?")
@@ -768,15 +770,15 @@ class EventChecklist(models.Model, RevisionMixin):
     fd_earth_fault = models.IntegerField(blank=True, null=True, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text="Prospective Short Circuit Current")
     # Worst case points
-    w1_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w1_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w1_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w1_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
     w1_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    w2_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w2_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w2_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w2_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
     w2_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    w3_description = models.CharField(blank=True, null=True, max_length=255, help_text="Description")
+    w3_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w3_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w3_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
     w3_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
@@ -796,12 +798,16 @@ class EventChecklist(models.Model, RevisionMixin):
             ('review_eventchecklist', 'Can review Event Checklists')
         ]
 
+    @cached_property
+    def fieldz(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+
     @property
     def activity_feed_string(self):
         return str(self.event)
 
     def get_absolute_url(self):
-        return reverse_lazy('ec_detail', kwargs={'pk': self.pk})
+        return reverse('ec_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return "%i - %s" % (self.pk, self.event)

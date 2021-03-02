@@ -11,7 +11,7 @@ import simplejson
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles import finders
 from django.core import signing
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
@@ -27,6 +27,7 @@ from django.views import generic
 from z3c.rml import rml2pdf
 
 from PyRIGS import decorators
+from PyRIGS.views import OEmbedView, is_ajax
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -40,7 +41,7 @@ class RigboardIndex(generic.TemplateView):
         context = super(RigboardIndex, self).get_context_data(**kwargs)
 
         # call out method to get current events
-        context['events'] = models.Event.objects.current_events()
+        context['events'] = models.Event.objects.current_events().select_related('riskassessment', 'invoice').prefetch_related('checklists')
         context['page_title'] = "Rigboard"
         return context
 
@@ -59,27 +60,22 @@ class EventDetail(generic.DetailView):
     template_name = 'event_detail.html'
     model = models.Event
 
-
-class EventOembed(generic.View):
-    model = models.Event
-
-    def get(self, request, pk=None):
-        embed_url = reverse('event_embed', args=[pk])
-        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
-
-        data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
-            'version': '1.0',
-            'type': 'rich',
-            'height': '250'
-        }
-
-        json = simplejson.JSONEncoderForHTML().encode(data)
-        return HttpResponse(json, content_type="application/json")
+    def get_context_data(self, **kwargs):
+        context = super(EventDetail, self).get_context_data(**kwargs)
+        title = "{} | {}".format(self.object.display_id, self.object.name)
+        if self.object.dry_hire:
+            title += " <span class='badge badge-secondary'>Dry Hire</span>"
+        context['page_title'] = title
+        return context
 
 
 class EventEmbed(EventDetail):
     template_name = 'event_embed.html'
+
+
+class EventOEmbed(OEmbedView):
+    model = models.Event
+    url_name = 'event_embed'
 
 
 class EventCreate(generic.CreateView):
@@ -157,7 +153,7 @@ class EventDuplicate(EventUpdate):
             new.checked_in_by = None
 
         # Remove all the authorisation information from the new event
-        new.auth_request_to = None
+        new.auth_request_to = ''
         new.auth_request_by = None
         new.auth_request_at = None
 
@@ -185,15 +181,9 @@ class EventPrint(generic.View):
 
         context = {
             'object': object,
-            'fonts': {
-                'opensans': {
-                    'regular': 'static/fonts/OPENSANS-REGULAR.TTF',
-                    'bold': 'static/fonts/OPENSANS-BOLD.TTF',
-                }
-            },
             'quote': True,
             'current_user': request.user,
-            'filename': 'Event {} {} {}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
+            'filename': 'Event_{}_{}_{}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
         }
 
         rml = template.render(context)
@@ -284,6 +274,7 @@ class EventArchive(generic.ListView):
 class EventAuthorise(generic.UpdateView):
     template_name = 'eventauthorisation_form.html'
     success_template = 'eventauthorisation_success.html'
+    preview = False
 
     def form_valid(self, form):
         self.object = form.save()
@@ -311,6 +302,7 @@ class EventAuthorise(generic.UpdateView):
         context['page_title'] = "{}: {}".format(self.event.display_id, self.event.name)
         if self.event.dry_hire:
             context['page_title'] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
+        context['preview'] = self.preview
         return context
 
     def get(self, request, *args, **kwargs):
@@ -359,7 +351,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         return self.get_object()
 
     def get_success_url(self):
-        if self.request.is_ajax():
+        if is_ajax(self.request):
             url = reverse_lazy('closemodal')
             messages.info(self.request, "location.reload()")
         else:
@@ -397,7 +389,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             to=[email],
             reply_to=[self.request.user.email],
         )
-        css = staticfiles_storage.path('css/email.css')
+        css = finders.find('css/email.css')
         html = premailer.Premailer(get_template("eventauthorisation_client_request.html").render(context),
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
@@ -412,8 +404,7 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
     model = models.Event
 
     def render_to_response(self, context, **response_kwargs):
-        from django.contrib.staticfiles.storage import staticfiles_storage
-        css = staticfiles_storage.path('css/email.css')
+        css = finders.find('css/email.css')
         response = super(EventAuthoriseRequestEmailPreview, self).render_to_response(context, **response_kwargs)
         assert isinstance(response, HttpResponse)
         response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
@@ -427,4 +418,5 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
             'sent_by': self.request.user.pk,
         })
         context['to_name'] = self.request.GET.get('to_name', None)
+        context['target'] = 'event_authorise_form_preview'
         return context

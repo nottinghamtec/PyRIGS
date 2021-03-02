@@ -25,7 +25,7 @@
                         {% endif %}
                     {% else %}
                     table-warning
-                    {% endif %}" id="event_row">
+                    {% endif %}" {% if event.cancelled %}style="opacity: 50% !important;"{% endif %} id="event_row">
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->

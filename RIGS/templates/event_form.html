@@ -7,25 +7,19 @@
 
 {% block css %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/flatpickr.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
     {{ block.super }}
-    <script src="{% static 'js/bootstrap-select.js' %}"></script>
-    <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
+    <script src="{% static 'js/selects.js' %}"></script>
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src="{% static 'js/jquery-ui.js' %}"></script><!--TODO optimise--->
-    <script src="{% static 'js/interaction.js' %}"></script>
-    <script src="{% static 'js/modal.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
-
     <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
 
     {% include 'partials/datetime-fix.html' %}
 
@@ -79,7 +73,7 @@
 
 {% block content %}
 {% include 'item_modal.html' %}
-<form class=" itemised_form" role="form" method="POST">
+<form class="itemised_form" role="form" method="POST">
     {% csrf_token %}
     <div class="row">
         <div class="col-12">

@@ -27,13 +27,14 @@ urlpatterns = [
     path('', include('users.urls')),
 
     path('admin/', admin.site.urls),
+    path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
 ]
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
 
     import debug_toolbar
-    urlpatterns = [
+    urlpatterns += [
         path('__debug__/', include(debug_toolbar.urls)),
         path('bootstrap/', TemplateView.as_view(template_name="bootstrap.html")),
-    ] + urlpatterns
+    ]

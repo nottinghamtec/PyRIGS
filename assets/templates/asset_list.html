@@ -5,16 +5,17 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/ajax-bootstrap-select.css' %}"/>
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
-    <script src="{% static 'js/bootstrap-select.js' %}"></script>
-    <script src="{% static 'js/ajax-bootstrap-select.js' %}"></script>
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}" async></script>
 {% endblock %}
 
 {% block js %}
+    {{ block.super }}
     <script>
         //Get querystring value
         function getParameterByName(name) {

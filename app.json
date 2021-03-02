@@ -51,7 +51,7 @@
       "url": "heroku/nodejs"
     },
     {
-      "url": "heroku/python"
+      "url": "https://github.com/nottinghamtec/heroku-buildpack-python"
     }
   ]
 }

@@ -52,7 +52,7 @@ class EventDetail(BasePage):
     URL_TEMPLATE = 'event/{event_id}'
 
     # TODO Refactor into regions to match template fragmentation
-    _event_name_selector = (By.XPATH, '//h1')
+    _event_name_selector = (By.XPATH, '//h2')
     _person_panel_selector = (By.XPATH, '//div[contains(text(), "Contact Details")]/..')
     _name_selector = (By.XPATH, '//dt[text()="Person"]/following-sibling::dd[1]')
     _email_selector = (By.XPATH, '//dt[text()="Email"]/following-sibling::dd[1]')
@@ -230,9 +230,11 @@ class CreateEventChecklist(FormPage):
     URL_TEMPLATE = 'event/{event_id}/checklist'
 
     _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
-    _power_mic_selector = (By.XPATH, "//div[@id='id_power_mic-group']//div[contains(@class, 'bootstrap-select')]")
+    _power_mic_selector = (By.XPATH, "//div[select[@id='id_power_mic']]")
     _add_vehicle_locator = (By.XPATH, "//button[contains(., 'Vehicle')]")
     _add_crew_locator = (By.XPATH, "//button[contains(., 'Crew')]")
+    _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
+    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(.,'new'))]]")
 
     form_items = {
         'safe_parking': (regions.CheckBox, (By.ID, 'id_safe_parking')),
@@ -272,8 +274,58 @@ class CreateEventChecklist(FormPage):
         return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
 
     @property
+    def vehicles(self):
+        return [self.VehicleRow(self, el) for el in self.find_elements(*self._vehicle_row_locator)]
+
+    class VehicleRow(Region):
+        _name_locator = ('xpath', ".//input")
+        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
+
+        @property
+        def name(self):
+            return regions.TextBox(self, self.root.find_element(*self._name_locator))
+
+        @property
+        def vehicle(self):
+            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
+
+    @property
+    def crew(self):
+        return [self.CrewRow(self, el) for el in self.find_elements(*self._crew_row_locator)]
+
+    class CrewRow(Region):
+        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
+        _start_time_locator = ('xpath', ".//input[@name[starts-with(., 'start') and not(contains(.,'new'))]]")
+        _end_time_locator = ('xpath', ".//input[@name[starts-with(., 'end') and not(contains(.,'new'))]]")
+        _role_locator = ('xpath', ".//input[@name[starts-with(., 'role') and not(contains(.,'new'))]]")
+
+        @property
+        def crewmember(self):
+            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
+
+        @property
+        def start_time(self):
+            return regions.DateTimePicker(self, self.root.find_element(*self._start_time_locator))
+
+        @property
+        def end_time(self):
+            return regions.DateTimePicker(self, self.root.find_element(*self._end_time_locator))
+
+        @property
+        def role(self):
+            return regions.TextBox(self, self.root.find_element(*self._role_locator))
+
+    @property
     def success(self):
         return '{event_id}' not in self.driver.current_url
+
+
+class EditEventChecklist(CreateEventChecklist):
+    URL_TEMPLATE = '/event/checklist/{pk}/edit'
+
+    @property
+    def success(self):
+        return 'edit' not in self.driver.current_url
 
 
 class GenericList(BasePage):

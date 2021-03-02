@@ -11,11 +11,11 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
-    is_ajax
+    is_ajax, OEmbedView
 from assets import forms, models
+from assets.models import get_available_asset_id
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
@@ -28,9 +28,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         return initial
 
     def get_queryset(self):
-        if self.request.method == 'POST':
-            self.form = forms.AssetSearchForm(data=self.request.POST)
-        elif self.request.method == 'GET' and len(self.request.GET) > 0:
+        if self.request.method == 'GET' and len(self.request.GET) > 0:
             self.form = forms.AssetSearchForm(data=self.request.GET)
         else:
             self.form = forms.AssetSearchForm(data=self.get_initial())
@@ -57,7 +55,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(
                 status__in=models.AssetStatus.objects.filter(should_show=True))
 
-        return queryset
+        return queryset.select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
         context = super(AssetList, self).get_context_data(**kwargs)
@@ -142,7 +140,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        initial["asset_id"] = models.Asset.get_available_asset_id()
+        initial["asset_id"] = get_available_asset_id()
         return initial
 
     def get_success_url(self):
@@ -166,37 +164,23 @@ class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
         return context
 
 
-class AssetOembed(generic.View):
-    model = models.Asset
-
-    def get(self, request, pk=None):
-        embed_url = reverse('asset_embed', args=[pk])
-        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
-
-        data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
-            'version': '1.0',
-            'type': 'rich',
-            'height': '250'
-        }
-
-        json = simplejson.JSONEncoderForHTML().encode(data)
-        return HttpResponse(json, content_type="application/json")
-
-
 class AssetEmbed(AssetDetail):
     template_name = 'asset_embed.html'
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+class AssetOEmbed(OEmbedView):
+    model = models.Asset
+    url_name = 'asset_embed'
+
+
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
     hide_hidden_status = False
 
     # TODO Refresh this when the modal is submitted
     def get_queryset(self):
-        self.form = forms.AssetSearchForm(data={})
-        return self.model.objects.filter(Q(last_audited_at__isnull=True))
+        self.form = forms.AssetSearchForm(data=self.request.GET)
+        return self.model.objects.filter(Q(last_audited_at__isnull=True)).select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
         context = super(AssetAuditList, self).get_context_data(**kwargs)
@@ -304,7 +288,9 @@ class CableTypeList(generic.ListView):
     model = models.CableType
     template_name = 'cable_type_list.html'
     paginate_by = 40
-    # ordering = ['__str__']
+
+    def get_queryset(self):
+        return self.model.objects.select_related('plug', 'socket')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

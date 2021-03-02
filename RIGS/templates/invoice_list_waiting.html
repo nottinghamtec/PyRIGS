@@ -53,7 +53,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {{ event.sum_total|floatformat:2 }}
+                            £{{ event.sum_total|floatformat:2 }}
                             <br />
                             <span class="text-muted">{% if not event.internal %}{{ event.purchase_order }}{% endif %}</span>
                         </td>

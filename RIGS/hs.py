@@ -76,6 +76,9 @@ class EventRiskAssessmentList(generic.ListView):
     model = models.RiskAssessment
     template_name = 'hs_object_list.html'
 
+    def get_queryset(self):
+        return self.model.objects.order_by('reviewed_at').select_related('event')
+
     def get_context_data(self, **kwargs):
         context = super(EventRiskAssessmentList, self).get_context_data(**kwargs)
         context['title'] = 'Risk Assessment'
@@ -83,7 +86,6 @@ class EventRiskAssessmentList(generic.ListView):
         context['edit'] = 'ra_edit'
         context['review'] = 'ra_review'
         context['perm'] = 'perms.RIGS.review_riskassessment'
-        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
         return context
 
 
@@ -187,7 +189,6 @@ class EventChecklistList(generic.ListView):
         context['edit'] = 'ec_edit'
         context['review'] = 'ec_review'
         context['perm'] = 'perms.RIGS.review_eventchecklist'
-        context['fields'] = [n.name for n in list(self.model._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
         return context
 
 
@@ -209,7 +210,7 @@ class HSList(generic.ListView):
     template_name = 'hs_list.html'
 
     def get_queryset(self):
-        return models.Event.objects.all().order_by('-start_date')
+        return models.Event.objects.all().order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
 
     def get_context_data(self, **kwargs):
         context = super(HSList, self).get_context_data(**kwargs)

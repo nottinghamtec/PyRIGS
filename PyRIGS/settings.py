@@ -9,27 +9,21 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
 import datetime
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
+from pathlib import Path
 import secrets
 
-import raven
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from envparse import env
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e')
-
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', cast=bool, default=True)
-
 STAGING = env('STAGING', cast=bool, default=False)
-
 CI = env('CI', cast=bool, default=False)
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
@@ -55,6 +49,7 @@ if DEBUG:
 
 # Application definition
 INSTALLED_APPS = (
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -72,11 +67,9 @@ INSTALLED_APPS = (
     'reversion',
     'captcha',
     'widget_tweaks',
-    'raven.contrib.django.raven_compat',
 )
 
 MIDDLEWARE = (
-    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -87,19 +80,19 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'PyRIGS.urls'
 
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -177,9 +170,12 @@ else:
         }
     }
 
-RAVEN_CONFIG = {
-    'dsn': env('RAVEN_DSN', default=""),
-}
+# Error/performance monitoring
+sentry_sdk.init(
+    dsn=env('SENTRY_DSN', default=""),
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+)
 
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
@@ -232,21 +228,18 @@ USE_TZ = True
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-STATIC_DIRS = (
-    os.path.join(BASE_DIR, 'static/')
-)
+STATIC_ROOT = str(BASE_DIR / 'static/')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'pipeline/built_assets/'),
+    str(BASE_DIR / 'pipeline/built_assets'),
 ]
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates')
+            BASE_DIR / 'templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {

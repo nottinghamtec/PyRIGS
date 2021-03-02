@@ -16,7 +16,7 @@
                 <th scope="row">{{ version.revision.date_created }}</th>
                 <td><a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id|default:version.changes.new.pk }} | {{version.changes.new|to_class_name}}</a></td>
                 <td>{{ version.pk }}|{{ version.revision.pk }}</td>
-                <td>{{ version.revision.user.name|default:"System" }}</td>
+                <td>{% include 'partials/linked_name.html' with profile=version.revision.user %}</td>
                 <td>
                     {% if version.changes.old == None %}
                         Created {{version.changes.new|to_class_name}}
