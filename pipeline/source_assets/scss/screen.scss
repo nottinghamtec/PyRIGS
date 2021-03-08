@@ -177,6 +177,11 @@ svg {
     white-space: no-wrap;
 }
 
+span.fas {
+    padding-left: 0.1em !important;
+    padding-right: 0.1em !important;
+}
+
 html.embedded {
   display: flex;
   flex-direction: column;
