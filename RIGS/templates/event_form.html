@@ -27,18 +27,18 @@
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
         $(document).ready(function () {
             dur = matches ? 0 : 500;
-            {% if not object.pk and not form.errors %}
-                $('.form-hws').slideUp(dur, function () {
-                    $('.form-is_rig').slideUp(dur);
-                });
-            {% elif not object.pk and form.errors %}
-                if ($('#{{form.is_rig.auto_id}}').attr('checked') !== 'checked') {
+            {% if object.pk %}
+            // Editing
+                {% if not object.is_rig %}
                     $('.form-is_rig').hide();
-                }
-            {% endif %}
-            {% if not object.pk %}
+                {% endif %}
+            //Creation
+            {% else %}
+                //Initial hide
+                $('.form-hws').slideUp(dur);
+                //Button handling
                 $('#is_rig-selector button').on('click', function () {
-                    $('.form-non_rig').slideDown(dur);
+                    $('.form-non_rig').slideDown(dur); //Non rig stuff also needed for rig, so always slide down
                     if ($(this).data('is_rig') === 1) {
                         $('#{{form.is_rig.auto_id}}').prop('checked', true);
                         if ($('.form-non_rig').is(':hidden')) {
@@ -48,7 +48,6 @@
                         }
                         $('.form-hws, .form-hws .form-is_rig').css('overflow', 'visible');
                     } else {
-
                         $('#{{form.is_rig.auto_id}}').prop('checked', false);
                         $('.form-is_rig').slideUp(dur);
                     }
@@ -62,13 +61,6 @@
           $('[data-toggle="tooltip"]').tooltip();
         })
     </script>
-    <noscript>
-        <style>
-        .form-hws {
-            display: inherit !important;
-        }
-        </style>
-    </noscript>
 {% endblock %}
 
 {% block content %}
