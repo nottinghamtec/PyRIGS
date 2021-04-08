@@ -34,8 +34,16 @@
                 {% endif %}
             //Creation
             {% else %}
-                //Initial hide
-                $('.form-hws').slideUp(dur);
+                // If there were errors, apply the previous Rig/not-Rig selection
+                {% if form.errors %}
+                    $('.form-hws').show();
+                    if ($('#{{form.is_rig.auto_id}}').attr('checked') !== 'checked') {
+                        $('.form-is_rig').hide();
+                    }
+                {% else %}
+                    //Initial hide
+                    $('.form-hws').slideUp(dur);
+                {% endif %}
                 //Button handling
                 $('#is_rig-selector button').on('click', function () {
                     $('.form-non_rig').slideDown(dur); //Non rig stuff also needed for rig, so always slide down
