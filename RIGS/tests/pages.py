@@ -53,7 +53,7 @@ class EventDetail(BasePage):
 
     # TODO Refactor into regions to match template fragmentation
     _event_name_selector = (By.XPATH, '//h2')
-    _person_panel_selector = (By.XPATH, '//div[contains(text(), "Contact Details")]/..')
+    _person_panel_selector = (By.XPATH, '//div[contains(text(), "Person Details")]/..')
     _name_selector = (By.XPATH, '//dt[text()="Person"]/following-sibling::dd[1]')
     _email_selector = (By.XPATH, '//dt[text()="Email"]/following-sibling::dd[1]')
     _phone_selector = (By.XPATH, '//dt[text()="Phone Number"]/following-sibling::dd[1]')
