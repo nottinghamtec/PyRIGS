@@ -55,7 +55,13 @@ class InvoiceDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Invoice {} ({})".format(self.object.display_id, self.object.invoice_date.strftime("%d/%m/%Y"))
+        context['page_title'] = "Invoice {} ({}) ".format(self.object.display_id, self.object.invoice_date.strftime("%d/%m/%Y"))
+        if self.object.void:
+            context['page_title'] += "<span class='badge badge-warning float-right'>VOID</span>"
+        elif self.object.is_closed:
+            context['page_title'] += "<span class='badge badge-success float-right'>PAID</span>"
+        else:
+            context['page_title'] += "<span class='badge badge-info float-right'>OUTSTANDING</span>"
         return context
 
 
