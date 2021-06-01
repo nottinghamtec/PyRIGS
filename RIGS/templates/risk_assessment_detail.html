@@ -51,11 +51,11 @@
                         <dd class="col-sm-6">
                             {{ object.power_mic.name|default:'None' }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
+                        <dt class="col-sm-6">{{ object|help_text:'outside' }}</dt>
                         <dd class="col-sm-6">
                             {{ object.outside|yesnoi:'invert' }}
                         </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'outside' }}</dt>
+                        <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
                         <dd class="col-sm-6">
                             {{ object.generators|yesnoi:'invert' }}
                         </dd>
