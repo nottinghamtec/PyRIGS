@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'users',
     'RIGS',
     'assets',
+    'training',
 
     'debug_toolbar',
     'registration',
