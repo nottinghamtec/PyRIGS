@@ -23,7 +23,8 @@
     </div>
     <div class="col-sm-4 mb-3">
         <div class="card">
-            <img class="card-img-top" src="{% static 'imgs/assets.jpg' %}" alt="" style="height: 150px; object-fit: cover;">
+            {% now "m-d" as todays_date %}
+            <img class="card-img-top" src="{% if todays_date == '04-01' %}{% static 'imgs/tappytaptap.gif' %}{%else%}{% static 'imgs/assets.jpg' %}{%endif%}" alt="" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Asset Database</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><span class="fas fa-tag align-middle"></span><span class="align-middle"> Asset List</span></a>
@@ -42,6 +43,8 @@
             <img class="card-img-top" src="{% static 'imgs/training.jpg' %}" alt="" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Training Database</h4>
             <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" href=""><span class="fas fa-eye align-middle"></span><span class="align-middle"> View Training Items</span></a>
+                <a class="list-group-item list-group-item-action" href=""><span class="fas fa-plus align-middle"></span><span class="align-middle"> Log Training Session</span></a>
             </div>
         </div>
     </div>        

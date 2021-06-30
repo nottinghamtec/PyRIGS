@@ -10,52 +10,50 @@ class Trainee(Profile):
 
 # Items
 class TrainingCategory(models.Model):
-    number = models.CharField(max_length=3) # Does this 1:1 correspond with a department? I think the answer is sometimes...
-    name = models.CharField(max_length=50)
-
-
-class TrainingItem(models.Model):
-    category = models.ForeignKey('TrainingCategory', on_delete=models.CASCADE)
     number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
 
 
-class TrainingItemInstance(models.Model):
-    item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
-    trainee = models.ForeignKey('Trainee', related_name='items', on_delete=models.CASCADE)    
-
-    training_started_on = models.DateField()
-    training_started_by = models.ForeignKey('Trainee', related_name='training_started', on_delete=models.CASCADE)
-    
-    training_complete_on = models.DateField()
-    training_complete_by = models.ForeignKey('Trainee', related_name='training_complete', on_delete=models.CASCADE)
-
-    passed_out_on = models.DateField()
-    passed_out_by = models.ForeignKey('Trainee', related_name='passed_out', on_delete=models.CASCADE)
-
-
-class Department(models.Model):
+class TrainingItem(models.Model):
+    category = models.ForeignKey('TrainingCategory', on_delete=models.RESTRICT)
+    number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
+
+
+# TODO Validation that dates cannot be in the future
+class TrainingItemQualification(models.Model):
+    STARTED = 0
+    COMPLETE = 1
+    PASSED_OUT = 2
+    CHOICES = (
+        (STARTED, 'Training Started'),
+        (COMPLETE, 'Training Complete'),
+        (PASSED_OUT, 'Passed Out'),
+    )
+    item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
+    trainee = models.ForeignKey('Trainee', related_name='items', on_delete=models.RESTRICT)    
+    depth = models.IntegerField(choices=CHOICES)
+    date = models.DateTimeField()
+    supervisor = models.ForeignKey('Trainee', related_name='training_started', on_delete=models.RESTRICT)
+    notes = models.TextField()
 
 
 # Levels
 class TrainingLevel(models.Model, RevisionMixin):
-    requirements = models.ManyToManyField(TrainingItem)
-
-    class Meta:
-        abstract = True
-
-@reversion.register
-class TechnicalAssistant(TrainingLevel):
-    # department = models.ForeignKey('Department', on_delete=models.CASCADE)
-    pass
-
-
-@reversion.register
-class Technician(TrainingLevel):
-    department = models.ForeignKey('Department', on_delete=models.CASCADE)
+    ASSISTANT = 0
+    TECHNICIAN = 1
+    SUPERVISOR = 2
+    CHOICES = (
+        (ASSISTANT, 'Technical Assistant'),
+        (TECHNICIAN, 'Technician'),
+        (SUPERVISOR, 'Supervisor'),
+    )
+    department = models.CharField(max_length=50, null=True) # Technical Assistant does not have a department
+    level = models.IntegerField(choices=CHOICES)
 
 
-@reversion.register
-class Supervisor(TrainingLevel):
-    department = models.ForeignKey('Department', on_delete=models.CASCADE)
+class TrainingLevelQualification(models.Model):
+    trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)   
+    level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
+    confirmed_on = models.DateTimeField()
+    confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT)
