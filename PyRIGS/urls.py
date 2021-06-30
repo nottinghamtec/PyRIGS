@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('versioning.urls')),
     path('', include('RIGS.urls')),
     path('assets/', include('assets.urls')),
+    path('training/', include('training.urls')),
 
     path('', login_required(views.Index.as_view()), name='index'),
 

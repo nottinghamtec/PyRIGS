@@ -15,9 +15,12 @@ class TrainingCategory(models.Model):
 
 
 class TrainingItem(models.Model):
-    category = models.ForeignKey('TrainingCategory', on_delete=models.RESTRICT)
+    category = models.ForeignKey('TrainingCategory', related_name='category', on_delete=models.RESTRICT)
     number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return "{}.{} {}".format(self.category.number, self.number, self.name)
 
 
 # TODO Validation that dates cannot be in the future

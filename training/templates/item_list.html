@@ -1,5 +1,13 @@
 {% extends 'base_rigs.html' %}
 
 {% block content %}
-
+<div class="row">
+{% for category in categories %}
+    <div class="col">
+        <div class="card">
+            <h4 class="card-header">{{ category.name }}</h4>
+        </div>
+    </div>
+{% endfor %}
+</div>
 {% endblock %}
