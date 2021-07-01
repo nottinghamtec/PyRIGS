@@ -33,13 +33,13 @@ class Command(BaseCommand):
         names = [(1, "Basic"), (2, "Sound"), (3, "Lighting"), (4, "Rigging"), (5, "Power"), (6, "Haulage")]
         
         for i, name in names:
-            category = models.TrainingCategory.objects.create(number=i, name=name)
+            category = models.TrainingCategory.objects.create(reference_number=i, name=name)
             category.save()
             self.categories.append(category)
 
     def setup_items(self):
-        names = ["Motorised Power Towers", "Catering", "Forgetting Cables", "Gazebo Construction", "Balanced Audio", "Unbalanced Audio"]
+        names = ["Motorised Power Towers", "Catering", "Forgetting Cables", "Gazebo Construction", "Balanced Audio", "Unbalanced Audio", "BBQ/Bin Interactions", "Pushing Boxes", "How Not To Die", "Setting up projectors", "Basketing truss", "First Aid", "Digging Trenches", "Avoiding Bin Lorries", "Getting cherry pickers stuck in mud", "Crashing the Van"]
         
         for i,name in enumerate(names):
-            item = models.TrainingItem.objects.create(category=random.choice(self.categories), number=random.randint(0, 100), name=name)
+            item = models.TrainingItem.objects.create(category=random.choice(self.categories), reference_number=random.randint(0, 100), name=name)
             self.items.append(item)

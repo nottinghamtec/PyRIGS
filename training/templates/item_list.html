@@ -4,8 +4,13 @@
 <div class="row">
 {% for category in categories %}
     <div class="col">
-        <div class="card">
+        <div class="card mb-3">
             <h4 class="card-header">{{ category.name }}</h4>
+            <div class="list-group list-group-flush">
+                {% for item in category.items.all %}
+                <li class="list-group-item">{{ item }}</li>
+                {% endfor %}
+            </div>
         </div>
     </div>
 {% endfor %}

@@ -4,23 +4,26 @@ from RIGS.models import RevisionMixin, Profile
 from reversion import revisions as reversion
 
 # 'shim' overtop the profile model to neatly contain all training related fields etc
-@reversion.register
 class Trainee(Profile):
-    pass
+    class Meta:
+        proxy = True
+
+    def get_records_of_depth(self, depth):
+        return self.training_items.filter(depth=depth)
 
 # Items
 class TrainingCategory(models.Model):
-    number = models.CharField(max_length=3)
+    reference_number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
 
 
 class TrainingItem(models.Model):
-    category = models.ForeignKey('TrainingCategory', related_name='category', on_delete=models.RESTRICT)
-    number = models.CharField(max_length=3)
+    reference_number = models.CharField(max_length=3)
+    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)    
     name = models.CharField(max_length=50)
 
     def __str__(self):
-        return "{}.{} {}".format(self.category.number, self.number, self.name)
+        return "{}.{} {}".format(self.category.reference_number, self.reference_number, self.name)
 
 
 # TODO Validation that dates cannot be in the future
@@ -34,24 +37,23 @@ class TrainingItemQualification(models.Model):
         (PASSED_OUT, 'Passed Out'),
     )
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
-    trainee = models.ForeignKey('Trainee', related_name='items', on_delete=models.RESTRICT)    
+    trainee = models.ForeignKey('Trainee', related_name='training_items', on_delete=models.RESTRICT)    
     depth = models.IntegerField(choices=CHOICES)
     date = models.DateTimeField()
+    # TODO Remember that some training is external. Support for making an organisation the trainer? 
     supervisor = models.ForeignKey('Trainee', related_name='training_started', on_delete=models.RESTRICT)
     notes = models.TextField()
 
 
 # Levels
+# FIXME Common Competencies...
 class TrainingLevel(models.Model, RevisionMixin):
-    ASSISTANT = 0
-    TECHNICIAN = 1
-    SUPERVISOR = 2
     CHOICES = (
-        (ASSISTANT, 'Technical Assistant'),
-        (TECHNICIAN, 'Technician'),
-        (SUPERVISOR, 'Supervisor'),
+        (0, 'Technical Assistant'),
+        (1, 'Technician'),
+        (2, 'Supervisor'),
     )
-    department = models.CharField(max_length=50, null=True) # Technical Assistant does not have a department
+    department = models.CharField(max_length=50, null=True) # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
 
 

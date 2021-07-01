@@ -1,0 +1,29 @@
+{% extends 'base_rigs.html' %}
+
+{% block content %}
+<div class="row mb-3">
+<h2 class="col-12">Training Levels</h2>
+<p>{{ user.name }} is a...<br></p>
+<div class="col">
+<h2><div class="badge badge-success">Sound Supervisor <span class="fas fa-volume-up"></span></div><h2>
+<h3><div class="badge badge-danger">Power Technician <span class="fas fa-plug"></span></div></h3>
+<h4><div class="badge badge-primary">Technical Assistant <span class="fas fa-wrench"></span></div></h4>
+</div>
+</div>
+<div class="row">
+<h2 class="col-12">Training Items</h2><br>
+{% for category in categories %}
+<div class="col-md-3">
+        <div class="card mb-3">
+            <h3 class="card-header">{{ category.name }}</h3>
+            <div class="list-group list-group-flush">
+            {% for depth in depths %}
+            <li class="list-group-item {% if depth.0 == 0 %}list-group-item-warning{%elif depth.0 == 1%}list-group-item-success{%else%}list-group-item-info{%endif%}">{{depth.1}}</li>
+            <li class="list-group-item">Dummy Item</li>
+            {% endfor %}
+            </div>
+        </div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}
