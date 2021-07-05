@@ -1,12 +1,34 @@
 {% extends 'base_rigs.html' %}
 
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row">
-<h1>Log New Training Session</h1>
-<div class="form-group">
-  <label for="selectpicker">Select Attendees</label>
-  <select name="attendees" id="attendees_id" class="form-control selectpicker" data-live-search="true">
-  </select>
-</div>
+    <div class="col">
+        <form class="form">
+            <div class="form-group">
+              <label for="selectpicker">Select Attendees</label>
+              <select name="attendees" id="attendees_id" class="form-control selectpicker custom-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+              </select>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

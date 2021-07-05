@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from django.views import generic
-from training import models
+from training import models, forms
 
 from users import views
 
@@ -29,4 +29,13 @@ class TraineeDetail(views.ProfileDetail):
         for i in [x for x,_ in choices]:
             context[str(i)] = self.object.get_records_of_depth(i)
         return context
-        
+
+
+class SessionLog(generic.FormView):
+    template_name = "session_log_form.html"
+    form_class = forms.SessionLogForm
+
+    def get_context_data(self, **kwargs):
+        context = super(SessionLog, self).get_context_data(**kwargs)
+        context["page_title"] = "Log New Training Session"
+    
