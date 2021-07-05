@@ -16,6 +16,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 from RIGS import models
 from assets import models as asset_models
+from training import models as training_models
 
 
 def is_ajax(request):
@@ -38,7 +39,8 @@ class SecureAPIRequest(generic.View):
         'organisation': models.Organisation,
         'profile': models.Profile,
         'event': models.Event,
-        'supplier': asset_models.Supplier
+        'supplier': asset_models.Supplier,
+        'training_item': training_models.TrainingItem,
     }
 
     perms = {
@@ -47,7 +49,8 @@ class SecureAPIRequest(generic.View):
         'organisation': 'RIGS.view_organisation',
         'profile': 'RIGS.view_profile',
         'event': None,
-        'supplier': None
+        'supplier': None,
+        'training_item': None, # TODO
     }
 
     '''

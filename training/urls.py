@@ -12,5 +12,7 @@ urlpatterns = [
     path('trainee/<int:pk>/',
          permission_required_with_403('RIGS.view_profile')(views.TraineeDetail.as_view()),
          name='trainee_detail'),
+    path('trainee/<int:pk>/edit/', views.AddQualification.as_view(),
+         name='edit_record'),
     path('session/', views.SessionLog.as_view(), name='session_log'),
 ]

@@ -9,7 +9,7 @@ class Trainee(Profile):
         proxy = True
 
     def get_records_of_depth(self, depth):
-        return self.training_items.filter(depth=depth)
+        return self.qualifications_obtained.filter(depth=depth)
 
 # Items
 class TrainingCategory(models.Model):
@@ -37,12 +37,12 @@ class TrainingItemQualification(models.Model):
         (PASSED_OUT, 'Passed Out'),
     )
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
-    trainee = models.ForeignKey('Trainee', related_name='training_items', on_delete=models.RESTRICT)    
+    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)    
     depth = models.IntegerField(choices=CHOICES)
-    date = models.DateTimeField()
+    date = models.DateField()
     # TODO Remember that some training is external. Support for making an organisation the trainer? 
-    supervisor = models.ForeignKey('Trainee', related_name='training_started', on_delete=models.RESTRICT)
-    notes = models.TextField()
+    supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.RESTRICT)
+    notes = models.TextField(blank=True)
 
 
 # Levels

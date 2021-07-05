@@ -72,7 +72,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'item_modal.html' %}
+{% include 'partials/item_modal.html' %}
 <form class="itemised_form" role="form" method="POST">
     {% csrf_token %}
     <div class="row">
@@ -326,7 +326,7 @@
 
                             <div class="form-group" data-toggle="tooltip" title="The purchase order number (for external clients)">
                                 <label for="{{ form.purchase_order.id_for_label }}"
-                                       class="col-sm-4 col-form-label">{{ form.purchase_order.label }}</label>
+                                       class="col-sm-4 col-fitem_tableorm-label">{{ form.purchase_order.label }}</label>
 
                                 <div class="col-sm-8">
                                     {% render_field form.purchase_order class+="form-control" %}
@@ -348,7 +348,7 @@
                             {% render_field form.notes class+="form-control" %}
                         </div>
                     </div>
-                    {% include 'item_table.html' %}
+                    {% include 'partials/item_table.html' %}
                 </div>
             </div>
         </div>

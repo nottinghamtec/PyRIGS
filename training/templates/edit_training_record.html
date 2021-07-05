@@ -1,0 +1,57 @@
+{% extends 'base_rigs.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+	{% include 'form_errors.html' %}
+{% endif %}
+<form id="item-form" action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
+    {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
+    <div class="form-group form-row">
+      <label for="item_id" class="col-sm-2 col-form-label">Item</label>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
+      </select>
+    </div>
+    <div class="form-group form-row">
+      <label for="depth" class="col-sm-2 col-form-label">Depth</label>
+      {% render_field form.depth|add_class:'form-control custom-select selectpicker col-sm' %}
+    </div>
+    <div class="form-group form-row">
+      <label for="selectpicker" class="col-sm-2 col-form-label">Supervisor</label>
+      <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
+      </select>
+    </div>
+    <div class="form-group form-row">
+        <label for="date" class="col-sm-2 col-form-label">Training Date</label>
+        <div class="col-sm-10">
+            {% render_field form.date|add_class:'form-control'|attr:'type="date"' %}
+        </div>
+    </div>
+    <div class="form-group form-row">
+        <label for="item_description" class="col-sm-2 col-form-label">Notes</label>
+        <div class="col-sm-10">
+            <textarea type="text" placeholder="Notes" class="form-control"
+                      id="notes" rows="3"></textarea>
+        </div>
+    </div>
+   <input type="submit" class="btn btn-primary">
+</form>
+{% endblock %}
