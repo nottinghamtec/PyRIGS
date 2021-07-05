@@ -26,7 +26,6 @@ class TrainingItem(models.Model):
         return "{}.{} {}".format(self.category.reference_number, self.reference_number, self.name)
 
 
-# TODO Validation that dates cannot be in the future
 class TrainingItemQualification(models.Model):
     STARTED = 0
     COMPLETE = 1
@@ -44,10 +43,13 @@ class TrainingItemQualification(models.Model):
     supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.RESTRICT)
     notes = models.TextField(blank=True)
 
+    def __str__(self):
+        return "{} in {} on {}".format(self.depth, self.item, self.date)
+
 
 # Levels
-# FIXME Common Competencies...
 class TrainingLevel(models.Model, RevisionMixin):
+    description = models.CharField(max_length=120)
     CHOICES = (
         (0, 'Technical Assistant'),
         (1, 'Technician'),
@@ -55,7 +57,8 @@ class TrainingLevel(models.Model, RevisionMixin):
     )
     department = models.CharField(max_length=50, null=True) # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
-
+    
+    # FIXME Common Competencies... have levels able to depend on other ones - but supervisors need to depend on both common and technican?
 
 class TrainingLevelQualification(models.Model):
     trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)   

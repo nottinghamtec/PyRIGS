@@ -6,7 +6,7 @@ from RIGS.models import Profile
 class SessionLogForm(forms.Form):
     pass
 
-
+# TODO Validation that dates cannot be in the future
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = models.TrainingItemQualification
@@ -17,4 +17,5 @@ class QualificationForm(forms.ModelForm):
         pk = kwargs.pop('pk', None)
         super(QualificationForm, self).__init__(*args, **kwargs)
         self.fields['trainee'].initial = Profile.objects.get(pk=pk)
+        
         
