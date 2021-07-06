@@ -1,7 +1,7 @@
 {% extends 'base_rigs.html' %}
 
 {% block content %}
-<div class="row my-3 align-items-end">
+<div class="row my-3 text-right">
 <a type="button" class="btn btn-success" href="{% url 'edit_record' pk=request.user.pk %}">
 	<i class="fas fa-plus"></i> Add New Training Record
 </a>
@@ -17,19 +17,30 @@
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25% complete</div>
                 </div>
                 <p>{{ level.description }}</p>
-                <p>Requirements:
-                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#reqs" aria-expanded="false" aria-controls="reqs">
-                   <span class="fas fa-arrow-down"></span>
+                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs">
+                   Requirements <span class="fas fa-caret-right reqs_{{level.pk}} collapse show"></span><span class="fas fa-caret-down collapse reqs_{{level.pk}}"></span>
                 </button>
-                <div class="collapse" id="reqs">
-                  {% for req in level.requirements.all %}
-                  <li>{{req}}</li>
-                  {% endfor %}
-                </p>
+                <div class="collapse reqs_{{level.pk}}">
+                  <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="table-warning">Training Started</th>
+                          <th scope="col" class="table-success">Training Complete</th>
+                          <th scope="col" class="table-info">Passed Out</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
+                        </tr>
+                      </tbody>
+                   </table>
                 </div>
             </div>
             <div class="card-footer">
-                <button class="btn btn-success" disabled>Incomplete</button>
+                <button class="btn btn-success text-right" disabled>Incomplete</button>
             </div>
         </div>
         {% endfor %}

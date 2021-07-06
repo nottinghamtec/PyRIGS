@@ -71,8 +71,23 @@ class TrainingLevel(models.Model, RevisionMixin):
     level = models.IntegerField(choices=CHOICES)
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
 
+    def get_requirements_of_depth(self, depth):
+        return self.requirements.filter(depth=depth)
+
+    @property
+    def started_requirements(self):
+        return self.get_requirements_of_depth(TrainingItemQualification.STARTED)
+
+    @property
+    def complete_requirements(self):
+        return self.get_requirements_of_depth(TrainingItemQualification.COMPLETE)
+
+    @property
+    def passed_out_requirements(self):
+        return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
+
     def __str__(self):
-        if self.department is None: # TA
+        if self.department is None: # 2TA
             return self.get_level_display()
         else:
             return "{} {}".format(self.get_department_display(), self.get_level_display())

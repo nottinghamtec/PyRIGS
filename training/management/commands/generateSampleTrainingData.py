@@ -19,7 +19,7 @@ class Command(BaseCommand):
     levels = []
 
     def handle(self, *args, **options):
-        print("Generating Training Data")
+        print("Generating training data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -31,6 +31,7 @@ class Command(BaseCommand):
             self.setup_categories()
             self.setup_items()
             self.setup_levels()
+        print("Done generating training data")
 
     def setup_categories(self):
         names = [(1, "Basic"), (2, "Sound"), (3, "Lighting"), (4, "Rigging"), (5, "Power"), (6, "Haulage")]
@@ -53,5 +54,10 @@ class Command(BaseCommand):
             technician = models.TrainingLevel.objects.create(level=models.TrainingLevel.TECHNICIAN, department=i, description="Moral pinnacle derive ultimate war dead. Strong fearful joy contradict battle christian faithful enlightenment prejudice zarathustra moral.")
             supervisor = models.TrainingLevel.objects.create(level=models.TrainingLevel.SUPERVISOR, department=i, description="Spirit holiest merciful mountains inexpedient reason value. Suicide ultimate hope.")
             supervisor.prerequisite_levels.add(technician)
+            for i in range(0, 30):
+                if i % 3 == 0:
+                    models.TrainingLevelRequirement.objects.create(level=technician, item=random.choice(self.items), depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                else:
+                    models.TrainingLevelRequirement.objects.create(level=supervisor, item=random.choice(self.items), depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
             self.levels.append(technician)
             self.levels.append(supervisor)
