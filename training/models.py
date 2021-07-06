@@ -52,10 +52,13 @@ class TrainingItemQualification(models.Model):
 # Levels
 class TrainingLevel(models.Model, RevisionMixin):
     description = models.CharField(max_length=120, blank=True)
+    TA = 0
+    TECHNICIAN = 1
+    SUPERVISOR = 2
     CHOICES = (
-        (0, 'Technical Assistant'),
-        (1, 'Technician'),
-        (2, 'Supervisor'),
+        (TA, 'Technical Assistant'),
+        (TECHNICIAN, 'Technician'),
+        (SUPERVISOR, 'Supervisor'),
     )
     DEPARTMENTS = (
         (0, 'Sound'),
@@ -69,7 +72,10 @@ class TrainingLevel(models.Model, RevisionMixin):
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
 
     def __str__(self):
-        return "{} {}".format(self.get_department_display(), self.get_level_display())
+        if self.department is None: # TA
+            return self.get_level_display()
+        else:
+            return "{} {}".format(self.get_department_display(), self.get_level_display())
 
 class TrainingLevelRequirement(models.Model):
     level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)

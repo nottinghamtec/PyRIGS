@@ -16,8 +16,10 @@ class Command(BaseCommand):
 
     categories = []
     items = []
+    levels = []
 
     def handle(self, *args, **options):
+        print("Generating Training Data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -46,4 +48,10 @@ class Command(BaseCommand):
             self.items.append(item)
 
     def setup_levels(self):
-        pass
+        self.levels.append(models.TrainingLevel.objects.create(level=models.TrainingLevel.TA, description="Passion will hatred faithful evil suicide noble battle. Truth aversion gains grandeur noble. Dead play gains prejudice god ascetic grandeur zarathustra dead good. Faithful ultimate justice overcome love will mountains inexpedient."))
+        for i,name in models.TrainingLevel.DEPARTMENTS:
+            technician = models.TrainingLevel.objects.create(level=models.TrainingLevel.TECHNICIAN, department=i, description="Moral pinnacle derive ultimate war dead. Strong fearful joy contradict battle christian faithful enlightenment prejudice zarathustra moral.")
+            supervisor = models.TrainingLevel.objects.create(level=models.TrainingLevel.SUPERVISOR, department=i, description="Spirit holiest merciful mountains inexpedient reason value. Suicide ultimate hope.")
+            supervisor.prerequisite_levels.add(technician)
+            self.levels.append(technician)
+            self.levels.append(supervisor)
