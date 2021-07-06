@@ -13,7 +13,7 @@ urlpatterns = [
          name='activity_feed'),
 ]
 
-for app in [apps.get_app_config(label) for label in ("RIGS", "assets")]:
+for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training")]:
     appname = str(app.label)
     if appname == 'RIGS':
         appname = 'rigboard'

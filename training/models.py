@@ -27,6 +27,11 @@ class TrainingItem(models.Model):
     def __str__(self):
         return "{}.{} {}".format(self.category.reference_number, self.reference_number, self.name)
 
+    def user_has_qualification(self, user, depth):
+        for q in user.qualifications_obtained.all():
+            if q.item == self and q.depth > depth:
+                return True
+
 
 class TrainingItemQualification(models.Model):
     STARTED = 0
@@ -86,11 +91,20 @@ class TrainingLevel(models.Model, RevisionMixin):
     def passed_out_requirements(self):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
+    def percentage_complete(self, user): # FIXME
+        needed_qualifications = self.requirements.all()
+        relavant_qualifications = [x for x in user.qualifications_obtained.all() if x in self.requirements.all()]
+        if len(needed_qualifications) > 0:
+            return round(len(relavant_qualifications) / len(needed_qualifications))
+        else:
+            return 0
+
     def __str__(self):
         if self.department is None: # 2TA
             return self.get_level_display()
         else:
             return "{} {}".format(self.get_department_display(), self.get_level_display())
+
 
 class TrainingLevelRequirement(models.Model):
     level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)

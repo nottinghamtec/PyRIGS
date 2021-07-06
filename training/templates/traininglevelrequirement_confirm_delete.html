@@ -1,0 +1,16 @@
+{% extends 'base_training.html' %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <p>Are you sure you wish to delete {{ page_title }}</p>
+
+    <div class="text-right">
+        <form action="{{ action_link }}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'level_detail' object.level.pk %}"/>
+            <input type="submit" value="Yes" class="btn btn-danger col-sm-1"/>
+            <a href="{% url 'level_detail' object.level.pk %}" class="btn btn-success col-sm-1">No</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

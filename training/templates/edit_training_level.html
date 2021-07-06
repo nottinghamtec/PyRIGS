@@ -1,4 +1,4 @@
-{% extends 'base_rigs.html' %}
+{% extends 'base_training.html' %}
 
 {% load static %}
 {% load widget_tweaks %}
@@ -32,7 +32,7 @@
     </div>
     <div class="form-group form-row">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
-      {% render_field form.depth|add_class:'form-control custom-select selectpicker col-sm'|attr:'required' %}
+      {% render_field form.depth|add_class:'form-control custom-select col-sm'|attr:'required' %}
     </div>
    <input type="submit" class="btn btn-primary">
 </form>

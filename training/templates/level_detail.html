@@ -1,0 +1,44 @@
+{% extends 'base_training.html' %}
+
+{% block content %}
+{% if edit or True %}
+<div class="col-sm-12 text-right pr-0">
+<a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}">
+	<span class="fas fa-plus"></span> Add New Requirement
+</a>
+</div>
+{% endif %}
+<div class="card mb-3">
+    <h4 class="card-header">Description</h4>
+    <div class="card-body">
+        <p>{{ object.description }}</p>
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-body">
+        <p>Users with this level...{% lorem %}</p>
+    </div>
+</div>
+<div class="card">
+    <h4 class="card-header">Level Requirements</h4>
+    <div class="card-body">
+        <table class="table card-body">
+          <thead>
+            <tr>
+              <th scope="col" class="table-warning">Training Started</th>
+              <th scope="col" class="table-success">Training Complete</th>
+              <th scope="col" class="table-info">Passed Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+</div>
+{% include 'partials/last_edited.html' with target="traininglevel_history" %}
+{% endblock %}

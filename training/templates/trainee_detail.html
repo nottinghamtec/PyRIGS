@@ -1,9 +1,12 @@
 {% extends 'base_rigs.html' %}
 
+{% load user_has_qualification from filters %}
+{% load percentage_complete from filters %}
+
 {% block content %}
-<div class="row my-3 text-right">
+<div class="col-sm-12 text-right">
 <a type="button" class="btn btn-success" href="{% url 'edit_record' pk=request.user.pk %}">
-	<i class="fas fa-plus"></i> Add New Training Record
+	<span class="fas fa-plus"></span> Add New Training Record
 </a>
 </div>
 <div class="row mb-3">
@@ -11,13 +14,16 @@
     <div class="card-columns">
         {% for level in levels %}
         <div class="card my-3">
-            <h3 class="card-header"><a href="{% url 'level_edit' level.pk %}">{{ level }}</a></h3>
+            <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
             <div class="card-body">
+                <p>{{ level.description|truncatewords:30 }}</p>
                 <div class="progress mb-2">
-                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25% complete</div>
+                  {% percentage_complete level request.user as completion %}
+                  
+                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
-                <p>{{ level.description }}</p>
-                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs">
+                
+                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs_{{level.pk}}">
                    Requirements <span class="fas fa-caret-right reqs_{{level.pk}} collapse show"></span><span class="fas fa-caret-down collapse reqs_{{level.pk}}"></span>
                 </button>
                 <div class="collapse reqs_{{level.pk}}">
@@ -31,9 +37,9 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 0 %}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 1 %}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 2 %}</li>{% endfor %}</ul></td>
                         </tr>
                       </tbody>
                    </table>

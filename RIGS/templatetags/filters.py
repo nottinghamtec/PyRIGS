@@ -10,6 +10,7 @@ from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
 
 from RIGS import models
+from training import models as tmodels
 
 register = template.Library()
 
@@ -189,6 +190,17 @@ def linkornone(target, namespace=None, autoescape=True):
     else:
         return "None"
 
+
+@register.simple_tag
+def user_has_qualification(user, item, depth):
+    if tmodels.TrainingItem.user_has_qualification(item, user, depth) is not None:
+        return mark_safe("<span class='fas fa-check text-success'></span>")
+    else:
+        return mark_safe("<span class='fas fa-hourglass-start text-warning'></span>")
+
+@register.simple_tag
+def percentage_complete(level, user):
+    return level.percentage_complete(user)
 
 @register.inclusion_tag('partials/button.html')
 def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style=None):

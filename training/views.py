@@ -86,3 +86,26 @@ class AddLevelRequirement(generic.CreateView):
 
     def get_success_url(self):
         return reverse_lazy('trainee_detail')
+
+
+class LevelDetail(generic.DetailView):
+    template_name = "level_detail.html"
+    model = models.TrainingLevel
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Training Level {}".format(self.object)
+        return context
+
+
+class RemoveRequirement(generic.DeleteView):
+    model = models.TrainingLevelRequirement
+    template_name = 'traininglevelrequirement_confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Delete Requirement '{}' from Training Level {}?".format(self.object, self.object.level)
+        return context
+
+    def get_success_url(self):
+        return self.request.POST.get('next')

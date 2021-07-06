@@ -15,5 +15,7 @@ urlpatterns = [
     path('trainee/<int:pk>/edit/', views.AddQualification.as_view(),
          name='edit_record'),
     path('session/', views.SessionLog.as_view(), name='session_log'),
-    path('level/<int:pk>/edit/', views.AddLevelRequirement.as_view(), name='level_edit'),
+    path('level/<int:pk>/', views.LevelDetail.as_view(), name='level_detail'),
+    path('level/<int:pk>/add_requirement/', views.AddLevelRequirement.as_view(), name='add_requirement'),
+    path('level/remove_requirement/<int:pk>/', views.RemoveRequirement.as_view(), name='remove_requirement'),
 ]
