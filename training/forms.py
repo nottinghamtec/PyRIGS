@@ -18,4 +18,13 @@ class QualificationForm(forms.ModelForm):
         super(QualificationForm, self).__init__(*args, **kwargs)
         self.fields['trainee'].initial = Profile.objects.get(pk=pk)
         
-        
+
+class RequirementForm(forms.ModelForm):
+    class Meta:
+        model = models.TrainingLevelRequirement
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        pk = kwargs.pop('pk', None)
+        super(RequirementForm, self).__init__(*args, **kwargs)
+        self.fields['level'].initial = models.TrainingLevel.objects.get(pk=pk)

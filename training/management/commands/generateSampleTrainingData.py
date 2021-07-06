@@ -28,6 +28,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             self.setup_categories()
             self.setup_items()
+            self.setup_levels()
 
     def setup_categories(self):
         names = [(1, "Basic"), (2, "Sound"), (3, "Lighting"), (4, "Rigging"), (5, "Power"), (6, "Haulage")]
@@ -43,3 +44,6 @@ class Command(BaseCommand):
         for i,name in enumerate(names):
             item = models.TrainingItem.objects.create(category=random.choice(self.categories), reference_number=random.randint(0, 100), name=name)
             self.items.append(item)
+
+    def setup_levels(self):
+        pass

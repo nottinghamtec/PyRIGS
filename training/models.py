@@ -16,6 +16,8 @@ class TrainingCategory(models.Model):
     reference_number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name_plural = 'Training Categories'
 
 class TrainingItem(models.Model):
     reference_number = models.CharField(max_length=3)
@@ -49,16 +51,34 @@ class TrainingItemQualification(models.Model):
 
 # Levels
 class TrainingLevel(models.Model, RevisionMixin):
-    description = models.CharField(max_length=120)
+    description = models.CharField(max_length=120, blank=True)
     CHOICES = (
         (0, 'Technical Assistant'),
         (1, 'Technician'),
         (2, 'Supervisor'),
     )
-    department = models.CharField(max_length=50, null=True) # N.B. Technical Assistant does not have a department
+    DEPARTMENTS = (
+        (0, 'Sound'),
+        (1, 'Lighting'),
+        (2, 'Power'),
+        (3, 'Rigging'),
+        (4, 'Haulage'),
+    )
+    department = models.IntegerField(choices=DEPARTMENTS, null=True) # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
-    
-    # FIXME Common Competencies... have levels able to depend on other ones - but supervisors need to depend on both common and technican?
+    prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
+
+    def __str__(self):
+        return "{} {}".format(self.get_department_display(), self.get_level_display())
+
+class TrainingLevelRequirement(models.Model):
+    level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)
+    item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
+    depth = models.IntegerField(TrainingItemQualification.CHOICES)
+
+    def __str__(self):
+        return "{} in {}".format(TrainingItemQualification.CHOICES[self.depth][1], self.item)
+
 
 class TrainingLevelQualification(models.Model):
     trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)   
