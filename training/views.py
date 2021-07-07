@@ -34,6 +34,16 @@ class TraineeDetail(views.ProfileDetail):
         return context
 
 
+class TraineeList(generic.ListView):
+    model = models.Trainee
+    template_name = 'trainee_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Profile List"
+        return context
+
+
 class SessionLog(generic.FormView):
     template_name = "session_log_form.html"
     form_class = forms.SessionLogForm
@@ -109,3 +119,4 @@ class RemoveRequirement(generic.DeleteView):
 
     def get_success_url(self):
         return self.request.POST.get('next')
+

@@ -199,6 +199,10 @@ def user_has_qualification(user, item, depth):
         return mark_safe("<span class='fas fa-hourglass-start text-warning'></span>")
 
 @register.simple_tag
+def user_level_if_present(user, level):
+    return tmodels.TrainingLevelQualification.objects.filter(trainee=user, level=level).first()
+
+@register.simple_tag
 def percentage_complete(level, user):
     return level.percentage_complete(user)
 

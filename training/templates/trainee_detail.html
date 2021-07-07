@@ -2,6 +2,7 @@
 
 {% load user_has_qualification from filters %}
 {% load percentage_complete from filters %}
+{% load user_level_if_present from filters %}
 
 {% block content %}
 <div class="col-sm-12 text-right">
@@ -11,6 +12,7 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
+    <p>Technical Assistant is conferred automatically when the item requirements are met. Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system. Supervisor status is <em>not automatic</em> and until signed off at a general meeting, does not count.<sup>Correct as of 7th July 2021, check the Training Policy.</sup></p>
     <div class="card-columns">
         {% for level in levels %}
         <div class="card my-3">
@@ -37,16 +39,21 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 0 %}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 1 %}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification request.user req.item 2 %}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 0 %}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 1 %}</li>{% endfor %}</ul></td>
+                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 2 %}</li>{% endfor %}</ul></td>
                         </tr>
                       </tbody>
                    </table>
                 </div>
             </div>
             <div class="card-footer">
-                <button class="btn btn-success text-right" disabled>Incomplete</button>
+                {% user_level_if_present object level as level_qualification %}
+                {% if level_qualification %}
+                <button class="btn btn-warning text-right" disabled>Awaiting Confirmation</button>
+                {% else %}
+                <button class="btn btn-danger text-right" disabled>Incomplete</button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}

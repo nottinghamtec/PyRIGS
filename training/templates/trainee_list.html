@@ -1,0 +1,38 @@
+{% extends 'base_training.html' %}
+
+{% load url_replace from filters %}
+{% load orderby from filters %}
+{% load paginator from filters %}
+{% load linkornone from filters %}
+{% load button from filters %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></th>
+                        <th>Supervisor?</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for object in object_list %}
+                    <tr id="row_item">
+                        <th scope="row" class="align-middle" id="cell_name">{{ object.name }}</th>
+                        <td>No</td>
+                        <td><a class="btn btn-info" href="{% url 'trainee_detail' pk=object.pk %}"><span class="fas fa-eye"></span> View Training Record</a></td>
+                    </tr>
+                {% empty %}
+                <tr class="table-warning">
+                    <td colspan="6" class="text-center">Nothing found</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
