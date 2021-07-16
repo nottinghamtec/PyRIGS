@@ -1,8 +1,8 @@
 {% extends 'base_rigs.html' %}
 
-{% load user_has_qualification from filters %}
-{% load percentage_complete from filters %}
-{% load user_level_if_present from filters %}
+{% load user_has_qualification from tags %}
+{% load percentage_complete from tags %}
+{% load user_level_if_present from tags %}
 
 {% block content %}
 <div class="col-sm-12 text-right">
@@ -22,7 +22,7 @@
                 <div class="progress mb-2">
                   {% percentage_complete level object as completion %}
                   
-                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
+                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
                 
                 <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs_{{level.pk}}">

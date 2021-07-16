@@ -18,7 +18,7 @@ class Trainee(Profile):
         return self.qualifications_obtained.filter(depth=depth)
 
     def is_user_qualified_in(self, item, required_depth):
-        qual = self.qualifications_obtained.get(item=item)
+        qual = self.qualifications_obtained.filter(item=item).first()  # this is a somewhat ghetto version of get_or_none
         return qual is not None and qual.depth >= required_depth
 
 # Items
@@ -114,9 +114,14 @@ class TrainingLevel(models.Model, RevisionMixin):
 
     def percentage_complete(self, user): # FIXME
         needed_qualifications = self.requirements.all()
-        relavant_qualifications = [x for x in user.qualifications_obtained.all() if x in self.requirements.all()]
+        relavant_qualifications = 0.0
+        # TODO Efficiency...
+        for req in needed_qualifications:
+            if user.is_user_qualified_in(req.item, req.depth):
+                relavant_qualifications += 1.0
+
         if len(needed_qualifications) > 0:
-            return round(len(relavant_qualifications) / len(needed_qualifications))
+            return int(relavant_qualifications / float(len(needed_qualifications)) * 100)
         else:
             return 0
 
