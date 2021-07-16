@@ -62,16 +62,16 @@ class AddQualification(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(AddQualification, self).get_context_data(**kwargs)
-        # context["page_title"] = "Edit {}'s Training Record".format(self.object)
         context["depths"] = models.TrainingItemQualification.CHOICES
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
-            context['override'] = 'base_rigs.html' # TODO
+            context['override'] = 'base_training.html'
+        context['page_title'] = "Add Qualification for {}".format(models.Trainee.objects.get(pk=self.kwargs['pk']))
         return context
 
     def get_success_url(self):
-        return reverse_lazy('trainee_detail')
+        return reverse_lazy('trainee_detail', kwargs={"pk": self.object.pk })
 
     def get_form_kwargs(self):
         kwargs = super(AddQualification, self).get_form_kwargs()

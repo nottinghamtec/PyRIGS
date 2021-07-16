@@ -26,6 +26,9 @@ class TrainingCategory(models.Model):
     reference_number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return "{}. {}".format(self.reference_number, self.name)
+
     class Meta:
         verbose_name_plural = 'Training Categories'
 
@@ -67,9 +70,9 @@ class TrainingItemQualification(models.Model):
 
     def save(self, *args, **kwargs):
         super().save()
-        for level in TrainingLevel.models.all(): # Mm yes efficiency
+        for level in TrainingLevel.objects.all(): # Mm yes efficiency
             if level.user_has_requirements(self.trainee):
-                level_qualification = models.TrainingLevelQualification.create(trainee=self.trainee, level=level)
+                level_qualification = TrainingLevelQualification.objects.create(trainee=self.trainee, level=level)
 
 
 # Levels
@@ -118,8 +121,7 @@ class TrainingLevel(models.Model, RevisionMixin):
             return 0
 
     def user_has_requirements(self, user):
-        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
-            
+        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())            
 
     def __str__(self):
         if self.department is None: # 2TA

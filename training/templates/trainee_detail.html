@@ -20,7 +20,7 @@
             <div class="card-body">
                 <p>{{ level.description|truncatewords:30 }}</p>
                 <div class="progress mb-2">
-                  {% percentage_complete level request.user as completion %}
+                  {% percentage_complete level object as completion %}
                   
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
@@ -61,18 +61,16 @@
 </div>
 <div class="row">
     <h2 class="col-12">Training Items</h2><br>
+    <h3 class="col-12">Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></h3>
     <div class="card-columns">
         {% for category in categories %}
         <div class="card mb-3">
-            <h3 class="card-header">{{ category.name }}</h3>
+            <h3 class="card-header">{{ category }}</h3>
             <div class="list-group list-group-flush">
-            {% for depth in depths %}
-            <li class="list-group-item {% if depth.0 == 0 %}list-group-item-warning{%elif depth.0 == 1%}list-group-item-success{%else%}list-group-item-info{%endif%}">{{depth.1}}</li>
             {% for q in object.qualifications_obtained.all %}
-                {% if q.depth == depth.0 and q.item.category == category %}
-                <li class="list-group-item">{{q.item}} ({{q.date}})</li>
+                {% if q.item.category == category %}
+                <li class="list-group-item {% if q.depth == 0 %}list-group-item-warning{%elif q.depth == 1%}list-group-item-success{%else%}list-group-item-info{%endif%}">{{q.item}} ({{q.date}})</li>
                 {% endif %}
-            {% endfor %}
             {% endfor %}
             </div>
         </div>

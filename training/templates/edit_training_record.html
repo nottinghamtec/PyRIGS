@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load widget_tweaks %}
+{% load button from filters %}
 
 {% block css %}
     {{ block.super }}
@@ -23,26 +24,26 @@
 {% if form.errors %}
 	{% include 'form_errors.html' %}
 {% endif %}
-<form id="item-form" action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
+<form role="form" action="{{ form.action|default:request.path }}" method="POST">{% csrf_token %}
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     <div class="form-group form-row">
       <label for="item_id" class="col-sm-2 col-form-label">Item</label>
-      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
       </select>
     </div>
     <div class="form-group form-row">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
-      {% render_field form.depth|add_class:'form-control custom-select selectpicker col-sm' %}
+      {% render_field form.depth|add_class:'form-control custom-select col-sm-4' %}
     </div>
     <div class="form-group form-row">
-      <label for="selectpicker" class="col-sm-2 col-form-label">Supervisor</label>
+      <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
       <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
       </select>
     </div>
     <div class="form-group form-row">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>
         <div class="col-sm-10">
-            {% render_field form.date|add_class:'form-control'|attr:'type="date"' %}
+            {% render_field form.date|add_class:'form-control'|attr:'type="date"' value=form.date.initial %}
         </div>
     </div>
     <div class="form-group form-row">
@@ -52,6 +53,8 @@
                       id="notes" rows="3"></textarea>
         </div>
     </div>
-   <input type="submit" class="btn btn-primary">
+   <div class="col-sm-12 text-right pr-0"}>
+        {% button 'submit' %}
+    </div>
 </form>
 {% endblock %}
