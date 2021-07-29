@@ -27,7 +27,7 @@ class TraineeDetail(views.ProfileDetail):
         context = super(TraineeDetail, self).get_context_data(**kwargs)
         context["page_title"] = "{}'s Training Record".format(self.object)
         context["levels"] = models.TrainingLevel.objects.all()
-        context["categories"] = models.TrainingCategory.objects.all() 
+        context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
         choices = models.TrainingItemQualification.CHOICES
         context["depths"] = choices
         for i in [x for x,_ in choices]:
@@ -124,11 +124,9 @@ class RemoveRequirement(generic.DeleteView):
 
 class ConfirmLevel(generic.RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        # TODO Prevent duplicate training level qualifications existing
-        level_qualification = models.TrainingLevelQualification.objects.filter(trainee=kwargs['pk'], level=kwargs['level_pk'])
-        print(level_qualification)
-        #level_qualification.confirmed_by = self.request.user
-        #level_qualification.confirmed_on = timezone.now()
-        #level_qualification.save()
+        level_qualification = models.TrainingLevelQualification.objects.get(trainee=kwargs['pk'], level=kwargs['level_pk'])
+        level_qualification.confirmed_by = self.request.user
+        level_qualification.confirmed_on = timezone.now()
+        level_qualification.save()
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
 

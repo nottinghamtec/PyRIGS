@@ -57,7 +57,7 @@
                         <button class="btn btn-warning text-right" disabled>Awaiting Confirmation</button>
                         {% endif %}
                     {% else %}
-                    <button class="btn btn-success active">Confirmed</button>
+                    <button class="btn btn-success active">Confirmed <small>by {{ level_qualification.confirmed_by }}</small></button>
                     {% endif %}
                 {% else %}
                 <button class="btn btn-danger text-right" disabled>Incomplete</button>
