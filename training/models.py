@@ -152,3 +152,6 @@ class TrainingLevelQualification(models.Model):
 
     def __str__(self):
         return "{} qualified as a {}".format(self.trainee, self.level)
+
+    class Meta:
+        unique_together = ["trainee", "level"]

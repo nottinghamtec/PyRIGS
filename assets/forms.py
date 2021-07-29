@@ -45,7 +45,7 @@ class CableTypeForm(forms.ModelForm):
         model = models.CableType
         fields = '__all__'
 
-    def clean(self):
+    def clean(self): # TODO Does unique_together work better than this?
         form_data = self.cleaned_data
         queryset = models.CableType.objects.filter(Q(plug=form_data['plug']) & Q(socket=form_data['socket']) & Q(circuits=form_data['circuits']) & Q(cores=form_data['cores']))
         # Being identical to itself shouldn't count...
