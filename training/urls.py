@@ -19,4 +19,5 @@ urlpatterns = [
     path('level/<int:pk>/', views.LevelDetail.as_view(), name='level_detail'),
     path('level/<int:pk>/add_requirement/', views.AddLevelRequirement.as_view(), name='add_requirement'),
     path('level/remove_requirement/<int:pk>/', views.RemoveRequirement.as_view(), name='remove_requirement'),
+    path('trainee/<int:pk>/level/<int:level_pk>/confirm', views.ConfirmLevel.as_view(), name='confirm_level'),
 ]

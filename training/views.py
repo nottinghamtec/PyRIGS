@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 from PyRIGS.views import OEmbedView, is_ajax
 from training import models, forms
+from django.utils import timezone
 
 from users import views
 
@@ -119,4 +120,15 @@ class RemoveRequirement(generic.DeleteView):
 
     def get_success_url(self):
         return self.request.POST.get('next')
+
+
+class ConfirmLevel(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        # TODO Prevent duplicate training level qualifications existing
+        level_qualification = models.TrainingLevelQualification.objects.filter(trainee=kwargs['pk'], level=kwargs['level_pk'])
+        print(level_qualification)
+        #level_qualification.confirmed_by = self.request.user
+        #level_qualification.confirmed_on = timezone.now()
+        #level_qualification.save()
+        return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
 

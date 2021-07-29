@@ -10,12 +10,12 @@ class Trainee(Profile):
 
     @property
     def is_supervisor(self):
-        for level_qualification in self.levels.all():
+        for level_qualification in self.levels.select_related('level').all():
             if confirmed_on is not None and level_qualification.level.level >= TrainingLevel.SUPERVISOR:
                 return True
 
     def get_records_of_depth(self, depth):
-        return self.qualifications_obtained.filter(depth=depth)
+        return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
 
     def is_user_qualified_in(self, item, required_depth):
         qual = self.qualifications_obtained.filter(item=item).first()  # this is a somewhat ghetto version of get_or_none
@@ -42,7 +42,7 @@ class TrainingItem(models.Model):
 
     @staticmethod
     def user_has_qualification(item, user, depth):
-        for q in user.qualifications_obtained.all():
+        for q in user.qualifications_obtained.all().select_related('item'):
             if q.item == item and q.depth > depth:
                 return True
 
@@ -113,7 +113,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
     def percentage_complete(self, user): # FIXME
-        needed_qualifications = self.requirements.all()
+        needed_qualifications = self.requirements.all().select_related()
         relavant_qualifications = 0.0
         # TODO Efficiency...
         for req in needed_qualifications:
@@ -126,7 +126,7 @@ class TrainingLevel(models.Model, RevisionMixin):
             return 0
 
     def user_has_requirements(self, user):
-        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())            
+        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.select_related().all())            
 
     def __str__(self):
         if self.department is None: # 2TA
@@ -149,3 +149,6 @@ class TrainingLevelQualification(models.Model):
     level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
     confirmed_on = models.DateTimeField(null=True)
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)
+
+    def __str__(self):
+        return "{} qualified as a {}".format(self.trainee, self.level)

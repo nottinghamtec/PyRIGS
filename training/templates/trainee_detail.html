@@ -50,7 +50,15 @@
             <div class="card-footer">
                 {% user_level_if_present object level as level_qualification %}
                 {% if level_qualification %}
-                <button class="btn btn-warning text-right" disabled>Awaiting Confirmation</button>
+                    {% if level_qualification.confirmed_by is None %}
+                        {% if request.user.is_supervisor or request.user.is_superuser %}
+                        <a class="btn btn-info" href="{% url 'confirm_level' object.pk level.pk %}">Confirm</a>
+                        {% else %}
+                        <button class="btn btn-warning text-right" disabled>Awaiting Confirmation</button>
+                        {% endif %}
+                    {% else %}
+                    <button class="btn btn-success active">Confirmed</button>
+                    {% endif %}
                 {% else %}
                 <button class="btn btn-danger text-right" disabled>Incomplete</button>
                 {% endif %}
