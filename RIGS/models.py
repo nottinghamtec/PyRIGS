@@ -286,8 +286,8 @@ class EventManager(models.Manager):
             ) & models.Q(invoice__isnull=True) &  # Has not already been invoiced
             models.Q(is_rig=True)  # Is a rig (not non-rig)
         ).order_by('start_date') \
-        .select_related('person', 'organisation', 'venue', 'mic') \
-        .prefetch_related('items')
+            .select_related('person', 'organisation', 'venue', 'mic') \
+            .prefetch_related('items')
 
         return events
 
