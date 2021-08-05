@@ -278,6 +278,19 @@ class EventManager(models.Manager):
         ).count()
         return event_count
 
+    def waiting_invoices(self):
+        events = self.filter(
+            (
+                models.Q(start_date__lte=datetime.date.today(), end_date__isnull=True) |  # Starts before with no end
+                models.Q(end_date__lte=datetime.date.today())  # Or has end date, finishes before
+            ) & models.Q(invoice__isnull=True) &  # Has not already been invoiced
+            models.Q(is_rig=True)  # Is a rig (not non-rig)
+        ).order_by('start_date') \
+        .select_related('person', 'organisation', 'venue', 'mic') \
+        .prefetch_related('items')
+
+        return events
+
 
 @reversion.register(follow=['items'])
 class Event(models.Model, RevisionMixin):

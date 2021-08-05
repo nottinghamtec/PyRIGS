@@ -217,3 +217,8 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
     elif type == 'submit':
         return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save', 'id': id, 'style': style}
     return {'target': url, 'pk': pk, 'class': clazz, 'icon': icon, 'text': text, 'id': id, 'style': style}
+
+
+@register.simple_tag
+def invoices_waiting():
+    return len(models.Event.objects.waiting_invoices())
