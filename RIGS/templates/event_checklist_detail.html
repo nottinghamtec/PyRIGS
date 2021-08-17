@@ -32,7 +32,11 @@
                 </dd>
                 <dt class="col-6">{{ object|help_text:'power_mic' }}</dt>
                 <dd class="col-6">
+                    {% if object.power_mic %}
                     <a href="{% url 'profile_detail' object.power_mic.pk %}">{{ object.power_mic.name }}</a>
+                    {% else %}
+                    None
+                    {% endif %}
                 </dd>
             </dl>
             <p>List vehicles and their drivers</p>
