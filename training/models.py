@@ -10,6 +10,7 @@ class Trainee(Profile):
 
     @property
     def is_supervisor(self):
+        # FIXME Efficiency
         for level_qualification in self.levels.select_related('level').all():
             if confirmed_on is not None and level_qualification.level.level >= TrainingLevel.SUPERVISOR:
                 return True

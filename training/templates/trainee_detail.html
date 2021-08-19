@@ -12,7 +12,7 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
-    <p>Technical Assistant is conferred automatically when the item requirements are met. Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system. Supervisor status is <em>not automatic</em> and until signed off at a general meeting, does not count.<sup>Correct as of 7th July 2021, check the Training Policy.</sup></p>
+    <div class="alert alert-info" role="alert">Technical Assistant is conferred automatically when the item requirements are met. Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system. Supervisor status is <em>not automatic</em> and until signed off at a general meeting, does not count.<sup>Correct as of 7th July 2021, check the Training Policy.</sup></div>
     <div class="card-columns">
         {% for level in levels %}
         <div class="card my-3">
@@ -21,10 +21,10 @@
                 <p>{{ level.description|truncatewords:30 }}</p>
                 <div class="progress mb-2">
                   {% percentage_complete level object as completion %}
-                  
+
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
-                
+
                 <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs_{{level.pk}}">
                    Requirements <span class="fas fa-caret-right reqs_{{level.pk}} collapse show"></span><span class="fas fa-caret-down collapse reqs_{{level.pk}}"></span>
                 </button>

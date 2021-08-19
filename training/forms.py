@@ -19,7 +19,7 @@ class QualificationForm(forms.ModelForm):
         super(QualificationForm, self).__init__(*args, **kwargs)
         self.fields['trainee'].initial = Profile.objects.get(pk=pk)
         self.fields['date'].initial = date.today()
-        
+
     def clean_date(self):
         date = self.cleaned_data['date']
         if date > date.today():
@@ -30,7 +30,9 @@ class QualificationForm(forms.ModelForm):
         supervisor = self.cleaned_data['supervisor']
         if supervisor.pk == self.cleaned_data['trainee'].pk:
             raise forms.ValidationError('One may not supervise oneself...')
-        return supervisor # TODO also confirm that the supervisor is a Supervisor
+        if not supervisor.is_supervisor:
+            raise forms.ValidationError('Selected supervisor must actually *be* a supervisor...')
+        return supervisor
 
 class RequirementForm(forms.ModelForm):
     depth = forms.ChoiceField(choices=models.TrainingItemQualification.CHOICES)
