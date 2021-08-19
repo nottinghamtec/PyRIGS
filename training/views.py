@@ -1,10 +1,12 @@
-from django.shortcuts import render
+import reversion
 
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import generic
 from PyRIGS.views import OEmbedView, is_ajax
 from training import models, forms
 from django.utils import timezone
+from django.db import transaction
 
 from users import views
 
@@ -15,7 +17,7 @@ class ItemList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(ItemList, self).get_context_data(**kwargs)
         context["page_title"] = "Training Items"
-        context["categories"] = models.TrainingCategory.objects.all()    
+        context["categories"] = models.TrainingCategory.objects.all()
         return context
 
 
@@ -80,7 +82,7 @@ class AddQualification(generic.CreateView):
         return kwargs
 
 
-class AddLevelRequirement(generic.CreateView): 
+class AddLevelRequirement(generic.CreateView):
     template_name = "edit_training_level.html"
     model = models.TrainingLevelRequirement
     form_class = forms.RequirementForm
@@ -97,6 +99,13 @@ class AddLevelRequirement(generic.CreateView):
 
     def get_success_url(self):
         return reverse_lazy('trainee_detail')
+
+    @transaction.atomic()
+    @reversion.create_revision()
+    def form_valid(self, form, *args, **kwargs):
+        reversion.add_to_revision(form.cleaned_data['level'])
+        reversion.set_comment("Level requirement added")
+        return super().form_valid(form, *args, **kwargs)
 
 
 class LevelDetail(generic.DetailView):
@@ -129,4 +138,3 @@ class ConfirmLevel(generic.RedirectView):
         level_qualification.confirmed_on = timezone.now()
         level_qualification.save()
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
-
