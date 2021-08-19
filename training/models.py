@@ -34,7 +34,7 @@ class TrainingCategory(models.Model):
 
 class TrainingItem(models.Model):
     reference_number = models.CharField(max_length=3)
-    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)    
+    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -57,10 +57,10 @@ class TrainingItemQualification(models.Model):
         (PASSED_OUT, 'Passed Out'),
     )
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
-    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)    
+    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)
     depth = models.IntegerField(choices=CHOICES)
     date = models.DateField()
-    # TODO Remember that some training is external. Support for making an organisation the trainer? 
+    # TODO Remember that some training is external. Support for making an organisation the trainer?
     supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.RESTRICT)
     notes = models.TextField(blank=True)
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
@@ -73,6 +73,9 @@ class TrainingItemQualification(models.Model):
         for level in TrainingLevel.objects.all(): # Mm yes efficiency
             if level.user_has_requirements(self.trainee):
                 level_qualification = TrainingLevelQualification.objects.create(trainee=self.trainee, level=level)
+
+    class Meta:
+        unique_together = ["trainee", "item", "depth"]
 
 
 # Levels
@@ -126,7 +129,7 @@ class TrainingLevel(models.Model, RevisionMixin):
             return 0
 
     def user_has_requirements(self, user):
-        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.select_related().all())            
+        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.select_related().all())
 
     def __str__(self):
         if self.department is None: # 2TA
@@ -145,7 +148,7 @@ class TrainingLevelRequirement(models.Model):
 
 
 class TrainingLevelQualification(models.Model):
-    trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)   
+    trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)
     level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
     confirmed_on = models.DateTimeField(null=True)
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)
