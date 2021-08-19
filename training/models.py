@@ -147,6 +147,9 @@ class TrainingLevelRequirement(models.Model):
     def __str__(self):
         return "{} in {}".format(TrainingItemQualification.CHOICES[self.depth][1], self.item)
 
+    class Meta:
+        unique_together = ["level", "item"]
+
 
 class TrainingLevelQualification(models.Model):
     trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)

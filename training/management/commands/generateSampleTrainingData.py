@@ -35,15 +35,15 @@ class Command(BaseCommand):
 
     def setup_categories(self):
         names = [(1, "Basic"), (2, "Sound"), (3, "Lighting"), (4, "Rigging"), (5, "Power"), (6, "Haulage")]
-        
+
         for i, name in names:
             category = models.TrainingCategory.objects.create(reference_number=i, name=name)
             category.save()
             self.categories.append(category)
 
     def setup_items(self):
-        names = ["Motorised Power Towers", "Catering", "Forgetting Cables", "Gazebo Construction", "Balanced Audio", "Unbalanced Audio", "BBQ/Bin Interactions", "Pushing Boxes", "How Not To Die", "Setting up projectors", "Basketing truss", "First Aid", "Digging Trenches", "Avoiding Bin Lorries", "Getting cherry pickers stuck in mud", "Crashing the Van"]
-        
+        names = ["Motorised Power Towers", "Catering", "Forgetting Cables", "Gazebo Construction", "Balanced Audio", "Unbalanced Audio", "BBQ/Bin Interactions", "Pushing Boxes", "How Not To Die", "Setting up projectors", "Basketing truss", "First Aid", "Digging Trenches", "Avoiding Bin Lorries", "Getting cherry pickers stuck in mud", "Crashing the Van", "Getting pigs to fly", "Basketing picnics", "Python programming", "Building Cables", "Unbuilding Cables", "Cat Herding", "Pancake making", "Tidying up", "Reading Manuals", "Bikeshedding"]
+
         for i,name in enumerate(names):
             item = models.TrainingItem.objects.create(category=random.choice(self.categories), reference_number=random.randint(0, 100), name=name)
             self.items.append(item)
@@ -54,10 +54,15 @@ class Command(BaseCommand):
             technician = models.TrainingLevel.objects.create(level=models.TrainingLevel.TECHNICIAN, department=i, description="Moral pinnacle derive ultimate war dead. Strong fearful joy contradict battle christian faithful enlightenment prejudice zarathustra moral.")
             supervisor = models.TrainingLevel.objects.create(level=models.TrainingLevel.SUPERVISOR, department=i, description="Spirit holiest merciful mountains inexpedient reason value. Suicide ultimate hope.")
             supervisor.prerequisite_levels.add(technician)
+            items = self.items.copy()
             for i in range(0, 30):
+                if len(items) == 0:
+                    break
+                item = random.choice(items)
+                items.remove(item)
                 if i % 3 == 0:
-                    models.TrainingLevelRequirement.objects.create(level=technician, item=random.choice(self.items), depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                    models.TrainingLevelRequirement.objects.create(level=technician, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
                 else:
-                    models.TrainingLevelRequirement.objects.create(level=supervisor, item=random.choice(self.items), depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                    models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
             self.levels.append(technician)
             self.levels.append(supervisor)

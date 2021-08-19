@@ -98,7 +98,7 @@ class AddLevelRequirement(generic.CreateView):
         return kwargs
 
     def get_success_url(self):
-        return reverse_lazy('trainee_detail')
+        return reverse_lazy('level_detail', kwargs={"pk": self.kwargs['pk']})
 
     @transaction.atomic()
     @reversion.create_revision()
