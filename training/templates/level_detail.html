@@ -60,6 +60,12 @@
        {% for level in object.prerequisite_levels.all %}
        {% user_level_if_present request.user level as level_qualification %}
        <li><a href="{{level.get_absolute_url}}">{{ level }}</a> <span class="fas {% if level_qualification %}text-success fa-check{% if level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
+       {% for nested_level in level.prerequisite_levels.all %}
+       {% user_level_if_present request.user level as nested_level_qualification %}
+       <ul>
+          <li><a href="{{nested_level.get_absolute_url}}">{{ nested_level }}</a> <span class="fas {% if nested_level_qualification %}text-success fa-check{% if nested_level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
+       </ul>
+       {% endfor %}
        {% empty %}
        None
        {% endfor %}
