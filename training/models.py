@@ -71,9 +71,9 @@ class TrainingItemQualification(models.Model):
 
     def save(self, *args, **kwargs):
         super().save()
-        for level in TrainingLevel.objects.all(): # Mm yes efficiency
+        for level in TrainingLevel.objects.all(): # Mm yes efficiency FIXME
             if level.user_has_requirements(self.trainee):
-                level_qualification = TrainingLevelQualification.objects.create(trainee=self.trainee, level=level)
+                level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
 
     class Meta:
         unique_together = ["trainee", "item", "depth"]

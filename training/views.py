@@ -27,7 +27,7 @@ class TraineeDetail(views.ProfileDetail):
 
     def get_context_data(self, **kwargs):
         context = super(TraineeDetail, self).get_context_data(**kwargs)
-        context["page_title"] = "{}'s Training Record".format(self.object)
+        context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
         context["levels"] = models.TrainingLevel.objects.all()
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
         choices = models.TrainingItemQualification.CHOICES
