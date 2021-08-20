@@ -143,8 +143,11 @@ class TrainingLevel(models.Model, RevisionMixin):
         return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.select_related().all())
 
     def __str__(self):
-        if self.department is None: # 2TA
-            return self.get_level_display()
+        if self.department is None:
+            if self.level == self.TA:
+                return self.get_level_display()
+            else:
+                return "{} Common Competencies".format(self.get_level_display())
         else:
             return "{} {}".format(self.get_department_display(), self.get_level_display())
 
