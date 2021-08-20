@@ -1,4 +1,4 @@
-{% extends 'base_rigs.html' %}
+{% extends request.is_ajax|yesno:'base_ajax.html,base_training.html' %}
 
 {% load static %}
 {% load widget_tweaks %}
@@ -24,7 +24,9 @@
 {% if form.errors %}
 	{% include 'form_errors.html' %}
 {% endif %}
-<form role="form" action="{{ form.action|default:request.path }}" method="POST">{% csrf_token %}
+<form role="form" action="{{ form.action|default:request.path }}" method="POST" id="add_record_form">
+    {% include 'form_errors.html' %}
+    {% csrf_token %}
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     <div class="form-group form-row">
       <label for="item_id" class="col-sm-2 col-form-label">Item</label>
@@ -53,8 +55,16 @@
                       id="notes" rows="3"></textarea>
         </div>
     </div>
-   <div class="col-sm-12 text-right pr-0"}>
+  {% if not request.is_ajax %}
+   <div class="col-sm-12 text-right pr-0">
         {% button 'submit' %}
     </div>
+  {% endif %}
 </form>
+{% endblock %}
+
+{% block footer %}
+<div class="col-sm-12 text-right pr-0">
+<button type="submit" class="btn btn-primary" title="Save" form="add_record_form"><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
+</div>
 {% endblock %}

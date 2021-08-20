@@ -1,15 +1,56 @@
 {% extends 'base_rigs.html' %}
 
+{% load static %}
 {% load user_has_qualification from tags %}
 {% load percentage_complete from tags %}
 {% load user_level_if_present from tags %}
 {% load colour_from_depth from tags %}
 
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script>
+    $('document').ready(function(){
+        $('#add_record').click(function (e) {
+             e.preventDefault();
+             var url = $(this).attr("href");
+             $.ajax({
+                url: url,
+                success: function(){
+                    $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length === 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                            $(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+                        });
+                    }
+                }
+             });
+        });
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
-<div class="col-sm-12 text-right">
-<a type="button" class="btn btn-success" href="{% url 'edit_record' pk=request.user.pk %}">
-	<span class="fas fa-plus"></span> Add New Training Record
-</a>
+<div class="row">
+    <div class="col-sm-12 text-right">
+    <a type="button" class="btn btn-success modal-href" href="{% url 'edit_record' pk=request.user.pk %}" id="add_record">
+	    <span class="fas fa-plus"></span> Add New Training Record
+    </a>
+    </div>
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
