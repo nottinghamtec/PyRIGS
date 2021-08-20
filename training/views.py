@@ -3,7 +3,7 @@ import reversion
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import generic
-from PyRIGS.views import OEmbedView, is_ajax
+from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
 from training import models, forms
 from django.utils import timezone
 from django.db import transaction
@@ -21,7 +21,7 @@ class ItemList(generic.ListView):
         return context
 
 
-class TraineeDetail(views.ProfileDetail):
+class TraineeDetail(views.ProfileDetail, ModalURLMixin):
     template_name = "trainee_detail.html"
     model = models.Trainee
 
@@ -35,6 +35,9 @@ class TraineeDetail(views.ProfileDetail):
         for i in [x for x,_ in choices]:
             context[str(i)] = self.object.get_records_of_depth(i)
         return context
+
+    def get_success_url(self):
+        return self.get_close_url('trainee_detail', 'trainee_detail')
 
 
 class TraineeItemDetail(generic.ListView):

@@ -12,9 +12,7 @@
         });
         $('#searchButton').click(function (e) {
              e.preventDefault();
-             var url = "{% url 'asset_audit' None %}";
-             var id = $("#{{form.q.id_for_label}}").val();
-             url = url.replace('None', id);
+             var url = "{% url 'asset_audit' None %}".replace('None', $("#{{form.q.id_for_label}}").val();
              $.ajax({
                 url: url,
                 success: function(){

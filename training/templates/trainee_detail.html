@@ -47,7 +47,7 @@
 {% block content %}
 <div class="row">
     <div class="col-sm-12 text-right">
-    <a type="button" class="btn btn-success modal-href" href="{% url 'edit_record' pk=request.user.pk %}" id="add_record">
+    <a type="button" class="btn btn-success" href="{% url 'edit_record' pk=request.user.pk %}" id="add_record">
 	    <span class="fas fa-plus"></span> Add New Training Record
     </a>
     </div>
@@ -70,30 +70,7 @@
                 <p>{{ level.description|truncatewords:30 }}</p>
                 <div class="progress mb-2">
                   {% percentage_complete level object as completion %}
-
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
-                </div>
-
-                <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target=".reqs_{{level.pk}}" aria-expanded="false" aria-controls="reqs_{{level.pk}}">
-                   Requirements <span class="fas fa-caret-right reqs_{{level.pk}} collapse show"></span><span class="fas fa-caret-down collapse reqs_{{level.pk}}"></span>
-                </button>
-                <div class="collapse reqs_{{level.pk}}">
-                  <table class="table table-sm">
-                      <thead>
-                        <tr>
-                          <th scope="col" class="table-warning">Training Started</th>
-                          <th scope="col" class="table-success">Training Complete</th>
-                          <th scope="col" class="table-info">Passed Out</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 0 %}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 1 %}</li>{% endfor %}</ul></td>
-                          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification object req.item 2 %}</li>{% endfor %}</ul></td>
-                        </tr>
-                      </tbody>
-                   </table>
                 </div>
             </div>
             <div class="card-footer text-right">
