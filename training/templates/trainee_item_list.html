@@ -1,0 +1,42 @@
+{% extends 'base_training.html' %}
+
+{% load url_replace from filters %}
+{% load paginator from filters %}
+{% load linkornone from filters %}
+{% load button from filters %}
+{% load colour_from_depth from tags %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Training Item</th>
+                        <th>Depth</th>
+                        <th>Date</th>
+                        <th>Supervisor</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for object in object_list %}
+                    <tr id="row_item">
+                        <th scope="row" class="align-middle" id="cell_name">{{ object.item }}</th>
+                        <td class="table-{% colour_from_depth object.depth %}">{{ object.get_depth_display }}</td>
+                        <td>{{ object.date }}</td>
+                        <td>{{ object.supervisor }}</td>
+                        <td>{{ object.notes }}</td>
+                    </tr>
+                {% empty %}
+                <tr class="table-warning">
+                    <td colspan="6" class="text-center">Nothing found</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,6 +14,7 @@ class Trainee(Profile):
         for level_qualification in self.levels.select_related('level').all():
             if level_qualification.confirmed_on is not None and level_qualification.level.level >= TrainingLevel.SUPERVISOR:
                 return True
+        return False
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
@@ -74,6 +75,15 @@ class TrainingItemQualification(models.Model):
         for level in TrainingLevel.objects.all(): # Mm yes efficiency FIXME
             if level.user_has_requirements(self.trainee):
                 level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
+
+    @classmethod
+    def get_colour_from_depth(obj, depth):
+        if depth == 0:
+            return "warning"
+        elif depth == 1:
+            return "success"
+        else:
+            return "info"
 
     class Meta:
         unique_together = ["trainee", "item", "depth"]

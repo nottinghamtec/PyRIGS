@@ -37,6 +37,19 @@ class TraineeDetail(views.ProfileDetail):
         return context
 
 
+class TraineeItemDetail(generic.ListView):
+    model = models.TrainingItemQualification
+    template_name = 'trainee_item_list.html'
+
+    def get_queryset(self):
+        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Detailed Training Record for {}".format(models.Trainee.objects.get(pk=self.kwargs['pk']))
+        return context
+
+
 class TraineeList(generic.ListView):
     model = models.Trainee
     template_name = 'trainee_list.html'

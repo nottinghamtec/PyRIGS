@@ -15,15 +15,18 @@
                     <tr>
                         <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></th>
                         <th>Supervisor?</th>
-                        <th>-</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for object in object_list %}
                     <tr id="row_item">
-                        <th scope="row" class="align-middle" id="cell_name">{{ object.name }}</th>
-                        <td>No</td>
-                        <td><a class="btn btn-info" href="{% url 'trainee_detail' pk=object.pk %}"><span class="fas fa-eye"></span> View Training Record</a></td>
+                        <th scope="row" class="align-middle" id="cell_name">{{ object.name }} {% if request.user.pk == object.pk %}<span class="fas fa-user text-success"></span>{%endif%}</th>
+                        <td {% if object.is_supervisor %}class="table-success"{%endif%}>{{ object.is_supervisor|yesno|title }}</td>
+                        <td>
+                            <a class="btn btn-info" href="{% url 'trainee_detail' pk=object.pk %}"><span class="fas fa-eye"></span> View Training Record</a>
+                            <a href="{% url 'trainee_item_detail' pk=object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
+                        </td>
                     </tr>
                 {% empty %}
                 <tr class="table-warning">

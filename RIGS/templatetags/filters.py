@@ -10,7 +10,6 @@ from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
 
 from RIGS import models
-from training import models as tmodels
 
 register = template.Library()
 

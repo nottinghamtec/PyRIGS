@@ -23,3 +23,6 @@ def user_level_if_present(user, level):
 def percentage_complete(level, user):
     return level.percentage_complete(user)
 
+@register.simple_tag
+def colour_from_depth(depth):
+    return models.TrainingItemQualification.get_colour_from_depth(depth)
