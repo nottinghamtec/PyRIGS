@@ -20,6 +20,7 @@ class Command(BaseCommand):
     hs_group = None
 
     def handle(self, *args, **options):
+        print("Generating sample user data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -32,6 +33,7 @@ class Command(BaseCommand):
             self.setup_groups()
             self.setup_useful_profiles()
             self.setup_generic_profiles()
+        print("Done generating sample user data")
 
     def setup_groups(self):
         self.keyholder_group = Group.objects.create(name='Keyholders')

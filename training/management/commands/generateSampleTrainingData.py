@@ -31,6 +31,7 @@ class Command(BaseCommand):
             self.setup_categories()
             self.setup_items()
             self.setup_levels()
+            self.setup_supervisor()
         print("Done generating training data")
 
     def setup_categories(self):
@@ -66,3 +67,12 @@ class Command(BaseCommand):
                     models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
             self.levels.append(technician)
             self.levels.append(supervisor)
+
+    def setup_supervisor(self):
+        supervisor = models.Profile.objects.create(username="supervisor", first_name="Super", last_name="Visor",
+                                                   initials="SV",
+                                                   email="supervisor@example.com", is_active=True,
+                                                   is_staff=True)
+        supervisor.set_password('supervisor')
+        supervisor.save()
+        models.TrainingLevelQualification.objects.create(trainee=supervisor, level=self.levels[-1], confirmed_on=timezone.now())
