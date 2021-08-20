@@ -15,30 +15,40 @@
     </div>
 </div>
 <div class="card mb-3">
+    <h4 class="card-header">Users with this level</h4>
     <div class="card-body">
-        <p>Users with this level...{% lorem %}</p>
+        <div class="card-columns">
+        {% for user in users_with %}
+        <div class="card w-50">
+            <img src="{{user.profile_picture}}" class="card-img-top" />
+            <div class="card-body">
+                <h5 class="card-title">{{user}}</h5>
+                <p>Qualified on... </p>
+            </div>
+            <div class="card-footer text-right pr-1"><a href="{% url 'profile_detail' user.pk %}" class="btn btn-primary btn-sm"><span class="fas fa-user"></span> View Profile</a></div>
+        </div>
+        {% endfor %}
+        </div>
     </div>
 </div>
 <div class="card">
     <h4 class="card-header">Level Requirements</h4>
-    <div class="card-body">
-        <table class="table card-body">
-          <thead>
-            <tr>
-              <th scope="col" class="table-warning">Training Started</th>
-              <th scope="col" class="table-success">Training Complete</th>
-              <th scope="col" class="table-info">Passed Out</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
-              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
-              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} <a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a></li>{% endfor %}</ul></td>
-            </tr>
-          </tbody>
-        </table>
-    </div>
+    <table class="table card-body">
+      <thead>
+        <tr>
+          <th scope="col" class="table-warning">Training Started</th>
+          <th scope="col" class="table-success">Training Complete</th>
+          <th scope="col" class="table-info">Passed Out</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% if request.user.is_supervisor or perms.training.change_traininglevel %}<a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a>{% endif %}</li>{% endfor %}</ul></td>
+          <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% if request.user.is_supervisor or perms.training.change_traininglevel %}<a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a>{% endif %}</li>{% endfor %}</ul></td>
+          <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% if request.user.is_supervisor or perms.training.change_traininglevel %}<a type="button" class="btn btn-danger btn-sm" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-times-circle"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+        </tr>
+      </tbody>
+    </table>
 </div>
 {% include 'partials/last_edited.html' with target="traininglevel_history" %}
 {% endblock %}
