@@ -47,7 +47,7 @@
 {% block content %}
 <div class="row">
     <div class="col-sm-12 text-right">
-    <a type="button" class="btn btn-success" href="{% url 'edit_record' pk=request.user.pk %}" id="add_record">
+    <a type="button" class="btn btn-success" href="{% url 'edit_record' object.pk %}" id="add_record">
 	    <span class="fas fa-plus"></span> Add New Training Record
     </a>
     </div>
