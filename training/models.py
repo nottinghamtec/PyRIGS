@@ -2,6 +2,7 @@ from django.db import models
 
 from RIGS.models import RevisionMixin, Profile
 from reversion import revisions as reversion
+from django.urls import reverse
 
 # 'shim' overtop the profile model to neatly contain all training related fields etc
 class Trainee(Profile):
@@ -90,6 +91,7 @@ class TrainingItemQualification(models.Model):
 
 
 # Levels
+@reversion.register(follow=["requirements"])
 class TrainingLevel(models.Model, RevisionMixin):
     description = models.CharField(max_length=120, blank=True)
     TA = 0
@@ -151,11 +153,21 @@ class TrainingLevel(models.Model, RevisionMixin):
         else:
             return "{} {}".format(self.get_department_display(), self.get_level_display())
 
+    @property
+    def activity_feed_string(self):
+        return str(self)
 
+    def get_absolute_url(self):
+        return reverse('level_detail', kwargs={'pk': self.pk})
+
+
+@reversion.register
 class TrainingLevelRequirement(models.Model):
     level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
-    depth = models.IntegerField(TrainingItemQualification.CHOICES)
+    depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
+
+    reversion_hide = True
 
     def __str__(self):
         return "{} in {}".format(TrainingItemQualification.CHOICES[self.depth][1], self.item)

@@ -147,6 +147,12 @@ class RemoveRequirement(generic.DeleteView):
     def get_success_url(self):
         return self.request.POST.get('next')
 
+    @transaction.atomic()
+    @reversion.create_revision()
+    def delete(self, *args, **kwargs):
+        reversion.add_to_revision(self.get_object().level)
+        return super().delete(*args, **kwargs)
+
 
 class ConfirmLevel(generic.RedirectView):
     def get_redirect_url(self, *args, **kwargs):
