@@ -1,5 +1,4 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
-{% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
 {% load yesnoi from filters %}
 {% load linkornone from filters %}
@@ -7,7 +6,6 @@
 {% block content %}
     <div class="row py-3">
         <div class="col-12">
-            <h3>Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
             <div class="card card-default mb-3">
                 <div class="card-header">General</div>
                 <div class="card-body">

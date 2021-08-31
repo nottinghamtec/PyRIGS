@@ -70,6 +70,11 @@ class EventRiskAssessmentDetail(generic.DetailView):
     model = models.RiskAssessment
     template_name = 'risk_assessment_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(EventRiskAssessmentDetail, self).get_context_data(**kwargs)
+        context['page_title'] = "Risk Assessment for Event <a href='{}'>{} {}</a>".format(self.object.event.get_absolute_url(), self.object.event.display_id, self.object.event.name)
+        return context
+
 
 class EventRiskAssessmentList(generic.ListView):
     paginate_by = 20
@@ -107,7 +112,7 @@ class EventChecklistDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventChecklistDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Event Checklist for Event {} {}".format(self.object.event.display_id, self.object.event.name)
+        context['page_title'] = "Event Checklist for Event <a href='{}'>{} {}</a>".format(self.object.event.get_absolute_url(), self.object.event.display_id, self.object.event.name)
         return context
 
 
