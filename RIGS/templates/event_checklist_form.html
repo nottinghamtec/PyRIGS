@@ -244,12 +244,19 @@
                     </div>
                 </div>
             </div>
-            {% elif event.riskassessment.event_size == 1 %}
+            {% else %}
             <div class="row my-3" id="size-1">
                 <div class="col-12">
+                    {% if event.riskassessment.event_size == 1 %}
                     <div class="card border-warning">
                         <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
                         <div class="card-body">
+                    {% else %}
+                    <div class="card border-danger">
+                                    <div class="card-header">Electrical Checks <small>for ‘Large’ TEC Events</small></div>
+                        <div class="card-body">
+                            <div class="alert alert-danger"><strong>Here be dragons. Ensure you have appeased the Power Gods before continuing... (If you didn't check with a Supervisor, <em>you cannot continue your event!</em>)</strong></div>
+                    {% endif %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.source_rcd %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.labelling %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
@@ -335,17 +342,6 @@
                             {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
                             {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
                             {% include 'partials/ec_power_info.html' %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="row my-3" id="size-2">
-                <div class="col-12">
-                    <div class="card border-danger">
-                        <div class="card-header">Electrical Checks <small>for ‘Large’ TEC Events</small></div>
-                        <div class="card-body">
-                            <p>Outside the scope of this assessment. <strong>I really hope you checked with a supervisor...</strong></p>
                         </div>
                     </div>
                 </div>
