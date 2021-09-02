@@ -19,6 +19,7 @@ from reversion import revisions as reversion
 from reversion.models import Version
 
 
+@reversion.register
 class Profile(AbstractUser):
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')

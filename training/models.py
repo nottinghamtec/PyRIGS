@@ -5,6 +5,7 @@ from reversion import revisions as reversion
 from django.urls import reverse
 
 # 'shim' overtop the profile model to neatly contain all training related fields etc
+@reversion.register # profile is already registered, but this triggers my custom versioning logic
 class Trainee(Profile):
     class Meta:
         proxy = True
@@ -24,6 +25,9 @@ class Trainee(Profile):
         qual = self.qualifications_obtained.filter(item=item).first()  # this is a somewhat ghetto version of get_or_none
         return qual is not None and qual.depth >= required_depth
 
+    def get_absolute_url(self):
+        return reverse('trainee_detail', kwargs={'pk': self.pk})
+
 # Items
 class TrainingCategory(models.Model):
     reference_number = models.CharField(max_length=3)
@@ -34,6 +38,7 @@ class TrainingCategory(models.Model):
 
     class Meta:
         verbose_name_plural = 'Training Categories'
+
 
 class TrainingItem(models.Model):
     reference_number = models.CharField(max_length=3)
@@ -75,7 +80,9 @@ class TrainingItemQualification(models.Model):
         super().save()
         for level in TrainingLevel.objects.all(): # Mm yes efficiency FIXME
             if level.user_has_requirements(self.trainee):
-                level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
+                with reversion.create_revision():
+                    level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
+                    reversion.add_to_revision(self.trainee)
 
     @classmethod
     def get_colour_from_depth(obj, depth):
@@ -176,11 +183,14 @@ class TrainingLevelRequirement(models.Model):
         unique_together = ["level", "item"]
 
 
+@reversion.register
 class TrainingLevelQualification(models.Model):
     trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)
     level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
     confirmed_on = models.DateTimeField(null=True)
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)
+
+    reversion_hide = True
 
     def __str__(self):
         return "{} qualified as a {}".format(self.trainee, self.level)

@@ -23,7 +23,6 @@
                     {% if version.revision.user %}
                         <a href="{% url 'profile_detail' pk=version.revision.user.pk %}" class="modal-href">
                         <img class="media-object rounded" src="{{ version.revision.user.profile_picture}}" />
-                        </a>
                     {% else %}
                         <img class="media-object rounded" src="{% static 'imgs/pyrigs-avatar.png' %}" />
                     {% endif %}
@@ -31,6 +30,7 @@
                     <div class="media-body">
                     <h5>
                         {{ version.revision.user.name|default:'System' }}
+                        {% if version.revision.user %}</a>{% endif %}
                         <span class="float-right"><small><span class="fas fa-clock"></span> <span class="time">{{version.revision.date_created|date:"c"}}</span> ({{version.revision.date_created}})</small></span>
                     </h5>
             {% endif %}
