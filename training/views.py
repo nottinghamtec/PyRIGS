@@ -28,6 +28,7 @@ class TraineeDetail(views.ProfileDetail, ModalURLMixin):
     def get_context_data(self, **kwargs):
         context = super(TraineeDetail, self).get_context_data(**kwargs)
         context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
+        # TODO Filter this to levels the user has
         context["levels"] = models.TrainingLevel.objects.all()
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
         choices = models.TrainingItemQualification.CHOICES
@@ -50,6 +51,17 @@ class TraineeItemDetail(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Detailed Training Record for {}".format(models.Trainee.objects.get(pk=self.kwargs['pk']))
+        return context
+
+
+class LevelList(generic.ListView):
+    model = models.TrainingLevel
+    template_name = "level_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "All Training Levels"
+        context["levels"] = models.TrainingLevel.objects.all()
         return context
 
 
@@ -130,7 +142,7 @@ class LevelDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Training Level {}".format(self.object)
+        context["page_title"] = "Training Level {} <span class='badge badge-{} badge-pill'><span class='fas fa-{}'></span></span>".format(self.object, self.object.get_department_colour(), self.object.icon)
         context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
         return context
 

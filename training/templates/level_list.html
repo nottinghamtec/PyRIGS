@@ -1,0 +1,24 @@
+{% extends 'base_training.html' %}
+
+{% block content %}
+<div class="alert alert-info" role="alert">
+<p>Please Note:</p>
+<ul>
+<li>Technical Assistant status is automatically valid when the item requirements are met.</li>
+<li>Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system.</li>
+<li>Supervisor status is <em>not automatically valid</em> and until signed off at a general meeting, does not count.</li>
+</ul>
+<sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
+</div>
+
+<div class="card-columns">
+    {% for level in levels %}
+    <div class="card my-3">
+        <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
+        <div class="card-body">
+            <p>{{ level.description }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

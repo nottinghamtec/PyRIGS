@@ -119,6 +119,19 @@ class TrainingLevel(models.Model, RevisionMixin):
     department = models.IntegerField(choices=DEPARTMENTS, null=True) # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
+    icon = models.CharField(null=True, blank=True, max_length=20)
+
+    def get_department_colour(self):
+        if self.department == 0:
+            return "info"
+        elif self.department == 1:
+            return "dark"
+        elif self.department == 2:
+            return "danger"
+        elif self.department == 3:
+            return "light"
+        else:
+            return "primary"
 
     def get_requirements_of_depth(self, depth):
         return self.requirements.filter(depth=depth)

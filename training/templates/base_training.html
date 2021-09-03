@@ -20,6 +20,8 @@
                             Item Detail</a>
        </div>
     </li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> All Levels</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> All Items</a></li>
     <li class="nav-item"><a class="nav-link" href="{% url 'training_activity_table' %}"><span class="fas fa-random"></span> Recent Changes</a></li>
 {% endif %}
 {% endblock %}

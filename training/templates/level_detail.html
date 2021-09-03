@@ -17,13 +17,13 @@
         <p>{{ object.description }}</p>
     </div>
 </div>
-<div class="card mb-3">
+<div class="card mb-3 d-none d-md-block">
     <h4 class="card-header">Users with this level</h4>
     <div class="card-body">
-        <div class="card-columns">
+        <div class="card-columns" style="column-count: 5">
         {% for user in users_with %}
         {% user_level_if_present user object as level_qualification %}
-        <div class="card w-50" {% if not level_qualification.confirmed_on %}style="border-style: dashed; opacity: 70%"{%endif%}>
+        <div class="card" {% if not level_qualification.confirmed_on %}style="border-style: dashed; opacity: 70%"{%endif%}>
             <img src="{{user.profile_picture}}" class="card-img-top" />
             <div class="card-body">
                 <h5 class="card-title">{{user}}</h5>
@@ -32,7 +32,7 @@
             <div class="card-footer text-right pr-1"><a href="{% url 'profile_detail' user.pk %}" class="btn btn-primary btn-sm"><span class="fas fa-user"></span> View Profile</a></div>
         </div>
         {% empty %}
-        Nobody here but us chickens...
+        Nobody here but us chickens... <span class="fas fa-egg text-warning"></span>
         {% endfor %}
         </div>
     </div>
@@ -62,7 +62,7 @@
        {% user_level_if_present request.user level as level_qualification %}
        <li><a href="{{level.get_absolute_url}}">{{ level }}</a> <span class="fas {% if level_qualification %}text-success fa-check{% if level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
        {% for nested_level in level.prerequisite_levels.all %}
-       {% user_level_if_present request.user level as nested_level_qualification %}
+       {% user_level_if_present request.user nested_level as nested_level_qualification %}
        <ul>
           <li><a href="{{nested_level.get_absolute_url}}">{{ nested_level }}</a> <span class="fas {% if nested_level_qualification %}text-success fa-check{% if nested_level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
        </ul>
@@ -73,5 +73,9 @@
        </ul>
     </div>
 </div>
-{% include 'partials/last_edited.html' with target="traininglevel_history" %}
+<div class="row">
+    <div class="col text-right">
+    {% include 'partials/last_edited.html' with target="traininglevel_history" %}
+    </div>
+</div>
 {% endblock %}

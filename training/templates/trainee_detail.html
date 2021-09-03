@@ -6,19 +6,7 @@
 {% load user_level_if_present from tags %}
 {% load colour_from_depth from tags %}
 
-{% block css %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
-{% endblock %}
-
-{% block preload_js %}
-    {{ block.super }}
-    <script src="{% static 'js/selects.js' %}"></script>
-{% endblock %}
-
 {% block js %}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
     <script>
     $('document').ready(function(){
         $('#add_record').click(function (e) {
@@ -54,22 +42,15 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
-    <div class="alert alert-info" role="alert">
-        <ul>
-        <li>Technical Assistant is conferred automatically when the item requirements are met.</li>
-        <li>Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system.</li>
-        <li>Supervisor status is <em>not automatic</em> and until signed off at a general meeting, does not count.</li>
-        </ul>
-        <sup>Correct as of 7th July 2021, check the Training Policy.</sup>
-    </div>
     <div class="card-columns">
         {% for level in levels %}
+        {% percentage_complete level object as completion %}
+        {% if completion > 0 %}
         <div class="card my-3">
             <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
             <div class="card-body">
                 <p>{{ level.description|truncatewords:30 }}</p>
                 <div class="progress mb-2">
-                  {% percentage_complete level object as completion %}
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
             </div>
@@ -90,6 +71,7 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 </div>
