@@ -5,17 +5,14 @@
 {% load button from filters %}
 
 {% block css %}
-    {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
-    {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
 {% endblock %}
 
 {% block js %}
-    {{ block.super }}
     <script src="{% static 'js/autocompleter.js' %}"></script>
     <script src="{% static 'js/tooltip.js' %}"></script>
 {% endblock %}
@@ -35,9 +32,15 @@
       {% render_field form.depth|add_class:'form-control custom-select col-sm-4' %}
     </div>
     <div class="form-group form-row">
+      {% if external %}
+      <label for="supervisor" class="col-sm-2 col-form-label">Supervising Organisation</label>
+      <select name="supervisor" id="supervising_organisation_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" required>
+      </select>
+      {% else %}
       <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
       <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
       </select>
+      {% endif %}
     </div>
     <div class="form-group form-row">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>

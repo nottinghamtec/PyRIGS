@@ -6,10 +6,20 @@
 {% load user_level_if_present from tags %}
 {% load colour_from_depth from tags %}
 
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
 {% block js %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
     <script>
     $('document').ready(function(){
-        $('#add_record').click(function (e) {
+        $('#add_record,#add_external').click(function (e) {
              e.preventDefault();
              var url = $(this).attr("href");
              $.ajax({
@@ -38,6 +48,10 @@
     <a type="button" class="btn btn-success" href="{% url 'edit_record' object.pk %}" id="add_record">
 	    <span class="fas fa-plus"></span> Add New Training Record
     </a>
+    <a type="button" class="btn btn-warning" href="#" id="add_external">
+	    <span class="fas fa-building"></span> Log External Training
+    </a>
+    <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info col-2"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
     </div>
 </div>
 <div class="row mb-3">
@@ -76,7 +90,7 @@
     </div>
 </div>
 <div class="row">
-    <h2 class="col-10">Training Items</h2><a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info col-2"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
+    <h2 class="col-10">Training Items</h2>
     <div class="alert alert-info" role="alert"><h3 class="col-12">Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></h3></div>
     <div class="card-deck">
         {% for category in categories %}
