@@ -77,6 +77,7 @@ zipp = "~=3.4.0"
 "zope.schema" = "~=6.0.1"
 sentry-sdk = "*"
 diff-match-patch = "*"
+python-barcode = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"

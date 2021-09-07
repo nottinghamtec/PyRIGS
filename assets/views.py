@@ -1,4 +1,5 @@
 import simplejson
+import random
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
@@ -9,6 +10,11 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+
+from PIL import Image, ImageDraw, ImageFont
+from barcode import Code39
+from barcode.writer import ImageWriter
 
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
     is_ajax, OEmbedView
@@ -338,3 +344,37 @@ class CableTypeUpdate(generic.UpdateView):
 
     def get_success_url(self):
         return reverse("cable_type_detail", kwargs={"pk": self.object.pk})
+
+
+class GenerateLabel(generic.View):
+    def get(self, request, pk):
+        black = (0, 0, 0)
+        white = (255, 255, 255)
+        size = (700, 200)
+        font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 20)
+        obj = get_object_or_404(models.Asset, asset_id=pk)
+
+        asset_id = "Asset: {}".format(obj.asset_id)
+        length = "Length: {}m".format(obj.length)
+        csa = "CSA: {}mm²".format(obj.csa)
+
+        image = Image.new("RGB", size, white)
+        logo = Image.open("static/imgs/square_logo.png")
+        draw = ImageDraw.Draw(image)
+
+        draw.text((210, 140), asset_id, fill=black, font=font)
+        draw.text((210, 170), length, fill=black, font=font)
+        draw.text((350, 170), csa, fill=black, font=font)
+        draw.multiline_text((500, 140), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
+
+        barcode = Code39(str(obj.asset_id), writer=ImageWriter())
+
+        logo_size = (200, 200)
+        image.paste(logo.resize(logo_size, Image.ANTIALIAS))
+        barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
+        width, height = barcode_image.size
+        image.paste(barcode_image.crop((0, 0, width, 135)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
+
+        response = HttpResponse(content_type="image/png")
+        image.save(response, "PNG")
+        return response
