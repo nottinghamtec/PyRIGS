@@ -1,4 +1,5 @@
 {% load widget_tweaks %}
+{% load linkornone from filters %}
 <div class="card mb-2">
   <div class="card-header">
     Purchase Details
@@ -51,14 +52,11 @@
       {% else %}
       <dl>
         <dt>Purchased From</dt>
-        <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
-
+        <dd>{% if object.purchased_from %}<a href="{{object.purchased_from.get_absolute_url}}">{{ object.purchased_from }}</a>{%else%}-{%endif%}</dd>
         <dt>Purchase Price</dt>
         <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
-
         <dt>Salvage Value</dt>
         <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
-
         <dt>Date Acquired</dt>
         <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
         {% if object.date_sold %}
