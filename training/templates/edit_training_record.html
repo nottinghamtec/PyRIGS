@@ -24,7 +24,7 @@
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     <div class="form-group form-row">
       <label for="item_id" class="col-sm-2 col-form-label">Item</label>
-      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=reference_number,name" required>
       </select>
     </div>
     <div class="form-group form-row">

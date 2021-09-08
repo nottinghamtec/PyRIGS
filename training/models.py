@@ -45,14 +45,22 @@ class TrainingItem(models.Model):
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
     name = models.CharField(max_length=50)
 
+    @property
+    def number(self):
+        return "{}.{}".format(self.category.reference_number, self.reference_number)
+
     def __str__(self):
-        return "{}.{} {}".format(self.category.reference_number, self.reference_number, self.name)
+        return "{} {}".format(self.number, self.name)
 
     @staticmethod
     def user_has_qualification(item, user, depth):
         for q in user.qualifications_obtained.all().select_related('item'):
             if q.item == item and q.depth > depth:
                 return True
+
+    class Meta:
+        unique_together = ["reference_number", "name", "category"]
+        ordering = ['category__reference_number', 'reference_number']
 
 
 class TrainingItemQualification(models.Model):
@@ -95,6 +103,7 @@ class TrainingItemQualification(models.Model):
 
     class Meta:
         unique_together = ["trainee", "item", "depth"]
+        order_with_respect_to = 'item'
 
 
 # Levels
