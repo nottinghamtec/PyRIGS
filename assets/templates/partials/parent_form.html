@@ -28,13 +28,13 @@
 
       <dt>Children</dt>
       {% if object.asset_parent.all %}
+      <div style="max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; ">
       {% for child in object.asset_parent.all %}
       <dd>
-        <a href="{% url 'asset_detail' child.asset_id %}">
-        {{ child.asset_id }} - {{ child.description }}
-        </a>
+        <a href="{% url 'asset_detail' child.asset_id %}">{{ child }}</a>
       </dd>
       {% endfor %}
+      </div>
       {% else %}
       <dd><span>-</span></dd>
       {% endif %}
