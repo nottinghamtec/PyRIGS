@@ -5,7 +5,7 @@
 <div class="row py-4">
     <div class="col-sm-12 text-right px-0">
         <div class="btn-group">
-            <a href="{% url 'event_detail' object.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
+            <a href="{% url 'event_detail' object.event.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
             <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
                 <span class="fas fa-times"></span> <span
                         class="d-none d-sm-inline">Delete</span>
