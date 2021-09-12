@@ -48,10 +48,7 @@
     <a type="button" class="btn btn-success" href="{% url 'edit_record' object.pk %}" id="add_record">
 	    <span class="fas fa-plus"></span> Add New Training Record
     </a>
-    <a type="button" class="btn btn-warning" href="#" id="add_external">
-	    <span class="fas fa-building"></span> Log External Training
-    </a>
-    <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info col-2"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
+    <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
     </div>
 </div>
 <div class="row mb-3">
@@ -86,14 +83,16 @@
             </div>
         </div>
         {% endif %}
+        {% empty %}
+        <p class="text-muted">No progress in any levels yet...did someone forget to fill out the paperwork?</p>
         {% endfor %}
     </div>
 </div>
 <div class="row">
     <h2 class="col-10">Training Items</h2>
-    <div class="alert alert-info" role="alert"><h3 class="col-12">Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></h3></div>
-    <div class="card-deck">
+    <div class="alert alert-info col-12" role="alert"><h3>Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></h3></div>
         {% for category in categories %}
+        {% if forloop.first or forloop.counter|divisibleby:3 %}<div class="card-deck col-12">{% endif %}
         <div class="card mb-3">
             <h3 class="card-header">{{ category }}</h3>
             <div class="list-group list-group-flush">
@@ -101,9 +100,12 @@
                 {% if q.item.category == category %}
                 <li class="list-group-item list-group-item-{% colour_from_depth q.depth %}">{{q.item}} ({{q.date}})</li>
                 {% endif %}
+            {% empty %}
+            <li class="list-group-item text-muted">None yet...</li>
             {% endfor %}
             </div>
         </div>
+        {% if forloop.counter|add:"1"|divisibleby:3 %}</div>{% endif %}
         {% endfor %}
     </div>
 </div>

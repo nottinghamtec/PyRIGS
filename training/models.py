@@ -10,13 +10,15 @@ class Trainee(Profile):
     class Meta:
         proxy = True
 
+    def level_qualifications(self, only_confirmed=False):
+        levels = self.levels.all()
+        if only_confirmed:
+            levels = levels.filter(confirmed_on__isnull=False)
+        return levels.select_related('level')
+
     @property
     def is_supervisor(self):
-        # FIXME Efficiency
-        for level_qualification in self.levels.select_related('level').all():
-            if level_qualification.confirmed_on is not None and level_qualification.level.level >= TrainingLevel.SUPERVISOR:
-                return True
-        return False
+        return self.level_qualifications(True).filter(level__gte=TrainingLevel.SUPERVISOR).exists()
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
