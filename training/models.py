@@ -138,6 +138,8 @@ class TrainingLevel(models.Model, RevisionMixin):
         elif self.department == 2:
             return "danger"
         elif self.department == 3:
+            return "warning"
+        elif self.department == 4:
             return "light"
         else:
             return "primary"

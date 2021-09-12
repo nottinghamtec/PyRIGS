@@ -1,4 +1,21 @@
 {% extends 'base_training.html' %}
+{% load colour_from_level from tags %}
+
+{% block css %}
+<style>
+.level-1::after {
+    content: "";
+    position: relative; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 50px;
+    margin-top: -15px;
+    margin-bottom: -15px;
+    background: black;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="alert alert-info" role="alert">
@@ -10,15 +27,28 @@
 </ul>
 <sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
 </div>
-
-<div class="card-columns">
-    {% for level in levels %}
-    <div class="card my-3">
-        <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
-        <div class="card-body">
-            <p>{{ level.description }}</p>
+<div class="chart">
+  {% for level in levels %}
+    {% if forloop.counter == 3 %}
+    <div class="row">
+    <div class="col-6">
+    {% endif %}
+    {% if level.level == 2 and level.department is None %}
+    </div>
+    <div class="col-6">
+    {% endif %}
+    <div class="{% if forloop.first %}level-1 row{% elif forloop.counter == 2 %}level-2 row{%endif%}">
+        <div class="card my-3">
+            <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
+            <div class="card-body bg-{% colour_from_level level %}">
+                <p>{{ level.description }}</p>
+            </div>
         </div>
     </div>
-    {% endfor %}
+    {% if forloop.last %}
+    </div>
+    </div>
+    {% endif %}
+  {% endfor %}
 </div>
 {% endblock %}
