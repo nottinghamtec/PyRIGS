@@ -53,11 +53,19 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
+    {% for level in completed_levels %}
+    {% if forloop.first %}<div class="card-columns">{% endif %}
+    <div class="card my-3 border-success">
+    <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
+    </div>
+    {% if forloop.last %}</div>{%endif%}
+    {% empty %}
+    <span class="badge badge-warning">No qualifications in any levels yet...did someone forget to fill out the paperwork?</span>
+    {% endfor %}
     <div class="card-columns">
-        {% for level in levels %}
+        {% for level in started_levels %}
         {% percentage_complete level object as completion %}
-        {% if completion > 0 %}
-        <div class="card my-3">
+        <div class="card my-3 border-warning">
             <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
             <div class="card-body">
                 <p>{{ level.description|truncatewords:30 }}</p>
@@ -82,9 +90,6 @@
                 {% endif %}
             </div>
         </div>
-        {% endif %}
-        {% empty %}
-        <p class="text-muted">No progress in any levels yet...did someone forget to fill out the paperwork?</p>
         {% endfor %}
     </div>
 </div>

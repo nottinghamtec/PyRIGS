@@ -22,7 +22,7 @@
                 <tbody>
                 {% for object in object_list %}
                     <tr id="row_item">
-                        <th scope="row" class="align-middle" id="cell_name">{{ object.name }} {% if request.user.pk == object.pk %}<span class="fas fa-user text-success"></span>{%endif%}</th>
+                        <th scope="row" class="align-middle" id="cell_name"><a href="{% url 'trainee_detail' object.pk %}">{{ object.name }} {% if request.user.pk == object.pk %}<span class="fas fa-user text-success"></span>{%endif%}</a></th>
                         <td {% if object.is_supervisor %}class="table-success"{%endif%}>{{ object.is_supervisor|yesno|title }}</td>
                         <td>{{ object.qualifications_obtained.all|length }}</td>
                         <td>

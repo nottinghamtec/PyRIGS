@@ -27,10 +27,12 @@ class TraineeDetail(views.ProfileDetail, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super(TraineeDetail, self).get_context_data(**kwargs)
-        context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
-        # TODO Filter this to levels the user has
-        # context["completed_levels"] = 
-        context["levels"] = models.TrainingLevel.objects.all()
+        if self.request.user.pk == self.object.pk:
+            context["page_title"] = "Your Training Record"
+        else:
+            context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
+        context["started_levels"] = self.object.started_levels()
+        context["completed_levels"] = self.object.level_qualifications()
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
         choices = models.TrainingItemQualification.CHOICES
         context["depths"] = choices

@@ -10,6 +10,9 @@ class Trainee(Profile):
     class Meta:
         proxy = True
 
+    def started_levels(self):
+        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
+
     def level_qualifications(self, only_confirmed=False):
         levels = self.levels.all()
         if only_confirmed:
@@ -219,7 +222,7 @@ class TrainingLevelQualification(models.Model):
     reversion_hide = True
 
     def __str__(self):
-        return "{} qualified as a {}".format(self.trainee, self.level)
+        return "{} is qualified as a {}".format(self.trainee, self.level)
 
     class Meta:
         unique_together = ["trainee", "level"]
