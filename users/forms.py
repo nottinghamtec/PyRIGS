@@ -1,4 +1,4 @@
-from captcha.fields import ReCaptchaField
+from hcaptcha.fields import hCaptchaField
 from django import forms
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        UserChangeForm, UserCreationForm)
@@ -9,7 +9,7 @@ from RIGS import models
 
 # Registration
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
-    captcha = ReCaptchaField()
+    hcaptcha = hCaptchaField()
 
     class Meta:
         model = models.Profile
@@ -41,7 +41,7 @@ class EmbeddedAuthenticationForm(CheckApprovedForm):
 
 
 class PasswordReset(PasswordResetForm):
-    captcha = ReCaptchaField(label='Captcha')
+    hcaptcha = hCaptchaField()
 
 
 class ProfileCreationForm(UserCreationForm):
