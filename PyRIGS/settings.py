@@ -65,8 +65,8 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'registration',
     'reversion',
-    'captcha',
     'widget_tweaks',
+    'hcaptcha',
 )
 
 MIDDLEWARE = (
@@ -186,12 +186,10 @@ LOGOUT_URL = '/user/logout/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
-# reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = env('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
-RECAPTCHA_PRIVATE_KEY = env('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
-NOCAPTCHA = True
-
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+# CAPTCHA settings
+if not DEBUG:
+    HCAPTCHA_SITEKEY = env('HCAPTCHA_SITEKEY')
+    HCAPTCHA_SECRET = env('HCAPTCHA_SECRET')
 
 # Email
 EMAILER_TEST = False

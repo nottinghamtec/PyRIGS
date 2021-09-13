@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7ce63a92a53c057af0591ed6a2663f9c81e9e65bb16ca277f6b07db8c7faeea4"
+            "sha256": "28cf82a210d555ef6791bb56e5ecf8c7ce345a85f65095d724e890fbbaa44803"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -213,6 +213,13 @@
             "index": "pypi",
             "version": "==2.4.0"
         },
+        "django-hcaptcha": {
+            "hashes": [
+                "sha256:2b80197c07bb8444249bcce3758b0472d369cca309fb02d7abcd0a856431b76b"
+            ],
+            "index": "pypi",
+            "version": "==0.1.0"
+        },
         "django-htmlmin": {
             "hashes": [
                 "sha256:e41b2a2157570846645cc636a9bddde8aa3e03f6834a9211e61a17f2ed42b87e"
@@ -227,13 +234,6 @@
             ],
             "index": "pypi",
             "version": "==1.7.3"
-        },
-        "django-recaptcha": {
-            "hashes": [
-                "sha256:567784963fd5400feaf92e8951d8dbbbdb4b4c48a76e225d4baa63a2c9d2cd8c"
-            ],
-            "index": "pypi",
-            "version": "==2.0.6"
         },
         "django-recurrence": {
             "hashes": [
