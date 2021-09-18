@@ -7,6 +7,7 @@ from registration.forms import RegistrationFormUniqueEmail
 
 from RIGS import models
 
+
 class CaptchaField(hCaptchaField):
     def validate(self, value):
         # Skip validation if we're testing FIXME: Arona, y u so lazy
@@ -14,6 +15,8 @@ class CaptchaField(hCaptchaField):
             super().validate(value)
 
 # Registration
+
+
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
     hcaptcha = CaptchaField()
 

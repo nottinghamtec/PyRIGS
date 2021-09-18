@@ -23,7 +23,7 @@ def create_datetime(year, month, day, hour, minute):
 def create_browser():
     options = webdriver.ChromeOptions()
     options.add_argument("--window-size=1920,1080")
-    #options.add_argument("--headless")
+    # options.add_argument("--headless")
     if settings.CI:
         options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(options=options)
