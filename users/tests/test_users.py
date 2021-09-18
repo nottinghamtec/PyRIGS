@@ -1,8 +1,10 @@
 import os
 import re
+import time
 
 from django.core import mail
 from django.test import LiveServerTestCase
+from django.test.utils import override_settings
 from selenium.webdriver.common.keys import Keys
 
 from PyRIGS.tests.base import create_browser
@@ -13,14 +15,12 @@ from RIGS import models
 class UserRegistrationTest(LiveServerTestCase):
     def setUp(self):
         self.browser = create_browser()
-
-        self.browser.implicitly_wait(3)  # Set implicit wait session wide
-        os.environ['RECAPTCHA_TESTING'] = 'True'
+        self.browser.implicitly_wait(5)  # Set implicit wait session wide
 
     def tearDown(self):
         self.browser.quit()
-        os.environ['RECAPTCHA_TESTING'] = 'False'
 
+    @override_settings(DEBUG=True)
     def test_registration(self):
         # Navigate to the registration page
         self.browser.get(self.live_server_url + '/user/register/')
@@ -61,9 +61,11 @@ class UserRegistrationTest(LiveServerTestCase):
         last_name.send_keys('Smith')
         initials.send_keys('JS')
         # phone.send_keys('0123456789')
-        self.browser.execute_script(
-            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
-
+        time.sleep(1)
+        self.browser.switch_to.frame(self.browser.find_element_by_tag_name("iframe"))
+        self.browser.find_element_by_id('anchor').click()
+        self.browser.switch_to.default_content()
+        time.sleep(3)
         # Submit incorrect form
         submit = self.browser.find_element_by_xpath("//input[@type='submit']")
         submit.click()
@@ -85,9 +87,6 @@ class UserRegistrationTest(LiveServerTestCase):
         # Correct error
         password1.send_keys('correcthorsebatterystaple')
         password2.send_keys('correcthorsebatterystaple')
-        self.browser.execute_script("console.log('Hello, world!')")
-        self.browser.execute_script(
-            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
 
         # Submit again
         password2.send_keys(Keys.ENTER)
@@ -126,8 +125,6 @@ class UserRegistrationTest(LiveServerTestCase):
         # Expected to fail as not approved
         username.send_keys('TestUsername')
         password.send_keys('correcthorsebatterystaple')
-        self.browser.execute_script(
-            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
         password.send_keys(Keys.ENTER)
 
         # Test approval
@@ -149,8 +146,6 @@ class UserRegistrationTest(LiveServerTestCase):
         username.send_keys('TestUsername')
         password = self.browser.find_element_by_id('id_password')
         password.send_keys('correcthorsebatterystaple')
-        self.browser.execute_script(
-            "return function() {jQuery('#g-recaptcha-response').val('PASSED'); return 0}()")
         password.send_keys(Keys.ENTER)
 
         # Check we are logged in

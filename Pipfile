@@ -77,7 +77,7 @@ zipp = "~=3.4.0"
 sentry-sdk = "*"
 diff-match-patch = "*"
 python-barcode = "*"
-django-hcaptcha = "*"
+django-hCaptcha = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"
@@ -89,8 +89,14 @@ pytest-django = "*"
 pluggy = "*"
 pytest-splinter = "*"
 pytest = "*"
-pytest-xdist = {extras = [ "psutil",], version = "*"}
-PyPOM = {extras = [ "splinter",], version = "*"}
 
 [requires]
 python_version = "3.9"
+
+[dev-packages.pytest-xdist]
+extras = [ "psutil",]
+version = "*"
+
+[dev-packages.PyPOM]
+extras = [ "splinter",]
+version = "*"
