@@ -5,15 +5,13 @@
     <p>Hi {{ to_name|default:"there" }},</p>
 
     <p><b>{{ request.user.get_full_name }}</b> has requested that you authorise <b>{{ object.display_id }}
-        | {{ object.name }}</b>{% if not to_name %} on behalf of <b>{{ object.person.name }}</b>{% endif %}.</p>
+        | {{ object.name }}</b>{% if not to_name %} on behalf of <b>{% if object.person %}{{ object.person.name }}{% else %}{{ object.organisation.name }}{% endif %}</b>{% endif %}.</p>
 
     <p>
         Please find the link below to complete the event booking process.
-        {% if object.event.organisation and object.event.organisation.union_account %}{# internal #}
-            Remember that only Presidents or Treasurers are allowed to sign off payments. You may need to forward
-            this
-            email on.
-        {% endif %}
+        Remember that only Presidents or Treasurers are allowed to sign off payments. You may need to forward
+        this
+        email on.
     </p>
 
 
