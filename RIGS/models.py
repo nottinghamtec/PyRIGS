@@ -539,6 +539,23 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return "{} (requested by {})".format(self.event.display_id, self.sent_by.initials)
 
 
+class InvoiceManager(models.Manager):
+    def outstanding_invoices(self):
+        # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
+        sql = "SELECT * FROM " \
+              "(SELECT " \
+              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
+              "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
+              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
+              "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
+              "AS sub " \
+              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
+              "ORDER BY invoice_date"
+
+        query = self.raw(sql)
+        return query
+
+
 @reversion.register(follow=['payment_set'])
 class Invoice(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -546,6 +563,8 @@ class Invoice(models.Model, RevisionMixin):
     void = models.BooleanField(default=False)
 
     reversion_perm = 'RIGS.view_invoice'
+
+    objects = InvoiceManager()
 
     @property
     def sum_total(self):

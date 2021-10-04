@@ -2,6 +2,8 @@
 
 {% load static %}
 {% load invoices_waiting from filters %}
+{% load invoices_outstanding from filters %}
+{% load total_invoices_todo from filters %}
 
 {% block titleheader %}
 <a class="navbar-brand" style="margin-left: auto; margin-right: auto;" href="/">RIGS</a>
@@ -45,14 +47,17 @@
     {% endif %}
     {% if perms.RIGS.view_invoice %}
     <li class="nav-item dropdown">
+      {% total_invoices_todo as todo %}
+      {% invoices_waiting as waiting %}
+      {% invoices_outstanding as outstanding %}
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Invoices <span class="badge {% if invoices_waiting == 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">{% invoices_waiting %}</span>
+        Invoices <span class="badge {% if todo == 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">{{ todo }}</span>
       </a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
         {% if perms.RIGS.add_invoice %}
-        <a class="dropdown-item text-nowrap" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting <span class="badge {% if invoices_waiting == 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">{% invoices_waiting %}</span></a>
+        <a class="dropdown-item text-nowrap" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting <span class="badge {% if waiting == 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">{{ waiting }}</span></a>
         {% endif %}
-        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding</a>
+        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding <span class="badge {% if outstanding == 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">{{ outstanding }}</span></a>
         <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
       </div>
     </li>
