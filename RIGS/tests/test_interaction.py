@@ -721,7 +721,7 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
     page.fd_voltage_l2 = 235
     page.fd_voltage_l3 = 0
     page.fd_phase_rotation = True
-    page.fd_earth_fault = 666
+    page.fd_earth_fault = 1.21
     page.fd_pssc = 1984
     page.w1_description = "In the carpark, by the bins"
     page.w1_polarity = True
