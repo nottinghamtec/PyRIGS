@@ -726,7 +726,7 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
     page.w1_description = "In the carpark, by the bins"
     page.w1_polarity = True
     page.w1_voltage = 240
-    page.w1_earth_fault = 333
+    page.w1_earth_fault = 0.42
 
     page.submit()
     assert page.success
