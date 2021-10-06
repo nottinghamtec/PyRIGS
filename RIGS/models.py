@@ -796,7 +796,7 @@ class EventChecklist(models.Model, RevisionMixin):
     fd_voltage_l2 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
     fd_voltage_l3 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
     fd_phase_rotation = models.BooleanField(blank=True, null=True, verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.IntegerField(blank=True, null=True, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text="Prospective Short Circuit Current")
     # Worst case points
     w1_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
