@@ -540,6 +540,23 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return "{} (requested by {})".format(self.event.display_id, self.sent_by.initials)
 
 
+class InvoiceManager(models.Manager):
+    def outstanding_invoices(self):
+        # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
+        sql = "SELECT * FROM " \
+              "(SELECT " \
+              "(SELECT COUNT(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payment_count\", " \
+              "(SELECT SUM(ei.cost * ei.quantity) FROM \"RIGS_eventitem\" AS ei WHERE ei.event_id=\"RIGS_invoice\".event_id) AS \"cost\", " \
+              "(SELECT SUM(p.amount) FROM \"RIGS_payment\" AS p WHERE p.invoice_id=\"RIGS_invoice\".id) AS \"payments\", " \
+              "\"RIGS_invoice\".\"id\", \"RIGS_invoice\".\"event_id\", \"RIGS_invoice\".\"invoice_date\", \"RIGS_invoice\".\"void\" FROM \"RIGS_invoice\") " \
+              "AS sub " \
+              "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'" \
+              "ORDER BY invoice_date"
+
+        query = self.raw(sql)
+        return query
+
+
 @reversion.register(follow=['payment_set'])
 class Invoice(models.Model, RevisionMixin):
     event = models.OneToOneField('Event', on_delete=models.CASCADE)
@@ -547,6 +564,8 @@ class Invoice(models.Model, RevisionMixin):
     void = models.BooleanField(default=False)
 
     reversion_perm = 'RIGS.view_invoice'
+
+    objects = InvoiceManager()
 
     @property
     def sum_total(self):
@@ -778,21 +797,21 @@ class EventChecklist(models.Model, RevisionMixin):
     fd_voltage_l2 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
     fd_voltage_l3 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
     fd_phase_rotation = models.BooleanField(blank=True, null=True, verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.IntegerField(blank=True, null=True, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    fd_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text="Prospective Short Circuit Current")
     # Worst case points
     w1_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w1_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w1_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w1_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w1_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     w2_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w2_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w2_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w2_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w2_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
     w3_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w3_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
     w3_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w3_earth_fault = models.IntegerField(blank=True, null=True, help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w3_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
 
     all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")

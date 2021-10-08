@@ -49,7 +49,7 @@ class Supplier(models.Model, RevisionMixin):
         ordering = ['name']
 
     def get_absolute_url(self):
-        return reverse('supplier_list')
+        return reverse('supplier_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return self.name
@@ -81,6 +81,9 @@ class CableType(models.Model):
             return "%s → %s" % (self.plug.description, self.socket.description)
         else:
             return "Unknown"
+
+    def get_absolute_url(self):
+        return reverse('cable_type_detail', kwargs={'pk': self.pk})
 
 
 def get_available_asset_id(wanted_prefix=""):

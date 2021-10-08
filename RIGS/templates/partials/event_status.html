@@ -6,6 +6,10 @@
             <span class="badge badge-success">PO: {{ event.purchase_order }}</span>
         {% elif event.authorised %}
             <span class="badge badge-success">Authorisation: Complete <span class="fas fa-check"></span></span>
+        {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+            <span class="badge badge-warning"> Authorisation: Issue <span class="fas fa-exclamation-circle"></span></span>
+        {% elif event.auth_request_to %}
+            <span class="badge badge-info"> Authorisation: Sent <span class="fas fa-paper-plane"></span></span>
         {% else %}
             <span class="badge badge-danger">Authorisation: <span class="fas fa-times"></span></span>
         {% endif %}

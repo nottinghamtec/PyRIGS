@@ -1,27 +1,29 @@
 <div class="col-sm-6">
+    {% if event.person %}
     <div class="card mb-3">
         <div class="card-header">Contact Details</div>
         <div class="card-body">
             <dl class="row">
                 <dt class="col-sm-5">Person</dt>
                 <dd class="col-sm-7">
-                    {% if event.person %}
-                        {{ event.person.name }}
-                    {% endif %}
+                      {{ event.person.name }}
                 </dd>
-
+                {% if event.person.email %}
                 <dt class="col-sm-5">Email</dt>
                 <dd class="col-sm-7">
                     <span class="overflow-ellipsis">{{ event.person.email }}</span>
                 </dd>
-
+                {% endif %}
+                {% if event.person.phone %}
                 <dt class="col-sm-5">Phone Number</dt>
                 <dd class="col-sm-7">{{ event.person.phone }}</dd>
+                {% endif %}
             </dl>
         </div>
     </div>
+    {% endif %}
     {% if event.organisation %}
-        <div class="card mt-3">
+        <div class="card">
             <div class="card-header">Organisation Details</div>
             <div class="card-body">
                 <dl class="row">
@@ -29,9 +31,10 @@
                     <dd class="col-sm-7">
                         {{ event.organisation.name }}
                     </dd>
-
+                    {% if event.organisation.phone %}
                     <dt class="col-sm-5">Phone Number</dt>
-                    <dd class="col-sm-7">{{ object.organisation.phone }}</dd>
+                    <dd class="col-sm-7">{{ event.organisation.phone }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>

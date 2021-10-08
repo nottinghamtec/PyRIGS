@@ -1,15 +1,24 @@
-from captcha.fields import ReCaptchaField
+from hcaptcha.fields import hCaptchaField
 from django import forms
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        UserChangeForm, UserCreationForm)
+from django.conf import settings
 from registration.forms import RegistrationFormUniqueEmail
 
 from RIGS import models
 
 
+class CaptchaField(hCaptchaField):
+    def validate(self, value):
+        # Skip validation if we're testing FIXME: Arona, y u so lazy
+        if settings.HCAPTCHA_SITEKEY != '10000000-ffff-ffff-ffff-000000000001':
+            super().validate(value)
+
 # Registration
+
+
 class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
-    captcha = ReCaptchaField()
+    hcaptcha = CaptchaField()
 
     class Meta:
         model = models.Profile
@@ -41,7 +50,7 @@ class EmbeddedAuthenticationForm(CheckApprovedForm):
 
 
 class PasswordReset(PasswordResetForm):
-    captcha = ReCaptchaField(label='Captcha')
+    hcaptcha = CaptchaField()
 
 
 class ProfileCreationForm(UserCreationForm):

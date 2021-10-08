@@ -102,6 +102,10 @@
                     <td>{{crew.role}}</td>
                     <td>{{crew.end}}</td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center bg-warning">Apparently this event happened by magic...</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -109,9 +113,27 @@
 </div>
 <div class="card  mb-3">
     <div class="card-header">Power {% include 'partials/event_size.html' with object=object.event.riskassessment %}</div>
-    {% if object.event.riskassessment.event_size != 2 %}
     <div class="card-body">
-        {% if object.event.riskassessment.event_size == 1 %}
+        {% if event.riskassessment.event_size == 0 %}
+        <dl class="row">
+            <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.rcds|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'supply_test'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.supply_test|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.earthing|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.pat|yesnoi }}
+            </dd>
+        </dl>
+        {% else %}
         <dl class="row">
             <dt class="col-10">{{ object|help_text:'source_rcd'|safe }}</dt>
             <dd class="col-2">
@@ -216,28 +238,8 @@
         </dl>
         <hr>
         {% include 'partials/ec_power_info.html' %}
-        {% else %}
-        <dl class="row">
-            <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
-            <dd class="col-2">
-                {{ object.rcds|yesnoi }}
-            </dd>
-            <dt class="col-10">{{ object|help_text:'supply_test'|safe }}</dt>
-            <dd class="col-2">
-                {{ object.supply_test|yesnoi }}
-            </dd>
-            <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
-            <dd class="col-2">
-                {{ object.earthing|yesnoi }}
-            </dd>
-            <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
-            <dd class="col-2">
-                {{ object.pat|yesnoi }}
-            </dd>
-        </dl>
         {% endif %}
     </div>
-    {% endif %}
 </div>
 <div class="col-12 text-right">
 {% button 'edit' url='ec_edit' pk=object.pk %}

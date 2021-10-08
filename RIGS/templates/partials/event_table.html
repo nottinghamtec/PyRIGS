@@ -67,9 +67,9 @@
                 </h4>
                 {% if event.is_rig and not event.cancelled %}
                     <h5>
-                        {{ event.person.name }}
+                        <a href="{{ event.person.get_absolute_url }}">{{ event.person.name }}</a>
                         {% if event.organisation %}
-                            for {{ event.organisation.name }}
+                            for <a href="{{ event.organisation.get_absolute_url }}">{{ event.organisation.name }}</a>
                         {% endif %}
                     </h5>
                 {% endif %}

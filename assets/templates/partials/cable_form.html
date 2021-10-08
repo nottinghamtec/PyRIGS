@@ -17,11 +17,9 @@
     {% else %}
     <dl>
       <dt>Cable Type</dt>
-      <dd>{{ object.cable_type|default_if_none:'-' }}</dd>
-
+      <dd>{% if object.cable_type %}<a href="{{object.cable_type.get_absolute_url}}">{{ object.cable_type }}</a>{%else%}-{%endif%}</dd>
       <dt>Length</dt>
       <dd>{{ object.length|default_if_none:'-' }}m</dd>
-
       <dt>Cross Sectional Area</dt>
       <dd>{{ object.csa|default_if_none:'-' }}mm²</dd>
     </dl>

@@ -222,3 +222,13 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
 @register.simple_tag
 def invoices_waiting():
     return len(models.Event.objects.waiting_invoices())
+
+
+@register.simple_tag
+def invoices_outstanding():
+    return len(models.Invoice.objects.outstanding_invoices())
+
+
+@register.simple_tag
+def total_invoices_todo():
+    return len(models.Event.objects.waiting_invoices()) + len(models.Invoice.objects.outstanding_invoices())

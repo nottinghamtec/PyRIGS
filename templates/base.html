@@ -31,28 +31,26 @@
 <a class="skip-link" href='#main'>Skip to content</a>
 {% include "analytics.html" %}
 {% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark flex-nowrap text-nowrap" role="navigation">
-  <a class="navbar-brand" href="{% if request.user.is_authenticated %}https://members.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">
-    <img src="{% static 'imgs/logo.webp' %}" width="40" height="40" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
-  </a>
-  <div class="container" style="padding-left: 0; padding-right: 0;">
-    <div class="row w-100 flex-nowrap">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
+  <div class="container">
+      <a class="navbar-brand" style="position: absolute; left:0.5em; top: 2px;" href="{% if request.user.is_authenticated %}https://members.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">
+        <img src="{% static 'imgs/logo.webp' %}" width="40" height="40" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
+      </a>
       {% block titleheader %}
       {% endblock %}
       <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="document.getElementById('logo').classList.toggle('d-none');">
       <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
             {% block titleelements %}
             {% endblock %}
         </ul>
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav align-self-end">
             {% block titleelements_right %}
             {% endblock %}
         </ul>
       </div>
-    </div>
   </div>
 </nav>
 {% endblock %}

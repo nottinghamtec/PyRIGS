@@ -34,7 +34,7 @@
         })
         .ajaxSelectPicker({
             ajax: {
-                url: '{% url 'asset_search_json' %}',
+                url: "{% url 'asset_search_json' %}",
                 type: "GET",
                 data: function () {
                     let params = {

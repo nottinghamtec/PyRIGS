@@ -1,5 +1,4 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
-{% block title %}Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}{% endblock %}
 {% load help_text from filters %}
 {% load yesnoi from filters %}
 {% load linkornone from filters %}
@@ -7,7 +6,6 @@
 {% block content %}
     <div class="row py-3">
         <div class="col-12">
-            <h3>Risk Assessment for Event N{{ object.event.pk|stringformat:"05d" }} {{ object.event.name }}</h3>
             <div class="card card-default mb-3">
                 <div class="card-header">General</div>
                 <div class="card-body">
@@ -97,58 +95,64 @@
                     </dl>
                 </div>
             </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Site Details</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-6">{{ object|help_text:'known_venue' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.known_venue|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'safe_loading'|safe }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.safe_loading|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'safe_storage' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.safe_storage|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'area_outside_of_control' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.area_outside_of_control|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'barrier_required' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.barrier_required|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'nonstandard_emergency_procedure' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.nonstandard_emergency_procedure|yesnoi:'invert' }}
-                        </dd>
-                    </dl>
+            <div class="row">
+                <div class="col-lg-6 col-12">
+                    <div class="card card-default mb-3">
+                        <div class="card-header">Site Details</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-10">{{ object|help_text:'known_venue' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.known_venue|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'safe_loading'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_loading|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'safe_storage' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_storage|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'area_outside_of_control' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.area_outside_of_control|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'barrier_required' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.barrier_required|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'nonstandard_emergency_procedure' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.nonstandard_emergency_procedure|yesnoi:'invert' }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="card card-default mb-3">
-                <div class="card-header">Structures</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-6">{{ object|help_text:'special_structures' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.special_structures|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'suspended_structures' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.suspended_structures|yesnoi:'invert' }}
-                        </dd>
-                        <dt class="col-sm-6">{{ object|help_text:'persons_responsible_structures' }}</dt>
-                        <dd class="col-sm-6">
-                            {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
-                        </dd>
-                        <dt class="col-6">{{ object|help_text:'rigging_plan'|safe }}</dt>
-                        <dd class="col-6">
-                            {{ object.rigging_plan|linkornone }}
-                        </dd>
-                    </dl>
+                <div class="col-lg-6 col-12">
+                    <div class="card card-default mb-3">
+                        <div class="card-header">Structures</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-10">{{ object|help_text:'special_structures' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.special_structures|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'suspended_structures' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.suspended_structures|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-12">{{ object|help_text:'persons_responsible_structures' }}</dt>
+                                <dd class="col-12">
+                                    {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
+                                </dd>
+                                <dt class="col-12">{{ object|help_text:'rigging_plan'|safe }}</dt>
+                                <dd class="col-12">
+                                    {{ object.rigging_plan|linkornone|default:'N/A' }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
