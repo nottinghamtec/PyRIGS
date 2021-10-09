@@ -53,10 +53,21 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
-    {% for level in completed_levels %}
+    {% for qual in completed_levels %}
     {% if forloop.first %}<div class="card-columns">{% endif %}
     <div class="card my-3 border-success">
-    <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
+        <h3 class="card-header"><a href="{% url 'level_detail' qual.level.pk %}">{{ qual }}</a></h3>
+        <div class="card-footer text-right pr-1">
+        {% if qual.confirmed_by is None %}
+            {% if request.user.is_supervisor or request.user.is_superuser %}
+            <span class="badge badge-warning">Awaiting Confirmation</span> <a class="btn btn-info" href="{% url 'confirm_level' object.pk qual.level.pk %}">Confirm</a>
+            {% else %}
+            <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
+            {% endif %}
+        {% else %}
+        <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by }}</small></button>
+        {% endif %}
+        </div>
     </div>
     {% if forloop.last %}</div>{%endif%}
     {% empty %}
@@ -72,22 +83,6 @@
                 <div class="progress mb-2">
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
-            </div>
-            <div class="card-footer text-right">
-                {% user_level_if_present object level as level_qualification %}
-                {% if level_qualification %}
-                    {% if level_qualification.confirmed_by is None %}
-                        {% if request.user.is_supervisor or request.user.is_superuser %}
-                        <a class="btn btn-info" href="{% url 'confirm_level' object.pk level.pk %}">Confirm</a>
-                        {% else %}
-                        <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
-                        {% endif %}
-                    {% else %}
-                    <button class="btn btn-success active">Confirmed <small>by {{ level_qualification.confirmed_by }}</small></button>
-                    {% endif %}
-                {% else %}
-                <button class="btn btn-danger" disabled>Incomplete</button>
-                {% endif %}
             </div>
         </div>
         {% endfor %}

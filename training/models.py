@@ -16,12 +16,16 @@ class Trainee(Profile):
     def level_qualifications(self, only_confirmed=False):
         levels = self.levels.all()
         if only_confirmed:
-            levels = levels.filter(confirmed_on__isnull=False)
+            levels = levels.exclude(confirmed_on__isnull=True)
         return levels.select_related('level')
 
     @property
     def is_supervisor(self):
-        return self.level_qualifications(True).filter(level__gte=TrainingLevel.SUPERVISOR).exists()
+        return self.level_qualifications(True).filter(level__gte=TrainingLevel.SUPERVISOR).exclude(level__department=TrainingLevel.HAULAGE).exists()
+
+    @property
+    def is_driver(self):
+        return self.level_qualifications(True).filter(level__department=TrainingLevel.HAULAGE).exists()
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
@@ -123,12 +127,13 @@ class TrainingLevel(models.Model, RevisionMixin):
         (TECHNICIAN, 'Technician'),
         (SUPERVISOR, 'Supervisor'),
     )
+    HAULAGE = 4
     DEPARTMENTS = (
         (0, 'Sound'),
         (1, 'Lighting'),
         (2, 'Power'),
         (3, 'Rigging'),
-        (4, 'Haulage'),
+        (HAULAGE, 'Haulage'),
     )
     department = models.IntegerField(choices=DEPARTMENTS, null=True) # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
