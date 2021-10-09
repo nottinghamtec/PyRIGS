@@ -5,7 +5,9 @@ from reversion import revisions as reversion
 from django.urls import reverse
 
 # 'shim' overtop the profile model to neatly contain all training related fields etc
-@reversion.register # profile is already registered, but this triggers my custom versioning logic
+
+
+@reversion.register  # profile is already registered, but this triggers my custom versioning logic
 class Trainee(Profile):
     class Meta:
         proxy = True
@@ -21,7 +23,10 @@ class Trainee(Profile):
 
     @property
     def is_supervisor(self):
-        return self.level_qualifications(True).filter(level__gte=TrainingLevel.SUPERVISOR).exclude(level__department=TrainingLevel.HAULAGE).exists()
+        return self.level_qualifications(True) \
+            .filter(level__gte=TrainingLevel.SUPERVISOR) \
+            .exclude(level__department=TrainingLevel.HAULAGE) \
+            .exclude(level__department__isnull=True).exists()
 
     @property
     def is_driver(self):
@@ -38,6 +43,8 @@ class Trainee(Profile):
         return reverse('trainee_detail', kwargs={'pk': self.pk})
 
 # Items
+
+
 class TrainingCategory(models.Model):
     reference_number = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
@@ -95,7 +102,7 @@ class TrainingItemQualification(models.Model):
 
     def save(self, *args, **kwargs):
         super().save()
-        for level in TrainingLevel.objects.all(): # Mm yes efficiency FIXME
+        for level in TrainingLevel.objects.all():  # Mm yes efficiency FIXME
             if level.user_has_requirements(self.trainee):
                 with reversion.create_revision():
                     level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
@@ -135,7 +142,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         (3, 'Rigging'),
         (HAULAGE, 'Haulage'),
     )
-    department = models.IntegerField(choices=DEPARTMENTS, null=True) # N.B. Technical Assistant does not have a department
+    department = models.IntegerField(choices=DEPARTMENTS, null=True)  # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
     icon = models.CharField(null=True, blank=True, max_length=20)
@@ -158,6 +165,10 @@ class TrainingLevel(models.Model, RevisionMixin):
         return self.requirements.filter(depth=depth)
 
     @property
+    def is_common_competencies(self):
+        return self.department is None and self.level > 0
+
+    @property
     def started_requirements(self):
         return self.get_requirements_of_depth(TrainingItemQualification.STARTED)
 
@@ -169,7 +180,7 @@ class TrainingLevel(models.Model, RevisionMixin):
     def passed_out_requirements(self):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
-    def percentage_complete(self, user): # FIXME
+    def percentage_complete(self, user):  # FIXME
         needed_qualifications = self.requirements.all().select_related()
         relavant_qualifications = 0.0
         # TODO Efficiency...
@@ -227,6 +238,8 @@ class TrainingLevelQualification(models.Model):
     reversion_hide = True
 
     def __str__(self):
+        if self.level.is_common_competencies:
+            return "{} is qualified in the {}".format(self.trainee, self.level)
         return "{} is qualified as a {}".format(self.trainee, self.level)
 
     class Meta:

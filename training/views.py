@@ -10,6 +10,7 @@ from django.db import transaction
 
 from users import views
 
+
 class ItemList(generic.ListView):
     template_name = "item_list.html"
     model = models.TrainingItem
@@ -36,7 +37,7 @@ class TraineeDetail(views.ProfileDetail, ModalURLMixin):
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
         choices = models.TrainingItemQualification.CHOICES
         context["depths"] = choices
-        for i in [x for x,_ in choices]:
+        for i in [x for x, _ in choices]:
             context[str(i)] = self.object.get_records_of_depth(i)
         return context
 
@@ -64,7 +65,7 @@ class LevelList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "All Training Levels"
-        context["levels"] = models.TrainingLevel.objects.all().order_by('level','department')
+        context["levels"] = models.TrainingLevel.objects.all().order_by('level', 'department')
         return context
 
 
@@ -105,7 +106,7 @@ class AddQualification(generic.CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('trainee_detail', kwargs={"pk": self.object.pk })
+        return reverse_lazy('trainee_detail', kwargs={"pk": self.object.pk})
 
     def get_form_kwargs(self):
         kwargs = super(AddQualification, self).get_form_kwargs()

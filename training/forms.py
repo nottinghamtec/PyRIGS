@@ -5,6 +5,7 @@ from datetime import date
 from training import models
 from RIGS.models import Profile
 
+
 class SessionLogForm(forms.Form):
     pass
 
@@ -33,6 +34,7 @@ class QualificationForm(forms.ModelForm):
         if not supervisor.is_supervisor:
             raise forms.ValidationError('Selected supervisor must actually *be* a supervisor...')
         return supervisor
+
 
 class RequirementForm(forms.ModelForm):
     depth = forms.ChoiceField(choices=models.TrainingItemQualification.CHOICES)

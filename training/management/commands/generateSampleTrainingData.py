@@ -90,4 +90,4 @@ class Command(BaseCommand):
                                                    is_staff=True)
         supervisor.set_password('supervisor')
         supervisor.save()
-        models.TrainingLevelQualification.objects.create(trainee=supervisor, level=models.TrainingLevel.objects.filter(level__gte=models.TrainingLevel.SUPERVISOR).exclude(department=models.TrainingLevel.HAULAGE).first(), confirmed_on=timezone.now())
+        models.TrainingLevelQualification.objects.create(trainee=supervisor, level=models.TrainingLevel.objects.filter(level__gte=models.TrainingLevel.SUPERVISOR).exclude(department=models.TrainingLevel.HAULAGE).exclude(department__isnull=True).first(), confirmed_on=timezone.now())
