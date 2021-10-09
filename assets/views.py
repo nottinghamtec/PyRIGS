@@ -48,9 +48,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
             queryset = self.model.objects.all()
         elif len(query_string) >= 3:
             queryset = self.model.objects.filter(
-                Q(asset_id__exact=query_string) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
+                Q(asset_id__exact=query_string.upper()) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
         else:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query_string))
+            queryset = self.model.objects.filter(Q(asset_id__exact=query_string.upper()))
 
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
