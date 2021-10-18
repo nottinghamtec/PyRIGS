@@ -369,6 +369,9 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def vat(self):
+        # No VAT is owed on internal transfers
+        if self.internal:
+            return 0
         return Decimal(self.sum_total * self.vat_rate.rate).quantize(Decimal('.01'))
 
     """
