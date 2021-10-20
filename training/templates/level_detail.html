@@ -2,11 +2,50 @@
 
 {% load user_has_qualification from tags %}
 {% load user_level_if_present from tags %}
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script>
+    $('document').ready(function(){
+        $('#requirement_button').click(function (e) {
+             e.preventDefault();
+             var url = $(this).attr("href");
+             $.ajax({
+                url: url,
+                success: function(){
+                    $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length === 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                            $(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+                        });
+                    }
+                }
+             });
+        });
+    });
+    </script>
+{% endblock %}
 
 {% block content %}
 {% if request.user.is_supervisor or perms.training.change_traininglevel %}
 <div class="col-sm-12 text-right pr-0">
-<a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}">
+<a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}" id="requirement_button">
 	<span class="fas fa-plus"></span> Add New Requirement
 </a>
 </div>

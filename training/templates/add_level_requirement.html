@@ -1,4 +1,4 @@
-{% extends 'base_training.html' %}
+{% extends request.is_ajax|yesno:'base_ajax.html,base_training.html' %}
 
 {% load static %}
 {% load widget_tweaks %}
@@ -34,6 +34,14 @@
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
       {% render_field form.depth|add_class:'form-control col-sm'|attr:'required' %}
     </div>
-   <input type="submit" class="btn btn-primary">
+   {% if not request.is_ajax %}
+   <button type="submit" class="btn btn-primary">Save</button>
+   {% endif %}
 </form>
+{% endblock %}
+
+{% block footer %}
+<div class="col-sm-12 text-right pr-0">
+    <button type="submit" class="btn btn-primary" title="Save" form="requirement-form"><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
+</div>
 {% endblock %}

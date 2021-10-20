@@ -55,6 +55,17 @@ class TraineeItemDetail(generic.ListView):
         return context
 
 
+class LevelDetail(generic.DetailView):
+    template_name = "level_detail.html"
+    model = models.TrainingLevel
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Training Level {} <span class='badge badge-{} badge-pill'><span class='fas fa-{}'></span></span>".format(self.object, self.object.get_department_colour(), self.object.icon)
+        context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
+        return context
+
+
 class LevelList(generic.ListView):
     model = models.TrainingLevel
     template_name = "level_list.html"
@@ -112,7 +123,7 @@ class AddQualification(generic.CreateView, ModalURLMixin):
 
 
 class AddLevelRequirement(generic.CreateView, ModalURLMixin):
-    template_name = "edit_training_level.html"
+    template_name = "add_level_requirement.html"
     model = models.TrainingLevelRequirement
     form_class = forms.RequirementForm
 
@@ -135,17 +146,6 @@ class AddLevelRequirement(generic.CreateView, ModalURLMixin):
         reversion.add_to_revision(form.cleaned_data['level'])
         reversion.set_comment("Level requirement added")
         return super().form_valid(form, *args, **kwargs)
-
-
-class LevelDetail(generic.DetailView):
-    template_name = "level_detail.html"
-    model = models.TrainingLevel
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = "Training Level {} <span class='badge badge-{} badge-pill'><span class='fas fa-{}'></span></span>".format(self.object, self.object.get_department_colour(), self.object.icon)
-        context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
-        return context
 
 
 class RemoveRequirement(generic.DeleteView):
