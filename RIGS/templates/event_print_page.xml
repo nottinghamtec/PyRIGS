@@ -190,19 +190,21 @@
                 {% endif %}
             </para>
         </td>
-        <td>£ {{ item.cost|floatformat:2 }}</td>
+        <td>£{{ item.cost|floatformat:2 }}</td>
         <td>{{ item.quantity }}</td>
-        <td>£ {{ item.total_cost|floatformat:2 }}</td>
+        <td>£{{ item.total_cost|floatformat:2 }}</td>
     </tr>
 {% endfor %}
 </blockTable>
 <keepTogether>
     <blockTable style="totalTable" colWidths="300,115,80">
+    {% if object.vat > 0 %}
     <tr>
-        <td>{% if quote %}VAT Registration Number: 170734807{% endif %}</td>
-        <td>Total (ex. VAT)</td>
+        <td>{% if quote %}VAT Registration Number: 170734807</td>
+        <td>Total (ex. VAT){% endif %}</td>
         <td>£ {{ object.sum_total|floatformat:2 }}</td>
     </tr>
+    {% endif %}
     <tr>
         <td>
             {% if quote %}
@@ -211,8 +213,10 @@
                 </para>
             {% endif %}
         </td>
+        {% if object.vat > 0 %}
         <td>VAT @ {{ object.vat_rate.as_percent|floatformat:2 }}%</td>
-        <td>£ {{ object.vat|floatformat:2 }}</td>
+        <td>£{{ object.vat|floatformat:2 }}</td>
+        {% endif %}
     </tr>
     <tr>
         <td>
@@ -224,7 +228,7 @@
         </td>
         {% if invoice %}
             <td>Total</td>
-            <td>£ {{ object.total|floatformat:2 }}</td>
+            <td>£{{ object.total|floatformat:2 }}</td>
         {% else %}
             <td>
                 <para>
@@ -233,7 +237,7 @@
             </td>
             <td>
                 <para>
-                    <b>£ {{ object.total|floatformat:2 }}</b>
+                    <b>£{{ object.total|floatformat:2 }}</b>
                 </para>
             </td>
         {% endif %}
@@ -267,7 +271,7 @@
             <tr>
                 <td>{{ payment.get_method_display }}</td>
                 <td>{{ payment.date }}</td>
-                <td>£ {{ payment.amount|floatformat:2 }}</td>
+                <td>£{{ payment.amount|floatformat:2 }}</td>
             </tr>
         {% endfor %}
     </blockTable>
@@ -275,18 +279,18 @@
         <tr>
             <td></td>
             <td>Payment Total</td>
-            <td>£ {{ object.invoice.payment_total|floatformat:2 }}</td>
+            <td>£{{ object.invoice.payment_total|floatformat:2 }}</td>
         </tr>
         <tr>
             <td></td>
             <td>
                 <para>
-                    <b>Balance</b> (ex. VAT)
+                    <b>Balance</b> {% if object.vat > 0 %}(ex. VAT){% endif %}
                 </para>
             </td>
             <td>
                 <para>
-                    <b>£ {{ object.invoice.balance|floatformat:2 }}</b>
+                    <b>£{{ object.invoice.balance|floatformat:2 }}</b>
                 </para>
             </td>
         </tr>
@@ -316,7 +320,7 @@
         <tr>
             <td>General Enquires and 24 Hour Emergency Contact: 0115 84 68720</td>
         </tr>
-    {% else %}
+    {% elif object.vat > 0 %}
         <tr>
         <td>
             <para>VAT Registration Number: 170734807</para>

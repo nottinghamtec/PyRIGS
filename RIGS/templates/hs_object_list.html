@@ -15,7 +15,7 @@
     <div class="row">
         <div class="col-12">
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table mb-0 table-sm">
                     <thead>
                         <tr>
                             <th scope="col">Event</th>
@@ -32,7 +32,7 @@
                     {% for object in object_list %}
                     <tr class="{% if object.reviewed_by %}table-success{%endif%}">
                         {# General #}
-                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a></th>
+                        <th scope="row"><a href="{% url 'event_detail' object.event.pk %}">{{ object.event }}</a><br><small>{{ object.event.get_status_display }}</small></th>
                         {% for field in object_list.0.fieldz %}
                             <td>{{ object|get_field:field }}</td>
                         {% endfor %}

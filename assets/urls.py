@@ -1,22 +1,24 @@
 from django.contrib.auth.decorators import login_required
-from django.urls import path
+from django.urls import path, register_converter
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from PyRIGS.decorators import has_oembed, permission_required_with_403
 from PyRIGS.views import OEmbedView
-from assets import views
+from . import views, converters
+
+register_converter(converters.AssetIDConverter, 'asset')
 
 urlpatterns = [
     path('', login_required(views.AssetList.as_view()), name='asset_index'),
     path('asset/list/', login_required(views.AssetList.as_view()), name='asset_list'),
-    path('asset/id/<str:pk>/', has_oembed(oembed_view="asset_oembed")(views.AssetDetail.as_view()), name='asset_detail'),
+    path('asset/id/<asset:pk>/', has_oembed(oembed_view="asset_oembed")(views.AssetDetail.as_view()), name='asset_detail'),
     path('asset/create/', permission_required_with_403('assets.add_asset')
          (views.AssetCreate.as_view()), name='asset_create'),
-    path('asset/id/<str:pk>/edit/', permission_required_with_403('assets.change_asset')
+    path('asset/id/<asset:pk>/edit/', permission_required_with_403('assets.change_asset')
          (views.AssetEdit.as_view()), name='asset_update'),
-    path('asset/id/<str:pk>/duplicate/', permission_required_with_403('assets.add_asset')
+    path('asset/id/<asset:pk>/duplicate/', permission_required_with_403('assets.add_asset')
          (views.AssetDuplicate.as_view()), name='asset_duplicate'),
-    path('asset/id/<str:pk>/label', login_required(views.GenerateLabel.as_view()), name='generate_label'),
+    path('asset/id/<asset:pk>/label', login_required(views.GenerateLabel.as_view()), name='generate_label'),
 
     path('cabletype/list/', login_required(views.CableTypeList.as_view()), name='cable_type_list'),
     path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),

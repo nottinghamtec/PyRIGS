@@ -6,11 +6,11 @@
         </div>
 	</th>
     {% if perms.RIGS.view_event %}
-	<td>£&nbsp;<span class="cost">{{item.cost|floatformat:2}}</span></td>
+	<td>£<span class="cost">{{item.cost|floatformat:2}}</span></td>
     {% endif %}
 	<td class="quantity">{{item.quantity}}</td>
     {% if perms.RIGS.view_event %}
-	<td>£&nbsp;<span class="sub-total" data-subtotal="{{item.total_cost}}">{{item.total_cost|floatformat:2}}</span></td>
+	<td>£<span class="sub-total" data-subtotal="{{item.total_cost}}">{{item.total_cost|floatformat:2}}</span></td>
     {% endif %}
 	{% if edit %}
     <td class="vert-align text-right">

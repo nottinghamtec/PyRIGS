@@ -27,12 +27,13 @@
 			{% endfor %}
 		</tbody>
         {% if auth or perms.RIGS.view_event %}
-		<tfoot>
+		<tfoot style="font-weight: bold">
 			<tr>
 				<td rowspan="3" colspan="2"></td>
-				<td>Total (ex. VAT)</td>
-				<td colspan="2">£ <span id="sumtotal">{{object.sum_total|default:0|floatformat:2}}</span></td>
+				<td>Total {% if object.vat > 0 or not object.pk %}(ex. VAT){% endif %}</td>
+				<td colspan="2">£<span id="sumtotal">{{object.sum_total|default:0|floatformat:2}}</span></td>
 			</tr>
+            {% if object.vat > 0 or not object.pk %}
 			<tr>
 				{% if not object.pk %}
 					<td id="vat-rate" data-rate="{{currentVAT.rate}}">VAT @
@@ -41,12 +42,13 @@
 					<td id="vat-rate" data-rate="{{object.vat_rate.rate}}">VAT @
 						{{object.vat_rate.as_percent|floatformat|default:"TBD"}}%</td>
 				{% endif %}
-				<td colspan="2">£ <span id="vat">{{object.vat|default:0|floatformat:2}}</span></td>
+				<td colspan="2">£<span id="vat">{{object.vat|default:0|floatformat:2}}</span></td>
 			</tr>
 			<tr>
 				<td>Total</td>
-				<td colspan="2">£ <span id="total">{{object.total|default:0|floatformat:2}}</span></td>
+				<td colspan="2">£<span id="total">{{object.total|default:0|floatformat:2}}</span></td>
 			</tr>
+            {% endif %}
 		</tfoot>
         {% endif %}
 	</table>
@@ -59,9 +61,9 @@
                     <em class="description"></em>
                 </div>
         </td>
-        <td>£&nbsp;<span class="cost"></span></td>
+        <td>£<span class="cost"></span></td>
         <td class="quantity"></td>
-        <td>£&nbsp;<span class="sub-total"></span></td>
+        <td>£<span class="sub-total"></span></td>
         {% if edit %}
         <td class="vert-align text-right">
             <div class="btn-group" role="group" aria-label="Action buttons">

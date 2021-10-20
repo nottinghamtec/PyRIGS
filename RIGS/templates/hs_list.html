@@ -4,10 +4,11 @@
 
 {% block content %}
 <div class="table-responsive">
-    <table class="table mb-0">
+    <table class="table mb-0 table-sm">
         <thead>
             <tr>
                 <th scope="col">Event</th>
+                <th scope="col">MIC</th>
                 <th scope="col">Dates</th>
                 <th scope="col">RA</th>
                 <th scope="col">Checklists</th>
@@ -16,7 +17,8 @@
         <tbody>
         {% for event in object_list %}
         <tr id="event_row">
-            <th scope="row" id="event_number"><a href="{% url 'event_detail' event.pk %}">{{ event }}</a></th>
+            <th scope="row" id="event_number"><a href="{% url 'event_detail' event.pk %}">{{ event }}</a><br><small>{{ event.get_status_display }}</small></th>
+            <td>{% if event.mic is not None %}<a href="{% url 'profile_detail' event.mic.pk %}">{% else %}<span class="text-danger">{% endif %}{{ event.mic }}{% if event.mic is not None %}</a>{% else %}</span>{%endif%}</td>
             <!--Dates-->
             <td id="event_dates">
                 <span><strong>{{ event.start_date|date:"D d/m/Y" }}</strong></span>

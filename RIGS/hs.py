@@ -82,7 +82,7 @@ class EventRiskAssessmentList(generic.ListView):
     template_name = 'hs_object_list.html'
 
     def get_queryset(self):
-        return self.model.objects.order_by('reviewed_at').select_related('event')
+        return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
 
     def get_context_data(self, **kwargs):
         context = super(EventRiskAssessmentList, self).get_context_data(**kwargs)
@@ -187,6 +187,9 @@ class EventChecklistList(generic.ListView):
     model = models.EventChecklist
     template_name = 'hs_object_list.html'
 
+    def get_queryset(self):
+        return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
+
     def get_context_data(self, **kwargs):
         context = super(EventChecklistList, self).get_context_data(**kwargs)
         context['title'] = 'Event Checklist'
@@ -215,7 +218,7 @@ class HSList(generic.ListView):
     template_name = 'hs_list.html'
 
     def get_queryset(self):
-        return models.Event.objects.all().order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
+        return models.Event.objects.all().exclude(status=models.Event.CANCELLED).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
 
     def get_context_data(self, **kwargs):
         context = super(HSList, self).get_context_data(**kwargs)
