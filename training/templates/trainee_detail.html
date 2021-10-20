@@ -59,7 +59,7 @@
         <h3 class="card-header"><a href="{% url 'level_detail' qual.level.pk %}">{{ qual }}</a></h3>
         <div class="card-footer text-right pr-1">
         {% if qual.confirmed_by is None %}
-            {% if request.user.is_supervisor or request.user.is_superuser %}
+            {% if request.user.pk != object.pk and request.user.is_supervisor %}
             <span class="badge badge-warning">Awaiting Confirmation</span> <a class="btn btn-info" href="{% url 'confirm_level' object.pk qual.level.pk %}">Confirm</a>
             {% else %}
             <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
