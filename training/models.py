@@ -8,7 +8,7 @@ from django.urls import reverse
 
 
 @reversion.register  # profile is already registered, but this triggers my custom versioning logic
-class Trainee(Profile):
+class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
 
@@ -214,7 +214,7 @@ class TrainingLevel(models.Model, RevisionMixin):
 
 
 @reversion.register
-class TrainingLevelRequirement(models.Model):
+class TrainingLevelRequirement(models.Model, RevisionMixin):
     level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
     depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
@@ -229,7 +229,7 @@ class TrainingLevelRequirement(models.Model):
 
 
 @reversion.register
-class TrainingLevelQualification(models.Model):
+class TrainingLevelQualification(models.Model, RevisionMixin):
     trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)
     level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
     confirmed_on = models.DateTimeField(null=True)
