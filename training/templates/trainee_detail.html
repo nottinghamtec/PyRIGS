@@ -71,7 +71,7 @@
     </div>
     {% if forloop.last %}</div>{%endif%}
     {% empty %}
-    <span class="badge badge-warning">No qualifications in any levels yet...did someone forget to fill out the paperwork?</span>
+    <div class="alert alert-warning">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
     {% endfor %}
     <div class="card-columns">
         {% for level in started_levels %}

@@ -22,7 +22,7 @@ class ItemList(generic.ListView):
         return context
 
 
-class TraineeDetail(views.ProfileDetail, ModalURLMixin):
+class TraineeDetail(views.ProfileDetail):
     template_name = "trainee_detail.html"
     model = models.Trainee
 
@@ -40,9 +40,6 @@ class TraineeDetail(views.ProfileDetail, ModalURLMixin):
         for i in [x for x, _ in choices]:
             context[str(i)] = self.object.get_records_of_depth(i)
         return context
-
-    def get_success_url(self):
-        return self.get_close_url('trainee_detail', 'trainee_detail')
 
 
 class TraineeItemDetail(generic.ListView):
@@ -90,7 +87,7 @@ class SessionLog(generic.FormView):
         return context
 
 
-class AddQualification(generic.CreateView):
+class AddQualification(generic.CreateView, ModalURLMixin):
     template_name = "edit_training_record.html"
     model = models.TrainingItemQualification
     form_class = forms.QualificationForm
@@ -106,7 +103,7 @@ class AddQualification(generic.CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('trainee_detail', kwargs={"pk": self.object.pk})
+        return self.get_close_url('trainee_detail', 'trainee_detail')
 
     def get_form_kwargs(self):
         kwargs = super(AddQualification, self).get_form_kwargs()
@@ -114,7 +111,7 @@ class AddQualification(generic.CreateView):
         return kwargs
 
 
-class AddLevelRequirement(generic.CreateView):
+class AddLevelRequirement(generic.CreateView, ModalURLMixin):
     template_name = "edit_training_level.html"
     model = models.TrainingLevelRequirement
     form_class = forms.RequirementForm
@@ -130,7 +127,7 @@ class AddLevelRequirement(generic.CreateView):
         return kwargs
 
     def get_success_url(self):
-        return reverse_lazy('level_detail', kwargs={"pk": self.kwargs['pk']})
+        return self.get_close_url('level_detail', 'level_detail')
 
     @transaction.atomic()
     @reversion.create_revision()
