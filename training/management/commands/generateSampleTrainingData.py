@@ -96,5 +96,6 @@ class Command(BaseCommand):
                                                    email="supervisor@example.com", is_active=True,
                                                    is_staff=True, is_approved=True)
         supervisor.set_password('supervisor')
+        supervisor.groups.add(Group.objects.get(name="Keyholders"))
         supervisor.save()
-        models.TrainingLevelQualification.objects.create(trainee=supervisor, level=models.TrainingLevel.objects.filter(level__gte=models.TrainingLevel.SUPERVISOR).exclude(department=models.TrainingLevel.HAULAGE).exclude(department__isnull=True).first(), confirmed_on=timezone.now())
+        models.TrainingLevelQualification.objects.create(trainee=supervisor, level=models.TrainingLevel.objects.filter(level__gte=models.TrainingLevel.SUPERVISOR).exclude(department=models.TrainingLevel.HAULAGE).exclude(department__isnull=True).first(), confirmed_on=timezone.now(), confirmed_by=models.Trainee.objects.first())

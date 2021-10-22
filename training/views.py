@@ -83,7 +83,7 @@ class TraineeList(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Profile List"
+        context["page_title"] = "Training Profile List"
         return context
 
 

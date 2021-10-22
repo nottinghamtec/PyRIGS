@@ -20,7 +20,7 @@ from reversion.models import Version
 
 
 @reversion.register
-class Profile(AbstractUser):
+class Profile(AbstractUser):  # TODO move to versioning - currently get import errors with that
     initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
@@ -66,7 +66,10 @@ class Profile(AbstractUser):
     def __str__(self):
         return self.name
 
-# TODO move to versioning - currently get import errors with that
+    @property
+    def as_trainee(self):
+        from training.models import Trainee
+        return Trainee.objects.get(pk=self.pk)
 
 
 class RevisionMixin(object):
