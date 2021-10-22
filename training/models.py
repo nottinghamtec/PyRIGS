@@ -42,8 +42,6 @@ class Trainee(Profile, RevisionMixin):
     def get_absolute_url(self):
         return reverse('trainee_detail', kwargs={'pk': self.pk})
 
-# Items
-
 
 class TrainingCategory(models.Model):
     reference_number = models.CharField(max_length=3)
@@ -134,12 +132,16 @@ class TrainingLevel(models.Model, RevisionMixin):
         (TECHNICIAN, 'Technician'),
         (SUPERVISOR, 'Supervisor'),
     )
+    SOUND = 0
+    LIGHTING = 1
+    POWER = 2
+    RIGGING = 3
     HAULAGE = 4
     DEPARTMENTS = (
-        (0, 'Sound'),
-        (1, 'Lighting'),
-        (2, 'Power'),
-        (3, 'Rigging'),
+        (SOUND, 'Sound'),
+        (LIGHTING, 'Lighting'),
+        (POWER, 'Power'),
+        (RIGGING, 'Rigging'),
         (HAULAGE, 'Haulage'),
     )
     department = models.IntegerField(choices=DEPARTMENTS, null=True)  # N.B. Technical Assistant does not have a department
@@ -147,16 +149,17 @@ class TrainingLevel(models.Model, RevisionMixin):
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
     icon = models.CharField(null=True, blank=True, max_length=20)
 
-    def get_department_colour(self):
-        if self.department == 0:
+    @property
+    def department_colour(self):
+        if self.department == self.SOUND:
             return "info"
-        elif self.department == 1:
+        elif self.department == self.LIGHTING:
             return "dark"
-        elif self.department == 2:
+        elif self.department == self.POWER:
             return "danger"
-        elif self.department == 3:
+        elif self.department == self.RIGGING:
             return "warning"
-        elif self.department == 4:
+        elif self.department == self.HAULAGE:
             return "light"
         else:
             return "primary"

@@ -26,7 +26,3 @@ def percentage_complete(level, user):
 @register.simple_tag
 def colour_from_depth(depth):
     return models.TrainingItemQualification.get_colour_from_depth(depth)
-
-@register.simple_tag
-def colour_from_level(level):
-    return level.get_department_colour()

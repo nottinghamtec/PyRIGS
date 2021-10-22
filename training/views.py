@@ -61,7 +61,7 @@ class LevelDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Training Level {} <span class='badge badge-{} badge-pill'><span class='fas fa-{}'></span></span>".format(self.object, self.object.get_department_colour(), self.object.icon)
+        context["page_title"] = "Training Level {} <span class='badge badge-{} badge-pill'><span class='fas fa-{}'></span></span>".format(self.object, self.object.department_colour, self.object.icon)
         context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
         return context
 

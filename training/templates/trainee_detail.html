@@ -45,9 +45,7 @@
 {% block content %}
 <div class="row">
     <div class="col-sm-12 text-right">
-        <a type="button" class="btn btn-success" href="{% url 'edit_record' object.pk %}" id="add_record">
-	        <span class="fas fa-plus"></span> Add New Training Record
-        </a>
+        {% include 'partials/add_qualification.html' %}
         <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
     </div>
 </div>

@@ -1,0 +1,5 @@
+{% if request.user.is_supervisor or perms.training.add_trainingitemqualification %}
+<a type="button" class="btn btn-success" href="{% url 'add_qualification' object.pk %}" id="add_record">
+    <span class="fas fa-plus"></span> Add New Training Record
+</a>
+{% endif %}
