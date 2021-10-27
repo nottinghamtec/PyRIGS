@@ -58,6 +58,7 @@ class TrainingItem(models.Model):
     reference_number = models.CharField(max_length=3)
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
     name = models.CharField(max_length=50)
+    active = models.BooleanField(default = True)
 
     @property
     def number(self):

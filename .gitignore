@@ -26,6 +26,7 @@ var/
 .installed.cfg
 *.egg
 node_modules/
+data/
 
 # Continer extras
 .vagrant

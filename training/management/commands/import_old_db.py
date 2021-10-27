@@ -5,46 +5,27 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from training import models
+#from RIGS import models.Profile
 
 class Command(BaseCommand):
     epoch = datetime.date(1970, 1, 1)
 
     def handle(self, *args, **options):
-        self.import_Trainee()
         self.import_TrainingCatagory()
         self.import_TrainingItem()
         self.import_TrainingItemQualification()
         self.import_TrainingLevel()
-        self.import_TrainingLevelRequirement()
         self.import_TrainingLevelQualification()
         
     @staticmethod
     def xml_path(file):
-        return os.path.join(settings.BASE_DIR, 'data/DB_Dump/{}'.format(file))
+        return os.path.join(settings.BASE_DIR, 'data/{}'.format(file))
 
     @staticmethod
     def parse_xml(file):
         tree = ET.parse(file)
 
         return tree.getroot()
-
-    def import_Trainee(self):
-        tally = [0, 0]
-
-        root = self.parse_xml(self.xml_path('Members.xml'))
-        
-        for child in root:
-            obj, created = models.Trainee.objects.update_or_create(
-                pk=int(child.find('ID').text)
-                name = child.find('Member_x0020_Name').text
-            )
-        
-            if created:
-                tally[1] += 1
-            else:
-                tally[0] += 1
-        
-        print('Trainees - Updated: {}, Created: {}'.format(tally[0], tally[1]))
 
     def import_TrainingCatagory(self):
         tally = [0, 0]
@@ -68,15 +49,17 @@ class Command(BaseCommand):
     def import_TrainingItem(self):
         tally = [0, 0]
 
-        root = self.parse_xml(self.xml_path('Training Items.xml'))
+        root = self.parse_xml(self.xml_path('Training Items.xml'))  
         
         for child in root:
+            if child.find('active').text == '0': active = False
+            else: active =  True
             obj, created = models.TrainingItem.objects.update_or_create(
                 pk = int(child.find('ID').text),
                 reference_number = int(child.find('Item_x0020_Number').text),
                 name = child.find('Item_x0020_Name').text,
-                category = int(child.find('Category_x0020_ID').text)
-                #active?
+                category = models.TrainingCategory.objects.get(pk=int(child.find('Category_x0020_ID').text)),
+                active = active
             )
         
             if created:
@@ -99,7 +82,7 @@ class Command(BaseCommand):
                     trainee = int(child.find('Member_ID').text),
                     depth = 0,
                     date = child.find('Traning_Started_Date').text,
-                    supervisor = int(child.find('Training_Started_Assessor_ID'),text),
+                    supervisor = int(child.find('Training_Started_Assessor_ID').text),
                     notes = child.find('Training_Started_Notes').text
                 )
             if child.find('Traning_Complete_Date').text != '':
@@ -157,23 +140,6 @@ class Command(BaseCommand):
                 tally[0] += 1
         
         print('Training Levels - Updated: {}, Created: {}'.format(tally[0], tally[1])) 
-
-    def import_TrainingLevelRequirement(self): #?
-        tally = [0, 0]
-
-        root = self.parse_xml(self.xml_path(''))
-        
-        for child in root:
-            obj, created = models.TrainingLevelRequirement.objects.update_or_create(
-                pk=int(child.find('ID').text)
-            )
-        
-            if created:
-                tally[1] += 1
-            else:
-                tally[0] += 1
-        
-        print('Training Level Requirements - Updated: {}, Created: {}'.format(tally[0], tally[1]))
 
     def import_TrainingLevelQualification(self):
         tally = [0, 0]
