@@ -69,7 +69,7 @@
     </div>
     {% if forloop.last %}</div>{%endif%}
     {% empty %}
-    <div class="alert alert-warning">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
+    <div class="alert alert-warning mx-auto">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
     {% endfor %}
     <div class="card-columns">
         {% for level in started_levels %}
@@ -87,8 +87,7 @@
     </div>
 </div>
 <div class="row">
-    <h2 class="col-10">Training Items</h2>
-    <div class="alert alert-info col-12" role="alert"><h3>Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></h3></div>
+    <h2 class="col-12 pb-2">Training Items <small class="bg-light rounded-sm p-2"> Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></small></h2>
         {% for category in categories %}
         {% if forloop.first or forloop.counter|divisibleby:3 %}<div class="card-deck col-12">{% endif %}
         <div class="card mb-3">

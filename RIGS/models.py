@@ -21,7 +21,7 @@ from reversion.models import Version
 
 @reversion.register
 class Profile(AbstractUser):  # TODO move to versioning - currently get import errors with that
-    initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
+    initials = models.CharField(max_length=5, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
     is_approved = models.BooleanField(default=False)
