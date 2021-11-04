@@ -151,6 +151,7 @@ class EventDuplicate(EventUpdate):
         # Clear checked in by if it's a dry hire
         if new.dry_hire is True:
             new.checked_in_by = None
+            new.collector = None
 
         # Remove all the authorisation information from the new event
         new.auth_request_to = ''
