@@ -343,10 +343,13 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def display_id(self):
-        if self.is_rig:
-            return str("N%05d" % self.pk)
+        if self.pk:
+            if self.is_rig:
+                return str("N%05d" % self.pk)
+            else:
+                return self.pk
         else:
-            return self.pk
+            return "????"
 
     # Calculated values
     """
