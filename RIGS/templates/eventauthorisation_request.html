@@ -1,7 +1,23 @@
 {% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block title %}Request Authorisation{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script src="{% static 'js/popover.js' %}"></script>
+    <script src="{% static 'js/clipboard.min.js' %}"></script>
+    <script>
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function(e) {
+            $(e.trigger).popover('show');
+            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            e.clearSelection();
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
     <div class="row">
@@ -14,10 +30,10 @@
             <div class="alert alert-info">
                 <dl class="dl-horizontal">
                     <dt>Person Email</dt>
-                    <dd>{{ object.person.email }}</dd>
+                    <dd id="person-email">{{ object.person.email }}</dd>{% if object.person.email %}<button class="btn btn-secondary btn-sm pr-1" data-clipboard-target="#person-email" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>{% endif %}
 
                     <dt>Organisation Email</dt>
-                    <dd>{{ object.organisation.email }}</dd>
+                    <dd id="org-email">{{ object.organisation.email }}</dd>{% if object.organisation.email %}<button class="btn btn-secondary btn-sm pr-1" data-clipboard-target="#org-email" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>{% endif %}
                 </dl>
             </div>
             <form action="{{ form.action|default:request.path }}" method="POST" id="auth-request-form">
