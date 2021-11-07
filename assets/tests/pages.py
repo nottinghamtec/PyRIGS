@@ -70,7 +70,7 @@ class AssetList(BasePage):
 
 
 class AssetForm(FormPage):
-    _purchased_from_select_locator = (By.CSS_SELECTOR, 'div#purchased-from-group>div.bootstrap-select')
+    _purchased_from_select_locator = (By.XPATH, '//div[@id="purchased-from-group"]/div/div/div')
     _parent_select_locator = (By.CSS_SELECTOR, 'div#parent-group>div.bootstrap-select')
     form_items = {
         'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
