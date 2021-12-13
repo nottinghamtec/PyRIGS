@@ -212,6 +212,8 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
         clazz += " btn-primary "
         icon = "fa-plus"
         text = "New"
+    elif type == 'copy':
+        return {'copy': True, 'id': id, 'style': style}
     elif type == 'search':
         return {'submit': True, 'class': 'btn-info', 'icon': 'fa-search', 'text': 'Search', 'id': id, 'style': style}
     elif type == 'submit':
