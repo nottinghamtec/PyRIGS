@@ -23,7 +23,7 @@
 		</thead>
 		<tbody id="item-table-body">
 			{% for item in object.items.all %}
-				{% include 'item_row.html' %}
+				{% include 'partials/item_row.html' %}
 			{% endfor %}
 		</tbody>
         {% if auth or perms.RIGS.view_event %}
