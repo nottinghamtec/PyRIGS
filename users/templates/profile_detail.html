@@ -95,11 +95,11 @@
                             <dd class="col-8">
                                 {% if user.api_key %}
                                     <code id="api-key">{{user.api_key}}</code>
-                                    <button class="btn btn-secondary align-middle" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                    <button class="btn btn-secondary align-middle pr-1 btn-sm" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
                                 {% else %}
                                     <span id="api-key">No API Key Generated</span>
                                 {% endif %}
-                                <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle">
+                                <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle pr-1">
                                     {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
                                     <span class="fas fa-redo"></span>
                                 </a>
@@ -133,7 +133,7 @@
                             <dd class="col-8">
                                 {% if user.api_key %}
                                     <code id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></code>
-                                    <button class="btn btn-secondary align-middle" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                    <button class="btn btn-secondary align-middle btn-sm pr-1" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
                                     <br>
                                     <small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
                                         To sync from Google Calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>

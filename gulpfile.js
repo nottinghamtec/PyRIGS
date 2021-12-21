@@ -3,7 +3,7 @@
 var gulp = require('gulp');
 
 const terser = require('gulp-uglify');
-const sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('node-sass'));
 const flatten = require('gulp-flatten');
 const autoprefixer = require('autoprefixer')
 const postcss = require('gulp-postcss')
@@ -14,8 +14,6 @@ const spawn = require('child_process').spawn;
 const cssnano = require('cssnano');
 const con = require('gulp-concat');
 const gulpif = require('gulp-if');
-
-sass.compiler = require('node-sass');
 
 function fonts(done) {
     return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.*')

@@ -114,7 +114,7 @@
 <div class="card  mb-3">
     <div class="card-header">Power {% include 'partials/event_size.html' with object=object.event.riskassessment %}</div>
     <div class="card-body">
-        {% if event.riskassessment.event_size == 0 %}
+        {% if object.event.riskassessment.event_size == 0 %}
         <dl class="row">
             <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
             <dd class="col-2">

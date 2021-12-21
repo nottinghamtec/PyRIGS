@@ -8,11 +8,26 @@
     {% if create or edit or duplicate %}
     <div class="form-group" id="purchased-from-group">
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
-      <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
-        {% if object.purchased_from %}
-        <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
-        {% endif %}
-      </select>
+      <div class="row">
+          <div class="col">
+              <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
+                {% if object.purchased_from %}
+                <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
+                {% endif %}
+              </select>
+          </div>
+          <div class="col align-right">
+            <div class="btn-group">
+                <a href="{% url 'supplier_create' %}" class="btn btn-success modal-href"
+                   data-target="#{{ form.purchased_from.id_for_label }}">
+                    <span class="fas fa-plus"></span>
+                </a>
+                <a {% if form.supplier.value %}href="{% url 'supplier_update' form.purchased_from.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.purchased_from.id_for_label }}-update" data-target="#{{ form.purchased_from.id_for_label }}">
+                    <span class="fas fa-edit"></span>
+                </a>
+            </div>
+          </div>
+      </div>
     </div>
 
     <div class="form-group">

@@ -1,24 +1,48 @@
 {% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
+{% load static %}
+{% load button from filters %}
 
 {% block title %}Request Authorisation{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script src="{% static 'js/popover.js' %}"></script>
+    <script src="{% static 'js/clipboard.min.js' %}"></script>
+    <script>
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function(e) {
+            $(e.trigger).popover('show');
+            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            e.clearSelection();
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
     <div class="row">
         <div class="col-sm-12">
-            <div class="alert alert-warning">
+            <div class="alert alert-warning pb-0">
                 <h1>Send authorisation request email.</h1>
-                <p>Pressing send will email the address provided. Please triple check everything before continuing.</p>
+                <p>Pressing send will email the address provided. <strong>Please triple check everything before continuing.</strong></p>
             </div>
 
-            <div class="alert alert-info">
+            <div class="alert alert-info pb-0">
+                {% if object.person.email or object.organisation.email %}
                 <dl class="dl-horizontal">
+                    {% if object.person.email %}
                     <dt>Person Email</dt>
-                    <dd>{{ object.person.email }}</dd>
-
+                    <dd><span id="person-email">{{ object.person.email }}</span>{% button 'copy' id='#person-email' %}</dd>
+                    {% endif %}
+                    {% if object.organisation.email %}
                     <dt>Organisation Email</dt>
-                    <dd>{{ object.organisation.email }}</dd>
+                    <dd><span id="org-email">{{ object.organisation.email }}</span>{% button 'copy' id='#org-email' %}</dd>
+                    {% endif %}
                 </dl>
+                {% else %}
+                <p>No email addresses saved to the client &#3232;_&#3232;</p>
+                {% endif %}
             </div>
             <form action="{{ form.action|default:request.path }}" method="POST" id="auth-request-form">
                 {% csrf_token %}
