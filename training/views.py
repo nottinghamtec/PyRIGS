@@ -69,6 +69,7 @@ class LevelDetail(generic.DetailView):
 class LevelList(generic.ListView):
     model = models.TrainingLevel
     template_name = "level_list.html"
+    ordering = ['qualifications_obtained']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
