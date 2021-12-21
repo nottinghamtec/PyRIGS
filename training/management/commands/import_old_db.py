@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db.utils import IntegrityError
+from django.utils.timezone import make_aware
 
 from training import models
 from RIGS.models import Profile
@@ -219,11 +220,13 @@ class Command(BaseCommand):
                 obj, created = models.TrainingLevelQualification.objects.update_or_create(
                     pk = int(child.find('ID').text),
                     trainee = Profile.objects.get(pk=self.id_map[child.find('Member_x0020_ID').text]),
-                    level = models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text)),
-                    # FIXME
-                    #confirmed_on = child.find('Date_x0020_Level_x0020_Awarded').text
-                    #confirmed by?
+                    level = models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text))
                 )
+                
+                if child.find('Date_x0020_Level_x0020_Awarded') is not None:
+                    obj.confirmed_on =  make_aware(datetime.datetime.strptime(child.find('Date_x0020_Level_x0020_Awarded').text.split('T')[0], "%Y-%m-%d"))
+                    obj.save()
+                    #confirmed by?
 
                 if created:
                     tally[1] += 1
