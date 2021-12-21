@@ -87,15 +87,25 @@ class Command(BaseCommand):
         root = self.parse_xml(self.xml_path('Training Items.xml'))
 
         for child in root:
-            if child.find('active').text == '0': active = False
-            else: active =  True
-            obj, created = models.TrainingItem.objects.update_or_create(
-                pk = int(child.find('ID').text),
-                reference_number = int(child.find('Item_x0020_Number').text),
-                name = child.find('Item_x0020_Name').text,
-                category = models.TrainingCategory.objects.get(pk=int(child.find('Category_x0020_ID').text)),
-                active = active
-            )
+            if child.find('active').text == '0': 
+                active = False
+            else: 
+                active =  True
+
+            number = int(child.find('Item_x0020_Number').text)
+            name = child.find('Item_x0020_Name').text
+            category = models.TrainingCategory.objects.get(pk=int(child.find('Category_x0020_ID').text))
+
+            try:
+                obj, created = models.TrainingItem.objects.update_or_create(
+                    pk = int(child.find('ID').text),
+                    reference_number = number,
+                    name = name,
+                    category = category,
+                    active = active
+                )
+            except IntegrityError:
+                print("Training Item {}.{} {} has a duplicate reference number".format(category.reference_number, number, name))
 
             if created:
                 tally[1] += 1
@@ -174,7 +184,7 @@ class Command(BaseCommand):
                 depString = None
 
             desc = ""
-            if child.find('Desc'):
+            if child.find('Desc') is not None:
                 desc = child.find('Desc').text
 
             obj, created = models.TrainingLevel.objects.update_or_create(
@@ -232,7 +242,7 @@ class Command(BaseCommand):
         for child in root:
             try:
                 item = child.find('Item').text.split(".")
-                obj, created = models.TrainingLevelRequirement.objects.update_or_create(level=models.TrainingLevel.objects.get(pk=int(child.find('Level').text)),item=models.TrainingItem.objects.get(reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])), depth=int(child.find('Depth').text))
+                obj, created = models.TrainingLevelRequirement.objects.update_or_create(level=models.TrainingLevel.objects.get(pk=int(child.find('Level').text)),item=models.TrainingItem.objects.get(active=True, reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])), depth=int(child.find('Depth').text))
 
                 if created:
                     tally[1] += 1

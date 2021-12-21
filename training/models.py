@@ -44,7 +44,7 @@ class Trainee(Profile, RevisionMixin):
 
 
 class TrainingCategory(models.Model):
-    reference_number = models.CharField(max_length=3)
+    reference_number = models.CharField(max_length=3, unique=True)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -74,7 +74,7 @@ class TrainingItem(models.Model):
                 return True
 
     class Meta:
-        unique_together = ["reference_number", "name", "category"]
+        unique_together = ["reference_number", "active", "category"]
         ordering = ['category__reference_number', 'reference_number']
 
 
