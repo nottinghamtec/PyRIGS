@@ -20,6 +20,7 @@ class Command(BaseCommand):
         self.import_TrainingItemQualification()
         self.import_TrainingLevel()
         self.import_TrainingLevelQualification()
+        self.import_TrainingLevelRequirements()
 
     @staticmethod
     def xml_path(file):
@@ -172,9 +173,13 @@ class Command(BaseCommand):
                 level = models.TrainingLevel.TA
                 depString = None
 
+            desc = ""
+            if child.find('Desc'):
+                desc = child.find('Desc').text
+
             obj, created = models.TrainingLevel.objects.update_or_create(
                 pk=int(child.find('ID').text),
-                description = name,
+                description = desc,
                 level = level
             )
             if depString is not None:
@@ -218,3 +223,24 @@ class Command(BaseCommand):
                 print("Training Level Qualification #{} is duplicate. ಠ_ಠ".format(child.find('ID').text))
 
         print('TrainingLevelQualifications - Updated: {}, Created: {}'.format(tally[0], tally[1]))
+
+    def import_TrainingLevelRequirements(self):
+        tally = [0, 0]
+
+        root = self.parse_xml(self.xml_path('Training Level Requirements.xml'))
+
+        for child in root:
+            try:
+                item = child.find('Item').text.split(".")
+                obj, created = models.TrainingLevelRequirement.objects.update_or_create(level=models.TrainingLevel.objects.get(pk=int(child.find('Level').text)),item=models.TrainingItem.objects.get(reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])), depth=int(child.find('Depth').text))
+
+                if created:
+                    tally[1] += 1
+                else:
+                    tally[0] += 1
+            except models.TrainingItem.DoesNotExist:
+                print("Item with number {} does not exist".format(item))
+            except models.TrainingItem.MultipleObjectsReturned:
+                print(models.TrainingItem.objects.filter(reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])))
+
+        print('TrainingLevelRequirements - Updated: {}, Created: {}'.format(tally[0], tally[1]))
