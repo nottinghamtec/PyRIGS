@@ -26,6 +26,9 @@ class TraineeDetail(views.ProfileDetail):
     template_name = "trainee_detail.html"
     model = models.Trainee
 
+    def get_queryset(self):
+        return self.model.objects.prefetch_related('qualifications_obtained')
+
     def get_context_data(self, **kwargs):
         context = super(TraineeDetail, self).get_context_data(**kwargs)
         if self.request.user.pk == self.object.pk:
@@ -69,7 +72,6 @@ class LevelDetail(generic.DetailView):
 class LevelList(generic.ListView):
     model = models.TrainingLevel
     template_name = "level_list.html"
-    ordering = ['qualifications_obtained']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -81,6 +83,11 @@ class LevelList(generic.ListView):
 class TraineeList(generic.ListView):
     model = models.Trainee
     template_name = 'trainee_list.html'
+    paginate_by = 25
+    ordering = ['qualifications_obtained']
+
+    def get_queryset(self):
+        return self.model.objects.prefetch_related('levels', 'qualifications_obtained')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
