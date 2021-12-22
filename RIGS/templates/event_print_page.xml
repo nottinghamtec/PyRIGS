@@ -184,7 +184,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                        <em>{{ item.description|markdown:"rml" }}</em>
+                        {{ item.description|markdown:"rml" }}
                     </para>
                     <para>
                 {% endif %}
