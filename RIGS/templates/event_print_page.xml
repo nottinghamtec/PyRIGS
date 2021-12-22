@@ -13,9 +13,7 @@
         </para>
 
         <keepInFrame>
-            <para style="style.event_description">
-            {{ object.description|default_if_none:""|markdown:"rml"|linebreaksxml }}
-            </para>
+            {{ object.description|default_if_none:""|markdown:"rml" }}
         </keepInFrame>
     </td>
     <td>
@@ -186,7 +184,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                        <em>{{ item.description|markdown:"rml"|linebreaksxml }}</em>
+                        <em>{{ item.description|markdown:"rml" }}</em>
                     </para>
                     <para>
                 {% endif %}

@@ -1,4 +1,5 @@
 {% load namewithnotes from filters %}
+{% load markdown_tags %}
 <div class="card card-info">
     <div class="card-header">Event Info</div>
     <div class="card-body">
@@ -46,7 +47,7 @@
             <dd class="col-sm-12">&nbsp;</dd>
 
             <dt class="col-sm-6">Event Description</dt>
-            <dd class="dont-break-out col-sm-12">{{ event.description|linebreaksbr }}</dd>
+            <dd class="dont-break-out col-sm-12">{{ event.description|markdown }}</dd>
 
             <dd class="col-sm-12">&nbsp;</dd>
 
