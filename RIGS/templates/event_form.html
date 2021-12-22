@@ -8,11 +8,13 @@
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simplemde.min.css' %}">
 {% endblock %}
 
 {% block preload_js %}
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/simplemde.min.js' %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -63,6 +65,16 @@
             {% endif %}
         });
         $(document).ready(function () {
+            setupMDE('#id_description');
+            setupMDE('#id_notes');
+            setupMDE('#item_description');
+
+            $('#itemModal').on('shown.bs.modal', function (e) {
+                $('#item_description').data('mde_editor').value(
+                    $('#item_description').val()
+                    );
+            });
+
             setupItemTable($("#{{ form.items_json.id_for_label }}").val());
         });
         $(function () {
@@ -168,7 +180,7 @@
                         <label for="{{ form.description.id_for_label }}"
                                class="col-sm-4 col-form-label">{{ form.description.label }}</label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-12">
                             {% render_field form.description class+="form-control" %}
                         </div>
                     </div>
@@ -345,7 +357,7 @@
                     <div class="col-sm-12">
                         <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
                             <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
-                            {% render_field form.notes class+="form-control" %}
+                            {% render_field form.notes class+="form-control md-enabled" %}
                         </div>
                     </div>
                     {% include 'partials/item_table.html' %}

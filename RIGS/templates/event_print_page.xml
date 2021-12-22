@@ -1,4 +1,6 @@
+{% load markdown_tags %}
 {% load filters %}
+
 <setNextFrame name="main"/>
 <nextFrame/>
 <blockTable style="headLayout" colWidths="330,165">
@@ -10,10 +12,8 @@
         <b>{{object.start_date|date:"D jS N Y"}}</b>
         </para>
 
-        <keepInFrame>
-            <para style="style.event_description">
-            {{ object.description|default_if_none:""|linebreaksxml }}
-                </para>
+        <keepInFrame maxHeight="500" onOverflow="shrink">
+            {{ object.description|default_if_none:""|markdown:"rml" }}
         </keepInFrame>
     </td>
     <td>
@@ -184,7 +184,7 @@
                 {% if item.description %}
                     </para>
                     <para style="item_description">
-                    <em>{{ item.description|linebreaksxml }}</em>
+                        {{ item.description|markdown:"rml" }}
                     </para>
                     <para>
                 {% endif %}

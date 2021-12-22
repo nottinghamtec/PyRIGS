@@ -96,7 +96,7 @@ class CreateEvent(FormPage):
     _warning_selector = (By.XPATH, '/html/body/div[1]/div[1]')
 
     form_items = {
-        'description': (regions.TextBox, (By.ID, 'id_description')),
+        'description': (regions.SimpleMDETextArea, (By.ID, 'id_description')),
 
         'name': (regions.TextBox, (By.ID, 'id_name')),
         'start_date': (regions.DatePicker, (By.ID, 'id_start_date')),
@@ -110,7 +110,7 @@ class CreateEvent(FormPage):
         'collected_by': (regions.TextBox, (By.ID, 'id_collector')),
         'po': (regions.TextBox, (By.ID, 'id_purchase_order')),
 
-        'notes': (regions.TextBox, (By.ID, 'id_notes'))
+        'notes': (regions.SimpleMDETextArea, (By.ID, 'id_notes'))
     }
 
     def select_event_type(self, type_name):
