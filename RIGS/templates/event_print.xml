@@ -74,6 +74,14 @@
             <lineStyle kind="linebelow" start="3,0" stop="3,0" colorName="black"/>
             <lineStyle kind="linebelow" start="5,0" stop="5,0" colorName="black"/>
         </blockTableStyle>
+
+        <listStyle name="ol"
+                   bulletFormat="%s."
+                   bulletFontSize="10" />
+
+        <listStyle name="ul"
+                   start="bulletchar"
+                   bulletFontSize="10"/>
     </stylesheet>
 
     <template > {# Note: page is 595x842 points (1 point=1/72in) #}

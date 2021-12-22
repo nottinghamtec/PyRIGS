@@ -1,7 +1,7 @@
 from pypom import Region
 from selenium.webdriver.common.by import By
 
-from PyRIGS.tests.regions import TextBox, Modal
+from PyRIGS.tests.regions import TextBox, Modal, SimpleMDETextArea
 
 
 class Header(Region):
@@ -42,7 +42,7 @@ class ItemModal(Modal):
 
     form_items = {
         'name': (TextBox, (By.ID, 'item_name')),
-        'description': (TextBox, (By.ID, 'item_description')),
+        'description': (SimpleMDETextArea, (By.ID, 'item_description')),
         'quantity': (TextBox, (By.ID, 'item_quantity')),
         'price': (TextBox, (By.ID, 'item_cost'))
     }

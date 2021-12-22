@@ -1,8 +1,9 @@
+{% load markdown_tags %}
 <tr id="item-{{item.pk}}" data-pk="{{item.pk}}" class="item_row">
 	<th scope="row">
 		<span class="name">{{ item.name }}</span>
         <div class="item-description">
-            <em class="description">{{item.description|linebreaksbr}}</em>
+            <em class="description">{{item.description|markdown}}</em>
         </div>
 	</th>
     {% if perms.RIGS.view_event %}

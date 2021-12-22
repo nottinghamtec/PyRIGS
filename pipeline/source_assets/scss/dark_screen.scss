@@ -133,4 +133,21 @@
       -webkit-box-shadow: 0 0 0px 1000px rgba($info, .3) inset;
       transition: background-color 5000s ease-in-out 0s;
     }
+    .editor-toolbar > a {
+        color: white !important;
+    }
+    .editor-toolbar > a:hover {
+        background: transparent !important;
+    }
+    .editor-toolbar > a.active {
+        background: $info !important;
+    }
+    .cm-s-paper {
+        color: white;
+        background-color: $darktheme;
+        border-color: #bbb;
+    }
+    .CodeMirror-cursor {
+        border-color: white !important;
+    }
 }

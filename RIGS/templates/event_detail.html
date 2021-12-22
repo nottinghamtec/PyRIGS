@@ -1,5 +1,7 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 
+{% load markdown_tags %}
+
 {% block content %}
 <div class="row my-3 py-3">
     {% if not request.is_ajax %}
@@ -43,7 +45,7 @@
                     {% if perms.RIGS.view_event %}
                     <h4>Notes</h4>
                     <hr>
-                    <p class="dont-break-out">{{ event.notes|linebreaksbr }}</p>
+                    <p class="dont-break-out">{{ event.notes|markdown }}</p>
                     {% endif %}
                     <br>
                     {% include 'partials/item_table.html' %}
