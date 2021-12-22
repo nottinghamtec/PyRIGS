@@ -12,7 +12,7 @@
         <b>{{object.start_date|date:"D jS N Y"}}</b>
         </para>
 
-        <keepInFrame>
+        <keepInFrame maxHeight="500" onOverflow="shrink">
             {{ object.description|default_if_none:""|markdown:"rml" }}
         </keepInFrame>
     </td>
