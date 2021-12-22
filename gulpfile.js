@@ -27,7 +27,9 @@ function styles(done) {
                     'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/flatpickr/dist/flatpickr.css',])
+                    'node_modules/flatpickr/dist/flatpickr.css',
+                    'node_modules/simplemde/dist/simplemde.min.css'
+                    ])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
@@ -62,6 +64,7 @@ function scripts() {
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
+                    'node_modules/simplemde/dist/simplemde.min.js',
                     'node_modules/konami/konami.js',
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))

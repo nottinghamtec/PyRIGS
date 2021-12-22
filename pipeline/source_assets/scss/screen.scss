@@ -226,3 +226,33 @@ html.embedded {
     max-width: 3em;
   }
 }
+
+.markdown {
+  h1 {
+    font-size: $h1-font-size * 0.75;
+  }
+  h2 {
+    font-size: $h2-font-size * 0.8;
+  }
+  h3 {
+    font-size: $h3-font-size * 0.85;
+  }
+  h4 {
+    font-size: $h4-font-size * 0.9;
+  }
+  h5 {
+    font-size: $h5-font-size * 0.95;
+  }
+
+  img {
+    max-width: 100%;
+  }
+}
+
+#rigboard {
+  .markdown {
+    img {
+      max-width: 30rem;
+    }
+  }
+}
