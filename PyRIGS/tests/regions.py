@@ -120,11 +120,10 @@ class TextBox(Region):
 class SimpleMDETextArea(Region):
     @property
     def value(self):
-        return self.driver.execute_script("return document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().getValue();", self.root.get_attribute("id"));
+        return self.driver.execute_script("return document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().getValue();", self.root.get_attribute("id"))
 
     def set_value(self, value):
-        self.driver.execute_script("document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().setValue(arguments[1]);", self.root.get_attribute("id"), value);
-        
+        self.driver.execute_script("document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().setValue(arguments[1]);", self.root.get_attribute("id"), value)
 
 
 class CheckBox(Region):
