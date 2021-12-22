@@ -12,6 +12,7 @@
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
     <script src="{% static 'js/simplemde.min.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -72,6 +73,11 @@
                 return assets;
             },
             preserveSelected: false
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            setupMDE('#id_comments');
         });
     </script>
 {% endblock %}
