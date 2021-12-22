@@ -1,0 +1,16 @@
+Hi {{ to_name|default:"there" }},
+
+{{ request.user.get_full_name }} has requested that you authorise N{{ object.pk|stringformat:"05d" }}| {{ object.name }}{% if not to_name %} on behalf of {% if object.person %}{{ object.person.name }}{% else %}{{ object.organisation.name }}{% endif %}{% endif %}.
+
+            Please find the link below to complete the event booking process.
+            {% if object.event.organisation and object.event.organisation.union_account %}{# internal #}
+                Remember that only Presidents or Treasurers are allowed to sign off payments. You may need to forward
+                this
+                email on.
+            {% endif %}
+
+{{ request.scheme }}://{{ request.get_host }}{% url 'event_authorise' object.pk hmac %}
+
+Please note you event will not be booked until you complete this form.
+
+TEC PA & Lighting

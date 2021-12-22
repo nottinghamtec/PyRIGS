@@ -1,0 +1,14 @@
+{% extends override|default:'base_rigs.html' %}
+{% load paginator from filters %}
+{% load to_class_name from filters %}
+
+{% block js %}
+{% include 'partials/version_scripts.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    {% include 'partials/activity_table_body.html' %}
+    {% paginator %}
+</div>
+{% endblock %}

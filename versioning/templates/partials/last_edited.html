@@ -1,0 +1,5 @@
+<div class="pt-2">
+    <a href="{% url target id|default:object.pk %}" title="View Revision History">
+    {% if object.is_first_version %}Created{% else %}Last edited{% endif %} {{ object.last_edited_at|default:'never' }} by {{ object.last_edited_by.name|default:'System' }}
+    </a>
+</div>

@@ -8,25 +8,23 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
-import raven
+import datetime
+from pathlib import Path
 import secrets
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from envparse import env
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') if os.environ.get(
-    'SECRET_KEY') else 'gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e'
-
+SECRET_KEY = env('SECRET_KEY', default='gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0c*geiu3p_e')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG'))) if os.environ.get('DEBUG') else True
-
-
-STAGING = bool(int(os.environ.get('STAGING'))) if os.environ.get('STAGING') else False
+DEBUG = env('DEBUG', cast=bool, default=True)
+STAGING = env('STAGING', cast=bool, default=False)
+CI = env('CI', cast=bool, default=False)
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
 
@@ -44,33 +42,36 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = (
-    ('Tom Price', 'tomtom5152@gmail.com')
-)
+ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'),
+          ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+if DEBUG:
+    ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
 # Application definition
-
 INSTALLED_APPS = (
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'versioning',
+    'users',
     'RIGS',
     'assets',
 
     'debug_toolbar',
     'registration',
     'reversion',
-    'captcha',
     'widget_tweaks',
-    'raven.contrib.django.raven_compat',
+    'hcaptcha',
 )
 
 MIDDLEWARE = (
-    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -79,6 +80,8 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'PyRIGS.urls'
@@ -86,11 +89,10 @@ ROOT_URLCONF = 'PyRIGS.urls'
 WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -147,12 +149,33 @@ LOGGING = {
     }
 }
 
-RAVEN_CONFIG = {
-    'dsn': os.environ.get('RAVEN_DSN'),
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    # 'release': raven.fetch_git_sha(os.path.dirname(os.path.dirname(__file__))),
-}
+# Tests lock up SQLite otherwise
+if STAGING or CI:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+        }
+    }
+elif DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+        }
+    }
+
+# Error/performance monitoring
+sentry_sdk.init(
+    dsn=env('SENTRY_DSN', default=""),
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+)
 
 # User system
 AUTH_USER_MODEL = 'RIGS.Profile'
@@ -163,24 +186,29 @@ LOGOUT_URL = '/user/logout/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
-# reCAPTCHA settings
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")  # If not set, use development key
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")  # If not set, use development key
-NOCAPTCHA = True
+# CAPTCHA settings
+if DEBUG or CI:
+    HCAPTCHA_SITEKEY = '10000000-ffff-ffff-ffff-000000000001'
+    HCAPTCHA_SECRET = '0x0000000000000000000000000000000000000000'
+else:
+    HCAPTCHA_SITEKEY = env('HCAPTCHA_SITEKEY')
+    HCAPTCHA_SECRET = env('HCAPTCHA_SECRET')
 
 # Email
 EMAILER_TEST = False
 if not DEBUG or EMAILER_TEST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = os.environ.get('EMAIL_HOST')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = bool(int(os.environ.get('EMAIL_USE_TLS', 0)))
-    EMAIL_USE_SSL = bool(int(os.environ.get('EMAIL_USE_SSL', 0)))
-    DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT', cast=int, default=25)
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = env('EMAIL_USE_TLS', cast=bool, default=False)
+    EMAIL_USE_SSL = env('EMAIL_USE_SSL', cast=bool, default=False)
+    DEFAULT_FROM_EMAIL = env('EMAIL_FROM')
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_COOLDOWN = datetime.timedelta(minutes=15)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
@@ -197,22 +225,22 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Need to allow seconds as datetime-local input type spits out a time that has seconds
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-STATIC_DIRS = (
-    os.path.join(BASE_DIR, 'static/')
-)
+STATIC_ROOT = str(BASE_DIR / 'static/')
+STATICFILES_DIRS = [
+    str(BASE_DIR / 'pipeline/built_assets'),
+]
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
+            BASE_DIR / 'templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -235,7 +263,3 @@ USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
-RISK_ASSESSMENT_URL = os.environ.get('RISK_ASSESSMENT_URL') if os.environ.get(
-    'RISK_ASSESSMENT_URL') else "http://example.com"
-RISK_ASSESSMENT_SECRET = os.environ.get('RISK_ASSESSMENT_SECRET') if os.environ.get(
-    'RISK_ASSESSMENT_SECRET') else secrets.token_hex(15)

@@ -1,0 +1,78 @@
+{% extends override|default:"base_rigs.html" %}
+{% load button from filters %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="col">
+    <form action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                {% include 'form_errors.html' %}
+                <div class="form-group form-row">
+                    <label for="{{ form.name.id_for_label }}"
+                           class="col-sm-2 control-label">{{ form.name.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.name class+="form-control" placeholder=form.name.label %}
+                    </div>
+                </div>
+                <div class="form-group form-row">
+                    <label for="{{ form.phone.id_for_label }}"
+                           class="col-sm-2 control-label">{{ form.phone.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.phone class+="form-control" type="tel" placeholder=form.phone.label %}
+                    </div>
+                </div>
+                <div class="form-group form-row">
+                    <label for="{{ form.email.id_for_label }}"
+                           class="col-sm-2 control-label">{{ form.email.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.email class+="form-control" type="email" placeholder=form.email.label %}
+                    </div>
+                </div>
+
+                <div class="form-group form-row">
+                    <label for="{{ form.address.id_for_label }}"
+                           class="col-sm-2 control-label">{{ form.address.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.address class+="form-control" placeholder=form.address.label %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group form-row">
+                    <label for="{{ form.notes.id_for_label }}"
+                           class="col-sm-2 control-label">{{ form.notes.label }}</label>
+                    <div class="col-sm-10">
+                        {% render_field form.notes class+="form-control" placeholder=form.notes.label %}
+                    </div>
+                </div>
+                {% if form.three_phase_available is not None %}
+                <div class="form-group form-row">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <div class="checkbox">
+                            <label>
+                                {% render_field form.three_phase_available %} {{ form.three_phase_available.label }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if form.union_account is not None %}
+                <div class="form-group form-row">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <div class="checkbox">
+                            <label>
+                                {% render_field form.union_account %} {{ form.union_account.label }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group text-right">
+            {% button 'submit' %}
+        </div>
+    </form>
+</div>
+{% endblock %}

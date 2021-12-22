@@ -1,13 +1,17 @@
 {% load widget_tweaks %}
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card mb-2">
+  <div class="card-header">
     Collection Details
   </div>
-  <div class="panel-body">
+  <div class="card-body">
     {% if create or edit or duplicate %}
     <div class="form-group" id="parent-group">
       <label for="selectpicker">Set Parent</label>
-      {% include 'partials/asset_picker.html' %}
+      <select name="parent" id="parent_id" class="form-control selectpicker" data-live-search="true">
+        {% if object.parent %}
+        <option value="{{object.parent.pk}}" selected>{{object.parent.description}}</option>
+        {% endif %}
+      </select>
     </div>
     {% else %}
     <dl>
@@ -24,13 +28,13 @@
 
       <dt>Children</dt>
       {% if object.asset_parent.all %}
+      <div style="max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; ">
       {% for child in object.asset_parent.all %}
       <dd>
-        <a href="{% url 'asset_detail' child.asset_id %}">
-        {{ child.asset_id }} - {{ child.description }}
-        </a>
+        <a href="{% url 'asset_detail' child.asset_id %}">{{ child }}</a>
       </dd>
       {% endfor %}
+      </div>
       {% else %}
       <dd><span>-</span></dd>
       {% endif %}

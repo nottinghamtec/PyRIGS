@@ -1,0 +1,8 @@
+<div class="card {% if object.last_audited_at is not None %}border-success{% else %}border-warning{% endif %}">
+  <div class="card-header">
+    Audit Details
+  </div>
+  <div class="card-body">
+        <p>Audited at <span class="badge badge-secondary">{{ object.last_audited_at|default_if_none:'-' }}</span> by <span class="badge badge-info">{{ object.last_audited_by|default_if_none:'-' }}</span></p>
+  </div>
+</div>

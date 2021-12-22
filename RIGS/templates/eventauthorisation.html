@@ -1,0 +1,37 @@
+{% extends 'base_client.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        $('form').on('submit', function () {
+            $('#loading-modal').modal({
+                backdrop: 'static',
+                show: true
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row my-3">
+        {% include 'partials/client_eventdetails.html' %}
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-12">
+            <div class="card">
+            {% with object=event auth=True %}
+                {% include 'partials/item_table.html' %}
+            {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    {% block authorisation %}
+    {% endblock %}
+{% endblock %}

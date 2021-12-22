@@ -1,0 +1,15 @@
+{% load static %}
+<script src="{% static "js/tooltip.js" %}"></script>
+<script src="{% static "js/popover.js" %}"></script>
+<script src="{% static "js/moment.js" %}"></script>
+<script>
+    $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+    });
+    const whiteList = $.fn.tooltip.Constructor.Default.whiteList;
+    whiteList.ins = []
+    whiteList.del = []
+    $(function() {
+        $('[data-toggle="popover"]').popover({whiteList: whiteList});
+    });
+</script>

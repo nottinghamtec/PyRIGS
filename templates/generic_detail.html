@@ -1,0 +1,76 @@
+{% extends override|default:"base_rigs.html" %}
+{% load widget_tweaks %}
+{% load button from filters %}
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <div class="card border-info">
+                <div class="card-header">{{ type }} Details</div>
+                <div class="card-body">
+                    <dl class="dl-horizontal">
+                        <dt>Name</dt>
+                        <dd>{{ object.name }}</dd>
+
+                        <dt>Phone</dt>
+                        <dd><a href="tel:{{ object.phone }}">{{ object.phone }}</a></dd>
+
+                        <dt>Email</dt>
+                        <dd><a href="mailto:{{ object.email }}"><span class="overflow-ellipsis">{{ object.email }}</span></a></dd>
+
+                        <dt>Address</dt>
+                        <dd>{{ object.address|linebreaksbr }}</dd>
+
+                        <dt>Notes</dt>
+                        <dd>{{ object.notes|linebreaksbr }}</dd>
+
+                        {% if object.three_phase_available is not None %}
+                        <dt>Three Phase Available</dt>
+                        <dd>{{ object.three_phase_available|yesno|capfirst }}</dd>
+                        {% endif%}
+
+                        {% if object.union_account is not None %}
+                        <dt>Union Account</dt>
+                        <dd>{{ object.union_account|yesno|capfirst }}</dd>
+                        {% endif%}
+                    </dl>
+                </div>
+            </div>
+        </div>
+        {% if associated %}
+            {% include associated|safe %}
+        {% endif %}
+    </div>
+    {% if associated2 %}
+        {% include associated2|safe %}
+    {% endif %}
+
+    {% if not request.is_ajax %}
+        <div class="row py-2">
+            <div class="col-sm-12 text-right">
+                {% if can_edit %}
+                <div class="btn-group">
+                    {% button 'edit' update_link object.pk %}
+                </div>
+                {% endif %}
+                {% include 'partials/last_edited.html' with target=history_link %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+{% if request.is_ajax %}
+    {% block footer %}
+        <div class="row py-2">
+            <div class="col-sm-12 text-right">
+                <div class="btn-group btn-page">
+                    <a href="{% url detail_link object.pk %}" class="btn btn-primary"><span
+                        class="fas fa-eye"></span> Open Page</a>
+                    {% if can_edit %}
+                    {% button 'edit' update_link object.pk %}
+                    {% endif %}
+                </div>
+                {% include 'partials/last_edited.html' with target=history_link %}
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,61 @@
+{% extends override|default:"base_rigs.html" %}
+{% load url_replace from filters %}
+{% load orderby from filters %}
+{% load paginator from filters %}
+{% load linkornone from filters %}
+{% load button from filters %}
+
+{% block content %}
+{% include 'partials/list_search.html' %}
+<div class="row py-3">
+    <div class="col text-right">
+        {% button 'new' url=create %}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name<a href="?{% orderby request 'orderBy' 'name' %}"><span class="caret"></span></a></th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Notes</th>
+                        {% if union_account %} {#TODO#}
+                        <th scope="col">Union Account</th>
+                        {% endif %}
+                        <th scope="col">Quick Links</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for object in object_list %}
+                    <tr id="row_item">
+                        <th scope="row" class="align-middle" id="cell_name">{{ object.name }}</th>
+                        <td class="align-middle">{{ object.email|linkornone:'mailto' }}</td>
+                        <td class="align-middle">{{ object.phone|linkornone:'tel' }}</td>
+                        <td class="align-middle">{{ object.notes|yesno|capfirst }}</td>
+                        {% if union_account %}
+                        <td>{{ object.union_account|yesno|capfirst }}</td>
+                        {% endif %}
+                        <td>
+                            <div class="btn-group d-flex" role="group">
+                                {% button 'view' url=detail pk=object.pk clazz="btn-sm modal-href" %}
+                                {% if can_edit %}
+                                {% button 'edit' url=edit pk=object.pk clazz="btn-sm modal-href" %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr class="table-warning">
+                    <td colspan="6" class="text-center">Nothing found</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% paginator %}
+{% endblock%}

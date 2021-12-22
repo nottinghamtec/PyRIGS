@@ -1,0 +1,20 @@
+{% if version.changes.anything_changed %}
+    {% for change in version.changes.field_changes %}
+        <span title="Changes to {{ change.field.verbose_name }}" class="bg-info rounded p-1" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}{% include "partials/version_changes_change.html" %}{% endspaceless %}'>{{ change.field.verbose_name }}</span>
+    {% endfor %}
+    {% for itemchange in version.changes.item_changes %}
+        <span title="Changes to {{ itemchange.name }}" class="bg-info rounded p-1" data-container="body" data-html="true" data-trigger='hover' data-toggle="popover" data-content='{% spaceless %}
+            <ul class="list-group list-group-flush">
+            {% for change in itemchange.field_changes %}
+                  <li class="list-group-item">
+                    <div class="dont-break-out">
+                    {{ change.field.verbose_name|title }}:
+                    {% include 'partials/version_changes_change.html' with change=change %}</div>
+                  </li>
+            {% endfor %}
+            </ul>
+            {% endspaceless %}'>{{ itemchange.name }}</span>
+    {% endfor %}
+{% else %}
+    nothing useful
+{% endif %}

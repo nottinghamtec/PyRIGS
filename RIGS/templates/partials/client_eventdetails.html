@@ -1,0 +1,76 @@
+<div class="col-sm-6">
+    {% if event.person %}
+    <div class="card mb-3">
+        <div class="card-header">Contact Details</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-5">Person</dt>
+                <dd class="col-sm-7">
+                      {{ event.person.name }}
+                </dd>
+                {% if event.person.email %}
+                <dt class="col-sm-5">Email</dt>
+                <dd class="col-sm-7">
+                    <span class="overflow-ellipsis">{{ event.person.email }}</span>
+                </dd>
+                {% endif %}
+                {% if event.person.phone %}
+                <dt class="col-sm-5">Phone Number</dt>
+                <dd class="col-sm-7">{{ event.person.phone }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    {% endif %}
+    {% if event.organisation %}
+        <div class="card">
+            <div class="card-header">Organisation Details</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Organisation</dt>
+                    <dd class="col-sm-7">
+                        {{ event.organisation.name }}
+                    </dd>
+                    {% if event.organisation.phone %}
+                    <dt class="col-sm-5">Phone Number</dt>
+                    <dd class="col-sm-7">{{ event.organisation.phone }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="col-sm-6">
+    <div class="card border-info">
+        <div class="card-header">Event Info</div>
+        <div class="card-body">
+            <dl class="row">
+                {% if event.venue %}
+                <dt class="col-sm-5">Event Venue</dt>
+                <dd class="col-sm-7">
+                {{ event.venue }}
+                </dd>
+                {% endif %}
+                <dt class="col-sm-5">Status</dt>
+                <dd class="col-sm-7">{{ event.get_status_display }}</dd>
+
+                <dd class="col-sm-12">&nbsp;</dd>
+
+                <dt class="col-sm-5">Access From</dt>
+                <dd class="col-sm-7">{{ event.access_at|date:"D d M Y H:i"|default:"" }}</dd>
+
+                <dt class="col-sm-5">Event Starts</dt>
+                <dd class="col-sm-7">{{ event.start_date|date:"D d M Y" }} {{ event.start_time|date:"H:i" }}</dd>
+
+                <dt class="col-sm-5">Event Ends</dt>
+                <dd class="col-sm-7">{{ event.end_date|date:"D d M Y" }} {{ event.end_time|date:"H:i" }}</dd>
+
+                <dd class="col-sm-12">&nbsp;</dd>
+
+                <dt class="col-sm-5">Event Description</dt>
+                <dd class="col-sm-12">{{ event.description|linebreaksbr }}</dd>
+            </dl>
+        </div>
+    </div>
+</div>

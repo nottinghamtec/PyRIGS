@@ -1,0 +1,65 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+{% load button from filters %}
+{% load static %}
+
+{% block content %}
+    <div class="col-sm-12">
+        {{ description }}
+        {% block search %}{% endblock %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Invoice #</th>
+                        <th scope="col">Event</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Event Date</th>
+                        <th scope="col">Invoice Date</th>
+                        <th scope="col">Balance</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for invoice in invoice_list %}
+                    <tr class="table-{% if invoice.is_closed %}success{% else %}warning{% endif %}">
+                        <th scope="row">{{ invoice.display_id }}<br>
+                        <span class="text-muted">{% if invoice.void %}(VOID){% elif invoice.is_closed %}(PAID){% else %}(O/S){% endif %}</span></th>
+                        <td><a href="{% url 'event_detail' invoice.event.pk %}">N{{ invoice.event.pk|stringformat:"05d" }}</a>: {{ invoice.event.name }} <br>
+                            <span class="text-muted">{{ invoice.event.get_status_display }}{% if not invoice.event.mic %}, No MIC{% endif %}
+                            </span>
+                        </td>
+                        <td>{% if invoice.event.organisation %}
+                                {{ invoice.event.organisation.name }}
+                                <br>
+                                <span class="text-muted">{{ invoice.event.internal|yesno:'Internal,External' }}</span>
+                            {% elif invoice.event.person %}
+                                {{ invoice.event.person.name }}
+                                <br>
+                                <span class="text-muted">Individual</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.event.start_date }}</td>
+                        <td>{{ invoice.invoice_date }}</td>
+                        <td>
+                            £{{ invoice.balance|floatformat:2 }}
+                            {% if not invoice.event.internal %}
+                            <br />
+                            <span class="text-muted">{{ invoice.event.purchase_order }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            {% button 'view' url='invoice_detail' pk=invoice.pk %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        <div class="row justify-content-center">
+            {% paginator %}
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

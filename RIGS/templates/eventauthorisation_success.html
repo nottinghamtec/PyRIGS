@@ -1,0 +1,42 @@
+{% extends 'eventauthorisation.html' %}
+{% load widget_tweaks %}
+
+{% block js %}
+{% endblock %}
+
+{% block authorisation %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">Event Authorisation</div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <dl class="dl row">
+                            <dt class="col-6">Name</dt>
+                            <dd class="col-6">{{ object.name }}</dd>
+
+                            <dt class="col-6">Email</dt>
+                            <dd class="col-6">{{ object.email }}</dd>
+
+                            <dt class="col-6">University ID</dt>
+                            <dd class="col-6">{{ object.uni_id }}</dd>
+                        </dl>
+                    </div>
+
+                    <div class="col-sm-12 col-md-6">
+                        <dl class="dl row">
+                            <dt class="col-6">Account code</dt>
+                            <dd class="col-6">{{ object.account_code }}</dd>
+
+                            <dt class="col-6">Authorised amount</dt>
+                            <dd class="col-6">£ {{ object.amount|floatformat:2 }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

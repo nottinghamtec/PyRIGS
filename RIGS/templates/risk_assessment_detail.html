@@ -1,0 +1,167 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% load help_text from filters %}
+{% load yesnoi from filters %}
+{% load linkornone from filters %}
+
+{% block content %}
+    <div class="row py-3">
+        <div class="col-12">
+            <div class="card card-default mb-3">
+                <div class="card-header">General</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-10">{{ object|help_text:'nonstandard_equipment'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.nonstandard_equipment|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'nonstandard_use'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.nonstandard_use|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'contractors'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.contractors|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'other_companies'|safe }}</dt>
+                        <dd class="col-2">
+                            {{ object.other_companies|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-10">{{ object|help_text:'crew_fatigue' }}</dt>
+                        <dd class="col-2">
+                            {{ object.crew_fatigue|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'general_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.general_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Power {% include 'partials/event_size.html' %}</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'big_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.big_power|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'power_mic'|safe }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.power_mic.name|default:'None' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'outside' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.outside|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'generators' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.generators|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'other_companies_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.other_companies_power|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'nonstandard_equipment_power' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.nonstandard_equipment_power|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-sm-6">{{ object|help_text:'multiple_electrical_environments' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.multiple_electrical_environments|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'power_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.power_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                        <dt class="col-6">{{ object|help_text:'power_plan'|safe }}</dt>
+                        <dd class="col-6">
+                            {{ object.power_plan|linkornone }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card card-default mb-3">
+                <div class="card-header">Sound</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">{{ object|help_text:'noise_monitoring' }}</dt>
+                        <dd class="col-sm-6">
+                            {{ object.noise_monitoring|yesnoi:'invert' }}
+                        </dd>
+                        <dt class="col-12">{{ object|help_text:'sound_notes' }}</dt>
+                        <dd class="col-12">
+                            {{ object.sound_notes|default:'N/A'|linebreaks }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-12">
+                    <div class="card card-default mb-3">
+                        <div class="card-header">Site Details</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-10">{{ object|help_text:'known_venue' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.known_venue|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'safe_loading'|safe }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_loading|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'safe_storage' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.safe_storage|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'area_outside_of_control' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.area_outside_of_control|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'barrier_required' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.barrier_required|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'nonstandard_emergency_procedure' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.nonstandard_emergency_procedure|yesnoi:'invert' }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-12">
+                    <div class="card card-default mb-3">
+                        <div class="card-header">Structures</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-10">{{ object|help_text:'special_structures' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.special_structures|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-10">{{ object|help_text:'suspended_structures' }}</dt>
+                                <dd class="col-2">
+                                    {{ object.suspended_structures|yesnoi:'invert' }}
+                                </dd>
+                                <dt class="col-12">{{ object|help_text:'persons_responsible_structures' }}</dt>
+                                <dd class="col-12">
+                                    {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
+                                </dd>
+                                <dt class="col-12">{{ object|help_text:'rigging_plan'|safe }}</dt>
+                                <dd class="col-12">
+                                    {{ object.rigging_plan|linkornone|default:'N/A' }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 text-right">
+            <a href="{% url 'ra_edit' object.pk %}" class="btn btn-warning my-3"><span class="fas fa-edit"></span> <span
+                    class="d-none d-sm-inline">Edit</span></a>
+            <a href="{% url 'event_detail' object.event.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View Event</a>
+            {{ object.review_string|safe }}
+            {% include 'partials/last_edited.html' with target="riskassessment_history" %}
+        </div>
+    </div>
+{% endblock %}

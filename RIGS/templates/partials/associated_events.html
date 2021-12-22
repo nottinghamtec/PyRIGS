@@ -1,0 +1,8 @@
+<div class="row">
+    <div class="col-sm-12 py-3">
+        <div class="card">
+            <div class="card-header">Associated Events</div>
+            {% include 'partials/event_table.html' with events=object.latest_events %}
+        </div>
+    </div>
+</div>

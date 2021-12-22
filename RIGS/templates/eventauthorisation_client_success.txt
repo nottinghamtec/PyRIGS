@@ -1,0 +1,7 @@
+Hi {{ to_name|default_if_none:"there" }},
+
+Your event N{{object.event.pk|stringformat:"05d"}} has been successfully authorised for £{{object.amount}} by {{object.name}} as of {{object.event.last_edited_at}}.
+
+Your event is now fully booked and payment will be processed by the finance department automatically.
+
+TEC PA & Lighting

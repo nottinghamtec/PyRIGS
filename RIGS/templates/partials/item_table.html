@@ -1,0 +1,83 @@
+<div class="table-responsive">
+	<table class="table table-hover" id="item-table" {% if edit %}data-orderurl="{#% url 'item_order' %#}"{% endif %}>
+		<thead>
+			<tr>
+				<th scope="col">Item</th>
+                {% if perms.RIGS.view_event %}
+				<th scope="col">Price</th>
+                {% endif %}
+				<th scope="col">Quantity</th>
+                {% if perms.RIGS.view_event %}
+				<th scope="col">Sub-total</th>
+                {% endif %}
+				{% if edit %}
+				<th scope="col" class="text-right align-self-start">
+					<button type="button" class="btn btn-success btn-sm item-add"
+						data-toggle="modal"
+						data-target="#itemModal">
+						<i class="fas fa-plus"></i> Add Item
+					</button>
+				</th>
+				{% endif %}
+			</tr>
+		</thead>
+		<tbody id="item-table-body">
+			{% for item in object.items.all %}
+				{% include 'partials/item_row.html' %}
+			{% endfor %}
+		</tbody>
+        {% if auth or perms.RIGS.view_event %}
+		<tfoot style="font-weight: bold">
+			<tr>
+				<td rowspan="3" colspan="2"></td>
+				<td>Total {% if object.vat > 0 or not object.pk %}(ex. VAT){% endif %}</td>
+				<td colspan="2">£<span id="sumtotal">{{object.sum_total|default:0|floatformat:2}}</span></td>
+			</tr>
+            {% if object.vat > 0 or not object.pk %}
+			<tr>
+				{% if not object.pk %}
+					<td id="vat-rate" data-rate="{{currentVAT.rate}}">VAT @
+						{{currentVAT.as_percent|floatformat}}% (TBC)</td>
+				{% else %}
+					<td id="vat-rate" data-rate="{{object.vat_rate.rate}}">VAT @
+						{{object.vat_rate.as_percent|floatformat|default:"TBD"}}%</td>
+				{% endif %}
+				<td colspan="2">£<span id="vat">{{object.vat|default:0|floatformat:2}}</span></td>
+			</tr>
+			<tr>
+				<td>Total</td>
+				<td colspan="2">£<span id="total">{{object.total|default:0|floatformat:2}}</span></td>
+			</tr>
+            {% endif %}
+		</tfoot>
+        {% endif %}
+	</table>
+</div>
+<table class="hidden invisible">
+    <tr id="new-item-row" class="item_row">
+        <td>
+            <span class="name"></span>
+                <div class="item-description">
+                    <em class="description"></em>
+                </div>
+        </td>
+        <td>£<span class="cost"></span></td>
+        <td class="quantity"></td>
+        <td>£<span class="sub-total"></span></td>
+        {% if edit %}
+        <td class="vert-align text-right">
+            <div class="btn-group" role="group" aria-label="Action buttons">
+	            <button type="button" class="item-edit btn btn-sm btn-warning"
+			            data-pk="{{item.pk}}"
+			            data-toggle="modal" data-target="#itemModal">
+		            <span class="fas fa-edit"></span>
+	            </button>
+	            <button type="button" class="item-delete btn btn-sm btn-danger"
+			            data-pk="{{item.pk}}">
+		            <span class="fas fa-times-circle"></span>
+	            </button>
+            </div>
+        </td>
+	    {% endif %}
+    </tr>
+</table>

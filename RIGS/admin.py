@@ -1,34 +1,42 @@
 from django.contrib import admin
-from RIGS import models, forms
-from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import ugettext_lazy as _
-from reversion.admin import VersionAdmin
-
-from django.contrib.admin import helpers
-from django.template.response import TemplateResponse
 from django.contrib import messages
-from django.db import transaction
+from django.contrib.admin import helpers
+from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Count
 from django.forms import ModelForm
-
+from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from reversion import revisions as reversion
+from reversion.admin import VersionAdmin
+
+from RIGS import models
+from users import forms as user_forms
 
 # Register your models here.
 admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
-admin.site.register(models.Invoice)
-admin.site.register(models.Payment)
+admin.site.register(models.Invoice, VersionAdmin)
+
+
+def approve_user(modeladmin, request, queryset):
+    queryset.update(is_approved=True)
+
+
+approve_user.short_description = "Approve selected users"
 
 
 @admin.register(models.Profile)
 class ProfileAdmin(UserAdmin):
+    # Don't know how to add 'is_approved' whilst preserving the default list...
+    list_filter = ('is_approved', 'is_active', 'is_staff', 'is_superuser', 'groups')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {
             'fields': ('first_name', 'last_name', 'email', 'initials', 'phone')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
+        (_('Permissions'), {'fields': ('is_approved', 'is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {
             'fields': ('last_login', 'date_joined')}),
@@ -39,8 +47,9 @@ class ProfileAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2'),
         }),
     )
-    form = forms.ProfileChangeForm
-    add_form = forms.ProfileCreationForm
+    form = user_forms.ProfileChangeForm
+    add_form = user_forms.ProfileCreationForm
+    actions = [approve_user]
 
 
 class AssociateAdmin(VersionAdmin):
@@ -95,7 +104,7 @@ class AssociateAdmin(VersionAdmin):
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'forms': forms
             }
-            return TemplateResponse(request, 'RIGS/admin_associate_merge.html', context)
+            return TemplateResponse(request, 'admin_associate_merge.html', context)
 
 
 @admin.register(models.Person)
@@ -114,3 +123,13 @@ class VenueAdmin(AssociateAdmin):
 class OrganisationAdmin(AssociateAdmin):
     list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
     merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
+
+
+@admin.register(models.RiskAssessment)
+class RiskAssessmentAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+
+
+@admin.register(models.EventChecklist)
+class EventChecklistAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')

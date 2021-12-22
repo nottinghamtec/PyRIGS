@@ -1,0 +1,92 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<script>
+  function setAcquired(today) {
+        var date = new Date(1970, 0, 1);
+        if(today) {
+            date = new Date();
+        }
+        $('#id_date_acquired').val([date.getFullYear(), ('0' + (date.getMonth()+1)).slice(-2), ('0' + date.getDate()).slice(-2)].join('-'));
+  }
+  function setFieldValue(ID, CSA) {
+      $('#' + String(ID)).val(CSA);
+  }
+  function checkIfCableHidden() {
+    document.getElementById("cable-table").hidden = !document.getElementById("id_is_cable").checked;
+  }
+  checkIfCableHidden();
+</script>
+<form method="POST" id="asset_audit_form" action="{{ form.action|default:request.path }}">
+  {% include 'form_errors.html' %}
+  {% csrf_token %}
+  <input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden=true>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.asset_id col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.description col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.category col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.status col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.serial_number col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.date_acquired col="col-6" %}
+    <div class="col-sm-4">
+        <button class="btn btn-info" onclick="setAcquired(true);" tabindex="-1">Today</button>
+        <button class="btn btn-warning" onclick="setAcquired(false);" tabindex="-1">Unknown</button>
+    </div>
+  </div>
+  <div class="form-group form-row">
+    {% include 'partials/form_field.html' with field=form.date_sold col="col-6" %}
+  </div>
+  <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.salvage_value col="col-6" prepend="£" %}
+  </div>
+  <hr>
+  <div class="form-group form-row">
+    <label for="{{ form.is_cable.id_for_label }}" class="col-2">Cable?</label>
+    <div class="col-6">
+      {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %}
+    </div>
+  </div>
+  <div id="cable-table">
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.cable_type col="col-6" %}
+    </div>
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.length append=form.length.help_text col="col-6" %}
+      <div class="col-4">
+        <button class="btn btn-danger" onclick="setFieldValue('{{ form.length.id_for_label }}','5');" tabindex="-1">5{{ form.length.help_text }}</button>
+        <button class="btn btn-success" onclick="setFieldValue('{{ form.length.id_for_label }}','10');" tabindex="-1">10{{ form.length.help_text }}</button>
+        <button class="btn btn-info" onclick="setFieldValue('{{ form.length.id_for_label }}','20');" tabindex="-1">20{{ form.length.help_text }}</button>
+      </div>
+    </div>
+    <div class="form-group form-row">
+      {% include 'partials/form_field.html' with field=form.csa append=form.csa.help_text title='CSA' col="col-6" %}
+      <div class="col-4">
+        <button class="btn btn-secondary" onclick="setFieldValue('{{ form.csa.id_for_label }}', '1.5');" tabindex="-1">1.5{{ form.csa.help_text }}</button>
+        <button class="btn btn-secondary" onclick="setFieldValue('{{ form.csa.id_for_label }}', '2.5');" tabindex="-1">2.5{{ form.csa.help_text }}</button>
+      </div>
+    </div>
+  </div>
+  {% if not request.is_ajax %}
+    <div class="form-group form-row pull-right">
+        <button class="btn btn-success" type="submit" form="asset_audit_form" id="id_mark_audited">Mark Audited</button>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}
+
+{% block footer %}
+<div class="form-group form-row">
+  <button class="btn btn-success pull-right" type="submit" form="asset_audit_form" onclick="onAuditClick({{form.asset_id.value}});" id="id_mark_audited">Mark Audited</button>
+</div>
+{% endblock %}

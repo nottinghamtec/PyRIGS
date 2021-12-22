@@ -1,0 +1,35 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="row justify-content-end">
+{% include 'partials/asset_buttons.html' %}
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+    {% include 'partials/asset_detail_form.html' %}
+    </div>
+    {% if perms.assets.asset_finance %}
+    <div class="col-md-6 mb-3">
+      {% include 'partials/purchasedetails_form.html' %}
+    </div>
+    {% endif %}
+    <div class="col-md-4 mb-3" {% if not object.is_cable %}hidden="true"{% endif %} id="cable-table">
+      {% include 'partials/cable_form.html' %}
+    </div>
+    <div class="col-md-4 mb-3">
+      {% include 'partials/parent_form.html' %}
+    </div>
+    <div class="col-md-4 mb-3">
+      {% include 'partials/audit_details.html' %}
+    </div>
+</div>
+{% if perms.assets.view_asset %}
+<div class="row justify-content-end">
+{% include 'partials/asset_buttons.html' %}
+</div>
+<div class="row justify-content-end">
+{% include 'partials/last_edited.html' with target="asset_history" id=object.asset_id %}
+</div>
+{% endif %}
+{% endblock %}

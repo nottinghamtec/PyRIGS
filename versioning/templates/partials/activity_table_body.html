@@ -1,0 +1,33 @@
+{% load to_class_name from filters %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Object</th>
+            <th scope="col">Version ID</th>
+            <th scope="col">User</th>
+            <th scope="col">Changes</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for version in object_list %}
+            <tr>
+                <th scope="row">{{ version.revision.date_created }}</th>
+                <td><a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id|default:version.changes.new.pk }} | {{version.changes.new|to_class_name}}</a></td>
+                <td>{{ version.pk }}|{{ version.revision.pk }}</td>
+                <td>{% include 'partials/linked_name.html' with profile=version.revision.user %}</td>
+                <td>
+                    {% if version.changes.old == None %}
+                        Created {{version.changes.new|to_class_name}}
+                    {% elif version.changes.new == None %}
+                        Deleted {{version.changes.old|to_class_name}}
+                    {% else %}
+                        {% include 'partials/version_changes.html' %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

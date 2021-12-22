@@ -1,0 +1,74 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+
+{% block content %}
+<div class="row my-3 py-3">
+    {% if not request.is_ajax %}
+        {% if perms.RIGS.view_event %}
+        <div class="col-sm-12 text-right">
+            {% include 'partials/event_detail_buttons.html' %}
+        </div>
+        {% endif %}
+    {% endif %}
+    {% if object.is_rig and perms.RIGS.view_event %}
+        {# only need contact details for a rig #}
+        <div class="col-md-6">
+            {% include 'partials/contact_details.html' %}
+        </div>
+    {% endif %}
+    <div class="col-md-6">
+        {% include 'partials/event_details.html' %}
+    </div>
+    {% if not event.dry_hire %}
+    <div class="col {% if event.is_rig %}py-3{%endif %}">
+        {% include 'partials/hs_details.html' %}
+    </div>
+    {% endif %}
+    {% if event.is_rig %}
+        {% if event.is_rig and event.internal and perms.RIGS.view_event %}
+        <div class="col-md-8 py-3">
+            {% include 'partials/auth_details.html' %}
+        </div>
+    {% endif %}
+    {% endif %}
+    {% if not request.is_ajax and perms.RIGS.view_event %}
+    <div class="col-sm-12 text-right">
+        {% include 'partials/event_detail_buttons.html' %}
+    </div>
+    {% endif %}
+    {% if event.is_rig %}
+        <div class="col-sm-12">
+            <div class="card card-default">
+                <div class="card-header">Event Details</div>
+                <div class="card-body">
+                    {% if perms.RIGS.view_event %}
+                    <h4>Notes</h4>
+                    <hr>
+                    <p class="dont-break-out">{{ event.notes|linebreaksbr }}</p>
+                    {% endif %}
+                    <br>
+                    {% include 'partials/item_table.html' %}
+                </div>
+            </div>
+        </div>
+        {% if not request.is_ajax and perms.RIGS.view_event %}
+        <div class="col-sm-12 text-right">
+            {% include 'partials/event_detail_buttons.html' %}
+        </div>
+        {% endif %}
+    {% endif %}
+    {% if not request.is_ajax and perms.RIGS.view_event %}
+        <div class="col-sm-12 text-right">
+            {% include 'partials/last_edited.html' with target="event_history" %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% if request.is_ajax %}
+    {% block footer %}
+            {% if perms.RIGS.view_event %}
+                {% include 'partials/last_edited.html' with target="event_history" %}
+            {% endif %}
+            <a href="{% url 'event_detail' object.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
+    {% endblock %}
+{% endif %}

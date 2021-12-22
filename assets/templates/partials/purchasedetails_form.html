@@ -1,40 +1,39 @@
 {% load widget_tweaks %}
-{% load static %}
-
-
-{% block css %}
-    <link rel="stylesheet" href="{% static "css/bootstrap-select.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/ajax-bootstrap-select.css" %}"/>
-{% endblock %}
-
-{% block preload_js %}
-    <script src="{% static "js/bootstrap-select.js" %}"></script>
-    <script src="{% static "js/ajax-bootstrap-select.js" %}"></script>
-{% endblock %}
-
-{% block js %}
-    <script src="{% static "js/autocompleter.js" %}"></script>
-{% endblock %}
-
-<div class="panel panel-default">
-  <div class="panel-heading">
+{% load linkornone from filters %}
+<div class="card mb-2">
+  <div class="card-header">
     Purchase Details
   </div>
-  <div class="panel-body">
+  <div class="card-body">
     {% if create or edit or duplicate %}
     <div class="form-group" id="purchased-from-group">
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
-      <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
-        {% if object.purchased_from %}
-            <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
-        {% endif %}
-      </select>
+      <div class="row">
+          <div class="col">
+              <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
+                {% if object.purchased_from %}
+                <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
+                {% endif %}
+              </select>
+          </div>
+          <div class="col align-right">
+            <div class="btn-group">
+                <a href="{% url 'supplier_create' %}" class="btn btn-success modal-href"
+                   data-target="#{{ form.purchased_from.id_for_label }}">
+                    <span class="fas fa-plus"></span>
+                </a>
+                <a {% if form.supplier.value %}href="{% url 'supplier_update' form.purchased_from.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.purchased_from.id_for_label }}-update" data-target="#{{ form.purchased_from.id_for_label }}">
+                    <span class="fas fa-edit"></span>
+                </a>
+            </div>
+          </div>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
       <div class="input-group">
-        <span class="input-group-addon">£</span>
+        <div class="input-group-prepend"><span class="input-group-text">£</span></div>
         {% render_field form.purchase_price|add_class:'form-control' value=object.purchase_price %}
       </div>
     </div>
@@ -42,7 +41,7 @@
     <div class="form-group">
       <label for="{{ form.salvage_value.id_for_label }}">Salvage Value</label>
       <div class="input-group">
-        <span class="input-group-addon">£</span>
+        <div class="input-group-prepend"><span class="input-group-text">£</span></div>
         {% render_field form.salvage_value|add_class:'form-control' value=object.salvage_value %}
       </div>
     </div>
@@ -54,7 +53,7 @@
       {% render_field form.date_acquired|add_class:'form-control'|attr:'type="date"' value=date_acq %}
       {% endwith %}
       {% else %}
-      <input type="date" name="date_acquired" value="{% now "Y-m-d" %}"
+      <input type="date" name="date_acquired" value="{% now 'Y-m-d' %}"
                     class="form-control" id="id_date_acquired">
                 {% endif %}
               </div>
@@ -68,14 +67,11 @@
       {% else %}
       <dl>
         <dt>Purchased From</dt>
-        <dd>{{ object.purchased_from|default_if_none:'-' }}</dd>
-
+        <dd>{% if object.purchased_from %}<a href="{{object.purchased_from.get_absolute_url}}">{{ object.purchased_from }}</a>{%else%}-{%endif%}</dd>
         <dt>Purchase Price</dt>
         <dd>£{{ object.purchase_price|default_if_none:'-' }}</dd>
-
         <dt>Salvage Value</dt>
         <dd>£{{ object.salvage_value|default_if_none:'-' }}</dd>
-
         <dt>Date Acquired</dt>
         <dd>{{ object.date_acquired|default_if_none:'-' }}</dd>
         {% if object.date_sold %}

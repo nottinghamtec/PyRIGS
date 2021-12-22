@@ -1,59 +1,27 @@
 {% load widget_tweaks %}
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card mb-2">
+  <div class="card-header">
     Cable Details
   </div>
-  <div class="panel-body">
+  <div class="card-body">
     {% if create or edit or duplicate %}
     <div class="form-group">
-      <label for="{{ form.plug.id_for_label }}">Plug</label>
-      {% render_field form.plug|add_class:'form-control'%}
+      {% include 'partials/form_field.html' with field=form.cable_type %}
     </div>
     <div class="form-group">
-      <label for="{{ form.socket.id_for_label }}">Socket</label>
-      {% render_field form.socket|add_class:'form-control'%}
+      {% include 'partials/form_field.html' with field=form.length append=form.length.help_text %}
     </div>
     <div class="form-group">
-      <label for="{{ form.length.id_for_label }}">Length</label>
-      <div class="input-group">
-        {% render_field form.length|add_class:'form-control' %}
-        <span class="input-group-addon">{{ form.length.help_text }}</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="{{ form.csa.id_for_label }}">Cross Sectional Area</label>
-      <div class="input-group">
-        {% render_field form.csa|add_class:'form-control' value=object.csa %}
-        <span class="input-group-addon">{{ form.csa.help_text }}</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="{{ form.circuits.id_for_label }}">Circuits</label>
-      {% render_field form.circuits|add_class:'form-control' value=object.circuits %}
-    </div>
-    <div class="form-group">
-      <label for="{{ form.cores.id_for_label }}">Cores</label>
-      {% render_field form.cores|add_class:'form-control' value=object.cores %}
+      {% include 'partials/form_field.html' with field=form.csa append=form.csa.help_text %}
     </div>
     {% else %}
     <dl>
-      <dt>Socket</dt>
-      <dd>{{ object.socket|default_if_none:'-' }}</dd>
-
-      <dt>Plug</dt>
-      <dd>{{ object.plug|default_if_none:'-' }}</dd>
-
+      <dt>Cable Type</dt>
+      <dd>{% if object.cable_type %}<a href="{{object.cable_type.get_absolute_url}}">{{ object.cable_type }}</a>{%else%}-{%endif%}</dd>
       <dt>Length</dt>
       <dd>{{ object.length|default_if_none:'-' }}m</dd>
-
       <dt>Cross Sectional Area</dt>
-      <dd>{{ object.csa|default_if_none:'-' }}m^2</dd>
-
-      <dt>Circuits</dt>
-      <dd>{{ object.circuits|default_if_none:'-' }}</dd>
-
-      <dt>Cores</dt>
-      <dd>{{ object.cores|default_if_none:'-' }}</dd>
+      <dd>{{ object.csa|default_if_none:'-' }}mm²</dd>
     </dl>
     {% endif %}
   </div>

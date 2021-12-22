@@ -1,7 +1,9 @@
-from pypom import Page, Region
-from selenium.webdriver.common.by import By
-from selenium.webdriver import Chrome
+from pypom import Page
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+
+from PyRIGS.tests import regions
 
 
 class BasePage(Page):
@@ -29,41 +31,29 @@ class BasePage(Page):
 
 class FormPage(BasePage):
     _errors_selector = (By.CLASS_NAME, "alert-danger")
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
 
     def remove_all_required(self):
-        self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
-        self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+        self.driver.execute_script(
+            "Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+        self.driver.execute_script(
+            "Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+
+    def submit(self):
+        previous_errors = self.errors
+        submit = self.find_element(*self._submit_locator)
+        ActionChains(self.driver).move_to_element(submit).perform()
+        submit.click()
+        self.wait.until(animation_is_finished())
+        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
     @property
     def errors(self):
         try:
-            error_page = self.ErrorPage(self, self.find_element(*self._errors_selector))
+            error_page = regions.ErrorPage(self, self.find_element(*self._errors_selector))
             return error_page.errors
         except NoSuchElementException:
             return None
-
-    class ErrorPage(Region):
-        _error_item_selector = (By.CSS_SELECTOR, "dl>span")
-
-        class ErrorItem(Region):
-            _field_selector = (By.CSS_SELECTOR, "dt")
-            _error_selector = (By.CSS_SELECTOR, "dd>ul>li")
-
-            @property
-            def field_name(self):
-                return self.find_element(*self._field_selector).text
-
-            @property
-            def errors(self):
-                return [x.text for x in self.find_elements(*self._error_selector)]
-
-        @property
-        def errors(self):
-            error_items = [self.ErrorItem(self, x) for x in self.find_elements(*self._error_item_selector)]
-            errors = {}
-            for error in error_items:
-                errors[error.field_name] = error.errors
-            return errors
 
 
 class LoginPage(BasePage):
@@ -84,3 +74,13 @@ class LoginPage(BasePage):
         password_element.send_keys(password)
 
         self.find_element(*self._submit_locator).click()
+
+
+class animation_is_finished():
+    def __call__(self, driver):
+        number_animating = driver.execute_script('return $(":animated").length')
+        finished = number_animating == 0
+        if finished:
+            import time
+            time.sleep(0.1)
+        return finished

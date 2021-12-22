@@ -1,0 +1,43 @@
+{% extends 'base_ajax.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add Payment{% endblock %}
+
+{% block content %}
+<form action="{{ form.action|default:request.path }}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="{{ form.invoice.name }}" value="{{ form.invoice.value }}"/>
+    {% include 'form_errors.html' %}
+    <div class="row pt-3">
+        <label class="col-sm-4 col-form-label"
+               for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+        <div class="col-sm-8">
+            {% render_field form.date class+="form-control" %}
+        </div>
+    </div>
+    <div class="row pt-3">
+        <label class="col-sm-4 col-form-label"
+               for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+        <div class="col-sm-8">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">£</span>
+                </div>
+                {% render_field form.amount class+="form-control" %}
+            </div>
+        </div>
+    </div>
+    <div class="row pt-3">
+        <label class="col-sm-4 col-form-label"
+               for="{{ form.method.id_for_label }}">{{ form.method.label }}</label>
+        <div class="col-sm-8">
+            {% render_field form.method class+="form-control" %}
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="col-sm-12 text-right">
+            <input type="submit" class="form-control btn btn-primary"/>
+        </div>
+    </div>
+</form>
+{% endblock %}

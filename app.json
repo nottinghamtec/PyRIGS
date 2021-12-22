@@ -4,6 +4,7 @@
   "scripts": {
     "postdeploy": "python manage.py migrate && python manage.py generateSampleData"
   },
+  "stack": "heroku-20",
   "env": {
     "DEBUG": {
       "required": true
@@ -47,7 +48,10 @@
   ],
   "buildpacks": [
     {
-      "url": "heroku/python"
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/nottinghamtec/heroku-buildpack-python"
     }
   ]
 }

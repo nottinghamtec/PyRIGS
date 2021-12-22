@@ -1,0 +1,9 @@
+{% if submit %}
+<button type="submit" class="btn {{ class }}" title="{{ text }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%}><span class="fas {{ icon }} align-middle"></span> <span class="d-none d-sm-inline align-middle">{{ text }}</span></button>
+{% elif pk %}
+<a href="{% url target pk %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%} {% if text == 'Print' %}target="_blank"{%endif%}><span class="fas {{ icon }} align-middle"></span> <span class="d-none d-sm-inline align-middle">{{ text }}</span></a>
+{% elif copy %}
+<button class="btn btn-secondary btn-sm mr-1" data-clipboard-target="{{id}}" data-content="Copied to clipboard!"><span class="fas fa-copy"></span></button>
+{% else %}
+<a href="{% url target %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%}><span class="fas {{ icon }} align-middle"></span> <span class="d-none d-sm-inline align-middle">{{ text }}</span></a>
+{% endif %}

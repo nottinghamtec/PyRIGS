@@ -1,6 +1,5 @@
 [run]
-source =
-    ./
-
-omit =
-    */migrations/*
+omit = */migrations/*
+       */tests/*
+       */site-packages/*
+       */distutils/*

@@ -1,0 +1,40 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+
+    <p>Hi {{ to_name|default:"there" }},</p>
+
+    <p><b>{{ request.user.get_full_name }}</b> has requested that you authorise <b>{{ object.display_id }}
+        | {{ object.name }}</b>{% if not to_name %} on behalf of <b>{% if object.person %}{{ object.person.name }}{% else %}{{ object.organisation.name }}{% endif %}</b>{% endif %}.</p>
+
+    <p>
+        Please find the link below to complete the event booking process.
+        Remember that only Presidents or Treasurers are allowed to sign off payments. You may need to forward
+        this
+        email on.
+    </p>
+
+
+    <table class="button-container" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td align="center">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class="button" align="center">
+                  <a href="{{ request.scheme }}://{{ request.get_host }}{% url target|default:'event_authorise' object.pk hmac %}">
+                      Complete Authorisation Form
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+
+    <p>Your event will not be booked until you complete this form.</p>
+
+    <p>TEC PA &amp; Lighting</p>
+    <br/>
+
+{% endblock %}

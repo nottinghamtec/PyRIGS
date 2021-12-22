@@ -1,0 +1,89 @@
+{% extends 'base_embed.html' %}
+{% load static %}
+
+{% block extra-head %}
+<link href="{% static 'fontawesome_free/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesome_free/css/solid.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+         <span class="float-right">
+            {% if object.mic %}
+            <div class="text-center">
+                <img src="{{ object.mic.profile_picture }}" class="event-mic-photo rounded"/>
+            </div>
+            {% elif object.is_rig %}
+            <span class="fas fa-exclamation-sign"></span>
+            {% endif %}
+        </span>
+
+        <h3>
+            <a href="{% url 'event_detail' object.pk %}">{{ object.display_id }} | {{ object.name }}</a>
+            {% if object.venue %}
+            <small>at {{ object.venue }}</small>
+            {% endif %}
+            <br/><small>
+                {{ object.start_date|date:"D d/m/Y" }}
+                {% if object.has_start_time %}
+                {{ object.start_time|date:"H:i" }}
+                {% endif %}
+                {% if object.end_date or object.has_end_time %}
+                &ndash;
+                {% endif %}
+                {% if object.end_date and object.end_date != object.start_date %}
+                {{ object.end_date|date:"D d/m/Y"  }}
+                {% endif %}
+                {% if object.has_end_time %}
+                {{ object.end_time|date:"H:i" }}
+                {% endif %}
+            </small>
+        </h3>
+        {% include 'partials/event_status.html' %}
+        <div class="row ml-2">
+            <div class="col-xs-6 pr-2">
+                <p>
+                    {% if object.is_rig %}
+                    <strong>Client:</strong> {{ object.person.name }}
+                    {% if object.organisation %}
+                    for {{ object.organisation.name }}
+                    {% endif %}
+                    {% if object.dry_hire %}(Dry Hire){% endif %}
+                    {% else %}
+                    <strong>Non-Rig</strong>
+                    {% endif %}
+                </p>
+                <p>
+                    <strong>MIC:</strong>
+                    {% if object.mic %}
+                    {{object.mic.name}}
+                    {% else %}
+                    None
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-xs-6 px-2">
+                {% if object.meet_at %}
+                <p>
+                    <strong>Crew meet:</strong>
+                    {{ object.meet_at|date:"H:i" }} {{ object.meet_at|date:"(Y-m-d)" }}
+                </p>
+                {% endif %}
+                {% if object.access_at %}
+                <p>
+                    <strong>Access at:</strong>
+                    {{ object.access_at|date:"H:i" }} {{ object.access_at|date:"(Y-m-d)" }}
+                </p>
+                {% endif %}
+                <p>
+                    <strong>Last updated:</strong>
+                    {{ object.last_edited_at }} by "{{ object.last_edited_by.initials }}"
+                </p>
+            </div>
+        </div>
+        {% if object.description %}
+        <p>
+            <strong>Description: </strong>
+            {{ object.description|linebreaksbr }}
+        </p>
+        {% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+<div class="col-12 pt-2">
+  <div class="card">
+      <div class="card-header">Associated Assets</div>
+      {% with object.assets.all as object_list %}
+          {% include 'partials/asset_list_table.html' %}
+      {% endwith %}
+  </div>
+</div>

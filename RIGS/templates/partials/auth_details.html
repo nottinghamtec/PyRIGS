@@ -1,0 +1,52 @@
+<div class="card card-default
+    {% if event.authorised %}
+        border-success
+    {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+        border-warning
+    {% elif event.auth_request_to %}
+        border-info
+    {% endif %}
+    ">
+    <div class="card-header">Client Authorisation</div>
+    <div class="card-body row">
+        <dl class="col-sm-6">
+            <dt>Authorisation Request</dt>
+            <dd>{{ object.auth_request_to|yesno:"Yes,No" }}</dd>
+
+            <dt>By</dt>
+            <dd>{{ object.auth_request_by }}</dd>
+
+            <dt>At</dt>
+            <dd>{{ object.auth_request_at|date:"D d M Y H:i"|default:"" }}</dd>
+
+            <dt>To</dt>
+            <dd>{{ object.auth_request_to }}</dd>
+        </dl>
+        <dl class="col-sm-6">
+            <hr class="d-block d-sm-none">
+            <dt>Authorised</dt>
+            <dd>{{ object.authorised|yesno:"Yes,No" }}</dd>
+
+            <dt>Authorised by</dt>
+            <dd>
+                {%  if object.authorisation %}
+                    {{ object.authorisation.name }}
+                    (<a href="mailto:{{ object.authorisation.email }}">{{ object.authorisation.email }}</a>)
+                {% endif %}
+            </dd>
+
+            <dt>Authorised at</dt>
+            <dd>{{ object.authorisation.last_edited_at|date:"D d M Y H:i" }}</dd>
+
+            <dt>Authorised amount</dt>
+            <dd>
+                {% if object.authorisation %}
+                    £ {{ object.authorisation.amount|floatformat:"2" }}
+                {% endif %}
+            </dd>
+
+            <dt>Requested by</dt>
+            <dd>{{ object.authorisation.sent_by }}</dd>
+        </dl>
+    </div>
+</div>

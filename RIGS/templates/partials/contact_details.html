@@ -1,0 +1,47 @@
+{% load linkornone from filters %}
+{% load namewithnotes from filters %}
+
+{% if object.person %}
+<div class="card card-default mb-3">
+    <div class="card-header">Person Details</div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-6">Person</dt>
+            <dd class="col-sm-6">
+                {% if object.person %}
+                    <a href="{% url 'person_detail' object.person.pk %}" class="modal-href">
+                        {{ object.person|namewithnotes:'person_detail' }}
+                    </a>
+                {% endif %}
+            </dd>
+            <dt class="col-sm-6">Email</dt>
+            <dd class="col-sm-6">{{ object.person.email|linkornone:'mailto' }}</dd>
+            <dt class="col-sm-6">Phone Number</dt>
+            <dd class="col-sm-6">{{ object.person.phone|linkornone:'tel' }}</dd>
+        </dl>
+    </div>
+</div>
+{% endif %}
+{% if object.organisation %}
+    <div class="card card-default">
+        <div class="card-header">Organisation Details</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-6">Organisation</dt>
+                <dd class="col-sm-6">
+                    {% if object.organisation %}
+                        <a href="{% url 'organisation_detail' object.organisation.pk %}" class="modal-href">
+                            {{ object.organisation|namewithnotes:'organisation_detail' }}
+                        </a>
+                    {% endif %}
+                </dd>
+                <dt class="col-sm-6">Email</dt>
+                <dd class="col-sm-6">{{ object.organisation.email|linkornone:'mailto' }}</dd>
+                <dt class="col-sm-6">Phone Number</dt>
+                <dd class="col-sm-6">{{ object.organisation.phone|linkornone:'tel' }}</dd>
+                <dt class="col-sm-6">Has SU Account</dt>
+                <dd class="col-sm-6">{{ event.organisation.union_account|yesno|capfirst }}</dd>
+            </dl>
+        </div>
+    </div>
+{% endif %}

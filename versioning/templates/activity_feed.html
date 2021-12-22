@@ -1,0 +1,37 @@
+{% block js %}
+{% include 'partials/version_scripts.html' %}
+<script>
+  const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
+  //TODO Maybe this should be a reduce rather than remove
+  dur = matches ? 0 : 'slow';
+  $(document).ready(function() {
+    $(function () {
+        $( "#activity" ).hide();
+        $( "#activity" ).load( "{% url 'activity_feed' %}", function() {
+          $('#activity_loading').slideUp(dur,function(){
+              $('#activity').slideDown(dur);
+          });
+            const whiteList = $.fn.tooltip.Constructor.Default.whiteList;
+            whiteList.ins = []
+          whiteList.del = []
+          $('#activity [data-toggle="popover"]').popover({whiteList: whiteList});
+        });
+    });
+  });
+</script>
+{% endblock %}
+
+<div class="card">
+  <div class="card-header">
+    <h4>Recent Changes</h4>
+  </div>
+  <div class="list-group list-group-flush">
+    <div id="activity_loading" class="list-group-item text-center">
+      <div class="spinner-border text-primary" role="status">
+         <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <div id="activity">
+    </div>
+  </div>
+</div>

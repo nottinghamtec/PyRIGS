@@ -1,0 +1,89 @@
+{% extends 'base_rigs.html' %}
+{% load button from filters %}
+
+{% block content %}
+<div class="row py-4">
+    <div class="col-sm-12 text-right px-0">
+        <div class="btn-group">
+            <a href="{% url 'event_detail' object.event.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
+            <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
+                <span class="fas fa-times"></span> <span
+                        class="d-none d-sm-inline">Delete</span>
+            </a>
+            <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
+                <span class="fas fa-ban"></span> <span
+                        class="d-none d-sm-inline">Void</span>
+            </a>
+            {% button 'print' url='invoice_print' pk=object.pk %}
+        </div>
+    </div>
+<div>
+<div class="row py-4">
+    {% with object.event as object %}
+    <div class="col-sm-6">
+        {% include 'partials/contact_details.html' %}
+    </div>
+    <div class="col-sm-6">
+        {% include 'partials/event_details.html' %}
+    </div>
+    {% if object.event.internal %}
+    <div class="col-sm-6">
+        {% include 'partials/auth_details.html' %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</div>
+<div class="row py-4">
+    <div class="col-sm-6">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="text-right py-3">
+                    <a href="{% url 'payment_create' %}?invoice={{ object.pk }}"
+                       class="btn btn-success modal-href"
+                       data-target="#{{ form.person.id_for_label }}">
+                        <span class="fas fa-plus"></span> Add
+                    </a>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Method</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for payment in object.payment_set.all %}
+                        <tr>
+                            <th scope="row">{{ payment.date }}</th>
+                            <td>{{ payment.amount|floatformat:2 }}</td>
+                            <td>{{ payment.get_method_display }}</td>
+                            <td>
+                                <a href="{% url 'payment_delete' payment.pk %}" class="btn btn-small btn-danger"><span class="fas fa-times"></span></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class="text-right"><strong>Balance:</strong></td>
+                        <td>{{ object.balance|floatformat:2 }}</td>
+                        <td></td>
+                        <td></td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="card">
+            {% with object.event as object %}
+                {% include 'partials/item_table.html' %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+<div class="col-12 text-right">
+    {% include 'partials/last_edited.html' with target="invoice_history" %}
+</div>
+{% endblock %}

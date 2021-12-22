@@ -1,0 +1,28 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+{% load button from filters %}
+{% load cache %}
+
+{% block content %}
+    {% if create %}
+        <form method="POST" action="{% url 'cable_type_create'%}">
+    {% elif edit %}
+        <form method="POST" action="{% url 'cable_type_update' object.id %}">
+    {% endif %}
+{% include 'form_errors.html' %}
+{% csrf_token %}
+<input type="hidden" name="id" value="{{ object.id|default:0 }}" hidden="">
+<div class="row">
+    <div class="col-sm-12">
+        {% for field in form %}
+            <div class="form-group">
+                {% include 'partials/form_field.html' with field=field %}
+            </div>
+        {% endfor %}
+        <div class="text-right">
+            {% button 'submit' %}
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}

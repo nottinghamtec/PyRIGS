@@ -1,0 +1,63 @@
+$button_color: #357ebf;
+
+body{
+  margin: 0px;
+}
+
+.main-table{
+  width: 100%;
+  border-collapse: collapse;
+
+}
+
+.client-header {
+  background-image: url("https://www.nottinghamtec.co.uk/imgs/wof2014-1.jpg");
+  background-color: #222;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  width: 100%;
+
+  margin-bottom: 28px;
+
+  .logos{
+    width: 100%;
+    max-width: 640px;
+  }
+
+  img {
+    height: 110px;
+  }
+}
+
+.content-container{
+  width: 100%;
+
+  .content {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    text-align: left;
+
+    .button-container{
+      width: 100%;
+
+      .button {
+        padding: 6px 12px;
+        background-color: $button_color;
+        border-radius: 4px;
+
+        a {
+          color: #fff;
+          text-decoration: none;
+        }
+
+      }
+
+    }
+
+  }
+}
+

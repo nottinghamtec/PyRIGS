@@ -1,22 +1,23 @@
 # Collection of page object models for use within tests.
-from pypom import Page, Region
+from django.urls import reverse
+from pypom import Region
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver import Chrome
-from django.urls import reverse
+
 from PyRIGS.tests import regions
-from PyRIGS.tests.pages import BasePage, FormPage
-import pdb
+from PyRIGS.tests.pages import BasePage, FormPage, animation_is_finished
 
 
 class AssetList(BasePage):
     URL_TEMPLATE = '/assets/asset/list'
 
     _asset_item_locator = (By.CLASS_NAME, 'assetRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _search_text_locator = (By.ID, 'id_q')
     _status_select_locator = (By.CSS_SELECTOR, 'div#status-group>div.bootstrap-select')
     _category_select_locator = (By.CSS_SELECTOR, 'div#category-group>div.bootstrap-select')
-    _go_button_locator = (By.ID, 'filter-submit')
+    _go_button_locator = (By.ID, 'id_search')
+    _filter_button_locator = (By.ID, 'filter-submit')
 
     class AssetListRow(Region):
         _asset_id_locator = (By.CLASS_NAME, "assetID")
@@ -56,6 +57,9 @@ class AssetList(BasePage):
     def search(self):
         self.find_element(*self._go_button_locator).click()
 
+    def filter(self):
+        self.find_element(*self._filter_button_locator).click()
+
     @property
     def status_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._status_select_locator))
@@ -66,9 +70,8 @@ class AssetList(BasePage):
 
 
 class AssetForm(FormPage):
-    _purchased_from_select_locator = (By.CSS_SELECTOR, 'div#purchased-from-group>div.bootstrap-select')
+    _purchased_from_select_locator = (By.XPATH, '//div[@id="purchased-from-group"]/div/div/div')
     _parent_select_locator = (By.CSS_SELECTOR, 'div#parent-group>div.bootstrap-select')
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
         'description': (regions.TextBox, (By.ID, 'id_description')),
@@ -82,12 +85,9 @@ class AssetForm(FormPage):
         'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
         'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
 
-        'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
-        'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),
+        'cable_type': (regions.SingleSelectPicker, (By.ID, 'id_cable_type')),
         'length': (regions.TextBox, (By.ID, 'id_length')),
         'csa': (regions.TextBox, (By.ID, 'id_csa')),
-        'circuits': (regions.TextBox, (By.ID, 'id_circuits')),
-        'cores': (regions.TextBox, (By.ID, 'id_cores'))
     }
 
     @property
@@ -97,11 +97,6 @@ class AssetForm(FormPage):
     @property
     def parent_selector(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._parent_select_locator))
-
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
 
 class AssetEdit(AssetForm):
@@ -122,6 +117,7 @@ class AssetCreate(AssetForm):
 
 class AssetDuplicate(AssetForm):
     URL_TEMPLATE = '/assets/asset/id/{asset_id}/duplicate'
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Duplicate')]")
 
     @property
     def success(self):
@@ -131,12 +127,12 @@ class AssetDuplicate(AssetForm):
 class SupplierList(BasePage):
     URL_TEMPLATE = reverse('supplier_list')
 
-    _supplier_item_locator = (By.CLASS_NAME, 'supplierRow')
-    _search_text_locator = (By.ID, 'id_query')
+    _supplier_item_locator = (By.ID, 'row_item')
+    _search_text_locator = (By.ID, 'id_search_text')
     _go_button_locator = (By.ID, 'id_search')
 
     class SupplierListRow(Region):
-        _name_locator = (By.CLASS_NAME, "supplierName")
+        _name_locator = (By.ID, "cell_name")
 
         @property
         def name(self):
@@ -160,15 +156,9 @@ class SupplierList(BasePage):
 
 
 class SupplierForm(FormPage):
-    _submit_locator = (By.CLASS_NAME, 'btn-success')
     form_items = {
         'name': (regions.TextBox, (By.ID, 'id_name')),
     }
-
-    def submit(self):
-        previous_errors = self.errors
-        self.find_element(*self._submit_locator).click()
-        self.wait.until(lambda x: self.errors != previous_errors or self.success)
 
 
 class SupplierCreate(SupplierForm):
@@ -186,3 +176,76 @@ class SupplierEdit(SupplierForm):
     @property
     def success(self):
         return '/edit' not in self.driver.current_url
+
+
+class AssetAuditList(AssetList):
+    URL_TEMPLATE = reverse('asset_audit_list')
+
+    _search_text_locator = (By.ID, 'id_q')
+    _go_button_locator = (By.ID, 'searchButton')
+    _modal_locator = (By.ID, 'modal')
+    _errors_selector = (By.CLASS_NAME, "alert-danger")
+
+    @property
+    def modal(self):
+        return self.AssetAuditModal(self, self.find_element(*self._modal_locator))
+
+    @property
+    def query(self):
+        return self.find_element(*self._search_text_locator).text
+
+    def set_query(self, query):
+        element = self.find_element(*self._search_text_locator)
+        element.clear()
+        element.send_keys(query)
+
+    def search(self):
+        self.find_element(*self._go_button_locator).click()
+        self.wait.until(animation_is_finished())
+
+    @property
+    def error(self):
+        try:
+            return self.find_element(*self._errors_selector)
+        except NoSuchElementException:
+            return None
+
+    class AssetAuditModal(regions.Modal):
+        _errors_selector = (By.CLASS_NAME, "alert-danger")
+        # Don't use the usual success selector - that tries and fails to hit the '10m long cable' helper button...
+        _submit_locator = (By.ID, "id_mark_audited")
+        _close_selector = (By.XPATH, "//button[@data-dismiss='modal']")
+
+        form_items = {
+            'asset_id': (regions.TextBox, (By.ID, 'id_asset_id')),
+            'description': (regions.TextBox, (By.ID, 'id_description')),
+            'is_cable': (regions.CheckBox, (By.ID, 'id_is_cable')),
+            'serial_number': (regions.TextBox, (By.ID, 'id_serial_number')),
+            'salvage_value': (regions.TextBox, (By.ID, 'id_salvage_value')),
+            'date_acquired': (regions.DatePicker, (By.ID, 'id_date_acquired')),
+            'category': (regions.SingleSelectPicker, (By.ID, 'id_category')),
+            'status': (regions.SingleSelectPicker, (By.ID, 'id_status')),
+
+            'plug': (regions.SingleSelectPicker, (By.ID, 'id_plug')),
+            'socket': (regions.SingleSelectPicker, (By.ID, 'id_socket')),
+            'length': (regions.TextBox, (By.ID, 'id_length')),
+            'csa': (regions.TextBox, (By.ID, 'id_csa')),
+            'circuits': (regions.TextBox, (By.ID, 'id_circuits')),
+            'cores': (regions.TextBox, (By.ID, 'id_cores'))
+        }
+
+        @property
+        def errors(self):
+            try:
+                error_page = regions.ErrorPage(self, self.find_element(*self._errors_selector))
+                return error_page.errors
+            except NoSuchElementException:
+                return None
+
+        def close(self):
+            self.page.find_element(*self._close_selector).click()
+            self.wait.until(expected_conditions.invisibility_of_element_located((By.ID, 'modal')))
+
+        def remove_all_required(self):
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"input\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
+            self.driver.execute_script("Array.from(document.getElementsByTagName(\"select\")).forEach(function (el, ind, arr) { el.removeAttribute(\"required\")});")
