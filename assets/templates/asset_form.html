@@ -5,11 +5,13 @@
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simplemde.min.css' %}">
 {% endblock %}
 
 {% block preload_js %}
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/simplemde.min.js' %}"></script>
 {% endblock %}
 
 {% block js %}

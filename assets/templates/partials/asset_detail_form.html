@@ -47,7 +47,7 @@
     <dd>{{ object.asset_id }}</dd>
 
     <dt>Description</dt>
-    <dd class="dont-break-out">{{ object.description }}</dd>
+    <dd>{{ object.description }}</dd>
 
     <dt>Category</dt>
     <dd>{{ object.category }}</dd>
@@ -59,7 +59,7 @@
     <dd>{{ object.serial_number|default:'-' }}</dd>
 
     <dt>Comments</dt>
-    <dd class="dont-break-out well">{{ object.comments|default:'-'|markdown }}</dd>
+    <dd style="overflow-wrap: break-word;">{{ object.comments|default:'-'|markdown }}</dd>
     {% endif %}
   </div>
 </div>
