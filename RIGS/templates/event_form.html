@@ -8,13 +8,13 @@
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simplemde.min.css' %}">
 {% endblock %}
 
 {% block preload_js %}
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
-    <script src="//cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script src="{% static 'js/simplemde.min.js' %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -180,7 +180,7 @@
                         <label for="{{ form.description.id_for_label }}"
                                class="col-sm-4 col-form-label">{{ form.description.label }}</label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-12">
                             {% render_field form.description class+="form-control" %}
                         </div>
                     </div>
