@@ -1,19 +1,76 @@
 {% extends 'base_training.html' %}
 
 {% load markdown_tags %}
+{% load get_supervisor from tags %}
 
 {% block css %}
 <style>
-.level-1::after {
-    content: "";
+.tree ul {
+    margin-left: 20px;
+}
+
+.tree li {
+    list-style-type: none;
+    margin:10px;
     position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 50px;
-    margin-top: -15px;
-    margin-bottom: -15px;
-    background: black;
+}
+
+.tree li::before {
+    content: "";
+    position: absolute;
+    top:-7px;
+    left:-20px;
+    border-left: 1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    border-radius:0 0 0 0px;
+    width:20px;
+    height:15px;
+}
+
+.tree li::after {
+    position:absolute;
+    content:"";
+    top:8px;
+    left:-20px;
+    border-left: 1px solid #ccc;
+    border-top:1px solid #ccc;
+    border-radius:0px 0 0 0;
+    width:20px;
+    height:100%;
+}
+
+.tree li:last-child::after  {
+    display:none;
+}
+
+.tree li:last-child:before{
+    border-radius: 0 0 0 5px;
+}
+
+ul.tree>li:first-child::before {
+    display:none;
+}
+
+ul.tree>li:first-child::after {
+    border-radius:5px 0 0 0;
+}
+
+.tree li a {
+    border: 1px #ccc solid;
+    border-radius: 5px;
+    padding:2px 5px;
+}
+
+.tree li a:hover, .tree li a:hover+ul li a,
+.tree li a:focus, .tree li a:focus+ul li a {
+    background: #ccc; color: #000; border: 1px solid #000;
+}
+
+.tree li a:hover+ul li::after, .tree li a:focus+ul li::after,
+.tree li a:hover+ul li::before, .tree li a:focus+ul li::before 
+.tree li a:hover+ul::before, .tree li a:focus+ul::before 
+.tree li a:hover+ul ul::before, .tree li a:focus+ul ul::before{
+    border-color:  #000; /*connector color on hover*/
 }
 </style>
 {% endblock %}
@@ -28,28 +85,17 @@
 </ul>
 <sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
 </div>
-<div class="chart">
-  {% for level in levels %}
-    {% if forloop.counter == 3 %}
-    <div class="row">
-    <div class="col-6">
-    {% endif %}
-    {% if level.level == 2 and level.department is None %}
-    </div>
-    <div class="col-6">
-    {% endif %}
-    <div class="{% if forloop.first %}level-1 row{% elif forloop.counter == 2 %}level-2 row{%endif%}">
-        <div class="card my-3 border-{{level.department_colour}}">
-            <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
-            <div class="card-body">
-                <p>{{ level.description|markdown }}</p>
-            </div>
-        </div>
-    </div>
-    {% if forloop.last %}
-    </div>
-    </div>
-    {% endif %}
-  {% endfor %}
-</div>
+<ul class="tree">
+    <li><div class="card"><div class="card-header">{{ta}}</div><div class="card-body">{{ta.description|markdown}}</div></div>
+        <ul>
+        {% for level in tech %}
+            <li><div class="card"><div class="card-header">{{level}}</div><div class="card-body">{{level.description|markdown}}</div></div>
+            <ul>
+            <li><div class="card p-3">{{level|get_supervisor}}</div></li>
+            </ul>
+            </li>
+        {% endfor %}
+        </ul>
+    </li>
+</ul>
 {% endblock %}

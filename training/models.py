@@ -184,6 +184,16 @@ class TrainingLevel(models.Model, RevisionMixin):
     def passed_out_requirements(self):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
+    def get_related_level(self, dif):
+        if (level == 0 and dif < 0) or (level == 2 and dif > 0):
+            return None
+        return TrainingLevel.objects.get(department=self.department, level=self.level+dif)
+
+    def get_common_competencies(self):
+        if is_common_competencies:
+            return self
+        return TrainingLevel.objects.get(level=self.level, department=None)
+
     def percentage_complete(self, user):  # FIXME
         needed_qualifications = self.requirements.all().select_related()
         relavant_qualifications = 0.0
