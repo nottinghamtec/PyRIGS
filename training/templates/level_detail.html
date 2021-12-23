@@ -2,6 +2,7 @@
 
 {% load user_has_qualification from tags %}
 {% load user_level_if_present from tags %}
+{% load markdown_tags %}
 {% load static %}
 
 {% block css %}
@@ -53,7 +54,7 @@
 <div class="card mb-3">
     <h4 class="card-header">Description</h4>
     <div class="card-body">
-        <p>{{ object.description }}</p>
+        <p>{{ object.description|markdown }}</p>
     </div>
 </div>
 <div class="card mb-3 d-none d-md-block">

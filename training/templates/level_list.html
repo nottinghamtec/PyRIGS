@@ -1,5 +1,7 @@
 {% extends 'base_training.html' %}
 
+{% load markdown_tags %}
+
 {% block css %}
 <style>
 .level-1::after {
@@ -40,7 +42,7 @@
         <div class="card my-3 border-{{level.department_colour}}">
             <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
             <div class="card-body">
-                <p>{{ level.description }}</p>
+                <p>{{ level.description|markdown }}</p>
             </div>
         </div>
     </div>
