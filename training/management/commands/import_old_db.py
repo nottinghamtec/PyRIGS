@@ -167,7 +167,17 @@ class Command(BaseCommand):
 
         for child in root:
             name = child.find('Level_x0020_Name').text
-            if name != "Technical Assistant":
+            if name == "Technical Assistant":
+                level = models.TrainingLevel.TA
+                depString = None
+            elif "Common" in name:
+                levelString = name.split()[0]
+                if levelString == "Technician":
+                    level = models.TrainingLevel.TECHNICIAN
+                elif levelString == "Supervisor":
+                    level = models.TrainingLevel.SUPERVISOR
+                depString = None
+            else:
                 depString = name.split()[-1]
                 levelString = name.split()[0]
                 if levelString == "Technician":
@@ -180,9 +190,6 @@ class Command(BaseCommand):
                 for dep in models.TrainingLevel.DEPARTMENTS:
                     if dep[1] == depString:
                         department = dep[0]
-            else:
-                level = models.TrainingLevel.TA
-                depString = None
 
             desc = ""
             if child.find('Desc') is not None:
@@ -202,6 +209,13 @@ class Command(BaseCommand):
             else:
                 tally[0] += 1
 
+        for level in models.TrainingLevel.objects.all():
+            if level.department != None:
+                if level.level == models.TrainingLevel.TECHNICIAN:
+                    level.prerequisite_levels.add(models.TrainingLevel.objects.get(level=models.TrainingLevel.TA), models.TrainingLevel.objects.get(level=models.TrainingLevel.TECHNICIAN, department=None))
+                elif level.level == models.TrainingLevel.SUPERVISOR:
+                    level.prerequisite_levels.add(models.TrainingLevel.objects.get(level=models.TrainingLevel.TECHNICIAN, department=level.department), models.TrainingLevel.objects.get(level=models.TrainingLevel.SUPERVISOR, department=None))
+                
         print('Training Levels - Updated: {}, Created: {}'.format(tally[0], tally[1]))
 
     def import_TrainingLevelQualification(self):
