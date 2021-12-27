@@ -4,6 +4,8 @@ from RIGS.models import RevisionMixin, Profile
 from reversion import revisions as reversion
 from django.urls import reverse
 
+from django.utils.safestring import SafeData, mark_safe
+
 # 'shim' overtop the profile model to neatly contain all training related fields etc
 
 
@@ -250,6 +252,14 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)
 
     reversion_hide = True
+
+    @property
+    def get_icon(self):
+        if self.level.icon is not None:
+            icon = "<span class='fas fa-{}'></span>".format(self.level.icon)
+        else:
+            icon = "".join([w[0] for w in str(self.level).split()])
+        return mark_safe("<span class='badge badge-{} badge-pill' data-toggle='tooltip' title='{}'>{}</span>".format(self.level.department_colour, self.level, icon))
 
     def __str__(self):
         if self.level.is_common_competencies:

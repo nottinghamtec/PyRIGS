@@ -7,6 +7,7 @@ from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
 from training import models, forms
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import Q, Count
 
 from users import views
 
@@ -86,10 +87,21 @@ class TraineeList(generic.ListView):
     model = models.Trainee
     template_name = 'trainee_list.html'
     paginate_by = 25
-    ordering = ['qualifications_obtained']
 
     def get_queryset(self):
-        return self.model.objects.prefetch_related('levels', 'qualifications_obtained')
+        q = self.request.GET.get('q', "")
+
+        filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(initials__icontains=q)
+
+        # try and parse an int
+        try:
+            val = int(q)
+            filter = filter | Q(pk=val)
+        except:  # noqa
+            # not an integer
+            pass
+
+        return self.model.objects.filter(filter).annotate(num_qualifications=Count('qualifications_obtained')).order_by('-num_qualifications').prefetch_related('levels', 'qualifications_obtained')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

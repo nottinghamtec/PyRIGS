@@ -27,7 +27,10 @@ def percentage_complete(level, user):
 def colour_from_depth(depth):
     return models.TrainingItemQualification.get_colour_from_depth(depth)
 
-
 @register.filter
 def get_supervisor(tech):
     return models.TrainingLevel.objects.get(department=tech.department, level=models.TrainingLevel.SUPERVISOR)
+
+@register.filter
+def get_levels_of_depth(trainee, level):
+    return trainee.level_qualifications(True).filter(level__level=level)
