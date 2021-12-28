@@ -15,7 +15,7 @@ class Trainee(Profile, RevisionMixin):
         proxy = True
 
     def started_levels(self):
-        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
+        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.percentage_complete(self) < 100]
 
     def level_qualifications(self, only_confirmed=False):
         return self.levels.all().filter(confirmed_on__isnull=only_confirmed).select_related('level')
@@ -56,7 +56,7 @@ class TrainingItem(models.Model):
     reference_number = models.IntegerField()
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
     name = models.CharField(max_length=50)
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
 
     @property
     def number(self):
@@ -70,9 +70,7 @@ class TrainingItem(models.Model):
 
     @staticmethod
     def user_has_qualification(item, user, depth):
-        for q in user.qualifications_obtained.all().select_related('item'):
-            if q.item == item and q.depth > depth:
-                return True
+        return user.qualifications_obtained.values('item', 'depth').filter(item=item, depth_gte=depth).exists()
 
     class Meta:
         unique_together = ["reference_number", "active", "category"]
@@ -199,7 +197,7 @@ class TrainingLevel(models.Model, RevisionMixin):
             return 0
 
     def user_has_requirements(self, user):
-        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.select_related().all())
+        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
 
     def __str__(self):
         if self.department is None:

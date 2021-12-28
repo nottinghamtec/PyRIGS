@@ -5,6 +5,7 @@ from assets import models
 from RIGS import models as rigsmodels
 from training import models as tmodels
 
+
 class Command(BaseCommand):
     help = 'Deletes testing sample data'
 

@@ -50,7 +50,7 @@ class SecureAPIRequest(generic.View):
         'profile': 'RIGS.view_profile',
         'event': None,
         'supplier': None,
-        'training_item': None, # TODO
+        'training_item': None,  # TODO
     }
 
     '''

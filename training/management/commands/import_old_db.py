@@ -10,6 +10,7 @@ from django.utils.timezone import make_aware
 from training import models
 from RIGS.models import Profile
 
+
 class Command(BaseCommand):
     epoch = datetime.date(1970, 1, 1)
     id_map = {}
@@ -50,15 +51,15 @@ class Command(BaseCommand):
                     tally[0] += 1
                 else:
                     # PYTHONIC, BABY
-                    initials = first_name[0] + "".join([name_section[0] for name_section in re.split("\s*-", last_name.replace("(", ""))])
+                    initials = first_name[0] + "".join([name_section[0] for name_section in re.split("\\s*-", last_name.replace("(", ""))])
                     # print(initials)
                     new_profile = Profile.objects.create(username=name.replace(" ", ""),
-                                           first_name=first_name,
-                                           last_name=last_name,
-                                           initials=initials)
+                                                         first_name=first_name,
+                                                         last_name=last_name,
+                                                         initials=initials)
                     self.id_map[child.find('ID').text] = new_profile.pk
                     tally[1] += 1
-            except AttributeError: # W.T.F
+            except AttributeError:  # W.T.F
                 print("Trainee #{} is FUBAR".format(child.find('ID').text))
 
         print('Trainees - Updated: {}, Created: {}'.format(tally[0], tally[1]))
@@ -71,7 +72,7 @@ class Command(BaseCommand):
         for child in root:
             obj, created = models.TrainingCategory.objects.update_or_create(
                 pk=int(child.find('ID').text),
-                reference_number = int(child.find('Category_x0020_Number').text),
+                reference_number=int(child.find('Category_x0020_Number').text),
                 name=child.find('Category_x0020_Name').text
             )
 
@@ -88,10 +89,10 @@ class Command(BaseCommand):
         root = self.parse_xml(self.xml_path('Training Items.xml'))
 
         for child in root:
-            if child.find('active').text == '0': 
+            if child.find('active').text == '0':
                 active = False
-            else: 
-                active =  True
+            else:
+                active = True
 
             number = int(child.find('Item_x0020_Number').text)
             name = child.find('Item_x0020_Name').text
@@ -99,11 +100,11 @@ class Command(BaseCommand):
 
             try:
                 obj, created = models.TrainingItem.objects.update_or_create(
-                    pk = int(child.find('ID').text),
-                    reference_number = number,
-                    name = name,
-                    category = category,
-                    active = active
+                    pk=int(child.find('ID').text),
+                    reference_number=number,
+                    name=name,
+                    category=category,
+                    active=active
                 )
             except IntegrityError:
                 print("Training Item {}.{} {} has a duplicate reference number".format(category.reference_number, number, name))
@@ -139,11 +140,11 @@ class Command(BaseCommand):
                     try:
                         obj, created = models.TrainingItemQualification.objects.update_or_create(
                             pk=int(child.find('ID').text),
-                            item = models.TrainingItem.objects.get(pk=int(child.find('Training_Item_ID').text)),
-                            trainee = Profile.objects.get(pk=self.id_map[child.find('Member_ID').text]),
-                            depth = depth_index,
-                            date = child.find('{}_Date'.format(depth)).text[:-9], # Stored as datetime with time as midnight because fuck you I guess
-                            supervisor = supervisor
+                            item=models.TrainingItem.objects.get(pk=int(child.find('Training_Item_ID').text)),
+                            trainee=Profile.objects.get(pk=self.id_map[child.find('Member_ID').text]),
+                            depth=depth_index,
+                            date=child.find('{}_Date'.format(depth)).text[:-9],  # Stored as datetime with time as midnight because fuck you I guess
+                            supervisor=supervisor
                         )
                         notes = child.find('{}_Notes'.format(depth))
                         if notes:
@@ -153,7 +154,7 @@ class Command(BaseCommand):
                             tally[1] += 1
                         else:
                             tally[0] += 1
-                    except IntegrityError: # Eh?
+                    except IntegrityError:  # Eh?
                         print("Training Record #{} is duplicate. ಠ_ಠ".format(child.find('ID').text))
                     except AttributeError:
                         print(child.find('ID').text)
@@ -197,8 +198,8 @@ class Command(BaseCommand):
 
             obj, created = models.TrainingLevel.objects.update_or_create(
                 pk=int(child.find('ID').text),
-                description = desc,
-                level = level
+                description=desc,
+                level=level
             )
             if depString is not None:
                 obj.department = department
@@ -210,12 +211,12 @@ class Command(BaseCommand):
                 tally[0] += 1
 
         for level in models.TrainingLevel.objects.all():
-            if level.department != None:
+            if level.department is not None:
                 if level.level == models.TrainingLevel.TECHNICIAN:
                     level.prerequisite_levels.add(models.TrainingLevel.objects.get(level=models.TrainingLevel.TA), models.TrainingLevel.objects.get(level=models.TrainingLevel.TECHNICIAN, department=None))
                 elif level.level == models.TrainingLevel.SUPERVISOR:
                     level.prerequisite_levels.add(models.TrainingLevel.objects.get(level=models.TrainingLevel.TECHNICIAN, department=level.department), models.TrainingLevel.objects.get(level=models.TrainingLevel.SUPERVISOR, department=None))
-                
+
         print('Training Levels - Updated: {}, Created: {}'.format(tally[0], tally[1]))
 
     def import_TrainingLevelQualification(self):
@@ -232,21 +233,21 @@ class Command(BaseCommand):
                     print('Training Level Qualification #{} does not qualify anyone. How?!'.format(child.find('ID').text))
                     continue
                 obj, created = models.TrainingLevelQualification.objects.update_or_create(
-                    pk = int(child.find('ID').text),
-                    trainee = Profile.objects.get(pk=self.id_map[child.find('Member_x0020_ID').text]),
-                    level = models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text))
+                    pk=int(child.find('ID').text),
+                    trainee=Profile.objects.get(pk=self.id_map[child.find('Member_x0020_ID').text]),
+                    level=models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text))
                 )
-                
+
                 if child.find('Date_x0020_Level_x0020_Awarded') is not None:
-                    obj.confirmed_on =  make_aware(datetime.datetime.strptime(child.find('Date_x0020_Level_x0020_Awarded').text.split('T')[0], "%Y-%m-%d"))
+                    obj.confirmed_on = make_aware(datetime.datetime.strptime(child.find('Date_x0020_Level_x0020_Awarded').text.split('T')[0], "%Y-%m-%d"))
                     obj.save()
-                    #confirmed by?
+                    # confirmed by?
 
                 if created:
                     tally[1] += 1
                 else:
                     tally[0] += 1
-            except IntegrityError: # Eh?
+            except IntegrityError:  # Eh?
                 print("Training Level Qualification #{} is duplicate. ಠ_ಠ".format(child.find('ID').text))
 
         print('TrainingLevelQualifications - Updated: {}, Created: {}'.format(tally[0], tally[1]))
@@ -259,7 +260,13 @@ class Command(BaseCommand):
         for child in root:
             try:
                 item = child.find('Item').text.split(".")
-                obj, created = models.TrainingLevelRequirement.objects.update_or_create(level=models.TrainingLevel.objects.get(pk=int(child.find('Level').text)),item=models.TrainingItem.objects.get(active=True, reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])), depth=int(child.find('Depth').text))
+                obj, created = models.TrainingLevelRequirement.objects.update_or_create(
+                    level=models.TrainingLevel.objects.get(
+                        pk=int(
+                            child.find('Level').text)), item=models.TrainingItem.objects.get(
+                        active=True, reference_number=item[1], category=models.TrainingCategory.objects.get(
+                            reference_number=item[0])), depth=int(
+                        child.find('Depth').text))
 
                 if created:
                     tally[1] += 1

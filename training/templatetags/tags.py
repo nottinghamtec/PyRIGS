@@ -8,6 +8,7 @@ from training import models
 
 register = template.Library()
 
+
 @register.simple_tag
 def user_has_qualification(user, item, depth):
     if models.TrainingItem.user_has_qualification(item, user, depth) is not None:
@@ -15,21 +16,26 @@ def user_has_qualification(user, item, depth):
     else:
         return mark_safe("<span class='fas fa-hourglass-start text-warning'></span>")
 
+
 @register.simple_tag
 def user_level_if_present(user, level):
     return models.TrainingLevelQualification.objects.filter(trainee=user, level=level).first()
+
 
 @register.simple_tag
 def percentage_complete(level, user):
     return level.percentage_complete(user)
 
+
 @register.simple_tag
 def colour_from_depth(depth):
     return models.TrainingItemQualification.get_colour_from_depth(depth)
 
+
 @register.filter
 def get_supervisor(tech):
     return models.TrainingLevel.objects.get(department=tech.department, level=models.TrainingLevel.SUPERVISOR)
+
 
 @register.filter
 def get_levels_of_depth(trainee, level):
