@@ -57,32 +57,6 @@
         <p>{{ object.description|markdown }}</p>
     </div>
 </div>
-<div class="card mb-3 d-none d-md-block">
-    <h4 class="card-header">Users with this level</h4>
-    <div class="card-body">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Person</th>
-              <th scope="col">Confirmed?</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for user in users_with %}
-                {% user_level_if_present user object as level_qualification %}
-                <tr {% if not level_qualification.confirmed_on %}style="border-style: dashed; opacity: 80%"{%endif%}>
-                    <td><img src="{{user.profile_picture}}" style="width: 50px" class="img-thumbnail"/> {{user}}</td>
-                    <td>{% if level_qualification.confirmed_on %}<p class="card-text"><small>Qualified on {{ level_qualification.confirmed_on }}</small></p>{%else%}Unconfirmed{%endif%}</td>
-                    <td><a href="{% url 'profile_detail' user.pk %}" class="btn btn-primary btn-sm"><span class="fas fa-user"></span> View Profile</a></div></td>
-                </tr>
-            {% empty %}
-                Nobody here but us chickens... <span class="fas fa-egg text-warning"></span>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
 <div class="card">
     <h4 class="card-header">Level Requirements</h4>
     <table class="table card-body">
@@ -117,6 +91,32 @@
        None
        {% endfor %}
        </ul>
+    </div>
+</div>
+<div class="card mb-3 d-none d-md-block">
+    <h4 class="card-header">Users with this level</h4>
+    <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Person</th>
+              <th scope="col">Confirmed?</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users_with %}
+                {% user_level_if_present user object as level_qualification %}
+                <tr {% if not level_qualification.confirmed_on %}style="border-style: dashed; opacity: 80%"{%endif%}>
+                    <td><img src="{{user.profile_picture}}" style="width: 50px" class="img-thumbnail"/> {{user}}</td>
+                    <td>{% if level_qualification.confirmed_on %}<p class="card-text"><small>Qualified on {{ level_qualification.confirmed_on }}</small></p>{%else%}Unconfirmed{%endif%}</td>
+                    <td><a href="{% url 'profile_detail' user.pk %}" class="btn btn-primary btn-sm"><span class="fas fa-user"></span> View Profile</a></div></td>
+                </tr>
+            {% empty %}
+                Nobody here but us chickens... <span class="fas fa-egg text-warning"></span>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="row">

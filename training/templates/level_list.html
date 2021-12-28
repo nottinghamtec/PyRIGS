@@ -54,24 +54,6 @@ ul.tree>li:first-child::before {
 ul.tree>li:first-child::after {
     border-radius:5px 0 0 0;
 }
-
-.tree li a {
-    border: 1px #ccc solid;
-    border-radius: 5px;
-    padding:2px 5px;
-}
-
-.tree li a:hover, .tree li a:hover+ul li a,
-.tree li a:focus, .tree li a:focus+ul li a {
-    background: #ccc; color: #000; border: 1px solid #000;
-}
-
-.tree li a:hover+ul li::after, .tree li a:focus+ul li::after,
-.tree li a:hover+ul li::before, .tree li a:focus+ul li::before 
-.tree li a:hover+ul::before, .tree li a:focus+ul::before 
-.tree li a:hover+ul ul::before, .tree li a:focus+ul ul::before{
-    border-color:  #000; /*connector color on hover*/
-}
 </style>
 {% endblock %}
 
@@ -89,9 +71,11 @@ ul.tree>li:first-child::after {
     <li><div class="card"><div class="card-header">{{ta}}</div><div class="card-body">{{ta.description|markdown}}</div></div>
         <ul>
         {% for level in tech %}
-            <li><div class="card"><div class="card-header">{{level}}</div><div class="card-body">{{level.description|markdown}}</div></div>
+            <li><div class="card"><div class="card-header"><a href="{{level.get_absolute_url}}">{{level}}</a></div><div class="card-body">{{level.description|markdown}}</div></div>
             <ul>
-            <li><div class="card p-3">{{level|get_supervisor}}</div></li>
+            {% with level|get_supervisor as super %}
+            <li><div class="card"><div class="card-header"><a href="{{super.get_absolute_url}}">{{super}}</a></div><div class="card-body">{{super.description|markdown}}</div></div></li>
+            {% endwith %}
             </ul>
             </li>
         {% endfor %}
