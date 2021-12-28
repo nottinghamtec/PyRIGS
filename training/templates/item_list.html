@@ -13,7 +13,11 @@
       <div class="card-body">
         <div class="list-group list-group-flush">
             {% for item in category.items.all %}
+            {% if item.active %}
             <li class="list-group-item">{{ item }}</li>
+            {% elif request.user.is_superuser %}
+            <li class="list-group-item text-warning">{{ item }} (inactive)</li>
+            {% endif %}
             {% endfor %}
         </div>
       </div>

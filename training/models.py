@@ -46,7 +46,7 @@ class Trainee(Profile, RevisionMixin):
 
 
 class TrainingCategory(models.Model):
-    reference_number = models.CharField(max_length=3, unique=True)
+    reference_number = models.IntegerField(unique=True)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -57,7 +57,7 @@ class TrainingCategory(models.Model):
 
 
 class TrainingItem(models.Model):
-    reference_number = models.CharField(max_length=3)
+    reference_number = models.IntegerField()
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
     name = models.CharField(max_length=50)
     active = models.BooleanField(default = True)
