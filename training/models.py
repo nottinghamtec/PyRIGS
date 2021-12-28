@@ -67,7 +67,10 @@ class TrainingItem(models.Model):
         return "{}.{}".format(self.category.reference_number, self.reference_number)
 
     def __str__(self):
-        return "{} {}".format(self.number, self.name)
+        name = "{} {}".format(self.number, self.name)
+        if not self.active:
+            name += " (inactive)"
+        return name
 
     @staticmethod
     def user_has_qualification(item, user, depth):

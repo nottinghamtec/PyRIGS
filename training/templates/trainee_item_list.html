@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                 {% for object in object_list %}
-                    <tr id="row_item">
+                    <tr id="row_item" {% if request.user.is_superuser and not object.item.active %}class="text-warning"{%endif%}>
                         <th scope="row" class="align-middle" id="cell_name">{{ object.item }}</th>
                         <td class="table-{% colour_from_depth object.depth %}">{{ object.get_depth_display }}</td>
                         <td>{{ object.date }}</td>

@@ -51,7 +51,7 @@ class TraineeItemDetail(generic.ListView):
     template_name = 'trainee_item_list.html'
 
     def get_queryset(self):
-        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all()
+        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all().order_by('-date').select_related('item', 'trainee', 'supervisor', 'item__category')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
