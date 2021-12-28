@@ -26,7 +26,7 @@
                         <th scope="row" class="align-middle" id="cell_name">{{ object.item }}</th>
                         <td class="table-{% colour_from_depth object.depth %}">{{ object.get_depth_display }}</td>
                         <td>{{ object.date }}</td>
-                        <td>{{ object.supervisor }}</td>
+                        <td><a href="{{ object.supervisor.get_absolute_url}}">{{ object.supervisor }}</a></td>
                         <td>{{ object.notes }}</td>
                     </tr>
                 {% empty %}

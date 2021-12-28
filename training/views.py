@@ -7,7 +7,7 @@ from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
 from training import models, forms
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Q, Count, OuterRef, F, Subquery, Window
 
 from users import views
 
@@ -37,12 +37,8 @@ class TraineeDetail(views.ProfileDetail):
         else:
             context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
         context["started_levels"] = self.object.started_levels()
-        context["completed_levels"] = self.object.level_qualifications()
+        context["completed_levels"] = self.object.level_qualifications().select_related('level')
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
-        choices = models.TrainingItemQualification.CHOICES
-        context["depths"] = choices
-        for i in [x for x, _ in choices]:
-            context[str(i)] = self.object.get_records_of_depth(i)
         return context
 
 
@@ -101,7 +97,7 @@ class TraineeList(generic.ListView):
             # not an integer
             pass
 
-        return self.model.objects.filter(filter).annotate(num_qualifications=Count('qualifications_obtained')).order_by('-num_qualifications').prefetch_related('levels', 'qualifications_obtained')
+        return self.model.objects.filter(filter).annotate(num_qualifications=Count('qualifications_obtained')).order_by('-num_qualifications').prefetch_related('levels', 'qualifications_obtained', 'qualifications_obtained__item')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

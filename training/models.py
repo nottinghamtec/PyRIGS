@@ -18,10 +18,7 @@ class Trainee(Profile, RevisionMixin):
         return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
 
     def level_qualifications(self, only_confirmed=False):
-        levels = self.levels.all()
-        if only_confirmed:
-            levels = levels.exclude(confirmed_on__isnull=True)
-        return levels.select_related('level')
+        return self.levels.all().filter(confirmed_on__isnull=only_confirmed).select_related('level')
 
     @property
     def is_supervisor(self):
@@ -38,8 +35,7 @@ class Trainee(Profile, RevisionMixin):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
 
     def is_user_qualified_in(self, item, required_depth):
-        qual = self.qualifications_obtained.filter(item=item).first()  # this is a somewhat ghetto version of get_or_none
-        return qual is not None and qual.depth >= required_depth
+        return self.qualifications_obtained.values('item', 'depth').filter(item=item).filter(depth__gte=required_depth).first() is not None  # this is a somewhat ghetto version of get_or_none
 
     def get_absolute_url(self):
         return reverse('trainee_detail', kwargs={'pk': self.pk})
@@ -93,8 +89,8 @@ class TrainingItemQualification(models.Model):
         (PASSED_OUT, 'Passed Out'),
     )
     item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
-    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)
     depth = models.IntegerField(choices=CHOICES)
+    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)
     date = models.DateField()
     # TODO Remember that some training is external. Support for making an organisation the trainer?
     supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.RESTRICT)
@@ -189,18 +185,8 @@ class TrainingLevel(models.Model, RevisionMixin):
     def passed_out_requirements(self):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
-    def get_related_level(self, dif):
-        if (level == 0 and dif < 0) or (level == 2 and dif > 0):
-            return None
-        return TrainingLevel.objects.get(department=self.department, level=self.level+dif)
-
-    def get_common_competencies(self):
-        if is_common_competencies:
-            return self
-        return TrainingLevel.objects.get(level=self.level, department=None)
-
-    def percentage_complete(self, user):  # FIXME
-        needed_qualifications = self.requirements.all().select_related()
+    def percentage_complete(self, user):
+        needed_qualifications = self.requirements.all().select_related('item')
         relavant_qualifications = 0.0
         # TODO Efficiency...
         for req in needed_qualifications:
