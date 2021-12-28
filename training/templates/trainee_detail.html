@@ -1,31 +1,29 @@
 {% extends 'base_training.html' %}
 
 {% load static %}
-{% load user_has_qualification from tags %}
 {% load percentage_complete from tags %}
-{% load user_level_if_present from tags %}
-{% load colour_from_depth from tags %}
+{% load markdown_tags %}
 
 {% block css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
-    <script src="{% static 'js/selects.js' %}"></script>
+<script src="{% static 'js/selects.js' %}"></script>
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
-    <script>
+<script src="{% static 'js/autocompleter.js' %}"></script>
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script>
     $('document').ready(function(){
         $('#add_record,#add_external').click(function (e) {
-             e.preventDefault();
-             var url = $(this).attr("href");
-             $.ajax({
-                url: url,
-                success: function(){
-                    $link = $(this);
+           e.preventDefault();
+           var url = $(this).attr("href");
+           $.ajax({
+            url: url,
+            success: function(){
+                $link = $(this);
                     // Anti modal inception
                     if ($link.parents('#modal').length === 0) {
                         modaltarget = $link.data('target');
@@ -36,10 +34,10 @@
                         });
                     }
                 }
-             });
-        });
+            });
+       });
     });
-    </script>
+</script>
 {% endblock %}
 
 {% block content %}
@@ -51,64 +49,39 @@
 </div>
 <div class="row mb-3">
     <h2 class="col-12">Training Levels</h2>
-    <h3 class="col-12">Qualified</h3>
     <ul class="list-group col-12">
-    {% for qual in completed_levels %}
-    <li class="list-group-item">
-        <a href="{% url 'level_detail' qual.level.pk %}">{{ qual.level }}</a>
-        {% if qual.confirmed_by is None %}
+        {% for qual in completed_levels %}
+        <li class="list-group-item">
+            <a href="{% url 'level_detail' qual.level.pk %}">{{ qual.level }}</a>
+            {% if qual.confirmed_by is None %}
             {% if request.user.pk != object.pk and request.user.is_supervisor %}
             <span class="badge badge-warning">Awaiting Confirmation</span> <a class="btn btn-info" href="{% url 'confirm_level' object.pk qual.level.pk %}">Confirm</a>
             {% else %}
             <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
             {% endif %}
-        {% else %}
-        <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by }}</small></button>
-        {% endif %}
-    </li>
-    {% empty %}
-    <div class="alert alert-warning mx-auto">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
-    {% endfor %}
+            {% else %}
+            <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by }}</small></button>
+            {% endif %}
+        </li>
+        {% empty %}
+        <div class="alert alert-warning mx-auto">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
+        {% endfor %}
     </ul>
-    <h3 class="col-12 pt-2">In Progress</h3>
     <div class="card-columns">
         {% for level in started_levels %}
         {% percentage_complete level object as completion %}
         <div class="card my-3 border-warning">
-            <h3 class="card-header"><a href="{% url 'level_detail' level.pk %}">{{ level }}</a></h3>
+            <h3 class="card-header"><a href="{{ level.get_absolute_url }}">{{ level }}</a></h3>
             <div class="card-body">
-                <p>{{ level.description|truncatewords:30 }}</p>
-                <div class="progress mb-2">
+                {{ level.description|markdown }}
+            </div>
+            <div class="card-footer">
+                <div class="progress">
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-<div class="row">
-    <h2 class="col-12 pb-2">Training Items <small class="bg-light rounded-sm p-2"> Key: <span class="badge badge-warning">Training Started</span> <span class="badge badge-success">Training Complete</span> <span class="badge badge-info">Passed Out</span></small></h2>
-        {% for category in categories %}
-        {% if forloop.first or forloop.counter|divisibleby:3 %}<div class="card-deck col-12">{% endif %}
-        <div class="card mb-3">
-            <h3 class="card-header">{{ category }}</h3>
-            <div class="list-group list-group-flush">
-            {% for q in object.qualifications_obtained.all %}
-                {% if q.item.category == category %}
-                <li class="list-group-item list-group-item-{% colour_from_depth q.depth %}">{{q.item}} ({{q.date}})</li>
-                {% endif %}
-            {% empty %}
-            <li class="list-group-item text-muted">None yet...</li>
-            {% endfor %}
-            </div>
-        </div>
-        {% if forloop.counter|add:"1"|divisibleby:3 %}</div>{% endif %}
-        {% endfor %}
-    </div>
-</div>
-<div class="row">
-    <div class="col text-right">
-        {% include 'partials/last_edited.html' with target="trainee_history" %}
-    </div>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
 </div>
 {% endblock %}
