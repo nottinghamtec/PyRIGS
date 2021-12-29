@@ -78,6 +78,9 @@ class SecureAPIRequest(generic.View):
         fields = request.GET.get('fields', None)
         if fields:
             fields = fields.split(",")
+        filters = request.GET.get('filters', [])
+        if filters:
+            filters = filters.split(",")
 
         # Supply data for one record
         if pk:
@@ -97,6 +100,9 @@ class SecureAPIRequest(generic.View):
                 qs = []
                 for field in fields:
                     q = Q(**{field + "__icontains": part})
+                    qs.append(q)
+                for filter in filters:
+                    q = Q(**{field: True})
                     qs.append(q)
                 queries.append(reduce(operator.or_, qs))
 

@@ -30,7 +30,7 @@
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     <div class="form-group form-row">
       <label for="item_id" class="col-sm-2 col-form-label">Item</label>
-      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=reference_number,name" required>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=reference_number,name&filters=active" required>
       </select>
     </div>
     <div class="form-group form-row">
@@ -38,15 +38,9 @@
       {% render_field form.depth|add_class:'form-control custom-select col-sm-4' %}
     </div>
     <div class="form-group form-row">
-      {% if external %}
-      <label for="supervisor" class="col-sm-2 col-form-label">Supervising Organisation</label>
-      <select name="supervisor" id="supervising_organisation_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" required>
-      </select>
-      {% else %}
       <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
       <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
       </select>
-      {% endif %}
     </div>
     <div class="form-group form-row">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>
