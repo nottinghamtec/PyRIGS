@@ -13,11 +13,17 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
     <script src="{% static 'js/tooltip.js' %}"></script>
 {% endblock %}
 
 {% block content %}
+<script src="{% static 'js/autocompleter.js' %}"></script>
+<script>
+    //Has to be done here or the pickers disappear on modal error
+    $('document').ready(function(){
+        $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+    });
+</script>
 <form role="form" action="{{ form.action|default:request.path }}" method="POST" id="add_record_form">
     {% include 'form_errors.html' %}
     {% csrf_token %}

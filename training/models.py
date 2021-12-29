@@ -14,8 +14,10 @@ class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
 
+    # TODO remove levels that the user has a qualification in
+    # FIXME use queryset
     def started_levels(self):
-        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.percentage_complete(self) < 100]
+        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
 
     def level_qualifications(self, only_confirmed=False):
         return self.levels.all().filter(confirmed_on__isnull=only_confirmed).select_related('level')
@@ -70,7 +72,7 @@ class TrainingItem(models.Model):
 
     @staticmethod
     def user_has_qualification(item, user, depth):
-        return user.qualifications_obtained.values('item', 'depth').filter(item=item, depth_gte=depth).exists()
+        return user.qualifications_obtained.values('item', 'depth').filter(item=item, depth__gte=depth).exists()
 
     class Meta:
         unique_together = ["reference_number", "active", "category"]

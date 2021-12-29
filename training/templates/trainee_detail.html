@@ -13,14 +13,13 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/autocompleter.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script>
     $('document').ready(function(){
-        $('#add_record,#add_external').click(function (e) {
-           e.preventDefault();
-           var url = $(this).attr("href");
-           $.ajax({
+        $('#add_record').click(function (e) {
+         e.preventDefault();
+         var url = $(this).attr("href");
+         $.ajax({
             url: url,
             success: function(){
                 $link = $(this);
@@ -30,12 +29,12 @@
                         modalobject = "";
                         $('#modal').load(url, function (e) {
                             $('#modal').modal();
-                            $(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+                            //$(".selectpicker").selectpicker().each(function(){initPicker($(this))});
                         });
                     }
                 }
-            });
-       });
+        });
+     });  
     });
 </script>
 {% endblock %}
@@ -53,14 +52,14 @@
         {% for qual in completed_levels %}
         <li class="list-group-item">
             <a href="{% url 'level_detail' qual.level.pk %}">{{ qual.level }}</a>
-            {% if qual.confirmed_by is None %}
+            {% if qual.confirmed_on is None %}
             {% if request.user.pk != object.pk and request.user.is_supervisor %}
             <span class="badge badge-warning">Awaiting Confirmation</span> <a class="btn btn-info" href="{% url 'confirm_level' object.pk qual.level.pk %}">Confirm</a>
             {% else %}
             <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
             {% endif %}
             {% else %}
-            <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by }}</small></button>
+            <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by|default:'System' }}</small></button>
             {% endif %}
         </li>
         {% empty %}
@@ -83,5 +82,10 @@
       </div>
       {% endfor %}
   </div>
+</div>
+<div class="row">
+    <div class="col text-right">
+        {% include 'partials/last_edited.html' with target="trainee_history" %}
+    </div>
 </div>
 {% endblock %}
