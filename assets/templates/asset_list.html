@@ -74,6 +74,10 @@
                 <label for="status" class="sr-only">Status</label>
                 {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
               </div>
+              <div class="form-check form-check-inline">
+                  {% render_field form.is_cable|add_class:'form-check-input' %}
+                  <label class="form-check-label" for="is_cable">Only Cables?</label>
+              </div>
               <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
         </form>
     </div>

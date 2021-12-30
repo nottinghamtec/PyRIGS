@@ -32,6 +32,7 @@ class AssetSearchForm(forms.Form):
     q = forms.CharField(required=False)
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
     status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
+    is_cable = forms.BooleanField(required=False)
 
 
 class SupplierForm(forms.ModelForm):

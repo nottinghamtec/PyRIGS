@@ -52,6 +52,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         else:
             queryset = self.model.objects.filter(Q(asset_id__exact=query_string.upper()))
 
+        if form.cleaned_data['is_cable']:
+            queryset = queryset.filter(is_cable=True)
+
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
 
