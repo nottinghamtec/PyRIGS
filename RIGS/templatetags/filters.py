@@ -114,10 +114,8 @@ def orderby(request, field, attr):
 
     return dict_.urlencode()
 
-# Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 
-
-@register.filter(needs_autoescape=True)
+@register.filter(needs_autoescape=True)  # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
     if(isinstance(value, bool)):
@@ -221,7 +219,7 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
     return {'target': url, 'pk': pk, 'class': clazz, 'icon': icon, 'text': text, 'id': id, 'style': style}
 
 
-@register.simple_tag
+@register.simple_tag  # TODO Can these be done with annotation/aggregation?
 def invoices_waiting():
     return len(models.Event.objects.waiting_invoices())
 

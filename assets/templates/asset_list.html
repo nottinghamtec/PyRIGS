@@ -1,6 +1,7 @@
 {% extends 'base_assets.html' %}
 {% load paginator from filters %}
 {% load button from filters %}
+{% load ids_from_objects from asset_tags %}
 {% load widget_tweaks %}
 {% load static %}
 
@@ -85,6 +86,9 @@
 <div class="row my-2">
     <div class="col text-right px-0">
     {% button 'new' 'asset_create' style="width: 6em" %}
+    {% if object_list %}
+    <a class="btn btn-primary" href="{% url 'generate_labels' object_list|ids_from_objects %}"><span class="fas fa-barcode"></span> Generate Labels</a>
+    {% endif %}
     </div>
 </div>
 <div class="row my-2">
