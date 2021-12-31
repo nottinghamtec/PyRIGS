@@ -128,9 +128,8 @@ class Command(BaseCommand):
             for depth, depth_index in depths:
                 if child.find('{}_Date'.format(depth)) is not None:
                     if child.find('{}_Assessor_ID'.format(depth)) is None:
-                        print("Training Record #{} had no supervisor. Hmm.".format(child.find('ID').text))
-                        tally[2] += 1
-                        # TODO Assign God/Satan/Unknown here.
+                        print("Training Record #{} had no supervisor. Assigning System User.".format(child.find('ID').text))
+                        supervisor = Profile.objects.get(first_name="God")
                         continue
                     supervisor = Profile.objects.get(pk=self.id_map[child.find('{}_Assessor_ID'.format(depth)).text])
                     if child.find('Member_ID') is None:
@@ -258,23 +257,25 @@ class Command(BaseCommand):
         root = self.parse_xml(self.xml_path('Training Level Requirements.xml'))
 
         for child in root:
-            try:
-                item = child.find('Item').text.split(".")
-                obj, created = models.TrainingLevelRequirement.objects.update_or_create(
-                    level=models.TrainingLevel.objects.get(
-                        pk=int(
-                            child.find('Level').text)), item=models.TrainingItem.objects.get(
-                        active=True, reference_number=item[1], category=models.TrainingCategory.objects.get(
-                            reference_number=item[0])), depth=int(
-                        child.find('Depth').text))
+            items = child.find('Items').text.split(",")
+            for item in items:
+                try:
+                    item = item.split('.')
+                    obj, created = models.TrainingLevelRequirement.objects.update_or_create(
+                        level=models.TrainingLevel.objects.get(
+                            pk=int(
+                                child.find('Level').text)), item=models.TrainingItem.objects.get(
+                            active=True, reference_number=item[1], category=models.TrainingCategory.objects.get(
+                                reference_number=item[0])), depth=int(
+                            child.find('Depth').text))
 
-                if created:
-                    tally[1] += 1
-                else:
-                    tally[0] += 1
-            except models.TrainingItem.DoesNotExist:
-                print("Item with number {} does not exist".format(item))
-            except models.TrainingItem.MultipleObjectsReturned:
-                print(models.TrainingItem.objects.filter(reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])))
+                    if created:
+                        tally[1] += 1
+                    else:
+                        tally[0] += 1
+                except models.TrainingItem.DoesNotExist:
+                    print("Item with number {} does not exist".format(item))
+                except models.TrainingItem.MultipleObjectsReturned:
+                    print(models.TrainingItem.objects.filter(reference_number=item[1], category=models.TrainingCategory.objects.get(reference_number=item[0])))
 
         print('TrainingLevelRequirements - Updated: {}, Created: {}'.format(tally[0], tally[1]))

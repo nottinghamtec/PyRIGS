@@ -43,7 +43,7 @@
             <img class="card-img-top" src="{% static 'imgs/training.jpg' %}" alt="" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Training Database</h4>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action text-info" href="{% url 'trainee_detail' %}"><span class="fas fa-file-signature align-middle"></span><span class="align-middle"> My Training Record</span></a>
+                <a class="list-group-item list-group-item-action text-info" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature align-middle"></span><span class="align-middle"> My Training Record</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span> Trainee List</a>
                 <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> Level List</a></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> Item List</a></a>

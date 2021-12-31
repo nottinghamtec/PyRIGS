@@ -14,7 +14,7 @@
         My Record
       </a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownMy">
-        <a class="dropdown-item" href="{% url 'trainee_detail' %}"><span class="fas fa-eye"></span>
+        <a class="dropdown-item" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-eye"></span>
                             Overview</a>
         <a class="dropdown-item" href="{% url 'trainee_item_detail' request.user.pk %}"><span class="fas fa-list"></span>
                             Item Detail</a>

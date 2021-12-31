@@ -6,11 +6,9 @@ from django.urls import reverse
 
 from django.utils.safestring import SafeData, mark_safe
 
-# 'shim' overtop the profile model to neatly contain all training related fields etc
 
-
-@reversion.register  # profile is already registered, but this triggers my custom versioning logic
-class Trainee(Profile, RevisionMixin):
+@reversion.register(follow=['qualifications_obtained'])  # profile is already registered, but this triggers my custom versioning logic
+class Trainee(Profile, RevisionMixin):  # 'shim' overtop the profile model to neatly contain all training related fields etc
     class Meta:
         proxy = True
 
@@ -20,7 +18,10 @@ class Trainee(Profile, RevisionMixin):
         return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
 
     def level_qualifications(self, only_confirmed=False):
-        return self.levels.all().filter(confirmed_on__isnull=only_confirmed).select_related('level')
+        levels = self.levels.all()
+        if only_confirmed:
+            levels = levels.exclude(confirmed_on=None)
+        return levels.select_related('level')
 
     @property
     def is_supervisor(self):
@@ -61,11 +62,11 @@ class TrainingItem(models.Model):
     active = models.BooleanField(default=True)
 
     @property
-    def number(self):
+    def display_id(self):
         return "{}.{}".format(self.category.reference_number, self.reference_number)
 
     def __str__(self):
-        name = "{} {}".format(self.number, self.name)
+        name = "{} {}".format(self.display_id, self.name)
         if not self.active:
             name += " (inactive)"
         return name
@@ -79,6 +80,7 @@ class TrainingItem(models.Model):
         ordering = ['category__reference_number', 'reference_number']
 
 
+@reversion.register
 class TrainingItemQualification(models.Model):
     STARTED = 0
     COMPLETE = 1
@@ -100,13 +102,9 @@ class TrainingItemQualification(models.Model):
     def __str__(self):
         return "{} in {} on {}".format(self.depth, self.item, self.date)
 
-    def save(self, *args, **kwargs):
-        super().save()
-        for level in TrainingLevel.objects.all():  # Mm yes efficiency FIXME
-            if level.user_has_requirements(self.trainee):
-                with reversion.create_revision():
-                    level_qualification = TrainingLevelQualification.objects.get_or_create(trainee=self.trainee, level=level)
-                    reversion.add_to_revision(self.trainee)
+    @property
+    def activity_feed_string(self):
+        return str("qualification for {} in {} ({})".format(self.trainee, self.item, self.get_depth_display()))
 
     @classmethod
     def get_colour_from_depth(obj, depth):

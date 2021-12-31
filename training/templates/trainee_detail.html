@@ -34,7 +34,7 @@
                     }
                 }
         });
-     });  
+     });
     });
 </script>
 {% endblock %}
@@ -43,7 +43,8 @@
 <div class="row">
     <div class="col-sm-12 text-right">
         {% include 'partials/add_qualification.html' %}
-        <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a><br/>
+        <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
+        <a href="{% url 'profile_detail' object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View User Profile</a>
     </div>
 </div>
 <div class="row mb-3">
@@ -51,6 +52,7 @@
     <ul class="list-group col-12">
         {% for qual in completed_levels %}
         <li class="list-group-item">
+            {{ qual.level.get_icon }}
             <a href="{% url 'level_detail' qual.level.pk %}">{{ qual.level }}</a>
             {% if qual.confirmed_on is None %}
             {% if request.user.pk != object.pk and request.user.is_supervisor %}
@@ -59,7 +61,7 @@
             <button class="btn btn-warning" disabled>Awaiting Confirmation</button>
             {% endif %}
             {% else %}
-            <button class="btn btn-success active">Confirmed <small>by {{ qual.confirmed_by|default:'System' }}</small></button>
+            Confirmed by <a href="{{ qual.confirmed_by.get_absolute_url }}">{{ qual.confirmed_by|default:'System' }}</a> on {{ qual.confirmed_on|date }}
             {% endif %}
         </li>
         {% empty %}
