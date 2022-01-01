@@ -7,8 +7,8 @@ from django.urls import reverse
 from django.utils.safestring import SafeData, mark_safe
 
 
-@reversion.register(follow=['qualifications_obtained'])  # profile is already registered, but this triggers my custom versioning logic
-class Trainee(Profile, RevisionMixin):  # 'shim' overtop the profile model to neatly contain all training related fields etc
+@reversion.register(for_concrete_model=False)
+class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
 
@@ -17,22 +17,16 @@ class Trainee(Profile, RevisionMixin):  # 'shim' overtop the profile model to ne
     def started_levels(self):
         return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
 
-    def level_qualifications(self, only_confirmed=False):
-        levels = self.levels.all()
-        if only_confirmed:
-            levels = levels.exclude(confirmed_on=None)
-        return levels.select_related('level')
-
     @property
     def is_supervisor(self):
-        return self.level_qualifications(True) \
+        return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level') \
             .filter(level__gte=TrainingLevel.SUPERVISOR) \
             .exclude(level__department=TrainingLevel.HAULAGE) \
             .exclude(level__department__isnull=True).exists()
 
     @property
     def is_driver(self):
-        return self.level_qualifications(True).filter(level__department=TrainingLevel.HAULAGE).exists()
+        return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level').filter(level__department=TrainingLevel.HAULAGE).exists()
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
@@ -80,7 +74,7 @@ class TrainingItem(models.Model):
         ordering = ['category__reference_number', 'reference_number']
 
 
-@reversion.register
+@reversion.register(follow=['trainee'])
 class TrainingItemQualification(models.Model):
     STARTED = 0
     COMPLETE = 1
@@ -104,7 +98,7 @@ class TrainingItemQualification(models.Model):
 
     @property
     def activity_feed_string(self):
-        return str("qualification for {} in {} ({})".format(self.trainee, self.item, self.get_depth_display()))
+        return str("{} in {}".format(self.get_depth_display(), self.item))
 
     @classmethod
     def get_colour_from_depth(obj, depth):
@@ -231,9 +225,9 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
         unique_together = ["level", "item"]
 
 
-@reversion.register
+@reversion.register(follow=['trainee'])
 class TrainingLevelQualification(models.Model, RevisionMixin):
-    trainee = models.ForeignKey('Trainee', related_name='levels', on_delete=models.RESTRICT)
+    trainee = models.ForeignKey('Trainee', related_name='level_qualifications', on_delete=models.RESTRICT)
     level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
     confirmed_on = models.DateTimeField(null=True)
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)

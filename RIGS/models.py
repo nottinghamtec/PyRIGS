@@ -19,8 +19,7 @@ from reversion import revisions as reversion
 from reversion.models import Version
 
 
-@reversion.register
-class Profile(AbstractUser):  # TODO move to versioning - currently get import errors with that
+class Profile(AbstractUser):
     initials = models.CharField(max_length=5, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
@@ -28,6 +27,8 @@ class Profile(AbstractUser):  # TODO move to versioning - currently get import e
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
+
+    reversion_hide = True
 
     @classmethod
     def make_api_key(cls):
@@ -65,11 +66,6 @@ class Profile(AbstractUser):  # TODO move to versioning - currently get import e
 
     def __str__(self):
         return self.name
-
-    @property
-    def as_trainee(self):
-        from training.models import Trainee
-        return Trainee.objects.get(pk=self.pk)
 
 
 class RevisionMixin(object):

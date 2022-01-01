@@ -8,6 +8,7 @@ from django.utils.functional import cached_property
 from reversion.models import Version, VersionQuerySet
 
 from RIGS import models
+from training.models import Trainee
 
 logger = logging.getLogger('tec.pyrigs')
 
@@ -121,7 +122,7 @@ class ModelComparison(object):
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(models.EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'last_login']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
