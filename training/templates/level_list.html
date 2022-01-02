@@ -3,60 +3,6 @@
 {% load markdown_tags %}
 {% load get_supervisor from tags %}
 
-{% block css %}
-<style>
-.tree ul {
-    margin-left: 20px;
-}
-
-.tree li {
-    list-style-type: none;
-    margin:10px;
-    position: relative;
-}
-
-.tree li::before {
-    content: "";
-    position: absolute;
-    top:-7px;
-    left:-20px;
-    border-left: 1px solid #ccc;
-    border-bottom:1px solid #ccc;
-    border-radius:0 0 0 0px;
-    width:20px;
-    height:15px;
-}
-
-.tree li::after {
-    position:absolute;
-    content:"";
-    top:8px;
-    left:-20px;
-    border-left: 1px solid #ccc;
-    border-top:1px solid #ccc;
-    border-radius:0px 0 0 0;
-    width:20px;
-    height:100%;
-}
-
-.tree li:last-child::after  {
-    display:none;
-}
-
-.tree li:last-child:before{
-    border-radius: 0 0 0 5px;
-}
-
-ul.tree>li:first-child::before {
-    display:none;
-}
-
-ul.tree>li:first-child::after {
-    border-radius:5px 0 0 0;
-}
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="alert alert-info" role="alert">
 <p>Please Note:</p>
@@ -67,19 +13,10 @@ ul.tree>li:first-child::after {
 </ul>
 <sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
 </div>
-<ul class="tree">
-    <li><div class="card"><div class="card-header">{{ta}}</div><div class="card-body">{{ta.description|markdown}}</div></div>
-        <ul>
-        {% for level in tech %}
-            <li><div class="card"><div class="card-header"><a href="{{level.get_absolute_url}}">{{level}}</a></div><div class="card-body">{{level.description|markdown}}</div></div>
-            <ul>
-            {% with level|get_supervisor as super %}
-            <li><div class="card"><div class="card-header"><a href="{{super.get_absolute_url}}">{{super}}</a></div><div class="card-body">{{super.description|markdown}}</div></div></li>
-            {% endwith %}
-            </ul>
-            </li>
-        {% endfor %}
-        </ul>
-    </li>
-</ul>
+{% for level in object_list %}
+<div class="card mb-2">
+    <div class="card-header">{{level}}</div>
+    <div class="card-body">{{level.description|markdown}}</div>
+</div>
+{% endfor %}
 {% endblock %}

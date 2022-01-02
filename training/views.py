@@ -85,9 +85,6 @@ class LevelList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "All Training Levels"
-        context["ta"] = models.TrainingLevel.objects.get(level=models.TrainingLevel.TA)
-        context["tech"] = models.TrainingLevel.objects.filter(level=models.TrainingLevel.TECHNICIAN).order_by('department')
-        context["sup"] = models.TrainingLevel.objects.filter(level=models.TrainingLevel.SUPERVISOR).order_by('department')
         return context
 
 
