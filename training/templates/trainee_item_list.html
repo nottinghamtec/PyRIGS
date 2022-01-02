@@ -7,7 +7,8 @@
 {% load colour_from_depth from tags %}
 
 {% block content %}
-<div class="row">
+<p class="text-muted text-right">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
+<div class="row pt-2">
     <div class="col">
         <div class="table-responsive">
             <table class="table table-striped table-sm">
