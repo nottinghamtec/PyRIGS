@@ -146,7 +146,7 @@ class Command(BaseCommand):
                             supervisor=supervisor
                         )
                         notes = child.find('{}_Notes'.format(depth))
-                        if notes:
+                        if notes is not None:
                             obj.notes = notes.text
                             obj.save()
                         if created:
