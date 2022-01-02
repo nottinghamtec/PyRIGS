@@ -19,6 +19,9 @@
                         <th>Date</th>
                         <th>Supervisor</th>
                         <th>Notes</th>
+                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
+                        <th></th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -29,6 +32,9 @@
                         <td>{{ object.date }}</td>
                         <td><a href="{{ object.supervisor.get_absolute_url}}">{{ object.supervisor }}</a></td>
                         <td>{{ object.notes }}</td>
+                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
+                        <td>{% button 'edit' 'edit_qualification' object.pk %}</td>
+                        {% endif %}
                     </tr>
                 {% empty %}
                 <tr class="table-warning">

@@ -93,7 +93,7 @@ class TrainingItemQualification(models.Model):
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
     def __str__(self):
-        return "{} in {} on {}".format(self.depth, self.item, self.date)
+        return "{} in {} on {}".format(self.get_depth_display(), self.item, self.date.strftime("%b %d %Y"))
 
     @property
     def activity_feed_string(self):

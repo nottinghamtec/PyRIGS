@@ -15,6 +15,8 @@ urlpatterns = [
     path('trainee/<int:pk>/history', permission_required_with_403('RIGS.view_profile')(VersionHistory.as_view()), name='trainee_history', kwargs={'model': models.Trainee, 'app': 'training'}), # Not picked up automatically because proxy model (I think)
     path('trainee/<int:pk>/add_qualification/', login_required(views.AddQualification.as_view()),
          name='add_qualification'),
+    path('trainee/<int:pk>/edit_qualification/', permission_required_with_403('training.change_trainingitemqualification')(views.EditQualification.as_view()),
+         name='edit_qualification'),
     path('session/', login_required(views.SessionLog.as_view()), name='session_log'),
     path('levels/', login_required(views.LevelList.as_view()), name='level_list'),
     path('level/<int:pk>/', login_required(views.LevelDetail.as_view()), name='level_detail'),

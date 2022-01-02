@@ -152,6 +152,23 @@ class AddQualification(generic.CreateView, ModalURLMixin):
         return kwargs
 
 
+class EditQualification(generic.UpdateView):
+    template_name = 'edit_training_record.html'
+    model = models.TrainingItemQualification
+    form_class = forms.QualificationForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EditQualification, self).get_context_data(**kwargs)
+        context["depths"] = models.TrainingItemQualification.CHOICES
+        context['page_title'] = "Edit Qualification {} for {}".format(self.object, models.Trainee.objects.get(pk=self.kwargs['pk']))
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(EditQualification, self).get_form_kwargs()
+        kwargs['pk'] = self.kwargs['pk']
+        return kwargs
+
+
 class AddLevelRequirement(generic.CreateView, ModalURLMixin):
     template_name = "add_level_requirement.html"
     model = models.TrainingLevelRequirement

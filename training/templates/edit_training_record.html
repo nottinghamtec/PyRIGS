@@ -31,6 +31,9 @@
     <div class="form-group form-row">
       <label for="item_id" class="col-sm-2 col-form-label">Item</label>
       <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=reference_number,name&filters=active" required>
+        {% if object.item %}
+        <option value="{{object.item.pk}}" selected>{{object.item}}</option>
+        {% endif %}
       </select>
     </div>
     <div class="form-group form-row">
@@ -40,20 +43,24 @@
     <div class="form-group form-row">
       <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
       <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
+        {% if object.supervisor %}
+        <option value="{{object.supervisor.pk}}" selected>{{object.supervisor}}</option>
+        {% endif %}
       </select>
     </div>
     <div class="form-group form-row">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>
         <div class="col-sm-8">
-            {% render_field form.date|add_class:'form-control'|attr:'type="date"' value=form.date.initial %}
+            {% with training_date=object.date|date:"Y-m-d" %}
+            {% render_field form.date|add_class:'form-control'|attr:'type="date"' value=training_date %}
+            {% endwith %}
         </div>
         <button class="btn btn-info col-sm-2" onclick="var date = new Date(); $('#id_date').val([date.getFullYear(), ('0' + (date.getMonth()+1)).slice(-2), ('0' + date.getDate()).slice(-2)].join('-'))" tabindex="-1" type="button">Today</button>
     </div>
     <div class="form-group form-row">
-        <label for="item_description" class="col-sm-2 col-form-label">Notes</label>
-        <div class="col-sm-10">
-            <textarea type="text" placeholder="Notes" class="form-control"
-                      id="notes" rows="3"></textarea>
+        <label for="id_notes" class="col-sm-2 col-form-label">Notes</label>
+        <div class="col-sm-8">
+        {% render_field form.notes|add_class:'form-control' rows=3 %}
         </div>
     </div>
   {% if not request.is_ajax %}
