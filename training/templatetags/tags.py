@@ -11,10 +11,10 @@ register = template.Library()
 
 @register.simple_tag
 def user_has_qualification(user, item, depth):
-    if models.TrainingItem.user_has_qualification(item, user, depth) is not None:
-        return mark_safe("<span class='fas fa-check text-success'></span>")
+    if models.TrainingItem.user_has_qualification(item, user, depth):
+        return mark_safe("<span class='fas fa-check text-success' title='You have this requirement'></span>")
     else:
-        return mark_safe("<span class='fas fa-hourglass-start text-warning'></span>")
+        return mark_safe("<span class='fas fa-hourglass-start text-warning' title='You do not yet have this requirement'></span>")
 
 
 @register.simple_tag

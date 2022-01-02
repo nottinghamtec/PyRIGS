@@ -16,7 +16,7 @@
             {% if item.active %}
             <li class="list-group-item">{{ item }}</li>
             {% elif request.user.is_superuser %}
-            <li class="list-group-item text-warning">{{ item }} (inactive)</li>
+            <li class="list-group-item text-warning">{{ item }}</li>
             {% endif %}
             {% endfor %}
         </div>

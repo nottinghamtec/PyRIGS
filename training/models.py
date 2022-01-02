@@ -17,8 +17,16 @@ class Trainee(Profile, RevisionMixin):
         return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.pk not in self.level_qualifications.values_list('level', flat=True)]
 
     @property
+    def is_technician(self):
+        return self.level_qualifications.exclude(confirmed_on=None).select_related('level') \
+             .filter(level__level=TrainingLevel.TECHNICIAN) \
+             .exclude(level__department=TrainingLevel.HAULAGE) \
+             .exclude(level__department__isnull=True).exists()
+
+
+    @property
     def is_supervisor(self):
-        return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level') \
+        return self.level_qualifications.exclude(confirmed_on=None).select_related('level') \
             .filter(level__level__gte=TrainingLevel.SUPERVISOR) \
             .exclude(level__department=TrainingLevel.HAULAGE) \
             .exclude(level__department__isnull=True).exists()
@@ -66,7 +74,7 @@ class TrainingItem(models.Model):
 
     @staticmethod
     def user_has_qualification(item, user, depth):
-        return user.qualifications_obtained.values('item', 'depth').filter(item=item, depth__gte=depth).exists()
+        return user.qualifications_obtained.only('item', 'depth').filter(item=item, depth__gte=depth).exists()
 
     class Meta:
         unique_together = ["reference_number", "active", "category"]
@@ -211,6 +219,14 @@ class TrainingLevel(models.Model, RevisionMixin):
     def get_absolute_url(self):
         return reverse('level_detail', kwargs={'pk': self.pk})
 
+    @property
+    def get_icon(self):
+        if self.icon is not None:
+            icon = "<span class='fas fa-{}'></span>".format(self.icon)
+        else:
+            icon = "".join([w[0] for w in str(self).split()])
+        return mark_safe("<span class='badge badge-{} badge-pill' data-toggle='tooltip' title='{}'>{}</span>".format(self.department_colour, str(self), icon))
+
 
 @reversion.register
 class TrainingLevelRequirement(models.Model, RevisionMixin):
@@ -238,11 +254,7 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
 
     @property
     def get_icon(self):
-        if self.level.icon is not None:
-            icon = "<span class='fas fa-{}'></span>".format(self.level.icon)
-        else:
-            icon = "".join([w[0] for w in str(self.level).split()])
-        return mark_safe("<span class='badge badge-{} badge-pill' data-toggle='tooltip' title='{}'>{}</span>".format(self.level.department_colour, self.level, icon))
+        return self.level.get_icon
 
     def __str__(self):
         if self.level.is_common_competencies:
