@@ -251,3 +251,4 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
 
     class Meta:
         unique_together = ["trainee", "level"]
+        ordering = ['-confirmed_on']
