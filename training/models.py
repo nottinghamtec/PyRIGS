@@ -127,7 +127,7 @@ class TrainingItemQualification(models.Model):
 # Levels
 @reversion.register(follow=["requirements"])
 class TrainingLevel(models.Model, RevisionMixin):
-    description = models.CharField(max_length=120, blank=True)
+    description = models.TextField(blank=True)
     TA = 0
     TECHNICIAN = 1
     SUPERVISOR = 2
@@ -148,7 +148,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         (RIGGING, 'Rigging'),
         (HAULAGE, 'Haulage'),
     )
-    department = models.IntegerField(choices=DEPARTMENTS, null=True)  # N.B. Technical Assistant does not have a department
+    department = models.IntegerField(choices=DEPARTMENTS, null=True, blank=True)  # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
     icon = models.CharField(null=True, blank=True, max_length=20)
