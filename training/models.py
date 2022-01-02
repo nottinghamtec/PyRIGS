@@ -12,10 +12,9 @@ class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
 
-    # TODO remove levels that the user has a qualification in
     # FIXME use queryset
     def started_levels(self):
-        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0]
+        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.pk not in self.level_qualifications.values_list('level', flat=True)]
 
     @property
     def is_supervisor(self):
@@ -108,6 +107,9 @@ class TrainingItemQualification(models.Model):
             return "success"
         else:
             return "info"
+
+    def get_absolute_url(self):
+        return reverse('trainee_item_detail', kwargs={'pk': self.trainee.pk})
 
     class Meta:
         unique_together = ["trainee", "item", "depth"]
