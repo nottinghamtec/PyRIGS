@@ -19,7 +19,7 @@ class Trainee(Profile, RevisionMixin):
     @property
     def is_supervisor(self):
         return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level') \
-            .filter(level__gte=TrainingLevel.SUPERVISOR) \
+            .filter(level__level__gte=TrainingLevel.SUPERVISOR) \
             .exclude(level__department=TrainingLevel.HAULAGE) \
             .exclude(level__department__isnull=True).exists()
 
