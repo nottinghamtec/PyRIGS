@@ -124,8 +124,9 @@ class Command(BaseCommand):
         for child in root:
             depths = [("Training_Started", models.TrainingItemQualification.STARTED),
                       ("Training_Complete", models.TrainingItemQualification.COMPLETE),
-                      ("Competency_Assessed", models.TrainingItemQualification.PASSED_OUT)]
-            for depth, depth_index in depths:
+                      ("Competency_Assessed", models.TrainingItemQualification.PASSED_OUT),]
+
+            for (depth, depth_index) in depths:
                 if child.find('{}_Date'.format(depth)) is not None:
                     if child.find('{}_Assessor_ID'.format(depth)) is None:
                         print("Training Record #{} had no supervisor. Assigning System User.".format(child.find('ID').text))
@@ -138,7 +139,6 @@ class Command(BaseCommand):
                         continue
                     try:
                         obj, created = models.TrainingItemQualification.objects.update_or_create(
-                            pk=int(child.find('ID').text),
                             item=models.TrainingItem.objects.get(pk=int(child.find('Training_Item_ID').text)),
                             trainee=Profile.objects.get(pk=self.id_map[child.find('Member_ID').text]),
                             depth=depth_index,
@@ -154,7 +154,7 @@ class Command(BaseCommand):
                         else:
                             tally[0] += 1
                     except IntegrityError:  # Eh?
-                        print("Training Record #{} is duplicate. ಠ_ಠ".format(child.find('ID').text))
+                        print("Training Record #{} is probably duplicate. ಠ_ಠ".format(child.find('ID').text))
                     except AttributeError:
                         print(child.find('ID').text)
 
