@@ -202,7 +202,8 @@ class TrainingLevel(models.Model, RevisionMixin):
 
     def user_has_requirements(self, user):
         has_required_items = all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
-        has_required_levels = not self.prerequisite_levels.all().exists() or set(user.level_qualifications.values_list('level', flat=True)).issubset(set(self.prerequisite_levels.all()))
+        # Always true if there are no prerequisites, otherwise get a set of prerequsite IDs and check if they are a subset of the set of qualification IDs
+        has_required_levels = not self.prerequisite_levels.all().exists() or set(self.prerequisite_levels.values_list('pk', flat=True)).issubset(set(user.level_qualifications.values_list('level', flat=True)))
         return has_required_items and has_required_levels
 
     def __str__(self):
