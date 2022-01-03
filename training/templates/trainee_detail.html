@@ -74,9 +74,10 @@
                   <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
                 </div>
                 {% if completion == 100 %}
+                    <br>
                     {% confirm_button request.user object level as cb %}
                     {% if cb %}
-                        {{ cb }}
+                        <div class="d-flex justify-content-between">{{ cb }}</div>
                     {% else %}
                         <p class="font-italic pt-2 pb-0">Missing prequisite level(s)</p>
                     {% endif %}

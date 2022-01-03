@@ -3,6 +3,7 @@ from django import template
 from django.utils.html import escape
 from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
+from django.urls import reverse
 
 from training import models
 
@@ -45,9 +46,9 @@ def get_levels_of_depth(trainee, level):
 @register.simple_tag
 def confirm_button(user, trainee, level):
     if level.user_has_requirements(trainee):
-        string = "<span class='badge badge-warning'>Awaiting Confirmation</span>"
-        if user.is_supervisor or user.has_perm('training.add_traininglevelqualification'):
-            string += " <a class='btn btn-info' href='{% url 'confirm_level' trainee.pk level.pk %}'>Confirm</a>"
+        string = "<span class='badge badge-warning p-2'>Awaiting Confirmation</span>"
+        if models.Trainee.objects.get(pk=user.pk).is_supervisor or user.has_perm('training.add_traininglevelqualification'):
+            string += "<a class='btn btn-info' href='{}'>Confirm</a>".format(reverse('confirm_level', kwargs={'pk': trainee.pk, 'level_pk': level.pk}))
         return mark_safe(string)
     else:
         return ""
