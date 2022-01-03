@@ -75,6 +75,7 @@ class LevelDetail(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Training Level {} {}".format(self.object, self.object.get_icon)
         context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
+        context["u"] = models.Trainee.objects.get(pk=self.kwargs['u']) if 'u' in self.kwargs else self.request.user
         return context
 
 
@@ -111,17 +112,6 @@ class TraineeList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Training Profile List"
-        return context
-
-
-class SessionLog(generic.FormView):
-    template_name = "session_log_form.html"
-    form_class = forms.SessionLogForm
-
-    def get_context_data(self, **kwargs):
-        context = super(SessionLog, self).get_context_data(**kwargs)
-        context["page_title"] = "Log New Training Session"
-        context["depths"] = models.TrainingItemQualification.CHOICES
         return context
 
 
