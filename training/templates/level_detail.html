@@ -44,6 +44,7 @@
 {% endblock %}
 
 {% block content %}
+{% if u %}<h3>for {{ u }}</h3>{% endif %}
 {% if request.user.is_supervisor or perms.training.change_traininglevel %}
 <div class="col-sm-12 text-right pr-0">
 <a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}" id="requirement_button">

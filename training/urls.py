@@ -17,11 +17,13 @@ urlpatterns = [
          name='add_qualification'),
     path('trainee/<int:pk>/edit_qualification/', permission_required_with_403('training.change_trainingitemqualification')(views.EditQualification.as_view()),
          name='edit_qualification'),
-    path('session/', login_required(views.SessionLog.as_view()), name='session_log'),
+
     path('levels/', login_required(views.LevelList.as_view()), name='level_list'),
     path('level/<int:pk>/', login_required(views.LevelDetail.as_view()), name='level_detail'),
+    path('level/<int:pk>/user/<int:u>/', login_required(views.LevelDetail.as_view()), name='level_detail'),
     path('level/<int:pk>/add_requirement/', login_required(views.AddLevelRequirement.as_view()), name='add_requirement'),
     path('level/remove_requirement/<int:pk>/', login_required(views.RemoveRequirement.as_view()), name='remove_requirement'),
+
     path('trainee/<int:pk>/level/<int:level_pk>/confirm', login_required(views.ConfirmLevel.as_view()), name='confirm_level'),
     path('trainee/<int:pk>/item_record', login_required(views.TraineeItemDetail.as_view()), name='trainee_item_detail'),
 ]

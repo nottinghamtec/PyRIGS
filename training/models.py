@@ -201,7 +201,9 @@ class TrainingLevel(models.Model, RevisionMixin):
             return 0
 
     def user_has_requirements(self, user):
-        return all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
+        has_required_items = all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
+        has_required_levels = set(user.level_qualifications.values_list('level', flat=True)).issubset(set(self.prerequisite_levels.all()))
+        return has_required_items and has_required_levels
 
     def __str__(self):
         if self.department is None:

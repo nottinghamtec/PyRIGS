@@ -40,3 +40,14 @@ def get_supervisor(tech):
 @register.filter
 def get_levels_of_depth(trainee, level):
     return trainee.level_qualifications.all().exclude(confirmed_on=None).exclude(level__department=models.TrainingLevel.HAULAGE).select_related('level').filter(level__level=level)
+
+
+@register.simple_tag
+def confirm_button(user, trainee, level):
+    if level.user_has_requirements(trainee):
+        string = "<span class='badge badge-warning'>Awaiting Confirmation</span>"
+        if user.is_supervisor or user.has_perm('training.add_traininglevelqualification'):
+            string += " <a class='btn btn-info' href='{% url 'confirm_level' trainee.pk level.pk %}'>Confirm</a>"
+        return mark_safe(string)
+    else:
+        return ""
