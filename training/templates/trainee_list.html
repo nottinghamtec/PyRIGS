@@ -38,7 +38,7 @@
                         <td>{{ object.is_driver|yesno|title }}</td>
                         <td>{% for level in object|get_levels_of_depth:1 %}{% if forloop.first %}Yes {%endif%}{{ level.get_icon }}{%empty%}No{%endfor%}</td>
                         <td>{% for level in object|get_levels_of_depth:2 %}{% if forloop.first %}Yes {%endif%}{{ level.get_icon }}{%empty%}No{%endfor%}</td>
-                        <td>{{ object.num_qualifications }} {% if forloop.first %} <span class="fas fa-crown text-warning"></span>{% endif %}</td>
+                        <td>{{ object.num_qualifications }} {% if forloop.first and page_obj.number is 1 %} <span class="fas fa-crown text-warning"></span>{% endif %}</td>
                         <td style="white-space: nowrap">
                             <a class="btn btn-info" href="{% url 'trainee_detail' pk=object.pk %}"><span class="fas fa-eye"></span> View Training Record</a>
                             <a href="{% url 'trainee_item_detail' pk=object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
