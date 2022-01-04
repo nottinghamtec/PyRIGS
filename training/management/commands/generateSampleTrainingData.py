@@ -198,7 +198,7 @@ class Command(BaseCommand):
                         models.TrainingLevelRequirement.objects.create(level=technician, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
                     else:
                         models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
-                except: # noqa
+                except:  # noqa
                     print("Failed create for {}. Weird.".format(item))
 
             self.levels.append(technician)
