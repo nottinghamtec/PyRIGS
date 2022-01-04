@@ -57,7 +57,7 @@ class TrainingCategory(models.Model):
 
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
-    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.RESTRICT)
+    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     active = models.BooleanField(default=True)
 
@@ -90,12 +90,12 @@ class TrainingItemQualification(models.Model):
         (COMPLETE, 'Training Complete'),
         (PASSED_OUT, 'Passed Out'),
     )
-    item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
+    item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
     depth = models.IntegerField(choices=CHOICES)
-    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.RESTRICT)
+    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.CASCADE)
     date = models.DateField()
     # TODO Remember that some training is external. Support for making an organisation the trainer?
-    supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.RESTRICT)
+    supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
@@ -232,8 +232,8 @@ class TrainingLevel(models.Model, RevisionMixin):
 
 @reversion.register
 class TrainingLevelRequirement(models.Model, RevisionMixin):
-    level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.RESTRICT)
-    item = models.ForeignKey('TrainingItem', on_delete=models.RESTRICT)
+    level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.CASCADE)
+    item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
     depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
 
     reversion_hide = True
@@ -247,10 +247,10 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
 
 @reversion.register(follow=['trainee'])
 class TrainingLevelQualification(models.Model, RevisionMixin):
-    trainee = models.ForeignKey('Trainee', related_name='level_qualifications', on_delete=models.RESTRICT)
-    level = models.ForeignKey('TrainingLevel', on_delete=models.RESTRICT)
+    trainee = models.ForeignKey('Trainee', related_name='level_qualifications', on_delete=models.CASCADE)
+    level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE)
     confirmed_on = models.DateTimeField(null=True)
-    confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.RESTRICT, null=True)
+    confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.CASCADE, null=True)
 
     reversion_hide = True
 

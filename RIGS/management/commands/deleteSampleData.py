@@ -35,6 +35,8 @@ class Command(BaseCommand):
         self.delete_objects(tmodels.TrainingCategory)
         self.delete_objects(tmodels.TrainingItem)
         self.delete_objects(tmodels.TrainingLevel)
+        self.delete_objects(tmodels.TrainingItemQualification)
+        self.delete_objects(tmodels.TrainingLevelRequirement)
 
     def delete_objects(self, model):
         for obj in model.objects.all():

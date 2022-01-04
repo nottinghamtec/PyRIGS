@@ -19,7 +19,7 @@ from django.urls.exceptions import NoReverseMatch
 from RIGS.models import Event
 from assets.models import Asset
 from django.db import connection
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 
 
@@ -67,10 +67,17 @@ class TestSampleDataGenerator(TestCase):
         assert Event.objects.all().count() == 0
 
 
-class TestSampleDataGenerator(TestCase):
-    @override_settings(DEBUG=True)
-    def setUp(self):
+@override_settings(DEBUG=True)
+class TestsWithSampleDataGenerator(TransactionTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         call_command('generateSampleData')
+
+    @classmethod
+    def tearDownClass(cls):
+        call_command('deleteSampleData')
+        super().tearDownClass()
 
     def test_unauthenticated(self):  # Nothing should be available to the unauthenticated
         for url in find_urls_recursive(urls.urlpatterns):
