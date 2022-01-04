@@ -193,9 +193,13 @@ class Command(BaseCommand):
                     break
                 item = random.choice(items)
                 items.remove(item)
-                if i % 3 == 0:
-                    models.TrainingLevelRequirement.objects.create(level=technician, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
-                else:
-                    models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                try:
+                    if i % 3 == 0:
+                        models.TrainingLevelRequirement.objects.create(level=technician, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                    else:
+                        models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
+                except: # noqa
+                    print("Failed create for {}. Weird.".format(item))
+
             self.levels.append(technician)
             self.levels.append(supervisor)
