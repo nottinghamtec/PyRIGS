@@ -12,7 +12,7 @@ urlpatterns = [
     path('trainee/<int:pk>/',
          has_perm_or_supervisor('RIGS.view_profile')(views.TraineeDetail.as_view()),
          name='trainee_detail'),
-    path('trainee/<int:pk>/history', has_perm_or_supervisor('RIGS.view_profile')(VersionHistory.as_view()), name='trainee_history', kwargs={'model': models.Trainee, 'app': 'training'}), # Not picked up automatically because proxy model (I think)
+    path('trainee/<int:pk>/history', has_perm_or_supervisor('RIGS.view_profile')(VersionHistory.as_view()), name='trainee_history', kwargs={'model': models.Trainee, 'app': 'training'}),  # Not picked up automatically because proxy model (I think)
     path('trainee/<int:pk>/add_qualification/', has_perm_or_supervisor('training.add_trainingitemqualificaiton')(views.AddQualification.as_view()),
          name='add_qualification'),
     path('trainee/<int:pk>/edit_qualification/', has_perm_or_supervisor('training.change_trainingitemqualification')(views.EditQualification.as_view()),

@@ -124,7 +124,7 @@ class Command(BaseCommand):
         for child in root:
             depths = [("Training_Started", models.TrainingItemQualification.STARTED),
                       ("Training_Complete", models.TrainingItemQualification.COMPLETE),
-                      ("Competency_Assessed", models.TrainingItemQualification.PASSED_OUT),]
+                      ("Competency_Assessed", models.TrainingItemQualification.PASSED_OUT), ]
 
             for (depth, depth_index) in depths:
                 if child.find('{}_Date'.format(depth)) is not None:

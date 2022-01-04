@@ -19,10 +19,9 @@ class Trainee(Profile, RevisionMixin):
     @property
     def is_technician(self):
         return self.level_qualifications.exclude(confirmed_on=None).select_related('level') \
-             .filter(level__level=TrainingLevel.TECHNICIAN) \
-             .exclude(level__department=TrainingLevel.HAULAGE) \
-             .exclude(level__department__isnull=True).exists()
-
+            .filter(level__level=TrainingLevel.TECHNICIAN) \
+            .exclude(level__department=TrainingLevel.HAULAGE) \
+            .exclude(level__department__isnull=True).exists()
 
     @property
     def is_supervisor(self):

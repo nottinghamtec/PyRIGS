@@ -35,19 +35,27 @@ class Command(BaseCommand):
     def setup_groups(self):
         self.committee_group = Group.objects.create(name='Committee')
 
-        perms = ["add_trainingitemqualification", "change_trainingitemqualification", "delete_trainingitemqualification", "add_traininglevelqualification", "change_traininglevelqualification", "delete_traininglevelqualification", "add_traininglevelrequirement", "change_traininglevelrequirement", "delete_traininglevelrequirement"]
+        perms = [
+            "add_trainingitemqualification",
+            "change_trainingitemqualification",
+            "delete_trainingitemqualification",
+            "add_traininglevelqualification",
+            "change_traininglevelqualification",
+            "delete_traininglevelqualification",
+            "add_traininglevelrequirement",
+            "change_traininglevelrequirement",
+            "delete_traininglevelrequirement"]
 
         for permId in perms:
             self.committee_group.permissions.add(Permission.objects.get(codename=permId))
 
         self.committee_group.save()
 
-
     def setup_useful_profiles(self):
         supervisor = Profile.objects.create(username="supervisor", first_name="Super", last_name="Visor",
-                                                   initials="SV",
-                                                   email="supervisor@example.com", is_active=True,
-                                                   is_staff=True, is_approved=True)
+                                            initials="SV",
+                                            email="supervisor@example.com", is_active=True,
+                                            is_staff=True, is_approved=True)
         supervisor.set_password('supervisor')
         supervisor.groups.add(Group.objects.get(name="Keyholders"))
         supervisor.save()
@@ -61,8 +69,8 @@ class Command(BaseCommand):
             confirmed_by=models.Trainee.objects.first())
 
         committee_user = Profile.objects.create(username="committee", first_name="Committee", last_name="Member",
-                                                     initials="CM",
-                                                     email="committee@example.com", is_active=True, is_approved=True)
+                                                initials="CM",
+                                                email="committee@example.com", is_active=True, is_approved=True)
         committee_user.groups.add(self.committee_group)
         supervisor.groups.add(Group.objects.get(name="Keyholders"))
         committee_user.set_password('committee')
