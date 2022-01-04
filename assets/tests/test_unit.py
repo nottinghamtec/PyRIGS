@@ -64,11 +64,11 @@ def test_x_frame_headers(client, django_user_model, test_asset):
 
     response = client.get(asset_url, follow=True)
     with pytest.raises(KeyError):
-        response._headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"]
 
     response = client.get(login_url, follow=True)
     with pytest.raises(KeyError):
-        response._headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"]
 
 
 def test_oembed(client, test_asset):
