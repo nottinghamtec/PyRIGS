@@ -67,7 +67,7 @@ class TestSampleDataGenerator(TestCase):
         assert Event.objects.all().count() == 0
 
 
-class TestSampleDataGenerator(TransactionTestCase):
+class TestSampleDataGenerator(TestCase):
     @override_settings(DEBUG=True)
     def setUp(self):
         call_command('generateSampleData')
