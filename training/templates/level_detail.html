@@ -59,31 +59,33 @@
 </div>
 <div class="card">
     <div class="card-header"><h4 class="card-title">Level Requirements</h4> {% if u.pk != request.user.pk %}<h5 class="card-subtitle font-italic">for {{ u }}</h5>{% endif %}</div>
-    <table class="table card-body">
-      <thead>
-        <tr>
-          <th scope="col" class="table-warning" style="width: 33%">Training Started</th>
-          <th scope="col" class="table-success" style="width: 33%">Training Complete</th>
-          <th scope="col" class="table-info" style="width: 33%">Passed Out</th>
-        </tr>
-      </thead>
-      <tbody class="table-body">
-        {% for level in object.prerequisite_levels.all %}
-        <tr data-toggle="collapse" data-target="#{{level.pk}}" style="cursor: pointer;"><th colspan="3" class="text-center font-italic" data-toggle="collapse" data-target="#level_{{level.pk}}">{{level}} (prerequisite)</th></tr>
-        <tr id="level_{{level.pk}}" class="collapse">
-          <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %}</li>{% endfor %}</ul></td>
-          <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %}</li>{% endfor %}</ul></td>
-          <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %}</li>{% endfor %}</ul></td>
-        </tr>
-        {% endfor %}
-        <tr><th colspan="3" class="text-center">{{object}}</th></tr>
-        <tr>
-          <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
-          <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
-          <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline"" href="{% url 'remove_requirement' pk=req.pk %}" title="Delete requirement"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" class="table-warning" style="width: 33%">Training Started</th>
+              <th scope="col" class="table-success" style="width: 33%">Training Complete</th>
+              <th scope="col" class="table-info" style="width: 33%">Passed Out</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            {% for level in object.prerequisite_levels.all %}
+            <tr data-toggle="collapse" data-target="#{{level.pk}}" style="cursor: pointer;"><th colspan="3" class="text-center font-italic" data-toggle="collapse" data-target="#level_{{level.pk}}">{{level}} (prerequisite)</th></tr>
+            <tr id="level_{{level.pk}}" class="collapse">
+              <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %}</li>{% endfor %}</ul></td>
+            </tr>
+            {% endfor %}
+            <tr><th colspan="3" class="text-center">{{object}}</th></tr>
+            <tr>
+              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %} {% if request.user.as_trainee.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline"" href="{% url 'remove_requirement' pk=req.pk %}" title="Delete requirement"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
     <h4 class="card-header">Prerequisite Levels:</h4>
     <div class="card-body">
        <ul>
