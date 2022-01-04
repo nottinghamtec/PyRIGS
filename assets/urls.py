@@ -7,6 +7,7 @@ from PyRIGS.views import OEmbedView
 from . import views, converters
 
 register_converter(converters.AssetIDConverter, 'asset')
+register_converter(converters.ListConverter, 'list')
 
 urlpatterns = [
     path('', login_required(views.AssetList.as_view()), name='asset_index'),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('asset/id/<asset:pk>/duplicate/', permission_required_with_403('assets.add_asset')
          (views.AssetDuplicate.as_view()), name='asset_duplicate'),
     path('asset/id/<asset:pk>/label', login_required(views.GenerateLabel.as_view()), name='generate_label'),
+    path('asset/<list:ids>/list/label',  views.GenerateLabels.as_view(), name='generate_labels'),
 
     path('cabletype/list/', login_required(views.CableTypeList.as_view()), name='cable_type_list'),
     path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),

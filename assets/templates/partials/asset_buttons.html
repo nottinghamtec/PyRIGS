@@ -12,9 +12,7 @@
         {% button 'edit' url='asset_update' pk=object.asset_id %}
         {% button 'duplicate' url='asset_duplicate' pk=object.asset_id %}
         <a type="button" class="btn btn-info" href="{% url 'asset_audit' object.asset_id %}"><span class="fas fa-certificate"></span> Audit</a>
-        {% if object.is_cable %}
         <a type="button" class="btn btn-primary" href="{% url 'generate_label' object.asset_id %}"><span class="fas fa-barcode"></span> Generate Label</a>
-        {% endif %}
     </div>
     {% endif %}
     {% if create or edit or duplicate %}

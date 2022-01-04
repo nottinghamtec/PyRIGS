@@ -1,5 +1,8 @@
 import simplejson
 import random
+import base64
+from io import BytesIO
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
@@ -11,10 +14,13 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 
+from PyPDF2 import PdfFileMerger, PdfFileReader
 from PIL import Image, ImageDraw, ImageFont
 from barcode import Code39
 from barcode.writer import ImageWriter
+from z3c.rml import rml2pdf
 
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
     is_ajax, OEmbedView
@@ -51,6 +57,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
                 Q(asset_id__exact=query_string.upper()) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
         else:
             queryset = self.model.objects.filter(Q(asset_id__exact=query_string.upper()))
+
+        if form.cleaned_data['is_cable']:
+            queryset = queryset.filter(is_cable=True)
 
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
@@ -346,35 +355,82 @@ class CableTypeUpdate(generic.UpdateView):
         return reverse("cable_type_detail", kwargs={"pk": self.object.pk})
 
 
-class GenerateLabel(generic.View):
-    def get(self, request, pk):
-        black = (0, 0, 0)
-        white = (255, 255, 255)
-        size = (700, 200)
-        font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 20)
-        obj = get_object_or_404(models.Asset, asset_id=pk)
+def generate_label(pk):
+    black = (0, 0, 0)
+    white = (255, 255, 255)
+    size = (700, 200)
+    font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 20)
+    obj = get_object_or_404(models.Asset, asset_id=pk)
 
-        asset_id = "Asset: {}".format(obj.asset_id)
+    asset_id = "Asset: {}".format(obj.asset_id)
+    if obj.is_cable:
         length = "Length: {}m".format(obj.length)
         csa = "CSA: {}mm²".format(obj.csa)
 
-        image = Image.new("RGB", size, white)
-        logo = Image.open("static/imgs/square_logo.png")
-        draw = ImageDraw.Draw(image)
+    image = Image.new("RGB", size, white)
+    logo = Image.open("static/imgs/square_logo.png")
+    draw = ImageDraw.Draw(image)
 
-        draw.text((210, 140), asset_id, fill=black, font=font)
+    draw.text((210, 140), asset_id, fill=black, font=font)
+    if obj.is_cable:
         draw.text((210, 170), length, fill=black, font=font)
-        draw.text((350, 170), csa, fill=black, font=font)
-        draw.multiline_text((500, 140), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
+        draw.text((360, 170), csa, fill=black, font=font)
+    draw.multiline_text((500, 140), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
 
-        barcode = Code39(str(obj.asset_id), writer=ImageWriter())
+    barcode = Code39(str(obj.asset_id), writer=ImageWriter())
 
-        logo_size = (200, 200)
-        image.paste(logo.resize(logo_size, Image.ANTIALIAS))
-        barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
-        width, height = barcode_image.size
-        image.paste(barcode_image.crop((0, 0, width, 135)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
+    logo_size = (200, 200)
+    image.paste(logo.resize(logo_size, Image.ANTIALIAS))
+    barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
+    width, height = barcode_image.size
+    image.paste(barcode_image.crop((0, 0, width, 135)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
 
+    return image
+
+
+class GenerateLabel(generic.View):  # TODO Caching
+    def get(self, request, pk):
         response = HttpResponse(content_type="image/png")
-        image.save(response, "PNG")
+        generate_label(pk).save(response, "PNG")
+        return response
+
+
+class GenerateLabels(generic.View):
+    def get(self, request, ids):
+        response = HttpResponse(content_type='application/pdf')
+        template = get_template('labels_print.xml')
+
+        images = []
+
+        for asset_id in ids:
+            image = generate_label(asset_id)
+            in_mem_file = BytesIO()
+            image.save(in_mem_file, format="PNG")
+            # reset file pointer to start
+            in_mem_file.seek(0)
+            img_bytes = in_mem_file.read()
+
+            base64_encoded_result_bytes = base64.b64encode(img_bytes)
+            base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
+            images.append(base64_encoded_result_str)
+
+        context = {
+            'images0': images[::4],
+            'images1': images[1::4],
+            'images2': images[2::4],
+            'images3': images[3::4],
+            'filename': "Asset Label Sheet generated at {}".format(timezone.now())
+        }
+        merger = PdfFileMerger()
+
+        rml = template.render(context)
+        buffer = rml2pdf.parseString(rml)
+        merger.append(PdfFileReader(buffer))
+        buffer.close()
+
+        merged = BytesIO()
+        merger.write(merged)
+
+        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
+        response.write(merged.getvalue())
         return response

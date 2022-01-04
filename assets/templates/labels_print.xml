@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE document SYSTEM "rml.dtd">
+{% load multiply from filters %}
+{% load index from asset_tags %}
+<document filename="{{filename}}">
+    <template>
+        <pageTemplate id="main">
+            <pageGraphics>
+            </pageGraphics>
+            <frame id="first" x1="5" y1="-10" width="581" height="842"/>
+        </pageTemplate>
+    </template>
+    <stylesheet>
+        <blockTableStyle id="table">
+        <!-- show a grid: this also comes in handy for debugging your tables.-->
+        <lineStyle kind="GRID" colorName="black" thickness="1" start="0,0" stop="-1,-1" />
+        </blockTableStyle>
+    </stylesheet>
+    <story>
+        <blockTable style="table">
+            {% for i in images0 %}
+            <tr>
+                <td>{% with images0|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
+width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images1|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
+width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images2|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
+width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images3|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
+width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
+            </tr>
+            {% endfor %}
+        </blockTable>
+    </story>
+</document>
