@@ -32,7 +32,7 @@ class Command(BaseCommand):
             self.setup_categories()
             self.setup_items()
             self.setup_levels()
-        call_command('generate_sample_training_users')
+        # call_command('generate_sample_training_users')
         print("Done generating training data")
 
     def setup_categories(self):
@@ -144,7 +144,13 @@ class Command(BaseCommand):
             "Wiki Editing"]
 
         for i, name in enumerate(names):
-            item = models.TrainingItem.objects.create(category=random.choice(self.categories), reference_number=random.randint(0, 100), name=name)
+            category = random.choice(self.categories)
+            previous_item = models.TrainingItem.objects.filter(category=category).last()
+            if previous_item is not None:
+                number = previous_item.reference_number + 1
+            else:
+                number = 0
+            item = models.TrainingItem.objects.create(category=category, reference_number=number, name=name)
             self.items.append(item)
 
     def setup_levels(self):
