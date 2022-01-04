@@ -12,4 +12,5 @@ class Command(BaseCommand):
         call_command('generateSampleUserData')
         call_command('generateSampleRIGSData')
         call_command('generateSampleAssetsData')
-        call_command('generateSampleTrainingData')
+        call_command('import_old_db')
+        call_command('generate_sample_training_users')

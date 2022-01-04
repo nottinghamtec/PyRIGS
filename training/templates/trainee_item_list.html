@@ -19,7 +19,7 @@
                         <th>Date</th>
                         <th>Supervisor</th>
                         <th>Notes</th>
-                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
+                        {% if request.user.as_trainee.is_supervisor or perms.training.change_trainingitemqualification %}
                         <th></th>
                         {% endif %}
                     </tr>
@@ -32,8 +32,8 @@
                         <td>{{ object.date }}</td>
                         <td><a href="{{ object.supervisor.get_absolute_url}}">{{ object.supervisor }}</a></td>
                         <td>{{ object.notes }}</td>
-                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
-                        <td>{% button 'edit' 'edit_qualification' object.pk %}</td>
+                        {% if request.user.as_trainee.is_supervisor or perms.training.change_trainingitemqualification %}
+                        <td>{% button 'edit' 'edit_qualification' trainee.pk %}</td>
                         {% endif %}
                     </tr>
                 {% empty %}

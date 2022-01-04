@@ -56,6 +56,11 @@ class Profile(AbstractUser):
     def latest_events(self):
         return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
 
+    @cached_property
+    def as_trainee(self):
+        from training.models import Trainee
+        return Trainee.objects.get(pk=self.pk)
+
     @classmethod
     def admins(cls):
         return Profile.objects.filter(email__in=[y for x in settings.ADMINS for y in x])

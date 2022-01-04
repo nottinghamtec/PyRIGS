@@ -2,6 +2,7 @@ import datetime
 import random
 
 from django.contrib.auth.models import Group, Permission
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -31,7 +32,7 @@ class Command(BaseCommand):
             self.setup_categories()
             self.setup_items()
             self.setup_levels()
-            self.setup_supervisor()
+        call_command('generate_sample_training_users')
         print("Done generating training data")
 
     def setup_categories(self):
@@ -192,20 +193,3 @@ class Command(BaseCommand):
                     models.TrainingLevelRequirement.objects.create(level=supervisor, item=item, depth=random.choice(models.TrainingItemQualification.CHOICES)[0])
             self.levels.append(technician)
             self.levels.append(supervisor)
-
-    def setup_supervisor(self):
-        supervisor = models.Profile.objects.create(username="supervisor", first_name="Super", last_name="Visor",
-                                                   initials="SV",
-                                                   email="supervisor@example.com", is_active=True,
-                                                   is_staff=True, is_approved=True)
-        supervisor.set_password('supervisor')
-        supervisor.groups.add(Group.objects.get(name="Keyholders"))
-        supervisor.save()
-        models.TrainingLevelQualification.objects.create(
-            trainee=supervisor,
-            level=models.TrainingLevel.objects.filter(
-                level__gte=models.TrainingLevel.SUPERVISOR).exclude(
-                department=models.TrainingLevel.HAULAGE).exclude(
-                department__isnull=True).first(),
-            confirmed_on=timezone.now(),
-            confirmed_by=models.Trainee.objects.first())

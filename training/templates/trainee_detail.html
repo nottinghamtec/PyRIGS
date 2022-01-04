@@ -43,9 +43,11 @@
 {% block content %}
 <div class="row">
     <div class="col-sm-12 text-right">
-        {% include 'partials/add_qualification.html' %}
-        <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
-        <a href="{% url 'profile_detail' object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View User Profile</a>
+        <div class="btn-group">
+            {% include 'partials/add_qualification.html' %}
+            <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
+            <a href="{% url 'profile_detail' object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View User Profile</a>
+        </div>
     </div>
 </div>
 <div class="row mb-3">

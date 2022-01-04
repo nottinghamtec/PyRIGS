@@ -63,6 +63,7 @@ class TraineeItemDetail(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
+        context["trainee"] = models.Trainee.objects.get(pk=self.kwargs['pk'])
         context["page_title"] = "Detailed Training Record for <a href='{}'>{}</a>".format(trainee.get_absolute_url(), trainee)
         return context
 

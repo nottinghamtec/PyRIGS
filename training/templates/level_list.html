@@ -15,7 +15,7 @@
 </div>
 {% for level in object_list %}
 <div class="card mb-2">
-    <div class="card-header">{{level}}</div>
+    <div class="card-header"><a href="{{level.get_absolute_url}}">{{level}}</a></div>
     <div class="card-body">{{level.description|markdown}}</div>
 </div>
 {% endfor %}
