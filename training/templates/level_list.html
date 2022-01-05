@@ -4,6 +4,7 @@
 {% load get_supervisor from tags %}
 
 {% block content %}
+{% if request.user.is_staff %}
 <div class="alert alert-info" role="alert">
 <p>Please Note:</p>
 <ul>
@@ -13,10 +14,17 @@
 </ul>
 <sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
 </div>
+{% endif %}
 {% for level in object_list %}
-<div class="card mb-2">
-    <div class="card-header"><a href="{{level.get_absolute_url}}">{{level}}</a></div>
-    <div class="card-body">{{level.description|markdown}}</div>
+{% ifchanged level.department %}
+{% if not forloop.first %}</div>{% endif %}
+<div class="card-group">
+{% endifchanged %}
+<div class="card mb-2 border-{{level.department_colour}}">
+    <div class="card-body">
+        <h3 class="card-title"><a href="{{level.get_absolute_url}}">{{level}}</a></h2>
+        {{level.description|markdown}}
+    </div>
 </div>
 {% endfor %}
 {% endblock %}

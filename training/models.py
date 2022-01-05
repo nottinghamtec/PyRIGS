@@ -152,6 +152,9 @@ class TrainingLevel(models.Model, RevisionMixin):
     prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
     icon = models.CharField(null=True, blank=True, max_length=20)
 
+    class Meta:
+        ordering = ["department", "level"]
+
     @property
     def department_colour(self):
         if self.department == self.SOUND:

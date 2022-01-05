@@ -225,17 +225,16 @@ class Command(BaseCommand):
 
         for child in root:
             try:
-                if child.find('Training_x0020_Level_x0020_ID') is None:
-                    print('Training Level Qualification #{} does not qualify in any level. How?'.format(child.find('ID').text))
+                trainee = Profile.objects.get(pk=self.id_map[child.find('Member_x0020_ID').text]) if child.find('Member_x0020_ID') is not None else False
+                level = models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text)) if child.find('Training_x0020_Level_x0020_ID') is not None else False
+
+                if trainee and level:
+                    obj, created = models.TrainingLevelQualification.objects.update_or_create(pk=int(child.find('ID').text),
+                                                                                              trainee=trainee,
+                                                                                              level=level)
+                else:
+                    print('Training Level Qualification #{} failed to import. Trainee: {} and Level: {}'.format(child.find('ID').text, trainee, level))
                     continue
-                if child.find('Member_x0020_ID') is None:
-                    print('Training Level Qualification #{} does not qualify anyone. How?!'.format(child.find('ID').text))
-                    continue
-                obj, created = models.TrainingLevelQualification.objects.update_or_create(
-                    pk=int(child.find('ID').text),
-                    trainee=Profile.objects.get(pk=self.id_map[child.find('Member_x0020_ID').text]),
-                    level=models.TrainingLevel.objects.get(pk=int(child.find('Training_x0020_Level_x0020_ID').text))
-                )
 
                 if child.find('Date_x0020_Level_x0020_Awarded') is not None:
                     obj.confirmed_on = make_aware(datetime.datetime.strptime(child.find('Date_x0020_Level_x0020_Awarded').text.split('T')[0], "%Y-%m-%d"))
