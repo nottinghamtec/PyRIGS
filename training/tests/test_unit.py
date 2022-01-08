@@ -34,4 +34,5 @@ def test_trainee_detail(admin_client, trainee, admin_user):
     url = reverse('trainee_detail', kwargs={'pk': trainee.pk})
     response = admin_client.get(url)
     assertNotContains(response, "Your")
-    assertContains(response, "{}'s Training Record".format(trainee.first_name + " " + trainee.last_name))
+    name = trainee.first_name + " " + trainee.last_name
+    assertContains(response, f"{name}'s Training Record")
