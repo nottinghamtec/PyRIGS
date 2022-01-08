@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage
 
+
 class TraineeDetail(BasePage):
     URL_TEMPLATE = 'trainee/{pk}'
 
