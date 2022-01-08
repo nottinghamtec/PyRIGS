@@ -105,7 +105,6 @@ def test_asset_edit(admin_client, test_asset):
 
 def test_cable_edit(admin_client, test_cable):
     url = reverse('asset_update', kwargs={'pk': test_cable.asset_id})
-    # TODO Why do I have to send is_cable=True here?
     response = admin_client.post(url, {'is_cable': True, 'length': -3, 'csa': -3})
 
     # TODO Can't figure out how to select the 'none' option...

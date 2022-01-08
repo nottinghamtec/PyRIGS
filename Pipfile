@@ -78,6 +78,7 @@ diff-match-patch = "*"
 python-barcode = "*"
 django-hCaptcha = "*"
 importlib-metadata = "*"
+django-hcaptcha = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"
