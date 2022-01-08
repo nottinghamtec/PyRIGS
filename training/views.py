@@ -206,7 +206,13 @@ class ConfirmLevel(generic.RedirectView):
     @transaction.atomic()
     @reversion.create_revision()
     def get_redirect_url(self, *args, **kwargs):
-        level_qualification = models.TrainingLevelQualification.objects.create(trainee=models.Trainee.objects.get(pk=kwargs['pk']), level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']), confirmed_by=self.request.user, confirmed_on=timezone.now())
+        level_qualification, created = models.TrainingLevelQualification.objects.get_or_create(trainee=models.Trainee.objects.get(pk=kwargs['pk']), level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']))
+
+        if created:
+            level_qualification.confirmed_by=self.request.user
+            level_qualification.confirmed_on=timezone.now()
+            level_qualification.save()
+
         reversion.add_to_revision(level_qualification.trainee)
         reversion.set_user(self.request.user)
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
