@@ -209,8 +209,8 @@ class ConfirmLevel(generic.RedirectView):
         level_qualification, created = models.TrainingLevelQualification.objects.get_or_create(trainee=models.Trainee.objects.get(pk=kwargs['pk']), level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']))
 
         if created:
-            level_qualification.confirmed_by=self.request.user
-            level_qualification.confirmed_on=timezone.now()
+            level_qualification.confirmed_by = self.request.user
+            level_qualification.confirmed_on = timezone.now()
             level_qualification.save()
 
         reversion.add_to_revision(level_qualification.trainee)
