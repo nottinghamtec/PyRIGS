@@ -23,3 +23,15 @@ def test_add_requirement(admin_client, level):
     url = reverse('add_requirement', kwargs={'pk': level.pk})
     response = admin_client.post(url)
     assertContains(response, level.pk)
+
+
+def test_trainee_detail(admin_client, trainee, admin_user):
+    url = reverse('trainee_detail', kwargs={'pk': admin_user.pk})
+    response = admin_client.get(url)
+    assertContains(response, "Your Training Record")
+    assertContains(response, "No qualifications in any levels")
+
+    url = reverse('trainee_detail', kwargs={'pk': trainee.pk})
+    response = admin_client.get(url)
+    assertNotContains(response, "Your")
+    assertContains(response, "{}'s Training Record".format(trainee.first_name + " " + trainee.last_name))
