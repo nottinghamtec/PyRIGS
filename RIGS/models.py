@@ -27,6 +27,7 @@ class Profile(AbstractUser):
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
+    is_supervisor = models.BooleanField(default=False)
 
     reversion_hide = True
 
@@ -55,11 +56,6 @@ class Profile(AbstractUser):
     @property
     def latest_events(self):
         return self.event_mic.order_by('-start_date').select_related('person', 'organisation', 'venue', 'mic', 'riskassessment', 'invoice').prefetch_related('checklists')
-
-    @cached_property
-    def as_trainee(self):
-        from training.models import Trainee
-        return Trainee.objects.get(pk=self.pk)
 
     @classmethod
     def admins(cls):

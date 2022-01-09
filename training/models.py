@@ -24,13 +24,6 @@ class Trainee(Profile, RevisionMixin):
             .exclude(level__department__isnull=True).exists()
 
     @property
-    def is_supervisor(self):
-        return self.level_qualifications.exclude(confirmed_on=None).select_related('level') \
-            .filter(level__level__gte=TrainingLevel.SUPERVISOR) \
-            .exclude(level__department=TrainingLevel.HAULAGE) \
-            .exclude(level__department__isnull=True).exists()
-
-    @property
     def is_driver(self):
         return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level').filter(level__department=TrainingLevel.HAULAGE).exists()
 
@@ -265,6 +258,11 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
     @property
     def get_icon(self):
         return self.level.get_icon
+
+    def clean(self):
+        if level.level >= TrainingLevel.SUPERVISOR and level.department != TrainingLevel.HAULAGE:
+            trainee.is_supervisor = True
+            trainee.save()
 
     def __str__(self):
         if self.level.is_common_competencies:
