@@ -22,6 +22,13 @@
 {% block content %}
 {% if form.errors %}
 	{% include 'form_errors.html' %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script>
+        //Has to be done here or the pickers disappear on modal error
+        $('document').ready(function(){
+            $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+        });
+    </script>
 {% endif %}
 <form id="requirement-form" action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
     {% render_field form.level|attr:'hidden' value=form.level.initial %}

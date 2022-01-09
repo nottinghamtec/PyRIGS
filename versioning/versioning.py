@@ -72,7 +72,7 @@ class FieldComparison(object):
 
 
 class ModelComparison(object):
-    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=[]):
+    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=['date_joined']):
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:
             self.fields = old._meta.get_fields()
@@ -122,7 +122,7 @@ class ModelComparison(object):
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(models.EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'last_login']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'date_joined']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
@@ -170,7 +170,7 @@ class RIGSVersionManager(VersionQuerySet):
         for model in model_array:
             content_types.append(ContentType.objects.get_for_model(model))
 
-        return self.filter(content_type__in=content_types).select_related("revision").order_by(
+        return self.filter(content_type__in=content_types).select_related("revision",).order_by(
             "-revision__date_created")
 
 

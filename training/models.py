@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.safestring import SafeData, mark_safe
 
 
-@reversion.register(for_concrete_model=False)
+@reversion.register(for_concrete_model=False, fields=[], follow=["qualifications_obtained", "level_qualifications"])
 class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
@@ -43,6 +43,10 @@ class Trainee(Profile, RevisionMixin):
     def get_absolute_url(self):
         return reverse('trainee_detail', kwargs={'pk': self.pk})
 
+    @property
+    def display_id(self):
+        return str(self)
+
 
 class TrainingCategory(models.Model):
     reference_number = models.IntegerField(unique=True)
@@ -55,6 +59,7 @@ class TrainingCategory(models.Model):
         verbose_name_plural = 'Training Categories'
 
 
+@reversion.register
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
@@ -80,8 +85,8 @@ class TrainingItem(models.Model):
         ordering = ['category__reference_number', 'reference_number']
 
 
-@reversion.register(follow=['trainee'])
-class TrainingItemQualification(models.Model):
+@reversion.register
+class TrainingItemQualification(models.Model, RevisionMixin):
     STARTED = 0
     COMPLETE = 1
     PASSED_OUT = 2
@@ -248,7 +253,7 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
         unique_together = ["level", "item"]
 
 
-@reversion.register(follow=['trainee'])
+@reversion.register
 class TrainingLevelQualification(models.Model, RevisionMixin):
     trainee = models.ForeignKey('Trainee', related_name='level_qualifications', on_delete=models.CASCADE)
     level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE)

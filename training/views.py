@@ -121,6 +121,12 @@ class AddQualification(generic.CreateView, ModalURLMixin):
     model = models.TrainingItemQualification
     form_class = forms.QualificationForm
 
+    @transaction.atomic()
+    @reversion.create_revision()
+    def form_valid(self, form, *args, **kwargs):
+        reversion.add_to_revision(form.cleaned_data['trainee'])
+        return super().form_valid(form, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(AddQualification, self).get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
@@ -156,6 +162,12 @@ class EditQualification(generic.UpdateView):
         kwargs['pk'] = self.kwargs['pk']
         return kwargs
 
+    @transaction.atomic()
+    @reversion.create_revision()
+    def form_valid(self, form, *args, **kwargs):
+        reversion.add_to_revision(form.cleaned_data['trainee'])
+        return super().form_valid(form, *args, **kwargs)
+
 
 class AddLevelRequirement(generic.CreateView, ModalURLMixin):
     template_name = "add_level_requirement.html"
@@ -179,7 +191,6 @@ class AddLevelRequirement(generic.CreateView, ModalURLMixin):
     @reversion.create_revision()
     def form_valid(self, form, *args, **kwargs):
         reversion.add_to_revision(form.cleaned_data['level'])
-        reversion.set_comment("Level requirement added")
         return super().form_valid(form, *args, **kwargs)
 
 
@@ -206,13 +217,13 @@ class ConfirmLevel(generic.RedirectView):
     @transaction.atomic()
     @reversion.create_revision()
     def get_redirect_url(self, *args, **kwargs):
-        level_qualification, created = models.TrainingLevelQualification.objects.get_or_create(trainee=models.Trainee.objects.get(pk=kwargs['pk']), level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']))
+        trainee = models.Trainee.objects.get(pk=kwargs['pk'])
+        level_qualification, created = models.TrainingLevelQualification.objects.get_or_create(trainee=trainee, level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']))
 
         if created:
             level_qualification.confirmed_by = self.request.user
             level_qualification.confirmed_on = timezone.now()
             level_qualification.save()
 
-        reversion.add_to_revision(level_qualification.trainee)
-        reversion.set_user(self.request.user)
+        reversion.add_to_revision(trainee)
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
