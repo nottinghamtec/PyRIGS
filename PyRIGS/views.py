@@ -101,10 +101,12 @@ class SecureAPIRequest(generic.View):
                 for field in fields:
                     q = Q(**{field + "__icontains": part})
                     qs.append(q)
-                for filter in filters:
-                    q = Q(**{field: True})
-                    qs.append(q)
+
                 queries.append(reduce(operator.or_, qs))
+
+            for f in filters:
+                q = Q(**{f: True})
+                queries.append(q)
 
             # Build the data response list
             results = []
