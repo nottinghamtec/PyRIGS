@@ -75,6 +75,7 @@ class CableType(models.Model):
 
     class Meta:
         ordering = ['plug', 'socket', '-circuits']
+        unique_together = ['plug', 'socket', 'circuits', 'cores']
 
     def __str__(self):
         if self.plug and self.socket:
