@@ -6,7 +6,7 @@ class PersonList(GenericListView):
     model = models.Person
 
     def get_context_data(self, **kwargs):
-        context = super(PersonList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = "People"
         context['create'] = 'person_create'
         context['edit'] = 'person_update'
@@ -19,7 +19,7 @@ class PersonDetail(GenericDetailView):
     model = models.Person
 
     def get_context_data(self, **kwargs):
-        context = super(PersonDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['history_link'] = 'person_history'
         context['detail_link'] = 'person_detail'
         context['update_link'] = 'person_update'
@@ -49,7 +49,7 @@ class OrganisationList(GenericListView):
     model = models.Organisation
 
     def get_context_data(self, **kwargs):
-        context = super(OrganisationList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['create'] = 'organisation_create'
         context['edit'] = 'organisation_update'
         context['can_edit'] = self.request.user.has_perm('RIGS.change_organisation')
@@ -62,7 +62,7 @@ class OrganisationDetail(GenericDetailView):
     model = models.Organisation
 
     def get_context_data(self, **kwargs):
-        context = super(OrganisationDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['history_link'] = 'organisation_history'
         context['detail_link'] = 'organisation_detail'
         context['update_link'] = 'organisation_update'
@@ -92,7 +92,7 @@ class VenueList(GenericListView):
     model = models.Venue
 
     def get_context_data(self, **kwargs):
-        context = super(VenueList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['create'] = 'venue_create'
         context['edit'] = 'venue_update'
         context['can_edit'] = self.request.user.has_perm('RIGS.change_venue')
@@ -104,7 +104,7 @@ class VenueDetail(GenericDetailView):
     model = models.Venue
 
     def get_context_data(self, **kwargs):
-        context = super(VenueDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['history_link'] = 'venue_history'
         context['detail_link'] = 'venue_detail'
         context['update_link'] = 'venue_update'

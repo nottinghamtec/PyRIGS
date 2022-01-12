@@ -180,7 +180,7 @@ class TestAssetForm(AutoLoginTest):
     def test_asset_edit(self):
         self.page = pages.AssetEdit(self.driver, self.live_server_url, asset_id=self.parent.asset_id).open()
 
-        self.assertTrue(self.driver.find_element_by_id('id_asset_id').get_attribute('readonly') is not None)
+        self.assertIsNotNone(self.driver.find_element_by_id('id_asset_id').get_attribute('readonly'))
 
         new_description = "Big Shelf"
         self.page.description = new_description
@@ -335,7 +335,7 @@ class TestAssetAudit(AutoLoginTest):
         self.assertNotIn(self.asset.asset_id, self.page.assets)
 
     def test_audit_list(self):
-        self.assertEqual(len(models.Asset.objects.filter(last_audited_at=None)), len(self.page.assets))
+        self.assertEqual(models.Asset.objects.filter(last_audited_at=None).count(), len(self.page.assets))
         asset_row = self.page.assets[0]
         self.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
         self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))

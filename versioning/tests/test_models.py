@@ -146,7 +146,7 @@ class RIGSVersionTestCase(TestCase):
         self.assertFalse(current_version.changes.fields_changed)
         self.assertTrue(current_version.changes.anything_changed)
 
-        self.assertTrue(diffs[0].old is None)
+        self.assertIsNone(diffs[0].old)
         self.assertEqual(diffs[0].new.name, "TI I1")
 
         # Edit the item
@@ -188,4 +188,4 @@ class RIGSVersionTestCase(TestCase):
         self.assertTrue(current_version.changes.anything_changed)
 
         self.assertEqual(diffs[0].old.name, "New Name")
-        self.assertTrue(diffs[0].new is None)
+        self.assertIsNone(diffs[0].new)

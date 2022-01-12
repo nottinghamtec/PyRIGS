@@ -69,7 +69,7 @@ class Profile(AbstractUser):
         return self.name
 
 
-class RevisionMixin(object):
+class RevisionMixin:
     @property
     def is_first_version(self):
         versions = Version.objects.get_for_object(self)

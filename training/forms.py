@@ -11,7 +11,7 @@ class QualificationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         pk = kwargs.pop('pk', None)
-        super(QualificationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['trainee'].initial = Profile.objects.get(pk=pk)
         self.fields['date'].widget.format = '%Y-%m-%d'
 
@@ -39,5 +39,5 @@ class RequirementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         pk = kwargs.pop('pk', None)
-        super(RequirementForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['level'].initial = models.TrainingLevel.objects.get(pk=pk)

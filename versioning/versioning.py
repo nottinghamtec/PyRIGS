@@ -13,14 +13,14 @@ from training.models import Trainee
 logger = logging.getLogger('tec.pyrigs')
 
 
-class FieldComparison(object):
+class FieldComparison:
     def __init__(self, field=None, old=None, new=None):
         self.field = field
         self._old = old
         self._new = new
 
     def display_value(self, value):
-        if (isinstance(self.field, IntegerField) or isinstance(self.field, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
+        if (isinstance(self.field, (IntegerField, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
             choice = [x[1] for x in self.field.choices if x[0] == value]
             if len(choice) > 0:
                 return choice[0]
@@ -71,7 +71,7 @@ class FieldComparison(object):
         return outputDiffs
 
 
-class ModelComparison(object):
+class ModelComparison:
     def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=['date_joined']):
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:

@@ -24,7 +24,7 @@ class InvoiceIndex(generic.ListView):
     template_name = 'invoice_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(InvoiceIndex, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         total = 0
         for i in context['object_list']:
             total += i.balance
@@ -41,8 +41,9 @@ class InvoiceDetail(generic.DetailView):
     template_name = 'invoice_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(InvoiceDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Invoice {} ({}) ".format(self.object.display_id, self.object.invoice_date.strftime("%d/%m/%Y"))
+        context = super().get_context_data(**kwargs)
+        invoice_date = self.object.invoice_date.strftime("%d/%m/%Y")
+        context['page_title'] = f"Invoice {self.object.display_id} ({invoice_date}) "
         if self.object.void:
             context['page_title'] += "<span class='badge badge-warning float-right'>VOID</span>"
         elif self.object.is_closed:
@@ -117,7 +118,7 @@ class InvoiceArchive(generic.ListView):
     paginate_by = 25
 
     def get_context_data(self, **kwargs):
-        context = super(InvoiceArchive, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = "Invoice Archive"
         context['description'] = "This page displays all invoices: outstanding, paid, and void"
         return context
@@ -196,7 +197,7 @@ class PaymentCreate(generic.CreateView):
     template_name = 'payment_form.html'
 
     def get_initial(self):
-        initial = super(generic.CreateView, self).get_initial()
+        initial = super().get_initial()
         invoicepk = self.request.GET.get('invoice', self.request.POST.get('invoice', None))
         if invoicepk is None:
             raise Http404()

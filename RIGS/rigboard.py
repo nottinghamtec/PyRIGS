@@ -38,7 +38,7 @@ class RigboardIndex(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         # get super context
-        context = super(RigboardIndex, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # call out method to get current events
         context['events'] = models.Event.objects.current_events().select_related('riskassessment', 'invoice').prefetch_related('checklists')
@@ -50,7 +50,7 @@ class WebCalendar(generic.TemplateView):
     template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):
-        context = super(WebCalendar, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['view'] = kwargs.get('view', '')
         context['date'] = kwargs.get('date', '')
         return context
@@ -61,8 +61,8 @@ class EventDetail(generic.DetailView):
     model = models.Event
 
     def get_context_data(self, **kwargs):
-        context = super(EventDetail, self).get_context_data(**kwargs)
-        title = "{} | {}".format(self.object.display_id, self.object.name)
+        context = super().get_context_data(**kwargs)
+        title = f"{self.object.display_id} | {self.object.name}"
         if self.object.dry_hire:
             title += " <span class='badge badge-secondary'>Dry Hire</span>"
         context['page_title'] = title
@@ -84,7 +84,7 @@ class EventCreate(generic.CreateView):
     template_name = 'event_form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventCreate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = "New Event"
         context['edit'] = True
         context['currentVAT'] = models.VatRate.objects.current_rate()
@@ -110,8 +110,8 @@ class EventUpdate(generic.UpdateView):
     template_name = 'event_form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventUpdate, self).get_context_data(**kwargs)
-        context['page_title'] = "Event {}".format(self.object.display_id)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Event {self.object.display_id}"
         context['edit'] = True
 
         form = context['form']
@@ -134,7 +134,7 @@ class EventUpdate(generic.UpdateView):
             if hasattr(self.object, 'authorised'):
                 messages.warning(self.request,
                                  'This event has already been authorised by the client, any changes to the price will require reauthorisation.')
-        return super(EventUpdate, self).render_to_response(context, **response_kwargs)
+        return super().render_to_response(context, **response_kwargs)
 
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
@@ -142,7 +142,7 @@ class EventUpdate(generic.UpdateView):
 
 class EventDuplicate(EventUpdate):
     def get_object(self, queryset=None):
-        old = super(EventDuplicate, self).get_object(queryset)  # Get the object (the event you're duplicating)
+        old = super().get_object(queryset)  # Get the object (the event you're duplicating)
         new = copy.copy(old)  # Make a copy of the object in memory
         new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None  # Remove old PO
@@ -167,8 +167,8 @@ class EventDuplicate(EventUpdate):
         return new
 
     def get_context_data(self, **kwargs):
-        context = super(EventDuplicate, self).get_context_data(**kwargs)
-        context['page_title'] = "Duplicate of Event {}".format(self.object.display_id)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Duplicate of Event {self.object.display_id}"
         context["duplicate"] = True
         return context
 
@@ -210,8 +210,7 @@ class EventArchive(generic.ListView):
     paginate_by = 25
 
     def get_context_data(self, **kwargs):
-        # get super context
-        context = super(EventArchive, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context['start'] = self.request.GET.get('start', None)
         context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
@@ -266,7 +265,7 @@ class EventArchive(generic.ListView):
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')
 
-        if len(qs) == 0:
+        if not qs.exists():
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
 
         return qs
@@ -283,7 +282,7 @@ class EventAuthorise(generic.UpdateView):
         self.template_name = self.success_template
         messages.add_message(self.request, messages.SUCCESS,
                              'Success! Your event has been authorised. ' +
-                             'You will also receive email confirmation to %s.' % self.object.email)
+                             f'You will also receive email confirmation to {self.object.email}.')
         return self.render_to_response(self.get_context_data())
 
     @property
@@ -297,10 +296,10 @@ class EventAuthorise(generic.UpdateView):
         return forms.InternalClientEventAuthorisationForm
 
     def get_context_data(self, **kwargs):
-        context = super(EventAuthorise, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['event'] = self.event
         context['tos_url'] = settings.TERMS_OF_HIRE_URL
-        context['page_title'] = "{}: {}".format(self.event.display_id, self.event.name)
+        context['page_title'] = f"{self.event.display_id}: {self.event.name}"
         if self.event.dry_hire:
             context['page_title'] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
         context['preview'] = self.preview
@@ -319,7 +318,7 @@ class EventAuthorise(generic.UpdateView):
         return super(EventAuthorise, self).get(request, *args, **kwargs)
 
     def get_form(self, **kwargs):
-        form = super(EventAuthorise, self).get_form(**kwargs)
+        form = super().get_form(**kwargs)
         form.instance.event = self.event
         form.instance.email = self.request.email
         form.instance.sent_by = self.request.sent_by
@@ -335,7 +334,7 @@ class EventAuthorise(generic.UpdateView):
         except (signing.BadSignature, AssertionError, KeyError, models.Profile.DoesNotExist):
             raise SuspiciousOperation(
                 "This URL is invalid. Please ask your TEC contact for a new URL")
-        return super(EventAuthorise, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMixin):
@@ -345,7 +344,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
     @method_decorator(decorators.nottinghamtec_address_required)
     def dispatch(self, *args, **kwargs):
-        return super(EventAuthorisationRequest, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     @property
     def object(self):
@@ -406,13 +405,13 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         css = finders.find('css/email.css')
-        response = super(EventAuthoriseRequestEmailPreview, self).render_to_response(context, **response_kwargs)
+        response = super().render_to_response(context, **response_kwargs)
         assert isinstance(response, HttpResponse)
         response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
         return response
 
     def get_context_data(self, **kwargs):
-        context = super(EventAuthoriseRequestEmailPreview, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['hmac'] = signing.dumps({
             'pk': self.object.pk,
             'email': self.request.GET.get('email', 'hello@world.test'),
