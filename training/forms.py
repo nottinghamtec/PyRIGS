@@ -3,6 +3,7 @@ from django import forms
 from training import models
 from RIGS.models import Profile
 
+
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = models.TrainingItemQualification

@@ -15,8 +15,8 @@ def trainee(db):
 @pytest.fixture
 def supervisor(db):
     supervisor = Profile.objects.create(username="supervisor", first_name="Super", last_name="Visor",
-                                     initials="SV",
-                                     email="supervisor@example.com", is_supervisor=True, is_active=True, is_approved=True)
+                                        initials="SV",
+                                        email="supervisor@example.com", is_supervisor=True, is_active=True, is_approved=True)
     yield supervisor
     supervisor.delete()
 
@@ -28,6 +28,7 @@ def training_item(db):
     yield training_item
     training_category.delete()
     training_item.delete()
+
 
 @pytest.fixture
 def level(db):
