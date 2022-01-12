@@ -1,14 +1,7 @@
 from django import forms
 
-from datetime import date
-
 from training import models
 from RIGS.models import Profile
-
-
-class SessionLogForm(forms.Form):
-    pass
-
 
 class QualificationForm(forms.ModelForm):
     class Meta:

@@ -309,10 +309,11 @@
         },
         "django-hcaptcha": {
             "hashes": [
-                "sha256:2b80197c07bb8444249bcce3758b0472d369cca309fb02d7abcd0a856431b76b"
+                "sha256:18804fb38a01827b6c65d111bac31265c1b96fcf52d7a54c3e2d2cb1c62ddcde",
+                "sha256:b2519eaf0cc97865ac72f825301122c5cf61e1e4852d6895994160222acb6c1a"
             ],
             "index": "pypi",
-            "version": "==0.1.0"
+            "version": "==0.2.0"
         },
         "django-htmlmin": {
             "hashes": [
@@ -362,11 +363,11 @@
         },
         "django-widget-tweaks": {
             "hashes": [
-                "sha256:19bcb66a4a9e68493ced04e7124882d753c5be517ed001556f9e35a40147f545",
-                "sha256:d6c64fbf92cd2df9031f597c1374982233c05a1190d295c39d1c57ce007569c7"
+                "sha256:01b911a1b47629de0a3a3097774798dee4eb703b94d41666929f688d5f77c723",
+                "sha256:07674e32031eda81077f0b8e390ce78d1d415e700cedd0396ef0ce452e95b94d"
             ],
             "index": "pypi",
-            "version": "==1.4.9"
+            "version": "==1.4.11"
         },
         "envparse": {
             "hashes": [
@@ -861,11 +862,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:2a1757d6611e4bec7d672c2b7ef45afef79fed201d064f53994753303944f5a8",
-                "sha256:e4cb107e305b2c1b919414775fa73a9997f996447417d22b98e7610ded1e9eb5"
+                "sha256:2cec50166bcb67e1965f8073541b2321e3864cd6fd42a526bcde9f0c4e4cc3f8",
+                "sha256:7bbaa32bba806ec629962f207b597e86831c7ee2c1f287c21ba7de7fea9a9c46"
             ],
             "index": "pypi",
-            "version": "==1.5.1"
+            "version": "==1.5.2"
         },
         "simplejson": {
             "hashes": [
@@ -1538,11 +1539,11 @@
         },
         "pytest-reverse": {
             "hashes": [
-                "sha256:9f2a3b163378922dd332ed056a58af4cfd1ccc8ad4a76606f43ed43cfff2140b",
-                "sha256:d878e28c785fb20291580aa816d566a21beac508e06a2c9eb4f934d49c31ce5c"
+                "sha256:1695b7c9e51b28db5af13d579b33b54a80958d86b886dfabd2a246bcad3e082e",
+                "sha256:6acfb50acd11caf3d222366f5e1458dea2351d47b6ca5b08ab408158636250ba"
             ],
             "index": "pypi",
-            "version": "==1.3.0"
+            "version": "==1.4.0"
         },
         "pytest-splinter": {
             "hashes": [

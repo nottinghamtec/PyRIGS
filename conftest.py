@@ -2,9 +2,7 @@ from django.conf import settings
 import django
 import pytest
 from django.core.management import call_command
-from RIGS.models import VatRate, Profile
-import random
-from django.db import connection
+from RIGS.models import VatRate
 from PyRIGS.tests import pages
 import os
 from selenium import webdriver

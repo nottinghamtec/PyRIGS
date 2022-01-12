@@ -1,14 +1,13 @@
 import reversion
 
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import generic
-from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
-from training import models, forms
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import Q, Count, OuterRef, F, Subquery, Window
+from django.db.models import Q, Count
 
+from PyRIGS.views import is_ajax, ModalURLMixin
+from training import models, forms
 from users import views
 
 
@@ -98,12 +97,12 @@ class TraineeList(generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('q', "")
 
-        filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(initials__icontains=q)
+        fil = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(initials__icontains=q)
 
         # try and parse an int
         try:
             val = int(q)
-            filter = filter | Q(pk=val)
+            fil = fil | Q(pk=val)
         except:  # noqa
             # not an integer
             pass
@@ -200,7 +199,7 @@ class RemoveRequirement(generic.DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Delete Requirement '{}' from Training Level {}?".format(self.object, self.object.level)
+        context["page_title"] = f"Delete Requirement '{self.object}' from Training Level {self.object.level}?"
         return context
 
     def get_success_url(self):

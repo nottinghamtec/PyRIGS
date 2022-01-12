@@ -1,10 +1,8 @@
-from django.db import models
-
 from RIGS.models import RevisionMixin, Profile
 from reversion import revisions as reversion
+from django.db import models
 from django.urls import reverse
-
-from django.utils.safestring import SafeData, mark_safe
+from django.utils.safestring import mark_safe
 
 
 @reversion.register(for_concrete_model=False, fields=[], follow=["qualifications_obtained", "level_qualifications"])
@@ -105,13 +103,13 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         return str("{} in {}".format(self.get_depth_display(), self.item))
 
     @classmethod
-    def get_colour_from_depth(obj, depth):
+    def get_colour_from_depth(cls, obj, depth):
         if depth == 0:
             return "warning"
-        elif depth == 1:
+        if depth == 1:
             return "success"
-        else:
-            return "info"
+
+        return "info"
 
     def get_absolute_url(self):
         return reverse('trainee_item_detail', kwargs={'pk': self.trainee.pk})
@@ -157,16 +155,16 @@ class TrainingLevel(models.Model, RevisionMixin):
     def department_colour(self):
         if self.department == self.SOUND:
             return "info"
-        elif self.department == self.LIGHTING:
+        if self.department == self.LIGHTING:
             return "dark"
-        elif self.department == self.POWER:
+        if self.department == self.POWER:
             return "danger"
-        elif self.department == self.RIGGING:
+        if self.department == self.RIGGING:
             return "warning"
-        elif self.department == self.HAULAGE:
+        if self.department == self.HAULAGE:
             return "light"
-        else:
-            return "primary"
+
+        return "primary"
 
     def get_requirements_of_depth(self, depth):
         return self.requirements.filter(depth=depth)
@@ -197,8 +195,8 @@ class TrainingLevel(models.Model, RevisionMixin):
 
         if len(needed_qualifications) > 0:
             return int(relavant_qualifications / float(len(needed_qualifications)) * 100)
-        else:
-            return 0
+
+        return 0
 
     def user_has_requirements(self, user):
         has_required_items = all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
@@ -225,7 +223,7 @@ class TrainingLevel(models.Model, RevisionMixin):
     @property
     def get_icon(self):
         if self.icon is not None:
-            icon = "<span class='fas fa-{}'></span>".format(self.icon)
+            icon = f"<span class='fas fa-{self.icon}'></span>"
         else:
             icon = "".join([w[0] for w in str(self).split()])
         return mark_safe("<span class='badge badge-{} badge-pill' data-toggle='tooltip' title='{}'>{}</span>".format(self.department_colour, str(self), icon))
@@ -260,14 +258,14 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
         return self.level.get_icon
 
     def clean(self):
-        if level.level >= TrainingLevel.SUPERVISOR and level.department != TrainingLevel.HAULAGE:
-            trainee.is_supervisor = True
-            trainee.save()
+        if self.level.level >= TrainingLevel.SUPERVISOR and self.level.department != TrainingLevel.HAULAGE:
+            self.trainee.is_supervisor = True
+            self.trainee.save()
 
     def __str__(self):
         if self.level.is_common_competencies:
-            return "{} is qualified in the {}".format(self.trainee, self.level)
-        return "{} is qualified as a {}".format(self.trainee, self.level)
+            return f"{self.trainee} is qualified in the {self.level}"
+        return f"{self.trainee} is qualified as a {self.level}"
 
     class Meta:
         unique_together = ["trainee", "level"]

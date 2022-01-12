@@ -8,6 +8,7 @@ from django.utils import timezone
 from reversion import revisions as reversion
 
 from RIGS import models
+from training.models import TrainingLevel
 
 # Override the django form defaults to use the HTML date/time/datetime UI elements
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
@@ -164,6 +165,9 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 ], attrs={'class': 'custom-control-input', 'required': 'true'})
 
     def clean(self):
+        if self.cleaned_data.get('big_power'):
+            if not self.cleaned_data.get('power_mic').level_qualifications.filter(level__department=TrainingLevel.POWER).exists():
+                self.add_error('power_mic', forms.ValidationError("Your Power MIC must be a Power Technician.", code="power_tech_required"))
         # Check expected values
         unexpected_values = []
         for field, value in models.RiskAssessment.expected_values.items():
