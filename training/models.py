@@ -44,7 +44,7 @@ class TrainingCategory(models.Model):
     name = models.CharField(max_length=50)
 
     def __str__(self):
-        return "{}. {}".format(self.reference_number, self.name)
+        return f"{self.reference_number}. {self.name}"
 
     class Meta:
         verbose_name_plural = 'Training Categories'
@@ -59,10 +59,10 @@ class TrainingItem(models.Model):
 
     @property
     def display_id(self):
-        return "{}.{}".format(self.category.reference_number, self.reference_number)
+        return f"{self.category.reference_number}.{self.reference_number}"
 
     def __str__(self):
-        name = "{} {}".format(self.display_id, self.name)
+        name = f"{self.display_id} {self.name}"
         if not self.active:
             name += " (inactive)"
         return name
