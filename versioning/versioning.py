@@ -8,7 +8,6 @@ from django.utils.functional import cached_property
 from reversion.models import Version, VersionQuerySet
 
 from RIGS import models
-from training.models import Trainee
 
 logger = logging.getLogger('tec.pyrigs')
 
@@ -20,7 +19,7 @@ class FieldComparison:
         self._new = new
 
     def display_value(self, value):
-        if (isinstance(self.field, (IntegerField, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
+        if isinstance(self.field, (IntegerField, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
             choice = [x[1] for x in self.field.choices if x[0] == value]
             if len(choice) > 0:
                 return choice[0]
