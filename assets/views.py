@@ -61,6 +61,9 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         if form.cleaned_data['is_cable']:
             queryset = queryset.filter(is_cable=True)
 
+        if form.cleaned_data['date_acquired']:
+            queryset = queryset.filter(date_acquired=form.cleaned_data['date_acquired'])
+
         if form.cleaned_data['category']:
             queryset = queryset.filter(category__in=form.cleaned_data['category'])
 

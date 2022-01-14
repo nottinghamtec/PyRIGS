@@ -3,6 +3,7 @@
 
 from django.db import models, migrations
 import RIGS.models
+import versioning
 
 
 class Migration(migrations.Migration):
@@ -21,6 +22,6 @@ class Migration(migrations.Migration):
             ],
             options={
             },
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
     ]
