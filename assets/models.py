@@ -6,7 +6,8 @@ from django.urls import reverse
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import RevisionMixin, Profile
+from RIGS.models import Profile
+from versioning.versioning import RevisionMixin
 
 
 class AssetCategory(models.Model):

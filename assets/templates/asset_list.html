@@ -61,25 +61,45 @@
 {% block content %}
 <div class="row">
     <div class="col px-0">
-        <form id="asset-search-form" method="GET" class="form-inline justify-content-end">
-              <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
-                {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
-                <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
-                <span class="input-group-append">{% button 'search' id="id_search" %}</span>
-              </div>
-              <div id="category-group" class="form-group px-1" style="margin-bottom: 0;">
-                <label for="category" class="sr-only">Category</label>
-                {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
-              </div>
-              <div id="status-group" class="form-group px-1" style="margin-bottom: 0;">
-                <label for="status" class="sr-only">Status</label>
-                {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
-              </div>
-              <div class="form-check form-check-inline">
-                  {% render_field form.is_cable|add_class:'form-check-input' %}
-                  <label class="form-check-label" for="is_cable">Only Cables?</label>
-              </div>
-              <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
+        <form id="asset-search-form" method="GET">
+            <div class="form-row">
+                <div class="col">
+                    <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
+                        {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
+                        <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
+                        <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-2">
+                <div class="col">
+                    <div id="category-group" class="form-group px-1" style="margin-bottom: 0;">
+                        <label for="category" class="sr-only">Category</label>
+                        {% render_field form.category|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+                    </div>
+                </div>
+                <div class="col">
+                    <div id="status-group" class="form-group px-1" style="margin-bottom: 0;">
+                        <label for="status" class="sr-only">Status</label>
+                        {% render_field form.status|attr:'multiple'|add_class:'form-control custom-select selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+                    </div>
+                </div>
+                <div class="col mt-2">
+                    <div class="form-check form-check-inline">
+                      {% render_field form.is_cable|add_class:'form-check-input' %}
+                      <label class="form-check-label" for="is_cable">Only Cables?</label>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="form-group d-flex flex-nowrap">
+                        <label for="date_acquired" class="text-nowrap mt-auto">Date Acquired</label>
+                        {% render_field form.date_acquired|add_class:'form-control mx-2' %}
+                    </div>
+                </div>
+                <div class="col-auto mr-auto">
+                      <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
+                </div>
+            </div>
         </form>
     </div>
 </div>

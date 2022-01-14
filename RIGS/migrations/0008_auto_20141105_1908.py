@@ -4,6 +4,7 @@
 from django.db import models, migrations
 from django.conf import settings
 import RIGS.models
+import versioning
 
 
 class Migration(migrations.Migration):
@@ -41,7 +42,7 @@ class Migration(migrations.Migration):
             ],
             options={
             },
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.CreateModel(
             name='EventItem',
@@ -70,7 +71,7 @@ class Migration(migrations.Migration):
             ],
             options={
             },
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.AddField(
             model_name='event',

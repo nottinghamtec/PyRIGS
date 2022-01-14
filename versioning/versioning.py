@@ -7,9 +7,44 @@ from django.db.models import EmailField, IntegerField, TextField, CharField, Boo
 from django.utils.functional import cached_property
 from reversion.models import Version, VersionQuerySet
 
-from RIGS import models
-
 logger = logging.getLogger('tec.pyrigs')
+
+
+class RevisionMixin:
+    @property
+    def is_first_version(self):
+        versions = Version.objects.get_for_object(self)
+        return len(versions) == 1
+
+    @property
+    def current_version(self):
+        version = Version.objects.get_for_object(self).select_related('revision').first()
+        return version
+
+    @property
+    def last_edited_at(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return version.revision.date_created
+
+    @property
+    def last_edited_by(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return version.revision.user
+
+    @property
+    def current_version_id(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return "V{0} | R{1}".format(version.pk, version.revision.pk)
+
+    @property
+    def date_created(self):
+        return self.current_version.revision.date_created
 
 
 class FieldComparison(object):
@@ -117,10 +152,11 @@ class ModelComparison(object):
 
     @cached_property
     def item_changes(self):
+        from RIGS.models import EventAuthorisation
         if self.follow and self.version.object is not None:
             item_type = ContentType.objects.get_for_model(self.version.object)
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
-            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(models.EventAuthorisation))
+            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
 
             comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
 

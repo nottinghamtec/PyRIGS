@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
+from versioning.versioning import RevisionMixin
 
 
 class Profile(AbstractUser):
@@ -64,41 +65,6 @@ class Profile(AbstractUser):
 
     def __str__(self):
         return self.name
-
-# TODO move to versioning - currently get import errors with that
-
-
-class RevisionMixin(object):
-    @property
-    def is_first_version(self):
-        versions = Version.objects.get_for_object(self)
-        return len(versions) == 1
-
-    @property
-    def current_version(self):
-        version = Version.objects.get_for_object(self).select_related('revision').first()
-        return version
-
-    @property
-    def last_edited_at(self):
-        version = self.current_version
-        if version is None:
-            return None
-        return version.revision.date_created
-
-    @property
-    def last_edited_by(self):
-        version = self.current_version
-        if version is None:
-            return None
-        return version.revision.user
-
-    @property
-    def current_version_id(self):
-        version = self.current_version
-        if version is None:
-            return None
-        return "V{0} | R{1}".format(version.pk, version.revision.pk)
 
 
 class Person(models.Model, RevisionMixin):

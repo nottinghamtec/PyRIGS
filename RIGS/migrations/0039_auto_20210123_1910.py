@@ -4,6 +4,7 @@ import RIGS.models
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+import versioning
 
 
 class Migration(migrations.Migration):
@@ -58,7 +59,7 @@ class Migration(migrations.Migration):
                 'ordering': ['event'],
                 'permissions': [('review_eventchecklist', 'Can review Event Checklists')],
             },
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.CreateModel(
             name='EventChecklistCrew',
@@ -69,7 +70,7 @@ class Migration(migrations.Migration):
                 ('end', models.DateTimeField()),
                 ('checklist', models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='crew', to='RIGS.eventchecklist')),
             ],
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.CreateModel(
             name='EventChecklistVehicle',
@@ -78,7 +79,7 @@ class Migration(migrations.Migration):
                 ('vehicle', models.CharField(max_length=255)),
                 ('checklist', models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='vehicles', to='RIGS.eventchecklist')),
             ],
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.CreateModel(
             name='RiskAssessment',
@@ -117,7 +118,7 @@ class Migration(migrations.Migration):
                 'ordering': ['event'],
                 'permissions': [('review_riskassessment', 'Can review Risk Assessments')],
             },
-            bases=(models.Model, RIGS.models.RevisionMixin),
+            bases=(models.Model, versioning.versioning.RevisionMixin),
         ),
         migrations.RemoveField(
             model_name='eventcrew',
