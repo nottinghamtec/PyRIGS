@@ -1,13 +1,9 @@
-import logging
-
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import EmailField, IntegerField, TextField, CharField, BooleanField
 from django.utils.functional import cached_property
 from reversion.models import Version, VersionQuerySet
-
-logger = logging.getLogger('tec.pyrigs')
 
 
 class RevisionMixin:
