@@ -44,7 +44,7 @@ def get_request_url(url):
 
 
 @pytest.mark.parametrize("command", ['generateSampleAssetsData', 'generateSampleRIGSData', 'generateSampleUserData',
-                                     'deleteSampleData'])
+                                     'deleteSampleData', 'generateSampleTrainingData', 'generate_sample_training_users'])
 def test_production_exception(command):
     from django.core.management.base import CommandError
     with pytest.raises(CommandError, match=".*production"):
