@@ -5,18 +5,16 @@
 {% load nice_errors from filters %}
 
 {% block css %}
-    {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
 {% endblock %}
 
 {% block preload_js %}
-    {{ block.super }}
-    <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/selects.js' %}" async></script>
 {% endblock %}
 
 {% block js %}
-    {{ block.super }}
     <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script>
         function parseBool(str) {

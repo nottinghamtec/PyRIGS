@@ -84,7 +84,7 @@ class BootstrapSelectElement(Region):
         return [self.BootstrapSelectOption(self, i) for i in options]
 
     def set_option(self, name, selected):
-        options = list((x for x in self.options if x.name == name))
+        options = [x for x in self.options if x.name == name]
         assert len(options) == 1
         options[0].set_selected(selected)
 

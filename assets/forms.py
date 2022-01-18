@@ -46,11 +46,3 @@ class CableTypeForm(forms.ModelForm):
     class Meta:
         model = models.CableType
         fields = '__all__'
-
-    def clean(self):
-        form_data = self.cleaned_data
-        queryset = models.CableType.objects.filter(Q(plug=form_data['plug']) & Q(socket=form_data['socket']) & Q(circuits=form_data['circuits']) & Q(cores=form_data['cores']))
-        # Being identical to itself shouldn't count...
-        if queryset.exists() and self.instance.pk != queryset[0].pk:
-            raise forms.ValidationError("A cable type that exactly matches this one already exists, please use that instead.", code="notunique")
-        return form_data

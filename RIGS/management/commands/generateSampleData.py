@@ -12,3 +12,4 @@ class Command(BaseCommand):
         call_command('generateSampleUserData')
         call_command('generateSampleRIGSData')
         call_command('generateSampleAssetsData')
+        call_command('generateSampleTrainingData')

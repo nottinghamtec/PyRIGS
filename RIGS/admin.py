@@ -14,7 +14,7 @@ from reversion.admin import VersionAdmin
 from RIGS import models
 from users import forms as user_forms
 
-# Register your models here.
+
 admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)

@@ -17,17 +17,19 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
-from versioning.versioning import RevisionMixin
 
 
 class Profile(AbstractUser):
-    initials = models.CharField(max_length=5, unique=True, null=True, blank=False)
+    initials = models.CharField(max_length=5, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
     is_approved = models.BooleanField(default=False)
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
+    is_supervisor = models.BooleanField(default=False)
+
+    reversion_hide = True
 
     @classmethod
     def make_api_key(cls):
@@ -65,6 +67,39 @@ class Profile(AbstractUser):
 
     def __str__(self):
         return self.name
+
+
+class RevisionMixin:
+    @property
+    def is_first_version(self):
+        versions = Version.objects.get_for_object(self)
+        return len(versions) == 1
+
+    @property
+    def current_version(self):
+        version = Version.objects.get_for_object(self).select_related('revision').first()
+        return version
+
+    @property
+    def last_edited_at(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return version.revision.date_created
+
+    @property
+    def last_edited_by(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return version.revision.user
+
+    @property
+    def current_version_id(self):
+        version = self.current_version
+        if version is None:
+            return None
+        return f"V{version.pk} | R{version.revision.pk}"
 
 
 class Person(models.Model, RevisionMixin):
@@ -172,7 +207,7 @@ class VatRate(models.Model, RevisionMixin):
         get_latest_by = 'start_at'
 
     def __str__(self):
-        return self.comment + " " + str(self.start_at) + " @ " + str(self.as_percent) + "%"
+        return f"{self.comment} {self.start_at} @ {self.as_percent}%"
 
 
 class Venue(models.Model, RevisionMixin):
@@ -312,10 +347,10 @@ class Event(models.Model, RevisionMixin):
         if self.pk:
             if self.is_rig:
                 return str("N%05d" % self.pk)
-            else:
-                return self.pk
-        else:
-            return "????"
+
+            return self.pk
+
+        return "????"
 
     # Calculated values
     """
@@ -440,7 +475,7 @@ class Event(models.Model, RevisionMixin):
         return reverse('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return "{}: {}".format(self.display_id, self.name)
+        return f"{self.display_id}: {self.name}"
 
     def clean(self):
         errdict = {}
@@ -486,11 +521,11 @@ class EventItem(models.Model, RevisionMixin):
         ordering = ['order']
 
     def __str__(self):
-        return "{}.{}: {} | {}".format(self.event_id, self.order, self.event.name, self.name)
+        return f"{self.event_id}.{self.order}: {self.event.name} | {self.name}"
 
     @property
     def activity_feed_string(self):
-        return str("item {}".format(self.name))
+        return f"item {self.name}"
 
 
 @reversion.register
@@ -508,7 +543,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return "{} (requested by {})".format(self.event.display_id, self.sent_by.initials)
+        return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
 class InvoiceManager(models.Manager):
@@ -636,7 +671,6 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Power
     big_power = models.BooleanField(help_text="Does the event require larger power supplies than 13A or 16A single phase wall sockets, or draw more than 20A total current?")
-    # If yes to the above two, you must answer...
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_mic', blank=True, null=True,
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC? (if yes to the above question, this person <em>must</em> be a Power Technician or Power Supervisor)")
     outside = models.BooleanField(help_text="Is the event outdoors?")

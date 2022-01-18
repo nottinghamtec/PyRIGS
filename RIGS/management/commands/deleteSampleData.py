@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import Group
 from assets import models
 from RIGS import models as rigsmodels
+from training import models as tmodels
 
 
 class Command(BaseCommand):
@@ -31,6 +32,11 @@ class Command(BaseCommand):
         self.delete_objects(rigsmodels.Payment)
         self.delete_objects(rigsmodels.RiskAssessment)
         self.delete_objects(rigsmodels.EventChecklist)
+        self.delete_objects(tmodels.TrainingCategory)
+        self.delete_objects(tmodels.TrainingItem)
+        self.delete_objects(tmodels.TrainingLevel)
+        self.delete_objects(tmodels.TrainingItemQualification)
+        self.delete_objects(tmodels.TrainingLevelRequirement)
 
     def delete_objects(self, model):
         for obj in model.objects.all():

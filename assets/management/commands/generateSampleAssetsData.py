@@ -20,6 +20,7 @@ class Command(BaseCommand):
     assets = []
 
     def handle(self, *args, **kwargs):
+        print("Generating sample assets data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -34,6 +35,7 @@ class Command(BaseCommand):
             self.create_assets()
             self.create_connectors()
             self.create_cables()
+        print("Done generating sample assets data")
 
     def create_categories(self):
         choices = ['Case', 'Video', 'General', 'Sound', 'Lighting', 'Rigging']

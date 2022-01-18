@@ -21,6 +21,7 @@ class Command(BaseCommand):
     profiles = models.Profile.objects.all()
 
     def handle(self, *args, **options):
+        print("Generating rigboard data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -35,6 +36,7 @@ class Command(BaseCommand):
             self.setup_organisations()
             self.setup_venues()
             self.setup_events()
+        print("Done generating rigboard data")
 
     def setup_people(self):
         names = ["Regulus Black", "Sirius Black", "Lavender Brown", "Cho Chang", "Vincent Crabbe", "Vincent Crabbe",

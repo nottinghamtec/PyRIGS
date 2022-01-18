@@ -43,16 +43,15 @@ class RevisionMixin:
         return self.current_version.revision.date_created
 
 
-class FieldComparison(object):
+class FieldComparison:
     def __init__(self, field=None, old=None, new=None):
         self.field = field
         self._old = old
         self._new = new
 
     def display_value(self, value):
-        if (isinstance(self.field, IntegerField) or isinstance(self.field, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
+        if isinstance(self.field, (IntegerField, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
             choice = [x[1] for x in self.field.choices if x[0] == value]
-            # TODO This defensive piece should not be necessary?
             if len(choice) > 0:
                 return choice[0]
         if isinstance(self.field, BooleanField):
@@ -102,8 +101,8 @@ class FieldComparison(object):
         return outputDiffs
 
 
-class ModelComparison(object):
-    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=[]):
+class ModelComparison:
+    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=['date_joined']):
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:
             self.fields = old._meta.get_fields()
@@ -154,7 +153,7 @@ class ModelComparison(object):
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist']}
+            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'date_joined']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
@@ -202,7 +201,7 @@ class RIGSVersionManager(VersionQuerySet):
         for model in model_array:
             content_types.append(ContentType.objects.get_for_model(model))
 
-        return self.filter(content_type__in=content_types).select_related("revision").order_by(
+        return self.filter(content_type__in=content_types).select_related("revision",).order_by(
             "-revision__date_created")
 
 

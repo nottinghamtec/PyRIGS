@@ -1,0 +1,142 @@
+{% extends 'base_training.html' %}
+
+{% load user_has_qualification from tags %}
+{% load user_level_if_present from tags %}
+{% load markdown_tags %}
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script>
+    $('document').ready(function(){
+        $('#requirement_button').click(function (e) {
+             e.preventDefault();
+             var url = $(this).attr("href");
+             $.ajax({
+                url: url,
+                success: function(){
+                    $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length === 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                            $(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+                        });
+                    }
+                }
+             });
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+{% if request.user.is_supervisor or perms.training.add_traininglevelrequirement %}
+<div class="col-sm-12 text-right pr-0">
+<a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}" id="requirement_button">
+	<span class="fas fa-plus"></span> Add New Requirement
+</a>
+</div>
+{% endif %}
+<div class="card mb-3">
+    <h4 class="card-header">Description</h4>
+    <div class="card-body">
+        <p>{{ object.description|markdown }}</p>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header"><h4 class="card-title">Level Requirements</h4> {% if u.pk != request.user.pk %}<h5 class="card-subtitle font-italic">for {{ u }}</h5>{% endif %}</div>
+    <div class="table-responsive card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" class="table-warning" style="width: 33%">Training Started</th>
+              <th scope="col" class="table-success" style="width: 33%">Training Complete</th>
+              <th scope="col" class="table-info" style="width: 33%">Passed Out</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            {% for level in object.prerequisite_levels.all %}
+            <tr data-toggle="collapse" data-target="#{{level.pk}}" style="cursor: pointer;"><th colspan="3" class="text-center font-italic" data-toggle="collapse" data-target="#level_{{level.pk}}">{{level}} (prerequisite)</th></tr>
+            <tr id="level_{{level.pk}}" class="collapse">
+              <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in level.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %}</li>{% endfor %}</ul></td>
+            </tr>
+            {% endfor %}
+            <tr><th colspan="3" class="text-center">{{object}}</th></tr>
+            <tr>
+              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline"" href="{% url 'remove_requirement' pk=req.pk %}" title="Delete requirement"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+    <h4 class="card-header">Prerequisite Levels:</h4>
+    <div class="card-body">
+       <ul>
+       {% for level in object.prerequisite_levels.all %}
+       {% user_level_if_present u level as level_qualification %}
+       <li><a href="{% url 'level_detail' level.pk u.pk %}">{{ level }}</a> <span class="fas {% if level_qualification %}text-success fa-check{% if level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
+       {% for nested_level in level.prerequisite_levels.all %}
+       {% user_level_if_present u nested_level as nested_level_qualification %}
+       <ul>
+          <li><a href="{% url 'level_detail' nested_level.pk u.pk %}">{{ nested_level }}</a> <span class="fas {% if nested_level_qualification %}text-success fa-check{% if nested_level_qualification.confirmed_by is not None %}-double{% endif %}{% else %}fa-hourglass-start text-warning{%endif%}"></span></li>
+       </ul>
+       {% endfor %}
+       {% empty %}
+       None
+       {% endfor %}
+       </ul>
+    </div>
+</div>
+<div class="card mb-3 mt-2">
+    <h4 class="card-header">Users with this level</h4>
+    <div class="card-body">
+        {% for user in users_with %}
+                {% user_level_if_present user object as level_qualification %}
+        {% if forloop.first %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Person</th>
+              <th scope="col">Confirmed?</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+        {% endif %}
+        <tr {% if not level_qualification.confirmed_on %}style="border-style: dashed; opacity: 80%"{%endif%}>
+            <td><a href="{{user.get_absolute_url}}"><img src="{{user.profile_picture}}" style="width: 50px" class="img-thumbnail"/> {{user}}</a></td>
+            <td>{% if level_qualification.confirmed_on %}<p class="card-text"><small>Qualified on {{ level_qualification.confirmed_on }}</small></p>{%else%}Unconfirmed{%endif%}</td>
+            <td><a href="{% url 'profile_detail' user.pk %}" class="btn btn-primary btn-sm"><span class="fas fa-user"></span> View Profile</a></div></td>
+        </tr>
+        {% if forloop.last %}
+            </tbody>
+        </table>
+        {% endif %}
+        {% empty %}
+            Nobody here but us chickens... <span class="fas fa-egg text-warning"></span>
+        {% endfor %}
+    </div>
+</div>
+<div class="row">
+    <div class="col text-right">
+    {% include 'partials/last_edited.html' with target="traininglevel_history" %}
+    </div>
+</div>
+{% endblock %}

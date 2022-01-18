@@ -20,6 +20,7 @@ class Command(BaseCommand):
     hs_group = None
 
     def handle(self, *args, **options):
+        print("Generating sample user data")
         from django.conf import settings
 
         if not (settings.DEBUG or settings.STAGING):
@@ -32,6 +33,7 @@ class Command(BaseCommand):
             self.setup_groups()
             self.setup_useful_profiles()
             self.setup_generic_profiles()
+        print("Done generating sample user data")
 
     def setup_groups(self):
         self.keyholder_group = Group.objects.create(name='Keyholders')
@@ -83,39 +85,32 @@ class Command(BaseCommand):
             self.profiles.append(new_profile)
 
     def setup_useful_profiles(self):
-        super_user = models.Profile.objects.create(username="superuser", first_name="Super", last_name="User",
-                                                   initials="SU",
-                                                   email="superuser@example.com", is_superuser=True, is_active=True,
-                                                   is_staff=True)
-        super_user.set_password('superuser')
+        super_user = models.Profile.objects.create_superuser(username="superuser",
+                                                             email="superuser@example.com", password="superuser", first_name="Super", last_name="User",
+                                                             initials="SU", is_active=True)
         super_user.save()
 
-        finance_user = models.Profile.objects.create(username="finance", first_name="Finance", last_name="User",
-                                                     initials="FU",
-                                                     email="financeuser@example.com", is_active=True, is_approved=True)
+        finance_user = models.Profile.objects.create_user(username="finance",
+                                                          email="financeuser@example.com", password="finance", first_name="Finance", last_name="User",
+                                                          initials="FU", is_active=True, is_approved=True)
         finance_user.groups.add(self.finance_group)
         finance_user.groups.add(self.keyholder_group)
-        finance_user.set_password('finance')
         finance_user.save()
 
-        hs_user = models.Profile.objects.create(username="hs", first_name="HS", last_name="User",
-                                                initials="HSU",
-                                                email="hsuser@example.com", is_active=True, is_approved=True)
+        hs_user = models.Profile.objects.create_user(username="hs",
+                                                     email="hsuser@example.com", password="hs", first_name="HS", last_name="User",
+                                                     initials="HSU", is_active=True, is_approved=True)
         hs_user.groups.add(self.hs_group)
         hs_user.groups.add(self.keyholder_group)
-        hs_user.set_password('hs')
         hs_user.save()
 
-        keyholder_user = models.Profile.objects.create(username="keyholder", first_name="Keyholder", last_name="User",
-                                                       initials="KU",
-                                                       email="keyholderuser@example.com", is_active=True,
-                                                       is_approved=True)
+        keyholder_user = models.Profile.objects.create_user(username="keyholder",
+                                                            email="keyholderuser@example.com", password="keyholder", first_name="Keyholder", last_name="User",
+                                                            initials="KU", is_active=True,
+                                                            is_approved=True)
         keyholder_user.groups.add(self.keyholder_group)
-        keyholder_user.set_password('keyholder')
         keyholder_user.save()
 
-        basic_user = models.Profile.objects.create(username="basic", first_name="Basic", last_name="User",
-                                                   initials="BU",
-                                                   email="basicuser@example.com", is_active=True, is_approved=True)
-        basic_user.set_password('basic')
-        basic_user.save()
+        basic_user = models.Profile.objects.create_user(username="basic",
+                                                        email="basicuser@example.com", password="basic", first_name="Basic", last_name="User",
+                                                        initials="BU", is_active=True, is_approved=True)

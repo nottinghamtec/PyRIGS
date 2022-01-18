@@ -1,0 +1,97 @@
+{% extends 'base_training.html' %}
+
+{% load static %}
+{% load percentage_complete from tags %}
+{% load confirm_button from tags %}
+{% load markdown_tags %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+<script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script>
+    $('document').ready(function(){
+        $('#add_record').click(function (e) {
+         e.preventDefault();
+         var url = $(this).attr("href");
+         $.ajax({
+            url: url,
+            success: function(){
+                $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length === 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                            //$(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+                        });
+                    }
+                }
+        });
+     });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12 text-right">
+        <div class="btn-group">
+            {% include 'partials/add_qualification.html' %}
+            <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
+            <a href="{% url 'profile_detail' object.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View User Profile</a>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <h2 class="col-12">Training Levels</h2>
+    <ul class="list-group col-12">
+        {% for qual in completed_levels %}
+        <li class="list-group-item">
+            {{ qual.level.get_icon }}
+            <a href="{% url 'level_detail' qual.level.pk %}">{{ qual.level }}</a>
+            Confirmed by <a href="{{ qual.confirmed_by.get_absolute_url }}">{{ qual.confirmed_by|default:'System' }}</a> on {{ qual.confirmed_on|date }}
+        </li>
+        {% empty %}
+        <div class="alert alert-warning mx-auto">No qualifications in any levels yet...did someone forget to fill out the paperwork?</div>
+        {% endfor %}
+    </ul>
+    <div class="card-columns">
+        {% for level in started_levels %}
+        {% percentage_complete level object as completion %}
+        <div class="card my-3 border-warning">
+            <h3 class="card-header"><a href="{% url 'level_detail' level.pk object.pk %}">{{ level }}</a></h3>
+            <div class="card-body">
+                {{ level.description|markdown }}
+            </div>
+            <div class="card-footer">
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
+                </div>
+                {% if completion == 100 %}
+                    <br>
+                    {% confirm_button request.user object level as cb %}
+                    {% if cb %}
+                        <div class="d-flex justify-content-between">{{ cb }}</div>
+                    {% else %}
+                        <p class="font-italic pt-2 pb-0">Missing prerequisite level(s)</p>
+                    {% endif %}
+                {% endif %}
+          </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+<div class="row">
+    <div class="col text-right">
+        {% include 'partials/last_edited.html' with target="trainee_history" %}
+    </div>
+</div>
+{% endblock %}

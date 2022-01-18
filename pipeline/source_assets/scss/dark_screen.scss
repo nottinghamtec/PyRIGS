@@ -28,6 +28,9 @@
         color: $gray-100 !important;
         border-color: $darktheme;
     }
+    .btn-link {
+        color: white;
+    }
     .bs-popover-right > .arrow::after {
         border-right-color: $darktheme;
     }

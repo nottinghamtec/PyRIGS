@@ -1,0 +1,29 @@
+{% extends 'base_training.html' %}
+
+{% load markdown_tags %}
+
+{% block content %}
+{% if request.user.is_staff %}
+<div class="alert alert-info" role="alert">
+<p>Please Note:</p>
+<ul>
+<li>Technical Assistant status is automatically valid when the item requirements are met.</li>
+<li>Technician status is also automatic, but notification of status should be made at the next general meeting, at which point 'approval' should be granted on the system.</li>
+<li>Supervisor status is <em>not automatically valid</em> and until signed off at a general meeting, does not count.</li>
+</ul>
+<sup>Correct as of 3rd September 2021, check the Training Policy.</sup>
+</div>
+{% endif %}
+{% for level in object_list %}
+{% ifchanged level.department %}
+{% if not forloop.first %}</div>{% endif %}
+<div class="card-group">
+{% endifchanged %}
+<div class="card mb-2 border-{{level.department_colour}}">
+    <div class="card-body">
+        <h3 class="card-title"><a href="{{level.get_absolute_url}}">{{level}}</a></h2>
+        {{level.description|markdown}}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

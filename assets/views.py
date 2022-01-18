@@ -76,7 +76,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         return queryset.select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
-        context = super(AssetList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["form"] = self.form
         if hasattr(self.form, 'cleaned_data'):
             context["category_filters"] = self.form.cleaned_data.get('category')
@@ -117,7 +117,7 @@ class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Asset {}".format(self.object.display_id)
+        context["page_title"] = f"Asset {self.object.display_id}"
         return context
 
 
@@ -130,7 +130,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         context = super().get_context_data(**kwargs)
         context["edit"] = True
         context["connectors"] = models.Connector.objects.all()
-        context["page_title"] = "Edit Asset: {}".format(self.object.display_id)
+        context["page_title"] = f"Edit Asset: {self.object.display_id}"
         return context
 
     def get_success_url(self):
@@ -150,7 +150,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
     form_class = forms.AssetForm
 
     def get_context_data(self, **kwargs):
-        context = super(AssetCreate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["create"] = True
         context["connectors"] = models.Connector.objects.all()
         context["page_title"] = "Create Asset"
@@ -177,8 +177,9 @@ class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
         context = super().get_context_data(**kwargs)
         context["create"] = None
         context["duplicate"] = True
-        context['previous_asset_id'] = self.get_object().asset_id
-        context["page_title"] = "Duplication of Asset: {}".format(context['previous_asset_id'])
+        old_id = self.get_object().asset_id
+        context['previous_asset_id'] = old_id
+        context["page_title"] = f"Duplication of Asset: {old_id}"
         return context
 
 
@@ -201,7 +202,7 @@ class AssetAuditList(AssetList):
         return self.model.objects.filter(Q(last_audited_at__isnull=True)).select_related('category', 'status')
 
     def get_context_data(self, **kwargs):
-        context = super(AssetAuditList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = "Asset Audit List"
         return context
 
@@ -212,7 +213,7 @@ class AssetAudit(AssetEdit):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Audit Asset: {}".format(self.object.display_id)
+        context["page_title"] = f"Audit Asset: {self.object.display_id}"
         return context
 
     def get_success_url(self):
@@ -229,7 +230,7 @@ class SupplierList(GenericListView):
     ordering = ['name']
 
     def get_context_data(self, **kwargs):
-        context = super(SupplierList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['create'] = 'supplier_create'
         context['edit'] = 'supplier_update'
         context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
@@ -256,7 +257,7 @@ class SupplierDetail(GenericDetailView):
     model = models.Supplier
 
     def get_context_data(self, **kwargs):
-        context = super(SupplierDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['history_link'] = 'supplier_history'
         context['update_link'] = 'supplier_update'
         context['detail_link'] = 'supplier_detail'
@@ -275,7 +276,7 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
     form_class = forms.SupplierForm
 
     def get_context_data(self, **kwargs):
-        context = super(SupplierCreate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
@@ -321,8 +322,8 @@ class CableTypeDetail(generic.DetailView):
     template_name = 'cable_type_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(CableTypeDetail, self).get_context_data(**kwargs)
-        context["page_title"] = "Cable Type {}".format(str(self.object))
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Cable Type {self.object}"
         return context
 
 
@@ -332,7 +333,7 @@ class CableTypeCreate(generic.CreateView):
     form_class = forms.CableTypeForm
 
     def get_context_data(self, **kwargs):
-        context = super(CableTypeCreate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["create"] = True
         context["page_title"] = "Create Cable Type"
 
@@ -348,9 +349,9 @@ class CableTypeUpdate(generic.UpdateView):
     form_class = forms.CableTypeForm
 
     def get_context_data(self, **kwargs):
-        context = super(CableTypeUpdate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["edit"] = True
-        context["page_title"] = "Edit Cable Type"
+        context["page_title"] = f"Edit Cable Type {self.object}"
 
         return context
 
@@ -365,10 +366,10 @@ def generate_label(pk):
     font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 20)
     obj = get_object_or_404(models.Asset, asset_id=pk)
 
-    asset_id = "Asset: {}".format(obj.asset_id)
+    asset_id = f"Asset: {obj.asset_id}"
     if obj.is_cable:
-        length = "Length: {}m".format(obj.length)
-        csa = "CSA: {}mm²".format(obj.csa)
+        length = f"Length: {obj.length}m"
+        csa = f"CSA: {obj.csa}mm²"
 
     image = Image.new("RGB", size, white)
     logo = Image.open("static/imgs/square_logo.png")

@@ -1,0 +1,28 @@
+{% extends 'base_training.html' %}
+
+{% block content %}
+<div id="accordion">
+  {% for category in categories %}
+  <div class="card">
+    <div class="card-header" id="heading{{forloop.counter}}">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{forloop.counter}}" aria-expanded="true" aria-controls="collapse{{forloop.counter}}">
+          {{ category }}
+        </button>
+    </div>
+    <div id="collapse{{forloop.counter}}" class="collapse" aria-labelledby="heading{{forloop.counter}}" data-parent="#accordion">
+      <div class="card-body">
+        <div class="list-group list-group-flush">
+            {% for item in category.items.all %}
+            {% if item.active %}
+            <li class="list-group-item">{{ item }}</li>
+            {% elif request.user.is_superuser %}
+            <li class="list-group-item text-warning">{{ item }}</li>
+            {% endif %}
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

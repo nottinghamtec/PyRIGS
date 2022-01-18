@@ -1,0 +1,54 @@
+{% extends 'base_training.html' %}
+
+{% load url_replace from filters %}
+{% load paginator from filters %}
+{% load linkornone from filters %}
+{% load button from filters %}
+{% load colour_from_depth from tags %}
+
+{% block content %}
+<p class="text-muted text-right">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
+<div class="row pt-2">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Training Item</th>
+                        <th>Depth</th>
+                        <th>Date</th>
+                        <th>Supervisor</th>
+                        <th>Notes</th>
+                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
+                        <th></th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for object in object_list %}
+                    <tr id="row_item" {% if request.user.is_superuser and not object.item.active %}class="text-warning"{%endif%}>
+                        <th scope="row" class="align-middle" id="cell_name">{{ object.item }}</th>
+                        <td class="table-{% colour_from_depth object.depth %}">{{ object.get_depth_display }}</td>
+                        <td>{{ object.date }}</td>
+                        <td><a href="{{ object.supervisor.get_absolute_url}}">{{ object.supervisor }}</a></td>
+                        <td>{{ object.notes }}</td>
+                        {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
+                        <td>{% button 'edit' 'edit_qualification' trainee.pk %}</td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                <tr class="table-warning">
+                    <td colspan="6" class="text-center">Nothing found</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col text-right">
+        {% include 'partials/last_edited.html' with target="trainee_history" object=trainee %}
+    </div>
+</div>
+{% endblock %}

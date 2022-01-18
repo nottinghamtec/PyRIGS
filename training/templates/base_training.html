@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block titleheader %}
+<a class="navbar-brand" href="{% url 'trainee_list' %}">Training</a>
+{% endblock %}
+
+{% block titleelements %}
+{% if user.is_authenticated %}
+    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdownMy" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        My Record
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownMy">
+        <a class="dropdown-item" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-eye"></span>
+                            Overview</a>
+        <a class="dropdown-item" href="{% url 'trainee_item_detail' request.user.pk %}"><span class="fas fa-list"></span>
+                            Item Detail</a>
+       </div>
+    </li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLists" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Lists
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownLists">
+        <a class="dropdown-item" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span> Trainee List</a>
+        <a class="dropdown-item" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> Level List</a>
+        <a class="dropdown-item" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> Item List</a>
+      </div>
+    </li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'training_activity_table' %}"><span class="fas fa-random"></span> Recent Changes</a></li>
+{% endif %}
+{% endblock %}
+
+{% block titleelements_right %}
+{% include 'partials/search.html' %}
+{% include 'partials/navbar_user.html' %}
+{% endblock %}

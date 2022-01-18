@@ -1,0 +1,54 @@
+{% extends 'base_rigs.html' %}
+
+{% load static %}
+{% load button from filters %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <form class="form">
+            <h3>People</h3>
+            <div class="form-group">
+              <label for="selectpicker">Select Supervisor</label>
+              <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="selectpicker">Select Attendees</label>
+              <select multiple name="attendees" id="attendees_id" class="form-control selectpicker custom-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+              </select>
+            </div>
+            <h3>Training Items</h3>
+            <div class="row">
+                {% for depth in depths %}
+                <div class="col">
+                <h4>{{ depth.1 }}</h4>
+                <select multiple name="{{ depth.0 }}" id="{{ depth.0 }}_id" class="form-control selectpicker custom-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}">
+                </select>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-sm-12 text-right my-3">
+            {% button 'submit' %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

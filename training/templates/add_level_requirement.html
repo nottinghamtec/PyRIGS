@@ -1,0 +1,54 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_training.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+	{% include 'form_errors.html' %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script>
+        //Has to be done here or the pickers disappear on modal error
+        $('document').ready(function(){
+            $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
+        });
+    </script>
+{% endif %}
+<form id="requirement-form" action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
+    {% render_field form.level|attr:'hidden' value=form.level.initial %}
+    <div class="form-group form-row">
+      <label for="item_id" class="col-sm-2 col-form-label">Item</label>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
+      </select>
+    </div>
+    <div class="form-group form-row">
+      <label for="depth" class="col-sm-2 col-form-label">Depth</label>
+      {% render_field form.depth|add_class:'form-control col-sm'|attr:'required' %}
+    </div>
+   {% if not request.is_ajax %}
+   <button type="submit" class="btn btn-primary">Save</button>
+   {% endif %}
+</form>
+{% endblock %}
+
+{% block footer %}
+<div class="col-sm-12 text-right pr-0">
+    <button type="submit" class="btn btn-primary" title="Save" form="requirement-form"><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
+</div>
+{% endblock %}

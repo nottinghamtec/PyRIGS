@@ -76,10 +76,11 @@ class CableType(models.Model):
 
     class Meta:
         ordering = ['plug', 'socket', '-circuits']
+        unique_together = ['plug', 'socket', 'circuits', 'cores']
 
     def __str__(self):
         if self.plug and self.socket:
-            return "%s → %s" % (self.plug.description, self.socket.description)
+            return f"{self.plug.description} → {self.socket.description}"
         else:
             return "Unknown"
 
@@ -148,7 +149,7 @@ class Asset(models.Model, RevisionMixin):
         ]
 
     def __str__(self):
-        return "{} | {}".format(self.asset_id, self.description)
+        return f"{self.asset_id} | {self.description}"
 
     def get_absolute_url(self):
         return reverse('asset_detail', kwargs={'pk': self.asset_id})

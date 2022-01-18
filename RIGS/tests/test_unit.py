@@ -284,11 +284,11 @@ def test_xframe_headers(admin_client, basic_event):
 
     response = admin_client.get(event_url, follow=True)
     with pytest.raises(KeyError):
-        response._headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"]
 
     response = admin_client.get(login_url, follow=True)
     with pytest.raises(KeyError):
-        response._headers["X-Frame-Options"]
+        response.headers["X-Frame-Options"]
 
 
 def test_oembed(client, basic_event):

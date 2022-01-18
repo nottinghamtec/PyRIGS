@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'users',
     'RIGS',
     'assets',
+    'training',
 
     'debug_toolbar',
     'registration',
@@ -259,3 +260,5 @@ USE_GRAVATAR = True
 
 TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

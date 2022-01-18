@@ -8,6 +8,7 @@ from django.utils import timezone
 from reversion import revisions as reversion
 
 from RIGS import models
+from training.models import TrainingLevel
 
 # Override the django form defaults to use the HTML date/time/datetime UI elements
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
@@ -96,10 +97,10 @@ class EventForm(forms.ModelForm):
             raise forms.ValidationError(
                 'You haven\'t provided any client contact details. Please add a person or organisation.',
                 code='contact')
-        return super(EventForm, self).clean()
+        return super().clean()
 
     def save(self, commit=True):
-        m = super(EventForm, self).save(commit=False)
+        m = super().save(commit=False)
 
         if (commit):
             m.save()
@@ -138,7 +139,7 @@ class BaseClientEventAuthorisationForm(forms.ModelForm):
 
 class InternalClientEventAuthorisationForm(BaseClientEventAuthorisationForm):
     def __init__(self, **kwargs):
-        super(InternalClientEventAuthorisationForm, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.fields['uni_id'].required = True
         self.fields['account_code'].required = True
 
@@ -153,7 +154,7 @@ class EventAuthorisationRequestForm(forms.Form):
 
 class EventRiskAssessmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(EventRiskAssessmentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             if str(name) == 'supervisor_consulted':
                 field.widget = forms.CheckboxInput()
@@ -164,6 +165,9 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 ], attrs={'class': 'custom-control-input', 'required': 'true'})
 
     def clean(self):
+        if self.cleaned_data.get('big_power'):
+            if not self.cleaned_data.get('power_mic').level_qualifications.filter(level__department=TrainingLevel.POWER).exists():
+                self.add_error('power_mic', forms.ValidationError("Your Power MIC must be a Power Technician.", code="power_tech_required"))
         # Check expected values
         unexpected_values = []
         for field, value in models.RiskAssessment.expected_values.items():
@@ -181,7 +185,7 @@ class EventRiskAssessmentForm(forms.ModelForm):
 
 class EventChecklistForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(EventChecklistForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['date'].widget.format = '%Y-%m-%d'
         for name, field in self.fields.items():
             if field.__class__ == forms.NullBooleanField:
