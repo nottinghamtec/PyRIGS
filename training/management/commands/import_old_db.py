@@ -48,6 +48,7 @@ class Command(BaseCommand):
 
                 if profile:
                     self.id_map[child.find('ID').text] = profile.pk
+                    print(f"Found existing user {profile}, matching data")
                     tally[0] += 1
                 else:
                     # PYTHONIC, BABY
@@ -59,6 +60,7 @@ class Command(BaseCommand):
                                                          initials=initials)
                     self.id_map[child.find('ID').text] = new_profile.pk
                     tally[1] += 1
+                    print(f"No match found, creating new user {new_profile}")
             except AttributeError:  # W.T.F
                 print("Trainee #{} is FUBAR".format(child.find('ID').text))
 
