@@ -35,7 +35,7 @@ def colour_from_depth(depth):
 
 @register.filter
 def get_levels_of_depth(trainee, level):
-    return trainee.level_qualifications.all().exclude(confirmed_on=None).exclude(level__department=models.TrainingLevel.HAULAGE).select_related('level').filter(level__level=level)
+    return trainee.level_qualifications.all().exclude(confirmed_on=None).exclude(level__department=None).exclude(level__department=models.TrainingLevel.HAULAGE).select_related('level').filter(level__level=level)
 
 
 @register.simple_tag
