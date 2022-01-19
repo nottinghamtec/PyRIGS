@@ -27,7 +27,6 @@ urlpatterns = [
     path('cabletype/<int:pk>/update/', permission_required_with_403('assets.change_cable_type')(views.CableTypeUpdate.as_view()), name='cable_type_update'),
     path('cabletype/<int:pk>/detail/', login_required(views.CableTypeDetail.as_view()), name='cable_type_detail'),
 
-    path('asset/search/', login_required(views.AssetSearch.as_view()), name='asset_search_json'),
     path('asset/id/<str:pk>/embed/',
          xframe_options_exempt(
              login_required(login_url='/user/login/embed/')(views.AssetEmbed.as_view())),
@@ -43,6 +42,4 @@ urlpatterns = [
          (views.SupplierCreate.as_view()), name='supplier_create'),
     path('supplier/<int:pk>/edit/', permission_required_with_403('assets.change_supplier')
          (views.SupplierUpdate.as_view()), name='supplier_update'),
-
-    path('supplier/search/', login_required(views.SupplierSearch.as_view()), name='supplier_search_json'),
 ]

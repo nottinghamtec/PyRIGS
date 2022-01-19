@@ -2,13 +2,12 @@ import datetime
 import operator
 from functools import reduce
 
-import simplejson
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
@@ -27,7 +26,7 @@ class Index(generic.TemplateView):  # Displays the current rig count along with 
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        context = super(Index, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['rig_count'] = models.Event.objects.rig_count()
         return context
 
@@ -39,6 +38,7 @@ class SecureAPIRequest(generic.View):
         'organisation': models.Organisation,
         'profile': models.Profile,
         'event': models.Event,
+        'asset': asset_models.Asset,
         'supplier': asset_models.Supplier,
         'training_item': training_models.TrainingItem,
     }
@@ -49,8 +49,9 @@ class SecureAPIRequest(generic.View):
         'organisation': 'RIGS.view_organisation',
         'profile': 'RIGS.view_profile',
         'event': None,
+        'asset': None,
         'supplier': None,
-        'training_item': None,  # TODO
+        'training_item': None,
     }
 
     '''
@@ -125,8 +126,7 @@ class SecureAPIRequest(generic.View):
                 results.append(data)
 
             # return a data response
-            json = simplejson.dumps(results)
-            return HttpResponse(json, content_type="application/json")  # Always json
+            return JsonResponse(results, safe=False)
 
         start = request.GET.get('start', None)
         end = request.GET.get('end', None)
@@ -151,8 +151,7 @@ class SecureAPIRequest(generic.View):
                 }
 
                 results.append(data)
-            json = simplejson.dumps(results)
-            return HttpResponse(json, content_type="application/json")  # Always json
+            return JsonResponse(results, safe=False)
 
         return HttpResponse(model)
 
@@ -176,7 +175,7 @@ class GenericListView(generic.ListView):
     paginate_by = 20
 
     def get_context_data(self, **kwargs):
-        context = super(GenericListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = self.model.__name__ + "s"
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
@@ -208,8 +207,8 @@ class GenericDetailView(generic.DetailView):
     template_name = "generic_detail.html"
 
     def get_context_data(self, **kwargs):
-        context = super(GenericDetailView, self).get_context_data(**kwargs)
-        context['page_title'] = "{} | {}".format(self.model.__name__, self.object.name)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"{self.model.__name__} | {self.object.name}"
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
@@ -219,8 +218,8 @@ class GenericUpdateView(generic.UpdateView):
     template_name = "generic_form.html"
 
     def get_context_data(self, **kwargs):
-        context = super(GenericUpdateView, self).get_context_data(**kwargs)
-        context['page_title'] = "Edit {}".format(self.model.__name__)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Edit {self.model.__name__}"
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
@@ -230,8 +229,8 @@ class GenericCreateView(generic.CreateView):
     template_name = "generic_form.html"
 
     def get_context_data(self, **kwargs):
-        context = super(GenericCreateView, self).get_context_data(**kwargs)
-        context['page_title'] = "Create {}".format(self.model.__name__)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Create {self.model.__name__}"
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         return context
@@ -256,14 +255,13 @@ class CloseModal(generic.TemplateView):
 class OEmbedView(generic.View):
     def get(self, request, pk=None):
         embed_url = reverse(self.url_name, args=[pk])
-        full_url = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'], embed_url)
+        full_url = f"{request.scheme}://{request.META['HTTP_HOST']}{embed_url}"
 
         data = {
-            'html': '<iframe src="{0}" frameborder="0" width="100%" height="250"></iframe>'.format(full_url),
+            'html': f'<iframe src="{full_url}" frameborder="0" width="100%" height="250"></iframe>',
             'version': '1.0',
             'type': 'rich',
             'height': '250'
         }
 
-        json = simplejson.JSONEncoderForHTML().encode(data)
-        return HttpResponse(json, content_type="application/json")
+        return JsonResponse(data)

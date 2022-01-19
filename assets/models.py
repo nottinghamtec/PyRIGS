@@ -189,3 +189,7 @@ class Asset(models.Model, RevisionMixin):
     @property
     def display_id(self):
         return str(self.asset_id)
+
+    @property
+    def name(self):
+        return f"{self.display_id} | {self.description}"

@@ -87,28 +87,10 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         return context
 
 
-class AssetSearch(AssetList):
-    hide_hidden_status = False
-
-    def render_to_response(self, context, **response_kwargs):
-        result = []
-
-        for asset in context["object_list"]:
-            result.append({"id": asset.pk, "label": (asset.asset_id + " | " + asset.description)})
-
-        return JsonResponse(result, safe=False)
-
-
 class AssetIDUrlMixin:
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
-        queryset = models.Asset.objects.filter(asset_id=pk)
-        try:
-            # Get the single item from the filtered queryset
-            obj = queryset.get()
-        except queryset.model.DoesNotExist:
-            raise Http404("No assets found matching the query")
-        return obj
+        return get_object_or_404(models.Asset, asset_id=pk)
 
 
 class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
@@ -194,7 +176,6 @@ class AssetOEmbed(OEmbedView):
 
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
-    hide_hidden_status = False
 
     # TODO Refresh this when the modal is submitted
     def get_queryset(self):
@@ -240,17 +221,6 @@ class SupplierList(GenericListView):
         else:
             context['override'] = 'base_assets.html'
         return context
-
-
-class SupplierSearch(SupplierList):
-    hide_hidden_status = False
-
-    def render_to_response(self, context, **response_kwargs):
-        result = []
-
-        for supplier in context["object_list"]:
-            result.append({"id": supplier.pk, "name": supplier.name})
-        return JsonResponse(result, safe=False)
 
 
 class SupplierDetail(GenericDetailView):
