@@ -27,7 +27,6 @@ function styles(done) {
                     'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/flatpickr/dist/flatpickr.css',
                     'node_modules/simplemde/dist/simplemde.min.css'
                     ])
     .pipe(sourcemaps.init())
@@ -60,7 +59,6 @@ function scripts() {
                     'node_modules/marked/marked.min.js',
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
-                    'node_modules/flatpickr/dist/flatpickr.min.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',

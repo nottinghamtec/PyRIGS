@@ -14,7 +14,6 @@
     "bootstrap-select": "^1.13.17",
     "clipboard": "^2.0.8",
     "cssnano": "^5.0.13",
-    "flatpickr": "^4.6.6",
     "fullcalendar": "^5.10.1",
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",

@@ -23,8 +23,6 @@
     <script src="{% static 'js/interaction.js' %}"></script>
     <script src="{% static 'js/tooltip.js' %}"></script>
 
-    {% include 'partials/datetime-fix.html' %}
-
     <script>
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
         $(document).ready(function () {

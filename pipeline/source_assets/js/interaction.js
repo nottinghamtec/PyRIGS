@@ -37,7 +37,7 @@ function updatePrices() {
 }
 
 function setupMDE(selector) {
-    editor = new SimpleMDE({ 
+    editor = new SimpleMDE({
         element: $(selector)[0],
         forceSync: true,
         toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
