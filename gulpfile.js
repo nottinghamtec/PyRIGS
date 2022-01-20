@@ -41,7 +41,7 @@ function styles(done) {
 
 function scripts() {
     const dest = 'pipeline/built_assets/js';
-    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
+    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js", "marked.min.js"];
     const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
     const jpop = ["jquery.min.js", "popper.min.js"]
@@ -57,6 +57,7 @@ function scripts() {
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/bootstrap/js/dist/alert.js',
 
+                    'node_modules/marked/marked.min.js',
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/flatpickr/dist/flatpickr.min.js',

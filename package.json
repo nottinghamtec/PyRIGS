@@ -27,6 +27,7 @@
     "html5sortable": "^0.13.3",
     "jquery": "^3.6.0",
     "konami": "^1.6.3",
+    "marked": "^4.0.10",
     "moment": "^2.27.0",
     "node-sass": "^7.0.0",
     "popper.js": "^1.16.1",
