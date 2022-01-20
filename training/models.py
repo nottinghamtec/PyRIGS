@@ -96,14 +96,14 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
     def __str__(self):
-        return "{} in {} on {}".format(self.get_depth_display(), self.item, self.date.strftime("%b %d %Y"))
+        return f"{self.get_depth_display()} in {self.item} on {self.date.strftime('%b %d %Y')}"
 
     @property
     def activity_feed_string(self):
-        return str("{} in {}".format(self.get_depth_display(), self.item))
+        return f"{self.get_depth_display()} in {self.item}"
 
     @classmethod
-    def get_colour_from_depth(cls, obj, depth):
+    def get_colour_from_depth(cls, depth):
         if depth == 0:
             return "warning"
         if depth == 1:
@@ -238,7 +238,8 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
     reversion_hide = True
 
     def __str__(self):
-        return "{} in {}".format(TrainingItemQualification.CHOICES[self.depth][1], self.item)
+        depth = TrainingItemQualification.CHOICES[self.depth][1]
+        return f"{depth} in {self.item}"
 
     class Meta:
         unique_together = ["level", "item"]

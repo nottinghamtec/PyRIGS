@@ -36,3 +36,10 @@ def test_trainee_detail(admin_client, trainee, admin_user):
     assertNotContains(response, "Your")
     name = trainee.first_name + " " + trainee.last_name
     assertContains(response, f"{name}'s Training Record")
+
+
+def test_trainee_item_detail(admin_client, trainee):
+    url = reverse('trainee_item_detail', kwargs={'pk': trainee.pk})
+    response = admin_client.get(url)
+    assert response.status_code == 200
+    assertContains(response, "Nothing found")
