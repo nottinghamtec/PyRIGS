@@ -145,11 +145,11 @@ class CreateEvent(FormPage):
 
     def add_person(self):
         self.find_element(*self._add_person_selector).click()
-        return regions.Modal(self, self.driver.find_element_by_id('modal'))
+        return regions.Modal(self, self.driver.find_element(By.ID, 'modal'))
 
     def add_event_item(self):
         self.find_element(*self._add_item_selector).click()
-        element = self.driver.find_element_by_id('itemModal')
+        element = self.driver.find_element(By.ID, 'itemModal')
         self.wait.until(EC.visibility_of(element))
         return rigs_regions.ItemModal(self, element)
 

@@ -123,7 +123,7 @@
         color: $gray-100;
     }
     input:-webkit-autofill,
-    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     textarea:-webkit-autofill,
     textarea:-webkit-autofill:hover,
@@ -145,7 +145,7 @@
     .editor-toolbar > a.active {
         background: $info !important;
     }
-    .cm-s-paper {
+    .cm-s-easymde {
         color: white;
         background-color: $darktheme;
         border-color: #bbb;

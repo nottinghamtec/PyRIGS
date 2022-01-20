@@ -27,7 +27,7 @@ function styles(done) {
                     'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
-                    'node_modules/simplemde/dist/simplemde.min.css'
+                    'node_modules/easymde/dist/easymde.min.css'
                     ])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
@@ -40,7 +40,7 @@ function styles(done) {
 
 function scripts() {
     const dest = 'pipeline/built_assets/js';
-    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js", "marked.min.js"];
+    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
     const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
     const jpop = ["jquery.min.js", "popper.min.js"]
@@ -56,14 +56,13 @@ function scripts() {
                     'node_modules/bootstrap/js/dist/modal.js',
                     'node_modules/bootstrap/js/dist/alert.js',
 
-                    'node_modules/marked/marked.min.js',
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
-                    'node_modules/simplemde/dist/simplemde.min.js',
+                    'node_modules/easymde/dist/easymde.min.js',
                     'node_modules/konami/konami.js',
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))

@@ -1,7 +1,3 @@
-marked.setOptions({
-    breaks: true,
-})
-
 function setupItemTable(items_json) {
     objectitems = JSON.parse(items_json)
     $.each(objectitems, function (key, val) {
@@ -37,7 +33,8 @@ function updatePrices() {
 }
 
 function setupMDE(selector) {
-    editor = new SimpleMDE({
+    editor = new EasyMDE({
+        autoDownloadFontAwesome: false,
         element: $(selector)[0],
         forceSync: true,
         toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
@@ -120,7 +117,7 @@ $('body').on('submit', '#item-form', function (e) {
     // update the table
     $row = $('#item-' + pk);
     $row.find('.name').html(escapeHtml(fields.name));
-    $row.find('.description').html(marked(fields.description));
+    $row.find('.description').html(fields.description);
     $row.find('.cost').html(parseFloat(fields.cost).toFixed(2));
     $row.find('.quantity').html(fields.quantity);
 

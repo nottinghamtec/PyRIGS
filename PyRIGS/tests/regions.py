@@ -120,10 +120,10 @@ class TextBox(Region):
 class SimpleMDETextArea(Region):
     @property
     def value(self):
-        return self.driver.execute_script("return document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().getValue();", self.root.get_attribute("id"))
+        return self.driver.execute_script("return document.querySelector('#' + arguments[0]).nextSibling.children[1].CodeMirror.getDoc().getValue();", self.root.get_attribute("id"))
 
     def set_value(self, value):
-        self.driver.execute_script("document.querySelector('#' + arguments[0]).nextSibling.nextSibling.CodeMirror.getDoc().setValue(arguments[1]);", self.root.get_attribute("id"), value)
+        self.driver.execute_script("document.querySelector('#' + arguments[0]).nextSibling.children[1].CodeMirror.getDoc().setValue(arguments[1]);", self.root.get_attribute("id"), value)
 
 
 class CheckBox(Region):
@@ -145,7 +145,7 @@ class RadioSelect(Region):  # Currently only works for yes/no radio selects
             value = "0"
         else:
             value = "1"
-        self.find_element(By.XPATH, "//label[@for='{}_{}']".format(self.root.get_attribute("id"), value)).click()
+        self.find_element(By.XPATH, f"//label[@for='{self.root.get_attribute('id')}_{value}']").click()
 
     @property
     def value(self):
