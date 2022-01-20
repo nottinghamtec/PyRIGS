@@ -10,7 +10,7 @@
     <h2 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h2>
     <div class="col-sm-4 mb-3">
         <div class="card">
-            <img class="card-img-top" src="{% static 'imgs/rigs.jpg' %}" alt="" style="height: 150px; object-fit: cover;">
+            <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/rigs.jpg' %}" alt="Some lights and haze, very purple" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Rigboard</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><span class="fas fa-list align-middle"></span><span class="align-middle"> Rigboard</span></a>
@@ -24,7 +24,7 @@
     <div class="col-sm-4 mb-3">
         <div class="card">
             {% now "m-d" as todays_date %}
-            <img class="card-img-top" src="{% if todays_date == '04-01' %}{% static 'imgs/tappytaptap.gif' %}{%else%}{% static 'imgs/assets.jpg' %}{%endif%}" alt="" style="height: 150px; object-fit: cover;">
+            <img class="card-img-top d-none d-sm-block" src="{% if todays_date == '04-01' %}{% static 'imgs/tappytaptap.gif' %}{%else%}{% static 'imgs/assets.jpg' %}{%endif%}" alt="M32 sound desk close up of the faders" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Asset Database</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><span class="fas fa-tag align-middle"></span><span class="align-middle"> Asset List</span></a>
@@ -40,7 +40,7 @@
     </div>
     <div class="col-sm-4 mb-3">
         <div class="card">
-            <img class="card-img-top" src="{% static 'imgs/training.jpg' %}" alt="" style="height: 150px; object-fit: cover;">
+            <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/training.jpg' %}" alt="People watching a presentation" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Training Database</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action text-info" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature align-middle"></span><span class="align-middle"> My Training Record</span></a>
