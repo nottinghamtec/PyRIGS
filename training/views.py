@@ -222,9 +222,11 @@ class ConfirmLevel(generic.RedirectView):
         level_qualification, created = models.TrainingLevelQualification.objects.get_or_create(trainee=trainee, level=models.TrainingLevel.objects.get(pk=kwargs['level_pk']))
 
         if created:
+            user = self.request.user
+            reversion.set_user(user)
             level_qualification.confirmed_by = self.request.user
             level_qualification.confirmed_on = timezone.now()
             level_qualification.save()
+            reversion.add_to_revision(trainee)
 
-        reversion.add_to_revision(trainee)
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
