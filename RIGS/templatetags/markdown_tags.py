@@ -9,7 +9,7 @@ register = template.Library()
 
 
 @register.filter(name="markdown")
-def markdown_filter(text, input_format='html'):
+def markdown_filter(text, input_format='html', add_style=""):
     # markdown library can't handle text=None
     if text is None:
         return text

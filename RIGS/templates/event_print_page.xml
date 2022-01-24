@@ -180,15 +180,10 @@
 {% for item in object.items.all %}
     <tr>
         <td>
-            <para>{{ item.name }}
-                {% if item.description %}
-                    </para>
-                    <para style="item_description">
-                        {{ item.description|markdown:"rml" }}
-                    </para>
-                    <para>
-                {% endif %}
-            </para>
+            <para>{{ item.name }}</para>
+            {% if item.description %}
+                {{ item.description|markdown:"rml" }}
+            {% endif %}
         </td>
         <td>£{{ item.cost|floatformat:2 }}</td>
         <td>{{ item.quantity }}</td>
@@ -208,9 +203,7 @@
     <tr>
         <td>
             {% if quote %}
-                <para>
-                    This quote is valid for 30 days unless otherwise arranged.
-                </para>
+                <para>This quote is valid for 30 days unless otherwise arranged.</para>
             {% endif %}
         </td>
         {% if object.vat > 0 %}
