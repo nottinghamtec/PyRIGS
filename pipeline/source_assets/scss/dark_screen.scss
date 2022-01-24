@@ -153,4 +153,7 @@
     .CodeMirror-cursor {
         border-color: white !important;
     }
+    .modal {
+      overflow-y: auto !important; //Bootstrap Dark Theme overrides this to none for some insane reason so we need to change it back
+    }
 }

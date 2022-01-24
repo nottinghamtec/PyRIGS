@@ -27,7 +27,7 @@ from django.views import generic
 from z3c.rml import rml2pdf
 
 from PyRIGS import decorators
-from PyRIGS.views import OEmbedView, is_ajax
+from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -53,10 +53,11 @@ class WebCalendar(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         context['view'] = kwargs.get('view', '')
         context['date'] = kwargs.get('date', '')
+        # context['page_title'] = "Calendar"
         return context
 
 
-class EventDetail(generic.DetailView):
+class EventDetail(generic.DetailView, ModalURLMixin):
     template_name = 'event_detail.html'
     model = models.Event
 
@@ -66,6 +67,10 @@ class EventDetail(generic.DetailView):
         if self.object.dry_hire:
             title += " <span class='badge badge-secondary'>Dry Hire</span>"
         context['page_title'] = title
+        if is_ajax(self.request):
+            context['override'] = "base_ajax.html"
+        else:
+            context['override'] = 'base_assets.html'
         return context
 
 

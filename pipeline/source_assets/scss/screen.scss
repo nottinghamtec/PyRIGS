@@ -116,10 +116,6 @@ textarea {
   hyphens: auto;
 }
 
-.modal-dialog {
-  z-index: inherit; // bug fix introduced in 52682ce
-}
-
 del {
   background-color: #f2dede;
   border-radius: 3px;
