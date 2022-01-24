@@ -13,7 +13,7 @@
         {% for version in object_list %}
             <tr>
                 <th scope="row">{{ version.revision.date_created }}</th>
-                <td>{{ version.pk }}|{{ version.revision.pk }}</td>
+                <td>{{ version.display_id }}</td>
                 <td>{{ version.revision.user.name }}</td>
                 <td>
                     {% if version.changes.old is None %}

@@ -569,7 +569,7 @@ class Invoice(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return "#{} for Event {}".format(self.display_id, self.event.display_id)
+        return f"#{self.display_id} for Event {self.event.display_id}"
 
     def __str__(self):
         return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
@@ -605,11 +605,11 @@ class Payment(models.Model, RevisionMixin):
     reversion_hide = True
 
     def __str__(self):
-        return "%s: %d" % (self.get_method_display(), self.amount)
+        return f"{self.get_method_display()}: {self.amount}"
 
     @property
     def activity_feed_string(self):
-        return str("payment of £{}".format(self.amount))
+        return f"payment of £{self.amount}"
 
 
 def validate_url(value):

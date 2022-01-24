@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 
 
-@reversion.register(for_concrete_model=False, fields=[], follow=["qualifications_obtained", "level_qualifications"])
+@reversion.register(for_concrete_model=False, fields=[])
 class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
@@ -38,6 +38,10 @@ class Trainee(Profile, RevisionMixin):
     @property
     def display_id(self):
         return str(self)
+
+    @property
+    def full_name(self):
+        return self.first_name + " " + self.last_name
 
 
 class TrainingCategory(models.Model):

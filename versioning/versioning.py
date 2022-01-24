@@ -36,7 +36,7 @@ class RevisionMixin:
         version = self.current_version
         if version is None:
             return None
-        return f"V{version.pk} | R{version.revision.pk}"
+        return version.display_id
 
     @property
     def date_created(self):
@@ -148,9 +148,11 @@ class ModelComparison:
     @cached_property
     def item_changes(self):
         from RIGS.models import EventAuthorisation
+        from training.models import TrainingLevelQualification, TrainingItemQualification
         if self.follow and self.version.object is not None:
             item_type = ContentType.objects.get_for_model(self.version.object)
-            old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type)
+            old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification)) \
+                .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
 
             comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'date_joined']}
@@ -234,3 +236,16 @@ class RIGSVersion(Version):
             old=self.parent._object_version.object if self.parent else None,
             follow=True
         )
+
+    @property
+    def display_id(self):
+        return f"V{self.pk} | R{self.revision.pk}"
+
+    @property
+    def display_name(self):
+        if hasattr(self.changes.new, 'display_id'):
+            id = self.changes.new.display_id
+        else:
+            id = self.changes.new.pk
+
+        return f"{id} | {self.changes.new.__class__.__name__}"

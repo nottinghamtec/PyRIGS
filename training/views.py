@@ -9,6 +9,7 @@ from django.db.models import Q, Count
 from PyRIGS.views import is_ajax, ModalURLMixin
 from training import models, forms
 from users import views
+from reversion.views import RevisionMixin
 
 
 class ItemList(generic.ListView):
@@ -34,7 +35,7 @@ class TraineeDetail(views.ProfileDetail):
         if self.request.user.pk == self.object.pk:
             context["page_title"] = "Your Training Record"
         else:
-            context["page_title"] = "{}'s Training Record".format(self.object.first_name + " " + self.object.last_name)
+            context["page_title"] = f"{self.object.full_name}'s Training Record"
         context["started_levels"] = self.object.started_levels()
         context["completed_levels"] = self.object.level_qualifications.all()
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')
@@ -63,7 +64,7 @@ class TraineeItemDetail(generic.ListView):
         context = super().get_context_data(**kwargs)
         trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
         context["trainee"] = models.Trainee.objects.get(pk=self.kwargs['pk'])
-        context["page_title"] = "Detailed Training Record for <a href='{}'>{}</a>".format(trainee.get_absolute_url(), trainee)
+        context["page_title"] = f"Detailed Training Record for <a href='{trainee.get_absolute_url()}'>{trainee}</a>"
         return context
 
 
@@ -73,7 +74,7 @@ class LevelDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Training Level {} {}".format(self.object, self.object.get_icon)
+        context["page_title"] = f"Training Level {self.object} {self.object.get_icon}"
         context["users_with"] = map(lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object))
         context["u"] = models.Trainee.objects.get(pk=self.kwargs['u']) if 'u' in self.kwargs else self.request.user
         return context
@@ -120,8 +121,6 @@ class AddQualification(generic.CreateView, ModalURLMixin):
     model = models.TrainingItemQualification
     form_class = forms.QualificationForm
 
-    @transaction.atomic()
-    @reversion.create_revision()
     def form_valid(self, form, *args, **kwargs):
         reversion.add_to_revision(form.cleaned_data['trainee'])
         return super().form_valid(form, *args, **kwargs)
@@ -133,14 +132,15 @@ class AddQualification(generic.CreateView, ModalURLMixin):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_training.html'
-        context['page_title'] = "Add Qualification for {}".format(models.Trainee.objects.get(pk=self.kwargs['pk']))
+        trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
+        context['page_title'] = f"Add Qualification for {trainee}"
         return context
 
     def get_success_url(self):
-        return self.get_close_url('trainee_detail', 'trainee_detail')
+        return self.get_close_url('add_qualification', 'trainee_detail')
 
     def get_form_kwargs(self):
-        kwargs = super(AddQualification, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs['pk']
         return kwargs
 
@@ -153,7 +153,8 @@ class EditQualification(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
-        context['page_title'] = "Edit Qualification {} for {}".format(self.object, models.Trainee.objects.get(pk=self.kwargs['pk']))
+        trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
+        context['page_title'] = f"Edit Qualification {self.object} for {trainee}"
         return context
 
     def get_form_kwargs(self):
@@ -175,7 +176,8 @@ class AddLevelRequirement(generic.CreateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "Add Requirements to Training Level {}".format(models.TrainingLevel.objects.get(pk=self.kwargs['pk']))
+        level = models.TrainingLevel.objects.get(pk=self.kwargs['pk'])
+        context["page_title"] = f"Add Requirements to Training Level {level}"
         return context
 
     def get_form_kwargs(self):
