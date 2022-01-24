@@ -1,8 +1,9 @@
-from RIGS.models import RevisionMixin, Profile
+from RIGS.models import Profile
 from reversion import revisions as reversion
 from django.db import models
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from versioning.versioning import RevisionMixin
 
 
 @reversion.register(for_concrete_model=False, fields=[], follow=["qualifications_obtained", "level_qualifications"])

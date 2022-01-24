@@ -36,7 +36,7 @@ class RevisionMixin:
         version = self.current_version
         if version is None:
             return None
-        return "V{0} | R{1}".format(version.pk, version.revision.pk)
+        return f"V{version.pk} | R{version.revision.pk}"
 
     @property
     def date_created(self):
