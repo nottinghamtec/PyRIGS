@@ -16,21 +16,25 @@ class Trainee(Profile, RevisionMixin):
         return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.pk not in self.level_qualifications.values_list('level', flat=True)]
 
     @property
+    def confirmed_levels(self):
+        return self.level_qualifications.exclude(confirmed_on=None).select_related('level')
+
+    @property
     def is_technician(self):
-        return self.level_qualifications.exclude(confirmed_on=None).select_related('level') \
+        return self.confirmed_levels \
             .filter(level__level=TrainingLevel.TECHNICIAN) \
             .exclude(level__department=TrainingLevel.HAULAGE) \
             .exclude(level__department__isnull=True).exists()
 
     @property
     def is_driver(self):
-        return self.level_qualifications.all().exclude(confirmed_on=None).select_related('level').filter(level__department=TrainingLevel.HAULAGE).exists()
+        return self.confirmed_levels.filter(level__department=TrainingLevel.HAULAGE).exists()
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
 
     def is_user_qualified_in(self, item, required_depth):
-        return self.qualifications_obtained.values('item', 'depth').filter(item=item).filter(depth__gte=required_depth).first() is not None  # this is a somewhat ghetto version of get_or_none
+        return self.qualifications_obtained.values('item', 'depth').filter(item=item).filter(depth__gte=required_depth).exists()
 
     def get_absolute_url(self):
         return reverse('trainee_detail', kwargs={'pk': self.pk})
@@ -47,6 +51,7 @@ class Trainee(Profile, RevisionMixin):
 class TrainingCategory(models.Model):
     reference_number = models.IntegerField(unique=True)
     name = models.CharField(max_length=50)
+    training_level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE, null=True, help_text="If this is set, any user with the selected level may pass out users within this category, regardless of other status")
 
     def __str__(self):
         return f"{self.reference_number}. {self.name}"

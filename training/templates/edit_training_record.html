@@ -42,7 +42,7 @@
     </div>
     <div class="form-group form-row">
       <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
-      <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials&filters=is_supervisor" required>
+      <select name="supervisor" id="supervisor_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
         {% if object.supervisor %}
         <option value="{{object.supervisor.pk}}" selected>{{object.supervisor}}</option>
         {% endif %}

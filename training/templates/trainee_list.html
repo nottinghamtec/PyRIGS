@@ -23,7 +23,7 @@
                class="form-control" id="id_search_text"/>
         <span class="input-group-append">{% button 'search' id="id_search" %}</span>
     </div>
-    <button type="submit" class="btn btn-primary mt-2 {% if request.GET.is_supervisor %}active{%endif%}" data-toggle="button" aria-pressed="false" name="is_supervisor" value="{% if request.GET.is_supervisor %}{% else %}True{% endif %}">
+    <button type="submit" class="btn btn-primary mt-2 {% if request.GET.is_supervisor %}active{%endif%}" data-toggle="button" aria-pressed="{% if request.GET.is_supervisor %}true{%endif%}" name="is_supervisor" value="{% if request.GET.is_supervisor %}{% else %}True{% endif %}">
       Only Supervisors
     </button>
 </form>

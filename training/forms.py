@@ -23,9 +23,13 @@ class QualificationForm(forms.ModelForm):
 
     def clean_supervisor(self):
         supervisor = self.cleaned_data['supervisor']
+        item = self.cleaned_data['item']
         if supervisor.pk == self.cleaned_data['trainee'].pk:
             raise forms.ValidationError('One may not supervise oneself...')
-        if not supervisor.is_supervisor:
+        if item.category.training_level:
+            if not supervisor.level_qualifications.filter(level=item.category.training_level):
+                raise forms.ValidationError('Selected supervising person is missing requisite training level to train in this department')
+        elif not supervisor.is_supervisor:
             raise forms.ValidationError('Selected supervisor must actually *be* a supervisor...')
         return supervisor
 
