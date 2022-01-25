@@ -185,11 +185,15 @@ class EventPrint(generic.View):
 
         merger = PdfFileMerger()
 
+        user_str = f"by {request.user.name} " if request.user is not None else ""
+        time = timezone.now().strftime('%d/%m/%Y %H:%I')
+
         context = {
             'object': object,
             'quote': True,
             'current_user': request.user,
-            'filename': 'Event_{}_{}_{}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date)
+            'filename': 'Event_{}_{}_{}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date),
+            'info_string': f"[Paperwork generated {user_str}on {time} - {object.current_version_id}]",
         }
 
         rml = template.render(context)

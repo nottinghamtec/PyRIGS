@@ -9,12 +9,12 @@ from reversion.models import Version, VersionQuerySet
 class RevisionMixin:
     @property
     def is_first_version(self):
-        versions = Version.objects.get_for_object(self)
+        versions = RIGSVersion.objects.get_for_object(self)
         return len(versions) == 1
 
     @property
     def current_version(self):
-        version = Version.objects.get_for_object(self).select_related('revision').first()
+        version = RIGSVersion.objects.get_for_object(self).select_related('revision').first()
         return version
 
     @property
