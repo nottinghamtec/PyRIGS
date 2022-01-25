@@ -16,7 +16,17 @@
 {% endblock %}
 
 {% block content %}
-{% include 'partials/list_search.html' %}
+<form method="GET" class="ml-auto w-25 d-flex flex-column justify-content-end">
+    {% csrf_token %}
+    <div class="input-group">
+        <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
+               class="form-control" id="id_search_text"/>
+        <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2 {% if request.GET.is_supervisor %}active{%endif%}" data-toggle="button" aria-pressed="false" name="is_supervisor" value="{% if request.GET.is_supervisor %}{% else %}True{% endif %}">
+      Only Supervisors
+    </button>
+</form>
 <div class="row pt-2">
     <div class="col">
         <div class="table-responsive">

@@ -108,6 +108,9 @@ class TraineeList(generic.ListView):
             # not an integer
             pass
 
+        if self.request.GET.get('is_supervisor', ''):
+            filt = filt & Q(is_supervisor=True)
+
         return self.model.objects.filter(filt).annotate(num_qualifications=Count('qualifications_obtained')).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
 
     def get_context_data(self, **kwargs):
