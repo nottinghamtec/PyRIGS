@@ -6,10 +6,17 @@ from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 
 
+class TraineeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True, is_approved=True)
+
+
 @reversion.register(for_concrete_model=False, fields=[])
 class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
+
+    objects = TraineeManager()
 
     # FIXME use queryset
     def started_levels(self):
