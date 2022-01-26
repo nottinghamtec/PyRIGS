@@ -16,8 +16,9 @@
                 <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><span class="fas fa-list align-middle"></span><span class="align-middle"> Rigboard</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><span class="fas fa-calendar align-middle"></span><span class="align-middle"> Calendar</span></a>
                 {% if perms.RIGS.add_event %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><span class="fas fa-plus align-middle"></span><span class="align-middle"> New Event</span></a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Event</span></a>
                 {% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'event_archive' %}"><span class="fas fa-book align-middle"></span><span class="align-middle"> Event Archive</span></a>
             </div>
         </div>
     </div>
@@ -29,11 +30,11 @@
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><span class="fas fa-tag align-middle"></span><span class="align-middle"> Asset List</span></a>
                 {% if perms.assets.add_asset %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><span class="fas fa-plus align-middle"></span><span class="align-middle"> New Asset</span></a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Asset</span></a>
                 {% endif %}
                 <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><span class="fas fa-parachute-box align-middle"></span><span class="align-middle"> Supplier List</span></a>
                 {% if perms.assets.add_supplier %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><span class="fas fa-plus align-middle"></span><span class="align-middle"> New Supplier</span></a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Supplier</span></a>
                 {% endif %}
             </div>
         </div>
@@ -43,10 +44,10 @@
             <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/training.jpg' %}" alt="People watching a presentation" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Training Database</h4>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action text-info" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature align-middle"></span><span class="align-middle"> My Training Record</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span> Trainee List</a>
-                <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> Level List</a></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> Item List</a></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature align-middle text-info"></span><span class="align-middle"> My Training Record</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span><span class="align-middle"> Trainee List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> <span class="align-middle">Level List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> <span class="align-middle">Item List</span></a>
             </div>
         </div>
     </div>
@@ -57,6 +58,7 @@
                     <a class="list-group-item list-group-item-action" href="https://forum.nottinghamtec.co.uk" target="_blank" rel="noopener noreferrer"><span class="fas fa-comment-alt text-primary align-middle"></span><span class="align-middle"> TEC Forum</span></a>
                     <a class="list-group-item list-group-item-action" href="//nottinghamtec.sharepoint.com" target="_blank" rel="noopener noreferrer"><span class="fas fa-folder text-info align-middle"></span><span class="align-middle"> TEC Sharepoint</span></a>
                     <a class="list-group-item list-group-item-action" href="//wiki.nottinghamtec.co.uk" target="_blank" rel="noopener noreferrer"><span class="fas fa-pen-square align-middle"></span><span class="align-middle"> TEC Wiki</span></a>
+                    <a class="list-group-item list-group-item-action" href="https://secure.jotformeu.com/UoNSU/accident_report_form?studentGroup=Media+or+Service+Group&mediaserviceGroup=TEC" target="_blank" rel="noopener noreferrer"><span class="fas fa-heartbeat  align-middle text-danger"></span><span class="align-middle"> H&S Report Form</span></a>
                     {% if perms.RIGS.change_event %}
                         <a class="list-group-item list-group-item-action" href="//members.nottinghamtec.co.uk/price" target="_blank" rel="noopener noreferrer"><span class="fas fa-pound-sign text-warning align-middle"></span><span class="align-middle"> Price List</span></a>
                     {% endif %}
