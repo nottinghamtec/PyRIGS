@@ -29,7 +29,7 @@ def admin_user(admin_user):
     admin_user.initials = "ETU"
     admin_user.is_approved = True
     admin_user.save()
-    yield admin_user
+    return admin_user
 
 
 @pytest.fixture
