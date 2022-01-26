@@ -10,13 +10,13 @@ from training import models
 from reversion.models import Version, Revision
 
 
-def test_add_qualification(admin_client, trainee, admin_user):
+def test_add_qualification(admin_client, trainee, admin_user, training_item):
     url = reverse('add_qualification', kwargs={'pk': trainee.pk})
     date = (timezone.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-    response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': trainee.pk})
+    response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': trainee.pk, 'item': training_item.pk})
     assertFormError(response, 'form', 'date', 'Qualification date may not be in the future')
     assertFormError(response, 'form', 'supervisor', 'One may not supervise oneself...')
-    response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': admin_user.pk})
+    response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': admin_user.pk, 'item': training_item.pk})
     assertFormError(response, 'form', 'supervisor', 'Selected supervisor must actually *be* a supervisor...')
 
 
@@ -45,6 +45,7 @@ def test_add_requirement(admin_client, level):
 def test_trainee_detail(admin_client, trainee, admin_user):
     url = reverse('trainee_detail', kwargs={'pk': admin_user.pk})
     response = admin_client.get(url)
+    assert response.status_code == 200
     assertContains(response, "Your Training Record")
     assertContains(response, "No qualifications in any levels")
 
