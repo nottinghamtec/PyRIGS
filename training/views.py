@@ -35,7 +35,7 @@ class TraineeDetail(views.ProfileDetail):
         if self.request.user.pk == self.object.pk:
             context["page_title"] = "Your Training Record"
         else:
-            context["page_title"] = f"{self.object.full_name}'s Training Record"
+            context["page_title"] = f"{self.object.get_full_name()}'s Training Record"
         context["started_levels"] = self.object.started_levels()
         context["completed_levels"] = self.object.level_qualifications.all()
         context["categories"] = models.TrainingCategory.objects.all().prefetch_related('items')

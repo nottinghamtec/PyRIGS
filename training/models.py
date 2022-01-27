@@ -11,7 +11,7 @@ class TraineeManager(models.Manager):
         return super().get_queryset().filter(is_active=True, is_approved=True)
 
 
-@reversion.register(for_concrete_model=False, fields=[])
+@reversion.register(for_concrete_model=False, fields=['is_supervisor'])
 class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
@@ -49,10 +49,6 @@ class Trainee(Profile, RevisionMixin):
     @property
     def display_id(self):
         return str(self)
-
-    @property
-    def full_name(self):
-        return self.first_name + " " + self.last_name
 
 
 class TrainingCategory(models.Model):
@@ -226,9 +222,9 @@ class TrainingLevel(models.Model, RevisionMixin):
             if self.level == self.TA:
                 return self.get_level_display()
             else:
-                return "{} Common Competencies".format(self.get_level_display())
+                return f"{self.get_level_display()} Common Competencies"
         else:
-            return "{} {}".format(self.get_department_display(), self.get_level_display())
+            return f"{self.get_department_display()} {self.get_level_display()}"
 
     @property
     def activity_feed_string(self):
@@ -243,7 +239,7 @@ class TrainingLevel(models.Model, RevisionMixin):
             icon = f"<span class='fas fa-{self.icon}'></span>"
         else:
             icon = "".join([w[0] for w in str(self).split()])
-        return mark_safe("<span class='badge badge-{} badge-pill' data-toggle='tooltip' title='{}'>{}</span>".format(self.department_colour, str(self), icon))
+        return mark_safe(f"<span class='badge badge-{self.department_colour} badge-pill' data-toggle='tooltip' title='{str(self)}'>{icon}</span>")
 
 
 @reversion.register
@@ -251,8 +247,6 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
     level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.CASCADE)
     item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
     depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
-
-    reversion_hide = True
 
     def __str__(self):
         depth = TrainingItemQualification.CHOICES[self.depth][1]
@@ -268,8 +262,6 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
     level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE)
     confirmed_on = models.DateTimeField(null=True)
     confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.CASCADE, null=True)
-
-    reversion_hide = True
 
     @property
     def get_icon(self):

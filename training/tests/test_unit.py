@@ -42,22 +42,40 @@ def test_add_requirement(admin_client, level):
     assertContains(response, level.pk)
 
 
-def test_trainee_detail(admin_client, trainee, admin_user):
-    url = reverse('trainee_detail', kwargs={'pk': admin_user.pk})
+def get_response(admin_client, url, kwargs={}):
+    url = reverse(url, kwargs=kwargs)
     response = admin_client.get(url)
     assert response.status_code == 200
+    return response
+
+
+def test_trainee_detail(admin_client, trainee, admin_user):
+    response = get_response(admin_client, 'trainee_detail', {'pk': admin_user.pk})
     assertContains(response, "Your Training Record")
     assertContains(response, "No qualifications in any levels")
 
-    url = reverse('trainee_detail', kwargs={'pk': trainee.pk})
-    response = admin_client.get(url)
+    response = get_response(admin_client, 'trainee_detail', {'pk': trainee.pk})
     assertNotContains(response, "Your")
-    name = trainee.first_name + " " + trainee.last_name
-    assertContains(response, f"{name}'s Training Record")
+    assertContains(response, f"{trainee.get_full_name()}'s Training Record")
 
 
 def test_trainee_item_detail(admin_client, trainee):
-    url = reverse('trainee_item_detail', kwargs={'pk': trainee.pk})
-    response = admin_client.get(url)
-    assert response.status_code == 200
+    response = get_response(admin_client, 'trainee_item_detail', {'pk': trainee.pk})
     assertContains(response, "Nothing found")
+
+
+def test_item_list(admin_client, training_item):
+    response = get_response(admin_client, 'item_list')
+    assertContains(response, str(training_item.category))
+
+
+def test_trainee_list_search(admin_client, admin_user, trainee, supervisor):
+    response = get_response(admin_client, 'trainee_list')
+    assertContains(response, admin_user.get_full_name())
+    assertContains(response, trainee.get_full_name())
+    assertContains(response, supervisor.get_full_name())
+
+    url = reverse('trainee_list')
+    response = admin_client.get(url, {'q': trainee.get_full_name()})
+    assertContains(response, trainee.get_full_name())
+    assertNotContains(response, supervisor.get_full_name())

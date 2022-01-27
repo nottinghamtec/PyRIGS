@@ -77,13 +77,13 @@
         border-collapse: separate !important;
         border-spacing: 0;
     }
-    .table tr th {
+    #event_table tr th {
       border-right: 0 !important;
     }
-    .table tr td {
+    #event_table tr td {
       border-left: 0 !important;
     }
-    .table tr td:not(:last-child) {
+    #event_table tr td:not(:last-child) {
         border-right: 0 !important;
     }
     @each $color, $value in $theme-colors {

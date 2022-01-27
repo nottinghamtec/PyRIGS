@@ -7,7 +7,10 @@
 {% load button from filters %}
 {% load get_levels_of_depth from tags %}
 
+{% load static %}
+
 {% block js %}
+    <script src="{% static "js/tooltip.js" %}"></script>
     <script>
         $(function () {
           $('[data-toggle="tooltip"]').tooltip();
