@@ -22,6 +22,91 @@ admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice, VersionAdmin)
 
 
+@transaction.atomic()  # Copied from django-extensions. GenericForeignKey support removed as unnecessary.
+def merge_model_instances(primary_object, alias_objects):
+    """
+    Merge several model instances into one, the `primary_object`.
+    Use this function to merge model objects and migrate all of the related
+    fields from the alias objects the primary object.
+    """
+
+    # get related fields
+    related_fields = list(filter(
+        lambda x: x.is_relation is True,
+        primary_object._meta.get_fields()))
+
+    many_to_many_fields = list(filter(
+        lambda x: x.many_to_many is True, related_fields))
+
+    related_fields = list(filter(
+        lambda x: x.many_to_many is False, related_fields))
+
+    # Loop through all alias objects and migrate their references to the
+    # primary object
+    deleted_objects = []
+    deleted_objects_count = 0
+    for alias_object in alias_objects:
+        # Migrate all foreign key references from alias object to primary
+        # object.
+        for many_to_many_field in many_to_many_fields:
+            alias_varname = many_to_many_field.name
+            related_objects = getattr(alias_object, alias_varname)
+            for obj in related_objects.all():
+                try:
+                    # Handle regular M2M relationships.
+                    getattr(alias_object, alias_varname).remove(obj)
+                    getattr(primary_object, alias_varname).add(obj)
+                except AttributeError:
+                    # Handle M2M relationships with a 'through' model.
+                    # This does not delete the 'through model.
+                    # TODO: Allow the user to delete a duplicate 'through' model.
+                    through_model = getattr(alias_object, alias_varname).through
+                    kwargs = {
+                        many_to_many_field.m2m_reverse_field_name(): obj,
+                        many_to_many_field.m2m_field_name(): alias_object,
+                    }
+                    through_model_instances = through_model.objects.filter(**kwargs)
+                    for instance in through_model_instances:
+                        # Re-attach the through model to the primary_object
+                        setattr(
+                            instance,
+                            many_to_many_field.m2m_field_name(),
+                            primary_object)
+                        instance.save()
+                        # TODO: Here, try to delete duplicate instances that are
+                        # disallowed by a unique_together constraint
+
+        for related_field in related_fields:
+            if related_field.one_to_many:
+                with transaction.atomic():
+                    try:
+                        alias_varname = related_field.get_accessor_name()
+                        related_objects = getattr(alias_object, alias_varname)
+                        for obj in related_objects.all():
+                            field_name = related_field.field.name
+                            setattr(obj, field_name, primary_object)
+                            obj.save()
+                    except IntegrityError:
+                            pass  # Skip to avoid integrity error from unique_together
+            elif related_field.one_to_one or related_field.many_to_one:
+                alias_varname = related_field.name
+                if hasattr(alias_object, alias_varname):
+                    related_object = getattr(alias_object, alias_varname)
+                    primary_related_object = getattr(primary_object, alias_varname)
+                    if primary_related_object is None:
+                        setattr(primary_object, alias_varname, related_object)
+                        primary_object.save()
+                    elif related_field.one_to_one:
+                        related_object.delete()
+
+        if alias_object.id:
+            deleted_objects += [alias_object]
+            alias_object.delete()
+            deleted_objects_count += 1
+
+    return primary_object, deleted_objects, deleted_objects_count
+
+
 class AssociateAdmin(VersionAdmin):
     search_fields = ['id', 'name']
     list_display_links = ['id', 'name']
@@ -44,38 +129,10 @@ class AssociateAdmin(VersionAdmin):
                 self.message_user(request, "An error occured. Did you select a 'master' record?", level=messages.ERROR)
                 return
 
-            with transaction.atomic(), reversion.create_revision():
-                for obj in queryset.exclude(pk=master_object_pk):
-                    # If we're merging profiles, merge their training information
-                    if hasattr(obj, 'event_mic'):
-                        events = obj.event_mic.all()
-                        for event in events:
-                            master_object.event_mic.add(event)
-                        for qual in obj.qualifications_obtained.all():
-                            try:
-                                with transaction.atomic():
-                                    master_object.qualifications_obtained.add(qual)
-                            except IntegrityError:
-                                existing_qual = master_object.qualifications_obtained.get(item=qual.item, depth=qual.depth)
-                                existing_qual.notes += qual.notes
-                                existing_qual.save()
-                        for level in obj.level_qualifications.all():
-                            try:
-                                with transaction.atomic():
-                                    master_object.level_qualifications.add(level)
-                            except IntegrityError:
-                                continue  # Exists, oh well
-                    else:
-                        events = obj.event_set.all()
-                        for event in events:
-                            master_object.event_set.add(event)
-                    obj.delete()
-                reversion.set_comment('Merging Objects')
-
-            self.message_user(request, "Objects successfully merged.")
-            return
+            primary_object, deleted_objects, deleted_objects_count = merge_model_instances(master_object, queryset.exclude(pk=master_object_pk).all())
+            reversion.set_comment('Merging Objects')
+            self.message_user(request, f"Objects successfully merged. {deleted_objects_count} old objects deleted.")
         else:  # Present the confirmation screen
-
             class TempForm(ModelForm):
                 class Meta:
                     model = queryset.model

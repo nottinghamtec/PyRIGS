@@ -3,7 +3,7 @@
 
 {% block content %}
 <form action="" method="post">{% csrf_token %}
-    <p>The following objects will be merged. Please select the 'master' record which you would like to keep. Other records will have associated events moved to the 'master' copy, and then will be deleted.</p>
+    <p>The following objects will be merged. Please select the 'master' record which you would like to keep. This may take some time.</p>
 
     <table>
     {% for form in forms %}
@@ -15,8 +15,8 @@
                     <th>{{ field.label }}</th>
                 {% endfor %}
             </tr>
-        {% endif %}     
-        
+        {% endif %}
+
         <tr>
             <td><input type="radio" name="master" value="{{form.instance.pk|unlocalize}}"></td>
             <td>{{form.instance.pk}}</td>
