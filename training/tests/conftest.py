@@ -24,7 +24,7 @@ def supervisor(db):
 @pytest.fixture
 def training_item(db):
     training_category = models.TrainingCategory.objects.create(reference_number=1, name="The Basics")
-    training_item = models.TrainingItem.objects.create(category=training_category, reference_number=1, name="How Not To Die")
+    training_item = models.TrainingItem.objects.create(category=training_category, reference_number=1, description="How Not To Die")
     yield training_item
     training_category.delete()
     training_item.delete()

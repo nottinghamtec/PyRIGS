@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 number = previous_item.reference_number + 1
             else:
                 number = 0
-            item = models.TrainingItem.objects.create(category=category, reference_number=number, name=name)
+            item = models.TrainingItem.objects.create(category=category, reference_number=number, description=name)
             self.items.append(item)
 
     def setup_levels(self):

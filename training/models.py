@@ -85,9 +85,11 @@ class TrainingItem(models.Model):
     @display_id.filter
     @classmethod
     def display_id(cls, lookup, value):
-        category_number, number = value.split('.')
-        if category_number and number:
-            return models.Q(category__reference_number=category_number, reference_number=number)
+        if '.' in str(value):
+            category_number, number = value.split('.')
+            if category_number and number:
+                return models.Q(category__reference_number=category_number, reference_number=number)
+        return models.Q()
 
     def __str__(self):
         name = f"{self.display_id} {self.description}"

@@ -28,7 +28,7 @@ def test_add_qualification_reversion(admin_client, trainee, training_item, super
     assert response.status_code == 302
     qual = models.TrainingItemQualification.objects.last()
     assert qual is not None
-    assert training_item.pk == qual.pk
+    assert training_item.pk == qual.item.pk
     # Ensure only one revision has been created
     assert Revision.objects.count() == 1
     response = admin_client.post(url, {'date': date, 'supervisor': supervisor.pk, 'trainee': trainee.pk, 'item': training_item.pk, 'depth': 1})

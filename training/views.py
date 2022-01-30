@@ -49,11 +49,10 @@ class TraineeItemDetail(generic.ListView):
     def get_queryset(self):
         q = self.request.GET.get('q', "")
 
-        filter = Q(item__name__icontains=q) | Q(supervisor__first_name__icontains=q) | Q(supervisor__last_name__icontains=q)
+        filter = Q(item__description__icontains=q) | Q(supervisor__first_name__icontains=q) | Q(supervisor__last_name__icontains=q)
 
         try:
-            q = q.split('.')
-            filter = filter | Q(item__category__reference_number=int(q[0]), item__reference_number=int(q[1]))
+            filter = filter | Q(item__display_id=int(q[0]))
         except:  # noqa
             # not an integer
             pass

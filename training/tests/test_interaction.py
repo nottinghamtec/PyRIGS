@@ -24,9 +24,9 @@ def test_add_qualification(logged_in_browser, live_server, trainee, supervisor, 
 
     page.item_selector.toggle()
     assert page.item_selector.is_open
-    page.item_selector.search(training_item.name)
+    page.item_selector.search(training_item.description)
     time.sleep(2)  # Slow down for javascript
-    page.item_selector.set_option(training_item.name, True)
+    # page.item_selector.set_option(training_item.description, True)
     assert page.item_selector.options[0].selected
     page.item_selector.toggle()
 

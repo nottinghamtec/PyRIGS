@@ -211,7 +211,7 @@ class TestEventCreate(BaseRigboardTest):
         self.assertEqual("Test Item 1", testitem['name'])
         self.assertEqual("2", testitem['quantity'])  # test a couple of "worse case" fields
 
-        total = self.driver.find_element_by_id('total')
+        total = self.driver.find_element(By.ID, 'total')
         ActionChains(self.driver).move_to_element(total).perform()
 
         # See new item appear in table
@@ -224,9 +224,9 @@ class TestEventCreate(BaseRigboardTest):
         self.assertEqual('47.90', row.subtotal)
 
         # Check totals TODO convert to page properties
-        self.assertEqual("47.90", self.driver.find_element_by_id('sumtotal').text)
-        self.assertIn("(TBC)", self.driver.find_element_by_id('vat-rate').text)
-        self.assertEqual("9.58", self.driver.find_element_by_id('vat').text)
+        self.assertEqual("47.90", self.driver.find_element(By.ID, 'sumtotal').text)
+        self.assertIn("(TBC)", self.driver.find_element(By.ID, 'vat-rate').text)
+        self.assertEqual("9.58", self.driver.find_element(By.ID, 'vat').text)
         self.assertEqual("57.48", total.text)
 
         self.page.submit()
