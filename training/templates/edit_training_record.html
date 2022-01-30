@@ -29,8 +29,8 @@
     {% csrf_token %}
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     <div class="form-group form-row">
-      <label for="item_id" class="col-sm-2 col-form-label">Item</label>
-      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-4" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=reference_number,name&filters=active" required>
+      <label for="item_id" class="col col-form-label">Item</label>
+      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active" required>
         {% if object.item %}
         <option value="{{object.item.pk}}" selected>{{object.item}}</option>
         {% endif %}
@@ -38,7 +38,7 @@
     </div>
     <div class="form-group form-row">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
-      {% render_field form.depth|add_class:'form-control custom-select col-sm-4' %}
+      {% render_field form.depth|add_class:'form-control custom-select col-sm-8' %}
     </div>
     <div class="form-group form-row">
       <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>

@@ -80,6 +80,7 @@ importlib-metadata = "*"
 django-hcaptcha = "*"
 "z3c.rml" = "*"
 pikepdf = "*"
+django-queryable-properties = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"

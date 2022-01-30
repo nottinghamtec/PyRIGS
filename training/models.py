@@ -4,6 +4,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
+from queryable_properties.properties import queryable_property
+from queryable_properties.managers import QueryablePropertiesManager
 
 
 class TraineeManager(models.Manager):
@@ -67,15 +69,28 @@ class TrainingCategory(models.Model):
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=50)
     active = models.BooleanField(default=True)
 
+    objects = QueryablePropertiesManager()
+
     @property
+    def name(self):
+        return str(self)
+
+    @queryable_property
     def display_id(self):
         return f"{self.category.reference_number}.{self.reference_number}"
 
+    @display_id.filter
+    @classmethod
+    def display_id(cls, lookup, value):
+        category_number, number = value.split('.')
+        if category_number and number:
+            return models.Q(category__reference_number=category_number, reference_number=number)
+
     def __str__(self):
-        name = f"{self.display_id} {self.name}"
+        name = f"{self.display_id} {self.description}"
         if not self.active:
             name += " (inactive)"
         return name
@@ -107,6 +122,8 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
+
+    objects = QueryablePropertiesManager()
 
     def __str__(self):
         return f"{self.get_depth_display()} in {self.item} on {self.date.strftime('%b %d %Y')}"
