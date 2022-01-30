@@ -87,7 +87,7 @@ def merge_model_instances(primary_object, alias_objects):
                             setattr(obj, field_name, primary_object)
                             obj.save()
                     except IntegrityError:
-                            pass  # Skip to avoid integrity error from unique_together
+                        pass  # Skip to avoid integrity error from unique_together
             elif related_field.one_to_one or related_field.many_to_one:
                 alias_varname = related_field.name
                 if hasattr(alias_object, alias_varname):

@@ -122,7 +122,7 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-9 col-md-7 col-lg-8">
-                                    <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
+                                    <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
                                         {% if person %}
                                             <option value="{{form.person.value}}" selected="selected" data-update_url="{% url 'person_update' form.person.value %}">{{ person }}</option>
                                         {% endif %}
@@ -149,7 +149,7 @@
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-9 col-md-7 col-lg-8">
-                                    <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" >
+                                    <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" >
                                         {% if organisation %}
                                             <option value="{{form.organisation.value}}" selected="selected" data-update_url="{% url 'organisation_update' form.organisation.value %}">{{ organisation }}</option>
                                         {% endif %}
@@ -207,7 +207,7 @@
                             <div class="col-sm-8">
                                 <div class="row">
                                     <div class="col-sm-9 col-md-7 col-lg-8">
-                                        <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                        <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                         {% if venue %}
                                             <option value="{{form.venue.value}}" selected="selected" data-update_url="{% url 'venue_update' form.venue.value %}">{{ venue }}</option>
                                         {% endif %}
@@ -302,7 +302,7 @@
                                        class="col-sm-4 col-form-label">{{ form.mic.label }}</label>
 
                                 <div class="col-sm-8">
-                                    <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                         {% if mic %}
                                             <option value="{{form.mic.value}}" selected="selected" >{{ mic.name }}</option>
                                         {% endif %}
@@ -316,7 +316,7 @@
                                            class="col-sm-4 col-form-label">{{ form.checked_in_by.label }}</label>
 
                                     <div class="col-sm-8">
-                                         <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                         <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                             {% if checked_in_by %}
                                                 <option value="{{form.checked_in_by.value}}" selected="selected" >{{ checked_in_by.name }}</option>
                                             {% endif %}

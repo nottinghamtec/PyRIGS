@@ -7,7 +7,7 @@
     {% if create or edit or duplicate %}
     <div class="form-group" id="parent-group">
       <label for="selectpicker">Set Parent</label>
-      <select name="parent" id="parent_id" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='asset' %}?fields=asset_id,description">
+      <select name="parent" id="parent_id" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='asset' %}?fields=asset_id,description">
         {% if object.parent %}
         <option value="{{object.parent.pk}}" selected>{{object.parent.description}}</option>
         {% endif %}
