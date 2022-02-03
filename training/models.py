@@ -296,6 +296,10 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
             return f"{self.trainee} is qualified in the {self.level}"
         return f"{self.trainee} is qualified as a {self.level}"
 
+    @property
+    def activity_feed_string(self):
+        return str(self)
+
     class Meta:
         unique_together = ["trainee", "level"]
         ordering = ['-confirmed_on']
