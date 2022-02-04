@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import pytz
 from django import forms
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -70,14 +71,33 @@ class Profile(AbstractUser):
         return self.name
 
 
+class ContactableManager(models.Manager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = Q(name__icontains=query) | Q(email__icontains=query) | Q(address__icontains=query) | Q(notes__icontains=query) | Q(
+            phone__startswith=query) | Q(phone__endswith=query)
+
+            # try and parse an int
+            try:
+                val = int(query)
+                or_lookup = or_lookup | Q(pk=val)
+            except:  # noqa
+                # not an integer
+                pass
+
+            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+        return qs
+
+
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default='')
     email = models.EmailField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
-
     notes = models.TextField(blank=True, default='')
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -110,11 +130,11 @@ class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default='')
     email = models.EmailField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
-
     notes = models.TextField(blank=True, default='')
     union_account = models.BooleanField(default=False)
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -184,8 +204,9 @@ class Venue(models.Model, RevisionMixin):
     email = models.EmailField(blank=True, default='')
     three_phase_available = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -259,6 +280,16 @@ class EventManager(models.Manager):
             .prefetch_related('items')
 
         return events
+
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = (Q(name__icontains=query) |
+                         Q(description__icontains=query)|
+                         Q(notes__icontains=query)
+                        )
+            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+        return qs
 
 
 @reversion.register(follow=['items'])
@@ -529,6 +560,13 @@ class InvoiceManager(models.Manager):
 
         query = self.raw(sql)
         return query
+
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = Q(event__name__icontains=query)
+            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+        return qs
 
 
 @reversion.register(follow=['payment_set'])

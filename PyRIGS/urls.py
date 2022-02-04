@@ -23,6 +23,7 @@ urlpatterns = [
          name="api_secure"),
 
     path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
+    path('search/', login_required(views.Search.as_view()), name='search'),
     path('search_help/', login_required(views.SearchHelp.as_view()), name='search_help'),
 
     path('', include('users.urls')),
