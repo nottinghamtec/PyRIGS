@@ -10,6 +10,7 @@ from pytest_django.asserts import assertTemplateUsed, assertInHTML
 from PyRIGS import urls
 from RIGS.models import Event, Profile
 from assets.models import Asset
+from training.tests.test_unit import get_response
 from django.db import connection
 from django.template.defaultfilters import striptags
 from django.urls.exceptions import NoReverseMatch
@@ -135,3 +136,11 @@ def test_keyholder_access(client):
     assertContains(response, 'View Revision History')
     client.logout()
     call_command('deleteSampleData')
+
+
+def test_search(admin_client, admin_user):
+    url = reverse('search')
+    response = admin_client.get(url, {'q': "Definetelynothingfoundifwesearchthis"})
+    assertContains(response, "No results found")
+    response = admin_client.get(url, {'q': admin_user.first_name })
+    assertContains(response, admin_user.first_name)
