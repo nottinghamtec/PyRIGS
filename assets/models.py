@@ -111,13 +111,11 @@ def get_available_asset_id(wanted_prefix=""):
 
 
 class AssetManager(models.Manager):
-   def search(self, query=None):
+    def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(description__icontains=query) |
-                         Q(comments__icontains=query)
-                        )
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+            or_lookup = (Q(asset_id__exact=query.upper()) | Q(description__icontains=query) | Q(serial_number__exact=query))
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 

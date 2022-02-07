@@ -253,22 +253,22 @@ class Search(generic.ListView):
 
             # combine querysets
             queryset_chain = chain(
-                    event_results,
-                    person_results,
-                    organisation_results,
-                    venue_results,
-                    invoice_results,
-                    asset_results,
-                    supplier_results,
-                    trainee_results,
-                    training_item_results,
+                event_results,
+                person_results,
+                organisation_results,
+                venue_results,
+                invoice_results,
+                asset_results,
+                supplier_results,
+                trainee_results,
+                training_item_results,
             )
             qs = sorted(queryset_chain,
                         key=lambda instance: instance.pk,
                         reverse=True)
-            self.count = len(qs) # since qs is actually a list
+            self.count = len(qs)  # since qs is actually a list
             return qs
-        return models.Event.objects.none() # just an empty queryset as default
+        return models.Event.objects.none()  # just an empty queryset as default
 
 
 class SearchHelp(generic.TemplateView):

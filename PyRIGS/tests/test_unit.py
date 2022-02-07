@@ -142,5 +142,5 @@ def test_search(admin_client, admin_user):
     url = reverse('search')
     response = admin_client.get(url, {'q': "Definetelynothingfoundifwesearchthis"})
     assertContains(response, "No results found")
-    response = admin_client.get(url, {'q': admin_user.first_name })
+    response = admin_client.get(url, {'q': admin_user.first_name})
     assertContains(response, admin_user.first_name)

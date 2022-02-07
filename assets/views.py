@@ -50,13 +50,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
 
         # TODO Feedback to user when search fails
         query_string = form.cleaned_data['q'] or ""
-        if len(query_string) == 0:
-            queryset = self.model.objects.all()
-        elif len(query_string) >= 3:
-            queryset = self.model.objects.filter(
-                Q(asset_id__exact=query_string.upper()) | Q(description__icontains=query_string) | Q(serial_number__exact=query_string))
-        else:
-            queryset = self.model.objects.filter(Q(asset_id__exact=query_string.upper()))
+        queryset = models.Asset.objects.search(query=query_string)
 
         if form.cleaned_data['is_cable']:
             queryset = queryset.filter(is_cable=True)
@@ -176,6 +170,7 @@ class AssetOEmbed(OEmbedView):
 
 class AssetAuditList(AssetList):
     template_name = 'asset_audit_list.html'
+    hide_hidden_status = True
 
     # TODO Refresh this when the modal is submitted
     def get_queryset(self):

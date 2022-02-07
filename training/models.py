@@ -18,9 +18,10 @@ class TraineeManager(models.Manager):
         if query is not None:
             or_lookup = (Q(first_name__icontains=query) |
                          Q(last_name__icontains=query)
-                        )
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+                         )
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
+
 
 @reversion.register(for_concrete_model=False, fields=['is_supervisor'])
 class Trainee(Profile, RevisionMixin):
@@ -79,8 +80,8 @@ class TrainingItemManager(QueryablePropertiesManager):
         qs = self.get_queryset()
         if query is not None:
             or_lookup = (Q(description__icontains=query)
-                        )
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+                         )
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 

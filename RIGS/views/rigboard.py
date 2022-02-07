@@ -244,32 +244,17 @@ class EventArchive(generic.ListView):
             filter &= Q(start_date__gte=start)
 
         q = self.request.GET.get('q', "")
+        objects = self.model.objects.all()
 
-        if q != "":
-            qfilter = Q(name__icontains=q) | Q(description__icontains=q) | Q(notes__icontains=q)
-
-            # try and parse an int
-            try:
-                val = int(q)
-                qfilter = qfilter | Q(pk=val)
-            except:  # noqa not an integer
-                pass
-
-            try:
-                if q[0] == "N":
-                    val = int(q[1:])
-                    qfilter = Q(pk=val)  # If string is N###### then do a simple PK filter
-            except:  # noqa
-                pass
-
-            filter &= qfilter
+        if q:
+            objects = self.model.objects.search(q)
 
         status = self.request.GET.getlist('status', "")
 
         if len(status) > 0:
             filter &= Q(status__in=status)
 
-        qs = self.model.objects.filter(filter).order_by('-start_date')
+        qs = objects.filter(filter).order_by('-start_date')
 
         # Preselect related for efficiency
         qs.select_related('person', 'organisation', 'venue', 'mic')

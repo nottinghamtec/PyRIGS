@@ -124,32 +124,7 @@ class InvoiceArchive(generic.ListView):
         return context
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
-
-        filter = Q(event__name__icontains=q)
-
-        # try and parse an int
-        try:
-            val = int(q)
-            filter = filter | Q(pk=val)
-            filter = filter | Q(event__pk=val)
-        except:  # noqa
-            # not an integer
-            pass
-
-        try:
-            if q[0] == "N":
-                val = int(q[1:])
-                filter = Q(event__pk=val)  # If string is Nxxxxx then filter by event number
-            elif q[0] == "#":
-                val = int(q[1:])
-                filter = Q(pk=val)  # If string is #xxxxx then filter by invoice number
-        except:  # noqa
-            pass
-
-        object_list = self.model.objects.filter(filter).order_by('-invoice_date')
-
-        return object_list
+        return self.model.objects.search(self.request.GET.get('q')).order_by('-invoice_date')
 
 
 class InvoiceWaiting(generic.ListView):

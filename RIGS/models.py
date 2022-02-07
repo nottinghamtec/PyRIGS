@@ -76,7 +76,7 @@ class ContactableManager(models.Manager):
         qs = self.get_queryset()
         if query is not None:
             or_lookup = Q(name__icontains=query) | Q(email__icontains=query) | Q(address__icontains=query) | Q(notes__icontains=query) | Q(
-            phone__startswith=query) | Q(phone__endswith=query)
+                phone__startswith=query) | Q(phone__endswith=query)
 
             # try and parse an int
             try:
@@ -86,7 +86,7 @@ class ContactableManager(models.Manager):
                 # not an integer
                 pass
 
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 
@@ -284,11 +284,22 @@ class EventManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(name__icontains=query) |
-                         Q(description__icontains=query)|
-                         Q(notes__icontains=query)
-                        )
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+            or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(notes__icontains=query)
+
+            try:             # try and parse an int
+                val = int(query)
+                or_lookup = or_lookup | Q(pk=val)
+            except:  # noqa not an integer
+                pass
+
+            try:
+                if query[0] == "N":
+                    val = int(query[1:])
+                    or_lookup = Q(pk=val)  # If string is N###### then do a simple PK filter
+            except:  # noqa
+                pass
+
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 
@@ -565,7 +576,27 @@ class InvoiceManager(models.Manager):
         qs = self.get_queryset()
         if query is not None:
             or_lookup = Q(event__name__icontains=query)
-            qs = qs.filter(or_lookup).distinct() # distinct() is often necessary with Q lookups
+
+            # try and parse an int
+            try:
+                val = int(query)
+                or_lookup = or_lookup | Q(pk=val)
+                or_lookup = or_lookup | Q(event__pk=val)
+            except:  # noqa
+                # not an integer
+                pass
+
+            try:
+                if query[0] == "N":
+                    val = int(query[1:])
+                    or_lookup = Q(event__pk=val)  # If string is Nxxxxx then filter by event number
+                elif query[0] == "#":
+                    val = int(query[1:])
+                    or_lookup = Q(pk=val)  # If string is #xxxxx then filter by invoice number
+            except:  # noqa
+                pass
+
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 
