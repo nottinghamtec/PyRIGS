@@ -9,6 +9,17 @@ from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
 
 
+def filter_by_pk(filt, query):
+    # try and parse an int
+    try:
+        val = int(query)
+        filt = filt | Q(pk=val)
+    except:  # noqa
+        # not an integer
+        pass
+    return filt
+
+
 class TraineeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_active=True, is_approved=True)
@@ -17,8 +28,9 @@ class TraineeManager(models.Manager):
         qs = self.get_queryset()
         if query is not None:
             or_lookup = (Q(first_name__icontains=query) |
-                         Q(last_name__icontains=query)
+                         Q(last_name__icontains=query) | Q(initials__icontains=query)
                          )
+            or_lookup = filter_by_pk(or_lookup, query)
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
