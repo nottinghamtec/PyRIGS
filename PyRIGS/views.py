@@ -225,7 +225,7 @@ class GenericCreateView(generic.CreateView):
 
 
 class Search(generic.ListView):
-    template_name = 'search.html'
+    template_name = 'search_results.html'
     paginate_by = 20
     count = 0
 
@@ -233,7 +233,7 @@ class Search(generic.ListView):
         context = super().get_context_data(*args, **kwargs)
         context['count'] = self.count or 0
         context['query'] = self.request.GET.get('q')
-        context['page_title'] = f"Search results for {context['query']}"
+        context['page_title'] = f"{context['count']} search results for <b>{context['query']}</b>"
         return context
 
     def get_queryset(self):
