@@ -95,12 +95,12 @@ class TraineeList(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        objects = self.model.objects
+        objects = self.model.objects.search(self.request.GET.get('q'))
 
         if self.request.GET.get('is_supervisor', ''):
             objects = objects.filter(is_supervisor=True)
 
-        return objects.search(self.request.GET.get('q')).annotate(num_qualifications=Count('qualifications_obtained', filter=Q(qualifications_obtained__depth=models.TrainingItemQualification.PASSED_OUT))
+        return objects.annotate(num_qualifications=Count('qualifications_obtained', filter=Q(qualifications_obtained__depth=models.TrainingItemQualification.PASSED_OUT))
                                                                   ).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
 
     def get_context_data(self, **kwargs):
