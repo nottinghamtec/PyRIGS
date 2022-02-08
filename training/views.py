@@ -95,23 +95,13 @@ class TraineeList(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
-
-        filt = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(initials__icontains=q)
-
-        # try and parse an int
-        try:
-            val = int(q)
-            filt = filt | Q(pk=val)
-        except:  # noqa
-            # not an integer
-            pass
+        objects = self.model.objects
 
         if self.request.GET.get('is_supervisor', ''):
-            filt = filt & Q(is_supervisor=True)
+            objects = objects.filter(is_supervisor=True)
 
-        return self.model.objects.filter(filt).annotate(num_qualifications=Count('qualifications_obtained', filter=Q(qualifications_obtained__depth=models.TrainingItemQualification.PASSED_OUT))
-                                                        ).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
+        return objects.search(self.request.GET.get('q')).annotate(num_qualifications=Count('qualifications_obtained', filter=Q(qualifications_obtained__depth=models.TrainingItemQualification.PASSED_OUT))
+                                                                  ).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

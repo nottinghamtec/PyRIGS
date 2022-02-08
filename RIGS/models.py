@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 import pytz
 from django import forms
+from django.db.models import Q, F
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -18,6 +19,17 @@ from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
 from versioning.versioning import RevisionMixin
+
+
+def filter_by_pk(filt, query):
+    # try and parse an int
+    try:
+        val = int(query)
+        filt = filt | Q(pk=val)
+    except:  # noqa
+        # not an integer
+        pass
+    return filt
 
 
 class Profile(AbstractUser):
@@ -51,7 +63,7 @@ class Profile(AbstractUser):
     def name(self):
         name = self.get_full_name()
         if self.initials:
-            name += ' "{}"'.format(self.initials)
+            name += f' "{self.initials}"'
         return name
 
     @property
@@ -70,14 +82,27 @@ class Profile(AbstractUser):
         return self.name
 
 
+class ContactableManager(models.Manager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = Q(name__icontains=query) | Q(email__icontains=query) | Q(address__icontains=query) | Q(notes__icontains=query) | Q(
+                phone__startswith=query) | Q(phone__endswith=query)
+
+            or_lookup = filter_by_pk(or_lookup, query)
+
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
+
+
 class Person(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default='')
     email = models.EmailField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
-
     notes = models.TextField(blank=True, default='')
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -110,11 +135,11 @@ class Organisation(models.Model, RevisionMixin):
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default='')
     email = models.EmailField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
-
     notes = models.TextField(blank=True, default='')
     union_account = models.BooleanField(default=False)
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -184,8 +209,9 @@ class Venue(models.Model, RevisionMixin):
     email = models.EmailField(blank=True, default='')
     three_phase_available = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default='')
-
     address = models.TextField(blank=True, default='')
+
+    objects = ContactableManager()
 
     def __str__(self):
         string = self.name
@@ -260,6 +286,23 @@ class EventManager(models.Manager):
 
         return events
 
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(notes__icontains=query)
+
+            or_lookup = filter_by_pk(or_lookup, query)
+
+            try:
+                if query[0] == "N":
+                    val = int(query[1:])
+                    or_lookup = Q(pk=val)  # If string is N###### then do a simple PK filter
+            except:  # noqa
+                pass
+
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
+
 
 @reversion.register(follow=['items'])
 class Event(models.Model, RevisionMixin):
@@ -314,10 +357,8 @@ class Event(models.Model, RevisionMixin):
     def display_id(self):
         if self.pk:
             if self.is_rig:
-                return str("N%05d" % self.pk)
-
+                return f"N{self.pk:05d}"
             return self.pk
-
         return "????"
 
     # Calculated values
@@ -530,6 +571,34 @@ class InvoiceManager(models.Manager):
         query = self.raw(sql)
         return query
 
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = Q(event__name__icontains=query)
+
+            or_lookup = filter_by_pk(or_lookup, query)
+
+            # try and parse an int
+            try:
+                val = int(query)
+                or_lookup = or_lookup | Q(event__pk=val)
+            except:  # noqa
+                # not an integer
+                pass
+
+            try:
+                if query[0] == "N":
+                    val = int(query[1:])
+                    or_lookup = Q(event__pk=val)  # If string is Nxxxxx then filter by event number
+                elif query[0] == "#":
+                    val = int(query[1:])
+                    or_lookup = Q(pk=val)  # If string is #xxxxx then filter by invoice number
+            except:  # noqa
+                pass
+
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
+
 
 @reversion.register(follow=['payment_set'])
 class Invoice(models.Model, RevisionMixin):
@@ -572,11 +641,11 @@ class Invoice(models.Model, RevisionMixin):
         return f"#{self.display_id} for Event {self.event.display_id}"
 
     def __str__(self):
-        return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
+        return f"{self.display_id}: {self.event} (£{self.balance:.2f})"
 
     @property
     def display_id(self):
-        return "{:05d}".format(self.pk)
+        return f"#{self.pk:05d}"
 
     class Meta:
         ordering = ['-invoice_date']
@@ -731,7 +800,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         return reverse('ra_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return "%i - %s" % (self.pk, self.event)
+        return f"{self.pk} - {self.event}"
 
 
 @reversion.register(follow=['vehicles', 'crew'])
@@ -813,7 +882,7 @@ class EventChecklist(models.Model, RevisionMixin):
         return reverse('ec_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return "%i - %s" % (self.pk, self.event)
+        return f"{self.pk} - {self.event}"
 
 
 @reversion.register
@@ -825,7 +894,7 @@ class EventChecklistVehicle(models.Model, RevisionMixin):
     reversion_hide = True
 
     def __str__(self):
-        return "{} driven by {}".format(self.vehicle, str(self.driver))
+        return f"{self.vehicle} driven by {self.driver}"
 
 
 @reversion.register
@@ -843,4 +912,4 @@ class EventChecklistCrew(models.Model, RevisionMixin):
             raise ValidationError('Unless you\'ve invented time travel, crew can\'t finish before they have started.')
 
     def __str__(self):
-        return "{} ({})".format(str(self.crewmember), self.role)
+        return f"{self.crewmember} ({self.role})"

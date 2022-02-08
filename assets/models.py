@@ -2,11 +2,12 @@ import re
 
 from django.core.exceptions import ValidationError
 from django.db import models, connection
+from django.db.models import Q
 from django.urls import reverse
 from reversion import revisions as reversion
 from reversion.models import Version
 
-from RIGS.models import Profile
+from RIGS.models import Profile, ContactableManager
 from versioning.versioning import RevisionMixin
 
 
@@ -45,6 +46,8 @@ class Supplier(models.Model, RevisionMixin):
     address = models.TextField(blank=True, default="")
 
     notes = models.TextField(blank=True, default="")
+
+    objects = ContactableManager()
 
     class Meta:
         ordering = ['name']
@@ -107,6 +110,15 @@ def get_available_asset_id(wanted_prefix=""):
         cursor.close()
 
 
+class AssetManager(models.Manager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = (Q(asset_id__exact=query.upper()) | Q(description__icontains=query) | Q(serial_number__exact=query))
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
     parent = models.ForeignKey(to='self', related_name='asset_parent',
@@ -141,6 +153,8 @@ class Asset(models.Model, RevisionMixin):
     asset_id_number = models.IntegerField(default=1)
 
     reversion_perm = 'assets.asset_finance'
+
+    objects = AssetManager()
 
     class Meta:
         ordering = ['asset_id_prefix', 'asset_id_number']

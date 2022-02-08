@@ -54,7 +54,7 @@ def send_eventauthorisation_success_email(instance):
     elif instance.event.organisation is not None and instance.email == instance.event.organisation.email:
         context['to_name'] = instance.event.organisation.name
 
-    subject = "N%05d | %s - Event Authorised" % (instance.event.pk, instance.event.name)
+    subject = f"{instance.event.display_id} | {instance.event.name} - Event Authorised"
 
     client_email = EmailMultiAlternatives(
         subject,
@@ -70,7 +70,7 @@ def send_eventauthorisation_success_email(instance):
 
     escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', instance.event.name)
 
-    client_email.attach('N%05d - %s - CONFIRMATION.pdf' % (instance.event.pk, escapedEventName),
+    client_email.attach(f'{instance.event.display_id} - {escapedEventName} - CONFIRMATION.pdf',
                         merged.getvalue(),
                         'application/pdf'
                         )
@@ -116,7 +116,7 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
             }
 
             email = EmailMultiAlternatives(
-                "%s new users awaiting approval on RIGS" % (context['number_of_users']),
+                f"{context['number_of_users']} new users awaiting approval on RIGS",
                 get_template("admin_awaiting_approval.txt").render(context),
                 to=[admin.email],
                 reply_to=[user.email],

@@ -1,6 +1,7 @@
-from RIGS.models import Profile
+from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
@@ -11,6 +12,16 @@ from queryable_properties.managers import QueryablePropertiesManager
 class TraineeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_active=True, is_approved=True)
+
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = (Q(first_name__icontains=query) |
+                         Q(last_name__icontains=query) | Q(initials__icontains=query)
+                         )
+            or_lookup = filter_by_pk(or_lookup, query)
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
 
 
 @reversion.register(for_concrete_model=False, fields=['is_supervisor'])
@@ -65,6 +76,16 @@ class TrainingCategory(models.Model):
         verbose_name_plural = 'Training Categories'
 
 
+class TrainingItemManager(QueryablePropertiesManager):
+    def search(self, query=None):
+        qs = self.get_queryset()
+        if query is not None:
+            or_lookup = (Q(description__icontains=query)
+                         )
+            qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
+        return qs
+
+
 @reversion.register
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
@@ -72,7 +93,7 @@ class TrainingItem(models.Model):
     description = models.CharField(max_length=50)
     active = models.BooleanField(default=True)
 
-    objects = QueryablePropertiesManager()
+    objects = TrainingItemManager()
 
     @property
     def name(self):
@@ -96,6 +117,9 @@ class TrainingItem(models.Model):
         if not self.active:
             name += " (inactive)"
         return name
+
+    def get_absolute_url(self):
+        return reverse('item_list')
 
     @staticmethod
     def user_has_qualification(item, user, depth):

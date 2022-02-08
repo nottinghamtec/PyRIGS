@@ -41,7 +41,7 @@ class ProfileDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProfileDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Profile: {}".format(self.object)
+        context['page_title'] = f"Profile: {self.object}"
         context["completed_levels"] = self.object.level_qualifications.all().select_related('level')
         return context
 

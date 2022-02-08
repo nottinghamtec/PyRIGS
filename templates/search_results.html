@@ -1,0 +1,48 @@
+{% extends "base_rigs.html" %}
+
+{% load to_class_name from filters %}
+{% load markdown_tags %}
+
+{% block content %}
+{% include 'partials/search.html' %}
+{% for object in object_list %}
+    {% with object|to_class_name as klass %}
+    <div class="card m-2">
+       <h4 class="card-header"><a href='{{ object.get_absolute_url }}'>[{{ klass }}] {{ object }}</a>
+       <small>
+       {% if klass == "Event" %}
+        {% if object.venue %}
+        <strong>Venue:</strong> {{ object.venue }}
+        {% endif %}
+        {% if object.is_rig %}
+        <strong>Client:</strong> {{ object.person.name }}
+        {% if object.organisation %}
+        for {{ object.organisation.name }}
+        {% endif %}
+        {% if object.dry_hire %}(Dry Hire){% endif %}
+        {% else %}
+        <strong>Non-Rig</strong>
+        {% endif %}
+        <strong>Times:</strong>
+        {{ object.start_date|date:"D d/m/Y" }}
+        {% if object.has_start_time %}
+        {{ object.start_time|date:"H:i" }}
+        {% endif %}
+        {% if object.end_date or object.has_end_time %}
+        &ndash;
+        {% endif %}
+        {% if object.end_date and object.end_date != object.start_date %}
+        {{ object.end_date|date:"D d/m/Y"  }}
+        {% endif %}
+        {% if object.has_end_time %}
+        {{ object.end_time|date:"H:i" }}
+        {% endif %}
+       {% endif %}
+       </small>
+       </h4>
+    </div>
+    {% endwith %}
+{% empty %}
+<h3 class="py-3 text-warning">No results found</h3>
+{% endfor %}
+{% endblock content %}
