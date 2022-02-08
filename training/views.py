@@ -101,7 +101,7 @@ class TraineeList(generic.ListView):
             objects = objects.filter(is_supervisor=True)
 
         return objects.annotate(num_qualifications=Count('qualifications_obtained', filter=Q(qualifications_obtained__depth=models.TrainingItemQualification.PASSED_OUT))
-                                                                  ).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
+                                ).order_by('-num_qualifications').prefetch_related('level_qualifications', 'qualifications_obtained', 'qualifications_obtained__item')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
