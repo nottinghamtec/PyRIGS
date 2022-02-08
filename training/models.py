@@ -1,4 +1,4 @@
-from RIGS.models import Profile
+from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
 from django.db import models
 from django.db.models import Q
@@ -7,17 +7,6 @@ from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
-
-
-def filter_by_pk(filt, query):
-    # try and parse an int
-    try:
-        val = int(query)
-        filt = filt | Q(pk=val)
-    except:  # noqa
-        # not an integer
-        pass
-    return filt
 
 
 class TraineeManager(models.Manager):

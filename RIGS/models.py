@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import pytz
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, F
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -19,6 +19,17 @@ from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from reversion.models import Version
 from versioning.versioning import RevisionMixin
+
+
+def filter_by_pk(filt, query):
+    # try and parse an int
+    try:
+        val = int(query)
+        filt = filt | Q(pk=val)
+    except:  # noqa
+        # not an integer
+        pass
+    return filt
 
 
 class Profile(AbstractUser):
@@ -78,13 +89,7 @@ class ContactableManager(models.Manager):
             or_lookup = Q(name__icontains=query) | Q(email__icontains=query) | Q(address__icontains=query) | Q(notes__icontains=query) | Q(
                 phone__startswith=query) | Q(phone__endswith=query)
 
-            # try and parse an int
-            try:
-                val = int(query)
-                or_lookup = or_lookup | Q(pk=val)
-            except:  # noqa
-                # not an integer
-                pass
+            or_lookup = filter_by_pk(or_lookup, query)
 
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
@@ -286,11 +291,7 @@ class EventManager(models.Manager):
         if query is not None:
             or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(notes__icontains=query)
 
-            try:             # try and parse an int
-                val = int(query)
-                or_lookup = or_lookup | Q(pk=val)
-            except:  # noqa not an integer
-                pass
+            or_lookup = filter_by_pk(or_lookup, query)
 
             try:
                 if query[0] == "N":
@@ -577,10 +578,11 @@ class InvoiceManager(models.Manager):
         if query is not None:
             or_lookup = Q(event__name__icontains=query)
 
+            or_lookup = filter_by_pk(or_lookup, query)
+
             # try and parse an int
             try:
                 val = int(query)
-                or_lookup = or_lookup | Q(pk=val)
                 or_lookup = or_lookup | Q(event__pk=val)
             except:  # noqa
                 # not an integer
