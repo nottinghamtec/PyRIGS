@@ -121,7 +121,7 @@ class SecureAPIRequest(generic.View):
                     'text': o.name,
                 }
                 try:  # See if there is a valid update URL
-                    data['update'] = reverse("%s_update" % model, kwargs={'pk': o.pk})
+                    data['update'] = reverse(f"{model}_update", kwargs={'pk': o.pk})
                 except NoReverseMatch:
                     pass
                 results.append(data)

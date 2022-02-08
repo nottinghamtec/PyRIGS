@@ -63,7 +63,7 @@ class Profile(AbstractUser):
     def name(self):
         name = self.get_full_name()
         if self.initials:
-            name += ' "{}"'.format(self.initials)
+            name += f' "{self.initials}"'
         return name
 
     @property
@@ -357,10 +357,8 @@ class Event(models.Model, RevisionMixin):
     def display_id(self):
         if self.pk:
             if self.is_rig:
-                return str("N%05d" % self.pk)
-
+                return f"N{self.pk:05d}"
             return self.pk
-
         return "????"
 
     # Calculated values
@@ -643,11 +641,11 @@ class Invoice(models.Model, RevisionMixin):
         return f"#{self.display_id} for Event {self.event.display_id}"
 
     def __str__(self):
-        return "%i: %s (%.2f)" % (self.pk, self.event, self.balance)
+        return f"{self.display_id}: {self.event} (£{self.balance:.2f})"
 
     @property
     def display_id(self):
-        return "{:05d}".format(self.pk)
+        return f"#{self.pk:05d}"
 
     class Meta:
         ordering = ['-invoice_date']
@@ -802,7 +800,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         return reverse('ra_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return "%i - %s" % (self.pk, self.event)
+        return f"{self.pk} - {self.event}"
 
 
 @reversion.register(follow=['vehicles', 'crew'])
@@ -884,7 +882,7 @@ class EventChecklist(models.Model, RevisionMixin):
         return reverse('ec_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return "%i - %s" % (self.pk, self.event)
+        return f"{self.pk} - {self.event}"
 
 
 @reversion.register
@@ -896,7 +894,7 @@ class EventChecklistVehicle(models.Model, RevisionMixin):
     reversion_hide = True
 
     def __str__(self):
-        return "{} driven by {}".format(self.vehicle, str(self.driver))
+        return f"{self.vehicle} driven by {self.driver}"
 
 
 @reversion.register
@@ -914,4 +912,4 @@ class EventChecklistCrew(models.Model, RevisionMixin):
             raise ValidationError('Unless you\'ve invented time travel, crew can\'t finish before they have started.')
 
     def __str__(self):
-        return "{} ({})".format(str(self.crewmember), self.role)
+        return f"{self.crewmember} ({self.role})"

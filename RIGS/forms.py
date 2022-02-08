@@ -172,9 +172,9 @@ class EventRiskAssessmentForm(forms.ModelForm):
         unexpected_values = []
         for field, value in models.RiskAssessment.expected_values.items():
             if self.cleaned_data.get(field) != value:
-                unexpected_values.append("<li>{}</li>".format(self._meta.model._meta.get_field(field).help_text))
+                unexpected_values.append(f"<li>{self._meta.model._meta.get_field(field).help_text}</li>")
         if len(unexpected_values) > 0 and not self.cleaned_data.get('supervisor_consulted'):
-            raise forms.ValidationError("Your answers to these questions: <ul>{}</ul> require consulting with a supervisor.".format(''.join([str(elem) for elem in unexpected_values])), code='unusual_answers')
+            raise forms.ValidationError(f"Your answers to these questions: <ul>{''.join([str(elem) for elem in unexpected_values])}</ul> require consulting with a supervisor.", code='unusual_answers')
         return super(EventRiskAssessmentForm, self).clean()
 
     class Meta:
@@ -235,9 +235,9 @@ class EventChecklistForm(forms.ModelForm):
             pk = int(key.split('_')[1])
 
             for field in other_fields:
-                value = self.data['{}_{}'.format(field, pk)]
+                value = self.data[f'{field}_{pk}']
                 if value == '':
-                    raise forms.ValidationError('Add a {} to crewmember {}'.format(field, pk), code='{}_mismatch'.format(field))
+                    raise forms.ValidationError(f'Add a {field} to crewmember {pk}', code=f'{field}_mismatch')
 
             try:
                 item = models.EventChecklistCrew.objects.get(pk=pk)

@@ -188,11 +188,14 @@ class EventPrint(generic.View):
         user_str = f"by {request.user.name} " if request.user is not None else ""
         time = timezone.now().strftime('%d/%m/%Y %H:%I')
 
+        name = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
+        filename = f"Event_{object.display_id}_{name}_{object.start_date}.pdf"
+
         context = {
             'object': object,
             'quote': True,
             'current_user': request.user,
-            'filename': 'Event_{}_{}_{}.pdf'.format(object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name), object.start_date),
+            'filename': filename,
             'info_string': f"[Paperwork generated {user_str}on {time} - {object.current_version_id}]",
         }
 
@@ -208,7 +211,7 @@ class EventPrint(generic.View):
         merger.write(merged)
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
+        response['Content-Disposition'] = f'filename="{filename}"'
         response.write(merged.getvalue())
         return response
 
@@ -378,7 +381,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
             context['to_name'] = event.organisation.name
 
         msg = EmailMultiAlternatives(
-            "N%05d | %s - Event Authorisation Request" % (self.object.pk, self.object.name),
+            f"{self.object.display_id} | {self.object.name} - Event Authorisation Request",
             get_template("eventauthorisation_client_request.txt").render(context),
             to=[email],
             reply_to=[self.request.user.email],

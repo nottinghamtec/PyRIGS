@@ -383,12 +383,14 @@ class GenerateLabels(generic.View):
             base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
             images.append(base64_encoded_result_str)
 
+        name = f"Asset Label Sheet generated at {timezone.now()}"
+
         context = {
             'images0': images[::4],
             'images1': images[1::4],
             'images2': images[2::4],
             'images3': images[3::4],
-            'filename': "Asset Label Sheet generated at {}".format(timezone.now())
+            'filename': name
         }
         merger = PdfFileMerger()
 
@@ -400,6 +402,6 @@ class GenerateLabels(generic.View):
         merged = BytesIO()
         merger.write(merged)
 
-        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
+        response['Content-Disposition'] = f'filename="{name}"'
         response.write(merged.getvalue())
         return response

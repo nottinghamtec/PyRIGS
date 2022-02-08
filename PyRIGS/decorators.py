@@ -9,9 +9,8 @@ from RIGS import models
 
 def get_oembed(login_url, request, oembed_view, kwargs):
     context = {}
-    context['oembed_url'] = "{0}://{1}{2}".format(request.scheme, request.META['HTTP_HOST'],
-                                                  reverse(oembed_view, kwargs=kwargs))
-    context['login_url'] = "{0}?{1}={2}".format(login_url, REDIRECT_FIELD_NAME, request.get_full_path())
+    context['oembed_url'] = f"{request.scheme}://{request.META['HTTP_HOST']}{reverse(oembed_view, kwargs=kwargs)}"
+    context['login_url'] = f"{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}"
     resp = render(request, 'login_redirect.html', context=context)
     return resp
 
@@ -25,7 +24,7 @@ def has_oembed(oembed_view, login_url=settings.LOGIN_URL):
                 if oembed_view is not None:
                     return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
-                    return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
+                    return HttpResponseRedirect(f'{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}')
 
         _checklogin.__doc__ = view_func.__doc__
         _checklogin.__dict__ = view_func.__dict__
@@ -55,7 +54,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                 if oembed_view is not None:
                     return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
-                    return HttpResponseRedirect('%s?%s=%s' % (login_url, REDIRECT_FIELD_NAME, request.get_full_path()))
+                    return HttpResponseRedirect(f'{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}')
             else:
                 resp = render(request, '403.html')
                 resp.status_code = 403

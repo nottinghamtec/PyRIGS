@@ -37,7 +37,7 @@ class EventRiskAssessmentCreate(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
-        context['page_title'] = 'Create Risk Assessment for Event {}'.format(event.display_id)
+        context['page_title'] = f'Create Risk Assessment for Event {event.display_id}'
         return context
 
     def get_success_url(self):
@@ -62,7 +62,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         ra = models.RiskAssessment.objects.get(pk=rpk)
         context['event'] = ra.event
         context['edit'] = True
-        context['page_title'] = 'Edit Risk Assessment for Event {}'.format(ra.event.display_id)
+        context['page_title'] = f'Edit Risk Assessment for Event {ra.event.display_id}'
         return context
 
 
@@ -72,7 +72,7 @@ class EventRiskAssessmentDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventRiskAssessmentDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Risk Assessment for Event <a href='{}'>{} {}</a>".format(self.object.event.get_absolute_url(), self.object.event.display_id, self.object.event.name)
+        context['page_title'] = f"Risk Assessment for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
 
@@ -112,7 +112,7 @@ class EventChecklistDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventChecklistDetail, self).get_context_data(**kwargs)
-        context['page_title'] = "Event Checklist for Event <a href='{}'>{} {}</a>".format(self.object.event.get_absolute_url(), self.object.event.display_id, self.object.event.name)
+        context['page_title'] = f"Event Checklist for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
 
@@ -134,7 +134,7 @@ class EventChecklistEdit(generic.UpdateView):
         ec = models.EventChecklist.objects.get(pk=pk)
         context['event'] = ec.event
         context['edit'] = True
-        context['page_title'] = 'Edit Event Checklist for Event {}'.format(ec.event.display_id)
+        context['page_title'] = f'Edit Event Checklist for Event {ec.event.display_id}'
         form = context['form']
         # Get some other objects to include in the form. Used when there are errors but also nice and quick.
         for field, model in form.related_models.items():
@@ -158,7 +158,7 @@ class EventChecklistCreate(generic.CreateView):
         ra = models.RiskAssessment.objects.filter(event=event).first()
 
         if ra is None:
-            messages.error(self.request, 'A Risk Assessment must exist prior to creating any Event Checklists for {}! Please create one now.'.format(event))
+            messages.error(self.request, f'A Risk Assessment must exist prior to creating any Event Checklists for {event}! Please create one now.')
             return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
 
         return super(EventChecklistCreate, self).get(self)
@@ -175,7 +175,7 @@ class EventChecklistCreate(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
-        context['page_title'] = 'Create Event Checklist for Event {}'.format(event.display_id)
+        context['page_title'] = f'Create Event Checklist for Event {event.display_id}'
         return context
 
     def get_success_url(self):

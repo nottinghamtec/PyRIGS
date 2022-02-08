@@ -28,7 +28,8 @@ class InvoiceIndex(generic.ListView):
         total = 0
         for i in context['object_list']:
             total += i.balance
-        context['page_title'] = "Outstanding Invoices ({} Events, £{:.2f})".format(len(list(context['object_list'])), total)
+        event_count = len(list(context['object_list']))
+        context['page_title'] = f"Outstanding Invoices ({event_count} Events, £{total:.2f})"
         context['description'] = "Paperwork for these events has been sent to treasury, but the full balance has not yet appeared on a ledger"
         return context
 
@@ -43,7 +44,7 @@ class InvoiceDetail(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         invoice_date = self.object.invoice_date.strftime("%d/%m/%Y")
-        context['page_title'] = f"Invoice {self.object.display_id} ({invoice_date}) "
+        context['page_title'] = f"Invoice {self.object.display_id} ({invoice_date})"
         if self.object.void:
             context['page_title'] += "<span class='badge badge-warning float-right'>VOID</span>"
         elif self.object.is_closed:
@@ -59,11 +60,14 @@ class InvoicePrint(generic.View):
         object = invoice.event
         template = get_template('event_print.xml')
 
+        name = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
+        filename = f"Invoice {invoice.display_id} for {object.display_id} {name}.pdf"
+
         context = {
             'object': object,
             'invoice': invoice,
             'current_user': request.user,
-            'filename': 'Invoice {} for {} {}.pdf'.format(invoice.display_id, object.display_id, re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name))
+            'filename': filename
         }
 
         rml = template.render(context)
@@ -73,7 +77,7 @@ class InvoicePrint(generic.View):
         pdfData = buffer.read()
 
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'filename="{}"'.format(context['filename'])
+        response['Content-Disposition'] = f'filename="{filename}"'
         response.write(pdfData)
         return response
 
@@ -138,7 +142,7 @@ class InvoiceWaiting(generic.ListView):
         objects = self.get_queryset()
         for obj in objects:
             total += obj.sum_total
-        context['page_title'] = "Events for Invoice ({} Events, £{:.2f})".format(len(objects), total)
+        context['page_title'] = f"Events for Invoice ({len(objects)} Events, £{total:.2f})"
         return context
 
     def get_queryset(self):
