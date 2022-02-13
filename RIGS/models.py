@@ -638,7 +638,7 @@ class Invoice(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return f"#{self.display_id} for Event {self.event.display_id}"
+        return f"{self.display_id} for Event {self.event.display_id}"
 
     def __str__(self):
         return f"{self.display_id}: {self.event} (£{self.balance:.2f})"

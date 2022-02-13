@@ -57,7 +57,7 @@ class TraineeItemDetail(generic.ListView):
             # not an integer
             pass
 
-        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all().filter(filter).order_by('-date').select_related('item', 'trainee', 'supervisor', 'item__category')
+        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all().filter(filter).order_by('-item__display_id').select_related('item', 'trainee', 'supervisor', 'item__category')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
