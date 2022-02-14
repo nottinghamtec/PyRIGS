@@ -47,17 +47,7 @@ class TraineeItemDetail(generic.ListView):
     template_name = 'trainee_item_list.html'
 
     def get_queryset(self):
-        q = self.request.GET.get('q', "")
-
-        filter = Q(item__description__icontains=q) | Q(supervisor__first_name__icontains=q) | Q(supervisor__last_name__icontains=q)
-
-        try:
-            filter = filter | Q(item__display_id=int(q[0]))
-        except:  # noqa
-            # not an integer
-            pass
-
-        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.all().filter(filter).order_by('-item__display_id').select_related('item', 'trainee', 'supervisor', 'item__category')
+        return models.Trainee.objects.get(pk=self.kwargs['pk']).qualifications_obtained.search(self.request.GET.get('q')).order_by('item__category__reference_number', 'item__reference_number').select_related('item', 'trainee')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

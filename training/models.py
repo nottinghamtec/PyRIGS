@@ -1,7 +1,8 @@
 from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F, Value, CharField
+from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
@@ -80,8 +81,7 @@ class TrainingItemManager(QueryablePropertiesManager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(description__icontains=query)
-                         )
+            or_lookup = (Q(description__icontains=query) | Q(display_id=query))
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
@@ -107,9 +107,12 @@ class TrainingItem(models.Model):
     @classmethod
     def display_id(cls, lookup, value):
         if '.' in str(value):
-            category_number, number = value.split('.')
-            if category_number and number:
-                return models.Q(category__reference_number=category_number, reference_number=number)
+            try:
+                category_number, number = value.split('.', 2)
+                if category_number and number:
+                    return Q(category__reference_number=int(category_number), reference_number=int(number))
+            except ValueError:
+                pass
         return models.Q()
 
     def __str__(self):
@@ -128,6 +131,21 @@ class TrainingItem(models.Model):
     class Meta:
         unique_together = ["reference_number", "active", "category"]
         ordering = ['category__reference_number', 'reference_number']
+
+
+class TrainingItemQualificationManager(QueryablePropertiesManager):
+    def search(self, query=None):
+        qs = self.get_queryset().select_related('item', 'supervisor', 'item__category')
+        if query is not None:
+            or_lookup = (Q(item__description__icontains=query) | Q(supervisor__first_name__icontains=query) | Q(supervisor__last_name__icontains=query) | Q(item__category__name__icontains=query) | Q(item__display_id=query))
+
+            try:
+                or_lookup = Q(item__category__reference_number=int(query)) | or_lookup
+            except:  # noqa
+                pass
+
+            qs = qs.filter(or_lookup).distinct()
+        return qs
 
 
 @reversion.register
@@ -149,7 +167,7 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     notes = models.TextField(blank=True)
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
-    objects = QueryablePropertiesManager()
+    objects = TrainingItemQualificationManager()
 
     def __str__(self):
         return f"{self.get_depth_display()} in {self.item} on {self.date.strftime('%b %d %Y')}"
