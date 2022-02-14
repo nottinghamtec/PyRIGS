@@ -83,6 +83,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
 
 class CableList(AssetList):
     template_name = 'cable_list.html'
+    paginator = None
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(is_cable=True)

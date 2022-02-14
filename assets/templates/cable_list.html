@@ -1,5 +1,4 @@
 {% extends 'base_assets.html' %}
-{% load paginator from filters %}
 {% load button from filters %}
 {% load ids_from_objects from asset_tags %}
 {% load widget_tweaks %}
@@ -124,7 +123,6 @@
 </div>
 <div class="row">
     <div class="col px-0">
-    {% load button from filters %}
 <div class="table-responsive">
     <table class="table">
       <thead class="thead-dark">
@@ -145,22 +143,10 @@
                 <td class="assetDesc"><span class="text-truncate d-inline-block align-middle">{{ item.description }}</span></td>
                 <td class="assetCategory align-middle">{{ item.category }}</td>
                 <td class="assetStatus align-middle">{{ item.status }}</td>
-                <td>{{ item.length }}m</td>
+                <td style="background-color:{% if item.length == 20.0 %}#304486{% elif item.length == 10.0 %}green{%elif item.length == 5.0 %}red{% endif %} !important;">{{ item.length }}m</td>
                 <td>{{ item.cable_type }}</td>
                 <td class="d-none d-sm-table-cell">
-                    {% if audit %}
-                    <a type="button" class="btn btn-info btn-sm modal-href" href="{% url 'asset_audit' item.asset_id %}"><i class="fas fa-certificate"></i> Audit</a>
-                    {% else %}
-                    <div class="btn-group" role="group">
-                        {% button 'view' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
-                        {% if perms.assets.change_asset %}
-                            {% button 'edit' url='asset_update' pk=item.asset_id clazz="btn-sm" %}
-                        {% endif %}
-                        {% if perms.assets.add_asset %}
-                            {% button 'duplicate' url='asset_duplicate' pk=item.asset_id clazz="btn-sm" %}
-                        {% endif %}
-                    </div>
-                    {% endif %}
+                    {% include 'partials/asset_list_buttons.html' %}
                 </td>
             </tr>
             {% empty %}
@@ -173,5 +159,4 @@
 </div>
     </div>
 </div>
-{% paginator %}
 {% endblock %}

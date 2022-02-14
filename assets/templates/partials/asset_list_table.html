@@ -18,19 +18,7 @@
                 <td class="assetCategory align-middle">{{ item.category }}</td>
                 <td class="assetStatus align-middle">{{ item.status }}</td>
                 <td class="d-none d-sm-table-cell">
-                    {% if audit %}
-                    <a type="button" class="btn btn-info btn-sm modal-href" href="{% url 'asset_audit' item.asset_id %}"><i class="fas fa-certificate"></i> Audit</a>
-                    {% else %}
-                    <div class="btn-group" role="group">
-                        {% button 'view' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
-                        {% if perms.assets.change_asset %}
-                            {% button 'edit' url='asset_update' pk=item.asset_id clazz="btn-sm" %}
-                        {% endif %}
-                        {% if perms.assets.add_asset %}
-                            {% button 'duplicate' url='asset_duplicate' pk=item.asset_id clazz="btn-sm" %}
-                        {% endif %}
-                    </div>
-                    {% endif %}
+                    {% include 'partials/asset_list_buttons.html' %}
                 </td>
             </tr>
             {% empty %}
