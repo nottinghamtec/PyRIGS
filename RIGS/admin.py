@@ -113,7 +113,7 @@ class AssociateAdmin(VersionAdmin):
     actions = ['merge']
 
     def get_queryset(self, request):
-        return super(AssociateAdmin, self).get_queryset(request).annotate(event_count=Count('event'))
+        return super().get_queryset(request).annotate(event_count=Count('event'))
 
     def number_of_events(self, obj):
         return obj.latest_events.count()

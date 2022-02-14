@@ -20,6 +20,10 @@ class AssetStatusAdmin(admin.ModelAdmin):
 class SupplierAdmin(AssociateAdmin):
     list_display = ['id', 'name']
     ordering = ['id']
+    merge_fields = ['name', 'phone', 'email', 'address', 'notes']
+
+    def get_queryset(self, request):
+        return super(VersionAdmin, self).get_queryset(request)
 
 
 @admin.register(assets.Asset)
