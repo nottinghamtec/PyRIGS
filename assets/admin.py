@@ -1,6 +1,6 @@
 from django.contrib import admin
 from reversion.admin import VersionAdmin
-
+from RIGS.admin import AssociateAdmin
 from assets import models as assets
 
 
@@ -17,7 +17,7 @@ class AssetStatusAdmin(admin.ModelAdmin):
 
 
 @admin.register(assets.Supplier)
-class SupplierAdmin(VersionAdmin):
+class SupplierAdmin(AssociateAdmin):
     list_display = ['id', 'name']
     ordering = ['id']
 

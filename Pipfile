@@ -81,6 +81,7 @@ django-hcaptcha = "*"
 "z3c.rml" = "*"
 pikepdf = "*"
 django-queryable-properties = "*"
+django-mass-edit = "*"
 
 [dev-packages]
 selenium = "~=3.141.0"

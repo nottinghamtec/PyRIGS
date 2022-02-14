@@ -68,6 +68,7 @@ INSTALLED_APPS = (
     'reversion',
     'widget_tweaks',
     'hcaptcha',
+    'massadmin',
 )
 
 MIDDLEWARE = (
