@@ -33,6 +33,7 @@ class AssetSearchForm(forms.Form):
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
     status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
     is_cable = forms.BooleanField(required=False)
+    cable_type = forms.ModelMultipleChoiceField(models.CableType.objects.all(), required=False)
     date_acquired = forms.DateField(required=False)
 
 

@@ -1,0 +1,177 @@
+{% extends 'base_assets.html' %}
+{% load paginator from filters %}
+{% load button from filters %}
+{% load ids_from_objects from asset_tags %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}" async></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        //Get querystring value
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+        //Function used to remove querystring
+        function removeQString(key) {
+	        var urlValue=document.location.href;
+
+	        //Get query string value
+	        var searchUrl=location.search;
+
+	        if(key!=="") {
+		        oldValue = getParameterByName(key);
+		        removeVal=key+"="+oldValue;
+		        if(searchUrl.indexOf('?'+removeVal+'&')!== "-1") {
+			        urlValue=urlValue.replace('?'+removeVal+'&','?');
+		        }
+		        else if(searchUrl.indexOf('&'+removeVal+'&')!== "-1") {
+			        urlValue=urlValue.replace('&'+removeVal+'&','&');
+		        }
+		        else if(searchUrl.indexOf('?'+removeVal)!== "-1") {
+			        urlValue=urlValue.replace('?'+removeVal,'');
+		        }
+		        else if(searchUrl.indexOf('&'+removeVal)!== "-1") {
+			        urlValue=urlValue.replace('&'+removeVal,'');
+		        }
+	        }
+	        else {
+		        var searchUrl=location.search;
+		        urlValue=urlValue.replace(searchUrl,'');
+	        }
+	        history.pushState({state:1, rand: Math.random()}, '', urlValue);
+            window.location.reload(true);
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+<h3>{{ object_list.count }} cables with a total length of {{ total_length|default:"0" }}m</h3>
+<div class="row">
+    <div class="col px-0">
+        <form id="asset-search-form" method="GET">
+            <div class="form-row">
+                <div class="col">
+                    <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
+                        {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
+                        <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
+                        <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-2">
+                <div class="col">
+                    <div id="category-group" class="form-group px-1">
+                        <label for="category" class="sr-only">Category</label>
+                        {% render_field form.category|attr:'multiple'|add_class:'selectpicker col-sm pl-0' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+                    </div>
+                </div>
+                <div class="col">
+                    <div id="status-group" class="form-group px-1">
+                        <label for="status" class="sr-only">Status</label>
+                        {% render_field form.status|attr:'multiple'|add_class:'selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group d-flex flex-nowrap">
+                      <label for="cable_type" class="sr-only">Cable Type</label>
+                      {% render_field form.cable_type|attr:'multiple'|add_class:'selectpicker col-sm' data-none-selected-text="Cable Type" data-header="Cable Type" data-actions-box="true" %}
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="form-group d-flex flex-nowrap">
+                        <label for="date_acquired" class="text-nowrap mt-auto">Date Acquired</label>
+                        {% render_field form.date_acquired|add_class:'form-control mx-2' %}
+                    </div>
+                </div>
+                <div class="col-auto mr-auto">
+                      <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row my-2">
+    <div class="col text-right px-0">
+    {% button 'new' 'asset_create' style="width: 6em" %}
+    {% if object_list %}
+    <a class="btn btn-primary" href="{% url 'generate_labels' object_list|ids_from_objects %}"><span class="fas fa-barcode"></span> Generate Labels</a>
+    {% endif %}
+    </div>
+</div>
+<div class="row my-2">
+    <div class="col bg-dark text-white rounded pt-3">
+        {# TODO Gotta be a cleaner way to do this... #}
+        <p><span class="ml-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('category', '{{filter.id}}')"></span>
+</button></span>{%endfor%}{% for filter in status_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('status', '{{filter.id}}')"></span>
+</button></span>{%endfor%}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col px-0">
+    {% load button from filters %}
+<div class="table-responsive">
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Asset ID</th>
+          <th scope="col">Description</th>
+          <th scope="col">Category</th>
+          <th scope="col">Status</th>
+          <th scope="col">Length</th>
+          <th scope="col">Cable Type</th>
+          <th scope="col" class="d-none d-sm-table-cell">Quick Links</th>
+        </tr>
+      </thead>
+      <tbody id="asset_table_body">
+        {% for item in object_list %}
+            <tr class="table-{{ item.status.display_class|default:'' }} assetRow">
+                <th scope="row" class="align-middle"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
+                <td class="assetDesc"><span class="text-truncate d-inline-block align-middle">{{ item.description }}</span></td>
+                <td class="assetCategory align-middle">{{ item.category }}</td>
+                <td class="assetStatus align-middle">{{ item.status }}</td>
+                <td>{{ item.length }}m</td>
+                <td>{{ item.cable_type }}</td>
+                <td class="d-none d-sm-table-cell">
+                    {% if audit %}
+                    <a type="button" class="btn btn-info btn-sm modal-href" href="{% url 'asset_audit' item.asset_id %}"><i class="fas fa-certificate"></i> Audit</a>
+                    {% else %}
+                    <div class="btn-group" role="group">
+                        {% button 'view' url='asset_detail' pk=item.asset_id clazz="btn-sm" %}
+                        {% if perms.assets.change_asset %}
+                            {% button 'edit' url='asset_update' pk=item.asset_id clazz="btn-sm" %}
+                        {% endif %}
+                        {% if perms.assets.add_asset %}
+                            {% button 'duplicate' url='asset_duplicate' pk=item.asset_id clazz="btn-sm" %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Nothing found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+    </div>
+</div>
+{% paginator %}
+{% endblock %}

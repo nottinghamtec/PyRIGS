@@ -22,6 +22,7 @@ urlpatterns = [
     path('asset/id/<asset:pk>/label', login_required(views.GenerateLabel.as_view()), name='generate_label'),
     path('asset/<list:ids>/list/label', views.GenerateLabels.as_view(), name='generate_labels'),
 
+    path('cables/list/', login_required(views.CableList.as_view()), name='cable_list'),
     path('cabletype/list/', login_required(views.CableTypeList.as_view()), name='cable_type_list'),
     path('cabletype/create/', permission_required_with_403('assets.add_cable_type')(views.CableTypeCreate.as_view()), name='cable_type_create'),
     path('cabletype/<int:pk>/update/', permission_required_with_403('assets.change_cable_type')(views.CableTypeUpdate.as_view()), name='cable_type_update'),

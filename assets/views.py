@@ -6,7 +6,7 @@ from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import Http404, HttpResponse, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -78,6 +78,24 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         context["categories"] = models.AssetCategory.objects.all()
         context["statuses"] = models.AssetStatus.objects.all()
         context["page_title"] = "Asset List"
+        return context
+
+
+class CableList(AssetList):
+    template_name = 'cable_list.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(is_cable=True)
+
+        if self.form.cleaned_data['cable_type']:
+            queryset = queryset.filter(cable_type__in=self.form.cleaned_data['cable_type'])
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Cable List"
+        context["total_length"] = self.get_queryset().aggregate(Sum('length'))['length__sum']
         return context
 
 
