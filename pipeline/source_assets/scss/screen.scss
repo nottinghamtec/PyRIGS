@@ -175,7 +175,7 @@ svg {
 
 span.fas {
     padding-left: 0.1em !important;
-    padding-right: 0.1em !important;
+    padding-right: 0.3em !important;
 }
 
 html.embedded {
@@ -251,4 +251,14 @@ html.embedded {
       max-width: 30rem;
     }
   }
+}
+
+.card, .card-header, .btn, input, select, .CodeMirror, .editor-toolbar, .card-img-top {
+    border-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.bootstrap-select, button.btn.dropdown-toggle.bs-placeholder.btn-light {
+    padding-right: 1rem !important;
 }
