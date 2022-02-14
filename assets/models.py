@@ -132,7 +132,7 @@ class Asset(models.Model, RevisionMixin):
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
-    salvage_value = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
+    salvage_value = models.DecimalField(null=True, decimal_places=2, max_digits=10)
     comments = models.TextField(blank=True)
 
     # Audit
