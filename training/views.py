@@ -136,14 +136,8 @@ class EditQualification(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
-        trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
-        context['page_title'] = f"Edit Qualification {self.object} for {trainee}"
+        context['page_title'] = f"Edit Qualification <em>{self.object}</em> for {self.object.trainee}"
         return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['pk'] = self.kwargs['pk']
-        return kwargs
 
     @transaction.atomic()
     @reversion.create_revision()

@@ -12,7 +12,8 @@ class QualificationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         pk = kwargs.pop('pk', None)
         super().__init__(*args, **kwargs)
-        self.fields['trainee'].initial = Profile.objects.get(pk=pk)
+        if pk:
+            self.fields['trainee'].initial = Profile.objects.get(pk=pk)
         self.fields['date'].widget.format = '%Y-%m-%d'
 
     def clean_date(self):
