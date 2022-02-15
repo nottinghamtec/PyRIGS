@@ -9,7 +9,7 @@
         {% if event.internal %}
             <a class="btn item-add modal-href event-authorise-request
                     {% if event.authorised %}
-                        btn-success active
+                        btn-success active disabled
                     {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
                         btn-warning
                     {% elif event.auth_request_to %}
@@ -18,7 +18,7 @@
                         btn-secondary
                     {% endif %}
                     "
-               href="{% url 'event_authorise_request' object.pk %}">
+               {% if event.authorised %}aria-disabled="true"{% else %}href="{% url 'event_authorise_request' object.pk %}"{% endif %}>
                 <span class="fas fa-paper-plane"></span>
                 <span class="d-none d-sm-inline">
                     {% if event.authorised %}

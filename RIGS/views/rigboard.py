@@ -83,6 +83,13 @@ class EventOEmbed(OEmbedView):
     url_name = 'event_embed'
 
 
+def get_related(form, context):  # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+    for field, model in form.related_models.items():
+        value = form[field].value()
+        if value is not None and value != '':
+            context[field] = model.objects.get(pk=value)
+
+
 class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
@@ -98,11 +105,8 @@ class EventCreate(generic.CreateView):
         if hasattr(form, 'items_json') and re.search(r'"-\d+"', form['items_json'].value()):
             messages.info(self.request, "Your item changes have been saved. Please fix the errors and save the event.")
 
-        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-        for field, model in form.related_models.items():
-            value = form[field].value()
-            if value is not None and value != '':
-                context[field] = model.objects.get(pk=value)
+        get_related(form, context)
+
         return context
 
     def get_success_url(self):
@@ -121,11 +125,7 @@ class EventUpdate(generic.UpdateView):
 
         form = context['form']
 
-        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-        for field, model in form.related_models.items():
-            value = form[field].value()
-            if value is not None and value != '':
-                context[field] = model.objects.get(pk=value)
+        get_related(form, context)
 
         return context
 
@@ -312,7 +312,7 @@ class EventAuthorise(generic.UpdateView):
                 messages.add_message(self.request, messages.WARNING,
                                      "This event has already been authorised, but the amount has changed. " +
                                      "Please check the amount and reauthorise.")
-        return super(EventAuthorise, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_form(self, **kwargs):
         form = super().get_form(**kwargs)
