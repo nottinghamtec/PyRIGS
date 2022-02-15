@@ -93,7 +93,7 @@ class CalendarICS(ICalFeed):
         title += item.name
 
         # Add the status
-        title += ' (' + str(item.get_status_display()) + ')'
+        title += f' ({item.get_status_display()})'
 
         return title
 
@@ -101,9 +101,8 @@ class CalendarICS(ICalFeed):
         return item.earliest_time
 
     def item_end_datetime(self, item):
-        if isinstance(item.latest_time, datetime.date):  # Ical end_datetime is non-inclusive, so add a day
-            return item.latest_time + datetime.timedelta(days=1)
-
+        # if isinstance(item.latest_time, datetime.date):  # Ical end_datetime is non-inclusive, so add a day
+        #    return item.latest_time + datetime.timedelta(days=1)
         return item.latest_time
 
     def item_location(self, item):
@@ -115,13 +114,13 @@ class CalendarICS(ICalFeed):
 
         tz = pytz.timezone(self.timezone)
 
-        desc = 'Rig ID = ' + str(item.pk) + '\n'
-        desc += 'Event = ' + item.name + '\n'
+        desc = f'Rig ID = {item.display_id}\n'
+        desc += f'Event = {item.name}\n'
         desc += 'Venue = ' + (item.venue.name if item.venue else '---') + '\n'
         if item.is_rig and item.person:
             desc += 'Client = ' + item.person.name + (
                 (' for ' + item.organisation.name) if item.organisation else '') + '\n'
-        desc += 'Status = ' + str(item.get_status_display()) + '\n'
+        desc += f'Status = {item.get_status_display()}\n'
         desc += 'MIC = ' + (item.mic.name if item.mic else '---') + '\n'
 
         desc += '\n'
@@ -140,22 +139,17 @@ class CalendarICS(ICalFeed):
 
         desc += '\n'
         if item.description:
-            desc += 'Event Description:\n' + item.description + '\n\n'
+            desc += f'Event Description:\n{item.description}\n\n'
         # if item.notes:  // Need to add proper keyholder checks before this gets put back
         #     desc += 'Notes:\n'+item.notes+'\n\n'
 
-        base_url = "https://rigs.nottinghamtec.co.uk"
-        desc += 'URL = ' + base_url + str(item.get_absolute_url())
+        desc += f'URL = https://rigs.nottinghamtec.co.uk{item.get_absolute_url()}'
 
         return desc
 
     def item_link(self, item):
         # Make a link to the event in the web interface
-        # base_url = "https://pyrigs.nottinghamtec.co.uk"
         return item.get_absolute_url()
-
-    # def item_created(self, item):  #TODO - Implement created date-time (using django-reversion?) - not really necessary though
-    #     return ''
 
     def item_updated(self, item):  # some ical clients will display this
         return item.last_edited_at

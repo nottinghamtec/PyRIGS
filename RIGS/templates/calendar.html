@@ -27,15 +27,12 @@
 
             calendar = new FullCalendar.Calendar(calendarEl, {
               themeSystem: 'bootstrap',
-              //defaultView: 'dayGridMonth', This is now default
               aspectRatio: 1.5,
               eventTimeFormat: {
                 'hour': '2-digit',
                 'minute': '2-digit',
                 'hour12': false
               },
-              //nowIndicator: true,
-              //firstDay: 1,
               headerToolbar: false,
               editable: false,
               dayMaxEventRows: true, // allow "more" link when too many events
@@ -58,8 +55,10 @@
                             };
                             $(doc).each(function() {
                                 end = $(this).attr('latest')
+                                allDay = false
                                 if(end.indexOf("T") < 0){ //If latest does not contain a time
-                                   end = moment(end).add(1, 'days') //End date is non-inclusive, so add a day
+                                   end = moment(end + " 23:59").format("YYYY-MM-DD[T]HH:mm:ss")
+                                   allDay = true
                                 }
 
                                 thisEvent = {
@@ -67,7 +66,8 @@
                                     'end': end,
                                     'className': 'modal-href',
                                     'title': $(this).attr('title'),
-                                    'url': $(this).attr('url')
+                                    'url': $(this).attr('url'),
+                                    'allDay': allDay
                                 }
 
                                 if($(this).attr('is_rig')===true || $(this).attr('status') === "Cancelled"){
