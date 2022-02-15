@@ -25,7 +25,6 @@ from z3c.rml import rml2pdf
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
     is_ajax, OEmbedView
 from assets import forms, models
-from assets.models import get_available_asset_id
 
 
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -153,7 +152,8 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        initial["asset_id"] = get_available_asset_id()
+        last_asset = self.model.objects.filter(asset_id_prefix="").last()
+        initial["asset_id"] = str(last_asset.asset_id_number + 1)
         return initial
 
     def get_success_url(self):
@@ -168,6 +168,13 @@ class DuplicateMixin:
 
 
 class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        prefix = self.get_object().asset_id_prefix
+        last_asset = self.model.objects.filter(asset_id_prefix=prefix).last()
+        initial["asset_id"] = prefix + str(last_asset.asset_id_number + 1)
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["create"] = None
@@ -276,7 +283,7 @@ class SupplierUpdate(GenericUpdateView, ModalURLMixin):
     form_class = forms.SupplierForm
 
     def get_context_data(self, **kwargs):
-        context = super(SupplierUpdate, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:

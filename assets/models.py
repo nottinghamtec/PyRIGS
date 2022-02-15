@@ -91,25 +91,6 @@ class CableType(models.Model):
         return reverse('cable_type_detail', kwargs={'pk': self.pk})
 
 
-def get_available_asset_id(wanted_prefix=""):
-    sql = """
-    SELECT a.asset_id_number+1
-    FROM assets_asset a
-    LEFT OUTER JOIN assets_asset b ON
-        (a.asset_id_number + 1 = b.asset_id_number AND
-        a.asset_id_prefix = b.asset_id_prefix)
-    WHERE b.asset_id IS NULL AND a.asset_id_number >= %s AND a.asset_id_prefix = %s;
-    """
-    with connection.cursor() as cursor:
-        cursor.execute(sql, [9000, wanted_prefix])
-        row = cursor.fetchone()
-        if row is None or row[0] is None:
-            return 9000
-        else:
-            return row[0]
-        cursor.close()
-
-
 class AssetManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
