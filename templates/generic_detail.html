@@ -1,6 +1,7 @@
 {% extends override|default:"base_rigs.html" %}
 {% load widget_tweaks %}
 {% load button from filters %}
+{% load markdown_tags %}
 
 {% block content %}
     <div class="row">
@@ -22,7 +23,7 @@
                         <dd>{{ object.address|linebreaksbr }}</dd>
 
                         <dt>Notes</dt>
-                        <dd>{{ object.notes|linebreaksbr }}</dd>
+                        <dd>{{ object.notes|markdown }}</dd>
 
                         {% if object.three_phase_available is not None %}
                         <dt>Three Phase Available</dt>

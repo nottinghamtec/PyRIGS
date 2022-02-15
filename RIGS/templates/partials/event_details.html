@@ -15,7 +15,7 @@
             {% if object.venue %}
             <dt class="col-sm-6">Venue Notes</dt>
             <dd class="col-sm-6">
-                {{ object.venue.notes }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%}
+                {{ object.venue.notes|markdown }}{% if object.venue.three_phase_available %}<br>(Three phase available){%endif%}
             </dd>
             {% endif %}
 
