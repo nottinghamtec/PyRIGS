@@ -100,6 +100,11 @@ class AssetManager(models.Manager):
         return qs
 
 
+def get_available_asset_id(wanted_prefix=""):
+    last_asset = Asset.objects.filter(asset_id_prefix=wanted_prefix).last()
+    return 9000 if last_asset is None else wanted_prefix + str(last_asset.asset_id_number + 1)
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
     parent = models.ForeignKey(to='self', related_name='asset_parent',

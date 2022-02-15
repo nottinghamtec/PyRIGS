@@ -2,6 +2,7 @@ import random
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from reversion import revisions as reversion
 
@@ -125,5 +126,9 @@ class Command(BaseCommand):
             if i % 3 == 0:
                 asset.purchased_from = random.choice(self.suppliers)
 
-            asset.clean()
-            asset.save()
+            with transaction.atomic():
+                try:
+                    asset.clean()
+                    asset.save()
+                except IntegrityError:
+                    pass

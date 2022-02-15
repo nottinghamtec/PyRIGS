@@ -151,8 +151,7 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        last_asset = self.model.objects.filter(asset_id_prefix="").last()
-        initial["asset_id"] = 9000 if last_asset is None else str(last_asset.asset_id_number + 1)
+        initial["asset_id"] = models.get_available_asset_id()
         return initial
 
     def get_success_url(self):
@@ -169,9 +168,7 @@ class DuplicateMixin:
 class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        prefix = self.get_object().asset_id_prefix
-        last_asset = self.model.objects.filter(asset_id_prefix=prefix).last()
-        initial["asset_id"] = 9000 if last_asset is None else prefix + str(last_asset.asset_id_number + 1)
+        initial["asset_id"] = models.get_available_asset_id(wanted_prefix=self.get_object().asset_id_prefix)
         return initial
 
     def get_context_data(self, **kwargs):
