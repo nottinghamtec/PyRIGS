@@ -31,7 +31,6 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     model = models.Asset
     template_name = 'asset_list.html'
     paginate_by = 40
-    ordering = ['-pk']
     hide_hidden_status = True
 
     def get_initial(self):
@@ -327,7 +326,6 @@ class CableTypeCreate(generic.CreateView):
         context = super().get_context_data(**kwargs)
         context["create"] = True
         context["page_title"] = "Create Cable Type"
-
         return context
 
     def get_success_url(self):
@@ -343,7 +341,6 @@ class CableTypeUpdate(generic.UpdateView):
         context = super().get_context_data(**kwargs)
         context["edit"] = True
         context["page_title"] = f"Edit Cable Type {self.object}"
-
         return context
 
     def get_success_url(self):

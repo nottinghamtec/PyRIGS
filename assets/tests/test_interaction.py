@@ -94,6 +94,55 @@ class TestAssetList(AutoLoginTest):
         self.assertEqual("10", asset_ids[1])
 
 
+def test_cable_create(logged_in_browser, admin_user, live_server, test_asset, category, status, cable_type):
+    page = pages.AssetCreate(logged_in_browser.driver, live_server.url).open()
+    wait = WebDriverWait(logged_in_browser.driver, 20)
+    page.description = str(cable_type)
+    page.category = category.name
+    page.status = status.name
+    page.serial_number = "MELON-MELON-MELON"
+    page.comments = "You might need that"
+    page.salvage_value = "666"
+    page.is_cable = True
+
+    assert logged_in_browser.driver.find_element(By.ID, 'cable-table').is_displayed()
+    wait.until(animation_is_finished())
+    page.cable_type = str(cable_type)
+    page.length = 10
+    page.csa = "1.5"
+
+    page.submit()
+    assert page.success
+
+
+def test_asset_edit(logged_in_browser, admin_user, live_server, test_asset):
+    page = pages.AssetEdit(logged_in_browser.driver, live_server.url, asset_id=test_asset.asset_id).open()
+
+    assert logged_in_browser.driver.find_element(By.ID, 'id_asset_id').get_attribute('readonly') is not None
+
+    new_description = "Big Shelf"
+    page.description = new_description
+
+    page.submit()
+    assert page.success
+
+    assert models.Asset.objects.get(asset_id=test_asset.asset_id).description == new_description
+
+
+def test_asset_duplicate(logged_in_browser, admin_user, live_server, test_asset):
+    page = pages.AssetDuplicate(logged_in_browser.driver, live_server.url, asset_id=test_asset.asset_id).open()
+
+    assert test_asset.asset_id != page.asset_id
+    assert test_asset.description == page.description
+    assert test_asset.status.name == page.status
+    assert test_asset.category.name == page.category
+    assert test_asset.date_acquired == page.date_acquired.date()
+
+    page.submit()
+    assert page.success
+    assert models.Asset.objects.last().description == test_asset.description
+
+
 @screenshot_failure_cls
 class TestAssetForm(AutoLoginTest):
     def setUp(self):
@@ -159,50 +208,6 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(asset.comments, comments)
         # This one is important as it defaults to today's date
         self.assertEqual(asset.date_acquired, acquired)
-
-    def test_cable_create(self):
-        self.page.description = "IEC -> IEC"
-        self.page.category = "Health & Safety"
-        self.page.status = "O.K."
-        self.page.serial_number = "MELON-MELON-MELON"
-        self.page.comments = "You might need that"
-        self.page.is_cable = True
-
-        self.assertTrue(self.driver.find_element_by_id('cable-table').is_displayed())
-        self.wait.until(animation_is_finished())
-        self.page.cable_type = "IEC → IEC"
-        self.page.socket = "IEC"
-        self.page.length = 10
-        self.page.csa = "1.5"
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-    def test_asset_edit(self):
-        self.page = pages.AssetEdit(self.driver, self.live_server_url, asset_id=self.parent.asset_id).open()
-
-        self.assertIsNotNone(self.driver.find_element_by_id('id_asset_id').get_attribute('readonly'))
-
-        new_description = "Big Shelf"
-        self.page.description = new_description
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-
-        self.assertEqual(models.Asset.objects.get(asset_id=self.parent.asset_id).description, new_description)
-
-    def test_asset_duplicate(self):
-        self.page = pages.AssetDuplicate(self.driver, self.live_server_url, asset_id=self.parent.asset_id).open()
-
-        self.assertNotEqual(self.parent.asset_id, self.page.asset_id)
-        self.assertEqual(self.parent.description, self.page.description)
-        self.assertEqual(self.parent.status.name, self.page.status)
-        self.assertEqual(self.parent.category.name, self.page.category)
-        self.assertEqual(self.parent.date_acquired, self.page.date_acquired.date())
-
-        self.page.submit()
-        self.assertTrue(self.page.success)
-        self.assertEqual(models.Asset.objects.last().description, self.parent.description)
 
 
 @screenshot_failure_cls
@@ -283,6 +288,28 @@ def test_audit_search(logged_in_browser, live_server, test_asset):
     assert logged_in_browser.is_text_present("Asset with that ID does not exist!")
 
 
+def test_audit_success(logged_in_browser, admin_user, live_server, test_asset):
+    page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
+    wait = WebDriverWait(logged_in_browser.driver, 20)
+    page.set_query(test_asset.asset_id)
+    page.search()
+    wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
+    # Now do it properly
+    page.modal.description = new_desc = "A BIG hammer"
+    page.modal.submit()
+    logged_in_browser.driver.implicitly_wait(4)
+    wait.until(animation_is_finished())
+    submit_time = timezone.now()
+    # Check data is correct
+    test_asset.refresh_from_db()
+    assert test_asset.description in new_desc
+    # Make sure audit 'log' was filled out
+    assert admin_user.initials == test_asset.last_audited_by.initials
+    assert_times_almost_equal(submit_time, test_asset.last_audited_at)
+    # Check we've removed it from the 'needing audit' list
+    assert test_asset.asset_id not in page.assets
+
+
 @screenshot_failure_cls
 class TestAssetAudit(AutoLoginTest):
     def setUp(self):
@@ -293,14 +320,14 @@ class TestAssetAudit(AutoLoginTest):
         self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1,
                                                          voltage_rating=40, num_pins=13)
         models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1))
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
         models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1))
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category,
-                                    date_acquired=datetime.date(2020, 2, 1))
+                                    date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
         self.asset = models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status,
                                                  category=self.category,
-                                                 date_acquired=datetime.date(2020, 2, 1))
+                                                 date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
         self.wait = WebDriverWait(self.driver, 20)
 
@@ -315,25 +342,6 @@ class TestAssetAudit(AutoLoginTest):
         self.wait.until(animation_is_finished())
         self.driver.implicitly_wait(4)
         self.assertIn("This field is required.", self.page.modal.errors["Description"])
-
-    def test_audit_success(self):
-        self.page.set_query(self.asset.asset_id)
-        self.page.search()
-        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
-        # Now do it properly
-        self.page.modal.description = new_desc = "A BIG hammer"
-        self.page.modal.submit()
-        self.driver.implicitly_wait(4)
-        self.wait.until(animation_is_finished())
-        submit_time = timezone.now()
-        # Check data is correct
-        self.asset.refresh_from_db()
-        self.assertEqual(self.asset.description, new_desc)
-        # Make sure audit 'log' was filled out
-        self.assertEqual(self.profile.initials, self.asset.last_audited_by.initials)
-        assert_times_almost_equal(submit_time, self.asset.last_audited_at)
-        # Check we've removed it from the 'needing audit' list
-        self.assertNotIn(self.asset.asset_id, self.page.assets)
 
     def test_audit_list(self):
         self.assertEqual(models.Asset.objects.filter(last_audited_at=None).count(), len(self.page.assets))
