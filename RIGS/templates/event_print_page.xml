@@ -180,7 +180,7 @@
 {% for item in object.items.all %}
     <tr>
         <td>
-            <para>{{ item.name }}</para>
+            <para><b>{{ item.name }}</b></para>
             {% if item.description %}
                 {{ item.description|markdown:"rml" }}
             {% endif %}
