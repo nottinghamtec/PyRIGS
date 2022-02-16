@@ -1,0 +1,135 @@
+{% extends 'base_print.xml' %}
+{% load filters %}
+
+{% block content %}
+<spacer length="15"/>
+<h1>Event Specific Risk Assessment for <strong>{{ object.event }}</strong></h1>
+<spacer length="15"/>
+<h2>Client: {{ object.event.person|default:object.event.organisation }} | Venue: {{ object.event.venue }} | MIC: {{ object.event.mic }}</h2>
+<spacer length="15"/>
+<hr/>
+<blockTable colWidths="425,100" spaceAfter="15">
+    <tr>
+        <td colspan="2"><h3><strong>General</strong></h3></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'nonstandard_equipment'|striptags }}</para></td>
+        <td>{{ object.nonstandard_equipment|yesno|capfirst }}</td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'nonstandard_use'|striptags }}</para></td>
+        <td>{{ object.nonstandard_use|yesno|capfirst }}</td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'contractors'|striptags }}</para></td>
+        <td>{{ object.contractors|yesno|capfirst }}</td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'other_companies'|striptags }}</para></td>
+        <td>{{ object.other_companies|yesno|capfirst }}</td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'crew_fatigue'|striptags }}</para></td>
+        <td>{{ object.crew_fatigue|yesno|capfirst }}</td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'general_notes'|striptags }}</para></td>
+        <td><para>{{ object.general_notes|default:'No' }}</para></td>
+    </tr>
+    <tr>
+        <td colspan="2"><h3><strong>Power</strong></h3><spacer length="4"/><para textColor="white" backColor={% if object.event_size == 0 %}"green"{% elif object.event_size == 1 %}"yellow"{% else %}"red"{% endif %} borderPadding="3">{{ object.get_event_size_display }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'big_power'|striptags }}</para></td>
+        <td><para>{{ object.big_power|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'power_mic'|striptags }}</para></td>
+        <td><para>{{ object.power_mic|default:object.event.mic }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'outside'|striptags }}</para></td>
+        <td><para>{{ object.outside|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'generators'|striptags }}</para></td>
+        <td><para>{{ object.generators|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'other_companies_power'|striptags }}</para></td>
+        <td><para>{{ object.other_companies_power|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'nonstandard_equipment_power'|striptags }}</para></td>
+        <td><para>{{ object.nonstandard_equipment_power|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'multiple_electrical_environments'|striptags }}</para></td>
+        <td><para>{{ object.multiple_electrical_environments|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'power_notes'|striptags }}</para></td>
+        <td><para>{{ object.power_notes|default:'No' }}</para></td>
+    </tr>
+    <tr>
+        <td colspan="2"><h3><strong>Sound</strong></h3></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'noise_monitoring'|striptags }}</para></td>
+        <td><para>{{ object.noise_monitoring|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'sound_notes'|striptags }}</para></td>
+        <td><para>{{ object.sound_notes|default:'No' }}</para></td>
+    </tr>
+    <tr>
+        <td colspan="2"><h3><strong>Site Details</strong></h3></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'known_venue'|striptags }}</para></td>
+        <td><para>{{ object.known_venue|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'safe_loading'|striptags }}</para></td>
+        <td><para>{{ object.safe_loading|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'safe_storage'|striptags }}</para></td>
+        <td><para>{{ object.safe_storage|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'area_outside_of_control'|striptags }}</para></td>
+        <td><para>{{ object.area_outside_of_control|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'barrier_required'|striptags }}</para></td>
+        <td><para>{{ object.barrier_required|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'nonstandard_emergency_procedure'|striptags }}</para></td>
+        <td><para>{{ object.nonstandard_emergency_procedure|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td colspan="2"><h3><strong>Structures</strong></h3></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'special_structures'|striptags }}</para></td>
+        <td><para>{{ object.special_structures|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'suspended_structures'|striptags }}</para></td>
+        <td><para>{{ object.suspended_structures|yesno|capfirst }}</para></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'persons_responsible_structures'|striptags }}</para></td>
+        <td><para>{{ object.persons_responsible_structures|default:'N/A' }}</para></td>
+    </tr>
+</blockTable>
+<spacer length="15"/>\
+<hr/>
+<spacer length="15"/>
+<para><em>Assessment completed by {{ object.last_edited_by }} on {{ object.last_edited_at }}</em></para>
+{% if object.reviewed_by %}
+<para><em>Reviewed by {{ object.reviewed_by }} on {{ object.reviewed.at }}</em></para>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load help_text from filters %}
+{% load nice_errors from filters %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    <script src="{% static 'js/selects.js' %}" async></script>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+
+    <script>
+        function parseBool(str) {
+            return str.toLowerCase() == 'true';
+        }
+        $('input[type=radio][name=big_power]').change(function() {
+            $('#{{ form.power_mic.id_for_label }}').prop('required', parseBool(this.value));
+        });
+        $('input[type=radio][name=outside], input[type=radio][name=generators], input[type=radio][name=other_companies_power], input[type=radio][name=nonstandard_equipment_power], input[type=radio][name=multiple_electrical_environments]').change(function() {
+            $('#{{ form.power_notes.id_for_label }}').prop('required', parseBool(this.value));
+            $('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
+        });
+        $('input[type=radio][name=special_structures]').change(function() {
+            $('#{{ form.persons_responsible_structures.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
+            $('label[for={{ form.persons_responsible_structures.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        });
+        $('input[type=radio][name=suspended_structures]').change(function() {
+            $('#{{ form.rigging_plan.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
+            $('label[for={{ form.rigging_plan.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col">
+        {% if form.errors %}
+        <div class="alert alert-danger alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <dl>
+	            {% with form|nice_errors as qq %}
+		            {% for error_name,desc in qq.items %}
+                    {% if error_name == 'General form errors' %}
+                    {{ form.non_field_errors.0|safe }}
+                    <div class="text-right">
+                        {% render_field form.supervisor_consulted class+="form-check-input" form="form" %}<label class="form-check-label" for="{{ form.supervisor_consulted.id_for_label}}">Please confirm you've done so.</label><br>
+                        <button class="btn btn-primary mt-2" type="submit" form="form"><span class="fas fa-thumbs-up"></span> Confirm</button>
+                    </div>
+                    {% else %}
+                    <span class="row">
+		                <dt class="col-4">{{error_name}}</dt>
+		                <dd class="col-8">{{desc}}</dd>
+                    </span>
+                    {% endif %}
+		            {% endfor %}
+	            {% endwith %}
+            </dl>
+        </div>
+        {% endif %}
+        {% if edit %}
+        <form role="form" method="POST" action="{% url 'ra_edit' pk=object.pk %}" id="form">
+        {% else %}
+        <form role="form" method="POST" action="{% url 'event_ra' pk=event.pk %}" id="form">
+        {% endif %}
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">General</div>
+                        <div class="card-body">
+                            <p><strong>If the answer is yes to any of the below, you must consult a supervisor and make sure all activities planned to be undertaken are sufficiently covered by health and safety documentation</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_equipment %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_use %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.contractors %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.other_companies %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.crew_fatigue %}
+
+                            <label for="{{ form.general_notes.id_for_label }}">{{ form.general_notes.help_text }}</label>
+                            {% render_field form.general_notes class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Power</div>
+                        <div class="card-body">
+                            {% include 'partials/yes_no_radio.html' with formitem=form.big_power %}
+                            <label for="{{ form.power_mic.id_for_label }}"
+                                class="col col-form-label">{{ form.power_mic.help_text|safe }}</label>
+                            <div class="col-6">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    {% if power_mic %}
+                                        <option value="{{form.power_mic.value}}" selected="selected">{{ power_mic }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <p class="pt-4"><strong>If the answer is yes to ANY of the below questions this is a Large Event and you <em>must</em> consult a power supervisor</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.outside %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.generators label="Will generators be used?" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.other_companies_power %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_equipment_power %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.multiple_electrical_environments %}
+                            <label for="{{ form.power_notes.id_for_label }}">{{ form.power_notes.help_text }}</label>
+                            {% render_field form.power_notes class+="form-control" %}
+                            <label for="{{ form.power_plan.id_for_label }}" class="mt-2">{{ form.power_plan.help_text|safe }}</label>
+                            {% render_field form.power_plan class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Sound</div>
+                        <div class="card-body">
+                            <p><strong>If yes, consult a supervisor of sound</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.noise_monitoring %}
+                            <label for="{{ form.sound_notes.id_for_label }}">{{ form.sound_notes.help_text }}</label>
+                            {% render_field form.sound_notes class+="form-control" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Site Details</div>
+                        <div class="card-body">
+                            <p><strong>If yes to any of the below, a site visit must be conducted, and an assessment of the venue completed and added to TEC’s records</strong></p>
+                            {% include 'partials/yes_no_radio.html' with formitem=form.known_venue %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.safe_loading %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.safe_storage %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.area_outside_of_control %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.barrier_required %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.nonstandard_emergency_procedure %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Structures</div>
+                        <div class="card-body">
+                            {% include 'partials/yes_no_radio.html' with formitem=form.special_structures %}
+                            <label for="{{ form.persons_responsible_structures.id_for_label }}" class="mt-3" hidden="true">{{ form.persons_responsible_structures.help_text }}</label>
+                            {% render_field form.persons_responsible_structures class+="form-control mb-3" hidden="true" %}
+                            {% include 'partials/yes_no_radio.html' with formitem=form.suspended_structures %}
+                            <label for="{{ form.rigging_plan.id_for_label }}" class="mt-2" hidden="true">{{ form.rigging_plan.help_text|safe }}</label>
+                            {% render_field form.rigging_plan class+="form-control" hidden="true" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" title="Save"><i
+                                class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
