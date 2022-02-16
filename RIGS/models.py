@@ -792,15 +792,22 @@ class RiskAssessment(models.Model, RevisionMixin):
         else:
             return self.SMALL[0]
 
+    def get_event_size_display(self):
+        return self.SIZES[self.event_size][1] + " Event"
+
     @property
     def activity_feed_string(self):
         return str(self.event)
+
+    @property
+    def name(self):
+        return str(self)
 
     def get_absolute_url(self):
         return reverse('ra_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return f"{self.pk} - {self.event}"
+        return f"{self.pk} | {self.event}"
 
 
 @reversion.register(follow=['vehicles', 'crew'])

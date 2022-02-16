@@ -83,6 +83,7 @@ urlpatterns = [
          name='ra_list'),
     path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.review_riskassessment')(views.EventRiskAssessmentReview.as_view()),
          name='ra_review'),
+    path('event/ra/<int:pk>/print/', permission_required_with_403('RIGS.view_riskassessment')(views.RAPrint.as_view()), name='ra_print'),
 
     path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.add_eventchecklist')(views.EventChecklistCreate.as_view()),
          name='event_ec'),

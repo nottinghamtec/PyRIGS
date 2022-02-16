@@ -1,14 +1,9 @@
 import copy
 import datetime
 import re
-import urllib.error
-import urllib.parse
-import urllib.request
-from io import BytesIO
-
 import premailer
 import simplejson
-from PyPDF2 import PdfFileMerger, PdfFileReader
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles import finders
@@ -24,10 +19,9 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
-from z3c.rml import rml2pdf
 
 from PyRIGS import decorators
-from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin
+from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -178,42 +172,16 @@ class EventDuplicate(EventUpdate):
         return context
 
 
-class EventPrint(generic.View):
-    def get(self, request, pk):
-        object = get_object_or_404(models.Event, pk=pk)
-        template = get_template('event_print.xml')
+class EventPrint(PrintView):
+    model = models.Event
+    template_name = 'event_print.xml'
+    append_terms = True
 
-        merger = PdfFileMerger()
-
-        user_str = f"by {request.user.name} " if request.user is not None else ""
-        time = timezone.now().strftime('%d/%m/%Y %H:%I')
-
-        name = re.sub(r'[^a-zA-Z0-9 \n\.]', '', object.name)
-        filename = f"Event_{object.display_id}_{name}_{object.start_date}.pdf"
-
-        context = {
-            'object': object,
-            'quote': True,
-            'current_user': request.user,
-            'filename': filename,
-            'info_string': f"[Paperwork generated {user_str}on {time} - {object.current_version_id}]",
-        }
-
-        rml = template.render(context)
-        buffer = rml2pdf.parseString(rml)
-        merger.append(PdfFileReader(buffer))
-        buffer.close()
-
-        terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
-        merger.append(BytesIO(terms.read()))
-
-        merged = BytesIO()
-        merger.write(merged)
-
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = f'filename="{filename}"'
-        response.write(merged.getvalue())
-        return response
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['quote'] = True
+        context['filename'] = f"Event_{context['object'].display_id}_{context['object_name']}_{context['object'].start_date}.pdf"
+        return context
 
 
 class EventArchive(generic.ListView):
@@ -223,7 +191,6 @@ class EventArchive(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['start'] = self.request.GET.get('start', None)
         context['end'] = self.request.GET.get('end', datetime.date.today().strftime('%Y-%m-%d'))
         context['statuses'] = models.Event.EVENT_STATUS_CHOICES

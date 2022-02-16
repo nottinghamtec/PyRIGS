@@ -1,8 +1,18 @@
 import datetime
 import operator
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
+
 from functools import reduce
 from itertools import chain
+from io import BytesIO
 
+from PyPDF2 import PdfFileMerger, PdfFileReader
+from z3c.rml import rml2pdf
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core import serializers
@@ -13,6 +23,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.template.loader import get_template
+from django.utils import timezone
 
 from RIGS import models
 from assets import models as asset_models
@@ -300,3 +312,47 @@ class OEmbedView(generic.View):
         }
 
         return JsonResponse(data)
+
+
+class PrintView(generic.View):
+    append_terms = False
+
+    def get_context_data(self, **kwargs):
+        obj = get_object_or_404(self.model, pk=self.kwargs['pk'])
+        user_str = f"by {self.request.user.name} " if self.request.user is not None else ""
+        time = timezone.now().strftime('%d/%m/%Y %H:%I')
+        object_name = re.sub(r'[^a-zA-Z0-9 \n\.]', '', obj.name)
+
+        context = {
+            'object': obj,
+            'current_user': self.request.user,
+            'object_name': object_name,
+            'info_string': f"[Paperwork generated {user_str}on {time} - {obj.current_version_id}]",
+        }
+
+        return context
+
+    def get(self, request, pk):
+        template = get_template(self.template_name)
+
+        merger = PdfFileMerger()
+
+        context = self.get_context_data()
+
+        rml = template.render(context)
+        buffer = rml2pdf.parseString(rml)
+        merger.append(PdfFileReader(buffer))
+        buffer.close()
+
+        if self.append_terms:
+            terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)
+            merger.append(BytesIO(terms.read()))
+
+        merged = BytesIO()
+        merger.write(merged)
+
+        response = HttpResponse(content_type='application/pdf')
+        f = context['filename']
+        response['Content-Disposition'] = f'filename="{f}"'
+        response.write(merged.getvalue())
+        return response

@@ -16,7 +16,7 @@
     {% endif %}
     {% if not event.dry_hire %}
         {% if event.riskassessment %}
-            <span class="badge badge-success">RA: <span class="fas fa-check"></span>{%if event.riskassessment.reviewed_by%}<span class="fas fa-check"></span>{%endif%}</span>
+            <a href="{{ event.riskassessment.get_absolute_url }}"><span class="badge badge-success">RA: <span class="fas fa-check{% if event.riskassessment.reviewed_by %}-double{%endif%}"></span></a>
         {% else %}
             <span class="badge badge-danger">RA: <span class="fas fa-times"></span></span>
         {% endif %}

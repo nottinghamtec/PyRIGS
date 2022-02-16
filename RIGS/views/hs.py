@@ -12,7 +12,7 @@ from PyRIGS.views import PrintView
 
 class EventRiskAssessmentCreate(generic.CreateView):
     model = models.RiskAssessment
-    template_name = 'risk_assessment_form.html'
+    template_name = 'hs/risk_assessment_form.html'
     form_class = forms.EventRiskAssessmentForm
 
     def get(self, *args, **kwargs):
@@ -49,7 +49,7 @@ class EventRiskAssessmentCreate(generic.CreateView):
 
 class EventRiskAssessmentEdit(generic.UpdateView):
     model = models.RiskAssessment
-    template_name = 'risk_assessment_form.html'
+    template_name = 'hs/risk_assessment_form.html'
     form_class = forms.EventRiskAssessmentForm
 
     def get_success_url(self):
@@ -72,7 +72,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
 
 class EventRiskAssessmentDetail(generic.DetailView):
     model = models.RiskAssessment
-    template_name = 'risk_assessment_detail.html'
+    template_name = 'hs/risk_assessment_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventRiskAssessmentDetail, self).get_context_data(**kwargs)
@@ -83,7 +83,7 @@ class EventRiskAssessmentDetail(generic.DetailView):
 class EventRiskAssessmentList(generic.ListView):
     paginate_by = 20
     model = models.RiskAssessment
-    template_name = 'hs_object_list.html'
+    template_name = 'hs/hs_object_list.html'
 
     def get_queryset(self):
         return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
@@ -112,7 +112,7 @@ class EventRiskAssessmentReview(generic.View):
 
 class EventChecklistDetail(generic.DetailView):
     model = models.EventChecklist
-    template_name = 'event_checklist_detail.html'
+    template_name = 'hs/event_checklist_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventChecklistDetail, self).get_context_data(**kwargs)
@@ -122,7 +122,7 @@ class EventChecklistDetail(generic.DetailView):
 
 class EventChecklistEdit(generic.UpdateView):
     model = models.EventChecklist
-    template_name = 'event_checklist_form.html'
+    template_name = 'hs/event_checklist_form.html'
     form_class = forms.EventChecklistForm
 
     def get_success_url(self):
@@ -145,7 +145,7 @@ class EventChecklistEdit(generic.UpdateView):
 
 class EventChecklistCreate(generic.CreateView):
     model = models.EventChecklist
-    template_name = 'event_checklist_form.html'
+    template_name = 'hs/event_checklist_form.html'
     form_class = forms.EventChecklistForm
 
     # From both business logic and programming POVs, RAs must exist before ECs!
@@ -184,7 +184,7 @@ class EventChecklistCreate(generic.CreateView):
 class EventChecklistList(generic.ListView):
     paginate_by = 20
     model = models.EventChecklist
-    template_name = 'hs_object_list.html'
+    template_name = 'hs/hs_object_list.html'
 
     def get_queryset(self):
         return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
@@ -214,7 +214,7 @@ class EventChecklistReview(generic.View):
 class HSList(generic.ListView):
     paginate_by = 20
     model = models.Event
-    template_name = 'hs_list.html'
+    template_name = 'hs/hs_list.html'
 
     def get_queryset(self):
         return models.Event.objects.all().exclude(status=models.Event.CANCELLED).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
@@ -227,3 +227,9 @@ class HSList(generic.ListView):
 
 class RAPrint(PrintView):
     model = models.RiskAssessment
+    template_name = 'hs/ra_print.xml'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filename'] = f"EventSpecificRiskAssessment_for_{context['object'].event.display_id}.pdf"
+        return context

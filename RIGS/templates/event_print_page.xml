@@ -1,12 +1,10 @@
 {% load markdown_tags %}
 {% load filters %}
 
-<setNextFrame name="main"/>
-<nextFrame/>
 <blockTable style="headLayout" colWidths="330,165">
 <tr>
     <td>
-        <h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'<small></small></h1>
+        <h1><b>N{{ object.pk|stringformat:"05d" }}:</b> '{{ object.name }}'</h1>
 
         <para style="style.event_description">
         <b>{{object.start_date|date:"D jS N Y"}}</b>
