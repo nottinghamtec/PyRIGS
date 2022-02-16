@@ -6,6 +6,8 @@ from django.views import generic
 from reversion import revisions as reversion
 
 from RIGS import models, forms
+from RIGS.views.rigboard import get_related
+from PyRIGS.views import PrintView
 
 
 class EventRiskAssessmentCreate(generic.CreateView):
@@ -38,6 +40,7 @@ class EventRiskAssessmentCreate(generic.CreateView):
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
         context['page_title'] = f'Create Risk Assessment for Event {event.display_id}'
+        get_related(context['form'], context)
         return context
 
     def get_success_url(self):
@@ -63,6 +66,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         context['event'] = ra.event
         context['edit'] = True
         context['page_title'] = f'Edit Risk Assessment for Event {ra.event.display_id}'
+        get_related(context['form'], context)
         return context
 
 
@@ -135,12 +139,7 @@ class EventChecklistEdit(generic.UpdateView):
         context['event'] = ec.event
         context['edit'] = True
         context['page_title'] = f'Edit Event Checklist for Event {ec.event.display_id}'
-        form = context['form']
-        # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-        for field, model in form.related_models.items():
-            value = form[field].value()
-            if value is not None and value != '':
-                context[field] = model.objects.get(pk=value)
+        get_related(context['form'], context)
         return context
 
 
@@ -224,3 +223,7 @@ class HSList(generic.ListView):
         context = super(HSList, self).get_context_data(**kwargs)
         context['page_title'] = 'H&S Overview'
         return context
+
+
+class RAPrint(PrintView):
+    model = models.RiskAssessment

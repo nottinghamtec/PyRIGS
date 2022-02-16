@@ -750,7 +750,7 @@ class RiskAssessment(models.Model, RevisionMixin):
         'contractors': False,
         'other_companies': False,
         'crew_fatigue': False,
-        'big_power': False,
+        # 'big_power': False Doesn't require checking with a super either way
         'generators': False,
         'other_companies_power': False,
         'nonstandard_equipment_power': False,
