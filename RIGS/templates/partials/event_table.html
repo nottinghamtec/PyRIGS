@@ -29,7 +29,15 @@
             <!---Number-->
             <th scope="row" id="event_number">{{ event.display_id }}</th>
             <!--Dates & Times-->
-            <td id="event_dates">
+            <td id="event_dates" style="text-align: justify;">
+                {% if not event.cancelled %}
+                    {% if event.meet_at %}
+                        <span class="text-nowrap">Meet: <strong>{{ event.meet_at|date:"D d/m/Y H:i" }}</strong></span>
+                    {% endif %}
+                    {% if event.access_at %}
+                        <br><span class="text-nowrap">Access: <strong>{{ event.access_at|date:"D d/m/Y H:i" }}</strong></span>
+                    {% endif %}
+                {% endif %}
                 <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}
                 {% if event.has_start_time %}
                     {{ event.start_time|date:"H:i" }}
@@ -42,14 +50,6 @@
                        {{ event.end_time|date:"H:i" }}
                     {% endif %}</strong>
                     </span>
-                {% endif %}
-                {% if not event.cancelled %}
-                    {% if event.meet_at %}
-                        <br><span class="text-nowrap">Meet: <strong>{{ event.meet_at|date:"D d/m/Y H:i" }}</strong></span>
-                    {% endif %}
-                    {% if event.access_at %}
-                        <br><span class="text-nowrap">Access: <strong>{{ event.access_at|date:" D d/m/Y H:i" }}</strong></span>
-                    {% endif %}
                 {% endif %}
             </td>
             <!---Details-->
