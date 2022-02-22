@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from barcode import Code39
 from barcode.writer import ImageWriter
 from z3c.rml import rml2pdf
@@ -348,8 +348,9 @@ def generate_label(pk):
     black = (0, 0, 0)
     white = (255, 255, 255)
     size = (700, 200)
-    font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 22)
-    heavy_font = ImageFont.truetype("static/fonts/OpenSans-Bold.tff", 35)
+    font_size = 22
+    font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", font_size)
+    heavy_font = ImageFont.truetype("static/fonts/OpenSans-Bold.tff", font_size + 13)
     obj = get_object_or_404(models.Asset, asset_id=pk)
 
     asset_id = f"Asset: {obj.asset_id}"
@@ -358,23 +359,25 @@ def generate_label(pk):
         csa = f"CSA: {obj.csa}mm²"
 
     image = Image.new("RGB", size, white)
+    image = ImageOps.expand(image, border=(5, 5, 5, 5), fill=black)
     logo = Image.open("static/imgs/square_logo.png")
     draw = ImageDraw.Draw(image)
 
-    draw.text((210, 120), asset_id, fill=black, font=heavy_font)
+    draw.text((300, 0), asset_id, fill=black, font=heavy_font)
     if obj.is_cable:
-        y = 165
+        y = 140
         draw.text((210, y), length, fill=black, font=font)
-        draw.text((365, y), csa, fill=black, font=font)
-    draw.multiline_text((512, 130), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
+        if obj.csa:
+            draw.text((365, y), csa, fill=black, font=font)
+    draw.text((210, size[1] - font_size - 8), "TEC PA & Lighting (0115) 84 68720", fill=black, font=font)
 
     barcode = Code39(str(obj.asset_id), writer=ImageWriter())
 
     logo_size = (200, 200)
-    image.paste(logo.resize(logo_size, Image.ANTIALIAS))
+    image.paste(logo.resize(logo_size, Image.ANTIALIAS), box=(5, 5))
     barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
     width, height = barcode_image.size
-    image.paste(barcode_image.crop((0, 0, width, 120)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
+    image.paste(barcode_image.crop((0, 0, width, 100)), (int(((size[0] + logo_size[0]) - width) / 2), 40))
 
     return image
 
@@ -403,15 +406,15 @@ class GenerateLabels(generic.View):
 
             base64_encoded_result_bytes = base64.b64encode(img_bytes)
             base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-            images.append(base64_encoded_result_str)
+            images.append((get_object_or_404(models.Asset, asset_id=asset_id), base64_encoded_result_str))
 
         name = f"Asset Label Sheet generated at {timezone.now()}"
 
         context = {
-            'images0': images[::4],
-            'images1': images[1::4],
-            'images2': images[2::4],
-            'images3': images[3::4],
+            'images0': images[::3],
+            'images1': images[1::3],
+            'images2': images[2::3],
+            # 'images3': images[3::4],
             'filename': name
         }
         merger = PdfFileMerger()

@@ -12,22 +12,18 @@
     </template>
     <stylesheet>
         <blockTableStyle id="table">
-        <!-- show a grid: this also comes in handy for debugging your tables.-->
-        <lineStyle kind="GRID" colorName="black" thickness="1" start="0,0" stop="-1,-1" />
         </blockTableStyle>
     </stylesheet>
     <story>
         <blockTable style="table">
             {% for i in images0 %}
             <tr>
-                <td>{% with images0|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
-width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
-                <td>{% with images1|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
-width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
-                <td>{% with images2|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
-width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
-                <td>{% with images3|index:forloop.counter0 as image %}{% if image %}<illustration width="120" height="35"><image file="data:image/png;base64,{{image}}" x="0" y="0"
-width="120" height="35"/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images0|index:forloop.counter0 as image %}{% if image %}<illustration width="180" height="55" borderStrokeWidth="1"
+borderStrokeColor="black"><image file="data:image/png;base64,{{image.1}}" x="0" y="0"
+{% if image.0.csa >= 4 %}width="180" height="55"{% else %}width="130" height="38"{%endif%}/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images1|index:forloop.counter0 as image %}{% if image %}<illustration width="180" height="55"><image file="data:image/png;base64,{{image.1}}" x="0" y="0"
+{% if image.0.csa >= 4 %}width="180" height="55"{% else %}width="130" height="38"{%endif%}/></illustration>{% endif %}{% endwith %}</td>
+                <td>{% with images2|index:forloop.counter0 as image %}{% if image %}<illustration width="180" height="55"><image file="data:image/png;base64,{{image.1}}" x="0" y="0" {% if image.0.csa >= 4 %}width="180" height="55"{% else %}width="130" height="38"{%endif%}/></illustration>{% endif %}{% endwith %}</td>
             </tr>
             {% endfor %}
         </blockTable>
