@@ -348,7 +348,8 @@ def generate_label(pk):
     black = (0, 0, 0)
     white = (255, 255, 255)
     size = (700, 200)
-    font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 20)
+    font = ImageFont.truetype("static/fonts/OpenSans-Regular.tff", 22)
+    heavy_font = ImageFont.truetype("static/fonts/OpenSans-Bold.tff", 35)
     obj = get_object_or_404(models.Asset, asset_id=pk)
 
     asset_id = f"Asset: {obj.asset_id}"
@@ -360,11 +361,12 @@ def generate_label(pk):
     logo = Image.open("static/imgs/square_logo.png")
     draw = ImageDraw.Draw(image)
 
-    draw.text((210, 140), asset_id, fill=black, font=font)
+    draw.text((210, 120), asset_id, fill=black, font=heavy_font)
     if obj.is_cable:
-        draw.text((210, 170), length, fill=black, font=font)
-        draw.text((360, 170), csa, fill=black, font=font)
-    draw.multiline_text((500, 140), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
+        y = 165
+        draw.text((210, y), length, fill=black, font=font)
+        draw.text((365, y), csa, fill=black, font=font)
+    draw.multiline_text((512, 130), "TEC PA & Lighting\n(0115) 84 68720", fill=black, font=font)
 
     barcode = Code39(str(obj.asset_id), writer=ImageWriter())
 
@@ -372,7 +374,7 @@ def generate_label(pk):
     image.paste(logo.resize(logo_size, Image.ANTIALIAS))
     barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
     width, height = barcode_image.size
-    image.paste(barcode_image.crop((0, 0, width, 135)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
+    image.paste(barcode_image.crop((0, 0, width, 120)), (int(((size[0] + logo_size[0]) - width) / 2), 0))
 
     return image
 
