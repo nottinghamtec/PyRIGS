@@ -16,6 +16,13 @@ class QualificationForm(forms.ModelForm):
             self.fields['trainee'].initial = Profile.objects.get(pk=pk)
         self.fields['date'].widget.format = '%Y-%m-%d'
 
+    def clean(self):
+        cleaned_data = super().clean()
+        item = cleaned_data.get('item')
+        trainee = cleaned_data.get('trainee')
+        if not item.user_has_requirements(trainee):
+            self.add_error('item', 'Missing prerequisites')
+
     def clean_date(self):
         date = self.cleaned_data['date']
         if date > date.today():

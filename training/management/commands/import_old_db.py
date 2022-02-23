@@ -104,19 +104,19 @@ class Command(BaseCommand):
                 obj, created = models.TrainingItem.objects.update_or_create(
                     pk=int(child.find('ID').text),
                     reference_number=number,
-                    name=name,
+                    description=name,
                     category=category,
                     active=active
                 )
             except IntegrityError:
-                print("Training Item {}.{} {} has a duplicate reference number".format(category.reference_number, number, name))
+                print(f"Training Item {category.reference_number}.{number} {name} has a duplicate reference number")
 
             if created:
                 tally[1] += 1
             else:
                 tally[0] += 1
 
-        print('Training Items - Updated: {}, Created: {}'.format(tally[0], tally[1]))
+        print(f'Training Items - Updated: {tally[0]}, Created: {tally[1]}')
 
     def import_TrainingItemQualification(self):
         tally = [0, 0, 0]
@@ -129,9 +129,9 @@ class Command(BaseCommand):
                       ("Competency_Assessed", models.TrainingItemQualification.PASSED_OUT), ]
 
             for (depth, depth_index) in depths:
-                if child.find('{}_Date'.format(depth)) is not None:
-                    if child.find('{}_Assessor_ID'.format(depth)) is None:
-                        print("Training Record #{} had no supervisor. Assigning System User.".format(child.find('ID').text))
+                if child.find(f'{depth}_Date') is not None:
+                    if child.find(f'{depth}_Assessor_ID') is None:
+                        print(f"Training Record #{child.find('ID').text} had no supervisor. Assigning System User.")
                         supervisor = Profile.objects.get(first_name="God")
                         continue
                     supervisor = Profile.objects.get(pk=self.id_map[child.find('{}_Assessor_ID'.format(depth)).text])

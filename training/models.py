@@ -75,6 +75,7 @@ class TrainingCategory(models.Model):
 
     class Meta:
         verbose_name_plural = 'Training Categories'
+        ordering = ['reference_number']
 
 
 class TrainingItemManager(QueryablePropertiesManager):
@@ -92,6 +93,7 @@ class TrainingItem(models.Model):
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
     description = models.CharField(max_length=50)
     active = models.BooleanField(default=True)
+    prerequisites = models.ManyToManyField('self', symmetrical=False, blank=True)
 
     objects = TrainingItemManager()
 
@@ -123,6 +125,13 @@ class TrainingItem(models.Model):
 
     def get_absolute_url(self):
         return reverse('item_list')
+
+    def has_prereqs(self):
+        return self.prerequisites.all().exists()
+
+    def user_has_requirements(self, user):
+        # Always true if there are no prerequisites, otherwise get a set of prerequsite IDs and check if they are a subset of the set of qualification IDs
+        return not self.has_prereqs() or set(self.prerequisites.values_list('pk', flat=True)).issubset(set(user.qualifications_obtained.values_list('item', flat=True)))
 
     @staticmethod
     def user_has_qualification(item, user, depth):
