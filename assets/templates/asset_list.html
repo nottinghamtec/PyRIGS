@@ -59,7 +59,6 @@
 {% endblock %}
 
 {% block content %}
-<h3>{{ object_list.count }} assets</h3>
 <div class="row">
     <div class="col px-0">
         <form id="asset-search-form" method="GET">
@@ -122,6 +121,7 @@
 </button></span>{%endfor%}</p>
     </div>
 </div>
+<h3>{{ object_list.count }} assets</h3>
 <div class="row">
     <div class="col px-0">
     {% include 'partials/asset_list_table.html' %}
