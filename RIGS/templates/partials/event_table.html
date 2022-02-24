@@ -1,4 +1,5 @@
 {% load namewithnotes from filters %}
+{% load markdown_tags %}
 <div class="table-responsive">
     <table class="table mb-0" id="event_table">
         <thead>
@@ -74,7 +75,7 @@
                     </h5>
                 {% endif %}
                 {% if not event.cancelled and event.description %}
-                    <p>{{ event.description|linebreaksbr }}</p>
+                    <p>{{ event.description|markdown }}</p>
                 {% endif %}
                 {% include 'partials/event_status.html' %}
             </td>
