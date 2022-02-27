@@ -26,4 +26,6 @@ urlpatterns = [
 
     path('trainee/<int:pk>/level/<int:level_pk>/confirm', login_required(views.ConfirmLevel.as_view()), name='confirm_level'),
     path('trainee/<int:pk>/item_record', login_required(views.TraineeItemDetail.as_view()), name='trainee_item_detail'),
+
+    path('session_log', has_perm_or_supervisor('training.add_trainingitemqualification')(views.SessionLog.as_view()), name='session_log'),
 ]

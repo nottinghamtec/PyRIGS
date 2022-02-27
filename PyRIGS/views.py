@@ -35,6 +35,13 @@ def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 
+def get_related(form, context):  # Get some other objects to include in the form. Used when there are errors but also nice and quick.
+    for field, model in form.related_models.items():
+        value = form[field].value()
+        if value is not None and value != '':
+            context[field] = model.objects.get(pk=value)
+
+
 class Index(generic.TemplateView):  # Displays the current rig count along with a few other bits and pieces
     template_name = 'index.html'
 

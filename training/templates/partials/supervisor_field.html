@@ -1,0 +1,6 @@
+<label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
+<select name="supervisor" id="supervisor_id" class="selectpicker col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
+{% if supervisor %}
+    <option value="{{form.supervisor.value}}" selected="selected">{{ supervisor }}</option>
+{% endif %}
+</select>

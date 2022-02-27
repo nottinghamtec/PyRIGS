@@ -1,5 +1,7 @@
+import datetime
 from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, F, Value, CharField
 from django.db.models.functions import Concat
@@ -8,6 +10,7 @@ from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
+from django.utils.translation import gettext_lazy as _
 
 
 class TraineeManager(models.Manager):
@@ -350,6 +353,9 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
     @property
     def activity_feed_string(self):
         return str(self)
+
+    def get_absolute_url(self):
+        return reverse('trainee_detail', kwargs={'pk': self.trainee.pk})
 
     class Meta:
         unique_together = ["trainee", "level"]

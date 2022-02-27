@@ -55,7 +55,7 @@ class Command(BaseCommand):
         supervisor = Profile.objects.create(username="supervisor", first_name="Super", last_name="Visor",
                                             initials="SV",
                                             email="supervisor@example.com", is_active=True,
-                                            is_staff=True, is_approved=True)
+                                            is_staff=True, is_approved=True, is_supervisor=True)
         supervisor.set_password('supervisor')
         supervisor.groups.add(Group.objects.get(name="Keyholders"))
         supervisor.save()

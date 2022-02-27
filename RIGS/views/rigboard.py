@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from PyRIGS import decorators
-from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView
+from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
 from RIGS import models, forms
 
 __author__ = 'ghost'
@@ -75,13 +75,6 @@ class EventEmbed(EventDetail):
 class EventOEmbed(OEmbedView):
     model = models.Event
     url_name = 'event_embed'
-
-
-def get_related(form, context):  # Get some other objects to include in the form. Used when there are errors but also nice and quick.
-    for field, model in form.related_models.items():
-        value = form[field].value()
-        if value is not None and value != '':
-            context[field] = model.objects.get(pk=value)
 
 
 class EventCreate(generic.CreateView):

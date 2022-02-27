@@ -5,8 +5,9 @@ from django.views import generic
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q, Count
+from django.db.utils import IntegrityError
 
-from PyRIGS.views import is_ajax, ModalURLMixin
+from PyRIGS.views import is_ajax, ModalURLMixin, get_related
 from training import models, forms
 from users import views
 from reversion.views import RevisionMixin
@@ -207,3 +208,26 @@ class ConfirmLevel(generic.RedirectView):
             reversion.add_to_revision(trainee)
 
         return reverse_lazy('trainee_detail', kwargs={'pk': kwargs['pk']})
+
+
+class SessionLog(generic.FormView):
+    template_name = 'session_log_form.html'
+    form_class = forms.SessionLogForm
+    success_url = reverse_lazy('trainee_list')
+
+    def form_valid(self, form, *args, **kwargs):
+        for trainee in form.cleaned_data.get('trainees'):
+            for item in form.cleaned_data.get('items'):
+                try:
+                    with transaction.atomic():
+                        models.TrainingItemQualification.objects.create(trainee=trainee, item=item, supervisor=form.cleaned_data.get('supervisor'), depth=form.cleaned_data.get('depth'), notes=form.cleaned_data.get('notes'), date=form.cleaned_data.get('date'))
+                        reversion.add_to_revision(trainee)
+                except IntegrityError:
+                    pass  # There was an attempt to create a duplicate qualification, ignore it
+        return super().form_valid(form, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Log Training Session"
+        get_related(context['form'], context)
+        return context

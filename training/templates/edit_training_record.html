@@ -41,12 +41,7 @@
       {% render_field form.depth|add_class:'form-control custom-select col-sm-8' %}
     </div>
     <div class="form-group form-row">
-      <label for="supervisor" class="col-sm-2 col-form-label">Supervisor</label>
-      <select name="supervisor" id="supervisor_id" class="selectpicker px-0 col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required>
-        {% if object.supervisor %}
-        <option value="{{object.supervisor.pk}}" selected>{{object.supervisor}}</option>
-        {% endif %}
-      </select>
+      {% include 'partials/supervisor_field.html' %}
     </div>
     <div class="form-group form-row">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>
