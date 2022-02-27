@@ -15,6 +15,10 @@ def validate_user_can_train_in(supervisor, item):
 
 
 class QualificationForm(forms.ModelForm):
+    related_models = {
+        'item': models.TrainingItem
+    }
+
     class Meta:
         model = models.TrainingItemQualification
         fields = '__all__'
@@ -49,6 +53,10 @@ class QualificationForm(forms.ModelForm):
 
 
 class RequirementForm(forms.ModelForm):
+    related_models = {
+        'item': models.TrainingItem
+    }
+
     depth = forms.ChoiceField(choices=models.TrainingItemQualification.CHOICES)
 
     class Meta:

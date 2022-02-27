@@ -32,11 +32,7 @@
 {% endif %}
 <form id="requirement-form" action="{{ form.action|default:request.path }}" method="post">{% csrf_token %}
     {% render_field form.level|attr:'hidden' value=form.level.initial %}
-    <div class="form-group form-row">
-      <label for="item_id" class="col-sm-2 col-form-label">Item</label>
-      <select name="item" id="item_id" class="form-control selectpicker custom-select col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}" required>
-      </select>
-    </div>
+    {% include 'partials/item_field.html' %}
     <div class="form-group form-row">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
       {% render_field form.depth|add_class:'form-control col-sm'|attr:'required' %}

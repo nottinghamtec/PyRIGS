@@ -118,6 +118,7 @@ class AddQualification(generic.CreateView, ModalURLMixin):
             context['override'] = 'base_training.html'
         trainee = models.Trainee.objects.get(pk=self.kwargs['pk'])
         context['page_title'] = f"Add Qualification for {trainee}"
+        get_related(context['form'], context)
         return context
 
     def get_success_url(self):
@@ -138,6 +139,7 @@ class EditQualification(generic.UpdateView):
         context = super().get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
         context['page_title'] = f"Edit Qualification <em>{self.object}</em> for {self.object.trainee}"
+        get_related(context['form'], context)
         return context
 
     @transaction.atomic()
@@ -156,6 +158,7 @@ class AddLevelRequirement(generic.CreateView, ModalURLMixin):
         context = super().get_context_data(**kwargs)
         level = models.TrainingLevel.objects.get(pk=self.kwargs['pk'])
         context["page_title"] = f"Add Requirements to Training Level {level}"
+        get_related(context['form'], context)
         return context
 
     def get_form_kwargs(self):

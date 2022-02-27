@@ -28,14 +28,7 @@
     {% include 'form_errors.html' %}
     {% csrf_token %}
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
-    <div class="form-group form-row">
-      <label for="item_id" class="col col-form-label">Item</label>
-      <select name="item" id="item_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active" required>
-        {% if object.item %}
-        <option value="{{object.item.pk}}" selected>{{object.item}}</option>
-        {% endif %}
-      </select>
-    </div>
+    {% include 'partials/item_field.html' %}
     <div class="form-group form-row">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
       {% render_field form.depth|add_class:'form-control custom-select col-sm-8' %}
