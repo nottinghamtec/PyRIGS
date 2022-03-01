@@ -71,8 +71,9 @@ class RequirementForm(forms.ModelForm):
 
 class SessionLogForm(forms.Form):
     trainees = forms.ModelMultipleChoiceField(models.Trainee.objects.all())
-    items = forms.ModelMultipleChoiceField(models.TrainingItem.objects.all())
-    depth = forms.ChoiceField(choices=models.TrainingItemQualification.CHOICES)
+    items_0 = forms.ModelMultipleChoiceField(models.TrainingItem.objects.all(), required=False)
+    items_1 = forms.ModelMultipleChoiceField(models.TrainingItem.objects.all(), required=False)
+    items_2 = forms.ModelMultipleChoiceField(models.TrainingItem.objects.all(), required=False)
     supervisor = forms.ModelChoiceField(models.Trainee.objects.all())
     date = forms.DateField(initial=datetime.date.today)
     notes = forms.CharField(required=False, widget=forms.Textarea)
@@ -88,6 +89,7 @@ class SessionLogForm(forms.Form):
         supervisor = self.cleaned_data['supervisor']
         if supervisor in self.cleaned_data.get('trainees', []):
             raise forms.ValidationError('One may not supervise oneself...')
-        for item in self.cleaned_data.get('items', []):
-            validate_user_can_train_in(supervisor, item)
+        for depth in models.TrainingItemQualification.CHOICES:
+            for item in self.cleaned_data.get('items_{depth.0}', []):
+                validate_user_can_train_in(supervisor, item)
         return supervisor

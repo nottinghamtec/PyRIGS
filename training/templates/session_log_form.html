@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load button from filters %}
+{% load colour_from_depth from tags %}
 
 {% block css %}
     {{ block.super }}
@@ -36,18 +37,16 @@
               </select>
             </div>
             <h3>Training Items</h3>
-            <div class="row px-3">
-                <div class="form-group">
-                  <label for="selectpicker">Training Items</label>
-                  <select multiple name="items" id="items_id" class="selectpicker col-12 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=description,reference_number&filters=active">
-                  </select>
-                </div>
-                <div class="form-group pl-3">
-                  {% include 'partials/form_field.html' with field=form.depth %}
-                </div>
-                <div class="form-group pl-3">
-                  {% include 'partials/form_field.html' with field=form.date %}
-                </div>
+            {% for depth in depths %}
+            <div class="form-group row">
+              <label for="selectpicker" class="col-sm-2 rounded bg-{% colour_from_depth depth.0 %} text-center py-1">{{ depth.1 }} Items</label>
+              <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active">
+              </select>
+            </div>
+            {% endfor %}
+            <h3>Session Information</h3>
+            <div class="form-group">
+                {% include 'partials/form_field.html' with field=form.date %}
             </div>
             <div class="form-group">
               {% include 'partials/form_field.html' with field=form.notes %}

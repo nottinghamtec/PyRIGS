@@ -219,18 +219,20 @@ class SessionLog(generic.FormView):
     success_url = reverse_lazy('trainee_list')
 
     def form_valid(self, form, *args, **kwargs):
-        for trainee in form.cleaned_data.get('trainees'):
-            for item in form.cleaned_data.get('items'):
-                try:
-                    with transaction.atomic():
-                        models.TrainingItemQualification.objects.create(trainee=trainee, item=item, supervisor=form.cleaned_data.get('supervisor'), depth=form.cleaned_data.get('depth'), notes=form.cleaned_data.get('notes'), date=form.cleaned_data.get('date'))
-                        reversion.add_to_revision(trainee)
-                except IntegrityError:
-                    pass  # There was an attempt to create a duplicate qualification, ignore it
+        for trainee in form.cleaned_data.get('trainees', []):
+            for depth in models.TrainingItemQualification.CHOICES:
+                for item in form.cleaned_data.get(f'items_{depth[0]}', []):
+                    try:
+                        with transaction.atomic():
+                            models.TrainingItemQualification.objects.create(trainee=trainee, item=item, supervisor=form.cleaned_data.get('supervisor'), depth=depth[0], notes=form.cleaned_data.get('notes'), date=form.cleaned_data.get('date'))
+                            reversion.add_to_revision(trainee)
+                    except IntegrityError:
+                        pass  # There was an attempt to create a duplicate qualification, ignore it
         return super().form_valid(form, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["depths"] = models.TrainingItemQualification.CHOICES
         context["page_title"] = "Log Training Session"
         get_related(context['form'], context)
         return context
