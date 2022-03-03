@@ -321,6 +321,8 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
     item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
     depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
 
+    reversion_hide = True
+
     def __str__(self):
         depth = TrainingItemQualification.CHOICES[self.depth][1]
         return f"{depth} in {self.item}"
