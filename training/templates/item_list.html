@@ -24,6 +24,7 @@
                     </ul>
                     </div>
                 {% endif %}
+                <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info"><span class="fas fa-user"></span> Qualified Users</a>
                 </li>
             {% endfor %}
         </div>

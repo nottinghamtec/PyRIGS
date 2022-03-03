@@ -236,3 +236,17 @@ class SessionLog(generic.FormView):
         context["page_title"] = "Log Training Session"
         get_related(context['form'], context)
         return context
+
+
+class ItemQualifications(generic.ListView):
+    template_name = "item_qualification_list.html"
+    model = models.TrainingItemQualification
+    paginate_by = 40
+
+    def get_queryset(self):
+        return models.TrainingItemQualification.objects.filter(item=self.kwargs['pk']).order_by('-depth').select_related('trainee')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"People Qualified In {self.object_list[0].item}"
+        return context

@@ -8,6 +8,8 @@ from versioning.views import VersionHistory
 
 urlpatterns = [
     path('items/', login_required(views.ItemList.as_view()), name='item_list'),
+    path('item/<int:pk>/qualified_users/', login_required(views.ItemQualifications.as_view()), name='item_qualification'),
+
     path('trainee/list/', login_required(views.TraineeList.as_view()), name='trainee_list'),
     path('trainee/<int:pk>/',
          has_perm_or_supervisor('RIGS.view_profile')(views.TraineeDetail.as_view()),
