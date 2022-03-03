@@ -33,6 +33,25 @@ $fa-font-path: '/static/fonts';
 @import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
 @import "node_modules/@fortawesome/fontawesome-free/scss/solid";
 
+html {
+  --brand: #3F58AA;
+  scrollbar-color: #3F58AA Canvas !important;
+}
+
+:root { accent-color: var(--brand); }
+:focus-visible { outline-color: var(--brand); }
+::selection { background-color: var(--brand); }
+::marker { color: var(--brand); }
+
+:is(
+  ::-webkit-calendar-picker-indicator,
+  ::-webkit-clear-button,
+  ::-webkit-inner-spin-button,
+  ::-webkit-outer-spin-button
+) {
+  color: var(--brand);
+}
+
 @media screen and
   (prefers-reduced-motion: reduce),
   (update: slow) {
