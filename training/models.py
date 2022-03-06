@@ -198,7 +198,7 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         return "info"
 
     def get_absolute_url(self):
-        return reverse('trainee_item_detail', kwargs={'pk': self.trainee.pk})
+        return reverse('edit_qualification', kwargs={'pk': self.pk})
 
     class Meta:
         unique_together = ["trainee", "item", "depth"]

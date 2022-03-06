@@ -130,7 +130,7 @@ class AddQualification(generic.CreateView, ModalURLMixin):
         return kwargs
 
 
-class EditQualification(generic.UpdateView):
+class EditQualification(generic.UpdateView, ModalURLMixin):
     template_name = 'edit_training_record.html'
     model = models.TrainingItemQualification
     form_class = forms.QualificationForm
@@ -147,6 +147,9 @@ class EditQualification(generic.UpdateView):
     def form_valid(self, form, *args, **kwargs):
         reversion.add_to_revision(form.cleaned_data['trainee'])
         return super().form_valid(form, *args, **kwargs)
+
+    def get_success_url(self):
+        return self.get_close_url('edit_qualification', 'trainee_item_detail')
 
 
 class AddLevelRequirement(generic.CreateView, ModalURLMixin):

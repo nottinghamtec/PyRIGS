@@ -5,6 +5,41 @@
 {% load linkornone from filters %}
 {% load button from filters %}
 {% load colour_from_depth from tags %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+<script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script>
+    $('document').ready(function(){
+        $('#edit').click(function (e) {
+         e.preventDefault();
+         var url = $(this).attr("href");
+         $.ajax({
+            url: url,
+            success: function(){
+                $link = $(this);
+                    // Anti modal inception
+                    if ($link.parents('#modal').length === 0) {
+                        modaltarget = $link.data('target');
+                        modalobject = "";
+                        $('#modal').load(url, function (e) {
+                            $('#modal').modal();
+                        });
+                    }
+                }
+        });
+     });
+    });
+</script>
+{% endblock %}
 
 {% block content %}
 <p class="text-muted text-right">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
@@ -33,7 +68,7 @@
                         <td><a href="{{ object.supervisor.get_absolute_url}}">{{ object.supervisor }}</a></td>
                         <td>{{ object.notes }}</td>
                         {% if request.user.is_supervisor or perms.training.change_trainingitemqualification %}
-                        <td>{% button 'edit' 'edit_qualification' object.pk %}</td>
+                        <td>{% button 'edit' 'edit_qualification' object.pk id="edit" %}</td>
                         {% endif %}
                     </tr>
                 {% empty %}

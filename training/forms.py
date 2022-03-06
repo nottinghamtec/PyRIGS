@@ -3,15 +3,14 @@ import datetime
 from django import forms
 
 from training import models
-from RIGS.models import Profile
 
 
-def validate_user_can_train_in(supervisor, item):
+def validate_user_can_train_in(self, supervisor, item):
     if item.category.training_level:
         if not supervisor.level_qualifications.filter(level=item.category.training_level):
-            raise forms.ValidationError('Selected supervising person is missing requisite training level to train in this department')
+            self.add_error('supervisor', 'Selected supervising person is missing requisite training level to train in this department')
     elif not supervisor.is_supervisor:
-        raise forms.ValidationError('Selected supervisor must actually *be* a supervisor...')
+        self.add_error('supervisor', 'Selected supervisor must actually *be* a supervisor...')
 
 
 class QualificationForm(forms.ModelForm):
@@ -28,8 +27,9 @@ class QualificationForm(forms.ModelForm):
         cleaned_data = super().clean()
         item = cleaned_data.get('item')
         trainee = cleaned_data.get('trainee')
-        supervisor = self.cleaned_data.get('supervisor')
-        validate_user_can_train_in(supervisor, item)
+        supervisor = cleaned_data.get('supervisor')
+        if supervisor:
+            validate_user_can_train_in(self, supervisor, item)
         if not item.user_has_requirements(trainee):
             self.add_error('item', 'Missing prerequisites')
 
@@ -52,10 +52,10 @@ class QualificationForm(forms.ModelForm):
 
 class AddQualificationForm(QualificationForm):
     def __init__(self, *args, **kwargs):
-        kwargs.pop('pk', None)
+        pk = kwargs.pop('pk', None)
         super().__init__(*args, **kwargs)
         if pk:
-            self.fields['trainee'].initial = Profile.objects.get(pk=pk)
+            self.fields['trainee'].initial = models.Trainee.objects.get(pk=pk)
 
 
 class RequirementForm(forms.ModelForm):
@@ -97,5 +97,5 @@ class SessionLogForm(forms.Form):
             raise forms.ValidationError('One may not supervise oneself...')
         for depth in models.TrainingItemQualification.CHOICES:
             for item in self.cleaned_data.get('items_{depth.0}', []):
-                validate_user_can_train_in(supervisor, item)
+                validate_user_can_train_in(self, supervisor, item)
         return supervisor
