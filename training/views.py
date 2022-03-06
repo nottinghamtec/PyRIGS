@@ -103,7 +103,7 @@ class TraineeList(generic.ListView):
 class AddQualification(generic.CreateView, ModalURLMixin):
     template_name = "edit_training_record.html"
     model = models.TrainingItemQualification
-    form_class = forms.QualificationForm
+    form_class = forms.AddQualificationForm
 
     def form_valid(self, form, *args, **kwargs):
         reversion.add_to_revision(form.cleaned_data['trainee'])

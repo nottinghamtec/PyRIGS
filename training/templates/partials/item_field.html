@@ -2,7 +2,7 @@
   <label for="item_id" class="col col-form-label">Item</label>
   <select name="item" id="item_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active" required>
     {% if item %}
-    <option value="{{form.item.pk}}" selected>{{item}}</option>
+    <option value="{{form.item.value}}" selected>{{item}}</option>
     {% endif %}
   </select>
 </div>

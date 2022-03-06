@@ -16,7 +16,8 @@ def validate_user_can_train_in(supervisor, item):
 
 class QualificationForm(forms.ModelForm):
     related_models = {
-        'item': models.TrainingItem
+        'item': models.TrainingItem,
+        'supervisor': models.Trainee
     }
 
     class Meta:
@@ -27,29 +28,34 @@ class QualificationForm(forms.ModelForm):
         cleaned_data = super().clean()
         item = cleaned_data.get('item')
         trainee = cleaned_data.get('trainee')
+        supervisor = self.cleaned_data.get('supervisor')
+        validate_user_can_train_in(supervisor, item)
         if not item.user_has_requirements(trainee):
             self.add_error('item', 'Missing prerequisites')
 
     def clean_date(self):
-        date = self.cleaned_data['date']
+        date = self.cleaned_data.get('date')
         if date > date.today():
             raise forms.ValidationError('Qualification date may not be in the future')
         return date
 
     def clean_supervisor(self):
-        supervisor = self.cleaned_data['supervisor']
-        item = self.cleaned_data['item']
-        if supervisor.pk == self.cleaned_data['trainee'].pk:
+        supervisor = self.cleaned_data.get('supervisor')
+        if supervisor.pk == self.cleaned_data.get('trainee').pk:
             raise forms.ValidationError('One may not supervise oneself...')
-        validate_user_can_train_in(supervisor, item)
         return supervisor
 
     def __init__(self, *args, **kwargs):
-        pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+        self.fields['date'].widget.format = '%Y-%m-%d'
+
+
+class AddQualificationForm(QualificationForm):
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('pk', None)
         super().__init__(*args, **kwargs)
         if pk:
             self.fields['trainee'].initial = Profile.objects.get(pk=pk)
-        self.fields['date'].widget.format = '%Y-%m-%d'
 
 
 class RequirementForm(forms.ModelForm):
