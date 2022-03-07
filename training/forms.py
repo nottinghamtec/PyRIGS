@@ -5,14 +5,6 @@ from django import forms
 from training import models
 
 
-def validate_user_can_train_in(self, supervisor, item):
-    if item.category.training_level:
-        if not supervisor.level_qualifications.filter(level=item.category.training_level):
-            self.add_error('supervisor', 'Selected supervising person is missing requisite training level to train in this department')
-    elif not supervisor.is_supervisor:
-        self.add_error('supervisor', 'Selected supervisor must actually *be* a supervisor...')
-
-
 class QualificationForm(forms.ModelForm):
     related_models = {
         'item': models.TrainingItem,
@@ -22,16 +14,6 @@ class QualificationForm(forms.ModelForm):
     class Meta:
         model = models.TrainingItemQualification
         fields = '__all__'
-
-    def clean(self):
-        cleaned_data = super().clean()
-        item = cleaned_data.get('item')
-        trainee = cleaned_data.get('trainee')
-        supervisor = cleaned_data.get('supervisor')
-        if supervisor:
-            validate_user_can_train_in(self, supervisor, item)
-        if not item.user_has_requirements(trainee):
-            self.add_error('item', 'Missing prerequisites')
 
     def clean_date(self):
         date = self.cleaned_data.get('date')
@@ -95,7 +77,4 @@ class SessionLogForm(forms.Form):
         supervisor = self.cleaned_data['supervisor']
         if supervisor in self.cleaned_data.get('trainees', []):
             raise forms.ValidationError('One may not supervise oneself...')
-        for depth in models.TrainingItemQualification.CHOICES:
-            for item in self.cleaned_data.get('items_{depth.0}', []):
-                validate_user_can_train_in(self, supervisor, item)
         return supervisor

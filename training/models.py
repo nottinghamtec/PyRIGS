@@ -181,12 +181,27 @@ class TrainingItemQualification(models.Model, RevisionMixin):
 
     objects = TrainingItemQualificationManager()
 
+    def clean(self):
+        errdict = {}
+        # Validate supervisor can train in this item
+        if hasattr(self, 'supervisor'):  # This will be false if form validation fails
+            if self.item.category.training_level:
+                if not self.supervisor.level_qualifications.filter(level=self.item.category.training_level):
+                    errdict['supervisor'] = ('Selected supervising person is missing requisite training level to train in this department')
+            elif not self.supervisor.is_supervisor:
+                errdict['supervisor'] = ('Selected supervisor must actually *be* a supervisor...')
+        # Item requirements only apply to being passed out
+        if self.depth == TrainingItemQualification.PASSED_OUT and not self.item.user_has_requirements(self.trainee):
+            errdict['item'] = ('Missing prerequisites')
+        if errdict != {}:  # If there was an error when validation
+            raise ValidationError(errdict)
+
     def __str__(self):
         return f"{self.get_depth_display()} in {self.item} on {self.date.strftime('%b %d %Y')}"
 
     @property
     def activity_feed_string(self):
-        return f"{self.get_depth_display()} in {self.item}"
+        return f"{self.trainee} {self.get_depth_display().lower()} {self.get_depth_display()} in {self.item}"
 
     @classmethod
     def get_colour_from_depth(cls, depth):

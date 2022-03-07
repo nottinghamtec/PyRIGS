@@ -39,7 +39,7 @@
             <h3>Training Items</h3>
             {% for depth in depths %}
             <div class="form-group row">
-              <label for="selectpicker" class="col-sm-2 rounded bg-{% colour_from_depth depth.0 %} text-center py-1">{{ depth.1 }} Items</label>
+              <label for="selectpicker" class="col-sm-2 text-{% colour_from_depth depth.0 %} py-1">{{ depth.1 }} Items</label>
               <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active">
               </select>
             </div>

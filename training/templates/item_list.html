@@ -16,7 +16,7 @@
                 <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }}
                 {% if item.prerequisites.exists %}
                     <div class="ml-3 font-italic">
-                    <p class="text-info mb-0">Prerequisites:</p>
+                    <p class="text-info mb-0">Passed Out Prerequisites:</p>
                     <ul>
                     {% for p in item.prerequisites.all %}
                     <li>{{p}}</li>
