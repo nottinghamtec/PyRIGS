@@ -40,7 +40,7 @@
                 <dt class="col-sm-6">Phone Number</dt>
                 <dd class="col-sm-6">{{ object.organisation.phone|linkornone:'tel' }}</dd>
                 <dt class="col-sm-6">Has SU Account</dt>
-                <dd class="col-sm-6">{{ event.organisation.union_account|yesno|capfirst }}</dd>
+                <dd class="col-sm-6">{{ object.organisation.union_account|yesno|capfirst }}</dd>
             </dl>
         </div>
     </div>

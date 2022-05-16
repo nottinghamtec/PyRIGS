@@ -142,7 +142,7 @@
                                 </dd>
                                 <dt class="col-12">{{ object|help_text:'persons_responsible_structures' }}</dt>
                                 <dd class="col-12">
-                                    {{ object.persons_responsible_structures.name|default:'N/A'|linebreaks }}
+                                    {{ object.persons_responsible_structures|default:'N/A'|linebreaks }}
                                 </dd>
                                 <dt class="col-12">{{ object|help_text:'rigging_plan'|safe }}</dt>
                                 <dd class="col-12">
