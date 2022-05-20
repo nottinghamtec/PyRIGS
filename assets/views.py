@@ -24,7 +24,7 @@ from z3c.rml import rml2pdf
 
 from PyRIGS.views import GenericListView, GenericDetailView, GenericUpdateView, GenericCreateView, ModalURLMixin, \
     is_ajax, OEmbedView
-from assets import forms, models
+from assets import forms, models, testing
 
 
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -430,3 +430,8 @@ class GenerateLabels(generic.View):
         response['Content-Disposition'] = f'filename="{name}"'
         response.write(merged.getvalue())
         return response
+
+
+class AddCableTest(generic.CreateView):
+    model = testing.CableTest
+    template = 'cable_test_form.html'

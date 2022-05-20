@@ -43,4 +43,6 @@ urlpatterns = [
          (views.SupplierCreate.as_view()), name='supplier_create'),
     path('supplier/<int:pk>/edit/', permission_required_with_403('assets.change_supplier')
          (views.SupplierUpdate.as_view()), name='supplier_update'),
+
+    path('testing/<int:pk>/cable_test/' views.AddCableTest.as_view(), name='cable_test'),
 ]

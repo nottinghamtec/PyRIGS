@@ -3,7 +3,6 @@ from django.db.models import Q
 
 from assets import models
 
-
 class AssetForm(forms.ModelForm):
     related_models = {
         'asset': models.Asset,
