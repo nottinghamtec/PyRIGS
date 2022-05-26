@@ -105,6 +105,11 @@ def get_available_asset_id(wanted_prefix=""):
     return 9000 if last_asset is None else wanted_prefix + str(last_asset.asset_id_number + 1)
 
 
+def validate_positive(value):
+    if value < 0:
+        raise ValidationError("A price cannot be negative")
+
+
 @reversion.register
 class Asset(models.Model, RevisionMixin):
     parent = models.ForeignKey(to='self', related_name='asset_parent',
@@ -117,8 +122,8 @@ class Asset(models.Model, RevisionMixin):
     purchased_from = models.ForeignKey(to=Supplier, on_delete=models.SET_NULL, blank=True, null=True, related_name="assets")
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
-    purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10)
-    salvage_value = models.DecimalField(null=True, decimal_places=2, max_digits=10)
+    purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
+    replacement_cost = models.DecimalField(null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
     comments = models.TextField(blank=True)
 
     # Audit
@@ -164,12 +169,6 @@ class Asset(models.Model, RevisionMixin):
         if asset_search is None:
             errdict["asset_id"] = [
                 "An Asset ID can only consist of letters and numbers, with a final number"]
-
-        if self.purchase_price and self.purchase_price < 0:
-            errdict["purchase_price"] = ["A price cannot be negative"]
-
-        if self.salvage_value and self.salvage_value < 0:
-            errdict["salvage_value"] = ["A price cannot be negative"]
 
         if self.is_cable:
             if not self.length or self.length <= 0:
