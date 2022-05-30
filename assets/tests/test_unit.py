@@ -84,7 +84,7 @@ def test_oembed(client, test_asset):
 
 
 def test_asset_create(admin_client):
-    response = admin_client.post(reverse('asset_create'), {'date_sold': '2000-01-01', 'date_acquired': '2020-01-01', 'purchase_price': '-30', 'salvage_value': '-30'})
+    response = admin_client.post(reverse('asset_create'), {'date_sold': '2000-01-01', 'date_acquired': '2020-01-01', 'purchase_price': '-30', 'replacement_cost': '-30'})
     assertFormError(response, 'form', 'asset_id', 'This field is required.')
     assert_asset_form_errors(response)
 
@@ -99,7 +99,7 @@ def test_cable_create(admin_client):
 
 def test_asset_edit(admin_client, test_asset):
     url = reverse('asset_update', kwargs={'pk': test_asset.asset_id})
-    response = admin_client.post(url, {'date_sold': '2000-12-01', 'date_acquired': '2020-12-01', 'purchase_price': '-50', 'salvage_value': '-50', 'description': "", 'status': "", 'category': ""})
+    response = admin_client.post(url, {'date_sold': '2000-12-01', 'date_acquired': '2020-12-01', 'purchase_price': '-50', 'replacement_cost': '-50', 'description': "", 'status': "", 'category': ""})
     assert_asset_form_errors(response)
 
 
@@ -127,4 +127,4 @@ def assert_asset_form_errors(response):
     assertFormError(response, 'form', 'category', 'This field is required.')
     assertFormError(response, 'form', 'date_sold', 'Cannot sell an item before it is acquired')
     assertFormError(response, 'form', 'purchase_price', 'A price cannot be negative')
-    assertFormError(response, 'form', 'salvage_value', 'A price cannot be negative')
+    assertFormError(response, 'form', 'replacement_cost', 'A price cannot be negative')

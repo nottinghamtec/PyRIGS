@@ -102,7 +102,7 @@ def test_cable_create(logged_in_browser, admin_user, live_server, test_asset, ca
     page.status = status.name
     page.serial_number = "MELON-MELON-MELON"
     page.comments = "You might need that"
-    page.salvage_value = "666"
+    page.replacement_cost = "666"
     page.is_cable = True
 
     assert logged_in_browser.driver.find_element(By.ID, 'cable-table').is_displayed()
@@ -179,7 +179,7 @@ class TestAssetForm(AutoLoginTest):
         self.page.comments = comments = "This is actually a sledgehammer, not a cable..."
 
         self.page.purchase_price = "12.99"
-        self.page.salvage_value = "99.12"
+        self.page.replacement_cost = "99.12"
         self.page.date_acquired = acquired = datetime.date(2020, 5, 2)
         self.page.purchased_from_selector.toggle()
         self.assertTrue(self.page.purchased_from_selector.is_open)
@@ -320,14 +320,14 @@ class TestAssetAudit(AutoLoginTest):
         self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1,
                                                          voltage_rating=40, num_pins=13)
         models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
         models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
+                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
         models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category,
-                                    date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
+                                    date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
         self.asset = models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status,
                                                  category=self.category,
-                                                 date_acquired=datetime.date(2020, 2, 1), salvage_value=10)
+                                                 date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
         self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
         self.wait = WebDriverWait(self.driver, 20)
 
