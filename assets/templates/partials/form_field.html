@@ -1,7 +1,7 @@
 {% load widget_tweaks %}
 {% load title_spaced from filters %}
 {% spaceless %}
-<label for="{{ field.id_for_label }}" {% if col %}class="col-2 col-form-label"{% endif %}>{% if title %}{{ title }}{%else%}{{field.name|title_spaced}}{%endif%}</label>
+<label for="{{ field.id_for_label }}" {% if col %}class="col-4 col-form-label"{% endif %}>{% if title %}{{ title }}{%else%}{{field.name|title_spaced}}{%endif%}</label>
 {% if append or prepend %}
 <div class="input-group {{col}}">
   {% if prepend %}
