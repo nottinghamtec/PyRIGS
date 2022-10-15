@@ -304,8 +304,29 @@ class EventManager(models.Manager):
         return qs
 
 
-@reversion.register(follow=['items'])
-class Event(models.Model, RevisionMixin):
+def find_earliest_event_time(event, datetime_list):
+    # If there is no start time defined, pretend it's midnight
+    startTimeFaked = False
+    if event.has_start_time:
+        startDateTime = datetime.datetime.combine(event.start_date, event.start_time)
+    else:
+        startDateTime = datetime.datetime.combine(event.start_date, datetime.time(00, 00))
+        startTimeFaked = True
+
+    # timezoneIssues - apply the default timezone to the naiive datetime
+    tz = pytz.timezone(settings.TIME_ZONE)
+    startDateTime = tz.localize(startDateTime)
+    datetime_list.append(startDateTime)  # then add it to the list
+
+    earliest = min(datetime_list).astimezone(tz)  # find the earliest datetime in the list
+
+    # if we faked it & it's the earliest, better own up
+    if startTimeFaked and earliest == startDateTime:
+        return event.start_date
+    return earliest
+
+
+class BaseEvent(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
     PROVISIONAL = 0
     CONFIRMED = 1
@@ -321,31 +342,85 @@ class Event(models.Model, RevisionMixin):
     name = models.CharField(max_length=255)
     person = models.ForeignKey('Person', null=True, blank=True, on_delete=models.CASCADE)
     organisation = models.ForeignKey('Organisation', blank=True, null=True, on_delete=models.CASCADE)
-    venue = models.ForeignKey('Venue', blank=True, null=True, on_delete=models.CASCADE)
     description = models.TextField(blank=True, default='')
-    notes = models.TextField(blank=True, default='')
     status = models.IntegerField(choices=EVENT_STATUS_CHOICES, default=PROVISIONAL)
-    dry_hire = models.BooleanField(default=False)
-    is_rig = models.BooleanField(default=True)
-    based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True,
-                                 null=True)
 
     # Timing
     start_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
+
+    purchase_order = models.CharField(max_length=255, blank=True, default='', verbose_name='PO')
+
+    class Meta:
+        abstract = True
+
+    @property
+    def cancelled(self):
+        return (self.status == self.CANCELLED)
+
+    @property
+    def confirmed(self):
+        return (self.status == self.BOOKED or self.status == self.CONFIRMED)
+
+    @property
+    def has_start_time(self):
+        return self.start_time is not None
+
+    @property
+    def has_end_time(self):
+        return self.end_time is not None
+
+    @property
+    def latest_time(self):
+        """Returns the end of the event - this function could return either a tzaware datetime, or a naiive date object"""
+        tz = pytz.timezone(settings.TIME_ZONE)
+        endDate = self.end_date
+        if endDate is None:
+            endDate = self.start_date
+
+        if self.has_end_time:
+            endDateTime = datetime.datetime.combine(endDate, self.end_time)
+            tz = pytz.timezone(settings.TIME_ZONE)
+            endDateTime = tz.localize(endDateTime)
+
+            return endDateTime
+
+        else:
+            return endDate
+
+    def clean(self):
+        errdict = {}
+        if self.end_date and self.start_date > self.end_date:
+            errdict['end_date'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
+
+        startEndSameDay = not self.end_date or self.end_date == self.start_date
+        hasStartAndEnd = self.has_start_time and self.has_end_time
+        if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
+            errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
+        return errdict
+
+
+@reversion.register(follow=['items'])
+class Event(BaseEvent):
+    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
+                        verbose_name="MIC", on_delete=models.CASCADE)
+    venue = models.ForeignKey('Venue', blank=True, null=True, on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, default='')
+    dry_hire = models.BooleanField(default=False)
+    is_rig = models.BooleanField(default=True)
+    based_on = models.ForeignKey('Event', on_delete=models.SET_NULL, related_name='future_events', blank=True,
+                                 null=True)
+
     access_at = models.DateTimeField(blank=True, null=True)
     meet_at = models.DateTimeField(blank=True, null=True)
 
-    # Crew management
+    # Dry-hire only
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True,
                                       on_delete=models.CASCADE)
-    mic = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_mic', blank=True, null=True,
-                            verbose_name="MIC", on_delete=models.CASCADE)
 
     # Monies
-    purchase_order = models.CharField(max_length=255, blank=True, default='', verbose_name='PO')
     collector = models.CharField(max_length=255, blank=True, default='', verbose_name='collected by')
 
     # Authorisation request details
@@ -396,24 +471,8 @@ class Event(models.Model, RevisionMixin):
         return Decimal(self.sum_total + self.vat).quantize(Decimal('.01'))
 
     @property
-    def cancelled(self):
-        return (self.status == self.CANCELLED)
-
-    @property
-    def confirmed(self):
-        return (self.status == self.BOOKED or self.status == self.CONFIRMED)
-
-    @property
     def hs_done(self):
         return self.riskassessment is not None and len(self.checklists.all()) > 0
-
-    @property
-    def has_start_time(self):
-        return self.start_time is not None
-
-    @property
-    def has_end_time(self):
-        return self.end_time is not None
 
     @property
     def earliest_time(self):
@@ -428,44 +487,9 @@ class Event(models.Model, RevisionMixin):
         if self.meet_at:
             datetime_list.append(self.meet_at)
 
-        # If there is no start time defined, pretend it's midnight
-        startTimeFaked = False
-        if self.has_start_time:
-            startDateTime = datetime.datetime.combine(self.start_date, self.start_time)
-        else:
-            startDateTime = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
-            startTimeFaked = True
-
-        # timezoneIssues - apply the default timezone to the naiive datetime
-        tz = pytz.timezone(settings.TIME_ZONE)
-        startDateTime = tz.localize(startDateTime)
-        datetime_list.append(startDateTime)  # then add it to the list
-
-        earliest = min(datetime_list).astimezone(tz)  # find the earliest datetime in the list
-
-        # if we faked it & it's the earliest, better own up
-        if startTimeFaked and earliest == startDateTime:
-            return self.start_date
+        earliest = find_earliest_event_time(self, datetime_list)
 
         return earliest
-
-    @property
-    def latest_time(self):
-        """Returns the end of the event - this function could return either a tzaware datetime, or a naiive date object"""
-        tz = pytz.timezone(settings.TIME_ZONE)
-        endDate = self.end_date
-        if endDate is None:
-            endDate = self.start_date
-
-        if self.has_end_time:
-            endDateTime = datetime.datetime.combine(endDate, self.end_time)
-            tz = pytz.timezone(settings.TIME_ZONE)
-            endDateTime = tz.localize(endDateTime)
-
-            return endDateTime
-
-        else:
-            return endDate
 
     @property
     def internal(self):
@@ -487,14 +511,7 @@ class Event(models.Model, RevisionMixin):
         return f"{self.display_id}: {self.name}"
 
     def clean(self):
-        errdict = {}
-        if self.end_date and self.start_date > self.end_date:
-            errdict['end_date'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
-
-        startEndSameDay = not self.end_date or self.end_date == self.start_date
-        hasStartAndEnd = self.has_start_time and self.has_end_time
-        if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
-            errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
+        errdict = super.clean()
 
         if self.access_at is not None:
             if self.access_at.date() > self.start_date:
@@ -554,6 +571,10 @@ class EventAuthorisation(models.Model, RevisionMixin):
     def activity_feed_string(self):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
+
+class Subhire(BaseEvent):
+    insurance_value = models.DecimalField(max_digits=10, decimal_places=2) # TODO Validate if this is over notifiable threshold
+    # TODO Associated events
 
 class InvoiceManager(models.Manager):
     def outstanding_invoices(self):

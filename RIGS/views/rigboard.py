@@ -100,6 +100,20 @@ class EventCreate(generic.CreateView):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
 
+class SubhireCreate(generic.CreateView):
+    model = models.Subhire
+    form_class = forms.SubhireForm
+    template_name = 'subhire_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "New Subhire"
+        context['edit'] = True
+        form = context['form']
+        get_related(form, context)
+        return context
+
+
 class EventUpdate(generic.UpdateView):
     model = models.Event
     form_class = forms.EventForm

@@ -30,6 +30,8 @@
         {% if perms.RIGS.add_event %}
         <a class="dropdown-item" href="{% url 'event_create' %}"><span class="fas fa-plus"></span>
                                 New Event</a>
+        <a class="dropdown-item" href="{% url 'subhire_create' %}"><span class="fas fa-truck"></span>
+                                New Subhire</a>
         {% endif %}
        </div>
     </li>

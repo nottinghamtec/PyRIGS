@@ -124,6 +124,21 @@ class EventForm(forms.ModelForm):
                   'purchase_order', 'collector']
 
 
+class SubhireForm(forms.ModelForm):
+    related_models = {
+        'person': models.Person,
+        'organisation': models.Organisation,
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['end_date'].widget.format = '%Y-%m-%d'
+
+    class Meta:
+        model = models.Subhire
+        fields = '__all__'
+
+
 class BaseClientEventAuthorisationForm(forms.ModelForm):
     tos = forms.BooleanField(required=True, label="Terms of hire")
     name = forms.CharField(label="Your Name")

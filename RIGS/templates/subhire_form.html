@@ -1,0 +1,180 @@
+{% extends 'base_rigs.html' %}
+
+{% load widget_tweaks %}
+{% load static %}
+{% load multiply from filters %}
+{% load button from filters %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/easymde.min.css' %}">
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/easymde.min.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            setupMDE('#id_description');
+        });
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+<form class="row" role="form" method="POST">
+    {% csrf_token %}
+    <div class="col-12">
+        {% include 'form_errors.html' %}
+    </div>
+    {# Contact details #}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Contact Details</div>
+            <div class="card-body">
+                <div class="form-group" data-toggle="tooltip">
+                    <label for="{{ form.person.id_for_label }}">Primary Contact</label>
+                    <div class="row">
+                        <div class="col-9">
+                            <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
+                                {% if person %}
+                                    <option value="{{form.person.value}}" selected="selected" data-update_url="{% url 'person_update' form.person.value %}">{{ person }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-3 align-right">
+                            <div class="btn-group">
+                                <a href="{% url 'person_create' %}" class="btn btn-success modal-href"
+                                   data-target="#{{ form.person.id_for_label }}">
+                                    <span class="fas fa-plus"></span>
+                                </a>
+                                <a {% if form.person.value %}href="{% url 'person_update' form.person.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.person.id_for_label }}-update" data-target="#{{ form.person.id_for_label }}">
+                                    <span class="fas fa-user-edit"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.organisation.id_for_label }}">Hire Company</label>
+                    <div class="row">
+                        <div class="col-9">
+                            <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}">
+                                {% if organisation %}
+                                    <option value="{{form.organisation.value}}" selected="selected" data-update_url="{% url 'organisation_update' form.organisation.value %}">{{ organisation }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-3 align-right">
+                            <div class="btn-group">
+                                <a href="{% url 'organisation_create' %}" class="btn btn-success modal-href"
+                                   data-target="#{{ form.organisation.id_for_label }}">
+                                    <span class="fas fa-plus"></span>
+                                </a>
+                                <a {% if form.organisation.value %}href="{% url 'organisation_update' form.organisation.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.organisation.id_for_label }}-update" data-target="#{{ form.organisation.id_for_label }}">
+                                    <span class="fas fa-edit"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Event details #}
+    <div class="col-md-6 mb-2">
+        <div class="card card-default">
+            <div class="card-header">Event Details</div>
+            <div class="card-body">
+                <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
+                    <label for="{{ form.name.id_for_label }}"
+                           class="col-sm-4 col-form-label">{{ form.name.label }}</label>
+                    <div class="col-sm-8">
+                        {% render_field form.name class+="form-control" %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.start_date.id_for_label }}"
+                           class="col-sm-4 col-form-label">{{ form.start_date.label }}</label>
+                    <div class="col-sm-8">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="Start date for event, required">
+                                {% render_field form.start_date class+="form-control" %}
+                            </div>
+                            <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="Start time of event, can be left blank">
+                                {% render_field form.start_time class+="form-control" step="60" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.end_date.id_for_label }}"
+                           class="col-sm-4 col-form-label">{{ form.end_date.label }}</label>
+                    <div class="col-sm-8">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
+                                {% render_field form.end_date class+="form-control" %}
+                            </div>
+                            <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="End time of event, leave blank if unknown">
+                                {% render_field form.end_time class+="form-control" step="60" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" data-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
+                    <label for="{{ form.status.id_for_label }}"
+                           class="col-sm-4 col-form-label">{{ form.status.label }}</label>
+                    <div class="col-sm-8">
+                        {% render_field form.status class+="form-control" %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.purchase_order.id_for_label }}"
+                           class="col-sm-4 col-form-label">{{ form.purchase_order.label }}</label>
+                    <div class="col-sm-8">
+                        {% render_field form.purchase_order class+="form-control" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Equipment Information</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}"
+                       class="col-sm-4 col-form-label">{{ form.description.label }}</label>
+                <div class="col-sm-12">
+                    {% render_field form.description class+="form-control" %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.insurance_value.id_for_label }}"
+                       class="col-sm-6 col-form-label">{{ form.insurance_value.label }}</label>
+                <div class="col-sm-8 input-group">
+                    <div class="input-group-prepend"><span class="input-group-text">£</span></div>
+                    {% render_field form.insurance_value class+="form-control" %}
+                </div>
+                <div class="border border-info p-2 rounded mt-1" style="border-width: thin thin thin thick !important;">
+                    If this value is greater than £50,000 then please email productions@nottinghamtec.co.uk in addition to complete the additional insurance requirements
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 text-right my-3">
+        {% button 'submit' %}
+    </div>
+</form>
+{% endblock %}
