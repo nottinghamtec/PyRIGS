@@ -5,21 +5,6 @@
 
 {% block title %}Request Authorisation{% endblock %}
 
-{% block js %}
-    <script src="{% static 'js/tooltip.js' %}"></script>
-    <script src="{% static 'js/popover.js' %}"></script>
-    <script src="{% static 'js/clipboard.min.js' %}"></script>
-    <script>
-        var clipboard = new ClipboardJS('.btn');
-
-        clipboard.on('success', function(e) {
-            $(e.trigger).popover('show');
-            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
-            e.clearSelection();
-        });
-    </script>
-{% endblock %}
-
 {% block content %}
     <div class="row">
         <div class="col-sm-12">
@@ -33,11 +18,11 @@
                 <dl class="dl-horizontal">
                     {% if object.person.email %}
                     <dt>Person Email</dt>
-                    <dd><span id="person-email">{{ object.person.email }}</span>{% button 'copy' id='#person-email' %}</dd>
+                    <dd><span id="person-email" class="pr-1">{{ object.person.email }}</span> {% button 'copy' id='#person-email' %}</dd>
                     {% endif %}
                     {% if object.organisation.email %}
                     <dt>Organisation Email</dt>
-                    <dd><span id="org-email">{{ object.organisation.email }}</span>{% button 'copy' id='#org-email' %}</dd>
+                    <dd><span id="org-email" class="pr-1">{{ object.organisation.email }}</span> {% button 'copy' id='#org-email' %}</dd>
                     {% endif %}
                 </dl>
                 {% else %}
@@ -57,10 +42,19 @@
             </form>
         </div>
     </div>
-
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script src="{% static 'js/popover.js' %}"></script>
+    <script src="{% static 'js/clipboard.min.js' %}"></script>
     <script>
         $('#auth-request-form').on('submit', function () {
             $('#auth-request-form button').attr('disabled', true);
+        });
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function(e) {
+            $(e.trigger).popover('show');
+            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            e.clearSelection();
         });
     </script>
 {% endblock %}
