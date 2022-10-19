@@ -70,8 +70,11 @@ urlpatterns = [
     path('event/<int:pk>/duplicate/', permission_required_with_403('RIGS.add_event')(views.EventDuplicate.as_view()),
          name='event_duplicate'),
 
+    path('subhire/<int:pk>/', views.SubhireDetail.as_view(),
+          name='subhire_detail'),
     path('subhire/create/', permission_required_with_403('RIGS.add_event')(views.SubhireCreate.as_view()),
           name='subhire_create'),
+
 
     # Event H&S
     path('event/hs/', permission_required_with_403('RIGS.view_riskassessment')(views.HSList.as_view()), name='hs_list'),

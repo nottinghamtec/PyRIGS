@@ -1,0 +1,27 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+
+{% load markdown_tags %}
+
+{% block content %}
+<div class="row my-3 py-3">
+    <div class="col-md-6">
+        {% include 'partials/contact_details.html' %}
+    </div>
+    <div class="col-md-6">
+        {% include 'partials/event_details.html' %}
+    </div>
+    {% if not request.is_ajax and perms.RIGS.view_event %}
+        <div class="col-sm-12 text-right">
+            {% include 'partials/last_edited.html' with target="event_history" %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% if request.is_ajax %}
+    {% block footer %}
+            {% if perms.RIGS.view_event %}
+                {% include 'partials/last_edited.html' with target="event_history" %}
+            {% endif %}
+    {% endblock %}
+{% endif %}

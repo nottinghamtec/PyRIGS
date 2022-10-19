@@ -25,12 +25,10 @@
         {% include 'partials/hs_details.html' %}
     </div>
     {% endif %}
-    {% if event.is_rig %}
-        {% if event.is_rig and event.internal and perms.RIGS.view_event %}
-        <div class="col-md-8 py-3">
-            {% include 'partials/auth_details.html' %}
-        </div>
-    {% endif %}
+    {% if event.is_rig and event.internal and perms.RIGS.view_event %}
+    <div class="col-md-8 py-3">
+        {% include 'partials/auth_details.html' %}
+    </div>
     {% endif %}
     {% if not request.is_ajax and perms.RIGS.view_event %}
     <div class="col-sm-12 text-right">

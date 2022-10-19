@@ -572,9 +572,15 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
+@reversion.register
 class Subhire(BaseEvent):
     insurance_value = models.DecimalField(max_digits=10, decimal_places=2) # TODO Validate if this is over notifiable threshold
     # TODO Associated events
+
+    @property
+    def display_id(self):
+        return f"S{self.pk:05d}"
+
 
 class InvoiceManager(models.Manager):
     def outstanding_invoices(self):
