@@ -96,7 +96,7 @@
     {# Event details #}
     <div class="col-md-6 mb-2">
         <div class="card card-default">
-            <div class="card-header">Event Details</div>
+            <div class="card-header">Hire Details</div>
             <div class="card-body">
                 <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
                     <label for="{{ form.name.id_for_label }}"
@@ -147,6 +147,14 @@
                         {% render_field form.purchase_order class+="form-control" %}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Associated Event(s)</div>
+        <div class="card-body">
+            <div class="form-group">
+              <select multiple name="events" id="events_id" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='event' %}"></select>
             </div>
         </div>
     </div>

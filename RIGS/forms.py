@@ -132,6 +132,7 @@ class SubhireForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['start_date'].widget.format = '%Y-%m-%d'
         self.fields['end_date'].widget.format = '%Y-%m-%d'
 
     class Meta:

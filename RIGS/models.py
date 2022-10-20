@@ -575,7 +575,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
 @reversion.register
 class Subhire(BaseEvent):
     insurance_value = models.DecimalField(max_digits=10, decimal_places=2) # TODO Validate if this is over notifiable threshold
-    # TODO Associated events
+    events = models.ManyToManyField(Event)
 
     @property
     def display_id(self):
