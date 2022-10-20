@@ -1,13 +1,12 @@
 {% load nice_errors from filters %}
 {% if form.errors %}
-	<div class="alert alert-danger alert-dismissable">
-		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	<div class="alert alert-danger mb-0">
 		<dl>
 			{% with form|nice_errors as qq %}
 				{% for error_name,desc in qq.items %}
                 <span class="row">
-				    <dt class="col-4">{{error_name}}</dt>
-				    <dd class="col-8">{{desc}}</dd>
+				    <dt class="col-3">{{error_name}}</dt>
+				    <dd class="col-9">{{desc}}</dd>
                 </span>
 				{% endfor %}
 			{% endwith %}
