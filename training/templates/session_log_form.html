@@ -28,25 +28,26 @@
             {% include 'form_errors.html' %}
             {% csrf_token %}
             <h3>People</h3>
-            <div class="form-group row">
+            <div class="form-group row" id="supervisor_group">
               {% include 'partials/supervisor_field.html' %}
             </div>
-            <div class="form-group row">
+            <div class="form-group row" id="trainees_group">
               <label for="trainees_id" class="col-sm-2">Select Attendees</label>
-              <select multiple name="trainees" id="trainees_id" class="selectpicker col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+              <select multiple name="trainees" id="trainees_id" class="selectpicker col-sm-10" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" data-noclear="true">
               </select>
             </div>
             <h3>Training Items</h3>
             {% for depth in depths %}
-            <div class="form-group row">
+            <div class="form-group row" id="{{depth.0}}">
               <label for="selectpicker" class="col-sm-2 text-{% colour_from_depth depth.0 %} py-1">{{ depth.1 }} Items</label>
-              <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active">
+              <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="selectpicker col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active" data-noclear="true">
               </select>
             </div>
             {% endfor %}
             <h3>Session Information</h3>
-            <div class="form-group">
-                {% include 'partials/form_field.html' with field=form.date %}
+            <div class="form-group row">
+                {% include 'partials/form_field.html' with field=form.date col='col-sm-6' %}
+                {% button 'today' id='id_date' %}
             </div>
             <div class="form-group">
               {% include 'partials/form_field.html' with field=form.notes %}

@@ -31,6 +31,15 @@ def training_item(db):
 
 
 @pytest.fixture
+def training_item_2(db):
+    training_category = models.TrainingCategory.objects.create(reference_number=2, name="Sound")
+    training_item = models.TrainingItem.objects.create(category=training_category, reference_number=1, description="Fundamentals of Audio")
+    yield training_item
+    training_category.delete()
+    training_item.delete()
+
+
+@pytest.fixture
 def level(db):
     level = models.TrainingLevel.objects.create(description="There is no description.", level=models.TrainingLevel.TECHNICIAN)
     yield level

@@ -216,6 +216,8 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
         return {'submit': True, 'class': 'btn-info', 'icon': 'fa-search', 'text': 'Search', 'id': id, 'style': style}
     elif type == 'submit':
         return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save', 'id': id, 'style': style}
+    elif type == 'today':
+        return {'today': True, 'id': id}
     return {'target': url, 'pk': pk, 'class': clazz, 'icon': icon, 'text': text, 'id': id, 'style': style}
 
 
