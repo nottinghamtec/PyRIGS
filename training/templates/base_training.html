@@ -30,7 +30,7 @@
         <a class="dropdown-item" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> Item List</a>
       </div>
     </li>
-    {% if perms.training.add_trainingitemqualification or request.user.is_supervisor %}
+    {% if request.user.is_supervisor %}
     <li class="nav-item"><a class="nav-link" href="{% url 'session_log' %}"><span class="fas fa-users"></span> Log Session</a></li>
     {% endif %}
     <li class="nav-item"><a class="nav-link" href="{% url 'training_activity_table' %}"><span class="fas fa-random"></span> Recent Changes</a></li>

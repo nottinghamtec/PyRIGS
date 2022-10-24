@@ -28,6 +28,7 @@ def admin_user(admin_user):
     admin_user.last_name = "Test"
     admin_user.initials = "ETU"
     admin_user.is_approved = True
+    admin_user.is_supervisor = True
     admin_user.save()
     return admin_user
 

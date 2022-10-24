@@ -201,7 +201,7 @@ class TrainingItemQualification(models.Model, RevisionMixin):
 
     @property
     def activity_feed_string(self):
-        return f"{self.trainee} {self.get_depth_display().lower()} {self.get_depth_display()} in {self.item}"
+        return f"{self.trainee} {self.get_depth_display().lower()} in {self.item}"
 
     @classmethod
     def get_colour_from_depth(cls, depth):
