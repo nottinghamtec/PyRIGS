@@ -79,10 +79,10 @@ django-hcaptcha = "*"
 pikepdf = "*"
 django-queryable-properties = "*"
 django-mass-edit = "*"
-selenium = "==3.141.0"
 
 [dev-packages]
-pycodestyle = "*"
+selenium = "~=3.141.0"
+pycodestyle = "~=2.9.1"
 coveralls = "*"
 django-coverage-plugin = "*"
 pytest-cov = "*"
