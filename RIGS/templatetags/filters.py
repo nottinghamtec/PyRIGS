@@ -118,9 +118,9 @@ def orderby(request, field, attr):
 @register.filter(needs_autoescape=True)  # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
-    if(isinstance(value, bool)):
+    if (isinstance(value, bool)):
         value = yesnoi(value, field in obj.inverted_fields)
-    elif(isinstance(value, str)):
+    elif (isinstance(value, str)):
         value = truncatewords(value, 20)
     return mark_safe(value)
 
@@ -144,7 +144,7 @@ def get_list(dictionary, key):
 
 @register.filter
 def profile_by_index(value):
-    if(value):
+    if (value):
         return models.Profile.objects.get(pk=int(value))
     else:
         return ""

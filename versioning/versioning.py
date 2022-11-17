@@ -183,7 +183,7 @@ class ModelComparison:
     def name(self):
         obj = self.new if self.new else self.old
 
-        if(hasattr(obj, 'activity_feed_string')):
+        if (hasattr(obj, 'activity_feed_string')):
             return obj.activity_feed_string
         else:
             return str(obj)

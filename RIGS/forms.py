@@ -217,7 +217,7 @@ class EventChecklistForm(forms.ModelForm):
         for key in vehicles:
             pk = int(key.split('_')[1])
             driver_key = 'driver_' + str(pk)
-            if(self.data[driver_key] == ''):
+            if (self.data[driver_key] == ''):
                 raise forms.ValidationError('Add a driver to vehicle ' + str(pk), code='vehicle_mismatch')
             else:
                 try:
