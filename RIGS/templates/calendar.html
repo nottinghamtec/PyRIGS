@@ -4,194 +4,56 @@
 {% block title %}Calendar{% endblock %}
 
 {% block css %}
-<link href="{% static 'css/main.css' %}" rel='stylesheet' />
-{% endblock %}
+<style>
 
-{% block js %}
-    <script src="{% static 'js/moment.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-    <script>
-        viewToUrl = {
-            'timeGridWeek':'week',
-            'timeGridDay':'day',
-            'dayGridMonth':'month'
-        }
-        viewFromUrl = {
-            'week':'timeGridWeek',
-            'day':'timeGridDay',
-            'month':'dayGridMonth'
-        }
-        var calendar; //Need to access it from jquery ready
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
+.calendar {
+  width: 98%;
+  margin: auto;
+  font-size: 13px;
+}
 
-            calendar = new FullCalendar.Calendar(calendarEl, {
-              themeSystem: 'bootstrap',
-              aspectRatio: 1.5,
-              eventTimeFormat: {
-                'hour': '2-digit',
-                'minute': '2-digit',
-                'hour12': false
-              },
-              headerToolbar: false,
-              editable: false,
-              dayMaxEventRows: true, // allow "more" link when too many events
-              events: function(fetchInfo, successCallback, failureCallback) {
-                    $.ajax({
-                        url: '/api/event',
-                        dataType: 'json',
-                        data: {
-                            start: moment(fetchInfo.startStr).format("YYYY-MM-DD[T]HH:mm:ss"),
-                            end: moment(fetchInfo.endStr).format("YYYY-MM-DD[T]HH:mm:ss")
-                        },
-                        success: function(doc) {
-                            var events = [];
-                            colours = {
-                                'Provisional': '#FFE89B',
-                                'Confirmed': '#3AB54A' ,
-                                'Booked': '#3AB54A' ,
-                                'Cancelled': 'grey' ,
-                                'non-rig': '#25AAE2'
-                            };
-                            $(doc).each(function() {
-                                end = $(this).attr('latest')
-                                allDay = false
-                                if(end.indexOf("T") < 0){ //If latest does not contain a time
-                                   end = moment(end + " 23:59").format("YYYY-MM-DD[T]HH:mm:ss")
-                                   allDay = true
-                                }
+.calendar tr, .calendar td {
+  border: 1px solid black;
+}
 
-                                thisEvent = {
-                                    'start': $(this).attr('earliest'),
-                                    'end': end,
-                                    'className': 'modal-href',
-                                    'title': $(this).attr('title'),
-                                    'url': $(this).attr('url'),
-                                    'allDay': allDay
-                                }
+.calendar th {
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+}
 
-                                if($(this).attr('is_rig')===true || $(this).attr('status') === "Cancelled"){
-                                    thisEvent['color'] = colours[$(this).attr('status')];
-                                }else{
-                                    thisEvent['color'] = colours['non-rig'];
-                                }
-                                events.push(thisEvent);
-                            });
-                            successCallback(events);
-                        }
-                    });
-                },
-                datesSet: function(info) {
-                    var view = info.view;
-                    // Set the title of the view
-                    $('#calendar-header').text(view.title);
+.calendar td {
+  width: 200px;
+  height: 150px;
+  padding: 20px 0px 0px 5px;
+}
 
-                    // Enable/Disable "Today" button as required
-                    let $today = $('#today-button');
-                    if(moment().isBetween(view.currentStart, view.currentEnd)){
-                        //Today is within the current view
-                        $today.prop('disabled', true);
-                    }else{
-                        $today.prop('disabled', false);
-                    }
+.month {
+  font-size: 25px;
+}
 
-                    // Set active view select button
-                    let $month = $('#month-button');
-                    let $week = $('#week-button');
-                    let $day = $('#day-button');
-                    switch(view.type){
-                        case 'dayGridMonth':
-                            $month.addClass('active');
-                            $week.removeClass('active');
-                            $day.removeClass('active');
-                            break;
+.date {
+  font-size: 16px;
+}
 
-                        case 'timeGridWeek':
-                            $month.removeClass('active');
-                            $week.addClass('active');
-                            $day.removeClass('active');
-                            break;
+ul {
+  height: 100%;
+  padding: 0px 5px 0px 20px;
+}
 
-                        case 'timeGridDay':
-                            $month.removeClass('active');
-                            $week.removeClass('active');
-                            $day.addClass('active');
-                            break;
-                    }
-                    history.replaceState(null,null,"{% url 'web_calendar' %}"+viewToUrl[view.type]+'/'+moment(view.currentStart).format('YYYY-MM-DD')+'/');
-                }
-            });
-            calendar.render();
-        });
-        $(document).ready(function() {
-            // set some button listeners
-            $('#next-button').click(function(){ calendar.next(); });
-            $('#prev-button').click(function(){ calendar.prev(); });
-            $('#today-button').click(function(){ calendar.today(); });
-            $('#month-button').click(function(){ calendar.changeView('dayGridMonth'); });
-            $('#week-button').click(function(){ calendar.changeView('timeGridWeek'); });
-            $('#day-button').click(function(){ calendar.changeView('timeGridDay'); });
-            $('#go-to-date-input').change(function(){
-                if(moment($('#go-to-date-input').val()).isValid()){
-                    $('#go-to-date-button').prop('disabled', false);
-                } else{
-                    $('#go-to-date-button').prop('disabled', true);
-                }
-            });
-            $('#go-to-date-button').click(function(){
-                day = moment($('#go-to-date-input').val());
-                if(day.isValid()){
-                    calendar.gotoDate(day.format("YYYY-MM-DD"));
-                } else{
-                    alert('Invalid Date');
-                }
-            });
-            {% if view and date %}
-            // Go to the initial settings, if they're valid
-            view = viewFromUrl['{{view}}'];
-            calendar.changeView(view);
-            day = moment('{{date}}');
-            if(day.isValid()){
-                calendar.gotoDate(day.format("YYYY-MM-DD"));
-            } else{
-                console.log('Supplied date is invalid - using default')
-            }
-            {% endif %}
-        });
-    </script>
+a {
+  color: #17a2b8;
+}
+.badge-purple, .bg-purple {
+    background-color: #800080 !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="pull-left">
-                <span id="calendar-header" class="h2"></span>
-            </div>
-            <div class="form-inline float-right btn-page my-3">
-                <div class="input-group mx-2">
-                  <input type="date" class="form-control" id="go-to-date-input" placeholder="Go to date...">
-                  <span class="input-group-append">
-                    <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
-                  </span>
-                </div>
-                <div class="btn-group mx-2">
-                  <button type="button" class="btn btn-primary" id="today-button">Today</button>
-                </div>
-                <div class="btn-group mx-2">
-                  <button type="button" class="btn btn-secondary" id="prev-button"><span class="fas fa-chevron-left"></span></button>
-                  <button type="button" class="btn btn-secondary" id="next-button"><span class="fas fa-chevron-right"></span></button>
-                </div>
-                <div class="btn-group ml-2">
-                  <button type="button" class="btn btn-light" id="month-button">Month</button>
-                  <button type="button" class="btn btn-light" id="week-button">Week</button>
-                  <button type="button" class="btn btn-light" id="day-button">Day</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div id='calendar'></div>
-        </div>
-    </div>
+<div class="clearfix">
+	<a class="btn btn-info left" href="{% url 'web_calendar' %}?{{ prev_month }}"> Previous Month </a>
+	<a class="btn btn-info right" href="{% url 'web_calendar' %}?{{ next_month }}"> Next Month </a>
+</div>
+{{ calendar }}
 {% endblock %}

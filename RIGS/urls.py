@@ -43,12 +43,8 @@ urlpatterns = [
 
     # Rigboard
     path('rigboard/', login_required(views.RigboardIndex.as_view()), name='rigboard'),
-    path('rigboard/calendar/', login_required()(views.WebCalendar.as_view()),
+    re_path(r'^rigboard/calendar/$', login_required()(views.WebCalendar.as_view()),
          name='web_calendar'),
-    re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
-            login_required()(views.WebCalendar.as_view()), name='web_calendar'),
-    re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
-            login_required()(views.WebCalendar.as_view()), name='web_calendar'),
     path('rigboard/archive/', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
 
 
@@ -77,7 +73,7 @@ urlpatterns = [
     path('subhire/create/', permission_required_with_403('RIGS.add_event')(views.SubhireCreate.as_view()),
           name='subhire_create'),
     path('subhire/<int:pk>/edit', views.SubhireEdit.as_view(),
-          name='subhire_edit'),
+          name='subhire_update'),
 
 
     # Event H&S

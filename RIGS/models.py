@@ -401,6 +401,12 @@ class BaseEvent(models.Model, RevisionMixin):
             errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
         return errdict
 
+    @property
+    def get_html_url(self):
+        return f'<a href="{self.get_edit_url()}"><span class="badge badge-{self.color}">{self}</span></a>'
+
+    def __str__(self):
+        return f"{self.display_id}: {self.name}"
 
 @reversion.register(follow=['items'])
 class Event(BaseEvent):
@@ -502,13 +508,29 @@ class Event(BaseEvent):
         else:
             return bool(self.purchase_order)
 
+    @property
+    def color(self):
+        if self.cancelled:
+            return "secondary"
+        elif not self.is_rig:
+            return "info"
+        elif not self.mic:
+            return "danger"
+        elif self.confirmed and self.authorised:
+            if self.dry_hire or self.riskassessment:
+               return "success"
+            else:
+                return "warning"
+        else:
+            return "warning"
+
     objects = EventManager()
 
     def get_absolute_url(self):
         return reverse('event_detail', kwargs={'pk': self.pk})
 
-    def __str__(self):
-        return f"{self.display_id}: {self.name}"
+    def get_edit_url(self):
+        return reverse('event_update', kwargs={'pk': self.pk})
 
     def clean(self):
         errdict = super.clean()
@@ -580,6 +602,13 @@ class Subhire(BaseEvent):
     @property
     def display_id(self):
         return f"S{self.pk:05d}"
+
+    @property
+    def color(self):
+        return "purple"
+
+    def get_edit_url(self):
+        return reverse('subhire_update', kwargs={'pk': self.pk})
 
 
 class InvoiceManager(models.Manager):

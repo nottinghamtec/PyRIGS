@@ -17,12 +17,13 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.html import mark_safe
 from django.utils.decorators import method_decorator
 from django.views import generic
 
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
-from RIGS import models, forms
+from RIGS import models, forms, utils
 
 __author__ = 'ghost'
 
@@ -40,14 +41,24 @@ class RigboardIndex(generic.TemplateView):
         return context
 
 
-class WebCalendar(generic.TemplateView):
+class WebCalendar(generic.ListView):
+    model = models.Event
     template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['view'] = kwargs.get('view', '')
-        context['date'] = kwargs.get('date', '')
-        # context['page_title'] = "Calendar"
+
+        # use today's date for the calendar
+        d = utils.get_date(self.request.GET.get('month', None))
+        context['prev_month'] = utils.prev_month(d)
+        context['next_month'] = utils.next_month(d)
+
+        # Instantiate our calendar class with today's year and date
+        cal = utils.Calendar(d.year, d.month)
+
+        # Call the formatmonth method, which returns our calendar as a table
+        html_cal = cal.formatmonth(withyear=True)
+        context['calendar'] = mark_safe(html_cal)
         return context
 
 
