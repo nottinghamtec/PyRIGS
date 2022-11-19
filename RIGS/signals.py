@@ -58,13 +58,13 @@ def send_eventauthorisation_success_email(instance):
 
     client_email = EmailMultiAlternatives(
         subject,
-        get_template("eventauthorisation_client_success.txt").render(context),
+        get_template("email/eventauthorisation_client_success.txt").render(context),
         to=[instance.email],
         reply_to=[settings.AUTHORISATION_NOTIFICATION_ADDRESS],
     )
 
     css = finders.find('css/email.css')
-    html = Premailer(get_template("eventauthorisation_client_success.html").render(context),
+    html = Premailer(get_template("email/eventauthorisation_client_success.html").render(context),
                      external_styles=css).transform()
     client_email.attach_alternative(html, 'text/html')
 
@@ -82,7 +82,7 @@ def send_eventauthorisation_success_email(instance):
 
     mic_email = EmailMessage(
         subject,
-        get_template("eventauthorisation_mic_success.txt").render(context),
+        get_template("email/eventauthorisation_mic_success.txt").render(context),
         to=[mic_email_address]
     )
 
@@ -117,12 +117,12 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 
             email = EmailMultiAlternatives(
                 f"{context['number_of_users']} new users awaiting approval on RIGS",
-                get_template("admin_awaiting_approval.txt").render(context),
+                get_template("email/admin_awaiting_approval.txt").render(context),
                 to=[admin.email],
                 reply_to=[user.email],
             )
             css = finders.find('css/email.css')
-            html = Premailer(get_template("admin_awaiting_approval.html").render(context),
+            html = Premailer(get_template("email/admin_awaiting_approval.html").render(context),
                              external_styles=css).transform()
             email.attach_alternative(html, 'text/html')
             email.send()

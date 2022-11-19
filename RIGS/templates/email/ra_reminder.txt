@@ -1,0 +1,9 @@
+Hi {{event.mic.get_full_name|default_if_none:"Productions Manager"}},
+
+{% if event.mic %}
+Just to let you know your event {{event.display_id}} requires a risk assessment completing prior to the event. Please do so as soon as possible.
+{% else %}
+This is a reminder that event {{event.display_id}} requires a MIC assigning and a risk assessment completing.
+{% endif %}
+
+The TEC Rig Information Gathering System

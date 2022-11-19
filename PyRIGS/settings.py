@@ -42,8 +42,9 @@ if not DEBUG:
 
 INTERNAL_IPS = ['127.0.0.1']
 
-ADMINS = [('Tom Price', 'tomtom5152@gmail.com'), ('IT Manager', 'it@nottinghamtec.co.uk'),
-          ('Arona Jones', 'arona.jones@nottinghamtec.co.uk')]
+DOMAIN = env('DOMAIN', default='example.com')
+
+ADMINS = [('IT Manager', f'it@{DOMAIN}'), ('Arona Jones', 'arona.jones@{DOMAIN}')]
 if DEBUG:
     ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 

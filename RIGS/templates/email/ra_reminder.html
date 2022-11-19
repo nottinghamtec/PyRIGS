@@ -1,0 +1,16 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+    <p>Hi {{event.mic.get_full_name|default_if_none:"Productions Manager"}},</p>
+
+    {% if event.mic %}
+    <p>Just to let you know your event {{event.display_id}} <em>requires<em> a pre-event risk assessment completing prior to the event. Please do so as soon as possible.</p>
+    {% else %}
+    <p>This is a reminder that event {{event.display_id}} requires a MIC assigning and a risk assessment completing.</p>
+    {% endif %}
+
+    <p>Fill it out here:</p>
+    <a href="{{url}}" class="btn btn-info"><span class="fas fa-paperclip"></span> Create Risk Assessment</a>
+
+    <p>TEC PA &amp; Lighting</p>
+{% endblock %}

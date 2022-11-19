@@ -1,0 +1,5 @@
+Hi {{object.event.mic.get_full_name|default_if_none:"somebody"}},
+
+Just to let you know your event N{{object.eventdisplay_id}} has been successfully authorised for £{{object.amount}} by {{object.name}} as of {{object.event.last_edited_at}}.
+
+The TEC Rig Information Gathering System
