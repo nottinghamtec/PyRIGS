@@ -3,6 +3,24 @@ import calendar
 from calendar import HTMLCalendar
 from RIGS.models import BaseEvent, Event, Subhire
 
+def get_html(events, day):
+    d = ''
+    for event in events:
+            # Open shared stuff
+            d += f'<a href="{event.get_edit_url()}" class="modal-href"><span class="badge badge-{event.color} w-100 text-left"'
+            if event.start_date.day != event.end_date.day:
+                if day == event.start_date.day:
+                    d += f'style="border-top-right-radius: 0; border-bottom-right-radius: 0;">{event}'
+                elif day == event.end_date.day:
+                    d += f'style="border-top-left-radius: 0; border-bottom-left-radius: 0;">&nbsp;'
+                else:
+                    d += f'style="border-radius: 0;">&nbsp;'
+            else:
+                d += f'{event}'
+            # Close shared stuff
+            d += "</span></a>"
+    return d
+
 class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None):
         self.year = year
@@ -12,16 +30,11 @@ class Calendar(HTMLCalendar):
     # formats a day as a td
     # filter events by day
     def formatday(self, day, events, subhires):
-        events_per_day = events.filter(start_date__day=day)
-        subhires_per_day = subhires.filter(start_date__day=day)
-        d = ''
-        for event in events_per_day:
-            d += f'{event.get_html_url}<br>'
-        for subhire in subhires_per_day:
-            d += f'{subhire.get_html_url}<br>'
-
+        events_per_day = events.order_by("start_date").filter(start_date__day__lte=day, end_date__day__gte=day)
+        subhires_per_day = subhires.order_by("start_date").filter(start_date__day__lte=day, end_date__day__gte=day)
+        d = get_html(events_per_day, day) + get_html(subhires_per_day, day)
         if day != 0:
-            return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
+            return f"<td valign='top' class='days'><span class='date'>{day}</span><br>{d}</td>"
         return '<td></td>'
 
     # formats a week as a tr
@@ -37,8 +50,7 @@ class Calendar(HTMLCalendar):
         events = Event.objects.filter(start_date__year=self.year, start_date__month=self.month)
         subhires = Subhire.objects.filter(start_date__year=self.year, start_date__month=self.month)
 
-        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
-        cal += f'{self.formatmonthname(self.year, self.month, withyear=withyear)}\n'
+        cal = f'<table cellpadding="0" cellspacing="0" class="calendar">\n'
         cal += f'{self.formatweekheader()}\n'
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f'{self.formatweek(week, events, subhires)}\n'

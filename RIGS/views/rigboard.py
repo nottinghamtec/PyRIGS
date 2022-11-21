@@ -47,7 +47,6 @@ class WebCalendar(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         # use today's date for the calendar
         d = utils.get_date(self.request.GET.get('month', None))
         context['prev_month'] = utils.prev_month(d)
@@ -59,6 +58,7 @@ class WebCalendar(generic.ListView):
         # Call the formatmonth method, which returns our calendar as a table
         html_cal = cal.formatmonth(withyear=True)
         context['calendar'] = mark_safe(html_cal)
+        context['page_title'] = d.strftime("%B %Y")
         return context
 
 

@@ -24,7 +24,6 @@ function fonts(done) {
 function styles(done) {
     const bs_select = ["bootstrap-select.css", "ajax-bootstrap-select.css"]
     return gulp.src(['pipeline/source_assets/scss/**/*.scss',
-                    'node_modules/fullcalendar/main.css',
                     'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                     'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
                     'node_modules/easymde/dist/easymde.min.css'
@@ -59,7 +58,6 @@ function scripts() {
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/moment/moment.js',
-                    'node_modules/fullcalendar/main.js',
                     'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
                     'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
                     'node_modules/easymde/dist/easymde.min.js',

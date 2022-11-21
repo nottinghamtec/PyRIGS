@@ -401,10 +401,6 @@ class BaseEvent(models.Model, RevisionMixin):
             errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
         return errdict
 
-    @property
-    def get_html_url(self):
-        return f'<a href="{self.get_edit_url()}"><span class="badge badge-{self.color}">{self}</span></a>'
-
     def __str__(self):
         return f"{self.display_id}: {self.name}"
 
@@ -503,7 +499,7 @@ class Event(BaseEvent):
 
     @property
     def authorised(self):
-        if self.internal:
+        if self.internal and hasattr(self, 'authorisation'):
             return self.authorisation.amount == self.total
         else:
             return bool(self.purchase_order)

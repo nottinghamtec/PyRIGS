@@ -1,59 +1,66 @@
 {% extends 'base_rigs.html' %}
 {% load static %}
 
-{% block title %}Calendar{% endblock %}
+{% block js %}
+<script src="{% static 'js/moment.js' %}"></script>
+<script>
+    $(document).ready(function() {
+            // set some button listeners
+            $('#today-button').click(function(){ calendar.today(); });
+            $('#go-to-date-input').change(function(){
+                if(moment($('#go-to-date-input').val()).isValid()){
+                    $('#go-to-date-button').prop('disabled', false);
+                } else{
+                    $('#go-to-date-button').prop('disabled', true);
+                }
+            });
+            $('#go-to-date-button').click(function(){
+                day = moment($('#go-to-date-input').val());
+                if(day.isValid()){
+                    calendar.gotoDate(day.format("YYYY-MM-DD"));
+                } else{
+                    alert('Invalid Date');
+                }
+            });
+        });
+</script>
+{% endblock %}
 
 {% block css %}
 <style>
-
-.calendar {
-  width: 98%;
-  margin: auto;
-  font-size: 13px;
-}
-
 .calendar tr, .calendar td {
-  border: 1px solid black;
+  border: 1px solid grey;
 }
-
-.calendar th {
-  padding: 10px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.calendar td {
-  width: 200px;
-  height: 150px;
-  padding: 20px 0px 0px 5px;
-}
-
-.month {
-  font-size: 25px;
-}
-
 .date {
-  font-size: 16px;
+    float: right;
 }
-
-ul {
-  height: 100%;
-  padding: 0px 5px 0px 20px;
+.days {
+    height: 20vh;
 }
-
-a {
-  color: #17a2b8;
+td {
+    width: calc(100% / 7);
 }
-.badge-purple, .bg-purple {
-    background-color: #800080 !important;
+th {
+    margin: 0.5em;
+    border-bottom: 3px solid grey;
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="clearfix">
-	<a class="btn btn-info left" href="{% url 'web_calendar' %}?{{ prev_month }}"> Previous Month </a>
-	<a class="btn btn-info right" href="{% url 'web_calendar' %}?{{ next_month }}"> Next Month </a>
+<div class="row justify-content-center">
+    <a class="btn btn-info col-2" href="{% url 'web_calendar' %}?{{ prev_month }}"><span class="fas fa-chevron-left"></span> Previous Month</a>
+    <div class="input-group col-4">
+        <input type="date" id="go-to-date-input" placeholder="Go to date...">
+        <span class="input-group-append">
+        <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
+        </span>
+    </div>
+    <button type="button" class="btn btn-primary col-2" id="today-button">Today</button>
+    <a class="btn btn-info mx-2 col-2" href="{% url 'web_calendar' %}?{{ next_month }}"><span class="fas fa-chevron-right"></span> Next Month</a>
 </div>
+
+<div class="table-responsive-md pt-2">
 {{ calendar }}
+</div>
 {% endblock %}
