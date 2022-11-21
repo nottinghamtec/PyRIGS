@@ -4,6 +4,8 @@
 <a href="{% url target pk %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%} {% if text == 'Print' %}target="_blank"{%endif%}><span class="fas {{ icon }} align-middle"></span> <span class="d-none d-sm-inline align-middle">{{ text }}</span></a>
 {% elif copy %}
 <button class="btn btn-secondary btn-sm mr-1" data-clipboard-target="{{id}}" data-content="Copied to clipboard!"><span class="fas fa-copy"></span></button>
+{% elif today %}
+<button class="btn btn-info col-sm-2" onclick="var date = new Date(); $('#{{id}}').val([date.getFullYear(), ('0' + (date.getMonth()+1)).slice(-2), ('0' + date.getDate()).slice(-2)].join('-'))" tabindex="-1" type="button">Today</button>
 {% else %}
 <a href="{% url target %}" class="btn {{ class }}" {% if id %}id="{{id}}"{%endif%} {% if style %}style="{{style}}"{%endif%}><span class="fas {{ icon }} align-middle"></span> <span class="d-none d-sm-inline align-middle">{{ text }}</span></a>
 {% endif %}

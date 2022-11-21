@@ -16,7 +16,7 @@ def test_add_qualification(admin_client, trainee, admin_user, training_item):
     response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': trainee.pk, 'item': training_item.pk})
     assertFormError(response, 'form', 'date', 'Qualification date may not be in the future')
     assertFormError(response, 'form', 'supervisor', 'One may not supervise oneself...')
-    response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': admin_user.pk, 'item': training_item.pk})
+    response = admin_client.post(url, {'date': date, 'trainee': admin_user.pk, 'supervisor': trainee.pk, 'item': training_item.pk})
     print(response.content)
     assertFormError(response, 'form', 'supervisor', 'Selected supervisor must actually *be* a supervisor...')
 

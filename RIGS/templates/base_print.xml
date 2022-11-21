@@ -84,7 +84,7 @@
                    bulletFontSize="10"/>
     </stylesheet>
 
-    <template > {# Note: page is 595x842 points (1 point=1/72in) #}
+    <template title="{{filename}}"> {# Note: page is 595x842 points (1 point=1/72in) #}
             <pageTemplate id="Headed" >
                 <pageGraphics>
                     <image file="static/imgs/paperwork/corner-tr-su.jpg" x="395" y="642" height="200" width="200"/>

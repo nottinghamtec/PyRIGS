@@ -47,14 +47,16 @@ function initPicker(obj) {
         //log: 3,
         preprocessData: function (data) {
             var i, l = data.length, array = [];
-            array.push({
-                        text: clearSelectionLabel,
-                        value: '',
-                        data:{
-                        	update_url: '',
-                        	subtext:''
-                        }
-                    });
+            if (!obj.data('noclear')) {
+                array.push({
+                            text: clearSelectionLabel,
+                            value: '',
+                            data:{
+                            	update_url: '',
+                            	subtext:''
+                            }
+                        });
+            }
 
             if (l) {
                 for(i = 0; i < l; i++){
@@ -71,11 +73,13 @@ function initPicker(obj) {
             return array;
         }
     };
-
-    obj.prepend($("<option></option>")
-		.attr("value",'')
-		.text(clearSelectionLabel)
-		.data('update_url',''));  //Add "clear selection" option
+    console.log(obj.data);
+    if (!obj.data('noclear')) {
+        obj.prepend($("<option></option>")
+		    .attr("value",'')
+		    .text(clearSelectionLabel)
+		    .data('update_url',''));  //Add "clear selection" option
+    }
 
 
 	obj.selectpicker().ajaxSelectPicker(options); //Initiaise selectPicker

@@ -44,7 +44,7 @@
 {% endblock %}
 
 {% block content %}
-{% if request.user.is_supervisor or perms.training.add_traininglevelrequirement %}
+{% if request.user.is_supervisor %}
 <div class="col-sm-12 text-right pr-0">
 <a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}" id="requirement_button">
 	<span class="fas fa-plus"></span> Add New Requirement
@@ -79,9 +79,9 @@
             {% endfor %}
             <tr><th colspan="3" class="text-center">{{object}}</th></tr>
             <tr>
-              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
-              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
-              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %} {% if request.user.is_supervisor or perms.training.delete_traininglevelrequirement %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline"" href="{% url 'remove_requirement' pk=req.pk %}" title="Delete requirement"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %} {% if request.user.is_supervisor %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %} {% if request.user.is_supervisor %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline" href="{% url 'remove_requirement' pk=req.pk %}"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
+              <td><ul class="list-unstyled">{% for req in object.passed_out_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 2 %} {% if request.user.is_supervisor %}<a type="button" class="btn btn-link tn-sm p-0 align-baseline"" href="{% url 'remove_requirement' pk=req.pk %}" title="Delete requirement"><span class="fas fa-trash-alt text-danger"></span></a>{%endif%}</li>{% endfor %}</ul></td>
             </tr>
           </tbody>
         </table>

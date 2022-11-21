@@ -36,7 +36,7 @@ class Profile(AbstractUser):
     initials = models.CharField(max_length=5, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default='')
     api_key = models.CharField(max_length=40, blank=True, editable=False, default='')
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False, verbose_name="Approval Status", help_text="Designates whether a staff member has approved this user.")
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
