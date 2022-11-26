@@ -75,7 +75,7 @@ urlpatterns = [
 
     path('event/<int:pk>/ra/', permission_required_with_403('RIGS.add_riskassessment')(views.EventRiskAssessmentCreate.as_view()),
          name='event_ra'),
-    path('event/ra/<int:pk>/', permission_required_with_403('RIGS.view_riskassessment')(views.EventRiskAssessmentDetail.as_view()),
+    path('event/ra/<int:pk>/', login_required(views.EventRiskAssessmentDetail.as_view()),
          name='ra_detail'),
     path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_riskassessment')(views.EventRiskAssessmentEdit.as_view()),
          name='ra_edit'),
@@ -87,7 +87,7 @@ urlpatterns = [
 
     path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.add_eventchecklist')(views.EventChecklistCreate.as_view()),
          name='event_ec'),
-    path('event/checklist/<int:pk>/', permission_required_with_403('RIGS.view_eventchecklist')(views.EventChecklistDetail.as_view()),
+    path('event/checklist/<int:pk>/', login_required(views.EventChecklistDetail.as_view()),
          name='ec_detail'),
     path('event/checklist/<int:pk>/edit/', permission_required_with_403('RIGS.change_eventchecklist')(views.EventChecklistEdit.as_view()),
          name='ec_edit'),
