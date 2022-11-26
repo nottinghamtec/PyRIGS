@@ -2,7 +2,6 @@ from django.urls import path
 
 from django.contrib.auth.decorators import login_required
 from training.decorators import is_supervisor
-from PyRIGS.decorators import permission_required_with_403
 
 from training import views, models
 from versioning.views import VersionHistory
@@ -12,10 +11,9 @@ urlpatterns = [
     path('item/<int:pk>/qualified_users/', login_required(views.ItemQualifications.as_view()), name='item_qualification'),
 
     path('trainee/list/', login_required(views.TraineeList.as_view()), name='trainee_list'),
-    path('trainee/<int:pk>/',
-         permission_required_with_403('RIGS.view_profile')(views.TraineeDetail.as_view()),
+    path('trainee/<int:pk>/', login_required(views.TraineeDetail.as_view()),
          name='trainee_detail'),
-    path('trainee/<int:pk>/history', permission_required_with_403('RIGS.view_profile')(VersionHistory.as_view()), name='trainee_history', kwargs={'model': models.Trainee, 'app': 'training'}),  # Not picked up automatically because proxy model (I think)
+    path('trainee/<int:pk>/history', login_required(VersionHistory.as_view()), name='trainee_history', kwargs={'model': models.Trainee, 'app': 'training'}),  # Not picked up automatically because proxy model (I think)
     path('trainee/<int:pk>/add_qualification/', is_supervisor()(views.AddQualification.as_view()),
          name='add_qualification'),
     path('trainee/edit_qualification/<int:pk>/', is_supervisor()(views.EditQualification.as_view()),
