@@ -20,7 +20,7 @@ class Command(BaseCommand):
         for event in events:
             earliest_time = event.earliest_time if isinstance(event.earliest_time, datetime.datetime) else timezone.make_aware(datetime.datetime.combine(event.earliest_time, datetime.time(00, 00)))
             # 48 hours = 172800 seconds
-            if not event.cancelled and not event.dry_hire and (earliest_time - timezone.now()).total_seconds() <= 172800 and not hasattr(event, 'riskassessment'):
+            if event.is_rig and not event.cancelled and not event.dry_hire and (earliest_time - timezone.now()).total_seconds() <= 172800 and not hasattr(event, 'riskassessment'):
                 context = {
                     "event": event,
                     "url": "https://" + settings.DOMAIN + reverse('event_ra', kwargs={'pk': event.pk})
