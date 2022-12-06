@@ -616,6 +616,9 @@ class Subhire(BaseEvent):
     def get_edit_url(self):
         return reverse('subhire_update', kwargs={'pk': self.pk})
 
+    def get_absolute_url(self):
+        return reverse('subhire_detail', kwargs={'pk': self.pk})
+
     @property
     def earliest_time(self):
         return find_earliest_event_time(self, [])

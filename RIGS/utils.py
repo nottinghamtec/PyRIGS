@@ -10,7 +10,7 @@ class Calendar(HTMLCalendar):
         super(Calendar, self).__init__()
 
     def get_html(self, day, event):
-        return f"<a href='{event.get_edit_url()}' class='modal-href' style='display: contents;'><div class='event event-start event-end bg-{event.color}' data-span='{event.length}' style='grid-column-start: {day[1]}'>{event}</div></a>"
+        return f"<a href='{event.get_absolute_url()}' class='modal-href' style='display: contents;'><div class='event event-start event-end bg-{event.color}' data-span='{event.length}' style='grid-column-start: calc({day[1]} + 1)'>{event}</div></a>"
 
     def formatmonth(self, withyear=True):
         events = Event.objects.filter(start_date__year=self.year, start_date__month=self.month)

@@ -23,7 +23,6 @@ $(document).ready(function () {
         s.type = 'text/javascript';
         document.body.appendChild(s);
         s.src = '{% static "js/asteroids.min.js"%}';
-        ga('send', 'event', 'easter_egg', 'activated');
     }
     easter_egg.load();
 });
