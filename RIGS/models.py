@@ -390,15 +390,25 @@ class BaseEvent(models.Model, RevisionMixin):
         else:
             return endDate
 
+    @property
+    def length(self):
+        start = self.earliest_time
+        if isinstance(self.earliest_time, datetime.datetime):
+            start = self.earliest_time.date()
+        end = self.latest_time
+        if isinstance(self.latest_time, datetime.datetime):
+            end = self.latest_time.date()
+        return (end - start).days
+
     def clean(self):
         errdict = {}
         if self.end_date and self.start_date > self.end_date:
-            errdict['end_date'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
+            errdict['end_date'] = ["Unless you've invented time travel, the event can't finish before it has started."]
 
         startEndSameDay = not self.end_date or self.end_date == self.start_date
         hasStartAndEnd = self.has_start_time and self.has_end_time
         if startEndSameDay and hasStartAndEnd and self.start_time > self.end_time:
-            errdict['end_time'] = ['Unless you\'ve invented time travel, the event can\'t finish before it has started.']
+            errdict['end_time'] = ["Unless you've invented time travel, the event can't finish before it has started."]
         return errdict
 
     def __str__(self):
@@ -605,6 +615,10 @@ class Subhire(BaseEvent):
 
     def get_edit_url(self):
         return reverse('subhire_update', kwargs={'pk': self.pk})
+
+    @property
+    def earliest_time(self):
+        return find_earliest_event_time(self, [])
 
 
 class InvoiceManager(models.Manager):
