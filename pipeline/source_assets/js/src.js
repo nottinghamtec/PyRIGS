@@ -4,16 +4,16 @@ Date.prototype.getISOString = function () {
         var dd = this.getDate().toString();
         return yyyy + '-' + (mm[1] ? mm : "0" + mm[0]) + '-' + (dd[1] ? dd : "0" + dd[0]); // padding
 };
-jQuery(document).ready(function () {
-    jQuery(document).on('click', '.modal-href', function (e) {
-        $link = jQuery(this);
+$(document).ready(function () {
+    $(document).on('click', '.modal-href', function (e) {
+        $link = $(this);
         // Anti modal inception
         if ($link.parents('#modal').length == 0) {
             e.preventDefault();
             modaltarget = $link.data('target');
             modalobject = "";
-            jQuery('#modal').load($link.attr('href'), function (e) {
-                jQuery('#modal').modal();
+            $('#modal').load($link.attr('href'), function (e) {
+                $('#modal').modal();
             });
         }
     });

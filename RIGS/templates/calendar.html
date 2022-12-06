@@ -3,23 +3,17 @@
 
 {% block js %}
 <script src="{% static 'js/moment.js' %}"></script>
+<script src="{% static 'js/interaction.js' %}"></script>
 <script>
     $(document).ready(function() {
             // set some button listeners
             $('#today-button').click(function(){ calendar.today(); });
             $('#go-to-date-input').change(function(){
                 if(moment($('#go-to-date-input').val()).isValid()){
-                    $('#go-to-date-button').prop('disabled', false);
+                    document.getElementById('go-to-date-button').classList.remove('disabled');
+                    document.getElementById('go-to-date-button').href = "?month=" + moment($('#go-to-date-input').val()).format("YYYY-MM");
                 } else{
-                    $('#go-to-date-button').prop('disabled', true);
-                }
-            });
-            $('#go-to-date-button').click(function(){
-                day = moment($('#go-to-date-input').val());
-                if(day.isValid()){
-                    calendar.gotoDate(day.format("YYYY-MM-DD"));
-                } else{
-                    alert('Invalid Date');
+                    document.getElementById('go-to-date-button').classList.add('disabled');
                 }
             });
         });
@@ -31,7 +25,6 @@
 .week {
   display:grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-flow: dense;
   grid-gap: 2px 10px;
   border: 1px solid black;
   height: 8em;
@@ -69,10 +62,6 @@
   border-bottom-left-radius: 5px;
 }
 
-.day:nth-child(1) > .event { grid-column-start: 1; }
-.day:nth-child(2) > .event { grid-column-start: 2; }
-.day:nth-child(3) > .event { grid-column-start: 3; }
-.day:nth-child(4) > .event { grid-column-start: 4; }
 
 [data-span="1"] { grid-column-end: span 1; }
 [data-span="2"] { grid-column-end: span 2; }
@@ -93,11 +82,13 @@ a {
 {% block content %}
 <div class="row justify-content-center mb-1">
     <a class="btn btn-info col-2" href="{% url 'web_calendar' %}?{{ prev_month }}"><span class="fas fa-chevron-left"></span> Previous Month</a>
-    <div class="input-group col-4">
-        <input type="date" id="go-to-date-input" placeholder="Go to date...">
-        <span class="input-group-append">
-        <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
-        </span>
+    <div class="form-inline col-4">
+        <div class="input-group">
+            <input type="date" id="go-to-date-input" placeholder="Go to date..." class="form-control">
+            <span class="input-group-append">
+            <a class="btn btn-success" id="go-to-date-button">Go!</a>
+            </span>
+        </div>
     </div>
     <button type="button" class="btn btn-primary col-2" id="today-button">Today</button>
     <a class="btn btn-info mx-2 col-2" href="{% url 'web_calendar' %}?{{ next_month }}"><span class="fas fa-chevron-right"></span> Next Month</a>
@@ -115,10 +106,14 @@ a {
 {% for week in weeks %}
 <div class="week">
     {% for day in week %}
-    <div class="day" id="{{day.0}}">
-        <h3 class="day-label text-muted">{% if day.0 != 0 %}{{day.0}}{% endif %}</h3>
-        {{ day.2|safe }}
-    </div>
+    {% if day.0 != 0 %}
+        <div class="day" id="{{day.0}}">
+            <h3 class="day-label text-muted">{{day.0}}</h3>
+            {{ day.2|safe }}
+        </div>
+    {% else %}
+    <div class="day"><span style="grid-column: {{day.1}} + 1; grid-row: 1 / span 4;"><span></div>
+    {% endif %}
     {% endfor %}
 </div>
 {% endfor %}
