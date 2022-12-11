@@ -350,12 +350,12 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
         msg = EmailMultiAlternatives(
             f"{self.object.display_id} | {self.object.name} - Event Authorisation Request",
-            get_template("eventauthorisation_client_request.txt").render(context),
+            get_template("email/eventauthorisation_client_request.txt").render(context),
             to=[email],
             reply_to=[self.request.user.email],
         )
         css = finders.find('css/email.css')
-        html = premailer.Premailer(get_template("eventauthorisation_client_request.html").render(context),
+        html = premailer.Premailer(get_template("email/eventauthorisation_client_request.html").render(context),
                                    external_styles=css).transform()
         msg.attach_alternative(html, 'text/html')
 
@@ -365,7 +365,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
 
 
 class EventAuthoriseRequestEmailPreview(generic.DetailView):
-    template_name = "eventauthorisation_client_request.html"
+    template_name = "email/eventauthorisation_client_request.html"
     model = models.Event
 
     def render_to_response(self, context, **response_kwargs):

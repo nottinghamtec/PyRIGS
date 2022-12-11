@@ -95,7 +95,7 @@ class AssetManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(asset_id__exact=query.upper()) | Q(description__icontains=query) | Q(serial_number__exact=query))
+            or_lookup = (Q(asset_id__exact=query.upper()) | Q(description__icontains=query) | Q(serial_number__exact=query) | Q(nickname__icontains=query))
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
@@ -125,6 +125,7 @@ class Asset(models.Model, RevisionMixin):
     purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
     replacement_cost = models.DecimalField(null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
     comments = models.TextField(blank=True)
+    nickname = models.CharField(max_length=120, blank=True)
 
     # Audit
     last_audited_at = models.DateTimeField(blank=True, null=True)
