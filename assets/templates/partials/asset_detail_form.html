@@ -22,6 +22,10 @@
       {% render_field form.description|add_class:'form-control' value=object.description %}
     </div>
     <div class="form-group">
+      <label for="{{ form.nickname.id_for_label }}">Nickname</label>
+      {% render_field form.nickname|add_class:'form-control' value=object.nickname %}
+    </div>
+    <div class="form-group">
       <label for="{{ form.category.id_for_label }}" >Category</label>
       {% render_field form.category|add_class:'form-control'%}
     </div>
@@ -45,7 +49,10 @@
     {% else %}
     <dt>Asset ID</dt>
     <dd>{{ object.asset_id }}</dd>
-
+    {% if object.nickname %}
+    <dt>Nickname</dt>
+    <dd>"{{ object.nickname }}"</dd>
+    {% endif %}
     <dt>Description</dt>
     <dd>{{ object.description }}</dd>
 
