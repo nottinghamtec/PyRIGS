@@ -600,10 +600,24 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
+class SubhireManager(models.Manager):
+    def current_events(self):
+        events = self.filter(
+            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True) & ~models.Q(
+                status=Event.CANCELLED)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now().date()) & ~models.Q(
+                status=Event.CANCELLED))  # Ends after
+        ).order_by('start_date', 'end_date', 'start_time', 'end_time').select_related('person', 'organisation')
+
+        return events
+
+
 @reversion.register
 class Subhire(BaseEvent):
     insurance_value = models.DecimalField(max_digits=10, decimal_places=2) # TODO Validate if this is over notifiable threshold
     events = models.ManyToManyField(Event)
+
+    objects = SubhireManager()
 
     @property
     def display_id(self):

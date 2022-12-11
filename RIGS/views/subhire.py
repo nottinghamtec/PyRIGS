@@ -46,3 +46,13 @@ class SubhireEdit(generic.UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('subhire_detail', kwargs={'pk': self.object.pk})
+
+
+class SubhireList(generic.TemplateView):
+    template_name = 'rigboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['events'] = models.Subhire.objects.current_events()
+        context['page_title'] = "Upcoming Subhire"
+        return context

@@ -74,6 +74,8 @@ urlpatterns = [
           name='subhire_create'),
     path('subhire/<int:pk>/edit', views.SubhireEdit.as_view(),
           name='subhire_update'),
+    path('subhire/upcoming', views.SubhireList.as_view(),
+          name='subhire_list'),
 
 
     # Event H&S
