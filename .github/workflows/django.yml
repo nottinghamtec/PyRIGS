@@ -13,18 +13,12 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
             python-version: 3.9
-      - uses: actions/cache@v3
-        id: pcache
-        with:
-            path: ~/.local/share/virtualenvs
-            key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
-            restore-keys: |
-              ${{ runner.os }}-pipenv-
+            cache: 'pipenv'
       - name: Install Dependencies
         run: |
               python3 -m pip install --upgrade pip pipenv
