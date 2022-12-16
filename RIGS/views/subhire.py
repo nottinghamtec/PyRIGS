@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 from django.views import generic
-from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
+from PyRIGS.views import ModalURLMixin, get_related
 from RIGS import models, forms
 
 

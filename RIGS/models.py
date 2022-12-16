@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import pytz
 from django import forms
-from django.db.models import Q, F
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -17,8 +17,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
-from reversion.models import Version
 from versioning.versioning import RevisionMixin
+
+from .validators import validate_url
 
 
 def filter_by_pk(filt, query):
@@ -621,6 +622,8 @@ class SubhireManager(models.Manager):
 class Subhire(BaseEvent):
     insurance_value = models.DecimalField(max_digits=10, decimal_places=2) # TODO Validate if this is over notifiable threshold
     events = models.ManyToManyField(Event)
+    quote = models.URLField(default='', validators=[validate_url])
+
 
     objects = SubhireManager()
 
@@ -772,14 +775,6 @@ class Payment(models.Model, RevisionMixin):
     @property
     def activity_feed_string(self):
         return f"payment of £{self.amount}"
-
-
-def validate_url(value):
-    if not value:
-        return  # Required error is done the field
-    obj = urlparse(value)
-    if obj.hostname not in ('nottinghamtec.sharepoint.com'):
-        raise ValidationError('URL must point to a location on the TEC Sharepoint')
 
 
 @reversion.register

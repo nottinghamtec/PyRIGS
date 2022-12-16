@@ -188,6 +188,10 @@
                         If this value is greater than £50,000 then please email productions@nottinghamtec.co.uk in addition to complete the additional insurance requirements
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="{{ form.quote.id_for_label }}" class="col-sm-6 col-form-label">{{ form.quote.label }} (TEC SharePoint link)</label>
+                    <div class="col-sm-12">{% render_field form.quote class+="form-control" %}</div>
+                </div>
             </div>
         </div>
     </div>

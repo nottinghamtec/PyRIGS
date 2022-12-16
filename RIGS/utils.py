@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, date
 import calendar
 from calendar import HTMLCalendar
-from RIGS.models import BaseEvent, Event, Subhire
+from RIGS.models import Event, Subhire
+
 
 class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None):
