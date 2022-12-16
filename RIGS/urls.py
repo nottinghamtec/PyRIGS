@@ -77,6 +77,10 @@ urlpatterns = [
     path('subhire/upcoming', views.SubhireList.as_view(),
           name='subhire_list'),
 
+     # Dashboards
+     path('dashboard/productions/', views.ProductionsDashboard.as_view(),
+          name='productions_dashboard'),
+
 
     # Event H&S
     path('event/hs/', permission_required_with_403('RIGS.view_riskassessment')(views.HSList.as_view()), name='hs_list'),

@@ -261,15 +261,15 @@ class EventManager(models.Manager):
                                                                                                  'venue', 'mic')
         return events
 
+    def active_dry_hires(self):
+        return self.filter(dry_hire=True, start_date__gte=timezone.now(), is_rig=True)
+
     def rig_count(self):
-        event_count = self.filter(
+        event_count = self.exclude(status=BaseEvent.CANCELLED).filter(
             (models.Q(start_date__gte=timezone.now(), end_date__isnull=True, dry_hire=False,
-                      is_rig=True) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=timezone.now(), dry_hire=False, is_rig=True) & ~models.Q(
-                status=Event.CANCELLED)) |  # Ends after
-            (models.Q(dry_hire=True, start_date__gte=timezone.now(), is_rig=True) & ~models.Q(
-                status=Event.CANCELLED))  # Active dry hire
+                      is_rig=True)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now(), dry_hire=False, is_rig=True)) |  # Ends after
+            (models.Q(dry_hire=True, start_date__gte=timezone.now(), is_rig=True))  # Active dry hire
         ).count()
         return event_count
 
@@ -602,14 +602,19 @@ class EventAuthorisation(models.Model, RevisionMixin):
 
 class SubhireManager(models.Manager):
     def current_events(self):
-        events = self.filter(
-            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True) & ~models.Q(
-                status=Event.CANCELLED)) |  # Starts after with no end
-            (models.Q(end_date__gte=timezone.now().date()) & ~models.Q(
-                status=Event.CANCELLED))  # Ends after
+        events = self.exclude(status=BaseEvent.CANCELLED).filter(
+            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now().date()))  # Ends after
         ).order_by('start_date', 'end_date', 'start_time', 'end_time').select_related('person', 'organisation')
 
         return events
+
+    def event_count(self):
+        event_count = self.exclude(status=BaseEvent.CANCELLED).filter(
+            (models.Q(start_date__gte=timezone.now(), end_date__isnull=True)) |  # Starts after with no end
+            (models.Q(end_date__gte=timezone.now()))
+        ).count()
+        return event_count
 
 
 @reversion.register

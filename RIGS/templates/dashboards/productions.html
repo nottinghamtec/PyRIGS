@@ -1,0 +1,29 @@
+{% extends 'base_rigs.html' %}
+
+{% load button from filters %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Upcoming Events</div>
+            <div class="card-body">{{ rig_count }}</div>
+            <div class="card-footer"><a href={% url 'rigboard' %}>View</a></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Upcoming Subhire</div>
+            <div class="card-body">{{ subhire_count }}</div>
+            <div class="card-footer"><a href={% url 'subhire_list' %}>View</a></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Active Dry Hires</div>
+            <div class="card-body">{{ hire_count }}</div>
+            <div class="card-footer"><a href={% url 'rigboard' %}>View</a></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
