@@ -48,7 +48,7 @@
                 <h4>Event Items</h4>
                 </div>
                 {% include 'partials/item_table.html' %}
-                {% if event.subhire_set %}
+                {% if event.subhire_set.count > 0 %}
                     <div class="card-body"><h4>Associated Subhires</h4></div>
                     {% with event.subhire_set.all as events %}
                         {% include 'partials/event_table.html' %}

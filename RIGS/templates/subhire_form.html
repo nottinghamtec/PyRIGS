@@ -98,7 +98,13 @@
             <div class="card-header">Associated Event(s)</div>
             <div class="card-body">
                 <div class="form-group">
-                  <select multiple name="events" id="events_id" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='event' %}"></select>
+                  <select multiple name="events" id="events_id" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='event' %}">
+                    {% if object.events.count > 0 %}
+                        {% for event in object.events.all %}
+                        <option value="{{event.id}}" selected>{{ event }}</option>
+                        {% endfor %}
+                    {% endif %}
+                  </select>
                 </div>
             </div>
         </div>

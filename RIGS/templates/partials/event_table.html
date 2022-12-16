@@ -42,7 +42,7 @@
             <!---Details-->
             <td id="event_details" class="w-100">
                 <h4>
-                    <a href="{% url 'event_detail' event.pk %}">
+                    <a href="{{event.get_absolute_url}}">
                         {{ event.name }}
                     </a>
                     {% if event.venue %}
