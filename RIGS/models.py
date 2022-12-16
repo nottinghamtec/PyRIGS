@@ -642,6 +642,11 @@ class Subhire(BaseEvent):
     def earliest_time(self):
         return find_earliest_event_time(self, [])
 
+    class Meta:
+        permissions = [
+            ('subhire_finance', 'Can see financial data for subhire - insurance values')
+        ]
+
 
 class InvoiceManager(models.Manager):
     def outstanding_invoices(self):

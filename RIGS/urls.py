@@ -68,13 +68,13 @@ urlpatterns = [
 
 
     # Subhire
-    path('subhire/<int:pk>/', views.SubhireDetail.as_view(),
+    path('subhire/<int:pk>/', login_required(views.SubhireDetail.as_view()),
           name='subhire_detail'),
     path('subhire/create/', permission_required_with_403('RIGS.add_event')(views.SubhireCreate.as_view()),
           name='subhire_create'),
-    path('subhire/<int:pk>/edit', views.SubhireEdit.as_view(),
+    path('subhire/<int:pk>/edit', permission_required_with_403('RIGS.change_event')(views.SubhireEdit.as_view()),
           name='subhire_update'),
-    path('subhire/upcoming', views.SubhireList.as_view(),
+    path('subhire/upcoming', login_required(views.SubhireList.as_view()),
           name='subhire_list'),
 
      # Dashboards

@@ -40,15 +40,17 @@
                 <dl class="row">
                     <dt class="col-sm-6">Description</dt>
                     <dd class="col-sm-6">{{ object.description }}</dd>
+                    {% if perms.RIGS.subhire_finance %}
                     <dt class="col-sm-6">Insurance Value</dt>
                     <dd class="col-sm-6">£{{ object.insurance_value }}</dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>
     </div>
     <div class="col-md-12 mt-2">
         <div class="card card-default">
-            <div class="card-header">Associated Events</div>
+            <div class="card-header">Associated Event(s)</div>
             {% with object.events.all as events %}
                 {% include 'partials/event_table.html' %}
             {%endwith%}
