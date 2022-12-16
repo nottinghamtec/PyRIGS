@@ -46,14 +46,12 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12 mt-2">
         <div class="card card-default">
             <div class="card-header">Associated Events</div>
-            <div class="card-body">
-                {% for event in object.events.all %}
-                    {{event}}
-                {%endfor%}
-            </div>
+            {% with object.events.all as events %}
+                {% include 'partials/event_table.html' %}
+            {%endwith%}
         </div>
     </div>
     {% if not request.is_ajax and perms.RIGS.view_event %}
@@ -69,5 +67,6 @@
             {% if perms.RIGS.view_event %}
                 {% include 'partials/last_edited.html' with target="event_history" %}
             {% endif %}
+            <a href="{% url 'subhire_detail' object.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
     {% endblock %}
 {% endif %}
