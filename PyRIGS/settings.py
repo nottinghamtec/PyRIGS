@@ -27,6 +27,7 @@ STAGING = env('STAGING', cast=bool, default=False)
 CI = env('CI', cast=bool, default=False)
 
 ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
+CSRF_TRUSTED_ORIGINS = []
 
 if STAGING:
     ALLOWED_HOSTS.append('.herokuapp.com')
@@ -35,6 +36,7 @@ if DEBUG:
     ALLOWED_HOSTS.append('localhost')
     ALLOWED_HOSTS.append('example.com')
     ALLOWED_HOSTS.append('127.0.0.1')
+    CSRF_TRUSTED_ORIGINS.append('.preview.app.github.dev')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:

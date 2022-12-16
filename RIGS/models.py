@@ -539,7 +539,7 @@ class Event(BaseEvent):
         return reverse('event_update', kwargs={'pk': self.pk})
 
     def clean(self):
-        errdict = super.clean()
+        errdict = super().clean()
 
         if self.access_at is not None:
             if self.access_at.date() > self.start_date:
