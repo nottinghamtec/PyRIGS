@@ -1,14 +1,60 @@
 {% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 
 {% load markdown_tags %}
+{% load button from filters %}
 
 {% block content %}
 <div class="row my-3 py-3">
+    <div class="col-sm-12 text-right mb-2">
+        {% button 'edit' 'subhire_update' object.pk %}
+    </div>
     <div class="col-md-6">
         {% include 'partials/contact_details.html' %}
     </div>
     <div class="col-md-6">
-        {% include 'partials/event_details.html' %}
+        <div class="card card-default">
+            <div class="card-header">Hire Details</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-6">Name</dt>
+                    <dd class="col-sm-6">{{ object.name }}</dd>
+                    <dt class="col-sm-6">Event Starts</dt>
+                    <dd class="col-sm-6">{{ object.start_date|date:"D d M Y" }} {{ object.start_time|date:"H:i" }}</dd>
+
+                    <dt class="col-sm-6">Event Ends</dt>
+                    <dd class="col-sm-6">{{ object.end_date|date:"D d M Y" }} {{ object.end_time|date:"H:i" }}</dd>
+                    
+                    <dt class="col-sm-6">Status</dt>
+                    <dd class="col-sm-6">{{ object.get_status_display }}</dd>
+
+                    <dt class="col-sm-6">PO</dt>
+                    <dd class="col-sm-6">{{ object.po }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mt-2">
+        <div class="card card-default">
+            <div class="card-header">Equipment Information</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-6">Description</dt>
+                    <dd class="col-sm-6">{{ object.description }}</dd>
+                    <dt class="col-sm-6">Insurance Value</dt>
+                    <dd class="col-sm-6">£{{ object.insurance_value }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-default">
+            <div class="card-header">Associated Events</div>
+            <div class="card-body">
+                {% for event in object.events.all %}
+                    {{event}}
+                {%endfor%}
+            </div>
+        </div>
     </div>
     {% if not request.is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
