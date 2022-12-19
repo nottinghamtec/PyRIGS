@@ -1,0 +1,84 @@
+{% load linked_name from filters %}
+{% load markdown_tags %}
+<div class="table-responsive">
+    <table class="table mb-0" id="event_table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Dates & Times</th>
+                <th scope="col">Hire Details</th>
+                <th scope="col">Associated Event(s)</th>
+                {% if perms.RIGS.subhire_finance %}
+                <th scope="col">Insurance Value</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+        <tr {% if event.cancelled %}style="opacity: 50% !important;"{% endif %} id="event_row">
+            <!---Number-->
+            <th scope="row" id="event_number">{{ event.display_id }}</th>
+            <!--Dates & Times-->
+            <td id="event_dates" style="text-align: justify;">
+                <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}
+                {% if event.has_start_time %}
+                    {{ event.start_time|date:"H:i" }}
+                {% endif %}</strong>
+                </span>
+                {% if event.end_date %}
+                    <br>
+                    <span class="text-nowrap">End: {% if event.end_date != event.start_date %}<strong>{{ event.end_date|date:"D d/m/Y"  }}{% endif %}
+                    {% if event.has_end_time %}
+                       {{ event.end_time|date:"H:i" }}
+                    {% endif %}</strong>
+                    </span>
+                {% endif %}
+            </td>
+            <!---Details-->
+            <td id="event_details" class="w-100">
+                <h4>
+                    <a href="{{event.get_absolute_url}}">
+                        {{ event.name }}
+                    </a>
+                </h4>
+                <h5>
+                    Primary Contact: {{ event.person|linked_name }}
+                    {% if event.organisation %}
+                        ({{ event.organisation|linked_name }})
+                    {% endif %}
+                </h5>
+                {% if not event.cancelled and event.description %}
+                    <p>{{ event.description|markdown }}</p>
+                {% endif %}
+                {% include 'partials/event_status.html' %}
+            </td>
+            <td class="p-0 text-nowrap">
+                <ul class="list-group">
+                {% for event in event.events.all %}
+                <li class="list-group-item"><a href="{{event.get_absolute_url}}">{{ event }}</a></li>
+                {% endfor %}
+                </ul>
+            </td>
+            {% if perms.RIGS.subhire_finance %}
+            <td id="insurance_value" class="text-nowrap">
+                £{{ event.insurance_value }}
+            </td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr class="bg-warning">
+            <td colspan="4">No events found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Total Value:</td>
+                <td>£{{ total_value }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

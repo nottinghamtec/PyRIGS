@@ -175,6 +175,9 @@ def namewithnotes(obj, url, autoescape=True):
     else:
         return obj.name
 
+@register.filter(needs_autoescape=True)
+def linked_name(object, autoescape=True):
+    return mark_safe(f"<a href='{object.get_absolute_url()}'>{object.name}</a>")
 
 @register.filter(needs_autoescape=True)
 def linkornone(target, namespace=None, autoescape=True):

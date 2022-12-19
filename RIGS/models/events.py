@@ -17,7 +17,30 @@ from .utils import filter_by_pk
 from .finance import VatRate
 
 
-class EventManager(models.Manager):
+class BaseEventManager(models.Manager):
+    def event_search(self, q, start, end, status):
+        filt = Q()
+        if end:
+            filt &= Q(start_date__lte=end)
+        if start:
+            filt &= Q(start_date__gte=start)
+
+        objects = self.all()
+
+        if q:
+            objects = self.search(q)
+
+        if len(status) > 0:
+            filt &= Q(status__in=status)
+
+        qs = objects.filter(filt).order_by('-start_date')
+
+        # Preselect related for efficiency
+        qs.select_related('person', 'organisation', 'venue', 'mic')
+
+        return qs
+
+class EventManager(BaseEventManager):
     def current_events(self):
         events = self.filter(
             (models.Q(start_date__gte=timezone.now(), end_date__isnull=True, dry_hire=False) & ~models.Q(
@@ -390,7 +413,7 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
-class SubhireManager(models.Manager):
+class SubhireManager(BaseEventManager):
     def current_events(self):
         events = self.exclude(status=BaseEvent.CANCELLED).filter(
             (models.Q(start_date__gte=timezone.now(), end_date__isnull=True)) |  # Starts after with no end
@@ -405,7 +428,6 @@ class SubhireManager(models.Manager):
             (models.Q(end_date__gte=timezone.now()))
         ).count()
         return event_count
-
 
 @reversion.register
 class Subhire(BaseEvent):

@@ -204,27 +204,7 @@ class EventArchive(generic.ListView):
                                  "Muppet! Check the dates, it has been fixed for you.")
             start, end = end, start  # Stop the impending fail
 
-        filter = Q()
-        if end != "":
-            filter &= Q(start_date__lte=end)
-        if start:
-            filter &= Q(start_date__gte=start)
-
-        q = self.request.GET.get('q', "")
-        objects = self.model.objects.all()
-
-        if q:
-            objects = self.model.objects.search(q)
-
-        status = self.request.GET.getlist('status', "")
-
-        if len(status) > 0:
-            filter &= Q(status__in=status)
-
-        qs = objects.filter(filter).order_by('-start_date')
-
-        # Preselect related for efficiency
-        qs.select_related('person', 'organisation', 'venue', 'mic')
+        qs = self.model.objects.event_search(self.request.GET.get('q', None), start, end, self.request.GET.get('status', ""))
 
         if not qs.exists():
             messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")

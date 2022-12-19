@@ -74,7 +74,7 @@ urlpatterns = [
           name='subhire_create'),
     path('subhire/<int:pk>/edit', permission_required_with_403('RIGS.change_event')(views.SubhireEdit.as_view()),
           name='subhire_update'),
-    path('subhire/upcoming', login_required(views.SubhireList.as_view()),
+    path('subhire/list/', login_required(views.SubhireList.as_view()),
           name='subhire_list'),
 
      # Dashboards
