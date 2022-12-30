@@ -290,7 +290,6 @@ class Event(BaseEvent):
     """
     Inc VAT
     """
-
     @property
     def total(self):
         return Decimal(self.sum_total + self.vat).quantize(Decimal('.01'))
@@ -337,9 +336,8 @@ class Event(BaseEvent):
             return "danger"
         elif self.confirmed and self.authorised:
             if self.dry_hire or self.riskassessment:
-               return "success"
-            else:
-                return "warning"
+                return "success"
+            return "warning"
         else:
             return "warning"
 
@@ -360,7 +358,7 @@ class Event(BaseEvent):
             elif self.start_time is not None and self.start_date == self.access_at.date() and self.access_at.time() > self.start_time:
                 errdict['access_at'] = ['Regardless of what some clients might think, access time cannot be after the event has started.']
 
-        if errdict != {}:  # If there was an error when validation
+        if errdict:  # If there was an error when validation
             raise ValidationError(errdict)
 
     def save(self, *args, **kwargs):
@@ -435,8 +433,15 @@ class Subhire(BaseEvent):
     events = models.ManyToManyField(Event)
     quote = models.URLField(default='', validators=[validate_url])
 
-
     objects = SubhireManager()
+
+    @property
+    def is_rig(self):
+        return False
+
+    @property
+    def dry_hire(self):
+        return False
 
     @property
     def display_id(self):
