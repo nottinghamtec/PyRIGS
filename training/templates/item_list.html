@@ -13,7 +13,8 @@
       <div class="card-body">
         <div class="list-group list-group-flush">
             {% for item in category.items.all %}
-                <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }}
+                <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }} <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info float-right"><span class="fas fa-user"></span> Qualified Users</a>
+                <br><small>{{ item.description }}</small>
                 {% if item.prerequisites.exists %}
                     <div class="ml-3 font-italic">
                     <p class="text-info mb-0">Passed Out Prerequisites:</p>
@@ -24,7 +25,6 @@
                     </ul>
                     </div>
                 {% endif %}
-                <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info"><span class="fas fa-user"></span> Qualified Users</a>
                 </li>
             {% endfor %}
         </div>
