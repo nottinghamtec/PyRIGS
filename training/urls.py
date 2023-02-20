@@ -8,6 +8,7 @@ from versioning.views import VersionHistory
 
 urlpatterns = [
     path('items/', login_required(views.ItemList.as_view()), name='item_list'),
+    path('items/export/', login_required(views.ItemListExport.as_view()), name='item_list_export'),
     path('item/<int:pk>/qualified_users/', login_required(views.ItemQualifications.as_view()), name='item_qualification'),
 
     path('trainee/list/', login_required(views.TraineeList.as_view()), name='trainee_list'),

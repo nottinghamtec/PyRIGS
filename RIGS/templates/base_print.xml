@@ -11,6 +11,7 @@
         <initialize>
             <color id="LightGray" RGB="#D3D3D3"/>
             <color id="DarkGray" RGB="#707070"/>
+            <color id="Brand" RGB="#3853a4"/>
         </initialize>
 
         <paraStyle name="style.para" fontName="OpenSans" />
@@ -27,6 +28,8 @@
         <paraStyle name="style.times" fontName="OpenSans"  fontSize="10" />
         <paraStyle name="style.head_titles" fontName="OpenSans-Bold" fontSize="10" />
         <paraStyle name="style.head_numbers" fontName="OpenSans"  fontSize="10" />
+        <paraStyle name="style.emheader" fontName="OpenSans" textColor="White" fontSize="12" backColor="Brand" leading="20"/>
+        <paraStyle name="style.breakbefore" parent="emheader" pageBreakBefore="1"/>
 
         <blockTableStyle id="eventSpecifics">
             <blockValign value="top"/>

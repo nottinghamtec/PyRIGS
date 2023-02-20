@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import Q, Count
 from django.db.utils import IntegrityError
 
-from PyRIGS.views import is_ajax, ModalURLMixin, get_related
+from PyRIGS.views import is_ajax, ModalURLMixin, get_related, PrintListView
 from training import models, forms
 from users import views
 from reversion.views import RevisionMixin
@@ -20,6 +20,17 @@ class ItemList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Training Items"
+        context["categories"] = models.TrainingCategory.objects.all()
+        return context
+
+
+class ItemListExport(PrintListView):
+    model = models.TrainingItem
+    template_name = 'item_list.xml'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filename'] = f"TrainingItemList.pdf"
         context["categories"] = models.TrainingCategory.objects.all()
         return context
 

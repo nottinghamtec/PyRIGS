@@ -1,0 +1,23 @@
+{% extends 'base_print.xml' %}
+
+{% block content %}
+<h1 style="page-head">TEC Training Item List</h1>
+<spacer length="15" />
+{% for category in categories %}
+
+<h2 {% if not forloop.first %}style="breakbefore"{%else%}style="emheader"{%endif%}>{{category}}</h2>
+    {% for item in category.items.all %}
+        <h3>{{ item }}</h3>
+        <para>{{ item.description }}</para>
+        {% if item.prerequisites.exists %}
+            <h4>Prerequisites:</h4>
+            <ul bulletFontSize="5">
+            {% for p in item.prerequisites.all %}
+            <li><para>{{p}}</para></li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        <spacer length="4" />
+    {% endfor %}
+{% endfor %}
+{% endblock %}
