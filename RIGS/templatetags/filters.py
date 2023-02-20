@@ -196,8 +196,8 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
         text = "Edit"
     elif type == 'print':
         clazz += " btn-primary "
-        icon = "fa-print"
-        text = "Print"
+        icon = "fa-download"
+        text = "Export"
     elif type == 'duplicate':
         clazz += " btn-info "
         icon = "fa-copy"

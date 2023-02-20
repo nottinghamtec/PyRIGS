@@ -1,6 +1,11 @@
 {% extends 'base_training.html' %}
 
+{% load button from filters %}
+
 {% block content %}
+<div class="col-12 text-right py-2 pr-0">
+{% button 'print' 'item_list_export' %}
+</div>
 <div id="accordion">
   {% for category in categories %}
   <div class="card">
