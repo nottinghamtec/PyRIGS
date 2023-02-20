@@ -347,6 +347,7 @@ def render_pdf_response(template, context, append_terms):
     response.write(merged.getvalue())
     return response
 
+
 class PrintView(generic.View):
     append_terms = False
 
