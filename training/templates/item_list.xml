@@ -6,8 +6,10 @@
 {% for category in categories %}
 
 <h2 {% if not forloop.first %}style="breakbefore"{%else%}style="emheader"{%endif%}>{{category}}</h2>
+<spacer length="10" />
     {% for item in category.items.all %}
         <h3>{{ item }}</h3>
+        <spacer length="4" />
         <para>{{ item.description }}</para>
         {% if item.prerequisites.exists %}
             <h4>Prerequisites:</h4>
@@ -17,7 +19,7 @@
             {% endfor %}
             </ul>
         {% endif %}
-        <spacer length="4" />
+        <spacer length="8" />
     {% endfor %}
 {% endfor %}
 {% endblock %}

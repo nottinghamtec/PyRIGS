@@ -143,10 +143,14 @@ class Command(BaseCommand):
             "Bin Diving",
             "Wiki Editing"]
 
-        descriptions = ["Physical training concentrates on mechanistic goals: training programs in this area develop specific motor skills, agility, strength or physical fitness, often with an intention of peaking at a particular time.",
-                        "In military use, training means gaining the physical ability to perform and survive in combat, and learn the many skills needed in a time of war. These include how to use a variety of weapons, outdoor survival skills, and how to survive being captured by the enemy, among many others.  See military education and training.",
-                        "For psychological or physiological reasons, people who believe it may be beneficial to them can choose to practice relaxation training, or autogenic training, in an attempt to increase their ability to relax or deal with stress. While some studies have indicated relaxation training is useful for some medical conditions, autogenic training has limited results or has been the result of few studies.",
-                        "Some occupations are inherently hazardous, and require a minimum level of competence before the practitioners can perform the work at an acceptable level of safety to themselves or others in the vicinity. Occupational diving, rescue, firefighting and operation of certain types of machinery and vehicles may require assessment and certification of a minimum acceptable competence before the person is allowed to practice as a licensed instructor."]
+        descriptions = [
+            "Physical training concentrates on mechanistic goals: training programs in this area develop specific motor skills, agility, strength or physical fitness, often with an intention of peaking at a particular time.",
+            "In military use, training means gaining the physical ability to perform and survive in combat, and learn the many skills needed in a time of war.",
+            "These include how to use a variety of weapons, outdoor survival skills, and how to survive being captured by the enemy, among many others.  See military education and training.",
+            "While some studies have indicated relaxation training is useful for some medical conditions, autogenic training has limited results or has been the result of few studies.",
+            "Some occupations are inherently hazardous, and require a minimum level of competence before the practitioners can perform the work at an acceptable level of safety to themselves or others in the vicinity.",
+            "Occupational diving, rescue, firefighting and operation of certain types of machinery and vehicles may require assessment and certification of a minimum acceptable competence before the person is allowed to practice as a licensed instructor."
+        ]
 
         for i, name in enumerate(names):
             category = random.choice(self.categories)
@@ -155,7 +159,7 @@ class Command(BaseCommand):
                 number = previous_item.reference_number + 1
             else:
                 number = 0
-            item = models.TrainingItem.objects.create(category=category, reference_number=number, name=name, description=random.choice(descriptions))
+            item = models.TrainingItem.objects.create(category=category, reference_number=number, name=name, description=random.choice(descriptions) + random.choice(descriptions) + random.choice(descriptions))
             self.items.append(item)
 
     def setup_levels(self):
