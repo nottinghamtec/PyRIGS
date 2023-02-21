@@ -168,7 +168,7 @@ class DuplicateMixin:
 class AssetDuplicate(DuplicateMixin, AssetIDUrlMixin, AssetCreate):
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
-        initial["asset_id"] = models.get_available_asset_id(wanted_prefix=self.get_object().asset_id_prefix)
+        initial["asset_id"] = models.get_available_asset_id()
         return initial
 
     def get_context_data(self, **kwargs):
