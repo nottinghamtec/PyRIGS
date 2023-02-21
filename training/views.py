@@ -30,7 +30,7 @@ class ItemListExport(PrintListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filename'] = f"TrainingItemList.pdf"
+        context['filename'] = "TrainingItemList.pdf"
         context["categories"] = models.TrainingCategory.objects.all()
         return context
 

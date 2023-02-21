@@ -359,7 +359,7 @@ class PrintView(generic.View):
             'object': obj,
             'current_user': self.request.user,
             'object_name': object_name,
-            'info_string': get_info_string(self.request.user) + "- {obj.current_version_id}]",
+            'info_string': get_info_string(self.request.user) + f"- {obj.current_version_id}]",
         }
 
         return context
@@ -371,7 +371,7 @@ class PrintView(generic.View):
 class PrintListView(generic.ListView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['current_user'] = self.request.user,
+        context['current_user'] = self.request.user
         context['info_string'] = get_info_string(self.request.user) + "]"
         return context
 
