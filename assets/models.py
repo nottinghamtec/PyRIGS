@@ -102,7 +102,8 @@ class AssetManager(models.Manager):
 
 def get_available_asset_id(wanted_prefix=""):
     last_asset = Asset.objects.filter(asset_id_prefix=wanted_prefix).last()
-    return 9000 if last_asset is None else wanted_prefix + str(last_asset.asset_id_number + 1)
+    last_asset_id = last_asset.asset_id_number if last_asset else 0
+    return wanted_prefix + str(last_asset_id + 1)
 
 
 def validate_positive(value):

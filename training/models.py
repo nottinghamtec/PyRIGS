@@ -85,7 +85,7 @@ class TrainingItemManager(QueryablePropertiesManager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(description__icontains=query) | Q(display_id=query))
+            or_lookup = (Q(name__icontains=query) | Q(description__icontains=query) | Q(display_id=query))
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
@@ -94,15 +94,12 @@ class TrainingItemManager(QueryablePropertiesManager):
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
     category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
-    description = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     prerequisites = models.ManyToManyField('self', symmetrical=False, blank=True)
 
     objects = TrainingItemManager()
-
-    @property
-    def name(self):
-        return str(self)
 
     @queryable_property
     def display_id(self):
@@ -121,7 +118,7 @@ class TrainingItem(models.Model):
         return models.Q()
 
     def __str__(self):
-        name = f"{self.display_id} {self.description}"
+        name = f"{self.display_id} {self.name}"
         if not self.active:
             name += " (inactive)"
         return name
@@ -149,7 +146,7 @@ class TrainingItemQualificationManager(QueryablePropertiesManager):
     def search(self, query=None):
         qs = self.get_queryset().select_related('item', 'supervisor', 'item__category')
         if query is not None:
-            or_lookup = (Q(item__description__icontains=query) | Q(supervisor__first_name__icontains=query) | Q(supervisor__last_name__icontains=query) | Q(item__category__name__icontains=query) | Q(item__display_id=query))
+            or_lookup = (Q(item__name__icontains=query) | Q(supervisor__first_name__icontains=query) | Q(supervisor__last_name__icontains=query) | Q(item__category__name__icontains=query) | Q(item__display_id=query))
 
             try:
                 or_lookup = Q(item__category__reference_number=int(query)) | or_lookup

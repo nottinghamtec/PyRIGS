@@ -105,8 +105,7 @@ class Command(BaseCommand):
 
         for i in range(100):
             prefix = random.choice(asset_prefixes)
-            asset_id = str(get_available_asset_id(wanted_prefix=prefix))
-            asset_id = prefix + asset_id
+            asset_id = get_available_asset_id(wanted_prefix=prefix)
             asset = models.Asset(
                 asset_id=asset_id,
                 description=random.choice(asset_description),
