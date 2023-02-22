@@ -28,7 +28,7 @@
         <paraStyle name="style.times" fontName="OpenSans"  fontSize="10" />
         <paraStyle name="style.head_titles" fontName="OpenSans-Bold" fontSize="10" />
         <paraStyle name="style.head_numbers" fontName="OpenSans"  fontSize="10" />
-        <paraStyle name="style.emheader" fontName="OpenSans" textColor="White" fontSize="12" backColor="Brand" leading="20"/>
+        <paraStyle name="style.emheader" fontName="OpenSans" textColor="White" fontSize="12" backColor="Brand" leading="20" borderPadding="4"/>
         <paraStyle name="style.breakbefore" parent="emheader" pageBreakBefore="1"/>
 
         <blockTableStyle id="eventSpecifics">
