@@ -211,7 +211,7 @@ class BaseEvent(models.Model, RevisionMixin):
         end = self.latest_time
         if isinstance(self.latest_time, datetime.datetime):
             end = self.latest_time.date()
-        return (end - start).days
+        return (end - start).days + 1
 
     def clean(self):
         errdict = {}
