@@ -11,7 +11,7 @@
         <spacer length="4" />
         <para>{{ item.description }}</para>
         {% if item.prerequisites.exists %}
-            <h4>Prerequisites:</h4>
+            <h4>Competency Assessment Prerequisites:</h4>
             <ul bulletFontSize="5">
             {% for p in item.prerequisites.all %}
             <li><para>{{p}}</para></li>

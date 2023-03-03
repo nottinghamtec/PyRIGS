@@ -22,7 +22,7 @@
                 <br><small>{{ item.description }}</small>
                 {% if item.prerequisites.exists %}
                     <div class="ml-3 font-italic">
-                    <p class="text-info mb-0">Passed Out Prerequisites:</p>
+                    <p class="text-info mb-0">Competency Assessment Prerequisites:</p>
                     <ul>
                     {% for p in item.prerequisites.all %}
                     <li>{{p}}</li>
