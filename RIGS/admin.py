@@ -206,3 +206,8 @@ class RiskAssessmentAdmin(VersionAdmin):
 @admin.register(models.EventChecklist)
 class EventChecklistAdmin(VersionAdmin):
     list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+
+
+@admin.register(models.PowerTestRecord)
+class EventChecklistAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')

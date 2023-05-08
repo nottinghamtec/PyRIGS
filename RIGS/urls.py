@@ -81,8 +81,8 @@ urlpatterns = [
          name='ra_edit'),
     path('event/ra/list', permission_required_with_403('RIGS.view_riskassessment')(views.EventRiskAssessmentList.as_view()),
          name='ra_list'),
-    path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.review_riskassessment')(views.EventRiskAssessmentReview.as_view()),
-         name='ra_review'),
+    path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.review_riskassessment')(views.MarkReviewed.as_view()),
+         name='ra_review', kwargs={'model': 'RiskAssessment'}),
     path('event/ra/<int:pk>/print/', permission_required_with_403('RIGS.view_riskassessment')(views.RAPrint.as_view()), name='ra_print'),
 
     path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.add_eventchecklist')(views.EventChecklistCreate.as_view()),
@@ -93,8 +93,17 @@ urlpatterns = [
          name='ec_edit'),
     path('event/checklist/list', permission_required_with_403('RIGS.view_eventchecklist')(views.EventChecklistList.as_view()),
          name='ec_list'),
-    path('event/checklist/<int:pk>/review/', permission_required_with_403('RIGS.review_eventchecklist')(views.EventChecklistReview.as_view()),
-         name='ec_review'),
+    path('event/checklist/<int:pk>/review/', permission_required_with_403('RIGS.review_eventchecklist')(views.MarkReviewed.as_view()),
+         name='ec_review', kwargs={'model': 'EventChecklist'}),
+
+    path('event/<int:pk>/power/', permission_required_with_403('RIGS.add_powertestrecord')(views.PowerTestCreate.as_view()),
+         name='event_pt'),
+    path('event/power/<int:pk>/', login_required(views.PowerTestDetail.as_view()),
+         name='pt_detail'),
+    path('event/power/<int:pk>/edit/', permission_required_with_403('RIGS.change_powertestrecord')(views.PowerTestEdit.as_view()),
+         name='pt_edit'),
+    path('event/power/<int:pk>/review/', permission_required_with_403('RIGS.review_power')(views.MarkReviewed.as_view()),
+         name='pt_review', kwargs={'model': 'PowerTestRecord'}),
 
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceIndex.as_view()),

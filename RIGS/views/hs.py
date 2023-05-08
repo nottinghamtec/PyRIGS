@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -10,7 +11,35 @@ from RIGS.views.rigboard import get_related
 from PyRIGS.views import PrintView
 
 
-class EventRiskAssessmentCreate(generic.CreateView):
+class HSCreateView(generic.CreateView):
+    def get_form(self, **kwargs):
+        form = super().get_form(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        form.instance.event = event
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        epk = self.kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+        context['event'] = event
+        context['page_title'] = f'Create {self} for Event {event.display_id}'
+        return context
+
+
+class MarkReviewed(generic.View):
+    def get(self, *args, **kwargs):
+        obj = apps.get_model('RIGS', kwargs.get('model')).objects.get(pk=kwargs.get('pk'))
+        with reversion.create_revision():
+            reversion.set_user(self.request.user)
+            obj.reviewed_by = self.request.user
+            obj.reviewed_at = timezone.now()
+            obj.save()
+        return HttpResponseRedirect(reverse_lazy('hs_list'))
+
+
+class EventRiskAssessmentCreate(HSCreateView):
     model = models.RiskAssessment
     template_name = 'hs/risk_assessment_form.html'
     form_class = forms.EventRiskAssessmentForm
@@ -26,22 +55,6 @@ class EventRiskAssessmentCreate(generic.CreateView):
             return HttpResponseRedirect(reverse_lazy('ra_edit', kwargs={'pk': ra.pk}))
 
         return super(EventRiskAssessmentCreate, self).get(self)
-
-    def get_form(self, **kwargs):
-        form = super(EventRiskAssessmentCreate, self).get_form(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        form.instance.event = event
-        return form
-
-    def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentCreate, self).get_context_data(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        context['event'] = event
-        context['page_title'] = f'Create Risk Assessment for Event {event.display_id}'
-        get_related(context['form'], context)
-        return context
 
     def get_success_url(self):
         return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
@@ -98,18 +111,6 @@ class EventRiskAssessmentList(generic.ListView):
         return context
 
 
-class EventRiskAssessmentReview(generic.View):
-    def get(self, *args, **kwargs):
-        rpk = kwargs.get('pk')
-        ra = models.RiskAssessment.objects.get(pk=rpk)
-        with reversion.create_revision():
-            reversion.set_user(self.request.user)
-            ra.reviewed_by = self.request.user
-            ra.reviewed_at = timezone.now()
-            ra.save()
-        return HttpResponseRedirect(reverse_lazy('ra_list'))
-
-
 class EventChecklistDetail(generic.DetailView):
     model = models.EventChecklist
     template_name = 'hs/event_checklist_detail.html'
@@ -143,7 +144,7 @@ class EventChecklistEdit(generic.UpdateView):
         return context
 
 
-class EventChecklistCreate(generic.CreateView):
+class EventChecklistCreate(HSCreateView):
     model = models.EventChecklist
     template_name = 'hs/event_checklist_form.html'
     form_class = forms.EventChecklistForm
@@ -161,21 +162,6 @@ class EventChecklistCreate(generic.CreateView):
             return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
 
         return super(EventChecklistCreate, self).get(self)
-
-    def get_form(self, **kwargs):
-        form = super(EventChecklistCreate, self).get_form(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        form.instance.event = event
-        return form
-
-    def get_context_data(self, **kwargs):
-        context = super(EventChecklistCreate, self).get_context_data(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        context['event'] = event
-        context['page_title'] = f'Create Event Checklist for Event {event.display_id}'
-        return context
 
     def get_success_url(self):
         return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
@@ -199,16 +185,59 @@ class EventChecklistList(generic.ListView):
         return context
 
 
-class EventChecklistReview(generic.View):
+class PowerTestDetail(generic.DetailView):
+    model = models.PowerTestRecord
+    template_name = 'hs/power_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Power Test Record for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
+        return context
+
+
+class PowerTestEdit(generic.UpdateView):
+    model = models.PowerTestRecord
+    template_name = 'hs/power_form.html'
+    form_class = forms.PowerTestRecordForm
+
+    def get_success_url(self):
+        ec = self.get_object()
+        ec.reviewed_by = None
+        ec.reviewed_at = None
+        ec.save()
+        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs.get('pk')
+        ec = models.PowerTestRecord.objects.get(pk=pk)
+        context['event'] = ec.event
+        context['edit'] = True
+        context['page_title'] = f'Edit Power Test Record for Event {ec.event.display_id}'
+        # get_related(context['form'], context)
+        return context
+
+
+class PowerTestCreate(HSCreateView):
+    model = models.PowerTestRecord
+    template_name = 'hs/power_form.html'
+    form_class = forms.PowerTestRecordForm
+
     def get(self, *args, **kwargs):
-        rpk = kwargs.get('pk')
-        ec = models.EventChecklist.objects.get(pk=rpk)
-        with reversion.create_revision():
-            reversion.set_user(self.request.user)
-            ec.reviewed_by = self.request.user
-            ec.reviewed_at = timezone.now()
-            ec.save()
-        return HttpResponseRedirect(reverse_lazy('ec_list'))
+        epk = kwargs.get('pk')
+        event = models.Event.objects.get(pk=epk)
+
+        # Check if RA exists
+        ra = models.RiskAssessment.objects.filter(event=event).first()
+
+        if ra is None:
+            messages.error(self.request, f'A Risk Assessment must exist prior to creating any Power Test Records for {event}! Please create one now.')
+            return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
+
+        return super().get(self)
+
+    def get_success_url(self):
+        return reverse_lazy('pt_detail', kwargs={'pk': self.object.pk})
 
 
 class HSList(generic.ListView):

@@ -689,8 +689,21 @@ def validate_url(value):
         raise ValidationError('URL must point to a location on the TEC Sharepoint')
 
 
+class ReviewableModel(models.Model):
+    reviewed_at = models.DateTimeField(null=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                                    verbose_name="Reviewer", on_delete=models.CASCADE)
+
+    @cached_property
+    def fieldz(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+
+    class Meta:
+        abstract = True
+
+
 @reversion.register
-class RiskAssessment(models.Model, RevisionMixin):
+class RiskAssessment(ReviewableModel, RevisionMixin):
     SMALL = (0, 'Small')
     MEDIUM = (1, 'Medium')
     LARGE = (2, 'Large')
@@ -738,10 +751,6 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Blimey that was a lot of options
 
-    reviewed_at = models.DateTimeField(null=True)
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-                                    verbose_name="Reviewer", on_delete=models.CASCADE)
-
     supervisor_consulted = models.BooleanField(null=True)
 
     expected_values = {
@@ -778,10 +787,6 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
-    @cached_property
-    def fieldz(self):
-        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
-
     @property
     def event_size(self):
         # Confirm event size. Check all except generators, since generators entails outside
@@ -811,7 +816,7 @@ class RiskAssessment(models.Model, RevisionMixin):
 
 
 @reversion.register(follow=['vehicles', 'crew'])
-class EventChecklist(models.Model, RevisionMixin):
+class EventChecklist(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
     # General
@@ -830,6 +835,30 @@ class EventChecklist(models.Model, RevisionMixin):
     hs_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of Safety Bag/Box")
     extinguishers_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of fire extinguishers")
 
+    inverted_fields = []
+
+    class Meta:
+        ordering = ['event']
+        permissions = [
+            ('review_eventchecklist', 'Can review Event Checklists')
+        ]
+
+    @property
+    def activity_feed_string(self):
+        return str(self.event)
+
+    def get_absolute_url(self):
+        return reverse('ec_detail', kwargs={'pk': self.pk})
+
+    def __str__(self):
+        return f"{self.pk} - {self.event}"
+
+
+@reversion.register
+class PowerTestRecord(ReviewableModel, RevisionMixin):
+    event = models.ForeignKey('Event', related_name='power_tests', on_delete=models.CASCADE)
+    venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, default='')
     # Small Electrical Checks
     rcds = models.BooleanField(blank=True, null=True, help_text="RCDs installed where needed and tested?")
     supply_test = models.BooleanField(blank=True, null=True, help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
@@ -865,31 +894,14 @@ class EventChecklist(models.Model, RevisionMixin):
     all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
 
-    reviewed_at = models.DateTimeField(null=True)
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-                                    verbose_name="Reviewer", on_delete=models.CASCADE)
-
-    inverted_fields = []
+    def __str__(self):
+        return f"{self.pk} - {self.event}"
 
     class Meta:
         ordering = ['event']
         permissions = [
-            ('review_eventchecklist', 'Can review Event Checklists')
+            ('review_power', 'Can review Power Test Records')
         ]
-
-    @cached_property
-    def fieldz(self):
-        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
-
-    @property
-    def activity_feed_string(self):
-        return str(self.event)
-
-    def get_absolute_url(self):
-        return reverse('ec_detail', kwargs={'pk': self.pk})
-
-    def __str__(self):
-        return f"{self.pk} - {self.event}"
 
 
 @reversion.register

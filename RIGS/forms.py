@@ -283,3 +283,17 @@ class EventChecklistForm(forms.ModelForm):
         model = models.EventChecklist
         fields = '__all__'
         exclude = ['reviewed_at', 'reviewed_by']
+
+
+class PowerTestRecordForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if field.__class__ == forms.NullBooleanField:
+                # Only display yes/no to user, the 'none' is only ever set in the background
+                field.widget = forms.CheckboxInput()
+
+    class Meta:
+        model = models.PowerTestRecord
+        fields = '__all__'
+        exclude = ['reviewed_at', 'reviewed_by']

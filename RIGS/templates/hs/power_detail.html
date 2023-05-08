@@ -1,0 +1,167 @@
+{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% load help_text from filters %}
+{% load profile_by_index from filters %}
+{% load yesnoi from filters %}
+{% load button from filters %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-right my-3">
+        {% button 'edit' url='pt_edit' pk=object.pk %}
+        {% button 'view' url='event_detail' pk=object.event.pk text="Event" %}
+        {% include 'partials/review_status.html' with perm=perms.RIGS.review_power review='pt_review' %}
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-header">{% include 'partials/event_size.html' with object=object.event.riskassessment %}</div>
+    <div class="card-body">
+        <dl class="row">
+                <dt class="col-6">Venue</dt>
+                <dd class="col-6">
+                    {% if object.venue %}
+                    <a href="{% url 'venue_detail' object.venue.pk %}" class="modal-href">
+                        {{ object.venue }}
+                    </a>
+                    {% endif %}
+                </dd>
+                <dt class="col-6">Notes</dt>
+                <dd class="col-6">
+                    {{ object.notes }}
+                </dd>
+        </dl>
+        {% if object.event.riskassessment.event_size == 0 %}
+        <dl class="row">
+            <dt class="col-10">{{ object|help_text:'rcds'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.rcds|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'supply_test'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.supply_test|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.earthing|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.pat|yesnoi }}
+            </dd>
+        </dl>
+        {% else %}
+        <dl class="row">
+            <dt class="col-10">{{ object|help_text:'source_rcd'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.source_rcd|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'labelling'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.labelling|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'earthing'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.earthing|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'pat'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.pat|yesnoi }}
+            </dd>
+        </dl>
+        <hr>
+        <p>Tests at first distro</p>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Test</th>
+                    <th scope="col" colspan="3" class="text-center">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
+                    <th>{{ object|help_text:'fd_voltage_l1' }}</th>
+                    <th>{{ object|help_text:'fd_voltage_l2' }}</th>
+                    <th>{{ object|help_text:'fd_voltage_l3' }}</th>
+                </tr>
+                <tr>
+                   <td>{{ object.fd_voltage_l1 }}</td>
+                   <td>{{ object.fd_voltage_l2 }}</td>
+                   <td>{{ object.fd_voltage_l3 }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'fd_phase_rotation'|safe }}</th>
+                    <td colspan="3">{{ object.fd_phase_rotation|yesnoi }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'fd_earth_fault'|safe}}</th>
+                    <td colspan="3">{{ object.fd_earth_fault }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'fd_pssc'}}</th>
+                    <td colspan="3">{{ object.fd_pssc }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <p>Tests at 'Worst Case' points (at least 1 point required)</p>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Test</th>
+                    <th scope="col" class="text-center">Point 1</th>
+                    <th scope="col" class="text-center">Point 2</th>
+                    <th scope="col" class="text-center">Point 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">{{ object|help_text:'w1_description'|safe}}</th>
+                    <td>{{ object.w1_description }}</td>
+                    <td>{{ object.w2_description|default:'' }}</td>
+                    <td>{{ object.w3_description|default:'' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'w1_polarity'|safe}}</th>
+                    <td>{{ object.w1_polarity|yesnoi }}</td>
+                    <td>{{ object.w2_polarity|default:''|yesnoi }}</td>
+                    <td>{{ object.w3_polarity|default:''|yesnoi }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'w1_voltage'|safe}}</th>
+                    <td>{{ object.w1_voltage }}</td>
+                    <td>{{ object.w2_voltage|default:'' }}</td>
+                    <td>{{ object.w3_voltage|default:'' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">{{ object|help_text:'w1_earth_fault'|safe}}</th>
+                    <td>{{ object.w1_earth_fault }}</td>
+                    <td>{{ object.w2_earth_fault|default:'' }}</td>
+                    <td>{{ object.w3_earth_fault|default:'' }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <dl class="row">
+            <dt class="col-10">{{ object|help_text:'all_rcds_tested'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.all_rcds_tested|yesnoi }}
+            </dd>
+            <dt class="col-10">{{ object|help_text:'public_sockets_tested'|safe }}</dt>
+            <dd class="col-2">
+                {{ object.public_sockets_tested|yesnoi }}
+            </dd>
+        </dl>
+        <hr>
+        {% include 'partials/ec_power_info.html' %}
+        {% endif %}
+    </div>
+</div>
+<div class="col-12 text-right">
+{% button 'edit' url='ec_edit' pk=object.pk %}
+{% button 'view' url='event_detail' pk=object.pk text="Event" %}
+{% include 'partials/review_status.html' with perm=perms.RIGS.review_eventchecklist review='ec_review' %}
+</div>
+<div class="col-12 text-right">
+{% include 'partials/last_edited.html' with target="eventchecklist_history" %}
+</div>
+{% endblock %}
