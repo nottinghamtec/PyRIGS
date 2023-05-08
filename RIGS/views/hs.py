@@ -93,24 +93,6 @@ class EventRiskAssessmentDetail(generic.DetailView):
         return context
 
 
-class EventRiskAssessmentList(generic.ListView):
-    paginate_by = 20
-    model = models.RiskAssessment
-    template_name = 'hs/hs_object_list.html'
-
-    def get_queryset(self):
-        return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
-
-    def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentList, self).get_context_data(**kwargs)
-        context['title'] = 'Risk Assessment'
-        context['view'] = 'ra_detail'
-        context['edit'] = 'ra_edit'
-        context['review'] = 'ra_review'
-        context['perm'] = 'perms.RIGS.review_riskassessment'
-        return context
-
-
 class EventChecklistDetail(generic.DetailView):
     model = models.EventChecklist
     template_name = 'hs/event_checklist_detail.html'
@@ -165,24 +147,6 @@ class EventChecklistCreate(HSCreateView):
 
     def get_success_url(self):
         return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
-
-
-class EventChecklistList(generic.ListView):
-    paginate_by = 20
-    model = models.EventChecklist
-    template_name = 'hs/hs_object_list.html'
-
-    def get_queryset(self):
-        return self.model.objects.exclude(event__status=models.Event.CANCELLED).order_by('reviewed_at').select_related('event')
-
-    def get_context_data(self, **kwargs):
-        context = super(EventChecklistList, self).get_context_data(**kwargs)
-        context['title'] = 'Event Checklist'
-        context['view'] = 'ec_detail'
-        context['edit'] = 'ec_edit'
-        context['review'] = 'ec_review'
-        context['perm'] = 'perms.RIGS.review_eventchecklist'
-        return context
 
 
 class PowerTestDetail(generic.DetailView):

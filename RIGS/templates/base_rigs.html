@@ -34,16 +34,7 @@
        </div>
     </li>
     {% if perms.RIGS.view_riskassessment %}
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        H&S
-      </a>
-      <div class="dropdown-menu" aria-labelledby="navbarDropdownHS">
-        <a class="dropdown-item" href="{% url 'hs_list' %}"><span class="fas fa-eye"></span> Overview</a>
-        <a class="dropdown-item" href="{% url 'ra_list' %}"><span class="fas fa-file-medical"></span> Risk Assessments</a>
-        <a class="dropdown-item" href="{% url 'ec_list' %}"><span class="fas fa-tasks"></span> Event Checklists</a>
-      </div>
-    </li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'hs_list' %}">H&S</a></li>
     {% endif %}
     {% if perms.RIGS.view_invoice %}
     <li class="nav-item dropdown">

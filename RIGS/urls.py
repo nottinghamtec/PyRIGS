@@ -79,8 +79,6 @@ urlpatterns = [
          name='ra_detail'),
     path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_riskassessment')(views.EventRiskAssessmentEdit.as_view()),
          name='ra_edit'),
-    path('event/ra/list', permission_required_with_403('RIGS.view_riskassessment')(views.EventRiskAssessmentList.as_view()),
-         name='ra_list'),
     path('event/ra/<int:pk>/review/', permission_required_with_403('RIGS.review_riskassessment')(views.MarkReviewed.as_view()),
          name='ra_review', kwargs={'model': 'RiskAssessment'}),
     path('event/ra/<int:pk>/print/', permission_required_with_403('RIGS.view_riskassessment')(views.RAPrint.as_view()), name='ra_print'),
@@ -91,8 +89,6 @@ urlpatterns = [
          name='ec_detail'),
     path('event/checklist/<int:pk>/edit/', permission_required_with_403('RIGS.change_eventchecklist')(views.EventChecklistEdit.as_view()),
          name='ec_edit'),
-    path('event/checklist/list', permission_required_with_403('RIGS.view_eventchecklist')(views.EventChecklistList.as_view()),
-         name='ec_list'),
     path('event/checklist/<int:pk>/review/', permission_required_with_403('RIGS.review_eventchecklist')(views.MarkReviewed.as_view()),
          name='ec_review', kwargs={'model': 'EventChecklist'}),
 

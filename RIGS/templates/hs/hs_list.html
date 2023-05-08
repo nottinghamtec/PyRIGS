@@ -12,6 +12,7 @@
                 <th scope="col">Dates</th>
                 <th scope="col">RA</th>
                 <th scope="col">Checklists</th>
+                <th scope="col">Power Records</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +35,14 @@
             {% endfor %}
             <a href="{% url 'event_ec' event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
             class="d-none d-sm-inline">Create</span></a>
+            </td>
+            <td>
+            {% for record in event.power_tests.all %}
+            {% include 'partials/hs_status.html' with event=event object=record view='pt_detail' edit='pt_edit' create='event_pt' review='pt_review' perm=perms.RIGS.review_power %}
+            <br/>
+            {% endfor %}
+            <a href="{% url 'event_pt' event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
+            class="hidden-xs">Create</span></a>
             </td>
         </tr>
         {% empty %}
