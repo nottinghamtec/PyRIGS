@@ -226,3 +226,16 @@ class RAPrint(PrintView):
         context = super().get_context_data(**kwargs)
         context['filename'] = f"EventSpecificRiskAssessment_for_{context['object'].event.display_id}.pdf"
         return context
+
+
+class EventCheckIn(generic.CreateView):
+    model = models.EventCheckIn
+    template_name = 'hs/eventcheckin_form.html'
+    form_class = forms.EventCheckInForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event'] = models.Event.objects.get(pk=self.kwargs.get('pk'))
+        context['page_title'] = f'Check In to Event {context["event"].display_id}'
+        # get_related(context['form'], context)
+        return context

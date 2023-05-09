@@ -1,0 +1,56 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load help_text from filters %}
+{% load profile_by_index from filters %}
+{% load button from filters %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-12">
+        {% include 'form_errors.html' %}
+        <form role="form" method="POST" action="{% url 'event_checkin' pk=event.pk %}">
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
+            <input type="hidden" name="{{ form.person.name }}" id="{{ form.person.id_for_label }}"
+               value="{{request.user.pk}}"/>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.time.id_for_label }}"
+                       class="col-sm-4 col-form-label">{{ form.time.label }}</label>
+                <div class="col-sm-8">
+                    {% render_field form.time class+="form-control" %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.vehicle.id_for_label }}" class="col-sm-4 col-form-label">Did you drive? If so, what did you drive?</label>
+                <br><button type="button" class="btn btn-primary" onclick="document.getElementById('id_vehicle').value='Virgil'"><span class="fas fa-truck-moving"></span> Virgil</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('id_vehicle').value='Virgil + Erms'"><span class="fas fa-trailer"></span><span class="fas fa-truck-moving"></span> Virgil + Erms</button>
+                <br>Other (enter text)
+                <div class="col-sm-8">
+                    {% render_field form.vehicle class+="form-control" %}
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    {% button 'submit' %}
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

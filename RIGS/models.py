@@ -902,3 +902,17 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
         permissions = [
             ('review_power', 'Can review Power Test Records')
         ]
+
+
+class EventCheckIn(models.Model):
+    event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
+    person = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checkins', on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    vehicle = models.CharField(max_length=100)
+
+
+class EventCheckOut(models.Model):
+    event = models.ForeignKey('Event', on_delete=models.CASCADE)
+    person = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checkouts', on_delete=models.CASCADE)
+    time = models.DateTimeField() # TODO Validate may not check in in future
+    vehicle = models.CharField(max_length=100)

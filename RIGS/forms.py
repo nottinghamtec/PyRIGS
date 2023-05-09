@@ -44,7 +44,7 @@ class EventForm(forms.ModelForm):
         return simplejson.dumps(items)
 
     def __init__(self, *args, **kwargs):
-        super(EventForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['items_json'].initial = self._get_items_json
         self.fields['start_date'].widget.format = '%Y-%m-%d'
@@ -297,3 +297,13 @@ class PowerTestRecordForm(forms.ModelForm):
         model = models.PowerTestRecord
         fields = '__all__'
         exclude = ['reviewed_at', 'reviewed_by']
+
+
+class EventCheckInForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['time'].initial = timezone.now()
+
+    class Meta:
+        model = models.EventCheckIn
+        fields = '__all__'

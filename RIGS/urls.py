@@ -101,6 +101,9 @@ urlpatterns = [
     path('event/power/<int:pk>/review/', permission_required_with_403('RIGS.review_power')(views.MarkReviewed.as_view()),
          name='pt_review', kwargs={'model': 'PowerTestRecord'}),
 
+    path('event/<int:pk>/checkin/', permission_required_with_403('RIGS.add_eventcheckin')(views.EventCheckIn.as_view()),
+         name='event_checkin'),
+
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceIndex.as_view()),
          name='invoice_list'),
