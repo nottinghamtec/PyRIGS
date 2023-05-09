@@ -16,6 +16,14 @@
     <div class="card-header">{% include 'partials/event_size.html' with object=object.event.riskassessment %}</div>
     <div class="card-body">
         <dl class="row">
+                <dt class="col-6">{{ object|help_text:'power_mic' }}</dt>
+                <dd class="col-6">
+                    {% if object.power_mic %}
+                    <a href="{% url 'profile_detail' object.power_mic.pk %}">{{ object.power_mic.name }}</a>
+                    {% else %}
+                    None
+                    {% endif %}
+                </dd>
                 <dt class="col-6">Venue</dt>
                 <dd class="col-6">
                     {% if object.venue %}

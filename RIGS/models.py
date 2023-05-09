@@ -820,8 +820,6 @@ class EventChecklist(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
     # General
-    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
-                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
     date = models.DateField()
 
@@ -857,6 +855,8 @@ class EventChecklist(ReviewableModel, RevisionMixin):
 @reversion.register
 class PowerTestRecord(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='power_tests', on_delete=models.CASCADE)
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
+                              verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
     notes = models.TextField(blank=True, default='')
     # Small Electrical Checks
@@ -902,33 +902,3 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
         permissions = [
             ('review_power', 'Can review Power Test Records')
         ]
-
-
-@reversion.register
-class EventChecklistVehicle(models.Model, RevisionMixin):
-    checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
-    vehicle = models.CharField(max_length=255)
-    driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='vehicles', on_delete=models.CASCADE)
-
-    reversion_hide = True
-
-    def __str__(self):
-        return f"{self.vehicle} driven by {self.driver}"
-
-
-@reversion.register
-class EventChecklistCrew(models.Model, RevisionMixin):
-    checklist = models.ForeignKey('EventChecklist', related_name='crew', blank=True, on_delete=models.CASCADE)
-    crewmember = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='crewed', on_delete=models.CASCADE)
-    role = models.CharField(max_length=255)
-    start = models.DateTimeField()
-    end = models.DateTimeField()
-
-    reversion_hide = True
-
-    def clean(self):
-        if self.start > self.end:
-            raise ValidationError('Unless you\'ve invented time travel, crew can\'t finish before they have started.')
-
-    def __str__(self):
-        return f"{self.crewmember} ({self.role})"
