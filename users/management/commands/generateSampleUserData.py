@@ -50,10 +50,7 @@ class Command(BaseCommand):
                            "add_supplier", "view_cabletype", "change_cabletype",
                            "add_cabletype", "view_eventchecklist", "change_eventchecklist",
                            "add_eventchecklist", "view_riskassessment", "change_riskassessment",
-                           "add_riskassessment", "add_eventchecklistcrew", "change_eventchecklistcrew",
-                           "delete_eventchecklistcrew", "view_eventchecklistcrew", "add_eventchecklistvehicle",
-                           "change_eventchecklistvehicle",
-                           "delete_eventchecklistvehicle", "view_eventchecklistvehicle", ]
+                           "add_riskassessment"]
         finance_perms = keyholder_perms + ["add_invoice", "change_invoice", "view_invoice",
                                            "add_payment", "change_payment", "delete_payment"]
         hs_perms = keyholder_perms + ["review_riskassessment", "review_eventchecklist"]

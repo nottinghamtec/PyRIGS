@@ -203,82 +203,6 @@ class EventChecklistForm(forms.ModelForm):
         'power_mic': models.Profile,
     }
 
-    # Two possible formats
-    def parsedatetime(self, date_string):
-        try:
-            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S'))
-        except ValueError:
-            return timezone.make_aware(datetime.strptime(date_string, '%Y-%m-%dT%H:%M'))
-
-    # There's probably a thousand better ways to do this, but this one is mine
-    def clean(self):
-        vehicles = {key: val for key, val in self.data.items()
-                    if key.startswith('vehicle')}
-        for key in vehicles:
-            pk = int(key.split('_')[1])
-            driver_key = 'driver_' + str(pk)
-            if (self.data[driver_key] == ''):
-                raise forms.ValidationError('Add a driver to vehicle ' + str(pk), code='vehicle_mismatch')
-            else:
-                try:
-                    item = models.EventChecklistVehicle.objects.get(pk=pk)
-                except models.EventChecklistVehicle.DoesNotExist:
-                    item = models.EventChecklistVehicle()
-
-                item.vehicle = vehicles['vehicle_' + str(pk)]
-                item.driver = models.Profile.objects.get(pk=self.data[driver_key])
-                item.full_clean('checklist')
-
-                # item does not have a database pk yet as it isn't saved
-                self.items['v' + str(pk)] = item
-
-        crewmembers = {key: val for key, val in self.data.items()
-                       if key.startswith('crewmember')}
-        other_fields = ['start', 'role', 'end']
-        for key in crewmembers:
-            pk = int(key.split('_')[1])
-
-            for field in other_fields:
-                value = self.data[f'{field}_{pk}']
-                if value == '':
-                    raise forms.ValidationError(f'Add a {field} to crewmember {pk}', code=f'{field}_mismatch')
-
-            try:
-                item = models.EventChecklistCrew.objects.get(pk=pk)
-            except models.EventChecklistCrew.DoesNotExist:
-                item = models.EventChecklistCrew()
-
-            item.crewmember = models.Profile.objects.get(pk=self.data['crewmember_' + str(pk)])
-            item.start = self.parsedatetime(self.data['start_' + str(pk)])
-            item.role = self.data['role_' + str(pk)]
-            item.end = self.parsedatetime(self.data['end_' + str(pk)])
-            item.full_clean('checklist')
-
-            # item does not have a database pk yet as it isn't saved
-            self.items['c' + str(pk)] = item
-
-        return super(EventChecklistForm, self).clean()
-
-    def save(self, commit=True):
-        checklist = super(EventChecklistForm, self).save(commit=False)
-        if (commit):
-            # Remove all existing, to be recreated from the form
-            checklist.vehicles.all().delete()
-            checklist.crew.all().delete()
-            checklist.save()
-
-            for key in self.items:
-                item = self.items[key]
-                reversion.add_to_revision(item)
-                # finish and save new database items
-                item.checklist = checklist
-                item.full_clean()
-                item.save()
-
-        self.items.clear()
-
-        return checklist
-
     class Meta:
         model = models.EventChecklist
         fields = '__all__'
@@ -303,6 +227,7 @@ class EventCheckInForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['time'].initial = timezone.now()
+        self.fields['role'].initial = "Crew"
 
     class Meta:
         model = models.EventCheckIn

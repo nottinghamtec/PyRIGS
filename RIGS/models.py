@@ -81,6 +81,9 @@ class Profile(AbstractUser):
     def __str__(self):
         return self.name
 
+    def current_event(self):
+        return EventCheckIn.objects.filter(person=self).latest('time') or None
+
 
 class ContactableManager(models.Manager):
     def search(self, query=None):
@@ -815,7 +818,7 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
         return f"{self.pk} | {self.event}"
 
 
-@reversion.register(follow=['vehicles', 'crew'])
+@reversion.register
 class EventChecklist(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
@@ -897,6 +900,10 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     def __str__(self):
         return f"{self.pk} - {self.event}"
 
+    @property
+    def activity_feed_string(self):
+        return str(self.event)
+
     class Meta:
         ordering = ['event']
         permissions = [
@@ -908,11 +915,12 @@ class EventCheckIn(models.Model):
     event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
     person = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checkins', on_delete=models.CASCADE)
     time = models.DateTimeField()
-    vehicle = models.CharField(max_length=100)
+    role = models.CharField(max_length=50, blank=True)
+    vehicle = models.CharField(max_length=100, blank=True)
+    end_time = models.DateTimeField(null=True)
 
+    def active(self):
+        return end_time is not None
 
-class EventCheckOut(models.Model):
-    event = models.ForeignKey('Event', on_delete=models.CASCADE)
-    person = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checkouts', on_delete=models.CASCADE)
-    time = models.DateTimeField() # TODO Validate may not check in in future
-    vehicle = models.CharField(max_length=100)
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={'pk': self.event.pk})

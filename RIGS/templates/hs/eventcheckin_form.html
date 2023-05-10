@@ -1,30 +1,12 @@
 {% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% load help_text from filters %}
-{% load profile_by_index from filters %}
 {% load button from filters %}
-
-{% block css %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
-{% endblock %}
-
-{% block preload_js %}
-    {{ block.super }}
-    <script src="{% static 'js/selects.js' %}"></script>
-{% endblock %}
-
-{% block js %}
-    {{ block.super }}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
-{% endblock %}
 
 {% block content %}
     <div class="col-12">
         {% include 'form_errors.html' %}
-        <form role="form" method="POST" action="{% url 'event_checkin' pk=event.pk %}">
+        <form id="checkin" role="form" method="POST" action="{% url 'event_checkin' pk=event.pk %}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
             <input type="hidden" name="{{ form.person.name }}" id="{{ form.person.id_for_label }}"
@@ -32,25 +14,49 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="{{ form.time.id_for_label }}"
-                       class="col-sm-4 col-form-label">{{ form.time.label }}</label>
+                       class="col-sm-4 col-form-label">Start Time</label>
                 <div class="col-sm-8">
                     {% render_field form.time class+="form-control" %}
                 </div>
             </div>
             <div class="form-group">
-                <label for="{{ form.vehicle.id_for_label }}" class="col-sm-4 col-form-label">Did you drive? If so, what did you drive?</label>
-                <br><button type="button" class="btn btn-primary" onclick="document.getElementById('id_vehicle').value='Virgil'"><span class="fas fa-truck-moving"></span> Virgil</button>
+                <label for="{{ form.vehicle.id_for_label }}" class="col col-form-label">What is your role?</label>
+                <div class="col-12">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('id_role').value='MIC'">MIC</button>
+                <button type="button" class="btn btn-danger" onclick="document.getElementById('id_role').value='Power MIC'">Power MIC</button>
+                <button type="button" class="btn btn-info" onclick="document.getElementById('id_role').value='Crew'">Crew</button>
+                <br/>
+                <p class="mt-2">Other (enter text)</p>
+                </div>
+                <div class="col-sm-8">
+                    {% render_field form.role class+="form-control" %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.vehicle.id_for_label }}" class="col col-form-label">Did you drive? If so, what did you drive?</label>
+                <div class="col-12">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('id_vehicle').value='Virgil'"><span class="fas fa-truck-moving"></span> Virgil</button>
                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('id_vehicle').value='Virgil + Erms'"><span class="fas fa-trailer"></span><span class="fas fa-truck-moving"></span> Virgil + Erms</button>
-                <br>Other (enter text)
+                <br/>
+                <p class="mt-2">Other (enter text)</p>
+                </div>
                 <div class="col-sm-8">
                     {% render_field form.vehicle class+="form-control" %}
                 </div>
             </div>
+            {% if not request.is_ajax %}
             <div class="row mt-3">
                 <div class="col-sm-12 text-right">
                     {% button 'submit' %}
                 </div>
             </div>
+            {% endif %}
         </form>
     </div>
+{% endblock %}
+
+{% block footer %}
+<div class="col-sm-12 text-right pr-0">
+    <button type="submit" class="btn btn-primary" title="Save" form="checkin"><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
+</div>
 {% endblock %}
