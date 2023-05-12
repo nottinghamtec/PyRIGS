@@ -64,7 +64,7 @@ INSTALLED_APPS = (
     'assets',
     'training',
 
-    #'debug_toolbar',
+    # 'debug_toolbar',
     'registration',
     'reversion',
     'widget_tweaks',
@@ -75,7 +75,7 @@ INSTALLED_APPS = (
 MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
