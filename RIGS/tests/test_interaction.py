@@ -318,7 +318,7 @@ class TestEventDuplicate(BaseRigboardTest):
 
         self.assertFalse(newEvent.authorised)
 
-        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element_by_xpath('//h2').text)
+        self.assertNotIn("N%05d" % self.testEvent.pk, self.driver.find_element(By.XPATH, '//h2').text)
         self.assertNotIn("Event data duplicated but not yet saved", self.page.warning)  # Check info message not visible
 
         # Check the new items are visible
@@ -327,26 +327,25 @@ class TestEventDuplicate(BaseRigboardTest):
         self.assertIn("Test Item 2", table.text)
         self.assertIn("Test Item 3", table.text)
 
-        infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
-        self.assertIn("N%05d" % self.testEvent.pk,
-                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+        infoPanel = self.driver.find_element(By.XPATH, '//div[contains(text(), "Event Info")]/..')
+        self.assertIn("N%05d" % self.testEvent.pk, infoPanel.find_element(By.XPATH, '//dt[text()="Based On"]/following-sibling::dd[1]').text)
         # Check the PO hasn't carried through
-        self.assertNotIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+        self.assertNotIn("TESTPO", infoPanel.find_element(By.XPATH, '//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         self.assertIn("N%05d" % self.testEvent.pk,
-                      infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+                      infoPanel.find_element(By.XPATH, '//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
         self.driver.get(self.live_server_url + '/event/' + str(self.testEvent.pk))  # Go back to the old event
 
         # Check that based-on hasn't crept into the old event
-        infoPanel = self.driver.find_element_by_xpath('//div[contains(text(), "Event Info")]/..')
+        infoPanel = self.driver.find_element(By.XPATH, '//div[contains(text(), "Event Info")]/..')
         self.assertNotIn("N%05d" % self.testEvent.pk,
-                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+                         infoPanel.find_element(By.XPATH, '//dt[text()="Based On"]/following-sibling::dd[1]').text)
         # Check the PO remains on the old event
-        self.assertIn("TESTPO", infoPanel.find_element_by_xpath('//dt[text()="PO"]/following-sibling::dd[1]').text)
+        self.assertIn("TESTPO", infoPanel.find_element(By.XPATH, '//dt[text()="PO"]/following-sibling::dd[1]').text)
 
         self.assertNotIn("N%05d" % self.testEvent.pk,
-                         infoPanel.find_element_by_xpath('//dt[text()="Based On"]/following-sibling::dd[1]').text)
+                         infoPanel.find_element(By.XPATH, '//dt[text()="Based On"]/following-sibling::dd[1]').text)
 
         # Check the items are as they were
         table = self.page.item_table  # ID number is known, see above

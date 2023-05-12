@@ -195,7 +195,7 @@ class TestAssetForm(AutoLoginTest):
         # self.assertTrue(self.page.parent_selector.options[0].selected)
         self.page.parent_selector.toggle()
 
-        self.assertFalse(self.driver.find_element_by_id('cable-table').is_displayed())
+        self.assertFalse(self.driver.find_element(By.ID, 'cable-table').is_displayed())
 
         self.page.submit()
         self.assertTrue(self.page.success)
@@ -350,7 +350,7 @@ class TestAssetAudit(AutoLoginTest):
         self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
         self.assertEqual(self.page.modal.asset_id, asset_row.id)
         self.page.modal.close()
-        self.assertFalse(self.driver.find_element_by_id('modal').is_displayed())
+        self.assertFalse(self.driver.find_element(By.ID, 'modal').is_displayed())
         # Make sure audit log was NOT filled out
         audited = models.Asset.objects.get(asset_id=asset_row.id)
         assert audited.last_audited_by is None

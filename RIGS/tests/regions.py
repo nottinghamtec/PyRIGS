@@ -6,7 +6,7 @@ from PyRIGS.tests.regions import TextBox, Modal, SimpleMDETextArea
 
 class Header(Region):
     def find_link(self, link_text):
-        return self.driver.find_element_by_partial_link_text(link_text)
+        return self.driver.find_element(By.PARTIAL_LINK_TEXT, link_text)
 
 
 class ItemRow(Region):
