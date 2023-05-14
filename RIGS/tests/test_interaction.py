@@ -676,14 +676,6 @@ def small_ec(page, admin_user):
     page.ear_plugs = True
     page.hs_location = "The Moon"
     page.extinguishers_location = "With the rest of the fire"
-    # If we do this first the search fails, for ... reasons
-    page.power_mic.search(admin_user.name)
-    page.power_mic.toggle()
-    assert not page.power_mic.is_open
-    page.earthing = True
-    page.rcds = True
-    page.supply_test = True
-    page.pat = True
 
 
 def test_ec_create_small(logged_in_browser, live_server, admin_user, ra):
@@ -704,14 +696,15 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
     page.ear_plugs = True
     page.hs_location = "Death Valley"
     page.extinguishers_location = "With the rest of the fire"
-    # If we do this first the search fails, for ... reasons
-    page.power_mic.search(admin_user.name)
-    page.power_mic.toggle()
-    assert not page.power_mic.is_open
 
     # Gotta scroll to make the button clickable
     logged_in_browser.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    page.submit()
+    assert page.success
 
+
+def test_power_checklist(logged_in_browser, live_server, admin_user, power_test, medium_ra):
+    page = pages.CreatePowerTestRecord(logged_in_browser.driver, live_server.url, event_id=medium_ra.event.pk).open()
     page.earthing = True
     page.pat = True
     page.source_rcd = True
@@ -726,54 +719,13 @@ def test_ec_create_medium(logged_in_browser, live_server, admin_user, medium_ra)
     page.w1_polarity = True
     page.w1_voltage = 240
     page.w1_earth_fault = "0.42"
+    # If we do this first the search fails, for ... reasons
+    page.power_mic.search(admin_user.name)
+    page.power_mic.toggle()
+    assert not page.power_mic.is_open
 
     page.submit()
     assert page.success
-
-
-def test_ec_create_vehicle(logged_in_browser, live_server, admin_user, checklist):
-    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
-    small_ec(page, admin_user)
-    page.add_vehicle()
-    assert len(page.vehicles) == 1
-    vehicle_name = 'Brian'
-    page.vehicles[0].name.set_value(vehicle_name)
-    # Appears we're moving too fast for javascript...
-    t.sleep(1)
-    page.vehicles[0].vehicle.search(admin_user.first_name)
-    t.sleep(1)
-    page.submit()
-    assert page.success
-    # Check data is correct
-    checklist.refresh_from_db()
-    vehicle = models.EventChecklistVehicle.objects.get(checklist=checklist.pk)
-    assert vehicle_name == vehicle.vehicle
-
-
-# TODO Test validation of end before start
-def test_ec_create_crew(logged_in_browser, live_server, admin_user, checklist):
-    page = pages.EditEventChecklist(logged_in_browser.driver, live_server.url, pk=checklist.pk).open()
-    small_ec(page, admin_user)
-    page.add_crew()
-    assert len(page.crew) == 1
-    role = "MIC"
-    start_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 9, 0))
-    end_time = timezone.make_aware(datetime.datetime(2015, 1, 1, 10, 30))
-    crew = page.crew[0]
-    t.sleep(2)
-    crew.crewmember.search(admin_user.first_name)
-    t.sleep(2)
-    crew.role.set_value(role)
-    crew.start_time.set_value(start_time)
-    crew.end_time.set_value(end_time)
-    page.submit()
-    assert page.success
-    # Check data is correct
-    crew_obj = models.EventChecklistCrew.objects.get(checklist=checklist.pk)
-    assert admin_user.pk == crew_obj.crewmember.pk
-    assert role == crew_obj.role
-    assert start_time == crew_obj.start
-    assert end_time == crew_obj.end
 
 
 # TODO Can I loop through all the boolean fields and test them at once?
