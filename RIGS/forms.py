@@ -232,3 +232,10 @@ class EventCheckInForm(forms.ModelForm):
     class Meta:
         model = models.EventCheckIn
         fields = '__all__'
+        exclude = ['end_time']
+
+
+class EditCheckInForm(forms.ModelForm):
+     class Meta:
+        model = models.EventCheckIn
+        fields = '__all__'

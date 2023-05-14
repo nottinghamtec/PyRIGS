@@ -68,37 +68,6 @@
         </div>
     </div>
 </div>
-<div class="card mb-3">
-    <div class="card-header">Crew Record</div>
-    <div class="table-responsive">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th scope="col">Crewmember</th>
-                    <th scope="col">Vehicle</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">End Time</th>
-                </tr>
-            </thead>
-            <tbody id="crewmemberst">
-                {% for crew in object.event.crew.all %}
-                <tr>
-                    <td>{{crew.person}}</td>
-                    <td>{{crew.vehicle|default:"None"}}</td>
-                    <td>{{crew.time}}</td>
-                    <td>{{crew.role}}</td>
-                    <td>{{crew.end_time}}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center bg-warning">Apparently this event happened by magic...</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
 <div class="col-12 text-right">
 {% button 'edit' url='ec_edit' pk=object.pk %}
 {% button 'view' url='event_detail' pk=object.pk text="Event" %}

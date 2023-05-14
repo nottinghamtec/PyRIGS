@@ -8,7 +8,7 @@ from reversion import revisions as reversion
 
 from RIGS import models, forms
 from RIGS.views.rigboard import get_related
-from PyRIGS.views import PrintView
+from PyRIGS.views import PrintView, ModalURLMixin
 
 
 class HSCreateView(generic.CreateView):
@@ -228,10 +228,13 @@ class RAPrint(PrintView):
         return context
 
 
-class EventCheckIn(generic.CreateView):
+class EventCheckIn(generic.CreateView, ModalURLMixin):
     model = models.EventCheckIn
     template_name = 'hs/eventcheckin_form.html'
     form_class = forms.EventCheckInForm
+
+    def get_success_url(self):
+        return self.get_close_url('event_detail', 'event_detail') # Well, that's one way of doing that...!
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -239,3 +242,29 @@ class EventCheckIn(generic.CreateView):
         context['page_title'] = f'Check In to Event {context["event"].display_id}'
         # get_related(context['form'], context)
         return context
+
+
+class EventCheckInEdit(generic.UpdateView, ModalURLMixin):
+    model = models.EventCheckIn
+    template_name = 'hs/eventcheckin_form.html'
+    form_class = forms.EditCheckInForm
+
+    def get_success_url(self):
+        return self.get_close_url('event_detail', 'event_detail') # Well, that's one way of doing that...!
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event'] = self.object.event
+        context['page_title'] = f'Edit Check In for Event {context["event"].display_id}'
+        context['edit'] = True
+        # get_related(context['form'], context)
+        return context
+
+
+class EventCheckOut(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        checkin = self.request.user.current_event()
+        if checkin:
+            checkin.end_time = timezone.now()
+            checkin.save()
+        return reverse_lazy('event_detail', kwargs={'pk': checkin.event.pk})

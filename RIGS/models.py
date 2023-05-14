@@ -82,7 +82,8 @@ class Profile(AbstractUser):
         return self.name
 
     def current_event(self):
-        return EventCheckIn.objects.filter(person=self).latest('time') or None
+        q = EventCheckIn.objects.filter(person=self, end_time=None)
+        return q.latest('time') if q.exists() else None
 
 
 class ContactableManager(models.Manager):
@@ -918,6 +919,10 @@ class EventCheckIn(models.Model):
     role = models.CharField(max_length=50, blank=True)
     vehicle = models.CharField(max_length=100, blank=True)
     end_time = models.DateTimeField(null=True)
+
+    def clean(self):
+        if self.end_time < self.time:
+            raise ValidationError("May not check out before you've checked in. Please invent time travel and retry.")
 
     def active(self):
         return end_time is not None
