@@ -55,12 +55,12 @@
             <div class="form-group">
                 <label for="{{ form.role.id_for_label }}" class="col col-form-label">Role</label>
                 <div class="row pl-3">
-                    <div class="col">
+                    <div class="col-md-6 col-sm-12">
                         <button type="button" class="btn btn-primary" onclick="document.getElementById('id_role').value='MIC'">MIC</button>
                         <button type="button" class="btn btn-danger" onclick="document.getElementById('id_role').value='Power MIC'">Power MIC</button>
                         <button type="button" class="btn btn-info" onclick="document.getElementById('id_role').value='Crew'">Crew</button>
                     </div>
-                    <div class="col">
+                    <div class="col-md-6 mt-2">
                         {% render_field form.role class+="form-control" placeholder="Other (enter text)" %}
                     </div>
                 </div>
@@ -68,11 +68,11 @@
             <div class="form-group">
                 <label for="{{ form.vehicle.id_for_label }}" class="col col-form-label">Vehicle (if applicable)</label>
                 <div class="row pl-3">
-                    <div class="col">
+                    <div class="col-md-6 col-sm-12">
                         <button type="button" class="btn btn-primary" onclick="document.getElementById('id_vehicle').value='Virgil'"><span class="fas fa-truck-moving"></span> Virgil</button>
                         <button type="button" class="btn btn-secondary" onclick="document.getElementById('id_vehicle').value='Virgil + Erms'"><span class="fas fa-trailer"></span><span class="fas fa-truck-moving"></span> Virgil + Erms</button>
                     </div>
-                    <div class="col">
+                    <div class="col-md-6 mt-2">
                         {% render_field form.vehicle class+="form-control" placeholder="Other (enter text)" %}
                     </div>
                 </div>

@@ -62,12 +62,12 @@
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th scope="col">Crewmember</th>
+                                <th scope="col">Name</th>
                                 <th scope="col">Vehicle</th>
                                 <th scope="col">Start Time</th>
                                 <th scope="col">Role</th>
                                 <th scope="col">End Time</th>
-                                <th scope="col">{% if self.request.user.pk is form.event.mic.pk %}<a href="{% url 'event_checkin_override' event.pk %}" class="btn btn-sm btn-success"><span class="fas fa-plus"></span> Add</a>{% endif %}</th>
+                                <th scope="col">{% if request.user.pk is event.mic.pk %}<a href="{% url 'event_checkin_override' event.pk %}" class="btn btn-sm btn-success"><span class="fas fa-plus"></span> Add</a>{% endif %}</th>
                             </tr>
                         </thead>
                         <tbody id="crewmembers">
@@ -78,7 +78,7 @@
                                 <td>{{crew.time}}</td>
                                 <td>{{crew.role}}</td>
                                 <td>{% if crew.end_time %}{{crew.end_time}}{% else %}<span class="text-success fas fa-clock" data-toggle="tooltip" title="This person is currently checked into this event"></span>{% endif %}</td>
-                                <td>{% if crew.end_time %}{% if crew.person.pk == request.user.pk or crew.event.mic.pk == request.user.pk %}{% button 'edit' 'edit_checkin' crew.pk clazz='btn-sm modal-href' %}{% endif %}{%endif%}</td>
+                                <td>{% if crew.end_time %}{% if crew.person.pk == request.user.pk or event.mic.pk == request.user.pk %}{% button 'edit' 'edit_checkin' crew.pk clazz='btn-sm modal-href' %}{% endif %}{%endif%}</td>
                             </tr>
                             {% empty %}
                             <tr>
