@@ -8,6 +8,11 @@
 <div class="row">
     <h1 class="col-sm-12 pb-3">R<small class="text-muted">ig</small> I<small class="text-muted">nformation</small> G<small class="text-muted">athering</small> S<small class="text-muted">ystem</small></h1>
     <h2 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h2>
+    <div class="col-sm-12 alert alert-primary rounded-0 mx-3">
+    {% for event in now %}
+    Event {{ event }} is happening now! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
+    {% endfor %}
+    </div>
     <div class="col-sm-4 mb-3">
         <div class="card">
             <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/rigs.jpg' %}" alt="Some lights and haze, very purple" style="height: 150px; object-fit: cover;">
