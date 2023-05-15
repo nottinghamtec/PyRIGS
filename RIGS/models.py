@@ -482,6 +482,15 @@ class Event(models.Model, RevisionMixin):
         else:
             return bool(self.purchase_order)
 
+    @property
+    def can_check_in(self):
+        earliest = self.earliest_time
+        if isinstance(self.earliest_time, datetime.date):
+            earliest = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
+            tz = pytz.timezone(settings.TIME_ZONE)
+            earliest = tz.localize(earliest)
+        return not self.dry_hire and earliest <= timezone.now()
+
     objects = EventManager()
 
     def get_absolute_url(self):
@@ -921,8 +930,11 @@ class EventCheckIn(models.Model):
     end_time = models.DateTimeField(null=True)
 
     def clean(self):
-        if self.end_time < self.time:
-            raise ValidationError("May not check out before you've checked in. Please invent time travel and retry.")
+        sass = " Please invent time travel and retry."
+        if self.time > timezone.now():
+            raise ValidationError("May not check in in the future." + sass)
+        if self.end_time and self.end_time < self.time:
+            raise ValidationError("May not check out before you've checked in." + sass)
 
     def active(self):
         return end_time is not None

@@ -244,6 +244,19 @@ class EventCheckIn(generic.CreateView, ModalURLMixin):
         return context
 
 
+class EventCheckInOverride(generic.CreateView):
+    model = models.EventCheckIn
+    template_name = 'hs/eventcheckin_form.html'
+    form_class = forms.EditCheckInForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event'] = models.Event.objects.get(pk=self.kwargs.get('pk'))
+        context['page_title'] = f'Manually add Check In to Event {context["event"].display_id}'
+        context['manual'] = True
+        return context
+
+
 class EventCheckInEdit(generic.UpdateView, ModalURLMixin):
     model = models.EventCheckIn
     template_name = 'hs/eventcheckin_form.html'

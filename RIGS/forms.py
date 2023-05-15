@@ -200,7 +200,6 @@ class EventChecklistForm(forms.ModelForm):
 
     related_models = {
         'venue': models.Venue,
-        'power_mic': models.Profile,
     }
 
     class Meta:
