@@ -25,7 +25,7 @@ class HSCreateView(generic.CreateView):
         epk = self.kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
         context['event'] = event
-        context['page_title'] = f'Create {self} for Event {event.display_id}'
+        context['page_title'] = f'Create {self.model.__name__} for Event {event.display_id}'
         return context
 
 

@@ -73,7 +73,7 @@ function initPicker(obj) {
             return array;
         }
     };
-    console.log(obj.data);
+    //console.log(obj.data);
     if (!obj.data('noclear')) {
         obj.prepend($("<option></option>")
 		    .attr("value",'')

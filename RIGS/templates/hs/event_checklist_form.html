@@ -13,22 +13,19 @@
 {% block preload_js %}
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
     <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
 {% endblock %}
 
 {% block content %}
     <div class="col-12">
         {% include 'form_errors.html' %}
-        {% if edit %}
-        <form role="form" method="POST" action="{% url 'ec_edit' pk=object.pk %}">
-        {% else %}
-        <form role="form" method="POST" action="{% url 'event_ec' pk=event.pk %}">
-        {% endif %}
+        
+        <form role="form" method="POST" action="{% if edit %}{% url 'ec_edit' pk=object.pk %}{% else %}{% url 'event_ec' pk=event.pk %}{% endif %}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
             {% csrf_token %}
@@ -59,7 +56,7 @@
                             <div class="form-group form-row" id="{{ form.venue.id_for_label }}-group">
                                 <label for="{{ form.venue.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.venue.label }}</label>
-                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
                                 {% elif event.venue %}
