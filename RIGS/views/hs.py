@@ -9,6 +9,7 @@ from reversion import revisions as reversion
 from RIGS import models, forms
 from RIGS.views.rigboard import get_related
 from PyRIGS.views import PrintView, ModalURLMixin
+from django.shortcuts import redirect
 
 
 class HSCreateView(generic.CreateView):
@@ -280,4 +281,4 @@ class EventCheckOut(generic.RedirectView):
         if checkin:
             checkin.end_time = timezone.now()
             checkin.save()
-        return reverse_lazy('event_detail', kwargs={'pk': checkin.event.pk})
+        return self.request.META.get('HTTP_REFERER', '/')
