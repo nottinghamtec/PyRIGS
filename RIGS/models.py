@@ -409,7 +409,15 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def hs_done(self):
-        return self.riskassessment is not None and len(self.checklists.all()) > 0
+        return self.riskassessment is not None and self.has_checklist and self.has_power
+
+    @property
+    def has_checklist(self):
+        return self.checklists.exists()
+
+    @property
+    def has_power(self):
+        return self.power_tests.exists()
 
     @property
     def has_start_time(self):
