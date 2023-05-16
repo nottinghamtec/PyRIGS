@@ -20,6 +20,7 @@ admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice, VersionAdmin)
+admin.site.register(models.EventCheckIn)
 
 
 @transaction.atomic()  # Copied from django-extensions. GenericForeignKey support removed as unnecessary.
