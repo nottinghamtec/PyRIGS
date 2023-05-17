@@ -235,7 +235,7 @@ class EventCheckIn(generic.CreateView, ModalURLMixin):
     form_class = forms.EventCheckInForm
 
     def get_success_url(self):
-        return self.get_close_url('event_detail', 'event_detail') # Well, that's one way of doing that...!
+        return self.get_close_url('event_detail', 'event_detail')  # Well, that's one way of doing that...!
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -264,7 +264,7 @@ class EventCheckInEdit(generic.UpdateView, ModalURLMixin):
     form_class = forms.EditCheckInForm
 
     def get_success_url(self):
-        return self.get_close_url('event_detail', 'event_detail') # Well, that's one way of doing that...!
+        return self.get_close_url('event_detail', 'event_detail')  # Well, that's one way of doing that...!
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

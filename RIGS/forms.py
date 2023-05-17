@@ -235,6 +235,6 @@ class EventCheckInForm(forms.ModelForm):
 
 
 class EditCheckInForm(forms.ModelForm):
-     class Meta:
+    class Meta:
         model = models.EventCheckIn
         fields = '__all__'

@@ -877,7 +877,7 @@ class EventChecklist(ReviewableModel, RevisionMixin):
 class PowerTestRecord(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='power_tests', on_delete=models.CASCADE)
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
-                              verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
     notes = models.TextField(blank=True, default='')
     # Small Electrical Checks
