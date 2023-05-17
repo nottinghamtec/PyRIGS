@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 from reversion import revisions as reversion
@@ -37,7 +37,7 @@ class MarkReviewed(generic.View):
             obj.reviewed_by = self.request.user
             obj.reviewed_at = timezone.now()
             obj.save()
-        return HttpResponseRedirect(reverse_lazy('hs_list'))
+        return HttpResponseRedirect(reverse('hs_list'))
 
 
 class EventRiskAssessmentCreate(HSCreateView):
@@ -53,12 +53,12 @@ class EventRiskAssessmentCreate(HSCreateView):
         ra = models.RiskAssessment.objects.filter(event=event).first()
 
         if ra is not None:
-            return HttpResponseRedirect(reverse_lazy('ra_edit', kwargs={'pk': ra.pk}))
+            return HttpResponseRedirect(reverse('ra_edit', kwargs={'pk': ra.pk}))
 
         return super(EventRiskAssessmentCreate, self).get(self)
 
     def get_success_url(self):
-        return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
+        return reverse('ra_detail', kwargs={'pk': self.object.pk})
 
 
 class EventRiskAssessmentEdit(generic.UpdateView):
@@ -71,7 +71,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         ra.reviewed_by = None
         ra.reviewed_at = None
         ra.save()
-        return reverse_lazy('ra_detail', kwargs={'pk': self.object.pk})
+        return reverse('ra_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super(EventRiskAssessmentEdit, self).get_context_data(**kwargs)
@@ -114,7 +114,7 @@ class EventChecklistEdit(generic.UpdateView):
         ec.reviewed_by = None
         ec.reviewed_at = None
         ec.save()
-        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+        return reverse('ec_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super(EventChecklistEdit, self).get_context_data(**kwargs)
@@ -142,12 +142,12 @@ class EventChecklistCreate(HSCreateView):
 
         if ra is None:
             messages.error(self.request, f'A Risk Assessment must exist prior to creating any Event Checklists for {event}! Please create one now.')
-            return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
+            return HttpResponseRedirect(reverse('event_ra', kwargs={'pk': epk}))
 
         return super(EventChecklistCreate, self).get(self)
 
     def get_success_url(self):
-        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+        return reverse('ec_detail', kwargs={'pk': self.object.pk})
 
 
 class PowerTestDetail(generic.DetailView):
@@ -170,7 +170,7 @@ class PowerTestEdit(generic.UpdateView):
         ec.reviewed_by = None
         ec.reviewed_at = None
         ec.save()
-        return reverse_lazy('ec_detail', kwargs={'pk': self.object.pk})
+        return reverse('ec_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -197,12 +197,12 @@ class PowerTestCreate(HSCreateView):
 
         if ra is None:
             messages.error(self.request, f'A Risk Assessment must exist prior to creating any Power Test Records for {event}! Please create one now.')
-            return HttpResponseRedirect(reverse_lazy('event_ra', kwargs={'pk': epk}))
+            return HttpResponseRedirect(reverse('event_ra', kwargs={'pk': epk}))
 
         return super().get(self)
 
     def get_success_url(self):
-        return reverse_lazy('pt_detail', kwargs={'pk': self.object.pk})
+        return reverse('pt_detail', kwargs={'pk': self.object.pk})
 
 
 class HSList(generic.ListView):

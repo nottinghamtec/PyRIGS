@@ -711,16 +711,16 @@ def validate_url(value):
 
 
 class ReviewableModel(models.Model):
-    reviewed_at = models.DateTimeField(null=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                                     verbose_name="Reviewer", on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
 
     @cached_property
     def fieldz(self):
         return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
-
-    class Meta:
-        abstract = True
 
 
 @reversion.register
@@ -821,6 +821,12 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
     def get_event_size_display(self):
         return self.SIZES[self.event_size][1] + " Event"
 
+    def __str__(self):
+        return f"{self.pk} | {self.event}"
+
+    def get_absolute_url(self):
+        return reverse('ra_detail', kwargs={'pk': self.pk})
+
     @property
     def activity_feed_string(self):
         return str(self.event)
@@ -828,12 +834,6 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
     @property
     def name(self):
         return str(self)
-
-    def get_absolute_url(self):
-        return reverse('ra_detail', kwargs={'pk': self.pk})
-
-    def __str__(self):
-        return f"{self.pk} | {self.event}"
 
 
 @reversion.register
@@ -862,15 +862,15 @@ class EventChecklist(ReviewableModel, RevisionMixin):
             ('review_eventchecklist', 'Can review Event Checklists')
         ]
 
+    def __str__(self):
+        return f"{self.pk} - {self.event}"
+
     @property
     def activity_feed_string(self):
         return str(self.event)
 
     def get_absolute_url(self):
         return reverse('ec_detail', kwargs={'pk': self.pk})
-
-    def __str__(self):
-        return f"{self.pk} - {self.event}"
 
 
 @reversion.register
@@ -915,18 +915,18 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
 
+    class Meta:
+        ordering = ['event']
+        permissions = [
+            ('review_power', 'Can review Power Test Records')
+        ]
+
     def __str__(self):
         return f"{self.pk} - {self.event}"
 
     @property
     def activity_feed_string(self):
         return str(self.event)
-
-    class Meta:
-        ordering = ['event']
-        permissions = [
-            ('review_power', 'Can review Power Test Records')
-        ]
 
 
 class EventCheckIn(models.Model):
@@ -935,7 +935,10 @@ class EventCheckIn(models.Model):
     time = models.DateTimeField()
     role = models.CharField(max_length=50, blank=True)
     vehicle = models.CharField(max_length=100, blank=True)
-    end_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.person} on {self.event}"
 
     def clean(self):
         sass = " Please invent time travel and retry."
@@ -944,11 +947,8 @@ class EventCheckIn(models.Model):
         if self.end_time and self.end_time < self.time:
             raise ValidationError("May not check out before you've checked in." + sass)
 
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={'pk': self.event_id})
+
     def active(self):
         return end_time is not None
-
-    def get_absolute_url(self):
-        return reverse('event_detail', kwargs={'pk': self.event.pk})
-
-    def __str__(self):
-        return f"{self.person} on {self.event}"
