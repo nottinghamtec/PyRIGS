@@ -101,13 +101,13 @@ urlpatterns = [
     path('event/power/<int:pk>/review/', permission_required_with_403('RIGS.review_power')(views.MarkReviewed.as_view()),
          name='pt_review', kwargs={'model': 'PowerTestRecord'}),
 
-    path('event/<int:pk>/checkin/', permission_required_with_403('RIGS.add_eventcheckin')(views.EventCheckIn.as_view()),
+    path('event/<int:pk>/checkin/', login_required(views.EventCheckIn.as_view()),
          name='event_checkin'),
-    path('event/checkout/', permission_required_with_403('RIGS.change_eventcheckin')(views.EventCheckOut.as_view()),
+    path('event/checkout/', login_required(views.EventCheckOut.as_view()),
          name='event_checkout'),
-    path('event/<int:pk>/checkin/edit/', permission_required_with_403('RIGS.change_eventcheckin')(views.EventCheckInEdit.as_view()),
+    path('event/<int:pk>/checkin/edit/', login_required(views.EventCheckInEdit.as_view()),
          name='edit_checkin'),
-    path('event/<int:pk>/checkin/add/', permission_required_with_403('RIGS.add_eventcheckin')(views.EventCheckInOverride.as_view()),
+    path('event/<int:pk>/checkin/add/', login_required(views.EventCheckInOverride.as_view()),
          name='event_checkin_override'),
 
     # Finance

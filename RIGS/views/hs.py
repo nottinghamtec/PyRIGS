@@ -263,6 +263,12 @@ class EventCheckInEdit(generic.UpdateView, ModalURLMixin):
     template_name = 'hs/eventcheckin_form.html'
     form_class = forms.EditCheckInForm
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.person == self.request.user and not obj.event.mic == self.request.user:
+            return redirect(self.request.META.get('HTTP_REFERER', '/'))
+        return super().dispatch(request)
+
     def get_success_url(self):
         return self.get_close_url('event_detail', 'event_detail')  # Well, that's one way of doing that...!
 
