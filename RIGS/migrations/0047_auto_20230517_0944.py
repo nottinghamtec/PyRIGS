@@ -5,6 +5,19 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def migrate_old_data(apps, schema_editor):
+    EventChecklist = apps.get_model('RIGS', 'EventChecklist')
+    EventCheckIn = apps.get_model('RIGS', 'EventCheckIn')
+    for ec in EventChecklist.objects.all():
+        for crew in ec.crew.all():
+            vehicle = ec.vehicles.get(driver=crew.crewmember) or None
+            EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=vehicle.vehicle)
+
+
+def revert(apps, schema_editor):
+    apps.get_model('RIGS', 'EventCheckIn').objects.all().delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -24,146 +37,5 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='checkins', to=settings.AUTH_USER_MODEL)),
             ],
         ),
-        migrations.RemoveField(
-            model_name='eventchecklistvehicle',
-            name='checklist',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklistvehicle',
-            name='driver',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='all_rcds_tested',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='earthing',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_earth_fault',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_phase_rotation',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_pssc',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_voltage_l1',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_voltage_l2',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='fd_voltage_l3',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='labelling',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='pat',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='power_mic',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='public_sockets_tested',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='rcds',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='source_rcd',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='supply_test',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w1_description',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w1_earth_fault',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w1_polarity',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w1_voltage',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w2_description',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w2_earth_fault',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w2_polarity',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w2_voltage',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w3_description',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w3_earth_fault',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w3_polarity',
-        ),
-        migrations.RemoveField(
-            model_name='eventchecklist',
-            name='w3_voltage',
-        ),
-        migrations.AddField(
-            model_name='powertestrecord',
-            name='power_mic',
-            field=models.ForeignKey(blank=True, help_text='Who is the Power MIC?', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='checklists', to=settings.AUTH_USER_MODEL, verbose_name='Power MIC'),
-        ),
-        migrations.AlterField(
-            model_name='eventchecklist',
-            name='reviewed_at',
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='powertestrecord',
-            name='reviewed_at',
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='riskassessment',
-            name='reviewed_at',
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.DeleteModel(
-            name='EventChecklistCrew',
-        ),
-        migrations.DeleteModel(
-            name='EventChecklistVehicle',
-        ),
+        migrations.RunPython(migrate_old_data, reverse_code=revert),
     ]
