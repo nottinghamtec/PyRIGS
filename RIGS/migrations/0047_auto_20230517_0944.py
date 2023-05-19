@@ -10,7 +10,10 @@ def migrate_old_data(apps, schema_editor):
     EventCheckIn = apps.get_model('RIGS', 'EventCheckIn')
     for ec in EventChecklist.objects.all():
         for crew in ec.crew.all():
-            vehicle = ec.vehicles.get(driver=crew.crewmember) or None
+            try:
+                vehicle = ec.vehicles.get(driver=crew.crewmember)
+            except EventChecklist.DoesNotExist:
+                vehicle = None
             EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=vehicle.vehicle)
 
 
