@@ -12,7 +12,7 @@ def migrate_old_data(apps, schema_editor):
         for crew in ec.crew.all():
             try:
                 vehicle = ec.vehicles.get(driver=crew.crewmember)
-            except EventChecklist.DoesNotExist:
+            except EventChecklistVehicle.DoesNotExist:
                 vehicle = None
             EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=vehicle.vehicle)
 
