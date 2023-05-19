@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def migrate_old_data(apps, schema_editor):
@@ -12,7 +13,7 @@ def migrate_old_data(apps, schema_editor):
         for crew in ec.crew.all():
             try:
                 vehicle = ec.vehicles.get(driver=crew.crewmember)
-            except EventChecklistVehicle.DoesNotExist:
+            except ObjectDoesNotExist:
                 vehicle = None
             EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=vehicle.vehicle)
 
