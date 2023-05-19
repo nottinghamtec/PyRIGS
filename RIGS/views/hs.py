@@ -29,15 +29,15 @@ class HSCreateView(generic.CreateView):
         return context
 
 
-class MarkReviewed(generic.View):
-    def get(self, *args, **kwargs):
+class MarkReviewed(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
         obj = apps.get_model('RIGS', kwargs.get('model')).objects.get(pk=kwargs.get('pk'))
         with reversion.create_revision():
             reversion.set_user(self.request.user)
             obj.reviewed_by = self.request.user
             obj.reviewed_at = timezone.now()
             obj.save()
-        return HttpResponseRedirect(reverse('hs_list'))
+        return self.request.META.get('HTTP_REFERER', reverse('hs_list'))
 
 
 class EventRiskAssessmentCreate(HSCreateView):
