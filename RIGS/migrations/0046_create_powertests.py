@@ -10,7 +10,7 @@ def migrate_old_data(apps, schema_editor):
     PowerTestRecord = apps.get_model('RIGS', 'PowerTestRecord')
     for ec in EventChecklist.objects.all():
         # New highscore for the most pythonic BS I've ever written.
-        PowerTestRecord.objects.create(event=ec.event, **{i.name:getattr(ec, i.attname) for i in PowerTestRecord._meta.get_fields() if not (i.is_relation or i.auto_created or i.name == "notes")})
+        PowerTestRecord.objects.create(**{i.name:getattr(ec, i.attname) for i in PowerTestRecord._meta.get_fields() if not (i.auto_created or i.name == "notes")})
 
 
 def revert(apps, schema_editor):
