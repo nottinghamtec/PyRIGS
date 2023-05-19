@@ -12,10 +12,9 @@ def migrate_old_data(apps, schema_editor):
     for ec in EventChecklist.objects.all():
         for crew in ec.crew.all():
             try:
-                vehicle = ec.vehicles.get(driver=crew.crewmember)
+                EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=ec.vehicles.get(driver=crew.crewmember).vehicle)
             except ObjectDoesNotExist:
-                vehicle = None
-            EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end, vehicle=vehicle.vehicle)
+                EventCheckIn.objects.create(event=ec.event, person=crew.crewmember, role=crew.role, time=crew.start, end_time=crew.end)
 
 
 def revert(apps, schema_editor):
