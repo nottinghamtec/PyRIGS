@@ -1,0 +1,105 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load button from filters %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/easymde.min.css' %}">
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/easymde.min.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-12">
+        {% include 'form_errors.html' %}
+        <form id="checkin" role="form" method="POST" action="{{ form.action|default:request.path }}">
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
+            {% if not request.is_ajax and self.request.user.pk is form.event.mic.pk %}
+            <div class="form-group">
+                <label for="{{ form.person.id_for_label }}"
+                       class="col-sm-4 col-form-label">{{ form.person.label }}</label>
+                <div class="col-sm-8">
+                    <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                        {% if person %}
+                            <option value="{{form.person.value}}" selected="selected" >{{ person.name }}</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+            {% else %}
+            <input type="hidden" name="{{ form.person.name }}" id="{{ form.person.id_for_label }}"
+               value="{{request.user.pk}}"/>
+            {% endif %}
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.time.id_for_label }}"
+                       class="col-sm-4 col-form-label">Start Time</label>
+                <div class="col-sm-8">
+                    {% render_field form.time class+="form-control" %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.role.id_for_label }}" class="col col-form-label">Role</label>
+                <div class="row pl-3">
+                    <div class="col-md-6 col-sm-12">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('id_role').value='MIC'">MIC</button>
+                        <button type="button" class="btn btn-danger" onclick="document.getElementById('id_role').value='Power MIC'">Power MIC</button>
+                        <button type="button" class="btn btn-info" onclick="document.getElementById('id_role').value='Crew'">Crew</button>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        {% render_field form.role class+="form-control" placeholder="Other (enter text)" %}
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.vehicle.id_for_label }}" class="col col-form-label">Vehicle (if applicable)</label>
+                <div class="row pl-3">
+                    <div class="col-md-6 col-sm-12">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('id_vehicle').value='Virgil'"><span class="fas fa-truck-moving"></span> Virgil</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('id_vehicle').value='Virgil + Erms'"><span class="fas fa-trailer"></span><span class="fas fa-truck-moving"></span> Virgil + Erms</button>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        {% render_field form.vehicle class+="form-control" placeholder="Other (enter text)" %}
+                    </div>
+                </div>
+            </div>
+            {% if edit or manual %}
+            <div class="form-group">
+                <label for="{{ form.end_time.id_for_label }}"
+                       class="col-sm-4 col-form-label">End Time</label>
+                <div class="col-sm-8">
+                    {% render_field form.end_time class+="form-control" %}
+                </div>
+            </div>
+            {% endif %}
+            {% if not request.is_ajax %}
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    {% button 'submit' %}
+                </div>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}
+
+{% block footer %}
+<div class="col-sm-12 text-right pr-0">
+    <button type="submit" class="btn btn-primary" title="Save" form="checkin"
+><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
+</div>
+{% endblock %}

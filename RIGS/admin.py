@@ -20,6 +20,7 @@ admin.site.register(models.VatRate, VersionAdmin)
 admin.site.register(models.Event, VersionAdmin)
 admin.site.register(models.EventItem, VersionAdmin)
 admin.site.register(models.Invoice, VersionAdmin)
+admin.site.register(models.EventCheckIn)
 
 
 @transaction.atomic()  # Copied from django-extensions. GenericForeignKey support removed as unnecessary.
@@ -204,5 +205,10 @@ class RiskAssessmentAdmin(VersionAdmin):
 
 
 @admin.register(models.EventChecklist)
+class EventChecklistAdmin(VersionAdmin):
+    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+
+
+@admin.register(models.PowerTestRecord)
 class EventChecklistAdmin(VersionAdmin):
     list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')

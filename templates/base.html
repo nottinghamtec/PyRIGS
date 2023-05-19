@@ -30,6 +30,9 @@
 <body>
 <a class="skip-link" href='#main'>Skip to content</a>
 {% block navbar %}
+{% if request.user.current_event %}
+<div class="bg-primary d-flex justify-content-between align-items-center"><span class="ml-2">You are currently checked in to <a href="{{request.user.current_event.event.get_absolute_url}}" class="text-white">{{request.user.current_event.event}}</a></span><a href="{% url 'event_checkout'%}" class="btn btn-warning">Check Out</a></div>
+{% endif %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
   <div class="container">
       <a class="navbar-brand" style="position: absolute; left:0.5em; top: 2px;" href="{% if request.user.is_authenticated %}https://rigs.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">

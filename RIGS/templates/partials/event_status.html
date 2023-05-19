@@ -15,18 +15,20 @@
         {% endif %}
     {% endif %}
     {% if not event.dry_hire %}
-        {% if event.riskassessment %}
+        {% if event.has_checklist %}
             <a href="{{ event.riskassessment.get_absolute_url }}"><span class="badge badge-success">RA: <span class="fas fa-check{% if event.riskassessment.reviewed_by %}-double{%endif%}"></span></a>
         {% else %}
             <span class="badge badge-danger">RA: <span class="fas fa-times"></span></span>
         {% endif %}
-    {% endif %}
-    {% if not event.dry_hire %}
-        {% if event.hs_done %}
-            {# TODO Display status of all checklists #}
-            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span></span>
+        {% if event.has_checklist %}
+            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span> {% if event.checklists.count > 1 %}({{event.checklists.count}}){% endif %}</span>
         {% else %}
             <span class="badge badge-danger">Checklist: <span class="fas fa-times"></span></span>
+        {% endif %}
+        {% if event.has_power %}
+            <span class="badge badge-success">Power Record: <span class="fas fa-check"></span> {% if event.power_tests.count > 1 %}({{event.power_tests.count}}){% endif %}</span>
+        {% else %}
+            <span class="badge badge-danger">Power Record: <span class="fas fa-times"></span></span>
         {% endif %}
     {% endif %}
     {% if perms.RIGS.view_invoice %}

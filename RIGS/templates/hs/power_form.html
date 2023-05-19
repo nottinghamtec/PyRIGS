@@ -1,0 +1,203 @@
+{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load help_text from filters %}
+{% load profile_by_index from filters %}
+{% load button from filters %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/autocompleter.js' %}"></script>
+    <script src="{% static 'js/tooltip.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-12">
+        {% include 'form_errors.html' %}
+        {% if edit %}
+        <form role="form" method="POST" action="{% url 'pt_edit' pk=object.pk %}">
+        {% else %}
+        <form role="form" method="POST" action="{% url 'event_pt' pk=event.pk %}">
+        {% endif %}
+            <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
+               value="{{event.pk}}"/>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">Event Information</div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-4">Event Date</dt>
+                                <dd class="col-8">{{ event.start_date}}{%if event.end_date %}-{{ event.end_date}}{%endif%}</dd>
+                                <dt class="col-4">Event Name</dt>
+                                <dd class="col-8">{{ event.name }}</dd>
+                                <dt class="col-4">Client</dt>
+                                <dd class="col-8">{{ event.person }}</dd>
+                                <dt class="col-4">Event Size</dt>
+                                <dd class="col-8">{% include 'partials/event_size.html' with object=event.riskassessment %}</dd>
+                            </dl>
+                            <hr>
+                            <div class="form-group form-row" id="{{ form.power_mic.id_for_label }}-group">
+                            <label for="{{ form.power_mic.id_for_label }}"
+                                class="col-4 col-form-label">{{ form.power_mic.help_text }}</label>
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
+                                    {% if power_mic %}
+                                        <option value="{{power_mic.pk}}" selected="selected">{{ power_mic.name }}</option>
+                                    {% elif event.riskassessment.power_mic %}
+                                        <option value="{{event.riskassessment.power_mic.pk}}" selected="selected">{{ event.riskassessment.power_mic.name }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="form-group form-row" id="{{ form.venue.id_for_label }}-group">
+                                <label for="{{ form.venue.id_for_label }}"
+                                class="col-4 col-form-label">{{ form.venue.label }}</label>
+                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                {% if venue %}
+                                    <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
+                                {% elif event.venue %}
+                                    <option value="{{event.venue.pk}}" selected="selected">{{ event.venue.name }}</option>
+                                {% endif %}
+                                </select>
+                            </div>
+                            <label for="{{ form.notes.id_for_label }}">Notes</label>
+                            {% render_field form.notes class+="form-control" %}
+                       </div>
+                    </div>
+                </div>
+            </div>
+            {% if event.riskassessment.event_size == 0 %}
+            <div class="row my-3" id="size-0">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (approx. 26A)</small></div>
+                        <div class="card-body">
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.rcds %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.supply_test %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="row my-3" id="size-1">
+                <div class="col-12">
+                    {% if event.riskassessment.event_size == 1 %}
+                    <div class="card border-warning">
+                        <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
+                        <div class="card-body">
+                    {% else %}
+                    <div class="card border-danger">
+                                    <div class="card-header">Electrical Checks <small>for ‘Large’ TEC Events</small></div>
+                        <div class="card-body">
+                            <div class="alert alert-danger"><strong>Here be dragons. Ensure you have appeased the Power Gods before continuing... (If you didn't check with a Supervisor, <em>you cannot continue your event!</em>)</strong></div>
+                    {% endif %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.source_rcd %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.labelling %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
+                            <hr>
+                            <p>Tests at first distro</p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="text-center">Test</th>
+                                            <th scope="col" colspan="3" class="text-center">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
+                                            <th class="text-center">{{ form.fd_voltage_l1.help_text }}</th>
+                                            <th class="text-center">{{ form.fd_voltage_l2.help_text }}</th>
+                                            <th class="text-center">{{ form.fd_voltage_l3.help_text }}</th>
+                                        </tr>
+                                        <tr>
+                                           <td>{% render_field form.fd_voltage_l1 class+="form-control" style="min-width: 5rem;" %}</td>
+                                           <td>{% render_field form.fd_voltage_l2 class+="form-control" style="min-width: 5rem;" %}</td>
+                                           <td>{% render_field form.fd_voltage_l3 class+="form-control" style="min-width: 5rem;" %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.fd_phase_rotation.help_text|safe}}</th>
+                                            <td colspan="3">{% include 'partials/checklist_checkbox.html' with formitem=form.fd_phase_rotation %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.fd_earth_fault.help_text|safe}}</th>
+                                            <td colspan="3">{% render_field form.fd_earth_fault class+="form-control" %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.fd_pssc.help_text|safe}}</th>
+                                            <td colspan="3">{% render_field form.fd_pssc class+="form-control" %}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr>
+                            <p>Tests at 'Worst Case' points (at least 1 point required)</p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="text-center">Test</th>
+                                            <th scope="col" class="text-center">Point 1</th>
+                                            <th scope="col" class="text-center">Point 2</th>
+                                            <th scope="col" class="text-center">Point 3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">{{form.w1_description.help_text|safe}}</th>
+                                            <td>{% render_field form.w1_description class+="form-control" style="min-width: 5rem;" %}</td>
+                                            <td>{% render_field form.w2_description class+="form-control" style="min-width: 5rem;" %}</td>
+                                            <td>{% render_field form.w3_description class+="form-control" style="min-width: 5rem;" %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.w1_polarity.help_text|safe}}</th>
+                                            <td>{% render_field form.w1_polarity %}</td>
+                                            <td>{% render_field form.w2_polarity %}</td>
+                                            <td>{% render_field form.w3_polarity %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.w1_voltage.help_text|safe}}</th>
+                                            <td>{% render_field form.w1_voltage class+="form-control" %}</td>
+                                            <td>{% render_field form.w2_voltage class+="form-control" %}</td>
+                                            <td>{% render_field form.w3_voltage class+="form-control" %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{form.w1_earth_fault.help_text|safe}}</th>
+                                            <td>{% render_field form.w1_earth_fault class+="form-control" %}</td>
+                                            <td>{% render_field form.w2_earth_fault class+="form-control" %}</td>
+                                            <td>{% render_field form.w3_earth_fault class+="form-control" %}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr/>
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
+                            {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
+                            {% include 'partials/ec_power_info.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row mt-3">
+                <div class="col-sm-12 text-right">
+                    {% button 'submit' %}
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

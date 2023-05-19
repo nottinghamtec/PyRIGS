@@ -10,10 +10,18 @@
         <hr>
         <h5>Event Checklists:</h5>
         {% for checklist in event.checklists.all %}
-            {% include 'partials/hs_status.html' with event=event object=checklist view='ec_detail' edit='ec_edit' create='event_ec' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
-            <br/>
-            {% endfor %}
-            <a href="{% url 'event_ec' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
-            class="hidden-xs">Create</span></a>
+        {% include 'partials/hs_status.html' with event=event object=checklist view='ec_detail' edit='ec_edit' create='event_ec' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
+        <br/>
+        {% endfor %}
+        <a href="{% url 'event_ec' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
+        class="hidden-xs">Create</span></a>
+        <hr>
+        <h5>Power Test Records:</h5>
+        {% for record in event.power_tests.all %}
+        {% include 'partials/hs_status.html' with event=event object=record view='pt_detail' edit='pt_edit' create='event_pt' review='pt_review' perm=perms.RIGS.review_power %}
+        <br/>
+        {% endfor %}
+        <a href="{% url 'event_pt' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
+        class="hidden-xs">Create</span></a>
     </div>
 </div>

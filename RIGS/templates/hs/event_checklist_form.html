@@ -13,57 +13,19 @@
 {% block preload_js %}
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
+    <script src="{% static 'js/interaction.js' %}"></script>
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
     <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
-
-    <script>
-    $(document).ready(function () {
-        $('button[data-action=add]').on('click', function (event) {
-            event.preventDefault();
-            let target = $($(this).attr('data-target'));
-            let newID = Number(target.attr('data-pk'));
-            let newRow = $($(this).attr('data-clone'))
-                    .clone().attr('style', "")
-                   .attr('id', function(i, val){
-                        return val.split("_")[0] + '_' + newID;
-                   })
-                   .appendTo(target);
-            newRow.find('select,input').attr('name', function(i, val){
-                        return val.split("_")[0] + '_' + newID;
-                   })//Disabled is to prevent the hidden row being sent to the form
-                   .removeAttr('disabled');
-            newRow.find('button[data-action=delete]').attr('data-id', newID);
-            newRow.find('select').addClass('selectpicker');
-            newRow.find('.selectpicker').selectpicker('refresh');
-            $(".selectpicker").each(function(){initPicker($(this))});
-            initDatetime();
-            $(target).attr('data-pk', newID - 1);
-        });
-        $(document).on('click', 'button[data-action=delete]', function(event) {
-           event.preventDefault();
-           $(this).closest('tr').remove();
-        });
-        //Somewhat rudimentary way of ensuring people fill in completely (if it hits the database validation the whole table row disappears when the page reloads...)
-        //the not is to avoid adding it to some of bootstrap-selects extra crap
-        $('#vehiclest,#crewmemberst').on('change', 'select,input', function () {
-            $(this).closest('tr').find("select,input").not(':input[type=search]').attr('required', 'true');
-        });
-    });
-    </script>
 {% endblock %}
 
 {% block content %}
     <div class="col-12">
         {% include 'form_errors.html' %}
-        {% if edit %}
-        <form role="form" method="POST" action="{% url 'ec_edit' pk=object.pk %}">
-        {% else %}
-        <form role="form" method="POST" action="{% url 'event_ec' pk=event.pk %}">
-        {% endif %}
+        
+        <form role="form" method="POST" action="{% if edit %}{% url 'ec_edit' pk=object.pk %}{% else %}{% url 'event_ec' pk=event.pk %}{% endif %}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
             {% csrf_token %}
@@ -94,59 +56,13 @@
                             <div class="form-group form-row" id="{{ form.venue.id_for_label }}-group">
                                 <label for="{{ form.venue.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.venue.label }}</label>
-                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
                                 {% elif event.venue %}
                                     <option value="{{event.venue.pk}}" selected="selected">{{ event.venue.name }}</option>
                                 {% endif %}
                                 </select>
-                            </div>
-                            <div class="form-group form-row" id="{{ form.power_mic.id_for_label }}-group">
-                            <label for="{{ form.power_mic.id_for_label }}"
-                                class="col-4 col-form-label">{{ form.power_mic.help_text }}</label>
-                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
-                                    {% if power_mic %}
-                                        <option value="{{power_mic.pk}}" selected="selected">{{ power_mic.name }}</option>
-                                    {% elif event.riskassessment.power_mic %}
-                                        <option value="{{event.riskassessment.power_mic.pk}}" selected="selected">{{ event.riskassessment.power_mic.name }}</option>
-                                    {% endif %}
-                                </select>
-                            </div>
-                            <p class="pt-3 font-weight-bold">List vehicles and their drivers</p>
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Vehicle</th>
-                                            <th scope="col">Driver</th>
-                                            <th scope="col"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="vehiclest" data-pk="-1">
-                                        <tr id="vehicles_new" style="display: none;">
-                                            <td><input type="text" class="form-control" name="vehicle_new" disabled="true"/></td>
-                                            <td><select data-container="body" class="form-control" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" name="driver_new" disabled="true"></select></td>
-                                            <td><button type="button" class="btn btn-danger btn-sm mt-1" data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button></td>
-                                        </tr>
-                                        {% for i in object.vehicles.all %}
-                                        <tr id="vehicles_{{i.pk}}">
-                                            <td><input name="vehicle_{{i.pk}}" type="text" class="form-control" value="{{ i.vehicle }}"/></td>
-                                            <td>
-                                                <select data-container="body" name="driver_{{i.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                                                    {% if i.driver != '' %}
-                                                        <option value="{{i.driver.pk}}" selected="selected">{{ i.driver.name }}</option>
-                                                    {% endif %}
-                                                </select>
-                                            </td>
-                                            <td><button type="button" class="btn btn-danger btn-sm mt-1" data-id='{{i.pk}}' data-action='delete' data-target='#vehicle'><span class="fas fa-times"></span></button></td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-right">
-                                <button type="button" class="btn btn-secondary" id="vehicle-add" data-action='add' data-target='#vehiclest' data-clone='#vehicles_new'><span class="fas fa-plus"></span> Add Vehicle</button>
                             </div>
                         </div>
                     </div>
@@ -175,176 +91,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row my-3">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">Crew Record</div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Person</th>
-                                            <th scope="col">Start Time</th>
-                                            <th scope="col">Role</th>
-                                            <th scope="col">End Time</th>
-                                            <th scope="col"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="crewmemberst" data-pk="-1">
-                                        <tr id="crew_new" style="display: none;">
-                                            <td>
-                                                <select name="crewmember_new" class="form-control" data-container="body" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" disabled="true"></select>
-                                            </td>
-                                            <td style="min-width: 15ch"><input name="start_new" type="datetime-local" class="form-control" value="{{ i.start }}" disabled=""/></td>
-                                            <td style="min-width: 15ch"><input name="role_new" type="text" class="form-control" value="{{ i.role }}" disabled="true"/></td>
-                                            <td style="min-width: 15ch"><input name="end_new" type="datetime-local" class="form-control" value="{{ i.end }}" disabled="true" /></td>
-                                            <td><button type="button" class="btn btn-danger btn-sm mt-1" data-id='{{crew.pk}}' data-action='delete' data-target='#crewmember'><span class="fas fa-times"></span></button></td>
-                                        </tr>
-                                        {% for crew in object.crew.all %}
-                                        <tr id="crew_{{crew.pk}}">
-                                            <td>
-                                                <select data-container="body" name="crewmember_{{crew.pk}}" class="form-control selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                                                    {% if crew.crewmember != '' %}
-                                                        <option value="{{crew.crewmember.pk}}" selected="selected">{{ crew.crewmember.name }}</option>
-                                                    {% endif %}
-                                                </select>
-                                            </td>
-                                            <td><input name="start_{{crew.pk}}" type="datetime-local" class="form-control" value="{{ crew.start|date:'Y-m-d' }}T{{ crew.start|date:'H:i:s' }}"/></td>
-                                            <td><input name="role_{{crew.pk}}" type="text" class="form-control" value="{{ crew.role }}"/></td>
-                                            <td><input name="end_{{crew.pk}}" type="datetime-local" class="form-control" value="{{ crew.end|date:'Y-m-d' }}T{{ crew.end|date:'H:i:s' }}"/></td>
-                                            <td><button type="button" class="btn btn-danger btn-sm mt-1" data-id='{{crew.pk}}' data-action='delete' data-target='#crewmember'><span class="fas fa-times"></span></button></td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="text-right">
-                                <button type="button" class="btn btn-secondary" data-action='add' data-target='#crewmemberst' data-clone='#crew_new'><span class="fas fa-plus"></span> Add Crewmember</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% if event.riskassessment.event_size == 0 %}
-            <div class="row my-3" id="size-0">
-                <div class="col-12">
-                    <div class="card border-success">
-                        <div class="card-header">Electrical Checks <small>for ‘Small’ TEC Events <6kVA (approx. 26A)</small></div>
-                        <div class="card-body">
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.rcds %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.supply_test %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="row my-3" id="size-1">
-                <div class="col-12">
-                    {% if event.riskassessment.event_size == 1 %}
-                    <div class="card border-warning">
-                        <div class="card-header">Electrical Checks <small>for ‘Medium’ TEC Events </small></div>
-                        <div class="card-body">
-                    {% else %}
-                    <div class="card border-danger">
-                                    <div class="card-header">Electrical Checks <small>for ‘Large’ TEC Events</small></div>
-                        <div class="card-body">
-                            <div class="alert alert-danger"><strong>Here be dragons. Ensure you have appeased the Power Gods before continuing... (If you didn't check with a Supervisor, <em>you cannot continue your event!</em>)</strong></div>
-                    {% endif %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.source_rcd %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.labelling %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.earthing %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.pat %}
-                            <hr>
-                            <p>Tests at first distro</p>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col" class="text-center">Test</th>
-                                            <th scope="col" colspan="3" class="text-center">Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
-                                            <th class="text-center">{{ form.fd_voltage_l1.help_text }}</th>
-                                            <th class="text-center">{{ form.fd_voltage_l2.help_text }}</th>
-                                            <th class="text-center">{{ form.fd_voltage_l3.help_text }}</th>
-                                        </tr>
-                                        <tr>
-                                           <td>{% render_field form.fd_voltage_l1 class+="form-control" style="min-width: 5rem;" %}</td>
-                                           <td>{% render_field form.fd_voltage_l2 class+="form-control" style="min-width: 5rem;" %}</td>
-                                           <td>{% render_field form.fd_voltage_l3 class+="form-control" style="min-width: 5rem;" %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.fd_phase_rotation.help_text|safe}}</th>
-                                            <td colspan="3">{% include 'partials/checklist_checkbox.html' with formitem=form.fd_phase_rotation %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.fd_earth_fault.help_text|safe}}</th>
-                                            <td colspan="3">{% render_field form.fd_earth_fault class+="form-control" %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.fd_pssc.help_text|safe}}</th>
-                                            <td colspan="3">{% render_field form.fd_pssc class+="form-control" %}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <hr>
-                            <p>Tests at 'Worst Case' points (at least 1 point required)</p>
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col" class="text-center">Test</th>
-                                            <th scope="col" class="text-center">Point 1</th>
-                                            <th scope="col" class="text-center">Point 2</th>
-                                            <th scope="col" class="text-center">Point 3</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th scope="row">{{form.w1_description.help_text|safe}}</th>
-                                            <td>{% render_field form.w1_description class+="form-control" style="min-width: 5rem;" %}</td>
-                                            <td>{% render_field form.w2_description class+="form-control" style="min-width: 5rem;" %}</td>
-                                            <td>{% render_field form.w3_description class+="form-control" style="min-width: 5rem;" %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.w1_polarity.help_text|safe}}</th>
-                                            <td>{% render_field form.w1_polarity %}</td>
-                                            <td>{% render_field form.w2_polarity %}</td>
-                                            <td>{% render_field form.w3_polarity %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.w1_voltage.help_text|safe}}</th>
-                                            <td>{% render_field form.w1_voltage class+="form-control" %}</td>
-                                            <td>{% render_field form.w2_voltage class+="form-control" %}</td>
-                                            <td>{% render_field form.w3_voltage class+="form-control" %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">{{form.w1_earth_fault.help_text|safe}}</th>
-                                            <td>{% render_field form.w1_earth_fault class+="form-control" %}</td>
-                                            <td>{% render_field form.w2_earth_fault class+="form-control" %}</td>
-                                            <td>{% render_field form.w3_earth_fault class+="form-control" %}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <hr/>
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.all_rcds_tested %}
-                            {% include 'partials/checklist_checkbox.html' with formitem=form.public_sockets_tested %}
-                            {% include 'partials/ec_power_info.html' %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
             <div class="row mt-3">
                 <div class="col-sm-12 text-right">
                     {% button 'submit' %}

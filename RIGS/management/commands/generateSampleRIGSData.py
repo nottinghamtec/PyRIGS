@@ -278,7 +278,7 @@ class Command(BaseCommand):
                                                      suspended_structures=bool(random.getrandbits(1)),
                                                      outside=bool(random.getrandbits(1)))
                 if i == 0 or random.randint(0, 1) > 0:  # Event 1 and 1 in 10 have a Checklist
-                    models.EventChecklist.objects.create(event=new_event, power_mic=random.choice(self.profiles),
+                    models.EventChecklist.objects.create(event=new_event,
                                                          safe_parking=bool(random.getrandbits(1)),
                                                          safe_packing=bool(random.getrandbits(1)),
                                                          exits=bool(random.getrandbits(1)),
@@ -287,6 +287,4 @@ class Command(BaseCommand):
                                                          ear_plugs=bool(random.getrandbits(1)),
                                                          hs_location="Locked away safely",
                                                          extinguishers_location="Somewhere, I forgot",
-                                                         earthing=bool(random.getrandbits(1)),
-                                                         pat=bool(random.getrandbits(1)),
                                                          date=timezone.now(), venue=random.choice(self.venues))

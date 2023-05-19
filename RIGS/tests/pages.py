@@ -230,11 +230,6 @@ class CreateEventChecklist(FormPage):
     URL_TEMPLATE = 'event/{event_id}/checklist'
 
     _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
-    _power_mic_selector = (By.XPATH, "//div[select[@id='id_power_mic']]")
-    _add_vehicle_locator = (By.XPATH, "//button[contains(., 'Vehicle')]")
-    _add_crew_locator = (By.XPATH, "//button[contains(., 'Crew')]")
-    _vehicle_row_locator = ('xpath', "//tr[@id[starts-with(., 'vehicle') and not(contains(.,'new'))]]")
-    _crew_row_locator = ('xpath', "//tr[@id[starts-with(., 'crew') and not(contains(.,'new'))]]")
 
     form_items = {
         'safe_parking': (regions.CheckBox, (By.ID, 'id_safe_parking')),
@@ -245,6 +240,20 @@ class CreateEventChecklist(FormPage):
         'ear_plugs': (regions.CheckBox, (By.ID, 'id_ear_plugs')),
         'hs_location': (regions.TextBox, (By.ID, 'id_hs_location')),
         'extinguishers_location': (regions.TextBox, (By.ID, 'id_extinguishers_location')),
+    }
+
+    @property
+    def success(self):
+        return '{event_id}' not in self.driver.current_url
+
+
+class CreatePowerTestRecord(FormPage):
+    URL_TEMPLATE = 'event/{event_id}/power'
+
+    _submit_locator = (By.XPATH, "//button[@type='submit' and contains(., 'Save')]")
+    _power_mic_selector = (By.XPATH, "//div[select[@id='id_power_mic']]")
+
+    form_items = {
         'rcds': (regions.CheckBox, (By.ID, 'id_rcds')),
         'supply_test': (regions.CheckBox, (By.ID, 'id_supply_test')),
         'earthing': (regions.CheckBox, (By.ID, 'id_earthing')),
@@ -263,57 +272,9 @@ class CreateEventChecklist(FormPage):
         'w1_earth_fault': (regions.TextBox, (By.ID, 'id_w1_earth_fault')),
     }
 
-    def add_vehicle(self):
-        self.find_element(*self._add_vehicle_locator).click()
-
-    def add_crew(self):
-        self.find_element(*self._add_crew_locator).click()
-
     @property
     def power_mic(self):
         return regions.BootstrapSelectElement(self, self.find_element(*self._power_mic_selector))
-
-    @property
-    def vehicles(self):
-        return [self.VehicleRow(self, el) for el in self.find_elements(*self._vehicle_row_locator)]
-
-    class VehicleRow(Region):
-        _name_locator = ('xpath', ".//input")
-        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
-
-        @property
-        def name(self):
-            return regions.TextBox(self, self.root.find_element(*self._name_locator))
-
-        @property
-        def vehicle(self):
-            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
-
-    @property
-    def crew(self):
-        return [self.CrewRow(self, el) for el in self.find_elements(*self._crew_row_locator)]
-
-    class CrewRow(Region):
-        _select_locator = ('xpath', ".//div[contains(@class,'bootstrap-select')]/..")
-        _start_time_locator = ('xpath', ".//input[@name[starts-with(., 'start') and not(contains(.,'new'))]]")
-        _end_time_locator = ('xpath', ".//input[@name[starts-with(., 'end') and not(contains(.,'new'))]]")
-        _role_locator = ('xpath', ".//input[@name[starts-with(., 'role') and not(contains(.,'new'))]]")
-
-        @property
-        def crewmember(self):
-            return regions.BootstrapSelectElement(self, self.root.find_element(*self._select_locator))
-
-        @property
-        def start_time(self):
-            return regions.DateTimePicker(self, self.root.find_element(*self._start_time_locator))
-
-        @property
-        def end_time(self):
-            return regions.DateTimePicker(self, self.root.find_element(*self._end_time_locator))
-
-        @property
-        def role(self):
-            return regions.TextBox(self, self.root.find_element(*self._role_locator))
 
     @property
     def success(self):

@@ -81,6 +81,10 @@ class Profile(AbstractUser):
     def __str__(self):
         return self.name
 
+    def current_event(self):
+        q = EventCheckIn.objects.filter(person=self, end_time=None)
+        return q.latest('time') if q.exists() else None
+
 
 class ContactableManager(models.Manager):
     def search(self, query=None):
@@ -405,7 +409,15 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def hs_done(self):
-        return self.riskassessment is not None and len(self.checklists.all()) > 0
+        return self.riskassessment is not None and self.has_checklist and self.has_power
+
+    @property
+    def has_checklist(self):
+        return self.checklists.exists()
+
+    @property
+    def has_power(self):
+        return self.power_tests.exists()
 
     @property
     def has_start_time(self):
@@ -477,6 +489,15 @@ class Event(models.Model, RevisionMixin):
             return self.authorisation.amount == self.total
         else:
             return bool(self.purchase_order)
+
+    @property
+    def can_check_in(self):
+        earliest = self.earliest_time
+        if isinstance(self.earliest_time, datetime.date):
+            earliest = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
+            tz = pytz.timezone(settings.TIME_ZONE)
+            earliest = tz.localize(earliest)
+        return not self.dry_hire and earliest <= timezone.now()
 
     objects = EventManager()
 
@@ -689,8 +710,21 @@ def validate_url(value):
         raise ValidationError('URL must point to a location on the TEC Sharepoint')
 
 
+class ReviewableModel(models.Model):
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                                    verbose_name="Reviewer", on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+    @cached_property
+    def fieldz(self):
+        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+
+
 @reversion.register
-class RiskAssessment(models.Model, RevisionMixin):
+class RiskAssessment(ReviewableModel, RevisionMixin):
     SMALL = (0, 'Small')
     MEDIUM = (1, 'Medium')
     LARGE = (2, 'Large')
@@ -738,10 +772,6 @@ class RiskAssessment(models.Model, RevisionMixin):
 
     # Blimey that was a lot of options
 
-    reviewed_at = models.DateTimeField(null=True)
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-                                    verbose_name="Reviewer", on_delete=models.CASCADE)
-
     supervisor_consulted = models.BooleanField(null=True)
 
     expected_values = {
@@ -778,10 +808,6 @@ class RiskAssessment(models.Model, RevisionMixin):
             ('review_riskassessment', 'Can review Risk Assessments')
         ]
 
-    @cached_property
-    def fieldz(self):
-        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
-
     @property
     def event_size(self):
         # Confirm event size. Check all except generators, since generators entails outside
@@ -795,6 +821,12 @@ class RiskAssessment(models.Model, RevisionMixin):
     def get_event_size_display(self):
         return self.SIZES[self.event_size][1] + " Event"
 
+    def __str__(self):
+        return f"{self.pk} | {self.event}"
+
+    def get_absolute_url(self):
+        return reverse('ra_detail', kwargs={'pk': self.pk})
+
     @property
     def activity_feed_string(self):
         return str(self.event)
@@ -803,20 +835,12 @@ class RiskAssessment(models.Model, RevisionMixin):
     def name(self):
         return str(self)
 
-    def get_absolute_url(self):
-        return reverse('ra_detail', kwargs={'pk': self.pk})
 
-    def __str__(self):
-        return f"{self.pk} | {self.event}"
-
-
-@reversion.register(follow=['vehicles', 'crew'])
-class EventChecklist(models.Model, RevisionMixin):
+@reversion.register
+class EventChecklist(ReviewableModel, RevisionMixin):
     event = models.ForeignKey('Event', related_name='checklists', on_delete=models.CASCADE)
 
     # General
-    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
-                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
     venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
     date = models.DateField()
 
@@ -830,6 +854,32 @@ class EventChecklist(models.Model, RevisionMixin):
     hs_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of Safety Bag/Box")
     extinguishers_location = models.CharField(blank=True, default='', max_length=255, help_text="Location of fire extinguishers")
 
+    inverted_fields = []
+
+    class Meta:
+        ordering = ['event']
+        permissions = [
+            ('review_eventchecklist', 'Can review Event Checklists')
+        ]
+
+    def __str__(self):
+        return f"{self.pk} - {self.event}"
+
+    @property
+    def activity_feed_string(self):
+        return str(self.event)
+
+    def get_absolute_url(self):
+        return reverse('ec_detail', kwargs={'pk': self.pk})
+
+
+@reversion.register
+class PowerTestRecord(ReviewableModel, RevisionMixin):
+    event = models.ForeignKey('Event', related_name='power_tests', on_delete=models.CASCADE)
+    power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
+                                  verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
+    venue = models.ForeignKey('Venue', on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, default='')
     # Small Electrical Checks
     rcds = models.BooleanField(blank=True, null=True, help_text="RCDs installed where needed and tested?")
     supply_test = models.BooleanField(blank=True, null=True, help_text="Electrical supplies tested?<br><small>(using socket tester)</small>")
@@ -865,58 +915,40 @@ class EventChecklist(models.Model, RevisionMixin):
     all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
 
-    reviewed_at = models.DateTimeField(null=True)
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-                                    verbose_name="Reviewer", on_delete=models.CASCADE)
-
-    inverted_fields = []
-
     class Meta:
         ordering = ['event']
         permissions = [
-            ('review_eventchecklist', 'Can review Event Checklists')
+            ('review_power', 'Can review Power Test Records')
         ]
 
-    @cached_property
-    def fieldz(self):
-        return [n.name for n in list(self._meta.get_fields()) if n.name != 'reviewed_at' and n.name != 'reviewed_by' and not n.is_relation and not n.auto_created]
+    def __str__(self):
+        return f"{self.pk} - {self.event}"
 
     @property
     def activity_feed_string(self):
         return str(self.event)
 
-    def get_absolute_url(self):
-        return reverse('ec_detail', kwargs={'pk': self.pk})
+
+class EventCheckIn(models.Model):
+    event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
+    person = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='checkins', on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    role = models.CharField(max_length=50, blank=True)
+    vehicle = models.CharField(max_length=100, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.pk} - {self.event}"
-
-
-@reversion.register
-class EventChecklistVehicle(models.Model, RevisionMixin):
-    checklist = models.ForeignKey('EventChecklist', related_name='vehicles', blank=True, on_delete=models.CASCADE)
-    vehicle = models.CharField(max_length=255)
-    driver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='vehicles', on_delete=models.CASCADE)
-
-    reversion_hide = True
-
-    def __str__(self):
-        return f"{self.vehicle} driven by {self.driver}"
-
-
-@reversion.register
-class EventChecklistCrew(models.Model, RevisionMixin):
-    checklist = models.ForeignKey('EventChecklist', related_name='crew', blank=True, on_delete=models.CASCADE)
-    crewmember = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='crewed', on_delete=models.CASCADE)
-    role = models.CharField(max_length=255)
-    start = models.DateTimeField()
-    end = models.DateTimeField()
-
-    reversion_hide = True
+        return f"{self.person} on {self.event}"
 
     def clean(self):
-        if self.start > self.end:
-            raise ValidationError('Unless you\'ve invented time travel, crew can\'t finish before they have started.')
+        sass = " Please invent time travel and retry."
+        if self.time > timezone.now():
+            raise ValidationError("May not check in in the future." + sass)
+        if self.end_time and self.end_time < self.time:
+            raise ValidationError("May not check out before you've checked in." + sass)
 
-    def __str__(self):
-        return f"{self.crewmember} ({self.role})"
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={'pk': self.event_id})
+
+    def active(self):
+        return end_time is not None
