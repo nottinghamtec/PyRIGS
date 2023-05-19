@@ -924,6 +924,9 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     def __str__(self):
         return f"{self.pk} - {self.event}"
 
+    def get_absolute_url(self):
+        return reverse('pt_detail', kwargs={'pk': self.pk})
+
     @property
     def activity_feed_string(self):
         return str(self.event)
