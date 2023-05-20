@@ -13,19 +13,12 @@ from django.shortcuts import redirect
 
 
 class HSCreateView(generic.CreateView):
-    def get_form(self, **kwargs):
-        form = super().get_form(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        form.instance.event = event
-        return form
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
+        event = models.Event.objects.get(pk=self.kwargs.get('pk'))
         context['event'] = event
         context['page_title'] = f'Create {self.model.__name__} for Event {event.display_id}'
+        get_related(context['form'], context)
         return context
 
 
@@ -43,7 +36,6 @@ class MarkReviewed(generic.RedirectView):
 class EventRiskAssessmentCreate(HSCreateView):
     model = models.RiskAssessment
     template_name = 'hs/risk_assessment_form.html'
-    form_class = forms.EventRiskAssessmentForm
 
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
@@ -54,6 +46,8 @@ class EventRiskAssessmentCreate(HSCreateView):
 
         if ra is not None:
             return HttpResponseRedirect(reverse('ra_edit', kwargs={'pk': ra.pk}))
+
+        form = forms.EventRiskAssessmentForm(initial={'venue': "66"})
 
         return super(EventRiskAssessmentCreate, self).get(self)
 
@@ -136,18 +130,21 @@ class EventChecklistCreate(HSCreateView):
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
-
         # Check if RA exists
         ra = models.RiskAssessment.objects.filter(event=event).first()
-
         if ra is None:
             messages.error(self.request, f'A Risk Assessment must exist prior to creating any Event Checklists for {event}! Please create one now.')
             return HttpResponseRedirect(reverse('event_ra', kwargs={'pk': epk}))
-
-        return super(EventChecklistCreate, self).get(self)
+        return super().get(self)
 
     def get_success_url(self):
         return reverse('ec_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].venue:
+            context['venue'] = context['event'].venue
+        return context
 
 
 class PowerTestDetail(generic.DetailView):
@@ -191,7 +188,6 @@ class PowerTestCreate(HSCreateView):
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
-
         # Check if RA exists
         ra = models.RiskAssessment.objects.filter(event=event).first()
 
@@ -203,6 +199,14 @@ class PowerTestCreate(HSCreateView):
 
     def get_success_url(self):
         return reverse('pt_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].venue:
+            context['venue'] = context['event'].venue
+        if context['event'].riskassessment.power_mic:
+            context['power_mic'] = context['event'].riskassessment.power_mic
+        return context
 
 
 class HSList(generic.ListView):
