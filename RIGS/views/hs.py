@@ -36,6 +36,7 @@ class MarkReviewed(generic.RedirectView):
 class EventRiskAssessmentCreate(HSCreateView):
     model = models.RiskAssessment
     template_name = 'hs/risk_assessment_form.html'
+    form_class = forms.EventRiskAssessmentForm
 
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
@@ -49,7 +50,7 @@ class EventRiskAssessmentCreate(HSCreateView):
 
         form = forms.EventRiskAssessmentForm(initial={'venue': "66"})
 
-        return super(EventRiskAssessmentCreate, self).get(self)
+        return super().get(self)
 
     def get_success_url(self):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})

@@ -25,7 +25,7 @@
         });
         $('input[type=radio][name=outside], input[type=radio][name=generators], input[type=radio][name=other_companies_power], input[type=radio][name=nonstandard_equipment_power], input[type=radio][name=multiple_electrical_environments]').change(function() {
             $('#{{ form.power_notes.id_for_label }}').prop('required', parseBool(this.value));
-            $('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
+            //$('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
         });
         $('input[type=radio][name=special_structures]').change(function() {
             $('#{{ form.persons_responsible_structures.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
