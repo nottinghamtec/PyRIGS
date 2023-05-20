@@ -54,8 +54,6 @@
                                 <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
                                     {% if power_mic %}
                                         <option value="{{power_mic.pk}}" selected="selected">{{ power_mic.name }}</option>
-                                    {% elif event.riskassessment.power_mic %}
-                                        <option value="{{event.riskassessment.power_mic.pk}}" selected="selected">{{ event.riskassessment.power_mic.name }}</option>
                                     {% endif %}
                                 </select>
                             </div>
@@ -65,8 +63,6 @@
                                 <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
-                                {% elif event.venue %}
-                                    <option value="{{event.venue.pk}}" selected="selected">{{ event.venue.name }}</option>
                                 {% endif %}
                                 </select>
                             </div>

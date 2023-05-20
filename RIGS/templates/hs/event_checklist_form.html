@@ -24,7 +24,7 @@
 {% block content %}
     <div class="col-12">
         {% include 'form_errors.html' %}
-        
+
         <form role="form" method="POST" action="{% if edit %}{% url 'ec_edit' pk=object.pk %}{% else %}{% url 'event_ec' pk=event.pk %}{% endif %}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
@@ -59,8 +59,6 @@
                                 <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
-                                {% elif event.venue %}
-                                    <option value="{{event.venue.pk}}" selected="selected">{{ event.venue.name }}</option>
                                 {% endif %}
                                 </select>
                             </div>

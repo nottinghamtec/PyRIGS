@@ -190,6 +190,8 @@ class EventRiskAssessmentForm(forms.ModelForm):
 class EventChecklistForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.event.venue:
+            self.fields['venue'].initial = self.instance.event.venue
         self.fields['date'].widget.format = '%Y-%m-%d'
         for name, field in self.fields.items():
             if field.__class__ == forms.NullBooleanField:
@@ -211,6 +213,10 @@ class EventChecklistForm(forms.ModelForm):
 class PowerTestRecordForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.event.venue:
+            self.fields['venue'].initial = self.instance.event.venue
+        if self.instance.event.riskassessment.power_mic:
+            self.fields['power_mic'].initial = self.instance.event.riskassessment.power_mic
         for name, field in self.fields.items():
             if field.__class__ == forms.NullBooleanField:
                 # Only display yes/no to user, the 'none' is only ever set in the background
