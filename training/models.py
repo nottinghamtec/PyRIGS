@@ -369,7 +369,7 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
         return str(self)
 
     def get_absolute_url(self):
-        return reverse('trainee_detail', kwargs={'pk': self.trainee.pk})
+        return reverse('trainee_detail', kwargs={'pk': self.trainee_id})
 
     class Meta:
         unique_together = ["trainee", "level"]

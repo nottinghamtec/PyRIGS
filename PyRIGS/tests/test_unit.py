@@ -59,8 +59,8 @@ class TestSampleDataGenerator(TestCase):
         assert Asset.objects.all().count() > 50
         assert Event.objects.all().count() > 100
         call_command('deleteSampleData')
-        assert Asset.objects.all().count() == 0
-        assert Event.objects.all().count() == 0
+        assert not Asset.objects.all().exists()
+        assert not Event.objects.all().exists()
 
 
 @override_settings(DEBUG=True)
@@ -76,9 +76,9 @@ def test_unauthenticated(client):  # Nothing should be available to the unauthen
                 assertTemplateUsed(response, 'login_redirect.html')
             else:
                 if "embed" in str(url):
-                    expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
+                    expected_url = f"{reverse('login_embed')}?next={request_url}"
                 else:
-                    expected_url = "{0}?next={1}".format(reverse('login'), request_url)
+                    expected_url = f"{reverse('login')}?next={request_url}"
                 assertRedirects(response, expected_url)
     call_command('deleteSampleData')
 

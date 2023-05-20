@@ -43,7 +43,7 @@ def confirm_button(user, trainee, level):
     if level.user_has_requirements(trainee):
         string = "<span class='badge badge-warning p-2'>Awaiting Confirmation</span>"
         if models.Trainee.objects.get(pk=user.pk).is_supervisor or user.has_perm('training.add_traininglevelqualification'):
-            string += "<a class='btn btn-info' href='{}'>Confirm</a>".format(reverse('confirm_level', kwargs={'pk': trainee.pk, 'level_pk': level.pk}))
+            string += f"<a class='btn btn-info' href='{reverse('confirm_level', kwargs={'pk': trainee.pk, 'level_pk': level.pk})}'>Confirm</a>"
         return mark_safe(string)
     else:
         return ""

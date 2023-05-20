@@ -30,15 +30,15 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
         modelname = model.__name__.lower()
         if appname == 'rigboard':
             urlpatterns += [
-                path('{}/<str:pk>/history/'.format(modelname),
-                     permission_required_with_403('{}.change_{}'.format(app.label, modelname))(
+                path(f'{modelname}/<str:pk>/history/',
+                     permission_required_with_403(f'{app.label}.change_{modelname}')(
                          views.VersionHistory.as_view()),
-                     name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
+                     name=f'{modelname}_history', kwargs={'model': model, 'app': appname, }),
             ]
         else:
             urlpatterns += [
-                path('{}/{}/<str:pk>/history/'.format(appname, modelname),
-                     permission_required_with_403('{}.change_{}'.format(app.label, modelname))(
+                path(f'{appname}/{modelname}/<str:pk>/history/',
+                     permission_required_with_403('{app.label}.change_{modelname}')(
                          views.VersionHistory.as_view()),
-                     name='{}_history'.format(modelname), kwargs={'model': model, 'app': appname, }),
+                     name=f'{modelname}_history', kwargs={'model': model, 'app': appname, }),
             ]

@@ -73,7 +73,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentEdit, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         rpk = self.kwargs.get('pk')
         ra = models.RiskAssessment.objects.get(pk=rpk)
         context['event'] = ra.event
@@ -88,7 +88,7 @@ class EventRiskAssessmentDetail(generic.DetailView):
     template_name = 'hs/risk_assessment_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = f"Risk Assessment for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
@@ -98,7 +98,7 @@ class EventChecklistDetail(generic.DetailView):
     template_name = 'hs/event_checklist_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventChecklistDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = f"Event Checklist for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
@@ -116,7 +116,7 @@ class EventChecklistEdit(generic.UpdateView):
         return reverse('ec_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        context = super(EventChecklistEdit, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         ec = models.EventChecklist.objects.get(pk=pk)
         context['event'] = ec.event
@@ -223,7 +223,7 @@ class HSList(generic.ListView):
         return models.Event.objects.all().exclude(status=models.Event.CANCELLED).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
 
     def get_context_data(self, **kwargs):
-        context = super(HSList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = 'H&S Overview'
         return context
 

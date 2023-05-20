@@ -114,7 +114,7 @@ class CreateEvent(FormPage):
     }
 
     def select_event_type(self, type_name):
-        self.find_element(By.XPATH, '//button[.="{}"]'.format(type_name)).click()
+        self.find_element(By.XPATH, f'//button[.="{type_name}"]').click()
 
     def item_row(self, ID):
         return rigs_regions.ItemRow(self, self.find_element(By.ID, "item-" + ID))

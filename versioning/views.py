@@ -27,10 +27,10 @@ class VersionHistory(generic.ListView):
             return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
-        context = super(VersionHistory, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['object'] = self.get_object()
         if self.kwargs['app'] != 'rigboard':
-            context['override'] = 'base_{}.html'.format(self.kwargs['app'])
+            context['override'] = f'base_{self.kwargs["app"]}.html'
 
         return context
 
@@ -59,10 +59,10 @@ class ActivityTable(generic.ListView):
         return RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs.get('models'), self.request.user)).order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
-        context = super(ActivityTable, self).get_context_data(**kwargs)
-        context['page_title'] = "{} Activity Stream".format(title(self.kwargs['app']))
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"{title(self.kwargs['app'])} Activity Stream"
         if self.kwargs['app'] != 'rigboard':
-            context['override'] = 'base_{}.html'.format(self.kwargs['app'])
+            context['override'] = f'base_{self.kwargs["app"]}.html'
 
         return context
 
@@ -77,7 +77,7 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
-        context = super(ActivityFeed, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = "Activity Feed"
         maxTimeDelta = datetime.timedelta(hours=1)
 
