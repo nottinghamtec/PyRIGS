@@ -48,12 +48,16 @@ class EventRiskAssessmentCreate(HSCreateView):
         if ra is not None:
             return HttpResponseRedirect(reverse('ra_edit', kwargs={'pk': ra.pk}))
 
-        form = forms.EventRiskAssessmentForm(initial={'venue': "66"})
-
         return super().get(self)
 
     def get_success_url(self):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].mic:
+            context['power_mic'] = context['event'].mic
+        return context
 
 
 class EventRiskAssessmentEdit(generic.UpdateView):
@@ -177,7 +181,7 @@ class PowerTestEdit(generic.UpdateView):
         context['event'] = ec.event
         context['edit'] = True
         context['page_title'] = f'Edit Power Test Record for Event {ec.event.display_id}'
-        # get_related(context['form'], context)
+        get_related(context['form'], context)
         return context
 
 
