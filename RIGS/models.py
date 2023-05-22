@@ -497,7 +497,7 @@ class Event(models.Model, RevisionMixin):
             earliest = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
             tz = pytz.timezone(settings.TIME_ZONE)
             earliest = tz.localize(earliest)
-        return not self.dry_hire and earliest <= timezone.now()
+        return not self.dry_hire and not self.status == Event.CANCELLED and earliest <= timezone.now()
 
     objects = EventManager()
 

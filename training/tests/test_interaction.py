@@ -44,7 +44,7 @@ def test_add_qualification(logged_in_browser, live_server, trainee, supervisor, 
     page.submit()
     assert page.success
     qualification = models.TrainingItemQualification.objects.get(trainee=trainee, item=training_item)
-    assert qualification.supervisor.pk == supervisor.pk
+    assert qualification.supervisor_id == supervisor.pk
     assert qualification.date == date
     assert qualification.notes == "A note"
     assert qualification.depth == models.TrainingItemQualification.STARTED

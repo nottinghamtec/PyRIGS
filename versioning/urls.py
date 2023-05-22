@@ -38,7 +38,7 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
         else:
             urlpatterns += [
                 path(f'{appname}/{modelname}/<str:pk>/history/',
-                     permission_required_with_403('{app.label}.change_{modelname}')(
+                     permission_required_with_403(f'{app.label}.change_{modelname}')(
                          views.VersionHistory.as_view()),
                      name=f'{modelname}_history', kwargs={'model': model, 'app': appname, }),
             ]
