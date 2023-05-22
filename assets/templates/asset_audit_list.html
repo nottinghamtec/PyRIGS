@@ -35,6 +35,11 @@
     function onAuditClick(assetID) {
          $('#' + assetID).remove();
     }
+    $('#modal').on('hidden.bs.modal', function (e) {
+      searchbar = document.getElementById('id_q');
+      searchbar.value = "";
+      setTimeout(searchbar.focus(), 2000);
+    })
     </script>
 {% endblock %}
 
