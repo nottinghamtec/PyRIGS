@@ -220,7 +220,7 @@ class HSList(generic.ListView):
     template_name = 'hs/hs_list.html'
 
     def get_queryset(self):
-        return models.Event.objects.all().exclude(status=models.Event.CANCELLED).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
+        return models.Event.objects.all().exclude(status=models.Event.CANCELLED).exclude(dry_hire=True).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
