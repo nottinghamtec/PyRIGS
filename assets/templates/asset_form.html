@@ -40,6 +40,12 @@
             setupMDE('#id_comments');
         });
     </script>
+    <script src="{% static "js/tooltip.js" %}"></script>
+    <script>
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
