@@ -12,7 +12,6 @@
     {{ block.super }}
     <script src="{% static 'js/selects.js' %}"></script>
     <script src="{% static 'js/easymde.min.js' %}"></script>
-    <script src="{% static 'js/interaction.js' %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -33,11 +32,6 @@
     <script>
         $('document').ready(function(){
             $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
-        });
-    </script>
-    <script>
-        $(document).ready(function () {
-            setupMDE('#id_comments');
         });
     </script>
     <script src="{% static "js/tooltip.js" %}"></script>
