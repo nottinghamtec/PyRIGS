@@ -105,6 +105,10 @@ class TrainingItem(models.Model):
     def display_id(self):
         return f"{self.category.reference_number}.{self.reference_number}"
 
+    @property
+    def display_name(self):
+        return f"{self.display_id} | {self.name}"
+
     @display_id.filter
     @classmethod
     def display_id(cls, lookup, value):

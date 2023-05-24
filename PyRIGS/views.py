@@ -135,10 +135,11 @@ class SecureAPIRequest(generic.View):
             query = reduce(operator.and_, queries)
             objects = self.models[model].objects.filter(query)
             for o in objects:
+                name = o.display_name if hasattr(o, 'display_name') else o.name
                 data = {
                     'pk': o.pk,
                     'value': o.pk,
-                    'text': o.name,
+                    'text': name,
                 }
                 try:  # See if there is a valid update URL
                     data['update'] = reverse(f"{model}_update", kwargs={'pk': o.pk})
@@ -183,7 +184,7 @@ class ModalURLMixin:
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy(update, kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
-            messages.info(self.request, "modalobject[0]['update_url']='" + update_url + "'")
+            messages.info(self.request, f"modalobject[0]['update_url']='{update_url}'")
         else:
             url = reverse_lazy(detail, kwargs={
                 'pk': self.object.pk,
