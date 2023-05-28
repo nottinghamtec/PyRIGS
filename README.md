@@ -11,8 +11,9 @@ For setup information and other such helpful stuff check the [Wiki](https://gith
 - PyRIGS: Base app, stores 'global' information
 - RIGS: Rigboard stuff - event calendar etc
 - assets: Database of our kit, testing data etc
+- training: Logs in-house training within various "departments" (sound, lighting etc).
 - versioning: Our custom logic built on top of django-reversion. Semi-modular.
 - users: Our custom logic for registration and profiles. Semi-modular.
-- training: SoonTM
+
 
 [![forthebadge](https://forthebadge.com/images/badges/built-with-resentment.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://forthebadge.com)
