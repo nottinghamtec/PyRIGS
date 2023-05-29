@@ -131,7 +131,7 @@ class BaseClientEventAuthorisationForm(forms.ModelForm):
     def clean(self):
         if self.cleaned_data.get('amount') != self.instance.event.total:
             self.add_error('amount', 'The amount authorised must equal the total for the event (inc VAT).')
-        return super(BaseClientEventAuthorisationForm, self).clean()
+        return super().clean()
 
     class Meta:
         abstract = True
@@ -179,7 +179,7 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 unexpected_values.append(f"<li>{self._meta.model._meta.get_field(field).help_text}</li>")
         if len(unexpected_values) > 0 and not self.cleaned_data.get('supervisor_consulted'):
             raise forms.ValidationError(f"Your answers to these questions: <ul>{''.join([str(elem) for elem in unexpected_values])}</ul> require consulting with a supervisor.", code='unusual_answers')
-        return super(EventRiskAssessmentForm, self).clean()
+        return super().clean()
 
     class Meta:
         model = models.RiskAssessment
@@ -195,8 +195,6 @@ class EventChecklistForm(forms.ModelForm):
             if field.__class__ == forms.NullBooleanField:
                 # Only display yes/no to user, the 'none' is only ever set in the background
                 field.widget = forms.CheckboxInput()
-    # Parsed from incoming form data by clean, then saved into models when the form is saved
-    items = {}
 
     related_models = {
         'venue': models.Venue,
@@ -215,6 +213,11 @@ class PowerTestRecordForm(forms.ModelForm):
             if field.__class__ == forms.NullBooleanField:
                 # Only display yes/no to user, the 'none' is only ever set in the background
                 field.widget = forms.CheckboxInput()
+
+    related_models = {
+        'venue': models.Venue,
+        'power_mic': models.Profile,
+    }
 
     class Meta:
         model = models.PowerTestRecord

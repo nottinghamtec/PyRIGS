@@ -259,7 +259,7 @@ class TestPrintPaperwork(TestCase):
 
 def test_login_redirect(client, django_user_model):
     request_url = reverse('event_embed', kwargs={'pk': 1})
-    expected_url = "{0}?next={1}".format(reverse('login_embed'), request_url)
+    expected_url = f"{reverse('login_embed')}?next={request_url}"
 
     # Request the page and check it redirects
     response = client.get(request_url, follow=True)
@@ -372,7 +372,8 @@ def test_ra_redirect(admin_client, admin_user, ra):
 
 
 class TestMarkdownTemplateTags(TestCase):
-    markdown = open(os.path.join(settings.BASE_DIR, "RIGS/tests/sample.md")).read()
+    with open(os.path.join(settings.BASE_DIR, "RIGS/tests/sample.md"), encoding="utf-8") as f:
+        markdown = f.read()
 
     def test_html_safe(self):
         html = markdown_filter(self.markdown)

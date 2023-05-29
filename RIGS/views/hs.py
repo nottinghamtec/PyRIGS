@@ -13,31 +13,24 @@ from django.shortcuts import redirect
 
 
 class HSCreateView(generic.CreateView):
-    def get_form(self, **kwargs):
-        form = super().get_form(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
-        form.instance.event = event
-        return form
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        epk = self.kwargs.get('pk')
-        event = models.Event.objects.get(pk=epk)
+        event = models.Event.objects.get(pk=self.kwargs.get('pk'))
         context['event'] = event
         context['page_title'] = f'Create {self.model.__name__} for Event {event.display_id}'
+        get_related(context['form'], context)
         return context
 
 
-class MarkReviewed(generic.View):
-    def get(self, *args, **kwargs):
+class MarkReviewed(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
         obj = apps.get_model('RIGS', kwargs.get('model')).objects.get(pk=kwargs.get('pk'))
         with reversion.create_revision():
             reversion.set_user(self.request.user)
             obj.reviewed_by = self.request.user
             obj.reviewed_at = timezone.now()
             obj.save()
-        return HttpResponseRedirect(reverse('hs_list'))
+        return self.request.META.get('HTTP_REFERER', reverse('hs_list'))
 
 
 class EventRiskAssessmentCreate(HSCreateView):
@@ -55,10 +48,16 @@ class EventRiskAssessmentCreate(HSCreateView):
         if ra is not None:
             return HttpResponseRedirect(reverse('ra_edit', kwargs={'pk': ra.pk}))
 
-        return super(EventRiskAssessmentCreate, self).get(self)
+        return super().get(self)
 
     def get_success_url(self):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].mic:
+            context['power_mic'] = context['event'].mic
+        return context
 
 
 class EventRiskAssessmentEdit(generic.UpdateView):
@@ -74,7 +73,7 @@ class EventRiskAssessmentEdit(generic.UpdateView):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentEdit, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         rpk = self.kwargs.get('pk')
         ra = models.RiskAssessment.objects.get(pk=rpk)
         context['event'] = ra.event
@@ -89,7 +88,7 @@ class EventRiskAssessmentDetail(generic.DetailView):
     template_name = 'hs/risk_assessment_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventRiskAssessmentDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = f"Risk Assessment for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
@@ -99,7 +98,7 @@ class EventChecklistDetail(generic.DetailView):
     template_name = 'hs/event_checklist_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(EventChecklistDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = f"Event Checklist for Event <a href='{self.object.event.get_absolute_url()}'>{self.object.event.display_id} {self.object.event.name}</a>"
         return context
 
@@ -117,7 +116,7 @@ class EventChecklistEdit(generic.UpdateView):
         return reverse('ec_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        context = super(EventChecklistEdit, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         ec = models.EventChecklist.objects.get(pk=pk)
         context['event'] = ec.event
@@ -136,18 +135,21 @@ class EventChecklistCreate(HSCreateView):
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
-
         # Check if RA exists
         ra = models.RiskAssessment.objects.filter(event=event).first()
-
         if ra is None:
             messages.error(self.request, f'A Risk Assessment must exist prior to creating any Event Checklists for {event}! Please create one now.')
             return HttpResponseRedirect(reverse('event_ra', kwargs={'pk': epk}))
-
-        return super(EventChecklistCreate, self).get(self)
+        return super().get(self)
 
     def get_success_url(self):
         return reverse('ec_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].venue:
+            context['venue'] = context['event'].venue
+        return context
 
 
 class PowerTestDetail(generic.DetailView):
@@ -179,7 +181,7 @@ class PowerTestEdit(generic.UpdateView):
         context['event'] = ec.event
         context['edit'] = True
         context['page_title'] = f'Edit Power Test Record for Event {ec.event.display_id}'
-        # get_related(context['form'], context)
+        get_related(context['form'], context)
         return context
 
 
@@ -191,7 +193,6 @@ class PowerTestCreate(HSCreateView):
     def get(self, *args, **kwargs):
         epk = kwargs.get('pk')
         event = models.Event.objects.get(pk=epk)
-
         # Check if RA exists
         ra = models.RiskAssessment.objects.filter(event=event).first()
 
@@ -204,6 +205,14 @@ class PowerTestCreate(HSCreateView):
     def get_success_url(self):
         return reverse('pt_detail', kwargs={'pk': self.object.pk})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if context['event'].venue:
+            context['venue'] = context['event'].venue
+        if context['event'].riskassessment.power_mic:
+            context['power_mic'] = context['event'].riskassessment.power_mic
+        return context
+
 
 class HSList(generic.ListView):
     paginate_by = 20
@@ -211,10 +220,10 @@ class HSList(generic.ListView):
     template_name = 'hs/hs_list.html'
 
     def get_queryset(self):
-        return models.Event.objects.all().exclude(status=models.Event.CANCELLED).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
+        return models.Event.objects.all().exclude(status=models.Event.CANCELLED).exclude(dry_hire=True).order_by('-start_date').select_related('riskassessment').prefetch_related('checklists')
 
     def get_context_data(self, **kwargs):
-        context = super(HSList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_title'] = 'H&S Overview'
         return context
 

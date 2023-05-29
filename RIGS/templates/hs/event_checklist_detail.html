@@ -9,6 +9,8 @@
     <div class="col-12 text-right my-3">
         {% button 'edit' url='ec_edit' pk=object.pk %}
         {% button 'view' url='event_detail' pk=object.event.pk text="Event" %}
+        <a href="{% url 'event_pt' object.event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
+        class="hidden-xs">Create Power Test</span></a>
         {% include 'partials/review_status.html' with perm=perms.RIGS.review_eventchecklist review='ec_review' %}
     </div>
 </div>
@@ -71,6 +73,8 @@
 <div class="col-12 text-right">
 {% button 'edit' url='ec_edit' pk=object.pk %}
 {% button 'view' url='event_detail' pk=object.pk text="Event" %}
+<a href="{% url 'event_pt' object.event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
+        class="hidden-xs">Create Power Test</span></a>
 {% include 'partials/review_status.html' with perm=perms.RIGS.review_eventchecklist review='ec_review' %}
 </div>
 <div class="col-12 text-right">

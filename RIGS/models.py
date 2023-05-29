@@ -497,7 +497,7 @@ class Event(models.Model, RevisionMixin):
             earliest = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
             tz = pytz.timezone(settings.TIME_ZONE)
             earliest = tz.localize(earliest)
-        return not self.dry_hire and earliest <= timezone.now()
+        return not self.dry_hire and not self.status == Event.CANCELLED and earliest <= timezone.now()
 
     objects = EventManager()
 
@@ -875,6 +875,9 @@ class EventChecklist(ReviewableModel, RevisionMixin):
 
 @reversion.register
 class PowerTestRecord(ReviewableModel, RevisionMixin):
+    earth_fault_text = "Earth Fault Loop Impedance (Z<small>S</small>) / Ω"
+    pssc_text = "Prospective Short Circuit Current / A"
+
     event = models.ForeignKey('Event', related_name='power_tests', on_delete=models.CASCADE)
     power_mic = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='checklists',
                                   verbose_name="Power MIC", on_delete=models.CASCADE, help_text="Who is the Power MIC?")
@@ -896,21 +899,21 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     fd_voltage_l2 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L2-N", help_text="L2 - N")
     fd_voltage_l3 = models.IntegerField(blank=True, null=True, verbose_name="First Distro Voltage L3-N", help_text="L3 - N")
     fd_phase_rotation = models.BooleanField(blank=True, null=True, verbose_name="Phase Rotation", help_text="Phase Rotation<br><small>(if required)</small>")
-    fd_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
-    fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text="Prospective Short Circuit Current")
+    fd_earth_fault = models.DecimalField(blank=True, null=True, max_digits=6, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text=earth_fault_text)
+    fd_pssc = models.IntegerField(blank=True, null=True, verbose_name="PSCC", help_text=pssc_text)
     # Worst case points
     w1_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w1_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
-    w1_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w1_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w1_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage / V")
+    w1_earth_fault = models.DecimalField(blank=True, null=True, max_digits=6, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text=earth_fault_text)
     w2_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w2_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
-    w2_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w2_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w2_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage / V")
+    w2_earth_fault = models.DecimalField(blank=True, null=True, max_digits=6, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text=earth_fault_text)
     w3_description = models.CharField(blank=True, default='', max_length=255, help_text="Description")
     w3_polarity = models.BooleanField(blank=True, null=True, help_text="Polarity Checked?")
-    w3_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage")
-    w3_earth_fault = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text="Earth Fault Loop Impedance (Z<small>S</small>)")
+    w3_voltage = models.IntegerField(blank=True, null=True, help_text="Voltage / V")
+    w3_earth_fault = models.DecimalField(blank=True, null=True, max_digits=6, decimal_places=2, verbose_name="Earth Fault Loop Impedance", help_text=earth_fault_text)
 
     all_rcds_tested = models.BooleanField(blank=True, null=True, help_text="All circuit RCDs tested?<br><small>(using test button)</small>")
     public_sockets_tested = models.BooleanField(blank=True, null=True, help_text="Public/Performer accessible circuits tested?<br><small>(using socket tester)</small>")
@@ -923,6 +926,9 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
 
     def __str__(self):
         return f"{self.pk} - {self.event}"
+
+    def get_absolute_url(self):
+        return reverse('pt_detail', kwargs={'pk': self.pk})
 
     @property
     def activity_feed_string(self):

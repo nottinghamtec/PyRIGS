@@ -12,7 +12,7 @@
       </thead>
       <tbody id="asset_table_body">
         {% for item in object_list %}
-            <tr class="table-{{ item.status.display_class|default:'' }} assetRow">
+            <tr class="table-{{ item.status.display_class|default:'' }} assetRow" id="{{ item.asset_id }}">
                 <th scope="row" class="align-middle"><a class="assetID" href="{% url 'asset_detail' item.asset_id %}">{{ item.asset_id }}</a></th>
                 <td class="assetDesc"><span class="text-truncate d-inline-block align-middle">{{ item.description }}</span></td>
                 <td class="assetCategory align-middle">{{ item.category }}</td>

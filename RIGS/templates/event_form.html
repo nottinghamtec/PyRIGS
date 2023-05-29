@@ -209,7 +209,7 @@
                                     <div class="col-sm-9 col-md-7 col-lg-8">
                                         <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                         {% if venue %}
-                                            <option value="{{form.venue.value}}" selected="selected" data-update_url="{% url 'venue_update' form.venue.value %}">{{ venue }}</option>
+                                            <option value="{{venue.id}}" selected="selected" data-update_url="{% url 'venue_update' venue.id %}">{{ venue }}</option>
                                         {% endif %}
                                         </select>
                                     </div>

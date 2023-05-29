@@ -265,5 +265,5 @@ class ItemQualifications(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"People Qualified In {self.object_list[0].item}"
+        context["page_title"] = f"People Qualified In {models.TrainingItem.objects.get(pk=self.kwargs['pk'])}"
         return context

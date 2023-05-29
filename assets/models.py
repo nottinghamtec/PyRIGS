@@ -135,7 +135,7 @@ class Asset(models.Model, RevisionMixin):
     # Cable assets
     is_cable = models.BooleanField(default=False)
     cable_type = models.ForeignKey(to=CableType, blank=True, null=True, on_delete=models.SET_NULL)
-    length = models.DecimalField(decimal_places=1, max_digits=10,
+    length = models.DecimalField(decimal_places=2, max_digits=10,
                                  blank=True, null=True, help_text='m')
     csa = models.DecimalField(decimal_places=2, max_digits=10,
                               blank=True, null=True, help_text='mm²')
@@ -192,5 +192,5 @@ class Asset(models.Model, RevisionMixin):
         return str(self.asset_id)
 
     @property
-    def name(self):
+    def display_name(self):
         return f"{self.display_id} | {self.description}"

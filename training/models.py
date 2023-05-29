@@ -105,6 +105,10 @@ class TrainingItem(models.Model):
     def display_id(self):
         return f"{self.category.reference_number}.{self.reference_number}"
 
+    @property
+    def display_name(self):
+        return f"{self.display_id} | {self.name}"
+
     @display_id.filter
     @classmethod
     def display_id(cls, lookup, value):
@@ -369,7 +373,7 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
         return str(self)
 
     def get_absolute_url(self):
-        return reverse('trainee_detail', kwargs={'pk': self.trainee.pk})
+        return reverse('trainee_detail', kwargs={'pk': self.trainee_id})
 
     class Meta:
         unique_together = ["trainee", "level"]

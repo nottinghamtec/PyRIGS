@@ -93,7 +93,7 @@ pytest = "*"
 pytest-reverse = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
 
 [dev-packages.pytest-xdist]
 extras = [ "psutil",]

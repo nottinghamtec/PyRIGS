@@ -51,22 +51,18 @@
                             <div class="form-group form-row" id="{{ form.power_mic.id_for_label }}-group">
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.power_mic.help_text }}</label>
-                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
                                     {% if power_mic %}
                                         <option value="{{power_mic.pk}}" selected="selected">{{ power_mic.name }}</option>
-                                    {% elif event.riskassessment.power_mic %}
-                                        <option value="{{event.riskassessment.power_mic.pk}}" selected="selected">{{ event.riskassessment.power_mic.name }}</option>
                                     {% endif %}
                                 </select>
                             </div>
                             <div class="form-group form-row" id="{{ form.venue.id_for_label }}-group">
                                 <label for="{{ form.venue.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.venue.label }}</label>
-                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="form-control selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
-                                {% elif event.venue %}
-                                    <option value="{{event.venue.pk}}" selected="selected">{{ event.venue.name }}</option>
                                 {% endif %}
                                 </select>
                             </div>
@@ -119,7 +115,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small></th>
+                                            <th scope="row" rowspan="2">Voltage<br><small>(cube meter)</small> / V</th>
                                             <th class="text-center">{{ form.fd_voltage_l1.help_text }}</th>
                                             <th class="text-center">{{ form.fd_voltage_l2.help_text }}</th>
                                             <th class="text-center">{{ form.fd_voltage_l3.help_text }}</th>

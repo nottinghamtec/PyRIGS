@@ -17,7 +17,6 @@
                 e.preventDefault();
                 data = $(this).serialize();
                 action = $(this).attr('action');
-                console.log(action)
                 $.post(action, data, function(resp) {
                     $('#modal').html(resp);
                 });
