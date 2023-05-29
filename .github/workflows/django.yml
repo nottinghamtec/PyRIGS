@@ -43,7 +43,7 @@ jobs:
               pipenv run python3 manage.py collectstatic --noinput
       - name: Run Tests
         run: pipenv run pytest -n auto --cov
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
             name: failure-screenshots ${{ matrix.test-group }}
