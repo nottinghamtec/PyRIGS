@@ -77,7 +77,7 @@ class AssetForm(FormPage):
         'description': (regions.TextBox, (By.ID, 'id_description')),
         'is_cable': (regions.CheckBox, (By.ID, 'id_is_cable')),
         'serial_number': (regions.TextBox, (By.ID, 'id_serial_number')),
-        'comments': (regions.SimpleMDETextArea, (By.ID, 'id_comments')),
+        'comments': (regions.TextBox, (By.ID, 'id_comments')),
         'purchase_price': (regions.TextBox, (By.ID, 'id_purchase_price')),
         'replacement_cost': (regions.TextBox, (By.ID, 'id_replacement_cost')),
         'date_acquired': (regions.DatePicker, (By.ID, 'id_date_acquired')),
