@@ -372,7 +372,7 @@ def test_ra_redirect(admin_client, admin_user, ra):
 
 
 class TestMarkdownTemplateTags(TestCase):
-    with open(os.path.join(settings.BASE_DIR, "RIGS/tests/sample.md")) as f:
+    with open(os.path.join(settings.BASE_DIR, "RIGS/tests/sample.md"), encoding="utf-8") as f:
         markdown = f.read()
 
     def test_html_safe(self):
