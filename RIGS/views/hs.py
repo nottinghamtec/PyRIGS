@@ -53,12 +53,6 @@ class EventRiskAssessmentCreate(HSCreateView):
     def get_success_url(self):
         return reverse('ra_detail', kwargs={'pk': self.object.pk})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if context['event'].mic:
-            context['power_mic'] = context['event'].mic
-        return context
-
 
 class EventRiskAssessmentEdit(generic.UpdateView):
     model = models.RiskAssessment
