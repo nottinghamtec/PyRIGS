@@ -166,7 +166,7 @@ class PowerTestEdit(generic.UpdateView):
         ec.reviewed_by = None
         ec.reviewed_at = None
         ec.save()
-        return reverse('ec_detail', kwargs={'pk': self.object.pk})
+        return reverse('pt_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
