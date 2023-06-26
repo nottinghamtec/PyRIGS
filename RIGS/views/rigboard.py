@@ -395,7 +395,7 @@ class CreateForumThread(generic.base.RedirectView):
 
         params = {
             'title': str(event),
-            'body': f'<span class="hidden" id="event-id">{event.pk}</span>https://rigs.nottinghamtec.co.uk/event/{event.pk}'
+            'body': f'<span class="hidden" id="event-id">{event.pk}</span>https://rigs.nottinghamtec.co.uk/event/{event.pk}',
             'category': 'rig-info'
         }
         return f'https://forum.nottinghamtec.co.uk/new-topic?{urllib.parse.urlencode(params)}'
@@ -403,8 +403,8 @@ class CreateForumThread(generic.base.RedirectView):
 
 class RecieveForumWebhook(generic.View):
     @method_decorator(csrf_exempt)
-  def dispatch(self, request, *args, **kwargs):
-    return super().dispatch(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if request.POST.get('secret') == env('FORUM_WEBHOOK_SECRET'):
