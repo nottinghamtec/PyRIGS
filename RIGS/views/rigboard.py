@@ -395,7 +395,7 @@ class CreateForumThread(generic.base.RedirectView):
 
         params = {
             'title': str(event),
-            'body': f'<span class="hidden" id="event-id">{event.pk}</span>https://rigs.nottinghamtec.co.uk/event/{event.pk}',
+            'body': f'https://rigs.nottinghamtec.co.uk/event/{event.pk}',
             'category': 'rig-info'
         }
         return f'https://forum.nottinghamtec.co.uk/new-topic?{urllib.parse.urlencode(params)}'
@@ -407,9 +407,12 @@ class RecieveForumWebhook(generic.View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get('secret') == env('FORUM_WEBHOOK_SECRET'):
-            event_id = BeautifulSoup(request.POST.get('body'), "html.parser")
-            event = models.Event.objects.filter(pk=soup.select_one('div[id="event-id"]')).first()
+        signer = Signer(key=env('FORUM_WEBHOOK_SECRET'))
+        if request.POST.get('X-Discourse-Event-Signature') == signer.sign(request.POST.body):
+            event_id = int(request.POST.body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
+            event = models.Event.objects.filter(pk=event_id).first()
             if event:
-                event.forum_url = ""
+                event.forum_url = "https://forum.nottinghamtec.co.uk/t/{}"
                 event.save()
+                return HttpResponse(status=200)
+        return HttpResponse(status=204)
