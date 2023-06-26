@@ -408,7 +408,7 @@ class RecieveForumWebhook(generic.View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET'), request.body).hexdigest()}"
+        computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, digestmod='sha256').hexdigest()}"
         if request.POST.get('X-Discourse-Event-Signature') == computed: #  and request.POST.get('X-Discourse-Event') == "topic_created":
             body = json.loads(request.body.decode('utf-8'))
             event_id = int(body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
