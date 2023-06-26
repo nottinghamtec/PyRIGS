@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles import finders
-from django.core import signing, Signer
+from django.core import signing
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
@@ -407,7 +407,7 @@ class RecieveForumWebhook(generic.View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        signer = Signer(key=env('FORUM_WEBHOOK_SECRET'))
+        signer = signing.Signer(key=env('FORUM_WEBHOOK_SECRET'))
         if request.POST.get('X-Discourse-Event-Signature') == signer.sign(request.POST.body):
             event_id = int(request.POST.body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
             event = models.Event.objects.filter(pk=event_id).first()
