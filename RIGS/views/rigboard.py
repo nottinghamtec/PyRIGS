@@ -5,6 +5,9 @@ import premailer
 import simplejson
 import urllib
 
+from envparse import env
+from bs4 import BeautifulSoup
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles import finders
@@ -20,6 +23,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
@@ -391,7 +395,18 @@ class CreateForumThread(generic.base.RedirectView):
 
         params = {
             'title': str(event),
-            'body': 'https://rigs.nottinghamtec.co.uk/event/{}'.format(event.pk),
+            'body': '<span class="hidden" id="event-id">{}</span>https://rigs.nottinghamtec.co.uk/event/{}'.format(event.pk, event.pk),
             'category': 'rig-info'
         }
         return 'https://forum.nottinghamtec.co.uk/new-topic' + "?" + urllib.parse.urlencode(params)
+
+
+class RecieveForumWebhook(generic.View):
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('secret') == env('FORUM_WEBHOOK_SECRET'):
+            event_id = BeautifulSoup(request.POST.get('body'), "html.parser")
+            event = models.Event.objects.filter(pk=soup.select_one('div[id="event-id"]')).first()
+            if event:
+                event.forum_url = ""
+                event.save()
