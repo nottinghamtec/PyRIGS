@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles import finders
-from django.core import signing
+from django.core import signing, Signer
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
