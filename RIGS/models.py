@@ -763,6 +763,7 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
     area_outside_of_control = models.BooleanField(help_text="Is any part of the work area out of TEC's direct control or openly accessible during the build or breakdown period?")
     barrier_required = models.BooleanField(help_text="Is there a requirement for TEC to provide any barrier for security or protection of persons/equipment?")
     nonstandard_emergency_procedure = models.BooleanField(help_text="Does the emergency procedure for the event differ from TEC's standard procedures?")
+    site_notes = models.TextField(blank=True, default='', help_text="Did you have to consult a supervisor about any of the above? If so who did you consult and what was the outcome?")
 
     # Structures
     special_structures = models.BooleanField(help_text="Does the event require use of winch stands, motors, MPT Towers, or staging?")
