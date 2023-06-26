@@ -4,6 +4,7 @@ import re
 import premailer
 import simplejson
 import urllib
+import hmac
 
 from envparse import env
 from bs4 import BeautifulSoup
@@ -407,8 +408,8 @@ class RecieveForumWebhook(generic.View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        signer = signing.Signer(key=env('FORUM_WEBHOOK_SECRET'))
-        if request.POST.get('X-Discourse-Event-Signature') == signer.sign(request.body):
+        computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET'), request.body).hexdigest()}"
+        if request.POST.get('X-Discourse-Event-Signature') == computed: #  and request.POST.get('X-Discourse-Event') == "topic_created":
             body = json.loads(request.body.decode('utf-8'))
             event_id = int(body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
             event = models.Event.objects.filter(pk=event_id).first()
