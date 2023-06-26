@@ -411,7 +411,7 @@ class RecieveForumWebhook(generic.View):
     def post(self, request, *args, **kwargs):
         computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, hashlib.sha256).hexdigest()}"
         print(computed)
-        if not hmac.compare_digest(request.POST.get('X-Discourse-Event-Signature'), computed):
+        if not hmac.compare_digest(request.headers.get('X-Discourse-Event-Signature'), computed):
             return HttpResponseForbidden('Invalid signature header')
         body = json.loads(request.body.decode('utf-8'))
         event_id = int(body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
