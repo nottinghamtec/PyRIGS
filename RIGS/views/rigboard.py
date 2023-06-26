@@ -398,11 +398,14 @@ class CreateForumThread(generic.base.RedirectView):
             'body': '<span class="hidden" id="event-id">{}</span>https://rigs.nottinghamtec.co.uk/event/{}'.format(event.pk, event.pk),
             'category': 'rig-info'
         }
-        return 'https://forum.nottinghamtec.co.uk/new-topic' + "?" + urllib.parse.urlencode(params)
+        return f'https://forum.nottinghamtec.co.uk/new-topic?{}'.format(urllib.parse.urlencode(params))
 
 
 class RecieveForumWebhook(generic.View):
-    @csrf_exempt
+    @method_decorator(csrf_exempt)
+  def dispatch(self, request, *args, **kwargs):
+    return super().dispatch(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         if request.POST.get('secret') == env('FORUM_WEBHOOK_SECRET'):
             event_id = BeautifulSoup(request.POST.get('body'), "html.parser")
