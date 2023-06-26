@@ -395,10 +395,10 @@ class CreateForumThread(generic.base.RedirectView):
 
         params = {
             'title': str(event),
-            'body': '<span class="hidden" id="event-id">{}</span>https://rigs.nottinghamtec.co.uk/event/{}'.format(event.pk, event.pk),
+            'body': f'<span class="hidden" id="event-id">{event.pk}</span>https://rigs.nottinghamtec.co.uk/event/{event.pk}'
             'category': 'rig-info'
         }
-        return f'https://forum.nottinghamtec.co.uk/new-topic?{}'.format(urllib.parse.urlencode(params))
+        return f'https://forum.nottinghamtec.co.uk/new-topic?{urllib.parse.urlencode(params)}'
 
 
 class RecieveForumWebhook(generic.View):
