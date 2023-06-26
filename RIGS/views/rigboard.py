@@ -409,8 +409,7 @@ class RecieveForumWebhook(generic.View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        hmac = hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, hashlib.sha256).hexdigest()
-        computed = f"sha256={hmac}"
+        computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, hashlib.sha256).hexdigest()}"
         print(computed)
         if not hmac.compare_digest(request.POST.get('X-Discourse-Event-Signature'), computed):
             return HttpResponseForbidden('Invalid signature header')
