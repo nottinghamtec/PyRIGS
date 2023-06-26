@@ -3,6 +3,7 @@ import datetime
 import re
 import premailer
 import simplejson
+import urllib
 
 from django.conf import settings
 from django.contrib import messages
@@ -377,3 +378,20 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         context['to_name'] = self.request.GET.get('to_name', None)
         context['target'] = 'event_authorise_form_preview'
         return context
+
+
+class CreateForumThread(generic.base.RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        event = get_object_or_404(models.Event, pk=kwargs['pk'])
+
+        if event.forum_url:
+            return event.forum_url
+
+        params = {
+            'title': str(event),
+            'body': 'https://rigs.nottinghamtec.co.uk/event/{}'.format(event.pk),
+            'category': 'rig-info'
+        }
+        return 'https://forum.nottinghamtec.co.uk/new-topic' + "?" + urllib.parse.urlencode(params)
