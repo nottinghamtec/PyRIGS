@@ -408,8 +408,9 @@ class RecieveForumWebhook(generic.View):
 
     def post(self, request, *args, **kwargs):
         signer = signing.Signer(key=env('FORUM_WEBHOOK_SECRET'))
-        if request.POST.get('X-Discourse-Event-Signature') == signer.sign(request.POST.body):
-            event_id = int(request.POST.body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
+        if request.POST.get('X-Discourse-Event-Signature') == signer.sign(request.body):
+            body = json.loads(request.body.decode('utf-8'))
+            event_id = int(body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
             event = models.Event.objects.filter(pk=event_id).first()
             if event:
                 event.forum_url = "https://forum.nottinghamtec.co.uk/t/{}"
