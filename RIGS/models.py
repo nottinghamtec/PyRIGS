@@ -712,7 +712,7 @@ class Payment(models.Model, RevisionMixin):
         return f"payment of £{self.amount}"
 
 
-def validate_url(value, requirement):
+def validate_url(value):
     if not value:
         return  # Required error is done the field
     obj = urlparse(value)
