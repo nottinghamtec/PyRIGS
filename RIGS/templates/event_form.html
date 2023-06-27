@@ -349,7 +349,7 @@
                                     {% render_field form.forum_url class+="form-control" %}
                                     {% if object.pk %}
                                     <p class="small mb-0">or</p>
-                                    <a href="{% url 'event_thread' object.pk %}" class="btn btn-primary" title="Create Forum Thread">
+                                    <a href="{% url 'event_thread' object.pk %}" class="btn btn-primary" title="Create Forum Thread" target="_blank">
                                     <span class="fas fa-plus"></span> <span class="hidden-xs">Create Forum Thread</span></a>
                                     {% endif %}
                                 </div>
