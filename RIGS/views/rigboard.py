@@ -410,14 +410,15 @@ class RecieveForumWebhook(generic.View):
 
     def post(self, request, *args, **kwargs):
         computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, hashlib.sha256).hexdigest()}"
-        print(computed)
         if not hmac.compare_digest(request.headers.get('X-Discourse-Event-Signature'), computed):
             return HttpResponseForbidden('Invalid signature header')
-        body = simplejson.loads(request.body.decode('utf-8'))
-        event_id = int(body['topic']['title'][1:6]) # find the ID, force convert it to an int to eliminate leading zeros
-        event = models.Event.objects.filter(pk=event_id).first()
-        if event:
-            event.forum_url = f"https://forum.nottinghamtec.co.uk/t/{body['topic']['slug']}"
-            event.save()
-            return HttpResponse(status=202)
+        # Check if this is the right kind of event. The webhook filters by category on the forum side
+        if request.headers.get('X-Discourse-Event') == "topic_created":
+            body = simplejson.loads(request.body.decode('utf-8'))
+            event_id = int(body['topic']['title'][1:6]) # find the ID, force convert it to an int to eliminate leading zeros
+            event = models.Event.objects.filter(pk=event_id).first()
+            if event:
+                event.forum_url = f"https://forum.nottinghamtec.co.uk/t/{body['topic']['slug']}"
+                event.save()
+                return HttpResponse(status=202)
         return HttpResponse(status=204)
