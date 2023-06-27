@@ -79,8 +79,8 @@
             {% endif %}
 
             <dt class="col-6">Forum Thread</dt>
-            {% if event.forum_thread %}
-            <dd class="col-6"><a href="{{event.forum_thread}}">{{event.forum_thread}}</a></dd>
+            {% if event.forum_url %}
+            <dd class="col-6"><a href="{{event.forum_url}}">{{event.forum_url}}</a></dd>
             {% else %}
             <a href="{% url 'event_thread' event.pk %}" class="btn btn-primary" title="Create Forum Thread"><span
             class="fas fa-plus"></span> <span
