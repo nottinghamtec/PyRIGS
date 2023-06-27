@@ -308,6 +308,14 @@ class EventManager(models.Manager):
         return qs
 
 
+def validate_forum_url(value):
+    if not value:
+        return  # Required error is done the field
+    obj = urlparse(value)
+    if obj.hostname not in ('forum.nottinghamtec.co.uk'):
+        raise ValidationError('URL must point to a location on the TEC Forum')
+
+
 @reversion.register(follow=['items'])
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
@@ -356,6 +364,8 @@ class Event(models.Model, RevisionMixin):
     auth_request_by = models.ForeignKey('Profile', null=True, blank=True, on_delete=models.CASCADE)
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(blank=True, default='')
+
+    forum_url = models.URLField(default='', blank=True, validators=[validate_forum_url])
 
     @property
     def display_id(self):
@@ -505,7 +515,7 @@ class Event(models.Model, RevisionMixin):
         return reverse('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return f"{self.display_id}: {self.name}"
+        return f"{self.display_id} | {self.name}"
 
     def clean(self):
         errdict = {}

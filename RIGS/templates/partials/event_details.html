@@ -77,6 +77,15 @@
                 <dt class="col-sm-6">PO</dt>
                 <dd class="col-sm-6">{{ object.purchase_order }}</dd>
             {% endif %}
+
+            <dt class="col-6">Forum Thread</dt>
+            {% if object.forum_url %}
+            <dd class="col-6"><a href="{{object.forum_url}}">{{object.forum_url}}</a></dd>
+            {% else %}
+            <a href="{% url 'event_thread' object.pk %}" class="btn btn-primary" title="Create Forum Thread"><span
+            class="fas fa-plus"></span> <span
+            class="hidden-xs">Create Forum Thread</span></a>
+            {% endif %}
         </dl>
     </div>
 </div>

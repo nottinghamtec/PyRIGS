@@ -110,6 +110,9 @@ urlpatterns = [
     path('event/<int:pk>/checkin/add/', login_required(views.EventCheckInOverride.as_view()),
          name='event_checkin_override'),
 
+    path('event/<int:pk>/thread/', permission_required_with_403('RIGS.change_event')(views.CreateForumThread.as_view()), name='event_thread'),
+    path('event/webhook/', views.RecieveForumWebhook.as_view(), name='webhook_recieve'),
+
     # Finance
     path('invoice/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceIndex.as_view()),
          name='invoice_list'),

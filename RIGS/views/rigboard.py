@@ -3,6 +3,12 @@ import datetime
 import re
 import premailer
 import simplejson
+import urllib
+import hmac
+import hashlib
+
+from envparse import env
+from bs4 import BeautifulSoup
 
 from django.conf import settings
 from django.contrib import messages
@@ -19,6 +25,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
@@ -377,3 +384,41 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         context['to_name'] = self.request.GET.get('to_name', None)
         context['target'] = 'event_authorise_form_preview'
         return context
+
+
+class CreateForumThread(generic.base.RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        event = get_object_or_404(models.Event, pk=kwargs['pk'])
+
+        if event.forum_url:
+            return event.forum_url
+
+        params = {
+            'title': str(event),
+            'body': f'https://rigs.nottinghamtec.co.uk/event/{event.pk}',
+            'category': 'rig-info'
+        }
+        return f'https://forum.nottinghamtec.co.uk/new-topic?{urllib.parse.urlencode(params)}'
+
+
+class RecieveForumWebhook(generic.View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        computed = f"sha256={hmac.new(env('FORUM_WEBHOOK_SECRET').encode(), request.body, hashlib.sha256).hexdigest()}"
+        if not hmac.compare_digest(request.headers.get('X-Discourse-Event-Signature'), computed):
+            return HttpResponseForbidden('Invalid signature header')
+        # Check if this is the right kind of event. The webhook filters by category on the forum side
+        if request.headers.get('X-Discourse-Event') == "topic_created":
+            body = simplejson.loads(request.body.decode('utf-8'))
+            event_id = int(body['topic']['title'][1:6])  # find the ID, force convert it to an int to eliminate leading zeros
+            event = models.Event.objects.filter(pk=event_id).first()
+            if event:
+                event.forum_url = f"https://forum.nottinghamtec.co.uk/t/{body['topic']['slug']}"
+                event.save()
+                return HttpResponse(status=202)
+        return HttpResponse(status=204)
