@@ -413,7 +413,7 @@ class RecieveForumWebhook(generic.View):
         print(computed)
         if not hmac.compare_digest(request.headers.get('X-Discourse-Event-Signature'), computed):
             return HttpResponseForbidden('Invalid signature header')
-        body = json.loads(request.body.decode('utf-8'))
+        body = simplejson.loads(request.body.decode('utf-8'))
         event_id = int(body['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
         event = models.Event.objects.filter(pk=event_id).first()
         if event:
