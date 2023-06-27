@@ -308,6 +308,14 @@ class EventManager(models.Manager):
         return qs
 
 
+def validate_forum_url(value, requirement):
+    if not value:
+        return  # Required error is done the field
+    obj = urlparse(value)
+    if obj.hostname not in ('forum.nottinghamtec.co.uk'):
+        raise ValidationError('URL must point to a location on the TEC Forum')
+
+
 @reversion.register(follow=['items'])
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
@@ -357,7 +365,7 @@ class Event(models.Model, RevisionMixin):
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(blank=True, default='')
 
-    forum_url = models.URLField(null=True, blank=True)
+    forum_url = models.URLField(null=True, blank=True, validators=[validate_forum_url])
 
     @property
     def display_id(self):
@@ -704,7 +712,7 @@ class Payment(models.Model, RevisionMixin):
         return f"payment of £{self.amount}"
 
 
-def validate_url(value):
+def validate_url(value, requirement):
     if not value:
         return  # Required error is done the field
     obj = urlparse(value)
