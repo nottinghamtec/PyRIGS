@@ -308,7 +308,7 @@ class EventManager(models.Manager):
         return qs
 
 
-def validate_forum_url(value, requirement):
+def validate_forum_url(value):
     if not value:
         return  # Required error is done the field
     obj = urlparse(value)
