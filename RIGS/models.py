@@ -515,7 +515,7 @@ class Event(models.Model, RevisionMixin):
         return reverse('event_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return f"{self.display_id}: {self.name}"
+        return f"{self.display_id} | {self.name}"
 
     def clean(self):
         errdict = {}
