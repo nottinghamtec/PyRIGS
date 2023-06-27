@@ -417,7 +417,7 @@ class RecieveForumWebhook(generic.View):
         event_id = int(body['topic']['title'][1:5]) # find the ID, force convert it to an int to eliminate leading zeros
         event = models.Event.objects.filter(pk=event_id).first()
         if event:
-            event.forum_url = "https://forum.nottinghamtec.co.uk/t/{}"
+            event.forum_url = f"https://forum.nottinghamtec.co.uk/t/{body['topic']['slug']}"
             event.save()
             return HttpResponse(status=202)
         return HttpResponse(status=204)
