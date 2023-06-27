@@ -1,3 +1,4 @@
+import logging
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -160,10 +161,9 @@ class ModelComparison:
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
             for version in old_item_versions:  # put all the old versions in a list
-                old = version._object_version.object
-                if old is None:
-                    pass
-                compare = ModelComparison(old=old, **comparisonParams)
+                if version is None or version._object_version is None:
+                    logging.warning(f"Something was null when it really shouldn't be! {old_item_versions}")
+                compare = ModelComparison(old=version._object_version.object, **comparisonParams)
                 item_dict[version.object_id] = compare
 
             for version in new_item_versions:  # go through the new versions
