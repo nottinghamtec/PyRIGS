@@ -365,7 +365,7 @@ class Event(models.Model, RevisionMixin):
     auth_request_at = models.DateTimeField(null=True, blank=True)
     auth_request_to = models.EmailField(blank=True, default='')
 
-    forum_url = models.URLField(null=True, blank=True, validators=[validate_forum_url])
+    forum_url = models.URLField(default='', blank=True, validators=[validate_forum_url])
 
     @property
     def display_id(self):
