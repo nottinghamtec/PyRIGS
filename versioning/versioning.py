@@ -148,9 +148,9 @@ class ModelComparison:
 
     @cached_property
     def item_changes(self):
-        from RIGS.models import EventAuthorisation
-        from training.models import TrainingLevelQualification, TrainingItemQualification
         if self.follow and self.version.object is not None:
+            from RIGS.models import EventAuthorisation
+            from training.models import TrainingLevelQualification, TrainingItemQualification
             item_type = ContentType.objects.get_for_model(self.version.object)
             old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification)) \
                 .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
@@ -160,9 +160,11 @@ class ModelComparison:
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
+            if len(new_item_versions) is 0:
+                return None
             for version in old_item_versions:  # put all the old versions in a list
-                if version is None or version._object_version is None:
-                    logging.warning(f"Something was null when it really shouldn't be! {old_item_versions}")
+                if version is None or version.object is None:
+                    continue
                 compare = ModelComparison(old=version._object_version.object, **comparisonParams)
                 item_dict[version.object_id] = compare
 
