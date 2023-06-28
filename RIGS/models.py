@@ -76,7 +76,8 @@ class Profile(AbstractUser):
 
     @classmethod
     def users_awaiting_approval_count(cls):
-        return Profile.objects.filter(models.Q(is_approved=False)).count()
+        # last_login = None ensures we only pick up genuinely new users, not those that have been deactivated for inactivity
+        return Profile.objects.filter(is_approved=False, last_login=None).count()
 
     def __str__(self):
         return self.name
