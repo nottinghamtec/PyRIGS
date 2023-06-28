@@ -160,7 +160,7 @@ class ModelComparison:
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
-            if len(new_item_versions) is 0:
+            if len(new_item_versions) == 0:
                 return None
             for version in old_item_versions:  # put all the old versions in a list
                 if version is None or version.object is None:

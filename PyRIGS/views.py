@@ -134,6 +134,9 @@ class SecureAPIRequest(generic.View):
             results = []
             query = reduce(operator.and_, queries)
             objects = self.models[model].objects.filter(query)
+            # Returning unactivated or unapproved users when they are elsewhere filtered out of the default queryset leads to some *very* unexpected results
+            if model == "profile":
+                objects = objects.filter(is_active=True, is_approved=True)
             for o in objects:
                 name = o.display_name if hasattr(o, 'display_name') else o.name
                 data = {
