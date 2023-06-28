@@ -160,15 +160,15 @@ class ModelComparison:
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
-            if len(new_item_versions) == 0:
-                return None
             for version in old_item_versions:  # put all the old versions in a list
-                if version is None or version.object is None:
-                    continue
-                compare = ModelComparison(old=version._object_version.object, **comparisonParams)
-                item_dict[version.object_id] = compare
+                    if version._model is None:
+                        continue
+                    compare = ModelComparison(old=version._object_version.object, **comparisonParams)
+                    item_dict[version.object_id] = compare
 
             for version in new_item_versions:  # go through the new versions
+                if version._model is None:
+                        continue
                 try:
                     compare = item_dict[version.object_id]  # see if there's a matching old version
                     compare.new = version._object_version.object  # then add the new version to the dictionary
