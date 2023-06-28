@@ -165,9 +165,9 @@
     </div>
 </div>
 <div class="col-12 text-right">
-{% button 'edit' url='ec_edit' pk=object.pk %}
+{% button 'edit' url='pt_edit' pk=object.pk %}
 {% button 'view' url='event_detail' pk=object.pk text="Event" %}
-{% include 'partials/review_status.html' with perm=perms.RIGS.review_eventchecklist review='ec_review' %}
+{% include 'partials/review_status.html' with perm=perms.RIGS.review_power review='pt_review' %}
 </div>
 <div class="col-12 text-right">
 {% include 'partials/last_edited.html' with target="eventchecklist_history" %}
