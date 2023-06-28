@@ -154,8 +154,9 @@ class AssociateAdmin(VersionAdmin):
 
 @admin.register(models.Profile)
 class ProfileAdmin(UserAdmin, AssociateAdmin):
-    list_display = ('username', 'name', 'is_approved', 'is_staff', 'is_superuser', 'is_supervisor', 'number_of_events')
+    list_display = ('username', 'name', 'is_approved', 'is_superuser', 'is_supervisor', 'number_of_events', 'last_login')
     list_display_links = ['username']
+    list_filter = UserAdmin.list_filter + ('is_approved',)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {
