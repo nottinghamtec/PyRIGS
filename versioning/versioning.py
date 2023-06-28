@@ -104,9 +104,6 @@ class FieldComparison:
 
 class ModelComparison:
     def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=['date_joined']):
-        if new is None and old is None:
-            logging.warning("Both new and old are none, this won't work")
-            pass
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:
             self.fields = old._meta.get_fields()
@@ -155,20 +152,19 @@ class ModelComparison:
         from training.models import TrainingLevelQualification, TrainingItemQualification
         if self.follow and self.version.object is not None:
             item_type = ContentType.objects.get_for_model(self.version.object)
+            old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification)) \
+                .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
 
             comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'date_joined']}
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
-            if self.version.parent is not None:
-                old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification)) \
-                    .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
-                for version in old_item_versions:  # put all the old versions in a list
-                    if version is None or version._object_version is None:
-                        logging.warning(f"Something was null when it really shouldn't be! {old_item_versions}")
-                    compare = ModelComparison(old=version._object_version.object, **comparisonParams)
-                    item_dict[version.object_id] = compare
+            for version in old_item_versions:  # put all the old versions in a list
+                if version is None or version._object_version is None:
+                    logging.warning(f"Something was null when it really shouldn't be! {old_item_versions}")
+                compare = ModelComparison(old=version._object_version.object, **comparisonParams)
+                item_dict[version.object_id] = compare
 
             for version in new_item_versions:  # go through the new versions
                 try:
@@ -231,7 +227,7 @@ class RIGSVersion(Version):
         try:
             previousVersion = versions.filter(revision_id__lt=self.revision_id).latest('revision__date_created')
         except ObjectDoesNotExist:
-            return None
+            return False
 
         return previousVersion
 
@@ -240,7 +236,7 @@ class RIGSVersion(Version):
         return ModelComparison(
             version=self,
             new=self._object_version.object,
-            old=self.parent._object_version.object,
+            old=self.parent._object_version.object if self.parent else None,
             follow=True
         )
 
