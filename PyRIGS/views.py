@@ -48,7 +48,7 @@ class Index(generic.TemplateView):  # Displays the current rig count along with 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['rig_count'] = models.Event.objects.rig_count()
-        context['now'] = models.Event.objects.events_in_bounds(timezone.now(), timezone.now()).exclude(dry_hire=True).exclude(status=models.Event.CANCELLED)
+        context['now'] = models.Event.objects.events_in_bounds(timezone.now(), timezone.now()).exclude(status=models.Event.CANCELLED).filter(is_rig=True, dry_hire=False)
         return context
 
 
