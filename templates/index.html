@@ -11,7 +11,7 @@
     {% if now %}
     <div class="col-sm-12 alert alert-primary rounded-0 mx-auto">
     {% for event in now %}
-    Event {{ event }} is happening now! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href align-baseline {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
+    Event {{ event }} is happening today! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href align-baseline {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
     {% endfor %}
     </div>
     {% endif %}
