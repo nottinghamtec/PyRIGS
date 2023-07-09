@@ -688,13 +688,11 @@ class Payment(models.Model, RevisionMixin):
     CASH = 'C'
     INTERNAL = 'I'
     EXTERNAL = 'E'
-    SUCORE = 'SU'
     ADJUSTMENT = 'T'
     METHODS = (
         (CASH, 'Cash'),
         (INTERNAL, 'Internal'),
         (EXTERNAL, 'External'),
-        (SUCORE, 'SU Core'),
         (ADJUSTMENT, 'TEC Adjustment'),
     )
 

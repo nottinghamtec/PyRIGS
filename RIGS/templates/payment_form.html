@@ -29,7 +29,15 @@
     </div>
     <div class="row pt-3">
         <label class="col-sm-4 col-form-label"
-               for="{{ form.method.id_for_label }}">{{ form.method.label }}</label>
+               for="{{ form.method.id_for_label }}">{{ form.method.label }}
+        <span class="fas fa-info-circle text-info" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-controls="collapse"></span>
+        <ul class="collapse" id="collapse">
+            <li>Cash - Self Explanatory</li>
+            <li>Internal - Transfers within the Students' Union only</li>
+            <li>External - All other transfers (<em>including</em> the University)</li>
+            <li>TEC Adjustment - Manual corrections</li>
+        </ul>
+        </label>
         <div class="col-sm-8">
             {% render_field form.method class+="form-control" %}
         </div>
