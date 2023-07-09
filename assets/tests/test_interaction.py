@@ -54,46 +54,45 @@ class TestAssetList(AutoLoginTest):
         self.assertEqual("10", asset_ids[2])
         self.assertEqual("C1", asset_ids[3])
 
-    @pytest.mark.xfail(reason="Fails on CI for unknown reason", raises=AssertionError)
-    def test_search(self):
-        self.page.set_query("10")
-        self.page.search()
-        self.assertTrue(len(self.page.assets) == 1)
-        self.assertEqual("Working Mic", self.page.assets[0].description)
-        self.assertEqual("10", self.page.assets[0].id)
 
-        self.page.set_query("light")
-        self.page.search()
-        self.assertTrue(len(self.page.assets) == 1)
-        self.assertEqual("A light", self.page.assets[0].description)
+@pytest.mark.xfail(reason="Fails on CI for unknown reason", raises=AssertionError)
+def test_search(logged_in_browser, admin_user, live_server, test_asset, test_asset_2, category, status, cable_type):
+    page = pages.AssetList(logged_in_browser.driver, live_server.url).open()
+    page.set_query(test_asset.asset_id)
+    page.search()
+    assert len(page.assets) == 1
+    assert page.assets[0].description == test_asset.description
+    assert page.assets[0].id == test_asset.asset_id
 
-        self.page.set_query("Random string")
-        self.page.search()
-        self.assertTrue(len(self.page.assets) == 0)
+    page.set_query(test_asset.description)
+    page.search()
+    assert len(page.assets) == 1
+    assert page.assets[0].description == test_asset.description
 
-        self.page.set_query("")
-        self.page.search()
-        # Only working stuff shown by default
-        self.assertTrue(len(self.page.assets) == 2)
+    page.set_query("Random string")
+    page.search()
+    assert len(page.assets) == 0
 
-        self.page.status_selector.toggle()
-        self.assertTrue(self.page.status_selector.is_open)
-        self.page.status_selector.select_all()
-        self.page.status_selector.toggle()
-        self.assertFalse(self.page.status_selector.is_open)
-        self.page.filter()
-        self.assertTrue(len(self.page.assets) == 4)
+    page.set_query("")
+    page.search()
+    # Only working stuff shown by default
+    assert len(page.assets) == 1
 
-        self.page.category_selector.toggle()
-        self.assertTrue(self.page.category_selector.is_open)
-        self.page.category_selector.set_option("Sound", True)
-        self.page.category_selector.close()
-        self.assertFalse(self.page.category_selector.is_open)
-        self.page.filter()
-        self.assertTrue(len(self.page.assets) == 2)
-        asset_ids = list(map(lambda x: x.id, self.page.assets))
-        self.assertEqual("1", asset_ids[0])
-        self.assertEqual("10", asset_ids[1])
+    page.status_selector.toggle()
+    assert page.status_selector.is_open
+    page.status_selector.select_all()
+    page.status_selector.toggle()
+    assert not page.status_selector.is_open
+    page.filter()
+    assert len(page.assets) == 2
+
+    page.category_selector.toggle()
+    assert page.category_selector.is_open
+    page.category_selector.set_option(category.name, True)
+    page.category_selector.close()
+    assert not page.category_selector.is_open
+    page.filter()
+    assert len(page.assets) == 2
 
 
 def test_cable_create(logged_in_browser, admin_user, live_server, test_asset, category, status, cable_type):
