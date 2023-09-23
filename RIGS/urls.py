@@ -4,7 +4,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
 
 from PyRIGS.decorators import (api_key_required, has_oembed,
-                               permission_required_with_403)
+                               permission_required_with_403, not_estates)
 from . import views
 
 urlpatterns = [
@@ -42,21 +42,22 @@ urlpatterns = [
          name='venue_update'),
 
     # Rigboard
-    path('rigboard/', login_required(views.RigboardIndex.as_view()), name='rigboard'),
-    path('rigboard/calendar/', login_required()(views.WebCalendar.as_view()),
+    path('rigboard/', not_estates()(views.RigboardIndex.as_view()), name='rigboard'),
+    path('rigboard/calendar/', not_estates()(views.WebCalendar.as_view()),
          name='web_calendar'),
     re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/$',
-            login_required()(views.WebCalendar.as_view()), name='web_calendar'),
+            not_estates()(views.WebCalendar.as_view()), name='web_calendar'),
     re_path(r'^rigboard/calendar/(?P<view>(month|week|day))/(?P<date>(\d{4}-\d{2}-\d{2}))/$',
-            login_required()(views.WebCalendar.as_view()), name='web_calendar'),
+            not_estates()(views.WebCalendar.as_view()), name='web_calendar'),
     path('rigboard/archive/', RedirectView.as_view(permanent=True, pattern_name='event_archive')),
 
+    path('estates/', login_required()(views.EstatesEventList.as_view()), name='estates'),
 
     path('event/<int:pk>/', has_oembed(oembed_view="event_oembed")(views.EventDetail.as_view()),
          name='event_detail'),
     path('event/create/', permission_required_with_403('RIGS.add_event')(views.EventCreate.as_view()),
          name='event_create'),
-    path('event/archive/', login_required()(views.EventArchive.as_view()),
+    path('event/archive/', not_estates()(views.EventArchive.as_view()),
          name='event_archive'),
     path('event/<int:pk>/embed/',
          xframe_options_exempt(login_required(login_url='/user/login/embed/')(views.EventEmbed.as_view())),
@@ -75,7 +76,7 @@ urlpatterns = [
 
     path('event/<int:pk>/ra/', permission_required_with_403('RIGS.add_riskassessment')(views.EventRiskAssessmentCreate.as_view()),
          name='event_ra'),
-    path('event/ra/<int:pk>/', login_required(views.EventRiskAssessmentDetail.as_view()),
+    path('event/ra/<int:pk>/', not_estates()(views.EventRiskAssessmentDetail.as_view()),
          name='ra_detail'),
     path('event/ra/<int:pk>/edit/', permission_required_with_403('RIGS.change_riskassessment')(views.EventRiskAssessmentEdit.as_view()),
          name='ra_edit'),
@@ -85,7 +86,7 @@ urlpatterns = [
 
     path('event/<int:pk>/checklist/', permission_required_with_403('RIGS.add_eventchecklist')(views.EventChecklistCreate.as_view()),
          name='event_ec'),
-    path('event/checklist/<int:pk>/', login_required(views.EventChecklistDetail.as_view()),
+    path('event/checklist/<int:pk>/', not_estates()(views.EventChecklistDetail.as_view()),
          name='ec_detail'),
     path('event/checklist/<int:pk>/edit/', permission_required_with_403('RIGS.change_eventchecklist')(views.EventChecklistEdit.as_view()),
          name='ec_edit'),
@@ -94,20 +95,20 @@ urlpatterns = [
 
     path('event/<int:pk>/power/', permission_required_with_403('RIGS.add_powertestrecord')(views.PowerTestCreate.as_view()),
          name='event_pt'),
-    path('event/power/<int:pk>/', login_required(views.PowerTestDetail.as_view()),
+    path('event/power/<int:pk>/', not_estates()(views.PowerTestDetail.as_view()),
          name='pt_detail'),
     path('event/power/<int:pk>/edit/', permission_required_with_403('RIGS.change_powertestrecord')(views.PowerTestEdit.as_view()),
          name='pt_edit'),
     path('event/power/<int:pk>/review/', permission_required_with_403('RIGS.review_power')(views.MarkReviewed.as_view()),
          name='pt_review', kwargs={'model': 'PowerTestRecord'}),
 
-    path('event/<int:pk>/checkin/', login_required(views.EventCheckIn.as_view()),
+    path('event/<int:pk>/checkin/', not_estates()(views.EventCheckIn.as_view()),
          name='event_checkin'),
-    path('event/checkout/', login_required(views.EventCheckOut.as_view()),
+    path('event/checkout/', not_estates()(views.EventCheckOut.as_view()),
          name='event_checkout'),
-    path('event/<int:pk>/checkin/edit/', login_required(views.EventCheckInEdit.as_view()),
+    path('event/<int:pk>/checkin/edit/', not_estates()(views.EventCheckInEdit.as_view()),
          name='edit_checkin'),
-    path('event/<int:pk>/checkin/add/', login_required(views.EventCheckInOverride.as_view()),
+    path('event/<int:pk>/checkin/add/', not_estates()(views.EventCheckInOverride.as_view()),
          name='event_checkin_override'),
 
     path('event/<int:pk>/thread/', permission_required_with_403('RIGS.change_event')(views.CreateForumThread.as_view()), name='event_thread'),

@@ -1,0 +1,78 @@
+{% load namewithnotes from filters %}
+{% load markdown_tags %}
+<div class="table-responsive">
+    <table class="table mb-0" id="event_table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Dates & Times</th>
+                <th scope="col">Event Details</th>
+                <th scope="col">Status</th>
+                <th scope="col">Member In Charge</th>
+                <th scope="col">Power Plan</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+        <tr {% if event.cancelled %}style="opacity: 50% !important;"{% endif %} id="event_row">
+            <!---Number-->
+            <th scope="row" id="event_number">{{ event.display_id }}</th>
+            <!--Dates & Times-->
+            <td id="event_dates" style="text-align: justify;">
+                <span class="text-nowrap">Start: <strong>{{ event.start_date|date:"D d/m/Y" }}
+                {% if event.has_start_time %}
+                    {{ event.start_time|date:"H:i" }}
+                {% endif %}</strong>
+                </span>
+                {% if event.end_date %}
+                    <br>
+                    <span class="text-nowrap">End: {% if event.end_date != event.start_date %}<strong>{{ event.end_date|date:"D d/m/Y"  }}{% endif %}
+                    {% if event.has_end_time %}
+                       {{ event.end_time|date:"H:i" }}
+                    {% endif %}</strong>
+                    </span>
+                {% endif %}
+            </td>
+            <!---Details-->
+            <td id="event_details" class="w-100">
+                <h4>
+                    {{ event.name }}
+                    {% if event.venue %}
+                        <small>at {{ event.venue }}</small>
+                    {% endif %}
+                </h4>
+                {% if event.is_rig and not event.cancelled %}
+                    <h5>
+                        {{ event.person.name }}
+                        {% if event.organisation %}
+                            for {{ event.organisation.name }}
+                        {% endif %}
+                    </h5>
+                {% endif %}
+                {% if not event.cancelled and event.description %}
+                    <p>{{ event.description|markdown }}</p>
+                {% endif %}
+            </td>
+            <td>
+                {{ event.get_status_display }}
+            </td>
+            <!---MIC-->
+            <td id="event_mic" class="text-nowrap">
+                {% if event.mic %}
+                        {{ event.mic }}
+                {% elif event.is_rig %}
+                    <span class="fas fa-user-slash"></span>
+                {% endif %}
+            </td>
+            <td>
+                {{ event.riskassessment.power_plan|default:"Pending" }}
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="bg-warning">
+            <td colspan="4">No events found</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

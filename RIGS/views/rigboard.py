@@ -26,6 +26,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
@@ -422,3 +423,17 @@ class RecieveForumWebhook(generic.View):
                 event.save()
                 return HttpResponse(status=202)
         return HttpResponse(status=204)
+
+class EstatesEventList(UserPassesTestMixin, generic.TemplateView):
+    template_name = 'estates/estates_event_list.html'
+
+    def get_context_data(self, **kwargs):
+        # get super context
+        context = super().get_context_data(**kwargs)
+        # call out method to get current events
+        context['events'] = models.Event.objects.current_events().filter(venue__on_campus=True, dry_hire=False, is_rig=True)
+        context['page_title'] = "Upcoming Campus Events"
+        return context
+    
+    def test_func(self):
+        return self.request.user.email.endswith('@nottingham.ac.uk')

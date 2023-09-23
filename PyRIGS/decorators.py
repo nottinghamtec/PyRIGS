@@ -121,3 +121,7 @@ def nottinghamtec_address_required(function):
         return function(request, *args, **kwargs)
 
     return wrap
+
+
+def not_estates():
+    return user_passes_test_with_403(lambda u: not u.email.endswith('@nottingham.ac.uk'))

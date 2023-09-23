@@ -6,6 +6,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 from django.views.generic import TemplateView
 
+from PyRIGS.decorators import not_estates
+
 from PyRIGS import views
 
 urlpatterns = [
@@ -14,17 +16,17 @@ urlpatterns = [
     path('assets/', include('assets.urls')),
     path('training/', include('training.urls')),
 
-    path('', login_required(views.Index.as_view()), name='index'),
+    path('', not_estates()(views.Index.as_view()), name='index'),
 
     # API
-    path('api/<str:model>/', login_required(views.SecureAPIRequest.as_view()),
+    path('api/<str:model>/', not_estates()(views.SecureAPIRequest.as_view()),
          name="api_secure"),
-    path('api/<str:model>/<int:pk>/', login_required(views.SecureAPIRequest.as_view()),
+    path('api/<str:model>/<int:pk>/', not_estates()(views.SecureAPIRequest.as_view()),
          name="api_secure"),
 
     path('closemodal/', views.CloseModal.as_view(), name='closemodal'),
-    path('search/', login_required(views.Search.as_view()), name='search'),
-    path('search_help/', login_required(views.SearchHelp.as_view()), name='search_help'),
+    path('search/', not_estates()(views.Search.as_view()), name='search'),
+    path('search_help/', not_estates()(views.SearchHelp.as_view()), name='search_help'),
 
     path('', include('users.urls')),
 
