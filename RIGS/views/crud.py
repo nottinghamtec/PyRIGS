@@ -115,7 +115,7 @@ class VenueDetail(GenericDetailView):
 
 class VenueCreate(GenericCreateView, ModalURLMixin):
     model = models.Venue
-    fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
+    fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available', 'on_campus']
 
     def get_success_url(self):
         return self.get_close_url('venue_update', 'venue_detail')
@@ -123,7 +123,7 @@ class VenueCreate(GenericCreateView, ModalURLMixin):
 
 class VenueUpdate(GenericUpdateView, ModalURLMixin):
     model = models.Venue
-    fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
+    fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available', 'on_campus']
 
     def get_success_url(self):
         return self.get_close_url('venue_update', 'venue_detail')

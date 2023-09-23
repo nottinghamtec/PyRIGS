@@ -1,6 +1,7 @@
 {% extends override|default:"base_rigs.html" %}
 {% load widget_tweaks %}
 {% load button from filters %}
+{% load verbose_name from filters %}
 {% load markdown_tags %}
 
 {% block content %}
@@ -28,6 +29,11 @@
                         {% if object.three_phase_available is not None %}
                         <dt>Three Phase Available</dt>
                         <dd>{{ object.three_phase_available|yesno|capfirst }}</dd>
+                        {% endif%}
+
+                        {% if object.on_campus is not None %}
+                        <dt>{{ object|verbose_name:"on_campus" }}</dt>
+                        <dd>{{ object.on_campus|yesno|capfirst }}</dd>
                         {% endif%}
 
                         {% if object.union_account is not None %}

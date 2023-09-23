@@ -213,6 +213,7 @@ class Venue(models.Model, RevisionMixin):
     phone = models.CharField(max_length=15, blank=True, default='')
     email = models.EmailField(blank=True, default='')
     three_phase_available = models.BooleanField(default=False)
+    on_campus = models.BooleanField(default=False, verbose_name="Is this venue on a UoN campus?")
     notes = models.TextField(blank=True, default='')
     address = models.TextField(blank=True, default='')
 

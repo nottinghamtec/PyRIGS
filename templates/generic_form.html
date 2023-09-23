@@ -78,6 +78,20 @@
                     </div>
                 </div>
                 {% endif %}
+                {% if form.on_campus is not None %}
+                <div class="form-group form-row">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <div class="checkbox">
+                            <label>
+                                {% render_field form.on_campus %} {{ form.on_campus.label }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger">
+                        <span class="fas fa-exclamation"></span> Selecting this option will add <em>all</em> events at this venue to the calendar viewable by UoN Estates.  
+                    </div>
+                </div>
+                {% endif %}
                 {% if form.union_account is not None %}
                 <div class="form-group form-row">
                     <div class="col-sm-10 col-sm-offset-2">
