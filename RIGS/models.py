@@ -1,4 +1,3 @@
-import datetime
 import hashlib
 import random
 import string
@@ -77,7 +76,7 @@ class Profile(AbstractUser):
     @classmethod
     def users_awaiting_approval_count(cls):
         # last_login = None ensures we only pick up genuinely new users, not those that have been deactivated for inactivity
-        return Profile.objects.filter(is_approved=False, last_login=None).count()
+        return Profile.objects.filter(is_approved=False, last_login=None, date_joined_date=timezone.now().date()).count()
 
     def __str__(self):
         return self.name

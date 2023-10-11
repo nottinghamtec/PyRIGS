@@ -3,6 +3,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
+import datetime
 
 from PyPDF2 import PdfFileReader, PdfFileMerger
 from django.conf import settings
@@ -110,7 +111,7 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
         if admin.last_emailed is None or admin.last_emailed + settings.EMAIL_COOLDOWN <= timezone.now():
             context = {
                 'request': request,
-                'link_suffix': reverse("admin:RIGS_profile_changelist") + '?is_approved__exact=0',
+                'link_suffix': reverse("admin:RIGS_profile_changelist") + f'?is_approved__exact=0&date_joined__date={timezone.now().date()}',
                 'number_of_users': models.Profile.users_awaiting_approval_count(),
                 'to_name': admin.first_name
             }
