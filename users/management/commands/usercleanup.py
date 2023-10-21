@@ -12,8 +12,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for person in Profile.objects.all():
-            # Inactivate users that have not logged in for a year (or have never logged in)
-            if person.last_login is None or (timezone.now() - person.last_login).days > 365:
+            # Inactivate users that have not logged in for a year
+            if person.last_login is not None and (timezone.now() - person.last_login).days > 365:
                 person.is_active = False
                 person.is_approved = False
                 person.save()
