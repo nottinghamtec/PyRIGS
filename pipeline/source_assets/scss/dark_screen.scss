@@ -77,17 +77,8 @@
         border-collapse: separate !important;
         border-spacing: 0;
     }
-    #event_table tr th {
-      border-right: 0 !important;
-    }
-    #event_table tr td {
-      border-left: 0 !important;
-    }
-    #event_table tr td:not(:last-child) {
-        border-right: 0 !important;
-    }
     @each $color, $value in $theme-colors {
-        .table-#{$color} {
+        table.table-#{$color} {
             > td,th {
                 border: 0.3em solid theme-color-level($color, -6) !important;
             }
@@ -95,6 +86,11 @@
                 color: white !important;
                 background-color: #222 !important;
             }
+        }
+        #event_row.table-#{$color} {
+            border: 0.3em solid theme-color-level($color, -6) !important;
+            background-color: #222 !important;
+            color: white !important;
         }
     }
     del {
@@ -155,5 +151,8 @@
     }
     .modal {
       overflow-y: auto !important; //Bootstrap Dark Theme overrides this to none for some insane reason so we need to change it back
+    }
+    .text-muted {
+        color: #c9c9c9 !important;
     }
 }

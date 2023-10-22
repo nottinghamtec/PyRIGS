@@ -1,4 +1,4 @@
-<div>
+<div id="event_status">
 <span class="badge badge-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
 {% if event.is_rig %}
     {% if event.sum_total > 0 %}
