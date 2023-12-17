@@ -35,6 +35,8 @@ if DEBUG:
     ALLOWED_HOSTS.append('localhost')
     ALLOWED_HOSTS.append('example.com')
     ALLOWED_HOSTS.append('127.0.0.1')
+    ALLOWED_HOSTS.append('.app.github.dev')
+    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
