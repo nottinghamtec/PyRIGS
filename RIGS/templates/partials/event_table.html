@@ -92,7 +92,7 @@ dd {
     <div class="eventgrid {% if event.cancelled %}
     table-secondary
     {% elif not event.is_rig %}
-    bg-info
+    table-info
     {% elif not event.mic %}
     table-danger
     {% elif event.confirmed and event.authorised %}
