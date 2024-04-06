@@ -167,9 +167,11 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">Events</div>
+                <div style="container-type: size; height: 30vh; overflow-y: scroll;">
                 {% with object.latest_events as events %}
                     {% include 'partials/event_table.html' %}
                 {% endwith %}
+                </div>
             </div>
         </div>
     </div>
