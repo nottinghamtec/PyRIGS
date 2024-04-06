@@ -281,3 +281,12 @@ html.embedded {
 .bootstrap-select, button.btn.dropdown-toggle.bs-placeholder.btn-light {
     padding-right: 1rem !important;
 }
+// New implementation of class dropped in Bootstrap 3
+.dl-horizontal {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.7rem 0;
+}
+.dl-horizontal > dd, .dl-horizontal .markdown > p {
+    margin-bottom: 0 !important;
+}
