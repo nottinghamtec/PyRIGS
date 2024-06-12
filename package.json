@@ -16,7 +16,7 @@
     "cssnano": "^5.0.13",
     "easymde": "^2.16.1",
     "fullcalendar": "^5.10.1",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-flatten": "^0.4.0",
     "gulp-if": "^3.0.0",
