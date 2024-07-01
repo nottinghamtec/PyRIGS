@@ -3,7 +3,7 @@
 <style>
 #event_table {
     display: grid;
-    grid-template-columns: max-content auto;
+    grid-template-columns: max-content min-content minmax(max-content, 1fr) max-content;
     column-gap: 1em;
 }
 .eventgrid {
@@ -11,14 +11,9 @@
     grid-column: 1/5;
     grid-template-columns: subgrid;
     padding: 1em;
-    dt {
-      float: left;
-      clear: left;
-      margin-right: 10px;
-    }
-    dd {
-      margin-left: 0px;
-    }
+    dt, dd { display: block; float: left; }
+    dt { clear: both; }
+    dd { float: right; }
 }
 .grid-header {
     border-bottom: 1px solid grey;
