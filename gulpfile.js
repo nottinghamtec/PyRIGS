@@ -70,14 +70,14 @@ function scripts() {
     .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
     .pipe(gulpif(function(file) { return jpop.includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
-    .pipe(terser())
+    // Only minify if filename does not already denote it as minified
+    .pipe(gulpif(function(file) { return file.path.indexOf("min") == -1;},terser()))
     .pipe(gulp.dest(dest))
     .pipe(browsersync.stream());
 }
 
 function browserSync(done) {
   spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'});
-  // TODO Wait for Django server to come up before browsersync, it seems inconsistent
   browsersync.init({
     notify: true,
     open: false,

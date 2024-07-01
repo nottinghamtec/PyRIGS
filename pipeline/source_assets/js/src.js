@@ -17,14 +17,12 @@ jQuery(document).ready(function () {
             });
         }
     });
-    var easter_egg = new Konami();
-    easter_egg.code = function () {
+    var easter_egg = new Konami(function () {
         var s = document.createElement('script');
         s.type = 'text/javascript';
         document.body.appendChild(s);
-        s.src = '{% static "js/asteroids.min.js"%}';
-        ga('send', 'event', 'easter_egg', 'activated');
-    }
+        s.src = '/static/js/asteroids.min.js';
+    });
     easter_egg.load();
 });
 //CTRL-Enter form submission
