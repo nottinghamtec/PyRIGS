@@ -16,7 +16,7 @@ const con = require('gulp-concat');
 const gulpif = require('gulp-if');
 
 function fonts(done) {
-    return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.*')
+    return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.*', { encoding: false })
         .pipe(gulp.dest('pipeline/built_assets/fonts'))
         .pipe(browsersync.stream());
 }
