@@ -1,16 +1,11 @@
 function changeSelectedValue(obj,pk,text,update_url) { //Pass in JQuery object and new parameters
     //console.log('Changing selected value');
     obj.find('option').remove();  //Remove all the available options
-    obj.append(  //Add the new option
-    	$("<option></option>")
-	    .attr("value",pk)
-	    .text(text)
-	    .data('update_url',update_url)
-	    );
-    obj.selectpicker('render'); //Re-render the UI
-    obj.selectpicker('refresh'); //Re-render the UI
-    obj.selectpicker('val', pk); //Set the new value to be selected
+    obj[0].add(new Option(text, pk, true, true)); // Add new option
+    //obj.selectpicker('val', pk); //Set the new value to be selected
+    obj.selectpicker('refresh');
     obj.change(); //Trigger the change function manually
+    //console.log(obj);
 }
 
 function refreshUpdateHref(obj) {
