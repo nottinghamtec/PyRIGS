@@ -140,6 +140,7 @@
         <nextFrame/>
         {% block content %}
         {% endblock %}
+        <namedString id="lastPage"><pageNumber/></namedString>
     </story>
 
 </document>
