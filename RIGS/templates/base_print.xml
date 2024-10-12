@@ -22,6 +22,9 @@
         <paraStyle name="center" alignment="center"/>
         <paraStyle name="page-head" alignment="center" fontName="OpenSans-Bold" fontSize="16" leading="18" spaceAfter="0"/>
 
+        {% block extrastyles %}
+        {% endblock %}
+
         <paraStyle name="style.event_description" fontName="OpenSans" textColor="DarkGray" />
         <paraStyle name="style.item_description" fontName="OpenSans" textColor="DarkGray" leftIndent="10" />
         <paraStyle name="style.specific_description" fontName="OpenSans" textColor="DarkGray" fontSize="10" />
