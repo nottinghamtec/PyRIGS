@@ -12,7 +12,7 @@
     <div class="col-sm-12">
     {% for event in now %}
     <div class="alert alert-primary rounded-0">
-    Event {{ event }} is happening today! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href align-baseline {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
+    Event <a href="{% url 'event_detail' event.pk %}" class="text-danger">{{ event }}</a> is happening today! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href align-baseline {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
     </div>
     {% endfor %}
     </div>
