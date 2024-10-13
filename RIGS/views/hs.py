@@ -231,6 +231,7 @@ class RAPrint(PrintView):
         context['filename'] = f"EventSpecificRiskAssessment_for_{context['object'].event.display_id}.pdf"
         return context
 
+
 class PowerPrint(PrintView):
     model = models.PowerTestRecord
     template_name = 'hs/power_print.xml'
@@ -239,6 +240,7 @@ class PowerPrint(PrintView):
         context = super().get_context_data(**kwargs)
         context['filename'] = f"PowerTestRecord_for_{context['object'].event.display_id}.pdf"
         return context
+
 
 class EventCheckIn(generic.CreateView, ModalURLMixin):
     model = models.EventCheckIn

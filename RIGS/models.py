@@ -942,7 +942,7 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     @property
     def activity_feed_string(self):
         return str(self.event)
-    
+
     @property
     def name(self):
         return f"Power Test Record - {self.event}"
