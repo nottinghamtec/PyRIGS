@@ -165,7 +165,6 @@
     </div>
 </div>
 <div class="col-12 text-right">
-{% button 'print' 'pt_print' object.pk %}
 {% button 'edit' url='pt_edit' pk=object.pk %}
 {% button 'view' url='event_detail' pk=object.event.pk text="Event" %}
 {% include 'partials/review_status.html' with perm=perms.RIGS.review_power review='pt_review' %}

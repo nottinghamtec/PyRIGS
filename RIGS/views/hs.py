@@ -232,16 +232,6 @@ class RAPrint(PrintView):
         return context
 
 
-class PowerPrint(PrintView):
-    model = models.PowerTestRecord
-    template_name = 'hs/power_print.xml'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filename'] = f"PowerTestRecord_for_{context['object'].event.display_id}.pdf"
-        return context
-
-
 class EventCheckIn(generic.CreateView, ModalURLMixin):
     model = models.EventCheckIn
     template_name = 'hs/eventcheckin_form.html'
