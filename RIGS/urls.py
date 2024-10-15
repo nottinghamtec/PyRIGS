@@ -100,6 +100,7 @@ urlpatterns = [
          name='pt_edit'),
     path('event/power/<int:pk>/review/', permission_required_with_403('RIGS.review_power')(views.MarkReviewed.as_view()),
          name='pt_review', kwargs={'model': 'PowerTestRecord'}),
+    path('event/power/<int:pk>/print/', permission_required_with_403('RIGS.view_powertestrecord')(views.PowerPrint.as_view()), name='pt_print'),
 
     path('event/<int:pk>/checkin/', login_required(views.EventCheckIn.as_view()),
          name='event_checkin'),

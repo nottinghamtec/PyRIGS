@@ -943,6 +943,10 @@ class PowerTestRecord(ReviewableModel, RevisionMixin):
     def activity_feed_string(self):
         return str(self.event)
 
+    @property
+    def name(self):
+        return f"Power Test Record - {self.event}"
+
 
 class EventCheckIn(models.Model):
     event = models.ForeignKey('Event', related_name='crew', on_delete=models.CASCADE)
