@@ -31,7 +31,7 @@
                 {% for event in object_list %}
                     <tr class="{{event.status_color}}">
                         <th scope="row"><a href="{% url 'event_detail' event.pk %}">{{ event.display_id }}</a><br>
-                            <span class="text-muted">{{ event.get_status_display }}</span></th>
+                            <span class="{% if event.get_status_display == 'Cancelled' %}text-danger{% endif %}">{{ event.get_status_display }}</span></th>
                         <td>{{ event.start_date }}</td>
                         <td>
                             {{ event.name }}
