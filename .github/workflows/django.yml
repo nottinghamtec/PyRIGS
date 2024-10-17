@@ -15,10 +15,13 @@ jobs:
       PYTHONDONTWRITEBYTECODE: 1
     steps:
       - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get install libcairo2-dev
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-            python-version: 3.9
+            python-version: "3.10"
             cache: 'pipenv'
       - name: Install Dependencies
         run: |
