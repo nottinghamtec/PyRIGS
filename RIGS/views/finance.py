@@ -5,7 +5,7 @@ import reversion
 from django import forms
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Sum
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -18,8 +18,76 @@ from RIGS import models
 
 forms.DateField.widget = forms.DateInput(attrs={'type': 'date'})
 
+TIME_FILTERS = ["all", "year", "month", "week"]
 
-class InvoiceIndex(generic.ListView):
+
+def days_between(d1, d2):
+    diff = d2 - d1
+    return diff.total_seconds() / datetime.timedelta(days=1).total_seconds()
+
+
+class InvoiceDashboard(generic.TemplateView):
+    template_name = 'invoice_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Invoice Dashboard"
+        context['description'] = "Overview of financial status of TEC rigs."
+
+        time_filter = self.request.GET.get('time_filter', 'all')
+
+        if time_filter not in TIME_FILTERS:
+            time_filter = 'all'
+
+        if time_filter == 'all':
+            context['events'] = models.Event.objects.all()
+            context['invoices'] = models.Invoice.objects.all()
+            context['payments'] = models.Payment.objects.all()
+        elif time_filter == 'year':
+            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=365))
+            context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=365))
+            context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=365))
+        elif time_filter == 'month':
+            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=30))
+            context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=30))
+            context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=30))
+        elif time_filter == 'week':
+            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=7))
+            context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=7))
+            context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=7))
+
+        context["time_filter"] = time_filter
+
+        context['total_outstanding'] = sum([i.balance for i in models.Invoice.objects.outstanding_invoices()])
+        context['total_waiting'] = sum([i.sum_total for i in models.Event.objects.waiting_invoices()])
+        context['total_events'] = len(context['events'])
+        context['total_invoices'] = len(context['invoices'])
+        context['total_payments'] = len(context['payments'])
+
+        payment_methods = dict(models.Payment.METHODS)
+
+        context['payment_methods'] = context["payments"].values('method').annotate(total=Sum('amount')).order_by('method')
+
+        for method in context['payment_methods']:
+            method['method'] = payment_methods.get(method['method'], f"Unknown method ({method['method']})")
+
+        context["total_income"] = sum([i['total'] for i in context['payment_methods']])
+
+        payments = context['payments']
+        mean_duration = 0
+
+        for payment in payments:
+            mean_duration += days_between(payment.invoice.invoice_date, payment.date)
+
+        if len(payments) > 0:
+            mean_duration /= len(payments)
+
+        context['mean_invoice_to_payment'] = mean_duration
+
+        return context
+
+
+class InvoiceOutstanding(generic.ListView):
     model = models.Invoice
     template_name = 'invoice_list.html'
 
