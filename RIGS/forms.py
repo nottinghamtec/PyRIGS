@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import simplejson
 from django import forms
 from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
+from django.utils.html import format_html
 from reversion import revisions as reversion
 
 from RIGS import models
@@ -97,6 +98,9 @@ class EventForm(forms.ModelForm):
             raise forms.ValidationError(
                 'You haven\'t provided any client contact details. Please add a person or organisation.',
                 code='contact')
+        access = self.cleaned_data.get("access_at")
+        if 'warn-access' not in self.data and access is not None and access.date() < (self.cleaned_data.get("start_date") - timedelta(days=7)):
+            raise forms.ValidationError(format_html("Are you sure about that? Your access time seems a bit optimistic. If you're sure, save again. <input type='hidden' id='warn-access' name='warn-access' value='0'/>"), code='access_sanity')
         return super().clean()
 
     def save(self, commit=True):

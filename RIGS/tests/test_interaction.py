@@ -127,7 +127,7 @@ class TestEventCreate(BaseRigboardTest):
 
         # Fix it
         self.page.end_date = datetime.date(2020, 1, 11)
-        self.page.access_at = datetime.datetime(2020, 1, 1, 9)
+        self.page.access_at = datetime.datetime(2020, 1, 8, 9)
         self.page.dry_hire = True
         self.page.status = "Booked"
         self.page.collected_by = "Fred"
