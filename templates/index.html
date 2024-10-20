@@ -9,9 +9,11 @@
     <h1 class="col-sm-12 pb-3">R<small class="text-muted">ig</small> I<small class="text-muted">nformation</small> G<small class="text-muted">athering</small> S<small class="text-muted">ystem</small></h1>
     <h2 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h2>
     {% if now %}
-    <div class="col-sm-12 alert alert-primary rounded-0 mx-auto">
+    <div class="col-sm-12">
     {% for event in now %}
+    <div class="alert alert-primary rounded-0">
     Event {{ event }} is happening today! <a href="{% url 'event_checkin' event.pk %}" class="btn btn-success btn-sm modal-href align-baseline {% if request.user.current_event %}disabled{%endif%}"><span class="fas fa-user-clock"></span> <span class="d-none d-sm-inline">Check In</span></a><br/>
+    </div>
     {% endfor %}
     </div>
     {% endif %}
