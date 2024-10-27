@@ -115,7 +115,8 @@ urlpatterns = [
     path('event/webhook/', views.RecieveForumWebhook.as_view(), name='webhook_recieve'),
 
     # Finance
-    path('invoice/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceIndex.as_view()),
+    path('invoice/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceDashboard.as_view()), name='invoice_dashboard'),
+    path('invoice/outstanding', permission_required_with_403('RIGS.view_invoice')(views.InvoiceOutstanding.as_view()),
          name='invoice_list'),
     path('invoice/archive/', permission_required_with_403('RIGS.view_invoice')(views.InvoiceArchive.as_view()),
          name='invoice_archive'),

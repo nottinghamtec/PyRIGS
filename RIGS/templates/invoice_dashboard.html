@@ -1,0 +1,105 @@
+{% extends 'base_rigs.html' %}
+
+{% block content %}
+
+<form method="GET" action="{% url 'invoice_dashboard' %}">
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="time_filter">Time Filter</label>
+            <select id="time_filter" name="time_filter" class="form-control">
+                <option value="week" {% if time_filter == 'week' %}selected{% endif %}>Last Week (7 days)</option>
+                <option value="month" {% if time_filter == 'month' %}selected{% endif %}>Last Month (30 days)</option>
+                <option value="year" {% if time_filter == 'year' %}selected{% endif %}>Last Year</option>
+                <option value="all" {% if time_filter == 'all' %}selected{% endif %}>All Time</option>
+            </select>
+        </div>
+    </div>
+</form>
+
+<script>
+    $('#time_filter').change(function () {
+        $(this).closest('form').submit();
+    });
+</script>
+
+<h3>Overview</h3>
+
+<!-- big cards in 2x2 grid with total_outstanding, total_events, total_invoices and total_payments, different backgrounds -->
+
+<div class="card-deck">
+    <div class="card">
+        <a href="{% url 'invoice_waiting' %}" class="text-decoration-none text-white">
+            <div class="card-body bg-primary">
+                <h5 class="card-title text-center">Total Waiting</h5>
+                <p class="card-text text-center h3"><strong>£{{ total_waiting|floatformat:2 }}</strong></p>
+            </div>
+        </a>
+    </div>
+    <div class="card">
+        <a href="{% url 'invoice_list' %}" class="text-decoration-none text-dark">
+            <div class="card-body bg-info">
+                <h5 class="card-title text-center">Total Outstanding</h5>
+                <p class="card-text text-center h3"><strong>£{{ total_outstanding|floatformat:2 }}</strong></p>
+            </div>
+        </a>
+    </div>
+    <div class="card">
+        <div class="card-body bg-danger">
+            <h5 class="card-title text-center">Total Events</h5>
+            <p class="card-text text-center h3"><strong>{{ total_events }}</strong></p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body bg-success">
+            <h5 class="card-title text-center">Total Invoices</h5>
+            <p class="card-text text-center h3"><strong>{{ total_invoices }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<h3>Payments</h3>
+
+<br/>
+
+<h4>Sources</h4>
+
+<br/>
+
+{% for source in payment_methods %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><strong>{{ source.method }}</strong></h5>
+        <p class="card-text h3">£{{ source.total|floatformat:2 }}</p>
+    </div>
+</div>
+{% endfor %}
+
+<br/>
+
+<h4>Total</h4>
+
+<br/>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title text-center">Total Income</h5>
+        <p class="card-text text-center h3"><strong>£{{ total_income|floatformat:2 }}</strong></p>
+    </div>
+</div>
+
+<br/>
+
+<h4>Invoice Payment Time</h4>
+
+<br/>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title text-center">Average Time to Pay</h5>
+        <p class="card-text text-center h3"><strong>{{ mean_invoice_to_payment|floatformat:2 }} days</strong></p>
+    </div>
+</div>
+
+{% endblock %}
