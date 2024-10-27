@@ -254,7 +254,7 @@ class Command(BaseCommand):
                             new_invoice.void = True
                         elif random.randint(0, 2) > 1:  # 1 in 3 have been paid
                             models.Payment.objects.create(invoice=new_invoice, amount=new_invoice.balance,
-                                                          date=datetime.date.today())
+                                                          date=datetime.date.today(), method=random.choice(models.Payment.METHODS)[0])
             if i == 1 or random.randint(0, 5) > 0:  # Event 1 and 1 in 5 have a RA
                 models.RiskAssessment.objects.create(event=new_event, supervisor_consulted=bool(random.getrandbits(1)),
                                                      nonstandard_equipment=bool(random.getrandbits(1)),
