@@ -1,5 +1,6 @@
 {% extends 'base_rigs.html' %}
 
+{% load humanize %}
 {% block content %}
 
 <form method="GET" action="{% url 'invoice_dashboard' %}">
@@ -31,7 +32,7 @@
         <a href="{% url 'invoice_waiting' %}" class="text-decoration-none text-white">
             <div class="card-body bg-primary">
                 <h5 class="card-title text-center">Total Waiting</h5>
-                <p class="card-text text-center h3"><strong>£{{ total_waiting|floatformat:2 }}</strong></p>
+                <p class="card-text text-center h3"><strong>£{{ total_waiting|floatformat:"2g" }}</strong></p>
             </div>
         </a>
     </div>
@@ -39,7 +40,7 @@
         <a href="{% url 'invoice_list' %}" class="text-decoration-none text-dark">
             <div class="card-body bg-info">
                 <h5 class="card-title text-center">Total Outstanding</h5>
-                <p class="card-text text-center h3"><strong>£{{ total_outstanding|floatformat:2 }}</strong></p>
+                <p class="card-text text-center h3"><strong>£{{ total_outstanding|floatformat:"2g" }}</strong></p>
             </div>
         </a>
     </div>
@@ -71,7 +72,7 @@
 <div class="card">
     <div class="card-body">
         <h5 class="card-title"><strong>{{ source.method }}</strong></h5>
-        <p class="card-text h3">£{{ source.total|floatformat:2 }}</p>
+        <p class="card-text h3">£{{ source.total|floatformat:"2g" }}</p>
     </div>
 </div>
 {% endfor %}
@@ -85,7 +86,7 @@
 <div class="card">
     <div class="card-body">
         <h5 class="card-title text-center">Total Income</h5>
-        <p class="card-text text-center h3"><strong>£{{ total_income|floatformat:2 }}</strong></p>
+        <p class="card-text text-center h3"><strong>£{{ total_income|floatformat:"2g" }}</strong></p>
     </div>
 </div>
 
@@ -98,7 +99,7 @@
 <div class="card">
     <div class="card-body">
         <h5 class="card-title text-center">Average Time to Pay</h5>
-        <p class="card-text text-center h3"><strong>{{ mean_invoice_to_payment|floatformat:2 }} days</strong></p>
+        <p class="card-text text-center h3"><strong>{{ mean_invoice_to_payment|floatformat:"2g" }} days</strong></p>
     </div>
 </div>
 
