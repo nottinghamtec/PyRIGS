@@ -374,7 +374,7 @@ def generate_label(pk):
     barcode = Code39(str(obj.asset_id), writer=ImageWriter())
 
     logo_size = (200, 200)
-    image.paste(logo.resize(logo_size, Image.ANTIALIAS), box=(5, 5))
+    image.paste(logo.resize(logo_size, Image.LANCZOS), box=(5, 5))
     barcode_image = barcode.render(writer_options={"quiet_zone": 0, "write_text": False})
     width, height = barcode_image.size
     image.paste(barcode_image.crop((0, 0, width, 100)), (int(((size[0] + logo_size[0]) - width) / 2), 40))
