@@ -40,19 +40,19 @@ class InvoiceDashboard(generic.TemplateView):
             time_filter = 'all'
 
         if time_filter == 'all':
-            context['events'] = models.Event.objects.all()
+            context['events'] = models.Event.objects.filter(is_rig=True)
             context['invoices'] = models.Invoice.objects.all()
             context['payments'] = models.Payment.objects.all()
         elif time_filter == 'year':
-            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=365))
+            context['events'] = models.Event.objects.filter(is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=365))
             context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=365))
             context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=365))
         elif time_filter == 'month':
-            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=30))
+            context['events'] = models.Event.objects.filter(is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=30))
             context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=30))
             context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=30))
         elif time_filter == 'week':
-            context['events'] = models.Event.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(days=7))
+            context['events'] = models.Event.objects.filter(is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=7))
             context['invoices'] = models.Invoice.objects.filter(invoice_date__gte=datetime.date.today() - datetime.timedelta(days=7))
             context['payments'] = models.Payment.objects.filter(date__gte=datetime.date.today() - datetime.timedelta(days=7))
 
