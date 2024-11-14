@@ -56,6 +56,9 @@
                 <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span><span class="align-middle"> Trainee List</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> <span class="align-middle">Level List</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> <span class="align-middle">Item List</span></a>
+                {% if request.user.is_supervisor %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'session_log' %}"><span class="fas fa-users"></span> <span class="align-middle">Log Session</span></a>
+                {% endif %}
             </div>
         </div>
     </div>
