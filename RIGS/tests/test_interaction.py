@@ -759,6 +759,7 @@ def test_ra_creation(logged_in_browser, live_server, admin_user, basic_event):
     page.barrier_required = False
     page.nonstandard_emergency_procedure = False
     page.special_structures = False
+    page.parking_and_access = False
     # self.page.persons_responsible_structures = "Nobody and her cat, She"
 
     page.suspended_structures = True

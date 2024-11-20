@@ -1,0 +1,22 @@
+<div class="card card-default">
+    <div class="card-header">Parking and Access</div>
+    <div class="card-body">
+        <p>This venue has additional parking and/or access requirements.</p>
+
+        <p>Ensure the MIC has:</p>
+        <ul>
+            <li>Details of where to park</li>
+            <li>Details of how to access the venue</li>
+            <li>Details of any access restrictions</li>
+            <li>If on campus, sorted parking permits</li>
+        </ul>
+
+        {% if object.parking_and_access and object.riskassessment.parking_and_access %}
+            <small>Additional parking marked on both rig details and risk assessment.</small>
+        {% elif object.parking_and_access %}
+            <small>Additional parking marked on rig details.</small>
+        {% elif object.riskassessment.parking_and_access %}
+            <small>Additional parking marked on risk assessment.</small>
+        {% endif %}
+    </div>
+</div>

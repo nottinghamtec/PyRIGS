@@ -124,6 +124,13 @@
         <td><para>{{ object|help_text:'persons_responsible_structures'|striptags }}</para></td>
         <td><para>{{ object.persons_responsible_structures|default:'N/A' }}</para></td>
     </tr>
+        <tr>
+        <td colspan="2"><h3><strong>Venue Access</strong></h3></td>
+    </tr>
+    <tr>
+        <td><para>{{ object|help_text:'parking_and_access'|striptags }}</para></td>
+        <td><para>{{ object.parking_and_access|yesno|capfirst }}</para></td>
+    </tr>
 </blockTable>
 <spacer length="15"/>\
 <hr/>

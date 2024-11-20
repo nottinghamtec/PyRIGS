@@ -44,5 +44,8 @@
         <span class="badge badge-info">Invoice: Not Generated</span>
         {% endif %}
     {% endif %}
+    {% if event.parking_and_access %}
+        <span class="badge badge-warning">Addititional Access Requirements</span>
+    {% endif %}
 {% endif %}
 </div>

@@ -22,6 +22,7 @@ class EventForm(forms.ModelForm):
     datetime_input_formats = list(settings.DATETIME_INPUT_FORMATS)
     meet_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
     access_at = forms.DateTimeField(input_formats=datetime_input_formats, required=False)
+    parking_and_access = forms.BooleanField(label="Additional parking or access requirements (i.e. campus parking permits, wristbands)?", required=False)
 
     items_json = forms.CharField()
 
@@ -125,7 +126,7 @@ class EventForm(forms.ModelForm):
         fields = ['is_rig', 'name', 'venue', 'start_time', 'end_date', 'start_date',
                   'end_time', 'meet_at', 'access_at', 'description', 'notes', 'mic',
                   'person', 'organisation', 'dry_hire', 'checked_in_by', 'status',
-                  'purchase_order', 'collector', 'forum_url']
+                  'purchase_order', 'collector', 'forum_url', 'parking_and_access']
 
 
 class BaseClientEventAuthorisationForm(forms.ModelForm):

@@ -20,7 +20,7 @@ def ra(basic_event, admin_user):
                                               known_venue=True, safe_loading=True, safe_storage=True,
                                               area_outside_of_control=True, barrier_required=True,
                                               nonstandard_emergency_procedure=True, special_structures=False,
-                                              suspended_structures=False, outside=False)
+                                              suspended_structures=False, outside=False, parking_and_access=False)
     yield ra
     ra.delete()
 
