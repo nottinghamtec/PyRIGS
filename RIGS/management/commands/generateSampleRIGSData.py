@@ -276,6 +276,7 @@ class Command(BaseCommand):
                                                      nonstandard_emergency_procedure=bool(random.getrandbits(1)),
                                                      special_structures=bool(random.getrandbits(1)),
                                                      suspended_structures=bool(random.getrandbits(1)),
+                                                     parking_and_access=bool(random.getrandbits(1)),
                                                      outside=bool(random.getrandbits(1)))
                 if i == 0 or random.randint(0, 1) > 0:  # Event 1 and 1 in 10 have a Checklist
                     models.EventChecklist.objects.create(event=new_event,
