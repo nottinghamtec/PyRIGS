@@ -10,5 +10,13 @@
             <li>Details of any access restrictions</li>
             <li>If on campus, sorted parking permits</li>
         </ul>
+
+        {% if object.parking_and_access and object.riskassessment.parking_and_access %}
+            <small>Additional parking marked on both rig details and risk assessment.</small>
+        {% elif object.parking_and_access %}
+            <small>Additional parking marked on rig details.</small>
+        {% elif object.riskassessment.parking_and_access %}
+            <small>Additional parking marked on risk assessment.</small>
+        {% endif %}
     </div>
 </div>
