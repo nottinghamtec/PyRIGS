@@ -809,6 +809,7 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
         'nonstandard_emergency_procedure': False,
         'special_structures': False,
         'suspended_structures': False,
+        'parking_and_access': False
     }
     inverted_fields = {key: value for (key, value) in expected_values.items() if not value}.keys()
 
