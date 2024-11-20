@@ -782,6 +782,9 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
     persons_responsible_structures = models.TextField(blank=True, default='', help_text="Who are the persons on site responsible for their use?")
     rigging_plan = models.URLField(blank=True, default='', help_text="Upload your rigging plan to the <a href='https://nottinghamtec.sharepoint.com/'>Sharepoint</a> and submit a link", validators=[validate_url])
 
+    # Venue Access
+    parking_and_access = models.BooleanField(help_text="Are there additional requirements for parking and access to the venue? (i.e. campus parking permits, event access wristbands)")
+
     # Blimey that was a lot of options
 
     supervisor_consulted = models.BooleanField(null=True)
