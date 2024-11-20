@@ -351,6 +351,9 @@ class Event(models.Model, RevisionMixin):
     access_at = models.DateTimeField(blank=True, null=True)
     meet_at = models.DateTimeField(blank=True, null=True)
 
+    # Venue requirements
+    parking_and_access = models.BooleanField(default=False)
+
     # Crew management
     checked_in_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_checked_in', blank=True, null=True,
                                       on_delete=models.CASCADE)
