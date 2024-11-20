@@ -36,7 +36,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
   <div class="container">
       <a class="navbar-brand" href="{% if request.user.is_authenticated %}https://rigs.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">
-        <img src="{% static 'imgs/logo.webp' %}" class="mr-auto" style="max-height: 40px; position: absolute; left: 0.5em; top: 0;" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
+        <img src="{% static 'imgs/logo.webp' %}" class="mr-auto" style="max-height: 40px;" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
       </a>
       {% block titleheader %}
       {% endblock %}
