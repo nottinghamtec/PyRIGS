@@ -11,6 +11,7 @@
                         {{ object.venue|namewithnotes:'venue_detail' }}
                     </a>
                 {% endif %}
+                {% if object.parking_and_access %}<span class="badge badge-warning">Additional Access Requirements</span>{% endif %}
             </dd>
             {% if object.venue %}
             <dt class="col-sm-6">Venue Notes</dt>

@@ -15,8 +15,11 @@
     {% endif %}
     {% if object.is_rig and perms.RIGS.view_event %}
         {# only need contact details for a rig #}
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
             {% include 'partials/contact_details.html' %}
+            {% if object.parking_and_access %}
+                {% include 'partials/parking_and_access.html' %}
+            {% endif %}
         </div>
     {% endif %}
     <div class="col-md-6">
