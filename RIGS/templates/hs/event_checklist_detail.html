@@ -69,8 +69,11 @@
             </div>
         </div>
     </div>
+
+    {% include 'partials/crew_list.html' with event=object.event %}
 </div>
-<div class="col-12 text-right">
+
+<div class="col-12 text-right mt-4">
 {% button 'edit' url='ec_edit' pk=object.pk %}
 {% button 'view' url='event_detail' pk=object.pk text="Event" %}
 <a href="{% url 'event_pt' object.event.pk %}" class="btn btn-info"><span class="fas fa-paperclip"></span> <span
