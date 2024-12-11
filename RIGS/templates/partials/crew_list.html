@@ -1,0 +1,48 @@
+{% load button from filters %}
+
+{% if event.can_check_in %}
+<div class="col-sm-12">
+    <div class="card mt-3">
+        <div class="card-header">Crew Record</div>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Vehicle</th>
+                        <th scope="col">Start Time</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">End Time</th>
+                        <th scope="col">{% if request.user.pk is event.mic.pk %}<a
+                                href="{% url 'event_checkin_override' event.pk %}" class="btn btn-sm btn-success"><span
+                                    class="fas fa-plus"></span> Add</a>{% endif %}</th>
+                    </tr>
+                </thead>
+                <tbody id="crewmembers">
+                    {% for crew in event.crew.all %}
+                    <tr>
+                        <td>{{crew.person}}</td>
+                        <td>{{crew.vehicle|default:"None"}}</td>
+                        <td>{{crew.time}}</td>
+                        <td>{{crew.role}}</td>
+                        <td>{% if crew.end_time %}
+                            {{crew.end_time}}
+                            {% else %}
+                            <span class="text-success fas fa-clock" data-toggle="tooltip"
+                                title="This person is currently checked into this event"></span>{% endif %}
+                        </td>
+                        <td>{% if crew.end_time %}{% if crew.person.pk == request.user.pk or event.mic.pk ==
+                            request.user.pk %}{% button 'edit' 'edit_checkin' crew.pk clazz='btn-sm modal-href' %}{%
+                            endif %}{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center bg-warning">Apparently this event happened by magic...</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
