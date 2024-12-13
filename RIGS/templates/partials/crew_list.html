@@ -31,9 +31,11 @@
                             <span class="text-success fas fa-clock" data-toggle="tooltip"
                                 title="This person is currently checked into this event"></span>{% endif %}
                         </td>
-                        <td>{% if crew.end_time %}{% if crew.person.pk == request.user.pk or event.mic.pk ==
-                            request.user.pk %}{% button 'edit' 'edit_checkin' crew.pk clazz='btn-sm modal-href' %}{%
-                            endif %}{% endif %}</td>
+                        <td>{% if crew.end_time %}
+                                {% if crew.person.pk == request.user.pk or event.mic.pk == request.user.pk %}
+                                    {% button 'edit' 'edit_checkin' crew.pk clazz='btn-sm modal-href' %}
+                                {% endif %}
+                            {% endif %}</td>
                     </tr>
                     {% empty %}
                     <tr>
