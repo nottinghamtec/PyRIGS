@@ -70,6 +70,13 @@
 </blockTable>
 
 <spacer length="15"/>
+{% if object.notes %}
+<hr/>
+<spacer length="15"/>
+<para><strong>Additional Notes:</strong></para>
+<spacer length="15"/>
+<para>{{ object.notes }}</para>
+<spacer length="15"/>
 <hr/>
 <spacer length="15"/>
 
