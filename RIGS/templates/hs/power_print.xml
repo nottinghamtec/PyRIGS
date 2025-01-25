@@ -70,6 +70,7 @@
 </blockTable>
 
 <spacer length="15"/>
+
 {% if object.notes %}
 <hr/>
 <spacer length="15"/>
@@ -77,6 +78,8 @@
 <spacer length="15"/>
 <para>{{ object.notes }}</para>
 <spacer length="15"/>
+{% endif %}
+
 <hr/>
 <spacer length="15"/>
 
