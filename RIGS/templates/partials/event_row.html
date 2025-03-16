@@ -1,0 +1,144 @@
+{% load namewithnotes from filters %}
+{% load markdown_tags %}
+
+<div class="card h-100 border-3 {{ border_class }}">
+    <div class="card-header {{ header_bg }} {{ header_text }} py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="d-flex align-items-center">
+                <h5 class="mb-0 mr-3">
+                    <a href="{% url 'event_detail' event.pk %}"
+                        class="{{ header_text }} text-decoration-underline fw-bold">
+                        <strong>{{ event.display_id }}</strong> - {{ event.name }}
+                    </a>
+                </h5>
+                {% if event.dry_hire %}
+                <span class="badge px-3 py-2 rounded-pill fs-6 text-dark bg-light">Dry Hire</span>
+                {% endif %}
+            </span>
+            <span class="badge fs-6 px-3 py-2 bg-light text-dark rounded-pill">{{ event.get_status_display }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-start">
+
+            <div class="col-md-2 border-end">
+                <div class="mb-2">
+                    <small class="text-muted">Meet at:</small>
+                    {% if event.meet_at %}
+                    <p class="mb-1">{{ event.meet_at|date:"j M Y, H:i" }}</p>
+                    {% else %}
+                    <p class="mb-1">Not specified</p>
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Access from:</small>
+                    {% if event.access_at %}
+                    <p class="mb-1">{{ event.access_at|date:"j M Y, H:i" }}</p>
+                    {% else %}
+                    <p class="mb-1">Not specified</p>
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Start:</small>
+                    <p class="mb-1">
+                        {% if event.start_date and event.start_time %}
+                        {{ event.start_date|date:"j M Y" }}, {{ event.start_time|date:"H:i" }}
+                        {% elif event.start_date %}
+                        {{ event.start_date|date:"j M Y" }}
+                        {% elif event.start_time %}
+                        {{ event.start_time|date:"H:i" }}
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">End:</small>
+                    <p class="mb-1">
+                        {% if event.end_date and event.end_time %}
+                        {{ event.end_date|date:"j M Y" }}, {{ event.end_time|date:"H:i" }}
+                        {% elif event.end_date %}
+                        {{ event.end_date|date:"j M Y" }}
+                        {% elif event.end_time %}
+                        {{ event.end_time|date:"H:i" }}
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="col-md-10">
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        {% if event.venue %}
+                        <div class="mb-3">
+                            <small class="text-muted">Venue:</small>
+                            <p class="mb-1">{{ event.venue|namewithnotes:'venue_detail' }}</p>
+                        </div>
+                        {% endif %}
+
+
+                        <div class="mb-3">
+                            <small class="text-muted">Client:</small>
+                            <p class="mb-1">
+                                {% if event.person %}
+                                <a href="{{ event.person.get_absolute_url }}">{{ event.person.name }}</a>
+                                {% if event.organisation %}
+                                for <a href="{{ event.organisation.get_absolute_url }}">{{ event.organisation }}</a>
+                                {% endif %}
+                                {% elif event.organisation %}
+                                <a href="{{ event.organisation.get_absolute_url }}">{{ event.organisation }}</a>
+                                {% else %}
+                                No client specified
+                                {% endif %}
+                            </p>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <small class="text-muted">Member in Charge (MIC):</small>
+                            <div class="d-flex align-items-center mt-1">
+                                {% if event.mic %}
+                                <img src="{{ event.mic.profile_picture }}" alt="{{ event.mic.name }}"
+                                    class="rounded-circle mr-1" width="32" height="32">
+                                <span>
+                                    {% if perms.RIGS.view_profile %}
+                                    <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+                                        {% endif %}
+                                        {{ event.mic.name }}
+                                        {% if perms.RIGS.view_profile %}
+                                    </a>
+                                    {% endif %}
+                                </span>
+                                {% else %}
+                                <span class="text-danger">No MIC assigned</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="mb-3">
+                            <small class="text-muted">Description:</small>
+                            <p class="mb-1">{{ event.description|markdown }}</p>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <small class="text-muted">Status:</small>
+                            <div class="mt-1">
+                                {% include "partials/event_status.html" with status=event.status %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

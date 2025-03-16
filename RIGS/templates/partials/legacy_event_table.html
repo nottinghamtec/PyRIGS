@@ -1,0 +1,195 @@
+{% load namewithnotes from filters %}
+{% load markdown_tags %}
+<style>
+#event_table {
+    display: grid;
+    grid-template-columns: max-content min-content minmax(max-content, 1fr) max-content;
+    column-gap: 1em;
+}
+.eventgrid {
+    display: inherit;
+    grid-column: 1/5;
+    grid-template-columns: subgrid;
+    padding: 1em;
+    dt, dd { display: block; float: left; }
+    dt { clear: both; }
+    dd { float: right; }
+}
+.grid-header {
+    border-bottom: 1px solid grey;
+    border-top: 1px solid grey;
+}
+#event_status {
+    grid-column-start: 3;
+}
+#event_mic {
+    grid-row-start: 1;
+    grid-column-start: 4;
+}
+.c-none {
+    display: none;
+}
+.c-inline {
+    display: inline;
+}
+@container (width <= 500px) {
+  #event_table {
+    grid-template-columns: 1fr !important;
+  }
+  .eventgrid {
+    grid-column: 1/1 !important;
+    padding: 0.5em;
+  }
+  .grid-header {
+    display: none;
+  }
+  #event_dates {
+    order: 2;
+  }
+  #event_status {
+    order: 3;
+  }
+  #event_mic {
+    grid-row-start: auto;
+    grid-column-start: 4;
+  }
+}
+@container (width <= 700px) {
+  #event_table {
+    grid-template-columns: max-content;
+    column-gap: 0.5em;
+  }
+  .eventgrid {
+    grid-column: 1/3;
+    border: 1px solid grey;
+  }
+  #event_dates {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  #event_number {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  #event_mic {
+    grid-column: 2;
+  }
+  #event_status {
+    grid-column: span 2;
+  }
+  .grid-header, .c-md-none {
+    display: none;
+  }
+}
+@container (width > 700px) {
+    .c-lg-block {
+        display: block;
+    }
+    .c-lg-inline {
+        display: inline;
+    }
+    .c-lg-none, .c-md-none {
+        display: none;
+    }
+}
+</style>
+<div id="event_table">
+    <div class="eventgrid grid-header font-weight-bold">
+        <div id="event_number">#</div>
+        <div id="event_dates">Dates & Times</div>
+        <div>Event Details</div>
+        <div id="event_mic">MIC</div>
+    </div>
+    {% for event in events %}
+    <div class="eventgrid {% if event.cancelled %}
+    table-secondary
+    {% elif not event.is_rig %}
+    table-info
+    {% elif not event.mic %}
+    table-danger
+    {% elif event.confirmed and event.authorised %}
+    {% if event.dry_hire or event.riskassessment %}
+    table-success
+    {% else %}
+    table-warning
+    {% endif %}
+    {% else %}
+    table-warning
+    {% endif %}" {% if event.cancelled %}style="opacity: 50% !important;"{% endif %} id="event_row">
+    <!---Number-->
+    <div class="font-weight-bold c-none c-lg-block" id="event_number">{{ event.display_id }}</div>
+    <!--Dates & Times-->
+    <div id="event_dates" style="min-width: 180px;">
+        <dl>
+          {% if not event.cancelled %}
+            {% if event.meet_at %}
+            <dt class="font-weight-normal">Meet:</dt>
+            <dd class="text-nowrap font-weight-bold text-lg-right">{{ event.meet_at|date:"D d/m/Y H:i" }}</dd>
+            {% endif %}
+            {% if event.access_at %}
+            <dt class="font-weight-normal">Access:</dt>
+            <dd class="text-nowrap font-weight-bold text-lg-right">{{ event.access_at|date:"D d/m/Y H:i" }}</dd>
+            {% endif %}
+          {% endif %}
+          <dt class="font-weight-normal">Start:</dt>
+          <dd class="text-nowrap font-weight-bold text-lg-right">{{ event.start_date|date:"D d/m/Y" }}
+            {% if event.has_start_time %}
+              {{ event.start_time|date:"H:i" }}
+            {% endif %}
+          </dd>
+          {% if event.end_date %}
+          <dt class="font-weight-normal">End:</dt>
+          <dd class="text-nowrap font-weight-bold text-lg-right">{{ event.end_date|date:"D d/m/Y" }}
+            {% if event.has_end_time %}
+            {{ event.end_time|date:"H:i" }}
+            {% endif %}
+          </dd>
+          {% endif %}
+        </dl>
+    </div>
+    <!---Details-->
+    <div id="event_details" class="w-100">
+        <h4>
+            <a href="{% url 'event_detail' event.pk %}">
+                <span class="c-inline c-lg-none">{{ event }}</span><span class="c-none c-lg-inline">{{ event.name }}</span>
+            </a>
+            {% if event.dry_hire %}
+            <span class="badge badge-secondary">Dry Hire</span>
+            {% endif %}
+            <br class="c-none c-lg-inline">
+            {% if event.venue %}
+            <small>at {{ event.venue|namewithnotes:'venue_detail' }}</small>
+            {% endif %}
+        </h4>
+        {% if event.is_rig and not event.cancelled %}
+        <h5>
+            <a href="{{ event.person.get_absolute_url }}">{{ event.person.name }}</a>
+            {% if event.organisation %}
+            for <a href="{{ event.organisation.get_absolute_url }}">{{ event.organisation.name }}</a>
+            {% endif %}
+        </h5>
+        {% endif %}
+        {% if not event.cancelled and event.description %}
+        <p>{{ event.description|markdown }}</p>
+        {% endif %}
+    </div>
+    {% include 'partials/event_status.html' %}
+    <!---MIC-->
+    <div id="event_mic" class="text-nowrap">
+        <span class="c-md-none align-middle">MIC:</span>
+        {% if event.mic %}
+        {% if perms.RIGS.view_profile %}
+        <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">
+            {% endif %}
+            <img src="{{ event.mic.profile_picture }}" class="event-mic-photo"/>
+            {{ event.mic }}
+            {% if perms.RIGS.view_profile %}
+        </a>
+        {% endif %}
+        {% elif event.is_rig %}
+        <span class="fas fa-exclamation"></span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+</div>

@@ -79,7 +79,9 @@ def api_key_required(function):
     """
     Decorator for views that checks api_pk and api_key.
     Failed users will be given a 403 error.
-    Should only be used for urls which include <api_pk> and <api_key> kwargs
+    Should only be used for urls which include <api_pk> and <api_key> kwargs.
+
+    Will update the kwargs to include the user object if successful (under the key 'user').
     """
 
     def wrap(request, *args, **kwargs):
@@ -97,6 +99,7 @@ def api_key_required(function):
 
         try:
             user_object = models.Profile.objects.get(pk=userid)
+            kwargs = {**kwargs, 'user': user_object}
         except models.Profile.DoesNotExist:
             return error_resp
 

@@ -3,6 +3,19 @@
 {% load markdown_tags %}
 {% load static %}
 
+{% block js %}
+    {{ block.super }}
+
+    <script>
+    $(document).keydown(function(e) {
+        if (e.ctrlKey && e.keyCode == 80) {
+            window.open("{% url 'event_print' object.pk %}", '_blank');
+            return false;
+        }
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
 <div class="row my-3 py-3">
     {% if not request.is_ajax %}
