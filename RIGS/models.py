@@ -378,7 +378,7 @@ class Event(models.Model, RevisionMixin):
                 return f"N{self.pk:05d}"
             return self.pk
         return "????"
-    
+
     @property
     def needs_mic(self):
         return self.is_rig and not self.dry_hire
