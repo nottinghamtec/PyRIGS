@@ -530,10 +530,11 @@ class TestCalendar(BaseRigboardTest):
         self.page.toggle_filter('cancelled')
         self.page.toggle_filter('provisional')
         self.page.toggle_filter('confirmed')
+        self.page.toggle_filter('only_mic')
 
         # and then check the url is correct
         self.assertIn(
-            "rigs.ics?rig=false&non-rig=false&dry-hire=false&cancelled=true&provisional=false&confirmed=false",
+            "rigs.ics?rig=false&non-rig=false&dry-hire=false&cancelled=true&provisional=false&confirmed=false&only_mic=true",
             self.page.cal_url)
 
         # Awesome - all seems to work
