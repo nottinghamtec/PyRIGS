@@ -3,7 +3,7 @@
 {% if event.is_rig %}
     {% if event.sum_total > 0 %}
         {% if event.purchase_order %}
-            <span class="badge badge-success">PO: {{ event.purchase_order }}</span>
+            <span class="badge badge-success">PO: Received</span>
         {% elif event.authorised %}
             <span class="badge badge-success">Authorisation: Complete <span class="fas fa-check"></span></span>
         {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
