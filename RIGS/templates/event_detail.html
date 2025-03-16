@@ -8,7 +8,7 @@
 
     <script>
     $(document).keydown(function(e) {
-        if (e.ctrlKey && e.keyCode == 80) {
+        if ((e.ctrlKey || e.metaKey) && e.keyCode == 80) {
             window.open("{% url 'event_print' object.pk %}", '_blank');
             return false;
         }
