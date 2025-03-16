@@ -24,6 +24,7 @@ class CalendarICS(ICalFeed):
     # Rig = 'rig' = True
     # Provisional = 'provisional' = True
     # Confirmed/Booked = 'confirmed' = True
+    # Only MIC = 'mic' = False
 
     def get_object(self, request, *args, **kwargs):
         params = {}
@@ -35,6 +36,9 @@ class CalendarICS(ICalFeed):
         params['cancelled'] = request.GET.get('cancelled', 'false') == 'true'
         params['provisional'] = request.GET.get('provisional', 'true') == 'true'
         params['confirmed'] = request.GET.get('confirmed', 'true') == 'true'
+        params['only_mic'] = request.GET.get('only_mic', 'false') == 'true'
+
+        params['user'] = kwargs['user']
 
         return params
 
@@ -72,6 +76,9 @@ class CalendarICS(ICalFeed):
             statusFilters = statusFilters | Q(status=models.Event.CONFIRMED) | Q(status=models.Event.BOOKED)
 
         filter = filter & typeFilters & statusFilters
+
+        if params['only_mic']:
+            filter = filter & Q(mic=params['user'])
 
         return models.Event.objects.filter(filter).order_by('-start_date').select_related('person', 'organisation',
                                                                                           'venue', 'mic')
