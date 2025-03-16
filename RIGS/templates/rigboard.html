@@ -4,15 +4,37 @@
 {% block content %}
 <div class="row align-items-center justify-content-between py-2 align-middle">
     <div class="col-sm-12 col-md align-middle d-flex flex-wrap">
-        Key: <span class="table-success mr-1 px-2 rounded">Ready</span><span class="table-warning mr-1 px-2 rounded text-nowrap">Action Required</span><span class="table-danger mr-1 px-2 rounded text-nowrap">Needs MIC</span><span class="table-secondary mr-1 px-2 rounded">Cancelled</span><span class="table-info px-2 rounded text-nowrap">Non-Rig</span>
+        Key: <span class="table-success mr-1 px-2 rounded">Ready</span><span
+            class="table-warning mr-1 px-2 rounded text-nowrap">Action Required</span><span
+            class="table-danger mr-1 px-2 rounded text-nowrap">Needs MIC</span><span
+            class="table-secondary mr-1 px-2 rounded">Cancelled</span><span
+            class="table-info px-2 rounded text-nowrap">Non-Rig</span>
     </div>
     {% if perms.RIGS.add_event %}
     <div class="col text-right">
         {% button 'new' 'event_create' %}
     </div>
     {% endif %}
+    {% if not request.GET.legacy %}
+    <a href="?legacy=true" class="btn btn-secondary">View legacy rigboard</a>
+    {% else %}
+    <a href="." class="btn btn-secondary">Go to new rigboard</a>
+    {% endif %}
 </div>
+
+{% if request.GET.legacy %}
+<div class="alert alert-warning">
+    <strong>Warning:</strong> The legacy rigboard is being deprecated and will be removed in the future. Please use the
+    new rigboard.
+</div>
+{% endif %}
+
+
 <div style="container-type: inline-size;">
-{% include 'partials/event_table.html' %}
+    {% if request.GET.legacy %}
+    {% include 'partials/legacy_event_table.html' %}
+    {% else %}
+    {% include 'partials/event_table.html' %}
+    {% endif %}
 </div>
 {% endblock %}
