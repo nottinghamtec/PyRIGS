@@ -244,6 +244,7 @@ class TestSupplierList(AutoLoginTest):
 
         self.page.set_query("")
         self.page.search()
+        time.sleep(1)
         self.assertTrue(len(self.page.suppliers) == 7)
 
         self.page.set_query("This is not a supplier")

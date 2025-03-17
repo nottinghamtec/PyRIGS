@@ -91,8 +91,8 @@ class TestRigboard(BaseRigboardTest):
         #    self.live_server_url + '/event/create/', self.driver.current_url)
 
     def test_event_order(self):
-        self.assertIn(self.testEvent.start_date.strftime('%a %d/%m/%Y'), self.page.events[0].dates)
-        self.assertIn(self.testEvent2.start_date.strftime('%a %d/%m/%Y'), self.page.events[1].dates)
+        self.assertIn(self.testEvent.start_date.strftime('%-d %b %Y'), self.page.events[0].dates)
+        self.assertIn(self.testEvent2.start_date.strftime('%-d %b %Y'), self.page.events[1].dates)
 
     def test_add_button(self):
         self.page.add()

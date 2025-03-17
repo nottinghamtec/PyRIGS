@@ -17,8 +17,8 @@ def select_super(page, supervisor):
     assert page.supervisor_selector.is_open
     page.supervisor_selector.search(supervisor.name[:-6])
     time.sleep(2)  # Slow down for javascript
+    page.supervisor_selector.set_option(supervisor.name, True)
     assert page.supervisor_selector.options[0].selected
-    page.supervisor_selector.toggle()
 
 
 def test_add_qualification(logged_in_browser, live_server, trainee, supervisor, training_item):
@@ -40,6 +40,7 @@ def test_add_qualification(logged_in_browser, live_server, trainee, supervisor, 
     page.item_selector.toggle()
 
     select_super(page, supervisor)
+    page.supervisor_selector.toggle()
 
     page.submit()
     assert page.success

@@ -16,14 +16,14 @@ class Rigboard(BasePage):
     URL_TEMPLATE = reverse('rigboard')
 
     _add_item_selector = (By.XPATH, "//a[contains(@class,'btn-primary') and contains(., 'New')]")
-    _event_row_locator = (By.ID, 'event_row')
+    _event_row_locator = (By.CLASS_NAME, "event-row")
 
     def add(self):
         self.find_element(*self._add_item_selector).click()
 
     class EventListRow(Region):
         _event_number_locator = (By.ID, "event_number")
-        _event_dates_locator = (By.ID, "event_dates")
+        _event_dates_locator = (By.CLASS_NAME, "event-dates")
         _event_details_locator = (By.ID, "event_details")
         _event_mic_locator = (By.ID, "event_mic")
 

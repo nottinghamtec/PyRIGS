@@ -1,7 +1,7 @@
 {% load namewithnotes from filters %}
 {% load markdown_tags %}
 
-<div class="card h-100 border-3 {{ border_class }}">
+<div class="card h-100 border-3 {{ border_class }} event-row">
     <div class="card-header {{ header_bg }} {{ header_text }} py-3">
         <div class="d-flex justify-content-between align-items-center">
             <span class="d-flex align-items-center">
@@ -21,7 +21,7 @@
     <div class="card-body">
         <div class="row align-items-start">
 
-            <div class="col-md-2 border-end">
+            <div class="col-md-2 border-end event-dates">
                 <div class="mb-2">
                     <small class="text-muted">Meet at:</small>
                     {% if event.meet_at %}
