@@ -25,7 +25,7 @@
                 <div class="mb-2">
                     <small class="text-muted">Meet at:</small>
                     {% if event.meet_at %}
-                    <p class="mb-1">{{ event.meet_at|date:"j M Y, H:i" }}</p>
+                    <p class="mb-1">{{ event.meet_at|date:"D j M Y, H:i" }}</p>
                     {% else %}
                     <p class="mb-1">Not specified</p>
                     {% endif %}
@@ -33,7 +33,7 @@
                 <div class="mb-2">
                     <small class="text-muted">Access from:</small>
                     {% if event.access_at %}
-                    <p class="mb-1">{{ event.access_at|date:"j M Y, H:i" }}</p>
+                    <p class="mb-1">{{ event.access_at|date:"D j M Y, H:i" }}</p>
                     {% else %}
                     <p class="mb-1">Not specified</p>
                     {% endif %}
@@ -42,9 +42,9 @@
                     <small class="text-muted">Start:</small>
                     <p class="mb-1">
                         {% if event.start_date and event.start_time %}
-                        {{ event.start_date|date:"j M Y" }}, {{ event.start_time|date:"H:i" }}
+                        {{ event.start_date|date:"D j M Y" }}, {{ event.start_time|date:"H:i" }}
                         {% elif event.start_date %}
-                        {{ event.start_date|date:"j M Y" }}
+                        {{ event.start_date|date:"D j M Y" }}
                         {% elif event.start_time %}
                         {{ event.start_time|date:"H:i" }}
                         {% else %}
@@ -56,9 +56,9 @@
                     <small class="text-muted">End:</small>
                     <p class="mb-1">
                         {% if event.end_date and event.end_time %}
-                        {{ event.end_date|date:"j M Y" }}, {{ event.end_time|date:"H:i" }}
+                        {{ event.end_date|date:"D j M Y" }}, {{ event.end_time|date:"H:i" }}
                         {% elif event.end_date %}
-                        {{ event.end_date|date:"j M Y" }}
+                        {{ event.end_date|date:"D j M Y" }}
                         {% elif event.end_time %}
                         {{ event.end_time|date:"H:i" }}
                         {% else %}
