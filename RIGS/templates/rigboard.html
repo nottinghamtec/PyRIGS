@@ -16,9 +16,16 @@
     </div>
     {% endif %}
     {% if not request.GET.legacy %}
-    <a href="?legacy=true" class="btn btn-secondary">View legacy rigboard</a>
+
+    {% if not request.GET.hide_cancelled %}
+    <a href="?hide_cancelled=true" class="btn btn-primary mr-3">Hide cancelled</a>
     {% else %}
-    <a href="." class="btn btn-secondary">Go to new rigboard</a>
+    <a href="." class="btn btn-primary mr-3">Show cancelled</a>
+    {% endif %}
+
+    <a href="?legacy=true" class="btn btn-secondary">Legacy rigboard</a>
+    {% else %}
+    <a href="." class="btn btn-secondary">New rigboard</a>
     {% endif %}
 </div>
 
