@@ -512,7 +512,7 @@ class Event(models.Model, RevisionMixin):
     def can_check_in(self):
         earliest = self.earliest_time
         if isinstance(self.earliest_time, datetime.date):
-            earliest = datetime.datetime.combine(self.start_date, datetime.time(00, 00))
+            earliest = datetime.datetime.combine(self.earliest_time, datetime.time(00, 00))
             tz = pytz.timezone(settings.TIME_ZONE)
             earliest = tz.localize(earliest)
         return not self.dry_hire and not self.status == Event.CANCELLED and earliest <= timezone.now()
