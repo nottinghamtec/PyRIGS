@@ -87,6 +87,8 @@
 
         <listStyle name="ul"
                    start="bulletchar"
+                   leftIndent="0"
+                   bulletDedent="10"
                    bulletFontSize="10"/>
     </stylesheet>
 
