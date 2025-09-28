@@ -43,7 +43,7 @@ jobs:
         if: steps.static-cache.outputs.cache-hit != 'true'
       - name: Basic Checks
         run: |
-              uv run pycodestyle . --exclude=migrations,node_modules
+              uv run pycodestyle . --exclude=.venv,migrations,node_modules
               uv run python3 manage.py check
               uv run python3 manage.py makemigrations --check --dry-run
               uv run python3 manage.py collectstatic --noinput
