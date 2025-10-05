@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
@@ -27,7 +28,7 @@ class LoginEmbed(LoginView):
 
 class ProfileDetail(generic.DetailView):
     template_name = "profile_detail.html"
-    model = settings.AUTH_USER_MODEL
+    model = get_user_model()
 
     def get_queryset(self):
         try:
@@ -47,7 +48,7 @@ class ProfileDetail(generic.DetailView):
 
 class ProfileUpdateSelf(generic.UpdateView):
     template_name = "profile_form.html"
-    model = settings.AUTH_USER_MODEL
+    model = get_user_model()
     fields = ['first_name', 'last_name', 'email', 'initials', 'phone', 'dark_theme']
 
     def get_queryset(self):

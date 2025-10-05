@@ -856,7 +856,6 @@ source = { virtual = "." }
 dependencies = [
     { name = "ansicolors" },
     { name = "asgiref" },
-    { name = "autopep8" },
     { name = "beautifulsoup4" },
     { name = "brotli" },
     { name = "cachetools" },
@@ -925,6 +924,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "autopep8" },
     { name = "coveralls" },
     { name = "django-coverage-plugin" },
     { name = "pluggy" },
@@ -942,7 +942,6 @@ dev = [
 requires-dist = [
     { name = "ansicolors" },
     { name = "asgiref" },
-    { name = "autopep8", specifier = ">=2.3.2" },
     { name = "beautifulsoup4" },
     { name = "brotli" },
     { name = "cachetools" },
@@ -1011,6 +1010,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "autopep8", specifier = ">=2.3.2" },
     { name = "coveralls" },
     { name = "django-coverage-plugin" },
     { name = "pluggy", specifier = "~=1.2.0" },

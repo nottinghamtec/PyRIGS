@@ -7,13 +7,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from PyRIGS.tests.base import AutoLoginTest, screenshot_failure_cls, assert_times_almost_equal
+from PyRIGS.tests.base import AutoLoginTest, assert_times_almost_equal
 from PyRIGS.tests.pages import animation_is_finished
 from assets import models
 from . import pages
 
 
-@screenshot_failure_cls
 class TestAssetList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -144,7 +143,6 @@ def test_asset_duplicate(logged_in_browser, admin_user, live_server, test_asset)
     assert models.Asset.objects.last().description == test_asset.description
 
 
-@screenshot_failure_cls
 class TestAssetForm(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -211,7 +209,6 @@ class TestAssetForm(AutoLoginTest):
         self.assertEqual(asset.date_acquired, acquired)
 
 
-@screenshot_failure_cls
 class TestSupplierList(AutoLoginTest):
     def setUp(self):
         super().setUp()
@@ -247,37 +244,32 @@ class TestSupplierList(AutoLoginTest):
         time.sleep(1)
         self.assertTrue(len(self.page.suppliers) == 7)
 
-        self.page.set_query("This is not a supplier")
+        self.page.set_query("NOTFOUND")
         self.page.search()
         self.assertTrue(len(self.page.suppliers) == 0)
 
 
-@screenshot_failure_cls
-class TestSupplierCreateAndEdit(AutoLoginTest):
-    def setUp(self):
-        super().setUp()
-        self.supplier = models.Supplier.objects.create(name="Fullmetal Heavy Industry")
+def test_supplier_create(logged_in_browser, live_server):
+    page = pages.SupplierCreate(logged_in_browser.driver, live_server.url).open()
 
-    def test_supplier_create(self):
-        self.page = pages.SupplierCreate(self.driver, self.live_server_url).open()
+    page.remove_all_required()
+    page.submit()
+    assert !self.page.success
+    assert "This field is required." in self.page.errors["Name"]
 
-        self.page.remove_all_required()
-        self.page.submit()
-        self.assertFalse(self.page.success)
-        self.assertIn("This field is required.", self.page.errors["Name"])
+    page.name = "Optican Health Supplies"
+    page.submit()
+    assert page.success
 
-        self.page.name = "Optican Health Supplies"
-        self.page.submit()
-        self.assertTrue(self.page.success)
 
-    def test_supplier_edit(self):
-        self.page = pages.SupplierEdit(self.driver, self.live_server_url, supplier_id=self.supplier.pk).open()
+def test_supplier_edit(logged_in_browser, live_server, test_supplier):
+    page = pages.SupplierEdit(logged_in_browser.driver, live_server.url, supplier_id=test_supplier.pk).open()
 
-        self.assertEqual("Fullmetal Heavy Industry", self.page.name)
-        new_name = "Cyberdyne Systems"
-        self.page.name = new_name
-        self.page.submit()
-        self.assertTrue(self.page.success)
+    assert test_supplier.name == page.name
+    new_name = "Cyberdyne Systems"
+    page.name = new_name
+    page.submit()
+    assert page.success
 
 
 def test_audit_search(logged_in_browser, live_server, test_asset):
@@ -312,47 +304,30 @@ def test_audit_success(logged_in_browser, admin_user, live_server, test_asset):
     assert test_asset.asset_id not in page.assets
 
 
-@screenshot_failure_cls
-class TestAssetAudit(AutoLoginTest):
-    def setUp(self):
-        super().setUp()
-        self.category = models.AssetCategory.objects.create(name="Haulage")
-        self.status = models.AssetStatus.objects.create(name="Probably Fine", should_show=True)
-        self.supplier = models.Supplier.objects.create(name="The Bazaar")
-        self.connector = models.Connector.objects.create(description="Trailer Socket", current_rating=1,
-                                                         voltage_rating=40, num_pins=13)
-        models.Asset.objects.create(asset_id="1", description="Trailer Cable", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
-        models.Asset.objects.create(asset_id="11", description="Trailerboard", status=self.status,
-                                    category=self.category, date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
-        models.Asset.objects.create(asset_id="111", description="Erms", status=self.status, category=self.category,
-                                    date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
-        self.asset = models.Asset.objects.create(asset_id="1111", description="A hammer", status=self.status,
-                                                 category=self.category,
-                                                 date_acquired=datetime.date(2020, 2, 1), replacement_cost=10)
-        self.page = pages.AssetAuditList(self.driver, self.live_server_url).open()
-        self.wait = WebDriverWait(self.driver, 20)
+def test_audit_fail(logged_in_browser, admin_user, live_server, test_asset):
+    page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
+    wait = WebDriverWait(logged_in_browser.driver, 20)
+    page.set_query(test_asset.asset_id)
+    page.search()
+    wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
+    # Do it wrong on purpose to check error display
+    page.modal.remove_all_required()
+    page.modal.description = ""
+    page.modal.submit()
+    wait.until(animation_is_finished())
+    assert "This field is required." in self.page.modal.errors["Description"]
 
-    def test_audit_fail(self):
-        self.page.set_query(self.asset.asset_id)
-        self.page.search()
-        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
-        # Do it wrong on purpose to check error display
-        self.page.modal.remove_all_required()
-        self.page.modal.description = ""
-        self.page.modal.submit()
-        self.wait.until(animation_is_finished())
-        self.driver.implicitly_wait(4)
-        self.assertIn("This field is required.", self.page.modal.errors["Description"])
 
-    def test_audit_list(self):
-        self.assertEqual(models.Asset.objects.filter(last_audited_at=None).count(), len(self.page.assets))
-        asset_row = self.page.assets[0]
-        self.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
-        self.wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
-        self.assertEqual(self.page.modal.asset_id, asset_row.id)
-        self.page.modal.close()
-        self.assertFalse(self.driver.find_element(By.ID, 'modal').is_displayed())
-        # Make sure audit log was NOT filled out
-        audited = models.Asset.objects.get(asset_id=asset_row.id)
-        assert audited.last_audited_by is None
+def test_audit_list(logged_in_browser, admin_user, live_server, test_asset):
+    page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
+    wait = WebDriverWait(logged_in_browser.driver, 20)
+    assert models.Asset.objects.filter(last_audited_at=None).count() == len(self.page.assets)
+    asset_row = page.assets[0]
+    logged_in_browser.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
+    wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
+    assert self.page.modal.asset_id == asset_row.id
+    page.modal.close()
+    assert !logged_in_browser.driver.find_element(By.ID, 'modal').is_displayed()
+    # Make sure audit log was NOT filled out
+    audited = models.Asset.objects.get(asset_id=asset_row.id)
+    assert audited.last_audited_by is None
