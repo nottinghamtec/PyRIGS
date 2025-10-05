@@ -360,7 +360,7 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         )
         css = finders.find('css/email.css')
         html = premailer.Premailer(get_template("email/eventauthorisation_client_request.html").render(context),
-                                   external_styles=css).transform()
+                                   external_styles=css, allow_loading_external_files=True).transform()
         msg.attach_alternative(html, 'text/html')
 
         msg.send()
@@ -376,7 +376,7 @@ class EventAuthoriseRequestEmailPreview(generic.DetailView):
         css = finders.find('css/email.css')
         response = super().render_to_response(context, **response_kwargs)
         assert isinstance(response, HttpResponse)
-        response.content = premailer.Premailer(response.rendered_content, external_styles=css).transform()
+        response.content = premailer.Premailer(response.rendered_content, external_styles=css, allow_loading_external_files=True).transform()
         return response
 
     def get_context_data(self, **kwargs):

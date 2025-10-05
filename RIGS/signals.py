@@ -66,7 +66,7 @@ def send_eventauthorisation_success_email(instance):
 
     css = finders.find('css/email.css')
     html = Premailer(get_template("email/eventauthorisation_client_success.html").render(context),
-                     external_styles=css).transform()
+                     external_styles=css, allow_loading_external_files=True).transform()
     client_email.attach_alternative(html, 'text/html')
 
     escapedEventName = re.sub(r'[^a-zA-Z0-9 \n\.]', '', instance.event.name)
@@ -124,7 +124,7 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
             )
             css = finders.find('css/email.css')
             html = Premailer(get_template("email/admin_awaiting_approval.html").render(context),
-                             external_styles=css).transform()
+                             external_styles=css, allow_loading_external_files=True).transform()
             email.attach_alternative(html, 'text/html')
             email.send()
 
