@@ -1,7 +1,7 @@
 <div class="row">
-    <label for="{{ formitem.id_for_label }}"
+    <label for="{{ formitem.0.id_for_label }}"
                                     class="col-8 control-label">{{ formitem.help_text|safe }}</label>
-    <div class="col-4 pb-3" id="{{ formitem.id_for_label|slice:'-2' }}">
+    <div class="col-4 pb-3" id="{{ formitem.0.id_for_label|slice:'-2'  }}">
         {% for radio in formitem %}
             <div class="custom-control custom-radio">
                 {{ radio.tag }}

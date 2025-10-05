@@ -5,7 +5,7 @@ import urllib.request
 from io import BytesIO
 import datetime
 
-from PyPDF2 import PdfFileReader, PdfFileMerger
+from PyPDF2 import PdfReader, PdfMerger
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.cache import cache
@@ -31,12 +31,12 @@ def send_eventauthorisation_success_email(instance):
     }
 
     template = get_template('event_print.xml')
-    merger = PdfFileMerger()
+    merger = PdfMerger()
 
     rml = template.render(context)
 
     buffer = rml2pdf.parseString(rml)
-    merger.append(PdfFileReader(buffer))
+    merger.append(PdfReader(buffer))
     buffer.close()
 
     terms = urllib.request.urlopen(settings.TERMS_OF_HIRE_URL)

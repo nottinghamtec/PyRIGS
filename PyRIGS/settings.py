@@ -26,21 +26,23 @@ DEBUG = env('DEBUG', cast=bool, default=True)
 STAGING = env('STAGING', cast=bool, default=False)
 CI = env('CI', cast=bool, default=False)
 
-ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
-
-if STAGING:
-    ALLOWED_HOSTS.append('.herokuapp.com')
+ALLOWED_HOSTS = ['https://pyrigs.nottinghamtec.co.uk', 'https://rigs.nottinghamtec.co.uk']
 
 if DEBUG:
-    ALLOWED_HOSTS.append('localhost')
-    ALLOWED_HOSTS.append('example.com')
-    ALLOWED_HOSTS.append('127.0.0.1')
-    ALLOWED_HOSTS.append('.app.github.dev')
-    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+    CRSF_TRUSTED_ORIGINS = ALLOWED_HOSTS.copy()
+    CRSF_TRUSTED_ORIGINS.append("http://localhost:8000")
+    CRSF_TRUSTED_ORIGINS.append("http://localhost:8001")
+    ALLOWED_HOSTS = ['*']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
     SECURE_SSL_REDIRECT = True  # Redirect all http requests to https
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', True)
+    CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', True)
+    SECURE_HSTS_PRELOAD = True
 
 INTERNAL_IPS = ['127.0.0.1']
 
@@ -257,6 +259,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
+                "RIGS.views.is_ajax",
             ],
             'debug': DEBUG
         },
@@ -269,10 +272,3 @@ TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
-SECURE_HSTS_SECONDS = 3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', True)
-CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', True)
-SECURE_HSTS_PRELOAD = True

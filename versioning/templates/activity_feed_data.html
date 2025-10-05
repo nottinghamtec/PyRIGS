@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:"base_ajax_nomodal.html,base_rigs.html" %}
+{% extends is_ajax|yesno:"base_ajax_nomodal.html,base_rigs.html" %}
 
 {% load static %}
 {% load humanize %}

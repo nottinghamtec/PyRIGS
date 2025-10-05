@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% extends is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
 {% load static %}
 {% load button from filters %}
@@ -28,7 +28,7 @@
         <form id="checkin" role="form" method="POST" action="{{ form.action|default:request.path }}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
-            {% if not request.is_ajax and self.request.user.pk is form.event.mic.pk %}
+            {% if not is_ajax and self.request.user.pk is form.event.mic.pk %}
             <div class="form-group">
                 <label for="{{ form.person.id_for_label }}"
                        class="col-sm-4 col-form-label">{{ form.person.label }}</label>
@@ -86,7 +86,7 @@
                 </div>
             </div>
             {% endif %}
-            {% if not request.is_ajax %}
+            {% if not is_ajax %}
             <div class="row mt-3">
                 <div class="col-sm-12 text-right">
                     {% button 'submit' %}

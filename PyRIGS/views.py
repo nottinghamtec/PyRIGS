@@ -9,7 +9,7 @@ from functools import reduce
 from itertools import chain
 from io import BytesIO
 
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 from z3c.rml import rml2pdf
 
 from django.conf import settings
@@ -32,7 +32,7 @@ from training import models as training_models
 
 
 def is_ajax(request):
-    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    return {"is_ajax": request.headers.get('x-requested-with') == 'XMLHttpRequest'}
 
 
 def get_related(form, context):  # Get some other objects to include in the form. Used when there are errors but also nice and quick.
@@ -333,10 +333,10 @@ def get_info_string(user):
 
 
 def render_pdf_response(template, context, append_terms):
-    merger = PdfFileMerger()
+    merger = PdfMerger()
     rml = template.render(context)
     buffer = rml2pdf.parseString(rml)
-    merger.append(PdfFileReader(buffer))
+    merger.append(PdfReader(buffer))
     buffer.close()
 
     if append_terms:

@@ -3,8 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
-
-from RIGS import models
+from django.conf import settings
 
 
 # This view should be exempt from requiring CSRF token.
@@ -28,7 +27,7 @@ class LoginEmbed(LoginView):
 
 class ProfileDetail(generic.DetailView):
     template_name = "profile_detail.html"
-    model = models.Profile
+    model = settings.AUTH_USER_MODEL
 
     def get_queryset(self):
         try:
@@ -48,7 +47,7 @@ class ProfileDetail(generic.DetailView):
 
 class ProfileUpdateSelf(generic.UpdateView):
     template_name = "profile_form.html"
-    model = models.Profile
+    model = settings.AUTH_USER_MODEL
     fields = ['first_name', 'last_name', 'email', 'initials', 'phone', 'dark_theme']
 
     def get_queryset(self):

@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from barcode import Code39
 from barcode.writer import ImageWriter
@@ -417,11 +417,11 @@ class GenerateLabels(generic.View):
             # 'images3': images[3::4],
             'filename': name
         }
-        merger = PdfFileMerger()
+        merger = PdfMerger()
 
         rml = template.render(context)
         buffer = rml2pdf.parseString(rml)
-        merger.append(PdfFileReader(buffer))
+        merger.append(PdfReader(buffer))
         buffer.close()
 
         merged = BytesIO()
