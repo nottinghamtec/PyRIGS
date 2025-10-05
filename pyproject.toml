@@ -88,4 +88,5 @@ dev = [
     "pytest-reverse",
     "pytest-xdist[psutil]",
     "PyPOM[splinter]",
+    "autopep8>=2.3.2",
 ]

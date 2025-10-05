@@ -127,7 +127,7 @@ class AssetEdit(LoginRequiredMixin, AssetIDUrlMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy('asset_update', kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
@@ -233,7 +233,7 @@ class SupplierList(GenericListView):
         context['edit'] = 'supplier_update'
         context['can_edit'] = self.request.user.has_perm('assets.change_supplier')
         context['detail'] = 'supplier_detail'
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -250,7 +250,7 @@ class SupplierDetail(GenericDetailView):
         context['detail_link'] = 'supplier_detail'
         context['associated'] = 'partials/associated_assets.html'
         context['associated2'] = ''
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -264,7 +264,7 @@ class SupplierCreate(GenericCreateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'
@@ -280,7 +280,7 @@ class SupplierUpdate(GenericUpdateView, ModalURLMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_assets.html'

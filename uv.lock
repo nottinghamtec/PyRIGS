@@ -33,6 +33,19 @@ wheels = [
 ]
 
 [[package]]
+name = "autopep8"
+version = "2.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pycodestyle" },
+    { name = "tomli" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/d8/30873d2b7b57dee9263e53d142da044c4600a46f2d28374b3e38b023df16/autopep8-2.3.2.tar.gz", hash = "sha256:89440a4f969197b69a995e4ce0661b031f455a9f776d2c5ba3dbd83466931758", size = 92210, upload-time = "2025-01-14T14:46:18.454Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/43/53afb8ba17218f19b77c7834128566c5bbb100a0ad9ba2e8e89d089d7079/autopep8-2.3.2-py2.py3-none-any.whl", hash = "sha256:ce8ad498672c845a0c3de2629c15b635ec2b05ef8177a6e7c91c74f3e9b51128", size = 45807, upload-time = "2025-01-14T14:46:15.466Z" },
+]
+
+[[package]]
 name = "backports-tempfile"
 version = "1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -843,6 +856,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "ansicolors" },
     { name = "asgiref" },
+    { name = "autopep8" },
     { name = "beautifulsoup4" },
     { name = "brotli" },
     { name = "cachetools" },
@@ -928,6 +942,7 @@ dev = [
 requires-dist = [
     { name = "ansicolors" },
     { name = "asgiref" },
+    { name = "autopep8", specifier = ">=2.3.2" },
     { name = "beautifulsoup4" },
     { name = "brotli" },
     { name = "cachetools" },

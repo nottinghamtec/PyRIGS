@@ -30,6 +30,8 @@ from RIGS import models
 from assets import models as asset_models
 from training import models as training_models
 
+# Template context processor
+
 
 def is_ajax(request):
     return {"is_ajax": request.headers.get('x-requested-with') == 'XMLHttpRequest'}
@@ -183,7 +185,7 @@ class SecureAPIRequest(generic.View):
 
 class ModalURLMixin:
     def get_close_url(self, update, detail):
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             url = reverse_lazy('closemodal')
             update_url = str(reverse_lazy(update, kwargs={'pk': self.object.pk}))
             messages.info(self.request, "modalobject=" + serializers.serialize("json", [self.object]))
@@ -202,7 +204,7 @@ class GenericListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.model.__name__ + "s"
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         return context
 
@@ -221,7 +223,7 @@ class GenericDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = f"{self.model.__name__} | {self.object.name}"
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         return context
 
@@ -232,7 +234,7 @@ class GenericUpdateView(generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = f"Edit {self.model.__name__}"
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         return context
 
@@ -243,7 +245,7 @@ class GenericCreateView(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = f"Create {self.model.__name__}"
-        if is_ajax(self.request):
+        if is_ajax(self.request).get('is_ajax'):
             context['override'] = "base_ajax.html"
         return context
 
