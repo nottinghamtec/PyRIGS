@@ -82,7 +82,7 @@ dev = [
     "django-coverage-plugin",
     "pytest-cov",
     "pytest-django",
-    "pluggy",
+    "pluggy~=1.2.0",
     "pytest-splinter",
     "pytest",
     "pytest-reverse",
