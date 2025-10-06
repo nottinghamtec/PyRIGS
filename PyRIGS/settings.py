@@ -104,7 +104,10 @@ DATABASES = {
 if not DEBUG:
     import dj_database_url
 
-    DATABASES['default'] = dj_database_url.config()
+    if env("FRANKENRIGS_DATABASE_URL") is not None:
+        DATABASES['default'] = dj_database_url.config(env="FRANKENRIGS_DATABASE_URL")
+    else:
+        DATABASES['default'] = dj_database_url.config()
 
 # Logging
 LOGGING = {

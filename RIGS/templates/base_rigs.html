@@ -6,7 +6,36 @@
 {% load total_invoices_todo from filters %}
 
 {% block titleheader %}
-<a class="navbar-brand" style="margin-left: auto; margin-right: auto;" href="/">RIGS</a>
+<style>
+.franken {
+  font-family: Fontdiner Swanky;
+  color: #00ff00;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 5px #00ff00,
+                 0 0 10px #00ff00,
+                 0 0 20px #00ff00,
+                 0 0 40px #00ff00;
+  }
+  50% {
+    text-shadow: 0 0 10px #00ff00,
+                 0 0 20px #00ff00,
+                 0 0 30px #00ff00,
+                 0 0 60px #00ff00;
+  }
+  100% {
+    text-shadow: 0 0 5px #00ff00,
+                 0 0 10px #00ff00,
+                 0 0 20px #00ff00,
+                 0 0 40px #00ff00;
+  }
+}
+</style>
+
+<a class="navbar-brand" style="margin-left: auto; margin-right: auto;" href="/"><span class="franken">Franken</span>RIGS</a>
 {% endblock %}
 
 {% block titleelements %}
