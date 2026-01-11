@@ -26,7 +26,7 @@ DEBUG = env('DEBUG', cast=bool, default=True)
 STAGING = env('STAGING', cast=bool, default=False)
 CI = env('CI', cast=bool, default=False)
 
-ALLOWED_HOSTS = ['https://pyrigs.nottinghamtec.co.uk', 'https://rigs.nottinghamtec.co.uk']
+ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",")
 
 if DEBUG:
     CRSF_TRUSTED_ORIGINS = ALLOWED_HOSTS.copy()
@@ -97,19 +97,17 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),
-    }
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             env('DATABASE_ENGINE', default='sqlite3')
+         ),
+         'NAME': env('DATABASE_NAME', default='rigs'),
+         'USER': env('DATABASE_USERNAME', default='rigs'),
+         'PASSWORD': env('DATABASE_PASSWORD', default='rigs'),
+         'HOST': env('DATABASE_HOST', default='127.0.0.1'),
+         'PORT': env('DATABASE_PORT', 5432),
+     }
 }
-
-if not DEBUG:
-    import dj_database_url
-
-    if env("FRANKENRIGS_DATABASE_URL") is not None:
-        DATABASES['default'] = dj_database_url.config(env="FRANKENRIGS_DATABASE_URL")
-    else:
-        DATABASES['default'] = dj_database_url.config()
 
 # Logging
 LOGGING = {
