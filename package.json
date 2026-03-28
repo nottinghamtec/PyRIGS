@@ -4,6 +4,9 @@
   "repository": "https://github.com/nottinghamtec/PyRIGS",
   "author": "Tom Price",
   "license": "Custom",
+  "engines": {
+    "node": "<=22"
+  },
   "dependencies": {
     "@forevolve/bootstrap-dark": "^2.1.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
