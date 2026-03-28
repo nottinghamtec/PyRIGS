@@ -5,7 +5,7 @@
   "author": "Tom Price",
   "license": "Custom",
   "engines": {
-    "node": "<=22"
+    "node": "22.x"
   },
   "dependencies": {
     "@forevolve/bootstrap-dark": "^2.1.0",
