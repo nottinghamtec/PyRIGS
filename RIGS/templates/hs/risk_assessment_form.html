@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
+{% extends is_ajax|yesno:'base_ajax.html,base_rigs.html' %}
 {% load widget_tweaks %}
 {% load static %}
 {% load help_text from filters %}

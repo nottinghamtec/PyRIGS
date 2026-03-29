@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:'base_ajax.html,base_training.html' %}
+{% extends is_ajax|yesno:'base_ajax.html,base_training.html' %}
 
 {% load static %}
 {% load widget_tweaks %}
@@ -51,7 +51,7 @@
         {% render_field form.notes|add_class:'form-control' rows=3 %}
         </div>
     </div>
-  {% if not request.is_ajax %}
+  {% if not is_ajax %}
    <div class="col-sm-12 text-right pr-0">
         {% button 'submit' %}
     </div>

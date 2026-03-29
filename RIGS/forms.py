@@ -39,6 +39,8 @@ class EventForm(forms.ModelForm):
     @property
     def _get_items_json(self):
         items = {}
+        if self.instance.pk is None:
+            return items
         for item in self.instance.items.all():
             data = serializers.serialize('json', [item])
             struct = simplejson.loads(data)

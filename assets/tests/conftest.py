@@ -52,3 +52,10 @@ def test_asset_2(db, category, test_status_2):
     asset, created = models.Asset.objects.get_or_create(asset_id="10", description="Working Mic", status=test_status_2, category=category, date_acquired=datetime.date(2001, 10, 20), replacement_cost=1000)
     yield asset
     asset.delete()
+
+
+@pytest.fixture
+def test_supplier(db):
+    supplier, created = models.Supplier.objects.get_or_create(name="Fullmetal Heavy Industry")
+    yield supplier
+    supplier.delete()

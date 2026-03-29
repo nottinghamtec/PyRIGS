@@ -104,3 +104,4 @@ screenshots/
 
 # Virutal Environments
 .venv/
+/.env
