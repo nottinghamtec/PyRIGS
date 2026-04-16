@@ -2,16 +2,18 @@
 <span class="badge text-bg-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
 {% if event.is_rig %}
     {% if event.sum_total > 0 %}
-        {% if event.purchase_order %}
-            <span class="badge text-bg-success">PO: Received</span>
-        {% elif event.authorised %}
-            <span class="badge text-bg-success">Authorisation: Complete <span class="fas fa-check"></span></span>
-        {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-            <span class="badge text-bg-warning"> Authorisation: Issue <span class="fas fa-exclamation-circle"></span></span>
-        {% elif event.auth_request_to %}
-            <span class="badge text-bg-info"> Authorisation: Sent <span class="fas fa-paper-plane"></span></span>
+        {% if event.organisation.union_account %}
+            {% if event.authorised %}
+                <span class="badge text-bg-success">Authorisation: Complete <span class="fas fa-check"></span></span>
+            {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
+                <span class="badge text-bg-warning"> Authorisation: Issue <span class="fas fa-exclamation-circle"></span></span>
+            {% elif event.auth_request_to %}
+                <span class="badge text-bg-info"> Authorisation: Sent <span class="fas fa-paper-plane"></span></span>
+            {% else %}
+                <span class="badge text-bg-danger">Authorisation: <span class="fas fa-times"></span></span>
+            {% endif %}
         {% else %}
-            <span class="badge text-bg-danger">Authorisation: <span class="fas fa-times"></span></span>
+            <span class="badge text-bg-success">PO: Received</span>
         {% endif %}
     {% endif %}
     {% if not event.dry_hire %}
