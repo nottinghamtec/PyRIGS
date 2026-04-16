@@ -13,7 +13,11 @@
                 <span class="badge badge-danger">Authorisation: <span class="fas fa-times"></span></span>
             {% endif %}
         {% else %}  
+            {% if event.purchase_order %}
                 <span class="badge badge-success">PO: Received</span>
+            {% else %}
+                <span class="badge badge-danger">PO: <span class="fas fa-times"></span></span>
+            {%endif %}
         {%endif %}
     {% endif %}
     {% if not event.dry_hire %}
