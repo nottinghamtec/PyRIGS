@@ -4,6 +4,7 @@ from pypom import Region
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage, animation_is_finished
@@ -55,7 +56,12 @@ class AssetList(BasePage):
         element.send_keys(queryString)
 
     def search(self):
+        old_assets = self.find_elements(*self._asset_item_locator)
         self.find_element(*self._go_button_locator).click()
+        WebDriverWait(self.driver, 10).until(
+            expected_conditions.staleness_of(old_assets[0])
+        )
+
 
     def filter(self):
         self.find_element(*self._filter_button_locator).click()
@@ -152,7 +158,11 @@ class SupplierList(BasePage):
         element.send_keys(queryString)
 
     def search(self):
+        old_suppliers = self.find_elements(*self._supplier_item_locator)
         self.find_element(*self._go_button_locator).click()
+        WebDriverWait(self.driver, 10).until(
+            expected_conditions.staleness_of(old_suppliers[0])
+        )
 
 
 class SupplierForm(FormPage):

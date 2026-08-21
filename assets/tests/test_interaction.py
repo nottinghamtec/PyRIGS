@@ -235,13 +235,11 @@ class TestSupplierList(AutoLoginTest):
     def test_search(self):
         self.page.set_query("TEC")
         self.page.search()
-
         self.assertTrue(len(self.page.suppliers) == 1)
         self.assertEqual("TEC PA & Lighting", self.page.suppliers[0].name)
 
         self.page.set_query("")
         self.page.search()
-        time.sleep(1)
         self.assertTrue(len(self.page.suppliers) == 7)
 
         self.page.set_query("NOTFOUND")
@@ -254,8 +252,8 @@ def test_supplier_create(logged_in_browser, live_server):
 
     page.remove_all_required()
     page.submit()
-    assert !self.page.success
-    assert "This field is required." in self.page.errors["Name"]
+    assert not page.success
+    assert "This field is required." in page.errors["Name"]
 
     page.name = "Optican Health Supplies"
     page.submit()
@@ -315,19 +313,19 @@ def test_audit_fail(logged_in_browser, admin_user, live_server, test_asset):
     page.modal.description = ""
     page.modal.submit()
     wait.until(animation_is_finished())
-    assert "This field is required." in self.page.modal.errors["Description"]
+    assert "This field is required." in page.modal.errors["Description"]
 
 
 def test_audit_list(logged_in_browser, admin_user, live_server, test_asset):
     page = pages.AssetAuditList(logged_in_browser.driver, live_server.url).open()
     wait = WebDriverWait(logged_in_browser.driver, 20)
-    assert models.Asset.objects.filter(last_audited_at=None).count() == len(self.page.assets)
+    assert models.Asset.objects.filter(last_audited_at=None).count() == len(page.assets)
     asset_row = page.assets[0]
     logged_in_browser.driver.find_element(By.XPATH, "//a[contains(@class,'btn') and contains(., 'Audit')]").click()
     wait.until(ec.visibility_of_element_located((By.ID, 'modal')))
-    assert self.page.modal.asset_id == asset_row.id
+    assert page.modal.asset_id == asset_row.id
     page.modal.close()
-    assert !logged_in_browser.driver.find_element(By.ID, 'modal').is_displayed()
+    assert not logged_in_browser.driver.find_element(By.ID, 'modal').is_displayed()
     # Make sure audit log was NOT filled out
     audited = models.Asset.objects.get(asset_id=asset_row.id)
     assert audited.last_audited_by is None
