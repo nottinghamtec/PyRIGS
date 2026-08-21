@@ -14,7 +14,12 @@
             </a>
         </li>
         <div class="dropdown-divider"></div>
-        <li class="float-right"><a href="{% url 'logout' %}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        <li class="float-right">
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        </li>
     </ul>
 {% else %}
 <a class="nav-link" href="{% url 'login' %}">
