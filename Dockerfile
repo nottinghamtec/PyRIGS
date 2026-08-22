@@ -3,39 +3,53 @@ FROM combos/python_node:3.10_22 AS base
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 FROM base AS builder
 
-# Set up environment
+WORKDIR /app
+
+# Set up node environment
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY gulpfile.js ./
+COPY pipeline/source_assets ./pipeline/source_assets
+
+RUN npm run build \
+    && rm -rf node_modules
+
+# Set up py environment
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-# Create non-root user
-RUN addgroup --system app && adduser --system --group app
-
-WORKDIR /app
-
 # Copy uv project files first (for better caching)
 COPY pyproject.toml uv.lock ./
-
-WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --all-groups
+    uv sync --frozen --no-install-project --no-dev
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --all-groups
+    uv sync --frozen --no-dev
+
+RUN python manage.py collectstatic --noinput
 
 FROM python:3.10-slim-trixie
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=builder /app /app
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"
-EXPOSE 8000
 
-CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "PyRIGS.wsgi"]
+# Create non-root user and run as it
+RUN addgroup --system app \
+    && adduser --system --group app \
+    && chown -R app:app /app
+USER app
+
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "PyRIGS.wsgi"]

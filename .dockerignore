@@ -47,3 +47,4 @@ tests/
 docker-compose*.yml
 Dockerfile*
 .dockerignore
+pipeline/built_assets/
