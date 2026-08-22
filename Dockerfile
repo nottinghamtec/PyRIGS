@@ -36,20 +36,17 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-RUN python manage.py collectstatic --noinput
+RUN uv run python manage.py collectstatic --noinput
 
 FROM python:3.10-slim-trixie
-COPY --from=builder /app /app
+RUN addgroup --system app \
+    && adduser --system --group app
+COPY --from=builder --chown=app:app /app /app
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Create non-root user and run as it
-RUN addgroup --system app \
-    && adduser --system --group app \
-    && chown -R app:app /app
 USER app
-
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "PyRIGS.wsgi"]
