@@ -29,9 +29,9 @@ CI = env('CI', cast=bool, default=False)
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",")
 
 if DEBUG:
-    CRSF_TRUSTED_ORIGINS = ALLOWED_HOSTS.copy()
-    CRSF_TRUSTED_ORIGINS.append("http://localhost:8000")
-    CRSF_TRUSTED_ORIGINS.append("http://localhost:8001")
+    CSRF_TRUSTED_ORIGINS = [f"http://{host}" for host in ALLOWED_HOSTS]
+    CSRF_TRUSTED_ORIGINS.append("http://localhost:8000")
+    CSRF_TRUSTED_ORIGINS.append("http://localhost:8001")
     ALLOWED_HOSTS = ['*']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -223,8 +223,6 @@ TIME_ZONE = 'Europe/London'
 
 FORMAT_MODULE_PATH = 'PyRIGS.formats'
 
-USE_L10N = True
-
 USE_TZ = True
 
 USE_THOUSAND_SEPARATOR = False
@@ -233,7 +231,14 @@ USE_THOUSAND_SEPARATOR = False
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 STATIC_URL = '/static/'
 STATIC_ROOT = str(BASE_DIR / 'static/')
 STATICFILES_DIRS = [
@@ -257,7 +262,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
-                "RIGS.views.is_ajax",
+                "PyRIGS.views.is_ajax",
             ],
             'debug': DEBUG
         },
