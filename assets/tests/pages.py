@@ -66,7 +66,6 @@ class AssetList(BasePage):
             import time
             time.sleep(2)
 
-
     def filter(self):
         self.find_element(*self._filter_button_locator).click()
 

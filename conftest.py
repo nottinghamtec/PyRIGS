@@ -14,6 +14,7 @@ from selenium import webdriver
 import importlib.metadata as _importlib_metadata
 importlib.metadata = _importlib_metadata
 
+
 def pytest_configure():
     settings.PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',

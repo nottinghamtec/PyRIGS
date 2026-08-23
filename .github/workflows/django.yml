@@ -48,7 +48,10 @@ jobs:
               uv run python3 manage.py makemigrations --check --dry-run
               uv run python3 manage.py collectstatic --noinput
       - name: Run Tests
-        run: uv run pytest -n auto --cov
+        run: uv run pytest --cov
+        env:
+          DATABASE_ENGINE: sqlite3
+          DATABASE_NAME: db.sqlite3
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
