@@ -154,6 +154,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        # Ignore dangling object references
+        'pypdf': {
+            'level': 'ERROR',
+            'propagate': False,
+        },
     }
 }
 
