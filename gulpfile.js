@@ -3,7 +3,7 @@
 var gulp = require('gulp');
 
 const terser = require('gulp-uglify');
-const sass = require('gulp-sass')(require('node-sass'));
+const sass = require('gulp-sass')(require('sass'));
 const flatten = require('gulp-flatten');
 const autoprefixer = require('autoprefixer')
 const postcss = require('gulp-postcss')
@@ -30,7 +30,12 @@ function styles(done) {
                     'node_modules/easymde/dist/easymde.min.css'
                     ])
     .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
+    // I know you are deprecated but please be quite
+    .pipe(sass({
+        loadPaths: ['.'],
+        quietDeps: true,
+        silenceDeprecations: ['import', 'color-functions', 'global-builtin', 'if-function'],
+    }).on('error', sass.logError))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
     .pipe(postcss([ autoprefixer(), cssnano() ]))
     .pipe(sourcemaps.write())
@@ -71,7 +76,7 @@ function scripts() {
     .pipe(gulpif(function(file) { return jpop.includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
     // Only minify if filename does not already denote it as minified
-    .pipe(gulpif(function(file) { return file.path.indexOf("min") == -1;},terser()))
+    .pipe(gulpif(function(file) { return file.path.indexOf("min") === -1;},terser()))
     .pipe(gulp.dest(dest))
     .pipe(browsersync.stream());
 }

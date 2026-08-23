@@ -38,7 +38,7 @@ class RIGSVersionTestCase(TestCase):
 
     def test_find_parent_version(self):
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
         self.assertEqual(current_version._object_version.object.notes, "A new note on the event")
 
         # Check the prev version is loaded correctly
@@ -50,7 +50,7 @@ class RIGSVersionTestCase(TestCase):
 
     def test_changes_since(self):
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
 
         changes = currentVersion.changes
         self.assertEqual(len(changes.field_changes), 1)
@@ -68,7 +68,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
         diff = currentVersion.changes
 
         # There are two changes
@@ -90,7 +90,7 @@ class RIGSVersionTestCase(TestCase):
             self.person.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.person).latest('revision__date_created')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.person).latest('revision_id')
         diff = currentVersion.changes
 
         # Should be declared as long
@@ -103,7 +103,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
 
         # Check the diff is correct
         self.assertEqual(currentVersion.changes.field_changes[0].diff,
@@ -119,7 +119,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.status = models.Event.CONFIRMED
             self.event.save()
 
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
         self.assertEqual(currentVersion.changes.field_changes[0].old, 'Provisional')
         self.assertEqual(currentVersion.changes.field_changes[0].new, 'Confirmed')
 
@@ -137,7 +137,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
 
         diffs = current_version.changes.item_changes
 
@@ -156,7 +156,7 @@ class RIGSVersionTestCase(TestCase):
             item1.save()
             self.event.save()
 
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
 
         diffs = current_version.changes.item_changes
 
@@ -178,7 +178,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
 
         diffs = current_version.changes.item_changes
 

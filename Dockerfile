@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM combos/python_node:3.10_22 AS base
+FROM combos/python_node:3.12_22 AS base
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 FROM base AS builder
 
@@ -38,7 +38,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 RUN uv run python manage.py collectstatic --noinput
 
-FROM python:3.10-slim-trixie
+FROM python:3.12-slim-trixie
 RUN addgroup --system app \
     && adduser --system --group app
 COPY --from=builder --chown=app:app /app /app

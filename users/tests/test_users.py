@@ -70,6 +70,7 @@ class UserRegistrationTest(LiveServerTestCase):
         # Submit incorrect form
         submit = self.browser.find_element(By.XPATH, "//input[@type='submit']")
         submit.click()
+        time.sleep(2)
 
         # Restablish error fields
         password1 = self.browser.find_element(By.ID, 'id_password1')
@@ -145,6 +146,7 @@ class UserRegistrationTest(LiveServerTestCase):
         password = self.browser.find_element(By.ID, 'id_password')
         password.send_keys('correcthorsebatterystaple')
         password.send_keys(Keys.ENTER)
+        time.sleep(2)
 
         # Check we are logged in
         udd = self.browser.find_element(By.CLASS_NAME, 'navbar').text

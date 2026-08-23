@@ -83,6 +83,7 @@ def test_search(logged_in_browser, admin_user, live_server, test_asset, test_ass
     page.status_selector.toggle()
     assert not page.status_selector.is_open
     page.filter()
+    time.sleep(2)
     assert len(page.assets) == 2
 
     page.category_selector.toggle()
@@ -91,6 +92,7 @@ def test_search(logged_in_browser, admin_user, live_server, test_asset, test_ass
     page.category_selector.close()
     assert not page.category_selector.is_open
     page.filter()
+    time.sleep(2)
     assert len(page.assets) == 2
 
 

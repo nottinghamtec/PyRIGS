@@ -9,7 +9,7 @@ from functools import reduce
 from itertools import chain
 from io import BytesIO
 
-from PyPDF2 import PdfMerger, PdfReader
+from pypdf import PdfReader, PdfWriter
 from z3c.rml import rml2pdf
 
 from django.conf import settings
@@ -335,7 +335,7 @@ def get_info_string(user):
 
 
 def render_pdf_response(template, context, append_terms):
-    merger = PdfMerger()
+    merger = PdfWriter()
     rml = template.render(context)
     buffer = rml2pdf.parseString(rml)
     merger.append(PdfReader(buffer))
