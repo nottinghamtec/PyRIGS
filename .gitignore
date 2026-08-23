@@ -104,4 +104,13 @@ screenshots/
 
 # Virutal Environments
 .venv/
-/.env
+
+# Environment variable files (keep .env.example)
+.env
+.env.*
+!.env.example
+
+nginx/certs/
+nginx/certbot/
+*.pem
+*.key

@@ -23,12 +23,10 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git
 .gitignore
 .mypy_cache
 .pytest_cache
 .hypothesis
-.env
 .venv
 env/
 venv/
@@ -43,8 +41,12 @@ venv.bak/
 *~
 docs/
 tests/
-*.md
 docker-compose*.yml
 Dockerfile*
 .dockerignore
 pipeline/built_assets/
+nginx/
+*.pem
+*.key
+.env.*
+scripts/

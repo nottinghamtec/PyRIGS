@@ -13,8 +13,7 @@ from RIGS import models
 
 
 class Command(BaseCommand):
-    # FIXME This needs a different implementation when moved off heroku
-    help = 'Sends email reminders as required. Triggered daily through heroku-scheduler in production.'
+    help = 'Sends email reminders as required. Triggered daily through sys cron in production.'
 
     def handle(self, *args, **options):
         events = models.Event.objects.current_events().select_related('riskassessment')
