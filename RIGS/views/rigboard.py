@@ -17,7 +17,7 @@ from django.core import signing
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse

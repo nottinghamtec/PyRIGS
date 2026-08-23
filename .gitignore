@@ -112,5 +112,6 @@ screenshots/
 
 nginx/certs/
 nginx/certbot/
+nginx/*.conf
 *.pem
 *.key
