@@ -237,15 +237,18 @@ class TestSupplierList(AutoLoginTest):
     def test_search(self):
         self.page.set_query("TEC")
         self.page.search()
+        time.sleep(2)
         self.assertTrue(len(self.page.suppliers) == 1)
         self.assertEqual("TEC PA & Lighting", self.page.suppliers[0].name)
 
         self.page.set_query("")
         self.page.search()
+        time.sleep(2)
         self.assertTrue(len(self.page.suppliers) == 7)
 
         self.page.set_query("NOTFOUND")
         self.page.search()
+        time.sleep(2)
         self.assertTrue(len(self.page.suppliers) == 0)
 
 

@@ -1,4 +1,6 @@
 # Collection of page object models for use within tests.
+import time
+
 from django.urls import reverse
 from pypom import Region
 from selenium.common.exceptions import NoSuchElementException
@@ -56,15 +58,8 @@ class AssetList(BasePage):
         element.send_keys(queryString)
 
     def search(self):
-        old_assets = self.find_elements(*self._asset_item_locator)
         self.find_element(*self._go_button_locator).click()
-        if len(old_assets) > 0:
-            WebDriverWait(self.driver, 10).until(
-                expected_conditions.staleness_of(old_assets[0])
-            )
-        else:
-            import time
-            time.sleep(2)
+        time.sleep(2)
 
     def filter(self):
         self.find_element(*self._filter_button_locator).click()
@@ -161,11 +156,8 @@ class SupplierList(BasePage):
         element.send_keys(queryString)
 
     def search(self):
-        old_suppliers = self.find_elements(*self._supplier_item_locator)
         self.find_element(*self._go_button_locator).click()
-        WebDriverWait(self.driver, 10).until(
-            expected_conditions.staleness_of(old_suppliers[0])
-        )
+        time.sleep(2)
 
 
 class SupplierForm(FormPage):
