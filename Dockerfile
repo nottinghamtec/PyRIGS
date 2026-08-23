@@ -40,7 +40,9 @@ RUN uv run python manage.py collectstatic --noinput
 
 FROM python:3.12-slim-trixie
 RUN addgroup --system app \
-    && adduser --system --group app
+    && adduser --system --group --home /home/app app \
+    && mkdir -p /home/app \
+    && chown app:app /home/app
 COPY --from=builder --chown=app:app /app /app
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
