@@ -46,7 +46,7 @@
         {% include associated2|safe %}
     {% endif %}
 
-    {% if not request.is_ajax %}
+    {% if not is_ajax %}
         <div class="row py-2">
             <div class="col-sm-12 text-right">
                 {% if can_edit %}
@@ -59,7 +59,7 @@
         </div>
     {% endif %}
 {% endblock %}
-{% if request.is_ajax %}
+{% if is_ajax %}
     {% block footer %}
         <div class="row py-2">
             <div class="col-sm-12 text-right">

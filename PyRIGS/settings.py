@@ -26,27 +26,29 @@ DEBUG = env('DEBUG', cast=bool, default=True)
 STAGING = env('STAGING', cast=bool, default=False)
 CI = env('CI', cast=bool, default=False)
 
-ALLOWED_HOSTS = ['pyrigs.nottinghamtec.co.uk', 'rigs.nottinghamtec.co.uk', 'pyrigs.herokuapp.com']
-
-if STAGING:
-    ALLOWED_HOSTS.append('.herokuapp.com')
+ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",")
 
 if DEBUG:
-    ALLOWED_HOSTS.append('localhost')
-    ALLOWED_HOSTS.append('example.com')
-    ALLOWED_HOSTS.append('127.0.0.1')
-    ALLOWED_HOSTS.append('.app.github.dev')
-    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+    CSRF_TRUSTED_ORIGINS = [f"http://{host}" for host in ALLOWED_HOSTS]
+    CSRF_TRUSTED_ORIGINS.append("http://localhost:8000")
+    CSRF_TRUSTED_ORIGINS.append("http://localhost:8001")
+    ALLOWED_HOSTS = ['*']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
     SECURE_SSL_REDIRECT = True  # Redirect all http requests to https
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', True)
+    CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', True)
+    SECURE_HSTS_PRELOAD = True
 
 INTERNAL_IPS = ['127.0.0.1']
 
 DOMAIN = env('DOMAIN', default='example.com')
 
-ADMINS = [('IT Manager', f'it@{DOMAIN}'), ('Arona Jones', f'arona.jones@{DOMAIN}')]
+ADMINS = [('IT Manager', f'it@{DOMAIN}'), ('Hang Xu', f'hang.xu@{DOMAIN}')]
 if DEBUG:
     ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
@@ -95,19 +97,17 @@ WSGI_APPLICATION = 'PyRIGS.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),
-    }
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             env('DATABASE_ENGINE', default='sqlite3')
+         ),
+         'NAME': env('DATABASE_NAME', default='rigs'),
+         'USER': env('DATABASE_USERNAME', default='rigs'),
+         'PASSWORD': env('DATABASE_PASSWORD', default='rigs'),
+         'HOST': env('DATABASE_HOST', default='127.0.0.1'),
+         'PORT': env('DATABASE_PORT', 5432),
+     }
 }
-
-if not DEBUG:
-    import dj_database_url
-
-    if env("FRANKENRIGS_DATABASE_URL") is not None:
-        DATABASES['default'] = dj_database_url.config(env="FRANKENRIGS_DATABASE_URL")
-    else:
-        DATABASES['default'] = dj_database_url.config()
 
 # Logging
 LOGGING = {
@@ -151,6 +151,11 @@ LOGGING = {
         # Might as well log any errors anywhere else in Django
         'django': {
             'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        # Ignore dangling object references
+        'pypdf': {
             'level': 'ERROR',
             'propagate': False,
         },
@@ -223,8 +228,6 @@ TIME_ZONE = 'Europe/London'
 
 FORMAT_MODULE_PATH = 'PyRIGS.formats'
 
-USE_L10N = True
-
 USE_TZ = True
 
 USE_THOUSAND_SEPARATOR = False
@@ -233,7 +236,14 @@ USE_THOUSAND_SEPARATOR = False
 DATETIME_INPUT_FORMATS = ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S')
 
 # Static files (CSS, JavaScript, Images)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 STATIC_URL = '/static/'
 STATIC_ROOT = str(BASE_DIR / 'static/')
 STATICFILES_DIRS = [
@@ -257,6 +267,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
+                "PyRIGS.views.is_ajax",
             ],
             'debug': DEBUG
         },
@@ -269,10 +280,3 @@ TERMS_OF_HIRE_URL = "http://www.nottinghamtec.co.uk/terms.pdf"
 AUTHORISATION_NOTIFICATION_ADDRESS = 'productions@nottinghamtec.co.uk'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
-SECURE_HSTS_SECONDS = 3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', True)
-CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', True)
-SECURE_HSTS_PRELOAD = True

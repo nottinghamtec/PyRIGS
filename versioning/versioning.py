@@ -227,7 +227,7 @@ class RIGSVersion(Version):
             "revision", "revision__user").all()
 
         try:
-            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest('revision__date_created')
+            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest('revision_id')
         except ObjectDoesNotExist:
             return False
 

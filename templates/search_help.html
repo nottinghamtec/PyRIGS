@@ -1,10 +1,10 @@
-{% extends request.is_ajax|yesno:"base_ajax.html,base.html" %}
+{% extends is_ajax|yesno:"base_ajax.html,base.html" %}
 
 {% block title %}Search Help{% endblock %}
 
 {% block content %}
     <div class="row">
-        {% if not request.is_ajax %}
+        {% if not is_ajax %}
             <div class="col-sm-12">
                 <h1>Search Help</h1>
             </div>

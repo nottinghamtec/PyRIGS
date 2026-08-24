@@ -1,9 +1,8 @@
 from django.conf import settings
-from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import path
+from django.urls import include, path
 from django.views.generic import TemplateView
 
 from PyRIGS import views
@@ -36,8 +35,8 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
 
-    import debug_toolbar
+    # import debug_toolbar
     urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls)),
+        # path('__debug__/', include(debug_toolbar.urls)),
         path('bootstrap/', TemplateView.as_view(template_name="bootstrap.html")),
     ]

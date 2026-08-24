@@ -17,22 +17,22 @@
     "bootstrap-select": "^1.13.18",
     "clipboard": "^2.0.8",
     "cssnano": "^5.0.13",
-    "easymde": "^2.16.1",
+    "easymde": "^2.21.0",
     "fullcalendar": "^5.10.1",
     "gulp-concat": "^2.6.1",
     "gulp-flatten": "^0.4.0",
     "gulp-if": "^3.0.0",
     "gulp-postcss": "^9.0.1",
-    "gulp-sass": "^5.0.0",
+    "gulp-sass": "^6.0.1",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-uglify": "^3.0.2",
     "html5sortable": "^0.13.3",
     "jquery": "^3.6.0",
-    "konami": "^1.6.3",
+    "konami": "^1.7.0",
     "moment": "^2.29.4",
-    "node-sass": "^9.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.26",
+    "sass": "^1.103.1",
     "uglify-js": "^3.14.5"
   },
   "devDependencies": {
@@ -43,5 +43,9 @@
     "gulp": "gulp",
     "build": "node node_modules/gulp/bin/gulp build",
     "heroku-cleanup": "rm -rf node_modules/ pipeline/source_assets gulpfile.js"
+  },
+  "overrides": {
+    "postcss": "^8.5.26",
+    "immutable": "^4.3.9"
   }
 }

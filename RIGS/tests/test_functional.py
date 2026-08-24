@@ -48,9 +48,9 @@ def test_create(admin_client):
     response = admin_client.post(url, {'start_date': datetime.date(2020, 1, 1), 'start_time': datetime.time(10, 00),
                                        'end_time': datetime.time(9, 00),
                                        'access_at': datetime.datetime(2020, 1, 5, 10)})
-    assertFormError(response, 'form', 'end_time',
+    assertFormError(response.context['form'], 'end_time',
                     "Unless you've invented time travel, the event can't finish before it has started.")
-    assertFormError(response, 'form', 'access_at',
+    assertFormError(response.context['form'], 'access_at',
                     "Regardless of what some clients might think, access time cannot be after the event has started.")
 
 

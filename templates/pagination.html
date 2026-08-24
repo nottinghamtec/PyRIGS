@@ -17,11 +17,11 @@
             {% endif %}
 
             {% for page in page_numbers %}
-                {% ifequal page page_obj.number %}
+                {% if page == page_obj.number %}
                     <li class="page-item active"><a class="page-link" href="#">{{ page }}</a></li>
                 {% else %}
                     <li class="page-item"><a class="page-link" href="?{% url_replace request 'page' page %}" class="page">{{ page }}</a></li>
-                {% endifequal %}
+                {% endif %}
             {% endfor %}
 
             {% if show_last %}

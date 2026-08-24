@@ -13,7 +13,7 @@ from RIGS import models
 
 
 class Command(BaseCommand):
-    help = 'Sends email reminders as required. Triggered daily through heroku-scheduler in production.'
+    help = 'Sends email reminders as required. Triggered daily through sys cron in production.'
 
     def handle(self, *args, **options):
         events = models.Event.objects.current_events().select_related('riskassessment')
@@ -33,6 +33,6 @@ class Command(BaseCommand):
                     reply_to=[f"h.s.manager@{settings.DOMAIN}"],
                 )
                 css = finders.find('css/email.css')
-                html = premailer.Premailer(get_template("email/ra_reminder.html").render(context), external_styles=css).transform()
+                html = premailer.Premailer(get_template("email/ra_reminder.html").render(context), external_styles=css, allow_loading_external_files=True).transform()
                 msg.attach_alternative(html, 'text/html')
                 msg.send()

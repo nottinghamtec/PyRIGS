@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
+{% extends is_ajax|yesno:"base_ajax.html,base_rigs.html" %}
 
 {% load markdown_tags %}
 {% load static %}
@@ -18,7 +18,7 @@
 
 {% block content %}
 <div class="row my-3 py-3">
-    {% if not request.is_ajax %}
+    {% if not is_ajax %}
         {% if perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'partials/event_detail_buttons.html' %}
@@ -49,7 +49,7 @@
         </div>
     {% endif %}
     {% endif %}
-    {% if not request.is_ajax and perms.RIGS.view_event %}
+    {% if not is_ajax and perms.RIGS.view_event %}
     <div class="col-sm-12 text-right">
         {% include 'partials/event_detail_buttons.html' %}
     </div>
@@ -69,16 +69,16 @@
                 </div>
             </div>
         </div>
-        
+
         {% include 'partials/crew_list.html' %}
 
-        {% if not request.is_ajax and perms.RIGS.view_event %}
+        {% if not is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'partials/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}
-    {% if not request.is_ajax and perms.RIGS.view_event %}
+    {% if not is_ajax and perms.RIGS.view_event %}
         <div class="col-sm-12 text-right">
             {% include 'partials/last_edited.html' with target="event_history" %}
         </div>
@@ -86,7 +86,7 @@
 </div>
 {% endblock %}
 
-{% if request.is_ajax %}
+{% if is_ajax %}
     {% block footer %}
             {% if perms.RIGS.view_event %}
                 {% include 'partials/last_edited.html' with target="event_history" %}

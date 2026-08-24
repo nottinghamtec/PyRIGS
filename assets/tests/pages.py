@@ -1,9 +1,12 @@
 # Collection of page object models for use within tests.
+import time
+
 from django.urls import reverse
 from pypom import Region
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 from PyRIGS.tests import regions
 from PyRIGS.tests.pages import BasePage, FormPage, animation_is_finished
@@ -56,6 +59,7 @@ class AssetList(BasePage):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+        time.sleep(2)
 
     def filter(self):
         self.find_element(*self._filter_button_locator).click()
@@ -153,6 +157,7 @@ class SupplierList(BasePage):
 
     def search(self):
         self.find_element(*self._go_button_locator).click()
+        time.sleep(2)
 
 
 class SupplierForm(FormPage):

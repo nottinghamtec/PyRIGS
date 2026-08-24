@@ -14,11 +14,11 @@ def test_add_qualification(admin_client, trainee, admin_user, training_item):
     url = reverse('add_qualification', kwargs={'pk': trainee.pk})
     date = (timezone.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
     response = admin_client.post(url, {'date': date, 'trainee': trainee.pk, 'supervisor': trainee.pk, 'item': training_item.pk})
-    assertFormError(response, 'form', 'date', 'Qualification date may not be in the future')
-    assertFormError(response, 'form', 'supervisor', 'One may not supervise oneself...')
+    assertFormError(response.context['form'], 'date', 'Qualification date may not be in the future')
+    assertFormError(response.context['form'], 'supervisor', 'One may not supervise oneself...')
     response = admin_client.post(url, {'date': date, 'trainee': admin_user.pk, 'supervisor': trainee.pk, 'item': training_item.pk})
     print(response.content)
-    assertFormError(response, 'form', 'supervisor', 'Selected supervisor must actually *be* a supervisor...')
+    assertFormError(response.context['form'], 'supervisor', 'Selected supervisor must actually *be* a supervisor...')
 
 
 def test_add_qualification_reversion(admin_client, trainee, training_item, supervisor):

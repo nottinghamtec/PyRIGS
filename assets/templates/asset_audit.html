@@ -1,4 +1,4 @@
-{% extends request.is_ajax|yesno:'base_ajax.html,base_assets.html' %}
+{% extends is_ajax|yesno:'base_ajax.html,base_assets.html' %}
 {% load widget_tweaks %}
 
 {% block content %}
@@ -79,7 +79,7 @@
       </div>
     </div>
   </div>
-  {% if not request.is_ajax %}
+  {% if not is_ajax %}
     <div class="form-group form-row pull-right">
         <button class="btn btn-success" type="submit" form="asset_audit_form" id="id_mark_audited">Mark Audited</button>
     </div>

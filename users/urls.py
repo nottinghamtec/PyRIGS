@@ -1,7 +1,6 @@
-from django.conf.urls import include
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.urls import path
+from django.urls import include, path
 from django.views.decorators.clickjacking import xframe_options_exempt
 from registration.backends.default.views import RegistrationView
 

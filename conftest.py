@@ -1,3 +1,4 @@
+import importlib
 from django.conf import settings
 import django
 import pytest
@@ -6,6 +7,12 @@ from RIGS.models import VatRate
 from PyRIGS.tests import pages
 import os
 from selenium import webdriver
+
+# z3c.rml got ``del importlib.metadata`` in __init__.py
+# reinject the original one here to solve ``module 'importlib' has no attribute 'metadata'``
+# what a bullsh*t
+import importlib.metadata as _importlib_metadata
+importlib.metadata = _importlib_metadata
 
 
 def pytest_configure():
@@ -44,7 +51,16 @@ def logged_in_browser(live_server, admin_user, browser, db):
 def splinter_driver_kwargs():
     options = webdriver.ChromeOptions()
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("--lang=en-GB")
     options.add_argument("--headless")
+    # disable pwd mgr notification to prevent focus change
+    options.add_experimental_option("prefs", {
+        "credentials_enable_service": False,
+        "profile.password_manager_enabled": False,
+        "profile.password_manager_leak_detection": False,
+        "autofill.profile_enabled": False,
+        "autofill.credit_card_enabled": False,
+    })
     if settings.CI:
         options.add_argument("--no-sandbox")
     return {"options": options}
