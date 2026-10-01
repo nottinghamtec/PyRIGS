@@ -88,12 +88,9 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-      - "443:443"
 
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/certbot:/var/www/certbot:ro
+      - ./nginx/default.dev.conf:/etc/nginx/conf.d/default.conf:ro
       - static_files:/var/www/static:ro
 
     depends_on:
