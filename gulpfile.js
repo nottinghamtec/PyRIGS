@@ -30,11 +30,13 @@ function styles(done) {
                     'node_modules/easymde/dist/easymde.min.css'
                     ])
     .pipe(sourcemaps.init())
-    // I know you are deprecated but please be quite
+    // Bootstrap 4's SCSS can only be consumed via @import (its partials share global variables),
+    // so that one deprecation stays silenced until we move to a Sass-module-aware framework.
+    // quietDeps hides the remaining deprecations raised inside third-party stylesheets.
     .pipe(sass({
         loadPaths: ['.'],
         quietDeps: true,
-        silenceDeprecations: ['import', 'color-functions', 'global-builtin', 'if-function'],
+        silenceDeprecations: ['import'],
     }).on('error', sass.logError))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
     .pipe(postcss([ autoprefixer(), cssnano() ]))
