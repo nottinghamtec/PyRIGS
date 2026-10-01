@@ -142,7 +142,7 @@ class TrainingItem(models.Model):
         return user.qualifications_obtained.only('item', 'depth').filter(item=item, depth__gte=depth).exists()
 
     class Meta:
-        unique_together = ["reference_number", "active", "category"]
+        constraints = [models.UniqueConstraint(fields=['reference_number', 'active', 'category'], name='unique_reference_number_active_category')]
         ordering = ['category__reference_number', 'reference_number']
 
 
@@ -217,7 +217,7 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         return reverse('edit_qualification', kwargs={'pk': self.pk})
 
     class Meta:
-        unique_together = ["trainee", "item", "depth"]
+        constraints = [models.UniqueConstraint(fields=['trainee', 'item', 'depth'], name='unique_trainee_item_depth')]
         order_with_respect_to = 'item'
 
 
@@ -344,7 +344,7 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
         return f"{depth} in {self.item}"
 
     class Meta:
-        unique_together = ["level", "item"]
+        constraints = [models.UniqueConstraint(fields=['level', 'item'], name='unique_level_item')]
 
 
 @reversion.register
@@ -376,5 +376,5 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
         return reverse('trainee_detail', kwargs={'pk': self.trainee_id})
 
     class Meta:
-        unique_together = ["trainee", "level"]
+        constraints = [models.UniqueConstraint(fields=['trainee', 'level'], name='unique_trainee_level')]
         ordering = ['-confirmed_on']

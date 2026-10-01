@@ -79,7 +79,7 @@ class CableType(models.Model):
 
     class Meta:
         ordering = ['plug', 'socket', '-circuits']
-        unique_together = ['plug', 'socket', 'circuits', 'cores']
+        constraints = [models.UniqueConstraint(fields=['plug', 'socket', 'circuits', 'cores'], name='unique_plug_socket_circuits_cores')]
 
     def __str__(self):
         if self.plug and self.socket:
