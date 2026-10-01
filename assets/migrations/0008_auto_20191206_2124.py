@@ -12,7 +12,7 @@ def forwards(apps, schema_editor):
             asset_search = re.search("^([A-Z0-9]*?[A-Z]?)([0-9]+)$", row.asset_id)
             if asset_search is None: # If the asset_id doesn't have a number at the end
                 row.asset_id += "1"
-            
+
             asset_search = re.search("^([A-Z0-9]*?[A-Z]?)([0-9]+)$", row.asset_id)
             row.asset_id_prefix = asset_search.group(1)
             row.asset_id_number = int(asset_search.group(2))
