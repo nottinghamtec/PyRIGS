@@ -126,7 +126,7 @@ class AddQualification(generic.CreateView, ModalURLMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
-        if is_ajax(self.request).get('is_ajax'):
+        if is_ajax(self.request):
             context['override'] = "base_ajax.html"
         else:
             context['override'] = 'base_training.html'
