@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM combos/python_node:3.12_22 AS base
+FROM combos/python_node:3.14_24 AS base
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 FROM base AS builder
 
@@ -16,7 +16,9 @@ RUN npm run build \
     && rm -rf node_modules
 
 # Set up py environment
-ENV PYTHONDONTWRITEBYTECODE=1 \
+# DEBUG must never be on in a built image; enable it explicitly via the environment if needed
+ENV DEBUG=false \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
@@ -38,14 +40,15 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 RUN uv run python manage.py collectstatic --noinput
 
-FROM python:3.12-slim-trixie
+FROM python:3.14-slim-trixie
 RUN addgroup --system app \
     && adduser --system --group --home /home/app app \
     && mkdir -p /home/app \
     && chown app:app /home/app
 COPY --from=builder --chown=app:app /app /app
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ENV DEBUG=false \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"
 
