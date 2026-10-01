@@ -27,6 +27,14 @@ server {
 
     client_max_body_size 20m;
 
+    # Serve collected static files directly rather than via WhiteNoise
+    location /static/ {
+        alias /var/www/static/;
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
     location / {
         proxy_pass http://pyrigs;
         proxy_set_header Host              $host;

@@ -33,7 +33,9 @@ set -e
 cp -fL "\$RENEWED_LINEAGE/fullchain.pem" "$CERTS_DIR/fullchain.pem"
 cp -fL "\$RENEWED_LINEAGE/privkey.pem" "$CERTS_DIR/privkey.pem"
 chmod 600 "$CERTS_DIR/privkey.pem"
-docker compose -f "$REPO_DIR/compose.yml" exec -T nginx nginx -s reload || true
+if ! docker compose -f "$REPO_DIR/compose.yml" exec -T nginx nginx -s reload; then
+    echo "pyrigs deploy-hook: WARNING: certificates were copied but nginx could not be reloaded (is the stack running?)" >&2
+fi
 echo "pyrigs deploy-hook: \$(date) renewed [\$RENEWED_DOMAINS] and reloaded nginx"
 EOF
 chmod +x "$HOOK_PATH"

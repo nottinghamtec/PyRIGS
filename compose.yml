@@ -6,9 +6,11 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      # postgres 18+ defaults PGDATA to a versioned subdirectory; pin it so the volume below holds the data
+      PGDATA: /var/lib/postgresql/data
 
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
@@ -47,6 +49,10 @@ services:
     expose:
       - "8000"
 
+    volumes:
+      # shared with nginx, which serves /static/ directly
+      - static_files:/app/static
+
     depends_on:
       db:
         condition: service_healthy
@@ -56,6 +62,7 @@ services:
       - -c
       - |
         python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
         gunicorn \
           --bind 0.0.0.0:8000 \
           --workers 2 \
@@ -87,9 +94,11 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certbot:/var/www/certbot:ro
+      - static_files:/var/www/static:ro
 
     depends_on:
       - pyrigs
 
 volumes:
   postgres_data:
+  static_files:

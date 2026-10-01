@@ -20,8 +20,7 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 30 \
     -keyout "$CERTS_DIR/privkey.pem" \
     -out "$CERTS_DIR/fullchain.pem" \
     -subj "/CN=$DOMAIN" \
-    -addext "subjectAltName=DNS:$DOMAIN" \
-    2>/dev/null
+    -addext "subjectAltName=DNS:$DOMAIN"
 chmod 600 "$CERTS_DIR/privkey.pem"
 
 echo "Done: self-signed certificate (valid for 30 days) generated in $CERTS_DIR"
