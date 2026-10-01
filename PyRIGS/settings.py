@@ -26,7 +26,7 @@ DEBUG = env('DEBUG', cast=bool, default=True)
 STAGING = env('STAGING', cast=bool, default=False)
 CI = env('CI', cast=bool, default=False)
 
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",")
+ALLOWED_HOSTS = [host.strip() for host in env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",") if host.strip()]
 
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = [f"http://{host}" for host in ALLOWED_HOSTS]
@@ -46,7 +46,6 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', cast=bool, default=True)
     CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', cast=bool, default=True)
-    SECURE_HSTS_PRELOAD = True
 
 INTERNAL_IPS = ['127.0.0.1']
 
