@@ -11,7 +11,7 @@ RUN npm run build
 
 # Stage 2: build the Python environment (multi-arch: official python image)
 FROM python:3.14-slim-trixie AS builder
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /uvx /bin/
 
 # pycairo (via z3c.rml) has no wheels and is compiled against cairo
 RUN apt-get update \
