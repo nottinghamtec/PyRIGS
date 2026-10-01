@@ -4,7 +4,6 @@ import django
 import pytest
 from django.core.management import call_command
 from RIGS.models import VatRate
-from PyRIGS.tests import pages
 import os
 from selenium import webdriver
 
@@ -38,42 +37,6 @@ def admin_user(admin_user):
     admin_user.is_supervisor = True
     admin_user.save()
     return admin_user
-
-
-@pytest.fixture
-def logged_in_browser(live_server, admin_user, browser, db):
-    login_page = pages.LoginPage(browser.driver, live_server.url).open()
-    login_page.login(admin_user.username, "password")
-    yield browser
-
-
-@pytest.fixture(scope='session')
-def splinter_driver_kwargs():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--lang=en-GB")
-    options.add_argument("--headless")
-    # disable pwd mgr notification to prevent focus change
-    options.add_experimental_option("prefs", {
-        "credentials_enable_service": False,
-        "profile.password_manager_enabled": False,
-        "profile.password_manager_leak_detection": False,
-        "autofill.profile_enabled": False,
-        "autofill.credit_card_enabled": False,
-    })
-    if settings.CI:
-        options.add_argument("--no-sandbox")
-    return {"options": options}
-
-
-@pytest.fixture(scope='session')
-def splinter_webdriver():
-    return 'chrome'
-
-
-@pytest.fixture(scope='session')
-def splinter_screenshot_dir():
-    return 'screenshots/'
 
 
 @pytest.fixture(autouse=True)  # Also enables DB access for all tests as a useful side effect

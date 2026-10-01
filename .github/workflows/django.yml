@@ -49,18 +49,9 @@ jobs:
               uv run python3 manage.py collectstatic --noinput
       - name: Run Tests
         run: |
-          uv run pytest -n auto --cov \
-            --ignore=RIGS/tests/test_interaction.py \
-            --ignore=assets/tests/test_interaction.py \
-            --ignore=training/tests/test_interaction.py
+          uv run pytest -n auto --cov
         env:
           DATABASE_ENGINE: sqlite3
           DATABASE_NAME: db.sqlite3
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-            name: failure-screenshots ${{ matrix.test-group }}
-            path: screenshots/
-            retention-days: 5
       - name: Coveralls
         run: uv run coveralls --service=github
