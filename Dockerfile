@@ -38,7 +38,9 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-RUN uv run python manage.py collectstatic --noinput
+# Placeholder values only satisfy settings that are mandatory when DEBUG is off; they are not kept in the image
+RUN EMAIL_HOST=build EMAIL_HOST_USER=build EMAIL_HOST_PASSWORD=build EMAIL_FROM=build@example.com \
+    uv run python manage.py collectstatic --noinput
 
 FROM python:3.14-slim-trixie
 RUN addgroup --system app \
