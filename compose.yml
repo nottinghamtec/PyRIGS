@@ -49,6 +49,14 @@ services:
     expose:
       - "8000"
 
+    healthcheck:
+      # gunicorn only starts listening once migrations and collectstatic have finished
+      test: [ "CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), 2).close()" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
     volumes:
       # shared with nginx, which serves /static/ directly
       - static_files:/app/static
@@ -94,7 +102,8 @@ services:
       - static_files:/var/www/static:ro
 
     depends_on:
-      - pyrigs
+      pyrigs:
+        condition: service_healthy
 
 volumes:
   postgres_data:
