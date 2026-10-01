@@ -28,14 +28,16 @@
         <form id="checkin" role="form" method="POST" action="{{ form.action|default:request.path }}">
             <input type="hidden" name="{{ form.event.name }}" id="{{ form.event.id_for_label }}"
                value="{{event.pk}}"/>
-            {% if not is_ajax and self.request.user.pk is form.event.mic.pk %}
+            {% if not is_ajax and request.user.pk == event.mic.pk %}
             <div class="form-group">
                 <label for="{{ form.person.id_for_label }}"
                        class="col-sm-4 col-form-label">{{ form.person.label }}</label>
                 <div class="col-sm-8">
                     <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
-                        {% if person %}
-                            <option value="{{form.person.value}}" selected="selected" >{{ person.name }}</option>
+                        {% if form.instance.person %}
+                            <option value="{{ form.instance.person.pk }}" selected="selected">{{ form.instance.person.name }}</option>
+                        {% else %}
+                            <option value="{{ request.user.pk }}" selected="selected">{{ request.user.name }}</option>
                         {% endif %}
                     </select>
                 </div>

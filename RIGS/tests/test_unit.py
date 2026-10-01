@@ -434,3 +434,16 @@ def test_ra_big_power_without_power_mic_is_a_form_error(ra):
     form = forms.EventRiskAssessmentForm(data=data, instance=ra)
     assert not form.is_valid()
     assert form.errors['power_mic'].as_data()[0].code == 'power_mic_required'
+
+
+def test_checkin_person_picker_only_for_event_mic(client, admin_user, basic_event, django_user_model):
+    other = django_user_model.objects.create_user(username="other", password="other", is_approved=True)
+    basic_event.mic = admin_user
+    basic_event.save()
+    url = reverse('event_checkin', kwargs={'pk': basic_event.pk})
+
+    client.force_login(admin_user)
+    assertContains(client.get(url), 'selectpicker')
+
+    client.force_login(other)
+    assertNotContains(client.get(url), 'selectpicker')

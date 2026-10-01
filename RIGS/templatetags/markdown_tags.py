@@ -40,7 +40,7 @@ def markdown_filter(text, input_format='html', add_style=""):
         for alist in soup.find_all(['ul', 'ol']):
             alist['style'] = alist.name
             for li in alist.find_all('li', recursive=False):
-                text = li.find(text=True)
+                text = li.find(string=True)
                 text.wrap(soup.new_tag('p'))
 
             if alist.parent.name != 'li':
