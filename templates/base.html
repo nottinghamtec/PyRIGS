@@ -76,7 +76,7 @@
             {% endfor %}
         {% endif %}
     {% endblock %}
-    {% if page_title and not request.is_ajax %}
+    {% if page_title and not is_ajax %}
     <h2>{{page_title|safe}}</h2>
     {% endif %}
     {% block content %}{% endblock %}

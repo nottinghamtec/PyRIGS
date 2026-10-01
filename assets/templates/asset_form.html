@@ -1,4 +1,4 @@
-{% extends 'base_assets.html' %}
+{% extends is_ajax|yesno:"base_ajax.html,base_assets.html" %}
 {% load widget_tweaks %}
 {% load static %}
 

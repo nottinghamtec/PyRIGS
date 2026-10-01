@@ -50,7 +50,7 @@
 {% elif object.event.riskassessment.event_size == 2 %}
     <para style="style.largeEvent"><strong>Large Event</strong></para>
 {% endif %}
-    
+
 <spacer length="15"/>
 
 <blockTable colWidths="250,250">

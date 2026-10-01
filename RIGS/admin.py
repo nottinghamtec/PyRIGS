@@ -32,15 +32,11 @@ def merge_model_instances(primary_object, alias_objects):
     """
 
     # get related fields
-    related_fields = list(filter(
-        lambda x: x.is_relation is True,
-        primary_object._meta.get_fields()))
+    related_fields = list(filter(lambda x: x.is_relation is True, primary_object._meta.get_fields()))
 
-    many_to_many_fields = list(filter(
-        lambda x: x.many_to_many is True, related_fields))
+    many_to_many_fields = list(filter(lambda x: x.many_to_many is True, related_fields))
 
-    related_fields = list(filter(
-        lambda x: x.many_to_many is False, related_fields))
+    related_fields = list(filter(lambda x: x.many_to_many is False, related_fields))
 
     # Loop through all alias objects and migrate their references to the
     # primary object
@@ -69,10 +65,7 @@ def merge_model_instances(primary_object, alias_objects):
                     through_model_instances = through_model.objects.filter(**kwargs)
                     for instance in through_model_instances:
                         # Re-attach the through model to the primary_object
-                        setattr(
-                            instance,
-                            many_to_many_field.m2m_field_name(),
-                            primary_object)
+                        setattr(instance, many_to_many_field.m2m_field_name(), primary_object)
                         instance.save()
                         # TODO: Here, try to delete duplicate instances that are
                         # disallowed by a unique_together constraint
@@ -109,31 +102,34 @@ def merge_model_instances(primary_object, alias_objects):
 
 
 class AssociateAdmin(VersionAdmin):
-    search_fields = ['id', 'name']
-    list_display_links = ['id', 'name']
-    actions = ['merge']
+    search_fields = ["id", "name"]
+    list_display_links = ["id", "name"]
+    actions = ["merge"]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(event_count=Count('event'))
+        return super().get_queryset(request).annotate(event_count=Count("event"))
 
     def number_of_events(self, obj):
         return obj.latest_events.count()
 
-    number_of_events.admin_order_field = 'event_count'
+    number_of_events.admin_order_field = "event_count"
 
     def merge(self, request, queryset):
-        if request.POST.get('post'):  # Has the user confirmed which is the master record?
+        if request.POST.get("post"):  # Has the user confirmed which is the master record?
             try:
-                master_object_pk = request.POST.get('master')
+                master_object_pk = request.POST.get("master")
                 master_object = queryset.get(pk=master_object_pk)
             except ObjectDoesNotExist:
                 self.message_user(request, "An error occured. Did you select a 'master' record?", level=messages.ERROR)
                 return
 
-            primary_object, deleted_objects, deleted_objects_count = merge_model_instances(master_object, queryset.exclude(pk=master_object_pk).all())
-            reversion.set_comment('Merging Objects')
+            primary_object, deleted_objects, deleted_objects_count = merge_model_instances(
+                master_object, queryset.exclude(pk=master_object_pk).all()
+            )
+            reversion.set_comment("Merging Objects")
             self.message_user(request, f"Objects successfully merged. {deleted_objects_count} old objects deleted.")
         else:  # Present the confirmation screen
+
             class TempForm(ModelForm):
                 class Meta:
                     model = queryset.model
@@ -144,39 +140,51 @@ class AssociateAdmin(VersionAdmin):
                 forms.append(TempForm(instance=obj))
 
             context = {
-                'title': _("Are you sure?"),
-                'queryset': queryset,
-                'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-                'forms': forms
+                "title": _("Are you sure?"),
+                "queryset": queryset,
+                "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+                "forms": forms,
             }
-            return TemplateResponse(request, 'admin_associate_merge.html', context)
+            return TemplateResponse(request, "admin_associate_merge.html", context)
 
 
 @admin.register(models.Profile)
 class ProfileAdmin(UserAdmin, AssociateAdmin):
-    list_display = ('username', 'name', 'is_approved', 'is_superuser', 'is_supervisor', 'number_of_events', 'last_login', 'date_joined')
-    list_display_links = ['username']
-    list_filter = UserAdmin.list_filter + ('is_approved', 'date_joined')
+    list_display = (
+        "username",
+        "name",
+        "is_approved",
+        "is_superuser",
+        "is_supervisor",
+        "number_of_events",
+        "last_login",
+        "date_joined",
+    )
+    list_display_links = ["username"]
+    list_filter = UserAdmin.list_filter + ("is_approved", "date_joined")
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        (_('Personal info'), {
-            'fields': ('first_name', 'last_name', 'email', 'initials', 'phone')}),
-        (_('Permissions'), {'fields': ('is_approved', 'is_active', 'is_staff', 'is_superuser',
-                                       'groups', 'user_permissions')}),
-        (_('Important dates'), {
-            'fields': ('last_login', 'date_joined')}),
+        (None, {"fields": ("username", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name", "email", "initials", "phone")}),
+        (
+            _("Permissions"),
+            {"fields": ("is_approved", "is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2'),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2"),
+            },
+        ),
     )
     form = user_forms.ProfileChangeForm
     add_form = user_forms.ProfileCreationForm
-    actions = ['approve_user', 'merge']
+    actions = ["approve_user", "merge"]
 
-    merge_fields = ['username', 'first_name', 'last_name', 'initials', 'email', 'phone', 'is_supervisor']
+    merge_fields = ["username", "first_name", "last_name", "initials", "email", "phone", "is_supervisor"]
 
     def approve_user(modeladmin, request, queryset):
         queryset.update(is_approved=True)
@@ -184,32 +192,32 @@ class ProfileAdmin(UserAdmin, AssociateAdmin):
 
 @admin.register(models.Person)
 class PersonAdmin(AssociateAdmin):
-    list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
-    merge_fields = ['name', 'phone', 'email', 'address', 'notes']
+    list_display = ("id", "name", "phone", "email", "number_of_events")
+    merge_fields = ["name", "phone", "email", "address", "notes"]
 
 
 @admin.register(models.Venue)
 class VenueAdmin(AssociateAdmin):
-    list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
-    merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'three_phase_available']
+    list_display = ("id", "name", "phone", "email", "number_of_events")
+    merge_fields = ["name", "phone", "email", "address", "notes", "three_phase_available"]
 
 
 @admin.register(models.Organisation)
 class OrganisationAdmin(AssociateAdmin):
-    list_display = ('id', 'name', 'phone', 'email', 'number_of_events')
-    merge_fields = ['name', 'phone', 'email', 'address', 'notes', 'union_account']
+    list_display = ("id", "name", "phone", "email", "number_of_events")
+    merge_fields = ["name", "phone", "email", "address", "notes", "union_account"]
 
 
 @admin.register(models.RiskAssessment)
 class RiskAssessmentAdmin(VersionAdmin):
-    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+    list_display = ("id", "event", "reviewed_at", "reviewed_by")
 
 
 @admin.register(models.EventChecklist)
 class EventChecklistAdmin(VersionAdmin):
-    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+    list_display = ("id", "event", "reviewed_at", "reviewed_by")
 
 
 @admin.register(models.PowerTestRecord)
-class EventChecklistAdmin(VersionAdmin):
-    list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')
+class PowerTestRecordAdmin(VersionAdmin):
+    list_display = ("id", "event", "reviewed_at", "reviewed_by")

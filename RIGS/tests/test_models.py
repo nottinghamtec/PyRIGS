@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime, time
-from decimal import *
+from decimal import Decimal
 
 import pytz
 import pytest
@@ -15,18 +15,18 @@ def assert_decimal_equality(d1, d2):
 
 
 def test_str():
-    profile = models.Profile(first_name='Test', last_name='Case')
-    assert str(profile) == 'Test Case'
-    profile.initials = 'TC'
+    profile = models.Profile(first_name="Test", last_name="Case")
+    assert str(profile) == "Test Case"
+    profile.initials = "TC"
     assert str(profile) == 'Test Case "TC"'
 
 
 @pytest.mark.django_db
 def test_find_correct(vat_rate):
-    new_rate = models.VatRate.objects.create(start_at='2016-03-01', rate=0.15, comment='test2')
-    r = models.VatRate.objects.find_rate('2015-03-01')
+    new_rate = models.VatRate.objects.create(start_at="2016-03-01", rate=0.15, comment="test2")
+    r = models.VatRate.objects.find_rate("2015-03-01")
     assert_decimal_equality(r.rate, vat_rate.rate)
-    r = models.VatRate.objects.find_rate('2016-03-01')
+    r = models.VatRate.objects.find_rate("2016-03-01")
     assert_decimal_equality(r.rate, new_rate.rate)
 
 
@@ -38,7 +38,7 @@ def test_related_vatrate(basic_event, vat_rate):
     assert_decimal_equality(vat_rate.rate, basic_event.vat_rate.rate)
 
 
-class EventTest():
+class EventTest:
     def test_count(many_events):
         # Sanity check we have the expected events created
         assert models.Event.objects.count() == 18
@@ -48,7 +48,6 @@ class EventTest():
         assert models.Event.objects.rig_count() == 7
 
     def test_current_events(many_events):
-        all_events = set(range(1, 18))
         current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
         not_current_events = set(cls.all_events) - set(cls.current_events)
         current_events = models.Event.objects.current_events()
@@ -65,7 +64,7 @@ class EventTest():
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.items():
+        for key, event in self.events.items():
             if event.pk % 2:
                 event.venue = v1
                 e1.append(event)
@@ -86,7 +85,7 @@ class EventTest():
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.items():
+        for key, event in self.events.items():
             if event.pk % 2:
                 event.person = p1
                 e1.append(event)
@@ -107,7 +106,7 @@ class EventTest():
 
         e1 = []
         e2 = []
-        for (key, event) in self.events.items():
+        for key, event in self.events.items():
             if event.pk % 2:
                 event.organisation = o1
                 e1.append(event)
@@ -119,7 +118,7 @@ class EventTest():
         assert set(e1) == set(o1.latest_events)
         assert set(e1) == set(o2.latest_events)
 
-        for (key, event) in self.events.items():
+        for key, event in self.events.items():
             event.organisation = None
 
     def test_organisation_person_join(many_events):
@@ -219,23 +218,18 @@ def test_latest_time():
 def test_in_bounds():
     manager = models.Event.objects
     events = [
-        manager.create(name="TE IB0", start_date='2016-01-02'),  # yes no
-        manager.create(name="TE IB1", start_date='2015-12-31', end_date='2016-01-04'),
-
+        manager.create(name="TE IB0", start_date="2016-01-02"),  # yes no
+        manager.create(name="TE IB1", start_date="2015-12-31", end_date="2016-01-04"),
         # basic checks
-        manager.create(name='TE IB2', start_date='2016-01-02', end_date='2016-01-04'),
-        manager.create(name='TE IB3', start_date='2015-12-31', end_date='2016-01-03'),
-        manager.create(name='TE IB4', start_date='2016-01-04',
-                       access_at=create_datetime(2016, 0o1, 0o3, 00, 00)),
-        manager.create(name='TE IB5', start_date='2016-01-04',
-                       meet_at=create_datetime(2016, 0o1, 0o2, 00, 00)),
-
+        manager.create(name="TE IB2", start_date="2016-01-02", end_date="2016-01-04"),
+        manager.create(name="TE IB3", start_date="2015-12-31", end_date="2016-01-03"),
+        manager.create(name="TE IB4", start_date="2016-01-04", access_at=create_datetime(2016, 0o1, 0o3, 00, 00)),
+        manager.create(name="TE IB5", start_date="2016-01-04", meet_at=create_datetime(2016, 0o1, 0o2, 00, 00)),
         # negative check
-        manager.create(name='TE IB6', start_date='2015-12-31', end_date='2016-01-01'),
+        manager.create(name="TE IB6", start_date="2015-12-31", end_date="2016-01-01"),
     ]
 
-    in_bounds = manager.events_in_bounds(create_datetime(2016, 1, 2, 0, 0),
-                                         create_datetime(2016, 1, 3, 0, 0))
+    in_bounds = manager.events_in_bounds(create_datetime(2016, 1, 2, 0, 0), create_datetime(2016, 1, 3, 0, 0))
     assert events[0] in in_bounds
     assert events[1], in_bounds
     assert events[2], in_bounds
@@ -293,43 +287,51 @@ class EventPricingTestCase(TestCase):
     # Decimal type is needed here as that is what is returned from the model.
     # Using anything else results in a failure due to floating point arritmetic
     def test_sum_totals(self):
-        self.assertEqual(self.e1.sum_total, Decimal('70.40'))
-        self.assertEqual(self.e2.sum_total, Decimal('381.20'))
+        self.assertEqual(self.e1.sum_total, Decimal("70.40"))
+        self.assertEqual(self.e2.sum_total, Decimal("381.20"))
 
     def test_vat_rate(self):
-        self.assertEqual(self.e1.vat_rate.rate, Decimal('0.20'))
-        self.assertEqual(self.e2.vat_rate.rate, Decimal('0.10'))
+        self.assertEqual(self.e1.vat_rate.rate, Decimal("0.20"))
+        self.assertEqual(self.e2.vat_rate.rate, Decimal("0.10"))
 
     def test_vat_ammount(self):
-        self.assertEqual(self.e1.vat, Decimal('14.08'))
-        self.assertEqual(self.e2.vat, Decimal('38.12'))
+        self.assertEqual(self.e1.vat, Decimal("14.08"))
+        self.assertEqual(self.e2.vat, Decimal("38.12"))
 
     def test_grand_total(self):
-        self.assertEqual(self.e1.total, Decimal('84.48'))
-        self.assertEqual(self.e2.total, Decimal('419.32'))
+        self.assertEqual(self.e1.total, Decimal("84.48"))
+        self.assertEqual(self.e2.total, Decimal("419.32"))
 
 
 class EventAuthorisationTestCase(TestCase):
     def setUp(self):
         self.profile = models.Profile.objects.get_or_create(
-            first_name='Test',
-            last_name='TEC User',
-            username='eventauthtest',
-            email='teccie@functional.test',
-            is_superuser=True  # lazily grant all permissions
+            first_name="Test",
+            last_name="TEC User",
+            username="eventauthtest",
+            email="teccie@functional.test",
+            is_superuser=True,  # lazily grant all permissions
         )[0]
-        self.person = models.Person.objects.create(name='Authorisation Test Person')
-        self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation', union_account=True)
-        self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person, organisation=self.organisation,
-                                                 start_date=date.today())
+        self.person = models.Person.objects.create(name="Authorisation Test Person")
+        self.organisation = models.Organisation.objects.create(
+            name="Authorisation Test Organisation", union_account=True
+        )
+        self.event = models.Event.objects.create(
+            name="AuthorisationTestCase", person=self.person, organisation=self.organisation, start_date=date.today()
+        )
         # Add some items
-        models.EventItem.objects.create(event=self.event, name="Authorisation test item", quantity=2, cost=123.45,
-                                        order=1)
+        models.EventItem.objects.create(
+            event=self.event, name="Authorisation test item", quantity=2, cost=123.45, order=1
+        )
 
     def test_event_property(self):
-        auth1 = models.EventAuthorisation.objects.create(event=self.event, email="authorisation@model.test.case",
-                                                         name="Test Auth 1", amount=self.event.total - 1,
-                                                         sent_by=self.profile)
+        auth1 = models.EventAuthorisation.objects.create(
+            event=self.event,
+            email="authorisation@model.test.case",
+            name="Test Auth 1",
+            amount=self.event.total - 1,
+            sent_by=self.profile,
+        )
         self.assertFalse(self.event.authorised)
         auth1.amount = self.event.total
         auth1.save()
@@ -337,7 +339,11 @@ class EventAuthorisationTestCase(TestCase):
 
     def test_last_edited(self):
         with reversion.create_revision():
-            auth = models.EventAuthorisation.objects.create(event=self.event, email="authorisation@model.test.case",
-                                                            name="Test Auth", amount=self.event.total,
-                                                            sent_by=self.profile)
+            auth = models.EventAuthorisation.objects.create(
+                event=self.event,
+                email="authorisation@model.test.case",
+                name="Test Auth",
+                amount=self.event.total,
+                sent_by=self.profile,
+            )
         self.assertIsNotNone(auth.last_edited_at)

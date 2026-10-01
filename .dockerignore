@@ -1,0 +1,30 @@
+# Exclude everything by default, then explicitly include what the image needs.
+# This also keeps .env files, keys and local virtualenvs out of the image.
+*
+
+# Build tooling
+!package.json
+!package-lock.json
+!gulpfile.js
+!pyproject.toml
+!uv.lock
+!.python-version
+!manage.py
+
+# Frontend sources
+!pipeline/source_assets/**
+
+# Django project and apps
+!PyRIGS/**
+!RIGS/**
+!assets/**
+!training/**
+!users/**
+!versioning/**
+!templates/**
+
+# Never ship these, even from within included directories
+**/tests
+**/__pycache__
+**/*.pyc
+**/*.sqlite3

@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  - repo: local
+    hooks:
+      - id: uv-check
+        name: uv lock check
+        description: Checks the validity of the uv.lock file.
+        entry: uv lock --check
+        language: system
+        files: pyproject.toml
+        pass_filenames: false
+
+      - id: ruff-lint
+        name: ruff linting
+        description: Run ruff linting
+        entry: uv run ruff check --force-exclude
+        language: system
+        'types_or': [python, pyi]
+        args: [--fix, --exit-non-zero-on-fix]
+
+      - id: ruff-format
+        name: ruff formatting
+        description: Run ruff formatting
+        entry: uv run ruff format --force-exclude
+        language: system
+        'types_or': [python, pyi]

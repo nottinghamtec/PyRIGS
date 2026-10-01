@@ -1,16 +1,13 @@
-import datetime
 from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q, F, Value, CharField
-from django.db.models.functions import Concat
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
-from django.utils.translation import gettext_lazy as _
 
 
 class TraineeManager(models.Manager):
@@ -20,15 +17,13 @@ class TraineeManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(first_name__icontains=query) |
-                         Q(last_name__icontains=query) | Q(initials__icontains=query)
-                         )
+            or_lookup = Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(initials__icontains=query)
             or_lookup = filter_by_pk(or_lookup, query)
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
 
-@reversion.register(for_concrete_model=False, fields=['is_supervisor'])
+@reversion.register(for_concrete_model=False, fields=["is_supervisor"])
 class Trainee(Profile, RevisionMixin):
     class Meta:
         proxy = True
@@ -37,31 +32,43 @@ class Trainee(Profile, RevisionMixin):
 
     # FIXME use queryset
     def started_levels(self):
-        return [level for level in TrainingLevel.objects.all() if level.percentage_complete(self) > 0 and level.pk not in self.level_qualifications.values_list('level', flat=True)]
+        return [
+            level
+            for level in TrainingLevel.objects.all()
+            if level.percentage_complete(self) > 0
+            and level.pk not in self.level_qualifications.values_list("level", flat=True)
+        ]
 
     @property
     def confirmed_levels(self):
-        return self.level_qualifications.exclude(confirmed_on=None).select_related('level')
+        return self.level_qualifications.exclude(confirmed_on=None).select_related("level")
 
     @property
     def is_technician(self):
-        return self.confirmed_levels \
-            .filter(level__level=TrainingLevel.TECHNICIAN) \
-            .exclude(level__department=TrainingLevel.HAULAGE) \
-            .exclude(level__department__isnull=True).exists()
+        return (
+            self.confirmed_levels.filter(level__level=TrainingLevel.TECHNICIAN)
+            .exclude(level__department=TrainingLevel.HAULAGE)
+            .exclude(level__department__isnull=True)
+            .exists()
+        )
 
     @property
     def is_driver(self):
         return self.confirmed_levels.filter(level__department=TrainingLevel.HAULAGE).exists()
 
     def get_records_of_depth(self, depth):
-        return self.qualifications_obtained.filter(depth=depth).select_related('item', 'trainee', 'supervisor')
+        return self.qualifications_obtained.filter(depth=depth).select_related("item", "trainee", "supervisor")
 
     def is_user_qualified_in(self, item, required_depth):
-        return self.qualifications_obtained.values('item', 'depth').filter(item=item).filter(depth__gte=required_depth).exists()
+        return (
+            self.qualifications_obtained.values("item", "depth")
+            .filter(item=item)
+            .filter(depth__gte=required_depth)
+            .exists()
+        )
 
     def get_absolute_url(self):
-        return reverse('trainee_detail', kwargs={'pk': self.pk})
+        return reverse("trainee_detail", kwargs={"pk": self.pk})
 
     @property
     def display_id(self):
@@ -71,21 +78,26 @@ class Trainee(Profile, RevisionMixin):
 class TrainingCategory(models.Model):
     reference_number = models.IntegerField(unique=True)
     name = models.CharField(max_length=50)
-    training_level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE, null=True, help_text="If this is set, any user with the selected level may pass out users within this category, regardless of other status")
+    training_level = models.ForeignKey(
+        "TrainingLevel",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="If this is set, any user with the selected level may pass out users within this category, regardless of other status",
+    )
 
     def __str__(self):
         return f"{self.reference_number}. {self.name}"
 
     class Meta:
-        verbose_name_plural = 'Training Categories'
-        ordering = ['reference_number']
+        verbose_name_plural = "Training Categories"
+        ordering = ["reference_number"]
 
 
 class TrainingItemManager(QueryablePropertiesManager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(name__icontains=query) | Q(description__icontains=query) | Q(display_id=query))
+            or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(display_id=query)
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
@@ -93,11 +105,11 @@ class TrainingItemManager(QueryablePropertiesManager):
 @reversion.register
 class TrainingItem(models.Model):
     reference_number = models.IntegerField()
-    category = models.ForeignKey('TrainingCategory', related_name='items', on_delete=models.CASCADE)
+    category = models.ForeignKey("TrainingCategory", related_name="items", on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
-    prerequisites = models.ManyToManyField('self', symmetrical=False, blank=True)
+    prerequisites = models.ManyToManyField("self", symmetrical=False, blank=True)
 
     objects = TrainingItemManager()
 
@@ -112,9 +124,9 @@ class TrainingItem(models.Model):
     @display_id.filter
     @classmethod
     def display_id(cls, lookup, value):
-        if '.' in str(value):
+        if "." in str(value):
             try:
-                category_number, number = value.split('.', 2)
+                category_number, number = value.split(".", 2)
                 if category_number and number:
                     return Q(category__reference_number=int(category_number), reference_number=int(number))
             except ValueError:
@@ -128,29 +140,41 @@ class TrainingItem(models.Model):
         return name
 
     def get_absolute_url(self):
-        return reverse('item_list')
+        return reverse("item_list")
 
     def has_prereqs(self):
         return self.prerequisites.all().exists()
 
     def user_has_requirements(self, user):
         # Always true if there are no prerequisites, otherwise get a set of prerequsite IDs and check if they are a subset of the set of qualification IDs
-        return not self.has_prereqs() or set(self.prerequisites.values_list('pk', flat=True)).issubset(set(user.qualifications_obtained.values_list('item', flat=True)))
+        return not self.has_prereqs() or set(self.prerequisites.values_list("pk", flat=True)).issubset(
+            set(user.qualifications_obtained.values_list("item", flat=True))
+        )
 
     @staticmethod
     def user_has_qualification(item, user, depth):
-        return user.qualifications_obtained.only('item', 'depth').filter(item=item, depth__gte=depth).exists()
+        return user.qualifications_obtained.only("item", "depth").filter(item=item, depth__gte=depth).exists()
 
     class Meta:
-        unique_together = ["reference_number", "active", "category"]
-        ordering = ['category__reference_number', 'reference_number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=["reference_number", "active", "category"], name="unique_reference_number_active_category"
+            )
+        ]
+        ordering = ["category__reference_number", "reference_number"]
 
 
 class TrainingItemQualificationManager(QueryablePropertiesManager):
     def search(self, query=None):
-        qs = self.get_queryset().select_related('item', 'supervisor', 'item__category')
+        qs = self.get_queryset().select_related("item", "supervisor", "item__category")
         if query is not None:
-            or_lookup = (Q(item__name__icontains=query) | Q(supervisor__first_name__icontains=query) | Q(supervisor__last_name__icontains=query) | Q(item__category__name__icontains=query) | Q(item__display_id=query))
+            or_lookup = (
+                Q(item__name__icontains=query)
+                | Q(supervisor__first_name__icontains=query)
+                | Q(supervisor__last_name__icontains=query)
+                | Q(item__category__name__icontains=query)
+                | Q(item__display_id=query)
+            )
 
             try:
                 or_lookup = Q(item__category__reference_number=int(query)) | or_lookup
@@ -167,16 +191,16 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     COMPLETE = 1
     PASSED_OUT = 2
     CHOICES = (
-        (STARTED, 'Training Started'),
-        (COMPLETE, 'Training Complete'),
-        (PASSED_OUT, 'Passed Out'),
+        (STARTED, "Training Started"),
+        (COMPLETE, "Training Complete"),
+        (PASSED_OUT, "Passed Out"),
     )
-    item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
+    item = models.ForeignKey("TrainingItem", on_delete=models.CASCADE)
     depth = models.IntegerField(choices=CHOICES)
-    trainee = models.ForeignKey('Trainee', related_name='qualifications_obtained', on_delete=models.CASCADE)
+    trainee = models.ForeignKey("Trainee", related_name="qualifications_obtained", on_delete=models.CASCADE)
     date = models.DateField()
     # TODO Remember that some training is external. Support for making an organisation the trainer?
-    supervisor = models.ForeignKey('Trainee', related_name='qualifications_granted', on_delete=models.CASCADE)
+    supervisor = models.ForeignKey("Trainee", related_name="qualifications_granted", on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
@@ -185,15 +209,17 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     def clean(self):
         errdict = {}
         # Validate supervisor can train in this item
-        if hasattr(self, 'supervisor'):  # This will be false if form validation fails
+        if hasattr(self, "supervisor"):  # This will be false if form validation fails
             if self.item.category.training_level:
                 if not self.supervisor.level_qualifications.filter(level=self.item.category.training_level):
-                    errdict['supervisor'] = ('Selected supervising person is missing requisite training level to train in this department')
+                    errdict["supervisor"] = (
+                        "Selected supervising person is missing requisite training level to train in this department"
+                    )
             elif not self.supervisor.is_supervisor:
-                errdict['supervisor'] = ('Selected supervisor must actually *be* a supervisor...')
+                errdict["supervisor"] = "Selected supervisor must actually *be* a supervisor..."
         # Item requirements only apply to being passed out
         if self.depth == TrainingItemQualification.PASSED_OUT and not self.item.user_has_requirements(self.trainee):
-            errdict['item'] = ('Missing prerequisites')
+            errdict["item"] = "Missing prerequisites"
         if errdict != {}:  # If there was an error when validation
             raise ValidationError(errdict)
 
@@ -214,11 +240,11 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         return "info"
 
     def get_absolute_url(self):
-        return reverse('edit_qualification', kwargs={'pk': self.pk})
+        return reverse("edit_qualification", kwargs={"pk": self.pk})
 
     class Meta:
-        unique_together = ["trainee", "item", "depth"]
-        order_with_respect_to = 'item'
+        constraints = [models.UniqueConstraint(fields=["trainee", "item", "depth"], name="unique_trainee_item_depth")]
+        order_with_respect_to = "item"
 
 
 # Levels
@@ -229,9 +255,9 @@ class TrainingLevel(models.Model, RevisionMixin):
     TECHNICIAN = 1
     SUPERVISOR = 2
     CHOICES = (
-        (TA, 'Technical Assistant'),
-        (TECHNICIAN, 'Technician'),
-        (SUPERVISOR, 'Supervisor'),
+        (TA, "Technical Assistant"),
+        (TECHNICIAN, "Technician"),
+        (SUPERVISOR, "Supervisor"),
     )
     SOUND = 0
     LIGHTING = 1
@@ -239,15 +265,17 @@ class TrainingLevel(models.Model, RevisionMixin):
     RIGGING = 3
     HAULAGE = 4
     DEPARTMENTS = (
-        (SOUND, 'Sound'),
-        (LIGHTING, 'Lighting'),
-        (POWER, 'Power'),
-        (RIGGING, 'Rigging'),
-        (HAULAGE, 'Haulage'),
+        (SOUND, "Sound"),
+        (LIGHTING, "Lighting"),
+        (POWER, "Power"),
+        (RIGGING, "Rigging"),
+        (HAULAGE, "Haulage"),
     )
-    department = models.IntegerField(choices=DEPARTMENTS, null=True, blank=True)  # N.B. Technical Assistant does not have a department
+    department = models.IntegerField(
+        choices=DEPARTMENTS, null=True, blank=True
+    )  # N.B. Technical Assistant does not have a department
     level = models.IntegerField(choices=CHOICES)
-    prerequisite_levels = models.ManyToManyField('self', related_name='prerequisites', symmetrical=False, blank=True)
+    prerequisite_levels = models.ManyToManyField("self", related_name="prerequisites", symmetrical=False, blank=True)
     icon = models.CharField(null=True, blank=True, max_length=20)
 
     class Meta:
@@ -288,7 +316,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         return self.get_requirements_of_depth(TrainingItemQualification.PASSED_OUT)
 
     def percentage_complete(self, user):
-        needed_qualifications = self.requirements.all().select_related('item')
+        needed_qualifications = self.requirements.all().select_related("item")
         relavant_qualifications = 0.0
         # TODO Efficiency...
         for req in needed_qualifications:
@@ -301,9 +329,13 @@ class TrainingLevel(models.Model, RevisionMixin):
         return 0
 
     def user_has_requirements(self, user):
-        has_required_items = all(TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all())
+        has_required_items = all(
+            TrainingItem.user_has_qualification(req.item, user, req.depth) for req in self.requirements.all()
+        )
         # Always true if there are no prerequisites, otherwise get a set of prerequsite IDs and check if they are a subset of the set of qualification IDs
-        has_required_levels = not self.prerequisite_levels.all().exists() or set(self.prerequisite_levels.values_list('pk', flat=True)).issubset(set(user.level_qualifications.values_list('level', flat=True)))
+        has_required_levels = not self.prerequisite_levels.all().exists() or set(
+            self.prerequisite_levels.values_list("pk", flat=True)
+        ).issubset(set(user.level_qualifications.values_list("level", flat=True)))
         return has_required_items and has_required_levels
 
     def __str__(self):
@@ -320,7 +352,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         return str(self)
 
     def get_absolute_url(self):
-        return reverse('level_detail', kwargs={'pk': self.pk})
+        return reverse("level_detail", kwargs={"pk": self.pk})
 
     @property
     def get_icon(self):
@@ -328,13 +360,15 @@ class TrainingLevel(models.Model, RevisionMixin):
             icon = f"<span class='fas fa-{self.icon}'></span>"
         else:
             icon = "".join([w[0] for w in str(self).split()])
-        return mark_safe(f"<span class='badge badge-{self.department_colour} badge-pill' data-toggle='tooltip' title='{str(self)}'>{icon}</span>")
+        return mark_safe(
+            f"<span class='badge badge-{self.department_colour} badge-pill' data-toggle='tooltip' title='{str(self)}'>{icon}</span>"
+        )
 
 
 @reversion.register
 class TrainingLevelRequirement(models.Model, RevisionMixin):
-    level = models.ForeignKey('TrainingLevel', related_name='requirements', on_delete=models.CASCADE)
-    item = models.ForeignKey('TrainingItem', on_delete=models.CASCADE)
+    level = models.ForeignKey("TrainingLevel", related_name="requirements", on_delete=models.CASCADE)
+    item = models.ForeignKey("TrainingItem", on_delete=models.CASCADE)
     depth = models.IntegerField(choices=TrainingItemQualification.CHOICES)
 
     reversion_hide = True
@@ -344,15 +378,15 @@ class TrainingLevelRequirement(models.Model, RevisionMixin):
         return f"{depth} in {self.item}"
 
     class Meta:
-        unique_together = ["level", "item"]
+        constraints = [models.UniqueConstraint(fields=["level", "item"], name="unique_level_item")]
 
 
 @reversion.register
 class TrainingLevelQualification(models.Model, RevisionMixin):
-    trainee = models.ForeignKey('Trainee', related_name='level_qualifications', on_delete=models.CASCADE)
-    level = models.ForeignKey('TrainingLevel', on_delete=models.CASCADE)
+    trainee = models.ForeignKey("Trainee", related_name="level_qualifications", on_delete=models.CASCADE)
+    level = models.ForeignKey("TrainingLevel", on_delete=models.CASCADE)
     confirmed_on = models.DateTimeField(null=True)
-    confirmed_by = models.ForeignKey('Trainee', related_name='confirmer', on_delete=models.CASCADE, null=True)
+    confirmed_by = models.ForeignKey("Trainee", related_name="confirmer", on_delete=models.CASCADE, null=True)
 
     @property
     def get_icon(self):
@@ -373,8 +407,8 @@ class TrainingLevelQualification(models.Model, RevisionMixin):
         return str(self)
 
     def get_absolute_url(self):
-        return reverse('trainee_detail', kwargs={'pk': self.trainee_id})
+        return reverse("trainee_detail", kwargs={"pk": self.trainee_id})
 
     class Meta:
-        unique_together = ["trainee", "level"]
-        ordering = ['-confirmed_on']
+        constraints = [models.UniqueConstraint(fields=["trainee", "level"], name="unique_trainee_level")]
+        ordering = ["-confirmed_on"]
