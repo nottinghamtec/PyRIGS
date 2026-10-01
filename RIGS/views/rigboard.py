@@ -8,7 +8,6 @@ import hmac
 import hashlib
 
 from envparse import env
-from bs4 import BeautifulSoup
 
 from django.conf import settings
 from django.contrib import messages
@@ -20,7 +19,6 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator

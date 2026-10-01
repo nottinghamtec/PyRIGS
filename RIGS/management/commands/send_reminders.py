@@ -4,7 +4,7 @@ import datetime
 from django.template.loader import get_template
 from django.contrib.staticfiles import finders
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from django.urls import reverse

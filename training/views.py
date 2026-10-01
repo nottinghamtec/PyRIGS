@@ -10,7 +10,6 @@ from django.db.utils import IntegrityError
 from PyRIGS.views import is_ajax, ModalURLMixin, get_related, PrintListView
 from training import models, forms
 from users import views
-from reversion.views import RevisionMixin
 
 
 class ItemList(generic.ListView):

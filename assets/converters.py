@@ -1,4 +1,3 @@
-import urllib.parse
 
 
 class AssetIDConverter:  # Forces lowercase to uppercase

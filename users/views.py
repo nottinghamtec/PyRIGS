@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
 
 
 # This view should be exempt from requiring CSRF token.

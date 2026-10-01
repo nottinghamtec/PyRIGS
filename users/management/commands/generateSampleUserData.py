@@ -1,11 +1,8 @@
-import datetime
 import random
 
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.utils import timezone
-from reversion import revisions as reversion
 
 from RIGS import models
 
@@ -108,6 +105,6 @@ class Command(BaseCommand):
         keyholder_user.groups.add(self.keyholder_group)
         keyholder_user.save()
 
-        basic_user = models.Profile.objects.create_user(username="basic",
+        models.Profile.objects.create_user(username="basic",
                                                         email="basicuser@example.com", password="basic", first_name="Basic", last_name="User",
                                                         initials="BU", is_active=True, is_approved=True)

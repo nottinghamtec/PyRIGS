@@ -5,10 +5,8 @@ import pytest
 from django.conf import settings
 from django.core import mail, signing
 from django.http import HttpResponseBadRequest
-from django.test import TestCase
 from django.urls import reverse
 
-import PyRIGS.tests.base
 from RIGS import models
 from pytest_django.asserts import assertContains, assertNotContains, assertFormError
 

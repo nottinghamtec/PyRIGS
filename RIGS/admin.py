@@ -211,5 +211,5 @@ class EventChecklistAdmin(VersionAdmin):
 
 
 @admin.register(models.PowerTestRecord)
-class EventChecklistAdmin(VersionAdmin):
+class PowerTestRecordAdmin(VersionAdmin):
     list_display = ('id', 'event', 'reviewed_at', 'reviewed_by')

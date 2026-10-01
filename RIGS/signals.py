@@ -3,7 +3,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
-import datetime
 
 from pypdf import PdfReader, PdfWriter
 from django.conf import settings

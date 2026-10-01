@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import simplejson
 from django import forms
@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 from django.utils.html import format_html
-from reversion import revisions as reversion
 
 from RIGS import models
 from training.models import TrainingLevel

@@ -1,14 +1,12 @@
-import datetime
 
 import pytest
 from django.urls import reverse
-from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains
+from pytest_django.asserts import assertFormError, assertRedirects
 
 from PyRIGS.tests.base import assert_oembed, login
 
 from assets import models
 
-from django.utils import timezone
 
 pytestmark = pytest.mark.django_db
 

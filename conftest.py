@@ -2,10 +2,8 @@ import importlib
 from django.conf import settings
 import django
 import pytest
-from django.core.management import call_command
 from RIGS.models import VatRate
 import os
-from selenium import webdriver
 
 # z3c.rml got ``del importlib.metadata`` in __init__.py
 # reinject the original one here to solve ``module 'importlib' has no attribute 'metadata'``

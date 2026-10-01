@@ -1,11 +1,9 @@
-import datetime
 import random
 
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
-from reversion import revisions as reversion
 
 from training import models
 from RIGS.models import Profile

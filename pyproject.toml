@@ -35,7 +35,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pycodestyle~=2.14",
     "coveralls~=4.0",
     "django-coverage-plugin~=3.1",
     "pytest-cov~=7.1",
@@ -46,4 +45,21 @@ dev = [
     "pytest-xdist[psutil]~=3.8",
     "autopep8~=2.3",
     "pip-audit~=2.10",
+    "ruff~=0.16",
+    "prek~=0.5",
 ]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+# The formatter does not split long strings/templates, so don't fail on them
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Re-exports for the URLconf
+"RIGS/views/__init__.py" = ["F403"]
+# EventTest is not collected by pytest (it isn't prefixed with Test) and references names that don't exist
+"RIGS/tests/test_models.py" = ["F821"]

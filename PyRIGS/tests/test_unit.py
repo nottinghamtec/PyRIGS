@@ -1,21 +1,16 @@
 import pytest
 from django.core.management import call_command
-from django.template.defaultfilters import striptags
 from django.urls import URLPattern, URLResolver
 from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
 from pytest_django.asserts import assertRedirects, assertContains, assertNotContains
-from pytest_django.asserts import assertTemplateUsed, assertInHTML
+from pytest_django.asserts import assertTemplateUsed
 
 from PyRIGS import urls
-from RIGS.models import Event, Profile
+from RIGS.models import Event
 from assets.models import Asset
-from training.tests.test_unit import get_response
-from django.db import connection
-from django.template.defaultfilters import striptags
-from django.urls.exceptions import NoReverseMatch
 
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.test.utils import override_settings
 
 

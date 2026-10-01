@@ -1,16 +1,13 @@
-import datetime
 from RIGS.models import Profile, filter_by_pk
 from reversion import revisions as reversion
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q, F, Value, CharField
-from django.db.models.functions import Concat
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
-from django.utils.translation import gettext_lazy as _
 
 
 class TraineeManager(models.Manager):

@@ -13,7 +13,6 @@ from pypdf import PdfReader, PdfWriter
 from z3c.rml import rml2pdf
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
@@ -22,7 +21,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.template.loader import get_template
 from django.utils import timezone
 

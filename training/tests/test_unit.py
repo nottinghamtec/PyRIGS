@@ -1,10 +1,9 @@
 import datetime
-import pytest
 
 from django.utils import timezone
 from django.urls import reverse
 
-from pytest_django.asserts import assertFormError, assertRedirects, assertContains, assertNotContains, assertURLEqual
+from pytest_django.asserts import assertFormError, assertContains, assertNotContains
 
 from training import models
 from reversion.models import Version, Revision

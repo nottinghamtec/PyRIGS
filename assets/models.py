@@ -1,11 +1,10 @@
 import re
 
 from django.core.exceptions import ValidationError
-from django.db import models, connection
+from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from reversion import revisions as reversion
-from reversion.models import Version
 
 from RIGS.models import Profile, ContactableManager
 from versioning.versioning import RevisionMixin

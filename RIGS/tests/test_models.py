@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime, time
-from decimal import *
+from decimal import Decimal
 
 import pytz
 import pytest
@@ -48,7 +48,6 @@ class EventTest():
         assert models.Event.objects.rig_count() == 7
 
     def test_current_events(many_events):
-        all_events = set(range(1, 18))
         current_events = (1, 2, 3, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18)
         not_current_events = set(cls.all_events) - set(cls.current_events)
         current_events = models.Event.objects.current_events()

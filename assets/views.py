@@ -1,5 +1,3 @@
-import simplejson
-import random
 import base64
 from io import BytesIO
 
@@ -7,12 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.db.models import Q, Sum
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.views import generic
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 

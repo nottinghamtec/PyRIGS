@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import pytz
 from django import forms
-from django.db.models import Q, F
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -17,7 +17,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from reversion import revisions as reversion
-from reversion.models import Version
 from versioning.versioning import RevisionMixin
 
 
@@ -981,4 +980,4 @@ class EventCheckIn(models.Model):
         return reverse('event_detail', kwargs={'pk': self.event_id})
 
     def active(self):
-        return end_time is not None
+        return self.end_time is None

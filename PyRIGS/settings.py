@@ -10,7 +10,6 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 import datetime
 from pathlib import Path
-import secrets
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration

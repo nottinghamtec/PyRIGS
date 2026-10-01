@@ -5,4 +5,4 @@ class AssetsAppConfig(AppConfig):
     name = 'assets'
 
     def ready(self):
-        import assets.signals
+        import assets.signals  # noqa: F401 (registers signal handlers)

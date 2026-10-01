@@ -3,7 +3,6 @@ from django.urls import path, register_converter
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from PyRIGS.decorators import has_oembed, permission_required_with_403
-from PyRIGS.views import OEmbedView
 from . import views, converters
 
 register_converter(converters.AssetIDConverter, 'asset')

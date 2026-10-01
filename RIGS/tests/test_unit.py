@@ -5,7 +5,6 @@ from datetime import date
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.utils.safestring import SafeText
 from RIGS.templatetags.markdown_tags import markdown_filter
 from django.urls import reverse, reverse_lazy
@@ -403,7 +402,7 @@ class TestMarkdownTemplateTags(TestCase):
             description=self.markdown,
             start_date='2016-01-01',
         )
-        event_item = models.EventItem.objects.create(event=event, name="TI I1", quantity=1, cost=1.00, order=1, description="* test \n * test \n * test")
+        models.EventItem.objects.create(event=event, name="TI I1", quantity=1, cost=1.00, order=1, description="* test \n * test \n * test")
         user = models.Profile.objects.create(
             username='RML test',
             is_superuser=True,  # Don't care about permissions

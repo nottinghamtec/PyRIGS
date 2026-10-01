@@ -1,8 +1,5 @@
 from django.urls import path
 from django.apps import apps
-from django.urls import path
-from django.template.loader import get_template
-from django.template import TemplateDoesNotExist
 
 from PyRIGS.decorators import (permission_required_with_403)
 from versioning import views

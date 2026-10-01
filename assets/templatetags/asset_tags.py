@@ -1,5 +1,4 @@
 from django import template
-from assets import models
 
 register = template.Library()
 

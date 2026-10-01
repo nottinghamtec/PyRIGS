@@ -5,4 +5,4 @@ class RIGSAppConfig(AppConfig):
     name = 'RIGS'
 
     def ready(self):
-        import RIGS.signals
+        import RIGS.signals  # noqa: F401 (registers signal handlers)
