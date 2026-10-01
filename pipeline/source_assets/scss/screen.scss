@@ -1,33 +1,39 @@
+// Bootstrap 5 is consumed via @import (the Sass module system is not yet supported by Bootstrap's own build)
 @import "custom-variables";
 //Required
-@import "node_modules/bootstrap/scss/bootstrap-reboot";
-@import "node_modules/bootstrap/scss/bootstrap-grid";
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/variables-dark";
+@import "node_modules/bootstrap/scss/maps";
+@import "node_modules/bootstrap/scss/mixins";
+@import "node_modules/bootstrap/scss/utilities";
 //Optional
 @import "node_modules/bootstrap/scss/root";
+@import "node_modules/bootstrap/scss/reboot";
 @import "node_modules/bootstrap/scss/type";
 @import "node_modules/bootstrap/scss/images";
+@import "node_modules/bootstrap/scss/containers";
+@import "node_modules/bootstrap/scss/grid";
 @import "node_modules/bootstrap/scss/tables";
 @import "node_modules/bootstrap/scss/forms";
 @import "node_modules/bootstrap/scss/buttons";
 @import "node_modules/bootstrap/scss/transitions";
 @import "node_modules/bootstrap/scss/dropdown";
 @import "node_modules/bootstrap/scss/button-group";
-@import "node_modules/bootstrap/scss/input-group";
-@import "node_modules/bootstrap/scss/custom-forms";
 @import "node_modules/bootstrap/scss/nav";
 @import "node_modules/bootstrap/scss/navbar";
 @import "node_modules/bootstrap/scss/card";
 @import "node_modules/bootstrap/scss/pagination";
 @import "node_modules/bootstrap/scss/badge";
 @import "node_modules/bootstrap/scss/alert";
-@import "node_modules/bootstrap/scss/media";
 @import "node_modules/bootstrap/scss/list-group";
 @import "node_modules/bootstrap/scss/close";
 @import "node_modules/bootstrap/scss/modal";
 @import "node_modules/bootstrap/scss/tooltip";
 @import "node_modules/bootstrap/scss/popover";
 @import "node_modules/bootstrap/scss/spinners";
-@import "node_modules/bootstrap/scss/utilities";
+@import "node_modules/bootstrap/scss/helpers";
+@import "node_modules/bootstrap/scss/utilities/api";
 //FontAwesome
 $fa-font-path: '/static/fonts';
 @import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
@@ -152,7 +158,7 @@ ins {
 }
 
 .btn-light {
-    background-color: $gray-200 !important;
+    --bs-btn-bg: #{$gray-200};
 }
 
 .skip-link {
@@ -272,14 +278,12 @@ html.embedded {
   }
 }
 
-.card, .card-header, .btn, input, select, .CodeMirror, .editor-toolbar, .card-img-top {
+.CodeMirror, .editor-toolbar {
     border-radius: 0 !important;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
 }
 
-.bootstrap-select, button.btn.dropdown-toggle.bs-placeholder.btn-light {
-    padding-right: 1rem !important;
+.ts-wrapper.form-select, .ts-wrapper.form-control {
+    padding: 0;
 }
 // New implementation of class dropped in Bootstrap 3
 .dl-horizontal {
@@ -289,4 +293,141 @@ html.embedded {
 }
 .dl-horizontal > dd, .dl-horizontal .markdown > p {
     margin-bottom: 0 !important;
+}
+
+// Dark mode: Bootstrap 5.3 colour modes (set via data-bs-theme on <html>), with a few project-specific tweaks
+$darktheme: #121416;
+
+[data-bs-theme="dark"] {
+    --bs-body-bg: #222;
+    --bs-body-color: #{$gray-100};
+    --bs-link-color: #{$blue};
+    --bs-link-hover-color: #{tint-color($blue, 20%)};
+    --bs-secondary-color: #c9c9c9;
+    --bs-tertiary-bg: #{$darktheme};
+
+    .navbar {
+        background-color: #111111 !important;
+    }
+    .dropdown-menu, .popover {
+        box-shadow: 0 0.5rem 1rem black;
+        --bs-dropdown-bg: #{$darktheme};
+        --bs-popover-bg: #{$darktheme};
+    }
+    .form-control:not(.btn), .form-select, .ts-control, .ts-dropdown {
+        background-color: $darktheme;
+        color: $gray-100;
+    }
+    .btn-light, .status {
+        --bs-btn-bg: #{$darktheme};
+        --bs-btn-color: #{$gray-100};
+        --bs-btn-border-color: #{$darktheme};
+        --bs-btn-hover-bg: #{tint-color($darktheme, 8%)};
+        --bs-btn-hover-color: #{$gray-100};
+        --bs-btn-hover-border-color: #{$darktheme};
+        background-color: $darktheme !important;
+        color: $gray-100 !important;
+        border-color: $darktheme;
+    }
+    .btn-link {
+        color: white;
+    }
+    .badge, .btn-success, .bg-warning {
+        color: black;
+    }
+    .btn-primary, .btn-secondary, .btn-info {
+        --bs-btn-color: #fff;
+        color: $gray-100;
+    }
+    .input-group-text {
+        border-color: $darktheme;
+    }
+    .page-item.disabled {
+        opacity: 0.5;
+    }
+    .bg-light {
+        color: black;
+        background-color: $gray-200 !important;
+        border-radius: 0.2em;
+    }
+    .fc-day-today {
+        background-color: transparent !important;
+        border: 0.2em solid $info !important;
+    }
+    .fc-daygrid-dot-event {
+        color: white !important;
+    }
+    .table {
+        border-collapse: separate !important;
+        border-spacing: 0;
+    }
+    @each $color, $value in $theme-colors {
+        table.table-#{$color} > * {
+            --bs-table-bg: #222;
+            --bs-table-color: white;
+            color: white !important;
+            background-color: #222 !important;
+        }
+        table.table-#{$color} td, table.table-#{$color} th {
+            border: 0.3em solid shade-color($value, 60%) !important;
+        }
+        #event_row.table-#{$color} {
+            border: 0.3em solid shade-color($value, 60%) !important;
+            background-color: #222 !important;
+            color: white !important;
+        }
+    }
+    del {
+      color: black;
+      background-color: $danger;
+      border-radius: 3px;
+    }
+    ins {
+      color: black;
+      background-color: $success;
+      border-radius: 3px;
+    }
+    pre {
+        background: $gray-600;
+        color: white;
+    }
+    .source {
+        color: white !important;
+    }
+    .embed_container {
+        border-color: #3853a4 !important;
+        background: #222;
+        color: $gray-100;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+      border: 1px solid $info;
+      -webkit-text-fill-color: white;
+      -webkit-box-shadow: 0 0 0px 1000px rgba($info, .3) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    .editor-toolbar > a {
+        color: white !important;
+    }
+    .editor-toolbar > a:hover {
+        background: transparent !important;
+    }
+    .editor-toolbar > a.active {
+        background: $info !important;
+    }
+    .cm-s-easymde {
+        color: white;
+        background-color: $darktheme;
+        border-color: #bbb;
+    }
+    .CodeMirror-cursor {
+        border-color: white !important;
+    }
 }
