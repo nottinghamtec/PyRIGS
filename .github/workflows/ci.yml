@@ -29,8 +29,8 @@ jobs:
 
       - run: uv sync --locked
 
-      - name: pycodestyle
-        run: uv run pycodestyle . --exclude=.venv,migrations,node_modules
+      - name: Pre-commit hooks (ruff, formatting, file hygiene)
+        run: uv run prek run --all-files --show-diff-on-failure
 
       - name: Django system checks
         run: uv run python manage.py check

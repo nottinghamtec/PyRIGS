@@ -53,4 +53,12 @@ The sample data creates these logins (the password is the same as the username):
 It also creates a number of generic profiles (e.g. `AmyPond`, `RoryWilliams`) which have no password set, so they can't be logged into.
 
 
+# Development
+Linting and formatting use [ruff](https://docs.astral.sh/ruff/), run through [prek](https://github.com/j178/prek) (a pre-commit compatible hook runner) using `.pre-commit-config.yaml`:
+```
+uv sync
+uv run prek install        # run the hooks on every commit
+uv run prek run --all-files
+```
+
 [![forthebadge](https://forthebadge.com/images/badges/built-with-resentment.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://forthebadge.com)
