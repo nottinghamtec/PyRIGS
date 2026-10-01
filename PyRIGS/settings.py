@@ -33,6 +33,10 @@ if DEBUG:
     CSRF_TRUSTED_ORIGINS.append("http://localhost:8000")
     CSRF_TRUSTED_ORIGINS.append("http://localhost:8001")
     ALLOWED_HOSTS = ['*']
+else:
+    # Django 4+ checks the Origin header on unsafe requests against this list, which
+    # matters when TLS is terminated by a proxy in front of us.
+    CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 if not DEBUG:
@@ -40,15 +44,15 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', True)
-    CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', True)
+    SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE_ENABLED', cast=bool, default=True)
+    CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE_ENABLED', cast=bool, default=True)
     SECURE_HSTS_PRELOAD = True
 
 INTERNAL_IPS = ['127.0.0.1']
 
 DOMAIN = env('DOMAIN', default='example.com')
 
-ADMINS = [('IT Manager', f'it@{DOMAIN}'), ('Hang Xu', f'hang.xu@{DOMAIN}')]
+ADMINS = [('IT Manager', f'it@{DOMAIN}')]
 if DEBUG:
     ADMINS.append(('Testing Superuser', 'superuser@example.com'))
 
@@ -68,7 +72,6 @@ INSTALLED_APPS = (
     'assets',
     'training',
 
-    # 'debug_toolbar',
     'registration',
     'reversion',
     'widget_tweaks',
@@ -79,7 +82,6 @@ INSTALLED_APPS = (
 MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
