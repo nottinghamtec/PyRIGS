@@ -15,28 +15,31 @@ class VersionHistory(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        return RIGSVersion.objects.get_for_object(self.get_object()).select_related("revision",
-                                                                                    "revision__user").all().order_by(
-            "-revision__date_created")
+        return (
+            RIGSVersion.objects.get_for_object(self.get_object())
+            .select_related("revision", "revision__user")
+            .all()
+            .order_by("-revision__date_created")
+        )
 
     def get_object(self, **kwargs):
         # Goddamit, almost got away without specific hacks
-        if self.kwargs['model'].__name__ == 'Asset':
-            return get_object_or_404(self.kwargs['model'], asset_id=self.kwargs['pk'])
+        if self.kwargs["model"].__name__ == "Asset":
+            return get_object_or_404(self.kwargs["model"], asset_id=self.kwargs["pk"])
         else:
-            return get_object_or_404(self.kwargs['model'], pk=self.kwargs['pk'])
+            return get_object_or_404(self.kwargs["model"], pk=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['object'] = self.get_object()
-        if self.kwargs['app'] != 'rigboard':
-            context['override'] = f'base_{self.kwargs["app"]}.html'
+        context["object"] = self.get_object()
+        if self.kwargs["app"] != "rigboard":
+            context["override"] = f"base_{self.kwargs['app']}.html"
 
         return context
 
 
 def get_models(app=None):
-    models = filter(lambda item: not hasattr(item, 'reversion_hide'), reversion.get_registered_models())
+    models = filter(lambda item: not hasattr(item, "reversion_hide"), reversion.get_registered_models())
     if app is not None:
         models = filter(lambda item: item in apps.get_app_config(app).get_models(), models)
     # Don't allow modifying original list!
@@ -46,7 +49,9 @@ def get_models(app=None):
 # TODO Default filter of having permission to view associated object
 def filter_models(models, user):
     if user is not None:
-        models = filter(lambda model: not hasattr(model, 'reversion_perm') or user.has_perm(model.reversion_perm), models)
+        models = filter(
+            lambda model: not hasattr(model, "reversion_perm") or user.has_perm(model.reversion_perm), models
+        )
     return models
 
 
@@ -56,13 +61,15 @@ class ActivityTable(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        return RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs.get('models'), self.request.user)).order_by("-revision__date_created")
+        return RIGSVersion.objects.get_for_multiple_models(
+            filter_models(self.kwargs.get("models"), self.request.user)
+        ).order_by("-revision__date_created")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = f"{title(self.kwargs['app'])} Activity Stream"
-        if self.kwargs['app'] != 'rigboard':
-            context['override'] = f'base_{self.kwargs["app"]}.html'
+        context["page_title"] = f"{title(self.kwargs['app'])} Activity Stream"
+        if self.kwargs["app"] != "rigboard":
+            context["override"] = f"base_{self.kwargs['app']}.html"
 
         return context
 
@@ -73,17 +80,19 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
     paginate_by = 25
 
     def get_queryset(self):
-        return RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user)).order_by("-revision__date_created")
+        return RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user)).order_by(
+            "-revision__date_created"
+        )
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "Activity Feed"
+        context["page_title"] = "Activity Feed"
         maxTimeDelta = datetime.timedelta(hours=1)
 
         items = []
 
-        for thisVersion in context['object_list']:
+        for thisVersion in context["object_list"]:
             thisVersion.withPrevious = False
             if len(items) >= 1:
                 timeDiff = items[-1].revision.date_created - thisVersion.revision.date_created

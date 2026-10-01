@@ -1,7 +1,5 @@
-
-
 class AssetIDConverter:  # Forces lowercase to uppercase
-    regex = '[^/]+'
+    regex = "[^/]+"
 
     def to_python(self, value):
         return str(value).upper()
@@ -11,10 +9,10 @@ class AssetIDConverter:  # Forces lowercase to uppercase
 
 
 class ListConverter:
-    regex = '[^/]+'
+    regex = "[^/]+"
 
     def to_python(self, value):
-        return value.split(',')
+        return value.split(",")
 
     def to_url(self, value):
         string = ""

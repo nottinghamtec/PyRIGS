@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class AssetsAppConfig(AppConfig):
-    name = 'assets'
+    name = "assets"
 
     def ready(self):
         import assets.signals  # noqa: F401 (registers signal handlers)

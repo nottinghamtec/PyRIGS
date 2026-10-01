@@ -14,9 +14,9 @@ class AssetCategory(models.Model):
     name = models.CharField(max_length=80)
 
     class Meta:
-        verbose_name = 'Asset Category'
-        verbose_name_plural = 'Asset Categories'
-        ordering = ['name']
+        verbose_name = "Asset Category"
+        verbose_name_plural = "Asset Categories"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -24,14 +24,17 @@ class AssetCategory(models.Model):
 
 class AssetStatus(models.Model):
     name = models.CharField(max_length=80)
-    should_show = models.BooleanField(
-        default=True, help_text="Should this be shown by default in the asset list.")
-    display_class = models.CharField(max_length=80, blank=True, help_text="HTML class to be appended to alter display of assets with this status, such as in the list.")
+    should_show = models.BooleanField(default=True, help_text="Should this be shown by default in the asset list.")
+    display_class = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="HTML class to be appended to alter display of assets with this status, such as in the list.",
+    )
 
     class Meta:
-        verbose_name = 'Asset Status'
-        verbose_name_plural = 'Asset Statuses'
-        ordering = ['name']
+        verbose_name = "Asset Status"
+        verbose_name_plural = "Asset Statuses"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -49,10 +52,10 @@ class Supplier(models.Model, RevisionMixin):
     objects = ContactableManager()
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
     def get_absolute_url(self):
-        return reverse('supplier_detail', kwargs={'pk': self.pk})
+        return reverse("supplier_detail", kwargs={"pk": self.pk})
 
     def __str__(self):
         return self.name
@@ -60,8 +63,8 @@ class Supplier(models.Model, RevisionMixin):
 
 class Connector(models.Model):
     description = models.CharField(max_length=80)
-    current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text='Amps')
-    voltage_rating = models.IntegerField(help_text='Volts')
+    current_rating = models.DecimalField(decimal_places=2, max_digits=10, help_text="Amps")
+    voltage_rating = models.IntegerField(help_text="Volts")
     num_pins = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
@@ -71,14 +74,16 @@ class Connector(models.Model):
 class CableType(models.Model):
     circuits = models.IntegerField(default=1)
     cores = models.IntegerField(default=3)
-    plug = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                             related_name='plug')
-    socket = models.ForeignKey(Connector, on_delete=models.CASCADE,
-                               related_name='socket')
+    plug = models.ForeignKey(Connector, on_delete=models.CASCADE, related_name="plug")
+    socket = models.ForeignKey(Connector, on_delete=models.CASCADE, related_name="socket")
 
     class Meta:
-        ordering = ['plug', 'socket', '-circuits']
-        constraints = [models.UniqueConstraint(fields=['plug', 'socket', 'circuits', 'cores'], name='unique_plug_socket_circuits_cores')]
+        ordering = ["plug", "socket", "-circuits"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plug", "socket", "circuits", "cores"], name="unique_plug_socket_circuits_cores"
+            )
+        ]
 
     def __str__(self):
         if self.plug and self.socket:
@@ -87,14 +92,19 @@ class CableType(models.Model):
             return "Unknown"
 
     def get_absolute_url(self):
-        return reverse('cable_type_detail', kwargs={'pk': self.pk})
+        return reverse("cable_type_detail", kwargs={"pk": self.pk})
 
 
 class AssetManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = (Q(asset_id__exact=query.upper()) | Q(description__icontains=query) | Q(serial_number__exact=query) | Q(nickname__icontains=query))
+            or_lookup = (
+                Q(asset_id__exact=query.upper())
+                | Q(description__icontains=query)
+                | Q(serial_number__exact=query)
+                | Q(nickname__icontains=query)
+            )
             qs = qs.filter(or_lookup).distinct()  # distinct() is often necessary with Q lookups
         return qs
 
@@ -112,53 +122,54 @@ def validate_positive(value):
 
 @reversion.register
 class Asset(models.Model, RevisionMixin):
-    parent = models.ForeignKey(to='self', related_name='asset_parent',
-                               blank=True, null=True, on_delete=models.SET_NULL)
+    parent = models.ForeignKey(to="self", related_name="asset_parent", blank=True, null=True, on_delete=models.SET_NULL)
     asset_id = models.CharField(max_length=15, unique=True)
     description = models.CharField(max_length=120)
     category = models.ForeignKey(to=AssetCategory, on_delete=models.CASCADE)
     status = models.ForeignKey(to=AssetStatus, on_delete=models.CASCADE)
     serial_number = models.CharField(max_length=150, blank=True)
-    purchased_from = models.ForeignKey(to=Supplier, on_delete=models.SET_NULL, blank=True, null=True, related_name="assets")
+    purchased_from = models.ForeignKey(
+        to=Supplier, on_delete=models.SET_NULL, blank=True, null=True, related_name="assets"
+    )
     date_acquired = models.DateField()
     date_sold = models.DateField(blank=True, null=True)
-    purchase_price = models.DecimalField(blank=True, null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
+    purchase_price = models.DecimalField(
+        blank=True, null=True, decimal_places=2, max_digits=10, validators=[validate_positive]
+    )
     replacement_cost = models.DecimalField(null=True, decimal_places=2, max_digits=10, validators=[validate_positive])
     comments = models.TextField(blank=True)
     nickname = models.CharField(max_length=120, blank=True)
 
     # Audit
     last_audited_at = models.DateTimeField(blank=True, null=True)
-    last_audited_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='audited_by', blank=True, null=True)
+    last_audited_by = models.ForeignKey(
+        Profile, on_delete=models.SET_NULL, related_name="audited_by", blank=True, null=True
+    )
 
     # Cable assets
     is_cable = models.BooleanField(default=False)
     cable_type = models.ForeignKey(to=CableType, blank=True, null=True, on_delete=models.SET_NULL)
-    length = models.DecimalField(decimal_places=2, max_digits=10,
-                                 blank=True, null=True, help_text='m')
-    csa = models.DecimalField(decimal_places=2, max_digits=10,
-                              blank=True, null=True, help_text='mm²')
+    length = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text="m")
+    csa = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True, help_text="mm²")
 
     # Hidden asset_id components
     # For example, if asset_id was "C1001" then asset_id_prefix would be "C" and number "1001"
     asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
-    reversion_perm = 'assets.asset_finance'
+    reversion_perm = "assets.asset_finance"
 
     objects = AssetManager()
 
     class Meta:
-        ordering = ['asset_id_prefix', 'asset_id_number']
-        permissions = [
-            ('asset_finance', 'Can see financial data for assets')
-        ]
+        ordering = ["asset_id_prefix", "asset_id_number"]
+        permissions = [("asset_finance", "Can see financial data for assets")]
 
     def __str__(self):
         return f"{self.asset_id} | {self.description}"
 
     def get_absolute_url(self):
-        return reverse('asset_detail', kwargs={'pk': self.asset_id})
+        return reverse("asset_detail", kwargs={"pk": self.asset_id})
 
     def clean(self):
         errdict = {}
@@ -168,8 +179,7 @@ class Asset(models.Model, RevisionMixin):
         self.asset_id = self.asset_id.upper()
         asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", self.asset_id)
         if asset_search is None:
-            errdict["asset_id"] = [
-                "An Asset ID can only consist of letters and numbers, with a final number"]
+            errdict["asset_id"] = ["An Asset ID can only consist of letters and numbers, with a final number"]
 
         if self.is_cable:
             if not self.length or self.length <= 0:

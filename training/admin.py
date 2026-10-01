@@ -12,4 +12,4 @@ admin.site.register(models.TrainingLevelRequirement, VersionAdmin)
 
 @admin.register(models.TrainingItemQualification)
 class TrainingItemQualificationAdmin(VersionAdmin):
-    list_display = ['__str__', 'trainee']
+    list_display = ["__str__", "trainee"]

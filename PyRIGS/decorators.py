@@ -9,9 +9,9 @@ from RIGS import models
 
 def get_oembed(login_url, request, oembed_view, kwargs):
     context = {}
-    context['oembed_url'] = f"{request.scheme}://{request.META['HTTP_HOST']}{reverse(oembed_view, kwargs=kwargs)}"
-    context['login_url'] = f"{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}"
-    resp = render(request, 'login_redirect.html', context=context)
+    context["oembed_url"] = f"{request.scheme}://{request.META['HTTP_HOST']}{reverse(oembed_view, kwargs=kwargs)}"
+    context["login_url"] = f"{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}"
+    resp = render(request, "login_redirect.html", context=context)
     return resp
 
 
@@ -24,7 +24,7 @@ def has_oembed(oembed_view, login_url=settings.LOGIN_URL):
                 if oembed_view is not None:
                     return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
-                    return HttpResponseRedirect(f'{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}')
+                    return HttpResponseRedirect(f"{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}")
 
         _checklogin.__doc__ = view_func.__doc__
         _checklogin.__dict__ = view_func.__dict__
@@ -44,6 +44,7 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
     """
     if not login_url:
         from django.conf import settings
+
         login_url = settings.LOGIN_URL
 
     def _dec(view_func):
@@ -54,9 +55,9 @@ def user_passes_test_with_403(test_func, login_url=None, oembed_view=None):
                 if oembed_view is not None:
                     return get_oembed(login_url, request, oembed_view, kwargs)
                 else:
-                    return HttpResponseRedirect(f'{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}')
+                    return HttpResponseRedirect(f"{login_url}?{REDIRECT_FIELD_NAME}={request.get_full_path()}")
             else:
-                resp = render(request, '403.html')
+                resp = render(request, "403.html")
                 resp.status_code = 403
                 return resp
 
@@ -86,10 +87,10 @@ def api_key_required(function):
 
     def wrap(request, *args, **kwargs):
 
-        userid = kwargs.get('api_pk')
-        key = kwargs.get('api_key')
+        userid = kwargs.get("api_pk")
+        key = kwargs.get("api_key")
 
-        error_resp = render(request, '403.html')
+        error_resp = render(request, "403.html")
         error_resp.status_code = 403
 
         if key is None:
@@ -99,7 +100,7 @@ def api_key_required(function):
 
         try:
             user_object = models.Profile.objects.get(pk=userid)
-            kwargs = {**kwargs, 'user': user_object}
+            kwargs = {**kwargs, "user": user_object}
         except models.Profile.DoesNotExist:
             return error_resp
 
@@ -117,8 +118,8 @@ def nottinghamtec_address_required(function):
 
     def wrap(request, *args, **kwargs):
         # Fail if current user's email address isn't @nottinghamtec.co.uk
-        if not request.user.email.endswith('@nottinghamtec.co.uk'):
-            error_resp = render(request, 'eventauthorisation_request_error.html')
+        if not request.user.email.endswith("@nottinghamtec.co.uk"):
+            error_resp = render(request, "eventauthorisation_request_error.html")
             return error_resp
 
         return function(request, *args, **kwargs)

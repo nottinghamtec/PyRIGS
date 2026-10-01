@@ -14,7 +14,7 @@ class RevisionMixin:
 
     @property
     def current_version(self):
-        version = RIGSVersion.objects.get_for_object(self).select_related('revision').first()
+        version = RIGSVersion.objects.get_for_object(self).select_related("revision").first()
         return version
 
     @property
@@ -50,7 +50,11 @@ class FieldComparison:
         self._new = new
 
     def display_value(self, value):
-        if isinstance(self.field, (IntegerField, CharField)) and self.field.choices is not None and len(self.field.choices) > 0:
+        if (
+            isinstance(self.field, (IntegerField, CharField))
+            and self.field.choices is not None
+            and len(self.field.choices) > 0
+        ):
             choice = [x[1] for x in self.field.choices if x[0] == value]
             if len(choice) > 0:
                 return choice[0]
@@ -91,18 +95,18 @@ class FieldComparison:
 
         outputDiffs = []
 
-        for (op, data) in diffs:
+        for op, data in diffs:
             if op == dmp.DIFF_INSERT:
-                outputDiffs.append({'type': 'insert', 'text': data})
+                outputDiffs.append({"type": "insert", "text": data})
             elif op == dmp.DIFF_DELETE:
-                outputDiffs.append({'type': 'delete', 'text': data})
+                outputDiffs.append({"type": "delete", "text": data})
             elif op == dmp.DIFF_EQUAL:
-                outputDiffs.append({'type': 'equal', 'text': data})
+                outputDiffs.append({"type": "equal", "text": data})
         return outputDiffs
 
 
 class ModelComparison:
-    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=['date_joined']):
+    def __init__(self, old=None, new=None, version=None, follow=False, excluded_keys=["date_joined"]):
         # recieves two objects of the same model, and compares them. Returns an array of FieldCompare objects
         try:
             self.fields = old._meta.get_fields()
@@ -150,12 +154,20 @@ class ModelComparison:
         if self.follow and self.version.object is not None:
             from RIGS.models import EventAuthorisation
             from training.models import TrainingLevelQualification, TrainingItemQualification
-            item_type = ContentType.objects.get_for_model(self.version.object)
-            old_item_versions = self.version.parent.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification)) \
-                .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
-            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
 
-            comparisonParams = {'excluded_keys': ['id', 'event', 'order', 'checklist', 'level', '_order', 'date_joined']}
+            item_type = ContentType.objects.get_for_model(self.version.object)
+            old_item_versions = (
+                self.version.parent.revision.version_set.exclude(content_type=item_type)
+                .exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification))
+                .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
+            )
+            new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(
+                content_type=ContentType.objects.get_for_model(EventAuthorisation)
+            )
+
+            comparisonParams = {
+                "excluded_keys": ["id", "event", "order", "checklist", "level", "_order", "date_joined"]
+            }
 
             # Build some dicts of what we have
             item_dict = {}  # build a list of items, key is the item_pk
@@ -177,7 +189,7 @@ class ModelComparison:
                 item_dict[version.object_id] = compare  # update the dictionary with the changes
 
             changes = []
-            for (_, compare) in list(item_dict.items()):
+            for _, compare in list(item_dict.items()):
                 if compare.fields_changed:
                     changes.append(compare)
 
@@ -187,7 +199,7 @@ class ModelComparison:
     def name(self):
         obj = self.new if self.new else self.old
 
-        if (hasattr(obj, 'activity_feed_string')):
+        if hasattr(obj, "activity_feed_string"):
             return obj.activity_feed_string
         else:
             return str(obj)
@@ -207,8 +219,13 @@ class RIGSVersionManager(VersionQuerySet):
         for model in model_array:
             content_types.append(ContentType.objects.get_for_model(model))
 
-        return self.filter(content_type__in=content_types).select_related("revision",).order_by(
-            "-revision__date_created")
+        return (
+            self.filter(content_type__in=content_types)
+            .select_related(
+                "revision",
+            )
+            .order_by("-revision__date_created")
+        )
 
 
 class RIGSVersion(Version):
@@ -222,11 +239,14 @@ class RIGSVersion(Version):
     def parent(self):
         thisId = self.object_id
 
-        versions = RIGSVersion.objects.get_for_object_reference(self.content_type.model_class(), thisId).select_related(
-            "revision", "revision__user").all()
+        versions = (
+            RIGSVersion.objects.get_for_object_reference(self.content_type.model_class(), thisId)
+            .select_related("revision", "revision__user")
+            .all()
+        )
 
         try:
-            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest('revision_id')
+            previousVersion = versions.filter(revision_id__lt=self.revision_id).latest("revision_id")
         except ObjectDoesNotExist:
             return False
 
@@ -238,7 +258,7 @@ class RIGSVersion(Version):
             version=self,
             new=self._object_version.object,
             old=self.parent._object_version.object if self.parent else None,
-            follow=True
+            follow=True,
         )
 
     @property
@@ -247,7 +267,7 @@ class RIGSVersion(Version):
 
     @property
     def display_name(self):
-        if hasattr(self.changes.new, 'display_id'):
+        if hasattr(self.changes.new, "display_id"):
             id = self.changes.new.display_id
         else:
             id = self.changes.new.pk

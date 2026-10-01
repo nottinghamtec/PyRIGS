@@ -9,7 +9,7 @@ from assets import models as amodels
 
 
 def create_events(admin_user):
-    models.VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+    models.VatRate.objects.create(start_at="2014-03-05", rate=0.20, comment="test1")
 
     events = {}
 
@@ -19,7 +19,7 @@ def create_events(admin_user):
 
     with reversion.create_revision():
         reversion.set_user(admin_user)
-        events[2] = models.Event.objects.create(name="TE E2", start_date='2014-03-05')
+        events[2] = models.Event.objects.create(name="TE E2", start_date="2014-03-05")
 
     with reversion.create_revision():
         reversion.set_user(admin_user)
@@ -38,13 +38,15 @@ def create_assets(admin_user):
 
     with reversion.create_revision():
         reversion.set_user(admin_user)
-        assets[1] = amodels.Asset.objects.create(asset_id="1991", description="Spaceflower", status=broken,
-                                                 category=lighting, date_acquired=date.today())
+        assets[1] = amodels.Asset.objects.create(
+            asset_id="1991", description="Spaceflower", status=broken, category=lighting, date_acquired=date.today()
+        )
 
     with reversion.create_revision():
         reversion.set_user(admin_user)
-        assets[2] = amodels.Asset.objects.create(asset_id="0001", description="Virgil", status=working,
-                                                 category=lighting, date_acquired=date.today())
+        assets[2] = amodels.Asset.objects.create(
+            asset_id="0001", description="Virgil", status=working, category=lighting, date_acquired=date.today()
+        )
 
     with reversion.create_revision():
         reversion.set_user(admin_user)
@@ -56,27 +58,27 @@ def create_assets(admin_user):
 
 def test_history_loads_successfully(admin_client, admin_user):
     events = create_events(admin_user)
-    request_url = reverse('event_history', kwargs={'pk': events[1].pk})
+    request_url = reverse("event_history", kwargs={"pk": events[1].pk})
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
     assets = create_assets(admin_user)
-    request_url = reverse('asset_history', kwargs={'pk': assets[1].asset_id})
+    request_url = reverse("asset_history", kwargs={"pk": assets[1].asset_id})
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
 
 
 def test_activity_feed_loads_successfully(admin_client):
-    request_url = reverse('activity_feed')
+    request_url = reverse("activity_feed")
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
 
 
 def test_activity_table_loads_successfully(admin_client):
-    request_url = reverse('activity_table')
+    request_url = reverse("activity_table")
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
 
-    request_url = reverse('assets_activity_table')
+    request_url = reverse("assets_activity_table")
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
 
@@ -84,7 +86,7 @@ def test_activity_table_loads_successfully(admin_client):
 # Some edge cases that have caused server errors in the past
 def test_deleted_event(admin_client, admin_user):
     events = create_events(admin_user)
-    request_url = reverse('activity_feed')
+    request_url = reverse("activity_feed")
 
     events[2].delete()
 
@@ -95,7 +97,7 @@ def test_deleted_event(admin_client, admin_user):
 
 def test_deleted_relation(admin_client, admin_user):
     events = create_events(admin_user)
-    request_url = reverse('activity_feed')
+    request_url = reverse("activity_feed")
 
     with reversion.create_revision():
         person = models.Person.objects.create(name="Test Person")

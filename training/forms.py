@@ -6,55 +6,50 @@ from training import models
 
 
 class QualificationForm(forms.ModelForm):
-    related_models = {
-        'item': models.TrainingItem,
-        'supervisor': models.Trainee
-    }
+    related_models = {"item": models.TrainingItem, "supervisor": models.Trainee}
 
     class Meta:
         model = models.TrainingItemQualification
-        fields = '__all__'
+        fields = "__all__"
 
     def clean_date(self):
-        date = self.cleaned_data.get('date')
+        date = self.cleaned_data.get("date")
         if date > date.today():
-            raise forms.ValidationError('Qualification date may not be in the future')
+            raise forms.ValidationError("Qualification date may not be in the future")
         return date
 
     def clean_supervisor(self):
-        supervisor = self.cleaned_data.get('supervisor')
-        if supervisor.pk == self.cleaned_data.get('trainee').pk:
-            raise forms.ValidationError('One may not supervise oneself...')
+        supervisor = self.cleaned_data.get("supervisor")
+        if supervisor.pk == self.cleaned_data.get("trainee").pk:
+            raise forms.ValidationError("One may not supervise oneself...")
         return supervisor
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['date'].widget.format = '%Y-%m-%d'
+        self.fields["date"].widget.format = "%Y-%m-%d"
 
 
 class AddQualificationForm(QualificationForm):
     def __init__(self, *args, **kwargs):
-        pk = kwargs.pop('pk', None)
+        pk = kwargs.pop("pk", None)
         super().__init__(*args, **kwargs)
         if pk:
-            self.fields['trainee'].initial = models.Trainee.objects.get(pk=pk)
+            self.fields["trainee"].initial = models.Trainee.objects.get(pk=pk)
 
 
 class RequirementForm(forms.ModelForm):
-    related_models = {
-        'item': models.TrainingItem
-    }
+    related_models = {"item": models.TrainingItem}
 
     depth = forms.ChoiceField(choices=models.TrainingItemQualification.CHOICES)
 
     class Meta:
         model = models.TrainingLevelRequirement
-        fields = '__all__'
+        fields = "__all__"
 
     def __init__(self, *args, **kwargs):
-        pk = kwargs.pop('pk', None)
+        pk = kwargs.pop("pk", None)
         super().__init__(*args, **kwargs)
-        self.fields['level'].initial = models.TrainingLevel.objects.get(pk=pk)
+        self.fields["level"].initial = models.TrainingLevel.objects.get(pk=pk)
 
 
 class SessionLogForm(forms.Form):
@@ -66,15 +61,13 @@ class SessionLogForm(forms.Form):
     date = forms.DateField(initial=datetime.date.today)
     notes = forms.CharField(required=False, widget=forms.Textarea)
 
-    related_models = {
-        'supervisor': models.Trainee
-    }
+    related_models = {"supervisor": models.Trainee}
 
     def clean_date(self):
         return QualificationForm.clean_date(self)
 
     def clean_supervisor(self):
-        supervisor = self.cleaned_data['supervisor']
-        if supervisor in self.cleaned_data.get('trainees', []):
-            raise forms.ValidationError('One may not supervise oneself...')
+        supervisor = self.cleaned_data["supervisor"]
+        if supervisor in self.cleaned_data.get("trainees", []):
+            raise forms.ValidationError("One may not supervise oneself...")
         return supervisor

@@ -7,13 +7,13 @@ from training import models as tmodels
 
 
 class Command(BaseCommand):
-    help = 'Deletes testing sample data'
+    help = "Deletes testing sample data"
 
     def handle(self, *args, **kwargs):
         from django.conf import settings
 
         if not settings.DEBUG:
-            raise CommandError('You cannot run this command in production')
+            raise CommandError("You cannot run this command in production")
 
         self.delete_objects(models.AssetCategory)
         self.delete_objects(models.AssetStatus)

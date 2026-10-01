@@ -9,18 +9,17 @@ import os
 # reinject the original one here to solve ``module 'importlib' has no attribute 'metadata'``
 # what a bullsh*t
 import importlib.metadata as _importlib_metadata
+
 importlib.metadata = _importlib_metadata
 
 
 def pytest_configure():
-    settings.PASSWORD_HASHERS = (
-        'django.contrib.auth.hashers.MD5PasswordHasher',
-    )
+    settings.PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
     settings.WHITENOISE_USE_FINDERS = True
     settings.WHITENOISE_AUTOREFRESH = True
     # TODO Why do we need this, with the above options enabled?
     settings.STATICFILES_DIRS += [
-        os.path.join(settings.BASE_DIR, 'static/'),
+        os.path.join(settings.BASE_DIR, "static/"),
     ]
     django.setup()
 
@@ -39,7 +38,7 @@ def admin_user(admin_user):
 
 @pytest.fixture(autouse=True)  # Also enables DB access for all tests as a useful side effect
 def vat_rate(db):
-    vat_rate = VatRate.objects.create(start_at='2014-03-05', rate=0.20, comment='test1')
+    vat_rate = VatRate.objects.create(start_at="2014-03-05", rate=0.20, comment="test1")
     yield vat_rate
     vat_rate.delete()
 

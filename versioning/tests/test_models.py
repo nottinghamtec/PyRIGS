@@ -9,27 +9,28 @@ from versioning import versioning
 
 class RIGSVersionTestCase(TestCase):
     def setUp(self):
-        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at='2013-01-01')
+        models.VatRate.objects.create(rate=0.20, comment="TP V1", start_at="2013-01-01")
 
         self.profile = models.Profile.objects.get_or_create(
-            first_name='Test',
-            last_name='TEC User',
-            username='eventauthtest',
-            email='teccie@functional.test',
-            is_superuser=True  # lazily grant all permissions
+            first_name="Test",
+            last_name="TEC User",
+            username="eventauthtest",
+            email="teccie@functional.test",
+            is_superuser=True,  # lazily grant all permissions
         )[0]
         with reversion.create_revision():
             reversion.set_user(self.profile)
-            self.person = models.Person.objects.create(name='Authorisation Test Person')
+            self.person = models.Person.objects.create(name="Authorisation Test Person")
 
         with reversion.create_revision():
             reversion.set_user(self.profile)
-            self.organisation = models.Organisation.objects.create(name='Authorisation Test Organisation')
+            self.organisation = models.Organisation.objects.create(name="Authorisation Test Organisation")
 
         with reversion.create_revision():
             reversion.set_user(self.profile)
-            self.event = models.Event.objects.create(name="AuthorisationTestCase", person=self.person,
-                                                     start_date=date.today())
+            self.event = models.Event.objects.create(
+                name="AuthorisationTestCase", person=self.person, start_date=date.today()
+            )
 
         with reversion.create_revision():
             reversion.set_user(self.profile)
@@ -38,26 +39,27 @@ class RIGSVersionTestCase(TestCase):
 
     def test_find_parent_version(self):
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
         self.assertEqual(current_version._object_version.object.notes, "A new note on the event")
 
         # Check the prev version is loaded correctly
         previousVersion = current_version.parent
-        assert previousVersion._object_version.object.notes == ''
+        assert previousVersion._object_version.object.notes == ""
 
         # Check that finding the parent of the first version fails gracefully
         self.assertFalse(previousVersion.parent)
 
     def test_changes_since(self):
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
 
         changes = currentVersion.changes
         self.assertEqual(len(changes.field_changes), 1)
 
     def test_manager(self):
         objs = versioning.RIGSVersion.objects.get_for_multiple_models(
-            [models.Event, models.Person, models.Organisation])
+            [models.Event, models.Person, models.Organisation]
+        )
         self.assertEqual(len(objs), 4)
 
     def test_text_field_types(self):
@@ -68,7 +70,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
         diff = currentVersion.changes
 
         # There are two changes
@@ -90,7 +92,7 @@ class RIGSVersionTestCase(TestCase):
             self.person.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.person).latest('revision_id')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.person).latest("revision_id")
         diff = currentVersion.changes
 
         # Should be declared as long
@@ -103,15 +105,18 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
 
         # Check the diff is correct
-        self.assertEqual(currentVersion.changes.field_changes[0].diff,
-                         [{'type': 'equal', 'text': "A"},
-                          {'type': 'delete', 'text': " new"},
-                          {'type': 'insert', 'text': "n old"},
-                          {'type': 'equal', 'text': " note on the event"}
-                          ])
+        self.assertEqual(
+            currentVersion.changes.field_changes[0].diff,
+            [
+                {"type": "equal", "text": "A"},
+                {"type": "delete", "text": " new"},
+                {"type": "insert", "text": "n old"},
+                {"type": "equal", "text": " note on the event"},
+            ],
+        )
 
     def test_choice_field(self):
         with reversion.create_revision():
@@ -119,12 +124,12 @@ class RIGSVersionTestCase(TestCase):
             self.event.status = models.Event.CONFIRMED
             self.event.save()
 
-        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
-        self.assertEqual(currentVersion.changes.field_changes[0].old, 'Provisional')
-        self.assertEqual(currentVersion.changes.field_changes[0].new, 'Confirmed')
+        currentVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
+        self.assertEqual(currentVersion.changes.field_changes[0].old, "Provisional")
+        self.assertEqual(currentVersion.changes.field_changes[0].new, "Confirmed")
 
     def test_creation_behaviour(self):
-        firstVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision__date_created').parent
+        firstVersion = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision__date_created").parent
         diff = firstVersion.changes
 
         # Mainly to check for exceptions:
@@ -137,7 +142,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
 
         diffs = current_version.changes.item_changes
 
@@ -156,7 +161,7 @@ class RIGSVersionTestCase(TestCase):
             item1.save()
             self.event.save()
 
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
 
         diffs = current_version.changes.item_changes
 
@@ -166,10 +171,13 @@ class RIGSVersionTestCase(TestCase):
         self.assertEqual(diffs[0].new.name, "New Name")
 
         # Check the diff
-        self.assertEqual(current_version.changes.item_changes[0].field_changes[0].diff,
-                         [{'type': 'delete', 'text': "TI I1"},
-                          {'type': 'insert', 'text': "New Name"},
-                          ])
+        self.assertEqual(
+            current_version.changes.item_changes[0].field_changes[0].diff,
+            [
+                {"type": "delete", "text": "TI I1"},
+                {"type": "insert", "text": "New Name"},
+            ],
+        )
 
         # Delete the item
 
@@ -178,7 +186,7 @@ class RIGSVersionTestCase(TestCase):
             self.event.save()
 
         # Find the most recent version
-        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest('revision_id')
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
 
         diffs = current_version.changes.item_changes
 

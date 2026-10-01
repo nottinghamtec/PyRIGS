@@ -21,7 +21,7 @@ def linebreaksxml(value, autoescape=True):
     value = normalize_newlines(value)
     if autoescape:
         value = escape(value)
-    return mark_safe(value.replace('\n', '<br />'))
+    return mark_safe(value.replace("\n", "<br />"))
 
 
 @register.filter
@@ -35,7 +35,7 @@ def to_class_name(value):
 
 
 @register.filter(needs_autoescape=True)
-def nice_errors(form, non_field_msg='General form errors', autoescape=True):
+def nice_errors(form, non_field_msg="General form errors", autoescape=True):
     nice_errors = ErrorDict()
     if isinstance(form, forms.BaseForm):
         for field, errors in list(form.errors.items()):
@@ -47,7 +47,7 @@ def nice_errors(form, non_field_msg='General form errors', autoescape=True):
     return nice_errors
 
 
-@register.inclusion_tag('pagination.html', takes_context=True)
+@register.inclusion_tag("pagination.html", takes_context=True)
 def paginator(context, adjacent_pages=3):
     """
     To be used in conjunction with the object_list generic view.
@@ -57,36 +57,35 @@ def paginator(context, adjacent_pages=3):
     view.
 
     """
-    page = context['page_obj']
-    paginator = context['paginator']
+    page = context["page_obj"]
+    paginator = context["paginator"]
     startPage = max(page.number - adjacent_pages, 1)
     if startPage <= 3:
         startPage = 1
     endPage = page.number + adjacent_pages + 1
     if endPage >= paginator.num_pages - 1:
         endPage = paginator.num_pages + 1
-    page_numbers = [n for n in range(startPage, endPage)
-                    if n > 0 and n <= paginator.num_pages]
+    page_numbers = [n for n in range(startPage, endPage) if n > 0 and n <= paginator.num_pages]
 
     dict = {
-        'request': context['request'],
-        'is_paginated': paginator.num_pages > 0,
-        'page_obj': page,
-        'paginator': paginator,
-        'results': paginator.per_page,
-        'page_numbers': page_numbers,
-        'show_first': 1 not in page_numbers,
-        'show_last': paginator.num_pages not in page_numbers,
-        'first': 1,
-        'last': paginator.num_pages,
-        'has_next': page.has_next(),
-        'has_previous': page.has_previous(),
+        "request": context["request"],
+        "is_paginated": paginator.num_pages > 0,
+        "page_obj": page,
+        "paginator": paginator,
+        "results": paginator.per_page,
+        "page_numbers": page_numbers,
+        "show_first": 1 not in page_numbers,
+        "show_last": paginator.num_pages not in page_numbers,
+        "first": 1,
+        "last": paginator.num_pages,
+        "has_next": page.has_next(),
+        "has_previous": page.has_previous(),
     }
 
     if page.has_next():
-        dict['next'] = page.next_page_number()
+        dict["next"] = page.next_page_number()
     if page.has_previous():
-        dict['previous'] = page.previous_page_number()
+        dict["previous"] = page.previous_page_number()
 
     return dict
 
@@ -115,25 +114,27 @@ def orderby(request, field, attr):
     return dict_.urlencode()
 
 
-@register.filter(needs_autoescape=True)  # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
+@register.filter(
+    needs_autoescape=True
+)  # Used for accessing outside of a form, i.e. in detail views of RiskAssessment and EventChecklist
 def get_field(obj, field, autoescape=True):
     value = getattr(obj, field)
-    if (isinstance(value, bool)):
+    if isinstance(value, bool):
         value = yesnoi(value, field in obj.inverted_fields)
-    elif (isinstance(value, str)):
+    elif isinstance(value, str):
         value = truncatewords(value, 20)
     return mark_safe(value)
 
 
 @register.filter
 def help_text(obj, field):
-    if hasattr(obj, '_meta'):
+    if hasattr(obj, "_meta"):
         return obj._meta.get_field(field).help_text
 
 
 @register.filter
 def verbose_name(obj, field):
-    if hasattr(obj._meta.get_field(field), 'verbose_name'):
+    if hasattr(obj._meta.get_field(field), "verbose_name"):
         return obj._meta.get_field(field).verbose_name
 
 
@@ -144,7 +145,7 @@ def get_list(dictionary, key):
 
 @register.filter
 def profile_by_index(value):
-    if (value):
+    if value:
         return models.Profile.objects.get(pk=int(value))
     else:
         return ""
@@ -165,13 +166,15 @@ def yesnoi(boolean, invert=False, autoescape=True):
 @register.filter
 @stringfilter
 def title_spaced(string):
-    return title(string).replace('_', ' ')
+    return title(string).replace("_", " ")
 
 
 @register.filter(needs_autoescape=True)
 def namewithnotes(obj, url, autoescape=True):
-    if hasattr(obj, 'notes') and obj.notes is not None and len(obj.notes) > 0:
-        return mark_safe(obj.name + f" <a href='{reverse(url, kwargs={'pk': obj.pk})}'><span class='fas fa-sticky-note'></span></a>")
+    if hasattr(obj, "notes") and obj.notes is not None and len(obj.notes) > 0:
+        return mark_safe(
+            obj.name + f" <a href='{reverse(url, kwargs={'pk': obj.pk})}'><span class='fas fa-sticky-note'></span></a>"
+        )
     else:
         return obj.name
 
@@ -188,37 +191,37 @@ def linkornone(target, namespace=None, autoescape=True):
         return "None"
 
 
-@register.inclusion_tag('partials/button.html')
+@register.inclusion_tag("partials/button.html")
 def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style=None):
-    if type == 'edit':
+    if type == "edit":
         clazz += " btn-warning "
         icon = "fa-edit"
         text = "Edit"
-    elif type == 'print':
+    elif type == "print":
         clazz += " btn-primary "
         icon = "fa-download"
         text = "Export"
-    elif type == 'duplicate':
+    elif type == "duplicate":
         clazz += " btn-info "
         icon = "fa-copy"
         text = "Duplicate"
-    elif type == 'view':
+    elif type == "view":
         clazz += " btn-primary "
         icon = "fa-eye"
         text = "View " + text
-    elif type == 'new':
+    elif type == "new":
         clazz += " btn-primary "
         icon = "fa-plus"
         text = "New"
-    elif type == 'copy':
-        return {'copy': True, 'id': id, 'style': style}
-    elif type == 'search':
-        return {'submit': True, 'class': 'btn-info', 'icon': 'fa-search', 'text': 'Search', 'id': id, 'style': style}
-    elif type == 'submit':
-        return {'submit': True, 'class': 'btn-primary', 'icon': 'fa-save', 'text': 'Save', 'id': id, 'style': style}
-    elif type == 'today':
-        return {'today': True, 'id': id}
-    return {'target': url, 'pk': pk, 'class': clazz, 'icon': icon, 'text': text, 'id': id, 'style': style}
+    elif type == "copy":
+        return {"copy": True, "id": id, "style": style}
+    elif type == "search":
+        return {"submit": True, "class": "btn-info", "icon": "fa-search", "text": "Search", "id": id, "style": style}
+    elif type == "submit":
+        return {"submit": True, "class": "btn-primary", "icon": "fa-save", "text": "Save", "id": id, "style": style}
+    elif type == "today":
+        return {"today": True, "id": id}
+    return {"target": url, "pk": pk, "class": clazz, "icon": icon, "text": text, "id": id, "style": style}
 
 
 @register.simple_tag  # TODO Can these be done with annotation/aggregation?
