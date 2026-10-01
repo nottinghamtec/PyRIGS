@@ -13,7 +13,8 @@ from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
 
 from PyRIGS.tests.base import assert_times_almost_equal, assert_oembed, login
-from RIGS import models
+from django.forms.models import model_to_dict
+from RIGS import forms, models
 
 pytestmark = pytest.mark.django_db
 
@@ -425,3 +426,11 @@ class TestMarkdownTemplateTags(TestCase):
     def test_linebreaks(self):
         html = markdown_filter(self.markdown)
         self.assertIn("Itemized lists<br/>\nlook like", html)
+
+
+def test_ra_big_power_without_power_mic_is_a_form_error(ra):
+    data = model_to_dict(ra)
+    data.update(big_power=True, power_mic=None, supervisor_consulted=True)
+    form = forms.EventRiskAssessmentForm(data=data, instance=ra)
+    assert not form.is_valid()
+    assert form.errors['power_mic'].as_data()[0].code == 'power_mic_required'

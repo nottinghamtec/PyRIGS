@@ -177,7 +177,10 @@ class EventRiskAssessmentForm(forms.ModelForm):
 
     def clean(self):
         if self.cleaned_data.get('big_power'):
-            if not self.cleaned_data.get('power_mic').level_qualifications.filter(level__department=TrainingLevel.POWER).exists():
+            power_mic = self.cleaned_data.get('power_mic')
+            if power_mic is None:
+                self.add_error('power_mic', forms.ValidationError("A Power MIC is required for big power.", code="power_mic_required"))
+            elif not power_mic.level_qualifications.filter(level__department=TrainingLevel.POWER).exists():
                 self.add_error('power_mic', forms.ValidationError("Your Power MIC must be a Power Technician.", code="power_tech_required"))
         # Check expected values
         unexpected_values = []
