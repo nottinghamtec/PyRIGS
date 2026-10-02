@@ -478,3 +478,17 @@ $dark-theme-colors: (
 .ts-wrapper.has-items .ts-control > input::placeholder {
     color: transparent;
 }
+
+// FullCalendar (standard theme) colours, matching the site's light/dark modes
+.fc {
+  --fc-border-color: var(--bs-border-color);
+  --fc-page-bg-color: var(--bs-body-bg);
+  --fc-neutral-bg-color: var(--bs-tertiary-bg);
+  --fc-today-bg-color: rgba(var(--bs-warning-rgb), 0.15);
+  --fc-list-event-hover-bg-color: var(--bs-tertiary-bg);
+}
+
+.fc a {
+  color: inherit;
+  text-decoration: none;
+}

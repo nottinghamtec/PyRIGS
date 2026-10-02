@@ -16,7 +16,9 @@
 {% block js %}
 <script>
     ready(function(){
-        document.getElementById('add_record').addEventListener('click', function (e) {
+        var link = document.getElementById('add_record');
+        if (!link) { return; }
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             modaltarget = undefined;
             modalobject = "";

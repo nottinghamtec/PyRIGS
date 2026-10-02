@@ -18,7 +18,9 @@
 {% block js %}
 <script>
     ready(function(){
-        document.getElementById('edit').addEventListener('click', function (e) {
+        var link = document.getElementById('edit');
+        if (!link) { return; }
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             modaltarget = undefined;
             modalobject = "";

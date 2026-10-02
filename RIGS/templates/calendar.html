@@ -27,7 +27,7 @@
 
             calendar = new FullCalendar.Calendar(calendarEl, {
 	          firstDay: 1,
-              themeSystem: 'bootstrap',
+              themeSystem: 'standard',
               aspectRatio: 1.5,
               eventTimeFormat: {
                 'hour': '2-digit',
@@ -143,23 +143,23 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-sm-12">
-            <div class="float-start">
+        <div class="col-sm-12 d-flex flex-wrap justify-content-between align-items-center">
+            <div>
                 <span id="calendar-header" class="h2"></span>
             </div>
-            <div class="d-flex align-items-center flex-wrap gap-2 float-end btn-page my-3">
-                <div class="input-group mx-2">
+            <div class="d-flex align-items-center flex-wrap gap-2 btn-page my-3">
+                <div class="input-group w-auto">
                   <input type="date" class="form-control" id="go-to-date-input" placeholder="Go to date...">
                   <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
                 </div>
-                <div class="btn-group mx-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-primary" id="today-button">Today</button>
                 </div>
-                <div class="btn-group mx-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-secondary" id="prev-button"><span class="fas fa-chevron-left"></span></button>
                   <button type="button" class="btn btn-secondary" id="next-button"><span class="fas fa-chevron-right"></span></button>
                 </div>
-                <div class="btn-group ms-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-light" id="month-button">Month</button>
                   <button type="button" class="btn btn-light" id="week-button">Week</button>
                   <button type="button" class="btn btn-light" id="day-button">Day</button>
