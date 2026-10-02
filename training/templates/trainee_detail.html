@@ -60,9 +60,10 @@
                 {{ level.description|markdown }}
             </div>
             <div class="card-footer">
-                <div class="progress">
-                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{{completion}}% complete</div>
+                <div class="progress" style="height: 1.5rem;">
+                  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{completion}}%" aria-valuenow="{{completion}}" aria-valuemin="0" aria-valuemax="100">{% if completion >= 30 %}{{completion}}% complete{% endif %}</div>
                 </div>
+                {% if completion < 30 %}<small class="text-body-secondary">{{completion}}% complete</small>{% endif %}
                 {% if completion == 100 %}
                     <br>
                     {% confirm_button request.user object level as cb %}
