@@ -350,13 +350,23 @@ $dark-theme-colors: (
     }
     --bs-body-bg: #222;
     --bs-body-color: #{$gray-100};
-    --bs-link-color: #{$blue};
-    --bs-link-hover-color: #{tint-color($blue, 20%)};
+    // Bootstrap derives these from $primary, which is too dim on the dark background
+    --bs-link-color: #6ea8fe;
+    --bs-link-color-rgb: #{to-rgb(#6ea8fe)};
+    --bs-link-hover-color: #8bb9fe;
+    --bs-link-hover-color-rgb: #{to-rgb(#8bb9fe)};
     --bs-secondary-color: #c9c9c9;
     --bs-tertiary-bg: #{$darktheme};
 
     .navbar {
         background-color: #111111 !important;
+    }
+    // Coloured card outlines (training levels): make them visible, including the "dark" and "light" ones
+    .card[class*="border-"] {
+        --bs-card-border-width: 2px;
+    }
+    .border-dark {
+        border-color: $gray-500 !important;
     }
     .dropdown-menu, .popover {
         box-shadow: 0 0.5rem 1rem black;
