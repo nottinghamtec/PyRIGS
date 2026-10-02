@@ -1,13 +1,15 @@
 function setupItemTable(items_json) {
     objectitems = JSON.parse(items_json)
-    $.each(objectitems, function (key, val) {
-        objectitems[key] = JSON.parse(val);
-    })
+    Object.keys(objectitems).forEach(function (key) {
+        objectitems[key] = JSON.parse(objectitems[key]);
+    });
     newitem = -1;
 }
 
 function escapeHtml(str) {
-    return $('<div/>').text(str).html();
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 function updatePrices() {
@@ -16,116 +18,144 @@ function updatePrices() {
     for (var pk in objectitems) {
         var fields = objectitems[pk].fields;
         var sub = fields.cost * fields.quantity;
-        $('#item-' + pk + ' .sub-total').html(parseFloat(sub).toFixed(2)).data('subtotal', sub);
+        var subTotal = document.querySelector('#item-' + pk + ' .sub-total');
+        if (subTotal) {
+            subTotal.textContent = parseFloat(sub).toFixed(2);
+            subTotal.dataset.subtotal = sub;
+        }
 
         sum += Number(sub);
     }
 
-    $('#sumtotal').text(parseFloat(sum).toFixed(2));
-    var vat = sum * Number($('#vat-rate').data('rate'));
-    $('#vat').text(parseFloat(vat).toFixed(2));
-    $('#total').text(parseFloat(sum + vat).toFixed(2));
+    document.getElementById('sumtotal').textContent = parseFloat(sum).toFixed(2);
+    var vat = sum * Number(document.getElementById('vat-rate').dataset.rate);
+    document.getElementById('vat').textContent = parseFloat(vat).toFixed(2);
+    document.getElementById('total').textContent = parseFloat(sum + vat).toFixed(2);
 }
 
 function setupMDE(selector) {
+    var element = document.querySelector(selector);
     editor = new EasyMDE({
         autoDownloadFontAwesome: false,
-        element: $(selector)[0],
+        element: element,
         forceSync: true,
         toolbar: ["bold", "italic", "strikethrough", "|", "unordered-list", "ordered-list", "|", "link", "|", "preview", "guide"],
         status: true,
     });
-    $(selector).data('mde_editor',editor);
+    element.mde_editor = editor;
 }
 
-$('#item-table').on('click', '.item-delete', function () {
-    delete objectitems[$(this).data('pk')]
-    $('#item-' + $(this).data('pk')).remove();
-    updatePrices();
-});
+(function () {
+    var itemTable = document.getElementById('item-table');
+    var itemForm = document.getElementById('item-form');
 
-$('#item-table').on('click', '.item-add', function () {
-    $('#item-form').data('pk', newitem);
+    function field(id) {
+        return document.getElementById(id);
+    }
 
-    // Set the form values
-    $('#item_name').val('');
-    $('#item_description').val('');
-    $('#item_quantity').val('');
-    $('#item_cost').val('');
+    if (itemTable) {
+        on(itemTable, 'click', '.item-delete', function () {
+            delete objectitems[this.dataset.pk];
+            var row = document.getElementById('item-' + this.dataset.pk);
+            if (row) {
+                row.remove();
+            }
+            updatePrices();
+        });
 
-    $($(this).data('target')).modal('show');
-});
+        on(itemTable, 'click', '.item-add', function () {
+            itemForm.dataset.pk = newitem;
 
-$('#item-table').on('click', '.item-edit', function () {
-    // set the pk as we will need this later
-    var pk = $(this).data('pk');
-    $('#item-form').data('pk', pk);
+            // Set the form values
+            field('item_name').value = '';
+            field('item_description').value = '';
+            field('item_quantity').value = '';
+            field('item_cost').value = '';
 
-    // Set the form values
-    var fields = objectitems[pk].fields;
-    $('#item_name').val(fields.name);
-    $('#item_description').val(fields.description);
-    $('#item_quantity').val(fields.quantity);
-    $('#item_cost').val(fields.cost);
+            showModal(this.dataset.modalTarget);
+        });
 
-    $($(this).data('target')).modal('show');
-});
+        on(itemTable, 'click', '.item-edit', function () {
+            // set the pk as we will need this later
+            var pk = this.dataset.pk;
+            itemForm.dataset.pk = pk;
 
-$('body').on('submit', '#item-form', function (e) {
-    e.preventDefault();
-    var pk = $(this).data('pk');
-    $('#itemModal').modal('hide');
+            // Set the form values
+            var fields = objectitems[pk].fields;
+            field('item_name').value = fields.name;
+            field('item_description').value = fields.description;
+            field('item_quantity').value = fields.quantity;
+            field('item_cost').value = fields.cost;
 
-    var fields;
-    if (pk == newitem--) {
-        // Create the new data structure and add it on.
-        fields = new Object();
-        fields['name'] = $('#item_name').val()
-        fields['description'] = $('#item_description').val();
-        fields['cost'] = $('#item_cost').val();
-        fields['quantity'] = $('#item_quantity').val();
+            showModal(this.dataset.modalTarget);
+        });
+    }
 
-        var order = 0;
-        for (item in objectitems) {
-            order++;
+    on(document, 'submit', '#item-form', function (e) {
+        e.preventDefault();
+        var pk = this.dataset.pk;
+        hideModal('#itemModal');
+
+        var fields;
+        if (pk == newitem--) {
+            // Create the new data structure and add it on.
+            fields = new Object();
+            fields['name'] = field('item_name').value;
+            fields['description'] = field('item_description').value;
+            fields['cost'] = field('item_cost').value;
+            fields['quantity'] = field('item_quantity').value;
+
+            var order = 0;
+            for (var item in objectitems) {
+                order++;
+            }
+
+            fields['order'] = order;
+
+            objectitems[pk] = new Object();
+            objectitems[pk]['fields'] = fields;
+
+            // Add the new table row
+            var row = field('new-item-row').cloneNode(true);
+            row.id = 'item-' + pk;
+            row.dataset.pk = pk;
+            field('item-table-body').appendChild(row);
+            row.querySelectorAll('.item-delete, .item-edit').forEach(function (button) {
+                button.dataset.pk = pk;
+            });
+        } else {
+            // Existing item
+            // update data structure
+            fields = objectitems[pk].fields;
+            fields.name = field('item_name').value;
+            fields.description = field('item_description').value;
+            fields.cost = field('item_cost').value;
+            fields.quantity = field('item_quantity').value;
+            objectitems[pk].fields = fields;
         }
+        // update the table
+        var tableRow = field('item-' + pk);
+        tableRow.querySelector('.name').innerHTML = escapeHtml(fields.name);
+        tableRow.querySelector('.description').innerHTML = fields.description;
+        tableRow.querySelector('.cost').innerHTML = parseFloat(fields.cost).toFixed(2);
+        tableRow.querySelector('.quantity').innerHTML = fields.quantity;
 
-        fields['order'] = order;
+        updatePrices();
+    });
 
-        objectitems[pk] = new Object();
-        objectitems[pk]['fields'] = fields;
+    on(document, 'submit', '.itemised_form', function () {
+        field('id_items_json').value = JSON.stringify(objectitems);
+    });
 
-        // Add the new table
-        $('#new-item-row').clone().attr('id', 'item-' + pk).data('pk', pk).appendTo('#item-table-body');
-        $('#item-'+pk+' .item-delete, #item-'+pk+' .item-edit').data('pk', pk)
-    } else {
-        // Existing item
-        // update data structure
-        fields = objectitems[pk].fields;
-        fields.name = $('#item_name').val()
-        fields.description = $('#item_description').val();
-        fields.cost = $('#item_cost').val();
-        fields.quantity = $('#item_quantity').val();
-        objectitems[pk].fields = fields;
-
+    if (itemTable && typeof sortable === 'function') {
+        var sortables = sortable("#item-table tbody");
+        if (sortables.length) {
+            sortables[0].addEventListener('sortupdate', function (e) {
+                var items = e.detail.destination.items;
+                for (var i in items) {
+                    objectitems[items[i].dataset.pk].fields.order = i;
+                }
+            });
+        }
     }
-    // update the table
-    $row = $('#item-' + pk);
-    $row.find('.name').html(escapeHtml(fields.name));
-    $row.find('.description').html(fields.description);
-    $row.find('.cost').html(parseFloat(fields.cost).toFixed(2));
-    $row.find('.quantity').html(fields.quantity);
-
-    updatePrices();
-});
-
-$('body').on('submit', '.itemised_form', function (e) {
-    $('#id_items_json').val(JSON.stringify(objectitems));
-});
-
-sortable("#item-table tbody")[0].addEventListener('sortupdate', function (e) {
-    var items = e.detail.destination.items;
-    for(var i in items) {
-        objectitems[items[i].dataset.pk].fields.order = i;
-    }
-});
+})();

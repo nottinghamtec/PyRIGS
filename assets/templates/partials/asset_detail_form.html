@@ -7,7 +7,7 @@
   </div>
   <div class="card-body">
     {% if create or edit or duplicate %}
-    <div class="form-group">
+    <div class="mb-3">
         <label for="{{ form.asset_id.id_for_label }}">Asset ID</label>
         {% if duplicate %}
         {% render_field form.asset_id|add_class:'form-control' value=object.asset_id %}
@@ -17,32 +17,32 @@
         {% render_field form.asset_id|add_class:'form-control' %}
         {% endif %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.description.id_for_label }}">Description</label>
       {% render_field form.description|add_class:'form-control' value=object.description %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.nickname.id_for_label }}">Nickname</label>
       {% render_field form.nickname|add_class:'form-control' value=object.nickname %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.category.id_for_label }}" >Category</label>
       {% render_field form.category|add_class:'form-control'%}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.status.id_for_label }}" >Status</label>
       {% render_field form.status|add_class:'form-control'%}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.serial_number.id_for_label }}">Serial Number</label>
       {% render_field form.serial_number|add_class:'form-control' value=object.serial_number %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label for="{{ form.is_cable.id_for_label }}">Cable?</label>
         {% render_field form.is_cable|attr:'onchange=checkIfCableHidden()' %}
     </div>
     <!---TODO: Lower default number of lines in comments box-->
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.comments.id_for_label }}">Comments</label>
       {% render_field form.comments|add_class:'form-control md-enabled' %}
     </div>

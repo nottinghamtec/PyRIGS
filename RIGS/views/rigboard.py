@@ -69,7 +69,7 @@ class EventDetail(generic.DetailView, ModalURLMixin):
         context = super().get_context_data(**kwargs)
         title = f"{self.object.display_id} | {self.object.name}"
         if self.object.dry_hire:
-            title += " <span class='badge badge-secondary'>Dry Hire</span>"
+            title += " <span class='badge text-bg-secondary'>Dry Hire</span>"
         context["page_title"] = title
         if is_ajax(self.request):
             context["override"] = "base_ajax.html"
@@ -278,7 +278,7 @@ class EventAuthorise(generic.UpdateView):
         context["tos_url"] = settings.TERMS_OF_HIRE_URL
         context["page_title"] = f"{self.event.display_id}: {self.event.name}"
         if self.event.dry_hire:
-            context["page_title"] += ' <span class="badge badge-secondary align-top">Dry Hire</span>'
+            context["page_title"] += ' <span class="badge text-bg-secondary align-top">Dry Hire</span>'
         context["preview"] = self.preview
         return context
 

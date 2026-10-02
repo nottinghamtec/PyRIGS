@@ -19,64 +19,64 @@
 
 {% block js %}
     {{ block.super }}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
     <script src="{% static 'js/interaction.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script>
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
-        $(document).ready(function () {
+        ready(function () {
             dur = matches ? 0 : 500;
+            var all = function (selector) { return document.querySelectorAll(selector); };
             {% if object.pk %}
             // Editing
                 {% if not object.is_rig %}
-                    $('.form-is_rig').hide();
+                    all('.form-is_rig').forEach(function (el) { el.style.display = 'none'; });
                 {% endif %}
             //Creation
             {% else %}
                 // If there were errors, apply the previous Rig/not-Rig selection
                 {% if form.errors %}
-                    $('.form-hws').show();
-                    if ($('#{{form.is_rig.auto_id}}').attr('checked') !== 'checked') {
-                        $('.form-is_rig').hide();
+                    all('.form-hws').forEach(function (el) { slideDown(el, 0); });
+                    if (document.getElementById('{{form.is_rig.auto_id}}').getAttribute('checked') !== 'checked') {
+                        all('.form-is_rig').forEach(function (el) { el.style.display = 'none'; });
                     }
                 {% else %}
                     //Initial hide
-                    $('.form-hws').slideUp(dur);
+                    all('.form-hws').forEach(function (el) { slideUp(el, dur); });
                 {% endif %}
                 //Button handling
-                $('#is_rig-selector button').on('click', function () {
-                    $('.form-non_rig').slideDown(dur); //Non rig stuff also needed for rig, so always slide down
-                    if ($(this).data('is_rig') === 1) {
-                        $('#{{form.is_rig.auto_id}}').prop('checked', true);
-                        if ($('.form-non_rig').is(':hidden')) {
-                            $('.form-is_rig').show();
+                all('#is_rig-selector button').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        var wasHidden = isHidden(document.querySelector('.form-non_rig'));
+                        all('.form-non_rig').forEach(function (el) { slideDown(el, dur); }); //Non rig stuff also needed for rig, so always slide down
+                        if (this.dataset.is_rig === '1') {
+                            document.getElementById('{{form.is_rig.auto_id}}').checked = true;
+                            all('.form-is_rig').forEach(function (el) {
+                                if (wasHidden) {
+                                    el.style.display = '';
+                                } else {
+                                    slideDown(el, dur);
+                                }
+                            });
+                            all('.form-hws, .form-hws .form-is_rig').forEach(function (el) { el.style.overflow = 'visible'; });
                         } else {
-                            $('.form-is_rig').slideDown(dur);
+                            document.getElementById('{{form.is_rig.auto_id}}').checked = false;
+                            all('.form-is_rig').forEach(function (el) { slideUp(el, dur); });
                         }
-                        $('.form-hws, .form-hws .form-is_rig').css('overflow', 'visible');
-                    } else {
-                        $('#{{form.is_rig.auto_id}}').prop('checked', false);
-                        $('.form-is_rig').slideUp(dur);
-                    }
+                    });
                 });
             {% endif %}
         });
-        $(document).ready(function () {
+        ready(function () {
             setupMDE('#id_description');
             setupMDE('#id_notes');
             setupMDE('#item_description');
 
-            $('#itemModal').on('shown.bs.modal', function (e) {
-                $('#item_description').data('mde_editor').value(
-                    $('#item_description').val()
-                    );
+            document.getElementById('itemModal').addEventListener('shown.bs.modal', function () {
+                var description = document.getElementById('item_description');
+                description.mde_editor.value(description.value);
             });
 
-            setupItemTable($("#{{ form.items_json.id_for_label }}").val());
-        });
-        $(function () {
-          $('[data-toggle="tooltip"]').tooltip();
+            setupItemTable(document.getElementById("{{ form.items_json.id_for_label }}").value);
         });
     </script>
 {% endblock %}
@@ -98,11 +98,11 @@
         <div class="col-sm-12">
             <div class="card text-center" id="is_rig-selector">
                 <div class="card-body">
-		            <span data-toggle="tooltip"
+		            <span data-bs-toggle="tooltip"
                           title="Anything that involves TEC kit, crew, or otherwise us providing a service to anyone.">
 			            <button type="button" class="btn btn-primary w-25" data-is_rig="1">Rig</button>
 		            </span>
-		            <span data-toggle="tooltip"
+		            <span data-bs-toggle="tooltip"
                           title="Things that aren't service-based, like training, meetings and site visits.">
 			            <button type="button" class="btn btn-info w-25" data-is_rig="0">Non-Rig</button>
 		            </span>
@@ -116,13 +116,13 @@
             <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
                 <div class="card-header">Contact Details</div>
                 <div class="card-body">
-                    <div class="form-group" data-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
+                    <div class="mb-3" data-bs-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
                         <label for="{{ form.person.id_for_label }}"
                                class="col-sm-4 col-form-label">{{ form.person.label }}</label>
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-9 col-md-7 col-lg-8">
-                                    <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
+                                    <select id="{{ form.person.id_for_label }}" name="{{ form.person.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='person' %}">
                                         {% if person %}
                                             <option value="{{form.person.value}}" selected="selected" data-update_url="{% url 'person_update' form.person.value %}">{{ person }}</option>
                                         {% endif %}
@@ -131,10 +131,10 @@
                                 <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                     <div class="btn-group">
                                         <a href="{% url 'person_create' %}" class="btn btn-success modal-href"
-                                           data-target="#{{ form.person.id_for_label }}">
+                                           data-select-target="#{{ form.person.id_for_label }}">
                                             <span class="fas fa-plus"></span>
                                         </a>
-                                        <a {% if form.person.value %}href="{% url 'person_update' form.person.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.person.id_for_label }}-update" data-target="#{{ form.person.id_for_label }}">
+                                        <a {% if form.person.value %}href="{% url 'person_update' form.person.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.person.id_for_label }}-update" data-select-target="#{{ form.person.id_for_label }}">
                                             <span class="fas fa-user-edit"></span>
                                         </a>
                                     </div>
@@ -142,14 +142,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" data-toggle="tooltip" title="The client organisation, leave blank if client is an individual">
+                    <div class="mb-3" data-bs-toggle="tooltip" title="The client organisation, leave blank if client is an individual">
                         <label for="{{ form.organisation.id_for_label }}"
                                class="col-sm-4 col-form-label">{{ form.organisation.label }}</label>
 
                         <div class="col-sm-8">
                             <div class="row">
                                 <div class="col-sm-9 col-md-7 col-lg-8">
-                                    <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" >
+                                    <select id="{{ form.organisation.id_for_label }}" name="{{ form.organisation.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='organisation' %}" >
                                         {% if organisation %}
                                             <option value="{{form.organisation.value}}" selected="selected" data-update_url="{% url 'organisation_update' form.organisation.value %}">{{ organisation }}</option>
                                         {% endif %}
@@ -158,10 +158,10 @@
                                 <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                     <div class="btn-group">
                                         <a href="{% url 'organisation_create' %}" class="btn btn-success modal-href"
-                                           data-target="#{{ form.organisation.id_for_label }}">
+                                           data-select-target="#{{ form.organisation.id_for_label }}">
                                             <span class="fas fa-plus"></span>
                                         </a>
-                                        <a {% if form.organisation.value %}href="{% url 'organisation_update' form.organisation.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.organisation.id_for_label }}-update" data-target="#{{ form.organisation.id_for_label }}">
+                                        <a {% if form.organisation.value %}href="{% url 'organisation_update' form.organisation.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.organisation.id_for_label }}-update" data-select-target="#{{ form.organisation.id_for_label }}">
                                             <span class="fas fa-edit"></span>
                                         </a>
                                     </div>
@@ -174,7 +174,7 @@
             <div class="card form-hws form-non_rig mb-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
                 <div class="card-header">Event Description</div>
                 <div class="card-body">
-                    <div class="form-group" data-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
+                    <div class="mb-3" data-bs-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
                         <label for="{{ form.description.id_for_label }}"
                                class="col-sm-4 col-form-label">{{ form.description.label }}</label>
 
@@ -192,7 +192,7 @@
                 <div class="card-header">Event Details</div>
                 <div class="card-body">
                     <div id="form-hws">
-                        <div class="form-group" data-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
+                        <div class="mb-3" data-bs-toggle="tooltip" title="Name of the event, displays on rigboard and on paperwork">
                             <label for="{{ form.name.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.name.label }}</label>
 
@@ -200,14 +200,14 @@
                                 {% render_field form.name class+="form-control" %}
                             </div>
                         </div>
-                        <div class="form-group" data-toggle="tooltip" title="The venue for the rig, leave blank if unknown (e.g. for a dry hire)">
+                        <div class="mb-3" data-bs-toggle="tooltip" title="The venue for the rig, leave blank if unknown (e.g. for a dry hire)">
                             <label for="{{ form.venue.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.venue.label }}</label>
 
                             <div class="col-sm-8">
                                 <div class="row">
                                     <div class="col-sm-9 col-md-7 col-lg-8">
-                                        <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                        <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                         {% if venue %}
                                             <option value="{{venue.id}}" selected="selected" data-update_url="{% url 'venue_update' venue.id %}">{{ venue }}</option>
                                         {% endif %}
@@ -216,10 +216,10 @@
                                     <div class="col-sm-3 col-md-5 col-lg-4 align-right">
                                         <div class="btn-group">
                                             <a href="{% url 'venue_create' %}" class="btn btn-success modal-href"
-                                               data-target="#{{ form.venue.id_for_label }}">
+                                               data-select-target="#{{ form.venue.id_for_label }}">
                                                 <span class="fas fa-plus"></span>
                                             </a>
-                                            <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-warning modal-href" id="{{ form.venue.id_for_label }}-update" data-target="#{{ form.venue.id_for_label }}">
+                                            <a href="{% if object.venue %}{% url 'venue_update' object.venue.pk %}{% endif %}" class="btn btn-warning modal-href" id="{{ form.venue.id_for_label }}-update" data-select-target="#{{ form.venue.id_for_label }}">
                                                 <span class="fas fa-edit"></span>
                                             </a>
                                         </div>
@@ -227,31 +227,31 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="{{ form.start_date.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.start_date.label }}</label>
 
                             <div class="col-sm-10">
                                 <div class="row">
-                                    <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="Start date for event, required">
+                                    <div class="col-sm-12 col-md-7" data-bs-toggle="tooltip" title="Start date for event, required">
                                         {% render_field form.start_date class+="form-control" %}
                                     </div>
-                                    <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="Start time of event, can be left blank">
+                                    <div class="col-sm-12 col-md-5" data-bs-toggle="tooltip" title="Start time of event, can be left blank">
                                         {% render_field form.start_time class+="form-control" step="60" %}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="{{ form.end_date.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.end_date.label }}</label>
 
                             <div class="col-sm-10">
                                 <div class="row">
-                                    <div class="col-sm-12 col-md-7" data-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
+                                    <div class="col-sm-12 col-md-7" data-bs-toggle="tooltip" title="End date of event, leave blank if unknown or same as start date">
                                         {% render_field form.end_date class+="form-control" %}
                                     </div>
-                                    <div class="col-sm-12 col-md-5" data-toggle="tooltip" title="End time of event, leave blank if unknown">
+                                    <div class="col-sm-12 col-md-5" data-bs-toggle="tooltip" title="End time of event, leave blank if unknown">
                                         {% render_field form.end_time class+="form-control" step="60" %}
                                     </div>
                                 </div>
@@ -260,14 +260,14 @@
 
                         {# Rig only information #}
                         <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
-                            <div class="form-group" data-toggle="tooltip" title="The date/time at which TEC have access to the venue">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The date/time at which TEC have access to the venue">
                                 <label for="{{ form.access_at.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.access_at.label }}</label>
                                 <div class="col-sm-8">
                                     {% render_field form.access_at class+="form-control" step="60" %}
                                 </div>
                             </div>
-                            <div class="form-group" data-toggle="tooltip" title="The date/time at which crew should meet for this event">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The date/time at which crew should meet for this event">
                                 <label for="{{ form.meet_at.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.meet_at.label }}</label>
 
@@ -275,15 +275,15 @@
                                     {% render_field form.meet_at class+="form-control" step="60" %}
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <div class="col-sm-offset-4 col-sm-8">
-                                        <label data-toggle="tooltip" title="Mark this event as a dry-hire, so it needs to be checked in at the end">
+                                        <label data-bs-toggle="tooltip" title="Mark this event as a dry-hire, so it needs to be checked in at the end">
                                         {{ form.dry_hire.label }} {% render_field form.dry_hire %}
                                     </div>
                                 </div>
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <div class="col-sm-offset-4 col-sm-8">
-                                    <label data-toggle="tooltip" title="Do we need to secure campus parking permits, wristbands for backstage access or other non-standard requirements?">
+                                    <label data-bs-toggle="tooltip" title="Do we need to secure campus parking permits, wristbands for backstage access or other non-standard requirements?">
                                         {{ form.parking_and_access.label }} {% render_field form.parking_and_access %}
                                     </label>
                                 </div>
@@ -292,7 +292,7 @@
                         </div>
 
                         {# Status is needed on all events types and it looks good here in the form #}
-                        <div class="form-group" data-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
+                        <div class="mb-3" data-bs-toggle="tooltip" title="The current status of the event. Only mark as booked once paperwork is received">
                             <label for="{{ form.status.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.status.label }}</label>
 
@@ -302,12 +302,12 @@
                         </div>
 
                         <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
-                            <div class="form-group" data-toggle="tooltip" title="The Member in Charge of this event">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The Member in Charge of this event">
                                 <label for="{{ form.mic.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.mic.label }}</label>
 
                                 <div class="col-sm-8">
-                                    <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                    <select id="{{ form.mic.id_for_label }}" name="{{ form.mic.name }}" class="px-0 ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                         {% if mic %}
                                             <option value="{{form.mic.value}}" selected="selected" >{{ mic.name }}</option>
                                         {% endif %}
@@ -316,12 +316,12 @@
                             </div>
 
                             {% if object.dry_hire %}
-                                <div class="form-group" data-toggle="tooltip" title="The person who checked-in this dry hire">
+                                <div class="mb-3" data-bs-toggle="tooltip" title="The person who checked-in this dry hire">
                                     <label for="{{ form.checked_in_by.id_for_label }}"
                                            class="col-sm-4 col-form-label">{{ form.checked_in_by.label }}</label>
 
                                     <div class="col-sm-8">
-                                         <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="px-0 selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                         <select id="{{ form.checked_in_by.id_for_label }}" name="{{ form.checked_in_by.name }}" class="px-0 ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                             {% if checked_in_by %}
                                                 <option value="{{form.checked_in_by.value}}" selected="selected" >{{ checked_in_by.name }}</option>
                                             {% endif %}
@@ -330,7 +330,7 @@
                                 </div>
                             {% endif %}
 
-                            <div class="form-group" data-toggle="tooltip" title="The student ID of the client who collected the dry-hire">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The student ID of the client who collected the dry-hire">
                                 <label for="{{ form.collector.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.collector.label }}</label>
 
@@ -339,7 +339,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" data-toggle="tooltip" title="The purchase order number (for external clients)">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The purchase order number (for external clients)">
                                 <label for="{{ form.purchase_order.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.purchase_order.label }}</label>
 
@@ -348,7 +348,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" data-toggle="tooltip" title="The thread for this event on the TEC Forum">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The thread for this event on the TEC Forum">
                                 <label for="{{ form.forum_url.id_for_label }}"
                                        class="col-sm-4 col-form-label">Forum Thread</label>
                                 <div class="col-sm-12">
@@ -357,7 +357,7 @@
                                     {% if object.pk %}
                                     <p class="small mb-0">or</p>
                                     <a href="{% url 'event_thread' object.pk %}" class="btn btn-primary" title="Create Forum Thread" target="_blank">
-                                    <span class="fas fa-plus"></span> <span class="hidden-xs">Create Forum Thread</span></a>
+                                    <span class="fas fa-plus"></span> <span class="d-none d-sm-inline">Create Forum Thread</span></a>
                                     {% endif %}
                                 </div>
                             </div>
@@ -372,7 +372,7 @@
             <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
                 <div class="card-body">
                     <div class="col-sm-12">
-                        <div class="form-group" data-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
+                        <div class="mb-3" data-bs-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
                             <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
                             {% render_field form.notes class+="form-control md-enabled" %}
                         </div>
@@ -381,7 +381,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 text-right form-hws form-non_rig my-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+        <div class="col-sm-12 text-end form-hws form-non_rig my-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
             {% button 'submit' %}
         </div>
     </div>

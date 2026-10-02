@@ -13,27 +13,35 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
 
     <script>
         function parseBool(str) {
             return str.toLowerCase() == 'true';
         }
-        $('input[type=radio][name=big_power]').change(function() {
-            $('#{{ form.power_mic.id_for_label }}').prop('required', parseBool(this.value));
+        function onRadioChange(names, handler) {
+            names.forEach(function (name) {
+                document.querySelectorAll('input[type=radio][name=' + name + ']').forEach(function (radio) {
+                    radio.addEventListener('change', handler);
+                });
+            });
+        }
+        onRadioChange(['big_power'], function() {
+            document.getElementById('{{ form.power_mic.id_for_label }}').required = parseBool(this.value);
         });
-        $('input[type=radio][name=outside], input[type=radio][name=generators], input[type=radio][name=other_companies_power], input[type=radio][name=nonstandard_equipment_power], input[type=radio][name=multiple_electrical_environments]').change(function() {
-            $('#{{ form.power_notes.id_for_label }}').prop('required', parseBool(this.value));
-            //$('#{{ form.power_plan.id_for_label }}').prop('required', parseBool(this.value));
+        onRadioChange(['outside', 'generators', 'other_companies_power', 'nonstandard_equipment_power', 'multiple_electrical_environments'], function() {
+            document.getElementById('{{ form.power_notes.id_for_label }}').required = parseBool(this.value);
         });
-        $('input[type=radio][name=special_structures]').change(function() {
-            $('#{{ form.persons_responsible_structures.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
-            $('label[for={{ form.persons_responsible_structures.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        onRadioChange(['special_structures'], function() {
+            var field = document.getElementById('{{ form.persons_responsible_structures.id_for_label }}');
+            field.hidden = !parseBool(this.value);
+            field.required = parseBool(this.value);
+            document.querySelector('label[for={{ form.persons_responsible_structures.id_for_label }}]').hidden = !parseBool(this.value);
         });
-        $('input[type=radio][name=suspended_structures]').change(function() {
-            $('#{{ form.rigging_plan.id_for_label }}').prop('hidden', !parseBool(this.value)).prop('required', parseBool(this.value));
-            $('label[for={{ form.rigging_plan.id_for_label }}]').prop('hidden', !parseBool(this.value));
+        onRadioChange(['suspended_structures'], function() {
+            var field = document.getElementById('{{ form.rigging_plan.id_for_label }}');
+            field.hidden = !parseBool(this.value);
+            field.required = parseBool(this.value);
+            document.querySelector('label[for={{ form.rigging_plan.id_for_label }}]').hidden = !parseBool(this.value);
         });
     </script>
 {% endblock %}
@@ -42,13 +50,13 @@
     <div class="col">
         {% if form.errors %}
         <div class="alert alert-danger alert-dismissable">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <dl>
 	            {% with form|nice_errors as qq %}
 		            {% for error_name,desc in qq.items %}
                     {% if error_name == 'General form errors' %}
                     {{ form.non_field_errors.0|safe }}
-                    <div class="text-right">
+                    <div class="text-end">
                         {% render_field form.supervisor_consulted class+="form-check-input" form="form" %}<label class="form-check-label" for="{{ form.supervisor_consulted.id_for_label}}">Please confirm you've done so.</label><br>
                         <button class="btn btn-primary mt-2" type="submit" form="form"><span class="fas fa-thumbs-up"></span> Confirm</button>
                     </div>
@@ -98,7 +106,7 @@
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col col-form-label">{{ form.power_mic.help_text|safe }}</label>
                             <div class="col-6">
-                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials">
                                     {% if power_mic %}
                                         <option value="{{form.power_mic.value}}" selected="selected">{{ power_mic }}</option>
                                     {% endif %}
@@ -174,7 +182,7 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-sm-12 text-right">
+                <div class="col-sm-12 text-end">
                     <div class="btn-group">
                         <button type="submit" class="btn btn-primary" title="Save"><i
                                 class="fas fa-save"></i> Save

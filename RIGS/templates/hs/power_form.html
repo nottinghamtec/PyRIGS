@@ -17,8 +17,6 @@
 
 {% block js %}
     {{ block.super }}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -48,19 +46,19 @@
                                 <dd class="col-8">{% include 'partials/event_size.html' with object=event.riskassessment %}</dd>
                             </dl>
                             <hr>
-                            <div class="form-group form-row" id="{{ form.power_mic.id_for_label }}-group">
+                            <div class="mb-3 row g-2" id="{{ form.power_mic.id_for_label }}-group">
                             <label for="{{ form.power_mic.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.power_mic.help_text }}</label>
-                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
+                                <select id="{{ form.power_mic.id_for_label }}" name="{{ form.power_mic.name }}" class="ts-select col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='profile' %}?fields=first_name,last_name,initials" required="true">
                                     {% if power_mic %}
                                         <option value="{{power_mic.pk}}" selected="selected">{{ power_mic.name }}</option>
                                     {% endif %}
                                 </select>
                             </div>
-                            <div class="form-group form-row" id="{{ form.venue.id_for_label }}-group">
+                            <div class="mb-3 row g-2" id="{{ form.venue.id_for_label }}-group">
                                 <label for="{{ form.venue.id_for_label }}"
                                 class="col-4 col-form-label">{{ form.venue.label }}</label>
-                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="selectpicker col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
+                                <select id="{{ form.venue.id_for_label }}" name="{{ form.venue.name }}" class="ts-select col-8" data-live-search="true" data-sourceurl="{% url 'api_secure' model='venue' %}">
                                 {% if venue %}
                                     <option value="{{venue.pk}}" selected="selected">{{ venue.name }}</option>
                                 {% endif %}
@@ -190,7 +188,7 @@
             </div>
             {% endif %}
             <div class="row mt-3">
-                <div class="col-sm-12 text-right">
+                <div class="col-sm-12 text-end">
                     {% button 'submit' %}
                 </div>
             </div>

@@ -47,7 +47,7 @@ function styles(done) {
 function scripts() {
     const dest = 'pipeline/built_assets/js';
     const base_scripts = ["src.js", "konami.js"];
-    const bs_select = ["tom-select.complete.js"]
+    const bs_select = ["tom-select.complete.js", "autocompleter.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
     return gulp.src([/* Bootstrap bundle includes Popper */
                     'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
@@ -63,7 +63,7 @@ function scripts() {
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
     .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
-    .pipe(gulpif(function(file) { return file.relative === "bootstrap.bundle.js";}, con('jpop.js')))
+    .pipe(gulpif(function(file) { return ["bootstrap.bundle.js", "helpers.js"].includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
     // Only minify if filename does not already denote it as minified
     .pipe(gulpif(function(file) { return file.path.indexOf("min") === -1;},terser()))

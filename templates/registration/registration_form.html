@@ -18,14 +18,14 @@
                     <div class="col-sm-8 col-sm-offset-2">
                         <form method="post" role="form">{% csrf_token %}
                             {% for field in form %}
-                            	<div class="form-group form-row">
+                            	<div class="mb-3 row g-2">
                             		<label for="{{ field.id_for_label }}" class="col-form-label col-sm-4">{{ field.label }}</label>
                             		<div class="controls col-sm-8">
                             			{% render_field field class+="form-control" placeholder=field.label %}
                             		</div>
                             	</div>
                             {% endfor %}
-                            <p><input type="submit" value="Register" class="btn btn-primary pull-right"></p>
+                            <p><input type="submit" value="Register" class="btn btn-primary float-end"></p>
                         </form>
                     </div>
                 </div>

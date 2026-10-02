@@ -14,35 +14,21 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/tooltip.js' %}"></script>
 <script>
-    $('document').ready(function(){
-        $('#add_record').click(function (e) {
-         e.preventDefault();
-         var url = $(this).attr("href");
-         $.ajax({
-            url: url,
-            success: function(){
-                $link = $(this);
-                    // Anti modal inception
-                    if ($link.parents('#modal').length === 0) {
-                        modaltarget = $link.data('target');
-                        modalobject = "";
-                        $('#modal').load(url, function (e) {
-                            $('#modal').modal();
-                            //$(".selectpicker").selectpicker().each(function(){initPicker($(this))});
-                        });
-                    }
-                }
+    ready(function(){
+        document.getElementById('add_record').addEventListener('click', function (e) {
+            e.preventDefault();
+            modaltarget = undefined;
+            modalobject = "";
+            loadModal(this.getAttribute("href"));
         });
-     });
     });
 </script>
 {% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-sm-12 text-right">
+    <div class="col-sm-12 text-end">
         <div class="btn-group">
             {% include 'partials/add_qualification.html' %}
             <a href="{% url 'trainee_item_detail' object.pk %}" class="btn btn-info"><span class="fas fa-info-circle"></span> View Detailed Record</a>
@@ -81,7 +67,7 @@
                     {% if cb %}
                         <div class="d-flex justify-content-between">{{ cb }}</div>
                     {% else %}
-                        <p class="font-italic pt-2 pb-0">Missing prerequisite level(s)</p>
+                        <p class="fst-italic pt-2 pb-0">Missing prerequisite level(s)</p>
                     {% endif %}
                 {% endif %}
           </div>
@@ -90,7 +76,7 @@
   </div>
 </div>
 <div class="row">
-    <div class="col text-right">
+    <div class="col text-end">
         {% include 'partials/last_edited.html' with target="trainee_history" %}
     </div>
 </div>

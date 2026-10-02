@@ -14,7 +14,7 @@
         <br/>
         {% endfor %}
         <a href="{% url 'event_ec' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
-        class="hidden-xs">Create</span></a>
+        class="d-none d-sm-inline">Create</span></a>
         <hr>
         <h5>Power Test Records:</h5>
         {% for record in event.power_tests.all %}
@@ -22,6 +22,6 @@
         <br/>
         {% endfor %}
         <a href="{% url 'event_pt' event.pk %}" class="btn btn-info mt-2"><span class="fas fa-paperclip"></span> <span
-        class="hidden-xs">Create</span></a>
+        class="d-none d-sm-inline">Create</span></a>
     </div>
 </div>

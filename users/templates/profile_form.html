@@ -19,29 +19,29 @@
             </div>
             <div class="col-md-6">
 	        <form action="{{form.action|default:request.path}}" method="post">{% csrf_token %}
-		        <div class="form-group">
+		        <div class="mb-3">
 			        {% include 'partials/form_field.html' with field=form.first_name %}
 		        </div>
-                <div class="form-group">
+                <div class="mb-3">
 			        {% include 'partials/form_field.html' with field=form.last_name %}
 		        </div>
-		        <div class="form-group">
+		        <div class="mb-3">
 			        <label for="{{form.email.id_for_label}}" class="col-form-label">{{form.email.label}}</label>
 			        {% render_field form.email type="email" class+="form-control" placeholder=form.email.label %}
 		        </div>
-                <div class="form-group">
+                <div class="mb-3">
 			        {% include 'partials/form_field.html' with field=form.initials %}
 		        </div>
-		        <div class="form-group">
+		        <div class="mb-3">
 			        <label for="{{form.phone.id_for_label}}" class="col-form-label">{{form.phone.label}}</label>
 		            {% render_field form.phone type="tel" class+="form-control" placeholder=form.phone.label %}
 		        </div>
-                <div class="form-group">
+                <div class="mb-3">
 		             <label for="{{ form.dark_theme.id_for_label }}">Enable Dark Theme?</label>
                      {% render_field form.dark_theme %}
 		        </div>
-		        <div class="form-group">
-                    <input class="btn btn-primary float-right" type="submit"/>
+		        <div class="mb-3">
+                    <input class="btn btn-primary float-end" type="submit"/>
                 </div>
           </form>
             </div>

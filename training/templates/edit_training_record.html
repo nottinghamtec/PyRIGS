@@ -13,30 +13,22 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/tooltip.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-<script src="{% static 'js/autocompleter.js' %}"></script>
-<script>
-    //Has to be done here or the pickers disappear on modal error
-    $('document').ready(function(){
-        $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
-    });
-</script>
 <form role="form" action="{{ form.action|default:request.path }}" method="POST" id="add_record_form">
     {% include 'form_errors.html' %}
     {% csrf_token %}
     {% render_field form.trainee|attr:'hidden' value=form.trainee.initial %}
     {% include 'partials/item_field.html' %}
-    <div class="form-group form-row">
+    <div class="mb-3 row g-2">
       <label for="depth" class="col-sm-2 col-form-label">Depth</label>
-      {% render_field form.depth|add_class:'form-control custom-select col-sm-8' %}
+      {% render_field form.depth|add_class:'form-control form-select col-sm-8' %}
     </div>
-    <div class="form-group form-row">
+    <div class="mb-3 row g-2">
       {% include 'partials/supervisor_field.html' %}
     </div>
-    <div class="form-group form-row">
+    <div class="mb-3 row g-2">
         <label for="date" class="col-sm-2 col-form-label">Training Date</label>
         <div class="col-sm-8">
             {% with training_date=object.date|date:"Y-m-d" %}
@@ -45,14 +37,14 @@
         </div>
         {% button 'today' id='id_date' %}
     </div>
-    <div class="form-group form-row">
+    <div class="mb-3 row g-2">
         <label for="id_notes" class="col-sm-2 col-form-label">Notes</label>
         <div class="col-sm-8">
         {% render_field form.notes|add_class:'form-control' rows=3 %}
         </div>
     </div>
   {% if not is_ajax %}
-   <div class="col-sm-12 text-right pr-0">
+   <div class="col-sm-12 text-end pe-0">
         {% button 'submit' %}
     </div>
   {% endif %}
@@ -60,7 +52,7 @@
 {% endblock %}
 
 {% block footer %}
-<div class="col-sm-12 text-right pr-0">
+<div class="col-sm-12 text-end pe-0">
 <button type="submit" class="btn btn-primary" title="Save" form="add_record_form"><span class="fas fa-save align-middle"></span> <span class="d-none d-sm-inline align-middle">Save</span></button>
 </div>
 {% endblock %}

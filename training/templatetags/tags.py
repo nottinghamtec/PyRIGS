@@ -47,7 +47,7 @@ def get_levels_of_depth(trainee, level):
 @register.simple_tag
 def confirm_button(user, trainee, level):
     if level.user_has_requirements(trainee):
-        string = "<span class='badge badge-warning p-2'>Awaiting Confirmation</span>"
+        string = "<span class='badge text-bg-warning p-2'>Awaiting Confirmation</span>"
         if models.Trainee.objects.get(pk=user.pk).is_supervisor or user.has_perm(
             "training.add_traininglevelqualification"
         ):

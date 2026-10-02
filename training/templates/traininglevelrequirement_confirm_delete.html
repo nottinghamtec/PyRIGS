@@ -4,7 +4,7 @@
 <div class="alert alert-danger" role="alert">
     <p>Are you sure you wish to delete {{ page_title }}</p>
 
-    <div class="text-right">
+    <div class="text-end">
         <form action="{{ action_link }}" method="post">
             {% csrf_token %}
             <input type="hidden" name="next" value="{% url 'level_detail' object.level.pk %}"/>

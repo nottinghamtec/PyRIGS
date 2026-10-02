@@ -20,6 +20,7 @@
     <link rel="icon" type="image/png" href="{% static 'imgs/pyrigs-avatar.png' %}">
     <link rel="apple-touch-icon" href="{% static 'imgs/pyrigs-avatar.png' %}">
 
+    {% include 'partials/dark_theme.html' %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
     {% block css %}
     {% endblock %}
@@ -35,16 +36,16 @@
 <a class="skip-link" href='#main'>Skip to content</a>
 {% block navbar %}
 {% if request.user.current_event %}
-<div class="bg-primary d-flex justify-content-between align-items-center"><span class="ml-2">You are currently checked in to <a href="{{request.user.current_event.event.get_absolute_url}}" class="text-white">{{request.user.current_event.event}}</a></span><a href="{% url 'event_checkout'%}" class="btn btn-warning">Check Out</a></div>
+<div class="bg-primary d-flex justify-content-between align-items-center"><span class="ms-2">You are currently checked in to <a href="{{request.user.current_event.event.get_absolute_url}}" class="text-white">{{request.user.current_event.event}}</a></span><a href="{% url 'event_checkout'%}" class="btn btn-warning">Check Out</a></div>
 {% endif %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
   <div class="container">
       <a class="navbar-brand" href="{% if request.user.is_authenticated %}https://rigs.nottinghamtec.co.uk{%else%}https://nottinghamtec.co.uk{%endif%}">
-        <img src="{% static 'imgs/logo.webp' %}" class="mr-auto" style="max-height: 40px;" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
+        <img src="{% static 'imgs/logo.webp' %}" class="me-auto" style="max-height: 40px;" alt="TEC's Logo: Serif 'TEC' vertically next to a blue box with the words 'PA and Lighting', surrounded by graduated rings" id="logo">
       </a>
       {% block titleheader %}
       {% endblock %}
-      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="document.getElementById('logo').classList.toggle('d-none');">
+      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="document.getElementById('logo').classList.toggle('d-none');">
       <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
@@ -69,8 +70,7 @@
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.level_tag }} alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     {{ message }}
                 </div>
             {% endfor %}
@@ -85,8 +85,6 @@
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
 <script src="{% static 'js/base.js' %}"></script>
-{% include 'partials/dark_theme.html' %}
-
 {% block js %}
 {% endblock %}
 </body>

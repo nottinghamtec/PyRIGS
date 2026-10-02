@@ -20,9 +20,7 @@
                for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
         <div class="col-sm-8">
             <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">£</span>
-                </div>
+                <span class="input-group-text">£</span>
                 {% render_field form.amount class+="form-control" %}
             </div>
         </div>
@@ -30,7 +28,7 @@
     <div class="row pt-3">
         <label class="col-sm-4 col-form-label"
                for="{{ form.method.id_for_label }}">{{ form.method.label }}
-        <span class="fas fa-info-circle text-info" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-controls="collapse"></span>
+        <span class="fas fa-info-circle text-info" data-bs-toggle="collapse" data-bs-target="#collapse" aria-expanded="false" aria-controls="collapse"></span>
         <ul class="collapse" id="collapse">
             <li>Cash - Self Explanatory</li>
             <li>Internal - Transfers within the Students' Union only</li>
@@ -43,7 +41,7 @@
         </div>
     </div>
     <div class="row pt-3">
-        <div class="col-sm-12 text-right">
+        <div class="col-sm-12 text-end">
             <input type="submit" class="form-control btn btn-primary"/>
         </div>
     </div>

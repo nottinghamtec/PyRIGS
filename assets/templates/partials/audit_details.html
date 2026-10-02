@@ -3,6 +3,6 @@
     Audit Details
   </div>
   <div class="card-body">
-        <p>Audited at <span class="badge badge-secondary">{{ object.last_audited_at|default_if_none:'-' }}</span> by <span class="badge badge-info">{{ object.last_audited_by|default_if_none:'-' }}</span></p>
+        <p>Audited at <span class="badge text-bg-secondary">{{ object.last_audited_at|default_if_none:'-' }}</span> by <span class="badge text-bg-info">{{ object.last_audited_by|default_if_none:'-' }}</span></p>
   </div>
 </div>

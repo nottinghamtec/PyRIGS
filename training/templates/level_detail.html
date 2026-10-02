@@ -16,28 +16,13 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
-    <script src="{% static 'js/tooltip.js' %}"></script>
     <script>
-    $('document').ready(function(){
-        $('#requirement_button').click(function (e) {
-             e.preventDefault();
-             var url = $(this).attr("href");
-             $.ajax({
-                url: url,
-                success: function(){
-                    $link = $(this);
-                    // Anti modal inception
-                    if ($link.parents('#modal').length === 0) {
-                        modaltarget = $link.data('target');
-                        modalobject = "";
-                        $('#modal').load(url, function (e) {
-                            $('#modal').modal();
-                            $(".selectpicker").selectpicker().each(function(){initPicker($(this))});
-                        });
-                    }
-                }
-             });
+    ready(function(){
+        document.getElementById('requirement_button').addEventListener('click', function (e) {
+            e.preventDefault();
+            modaltarget = undefined;
+            modalobject = "";
+            loadModal(this.getAttribute("href"));
         });
     });
     </script>
@@ -45,7 +30,7 @@
 
 {% block content %}
 {% if request.user.is_supervisor %}
-<div class="col-sm-12 text-right pr-0">
+<div class="col-sm-12 text-end pe-0">
 <a type="button" class="btn btn-success mb-3" href="{% url 'add_requirement' pk=object.pk %}" id="requirement_button">
 	<span class="fas fa-plus"></span> Add New Requirement
 </a>
@@ -58,7 +43,7 @@
     </div>
 </div>
 <div class="card">
-    <div class="card-header"><h4 class="card-title">Level Requirements</h4> {% if u.pk != request.user.pk %}<h5 class="card-subtitle font-italic">for {{ u }}</h5>{% endif %}</div>
+    <div class="card-header"><h4 class="card-title">Level Requirements</h4> {% if u.pk != request.user.pk %}<h5 class="card-subtitle fst-italic">for {{ u }}</h5>{% endif %}</div>
     <div class="table-responsive card-body">
         <table class="table">
           <thead>
@@ -70,7 +55,7 @@
           </thead>
           <tbody class="table-body">
             {% for level in object.prerequisite_levels.all %}
-            <tr data-toggle="collapse" data-target="#{{level.pk}}" style="cursor: pointer;"><th colspan="3" class="text-center font-italic" data-toggle="collapse" data-target="#level_{{level.pk}}">{{level}} (prerequisite)</th></tr>
+            <tr data-bs-toggle="collapse" data-bs-target="#{{level.pk}}" style="cursor: pointer;"><th colspan="3" class="text-center fst-italic" data-bs-toggle="collapse" data-bs-target="#level_{{level.pk}}">{{level}} (prerequisite)</th></tr>
             <tr id="level_{{level.pk}}" class="collapse">
               <td><ul class="list-unstyled">{% for req in level.started_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 0 %}</li>{% endfor %}</ul></td>
               <td><ul class="list-unstyled">{% for req in level.complete_requirements %}<li>{{ req.item }} {% user_has_qualification u req.item 1 %}</li>{% endfor %}</ul></td>
@@ -135,7 +120,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col text-right">
+    <div class="col text-end">
     {% include 'partials/last_edited.html' with target="traininglevel_history" %}
     </div>
 </div>

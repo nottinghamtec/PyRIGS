@@ -11,7 +11,7 @@
                         {{ object.venue|namewithnotes:'venue_detail' }}
                     </a>
                 {% endif %}
-                {% if object.parking_and_access or object.riskassessment.parking_and_access %}<span class="badge badge-warning">Additional Access Requirements</span>{% endif %}
+                {% if object.parking_and_access or object.riskassessment.parking_and_access %}<span class="badge text-bg-warning">Additional Access Requirements</span>{% endif %}
             </dd>
             {% if object.venue %}
             <dt class="col-sm-6">Venue Notes</dt>
@@ -85,7 +85,7 @@
             {% else %}
             <a href="{% url 'event_thread' object.pk %}" class="btn btn-primary" title="Create Forum Thread" target="_blank"><span
             class="fas fa-plus"></span> <span
-            class="hidden-xs">Create Forum Thread</span></a>
+            class="d-none d-sm-inline">Create Forum Thread</span></a>
             {% endif %}
         </dl>
     </div>

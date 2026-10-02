@@ -1,51 +1,51 @@
 <div id="event_status">
-<span class="badge badge-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
+<span class="badge text-bg-{% if event.confirmed %}success{% elif event.cancelled %}dark{% else %}warning{% endif %}">Status: {{ event.get_status_display }}</span>
 {% if event.is_rig %}
     {% if event.sum_total > 0 %}
         {% if event.purchase_order %}
-            <span class="badge badge-success">PO: Received</span>
+            <span class="badge text-bg-success">PO: Received</span>
         {% elif event.authorised %}
-            <span class="badge badge-success">Authorisation: Complete <span class="fas fa-check"></span></span>
+            <span class="badge text-bg-success">Authorisation: Complete <span class="fas fa-check"></span></span>
         {% elif event.authorisation and event.authorisation.amount != event.total and event.authorisation.last_edited_at > event.auth_request_at %}
-            <span class="badge badge-warning"> Authorisation: Issue <span class="fas fa-exclamation-circle"></span></span>
+            <span class="badge text-bg-warning"> Authorisation: Issue <span class="fas fa-exclamation-circle"></span></span>
         {% elif event.auth_request_to %}
-            <span class="badge badge-info"> Authorisation: Sent <span class="fas fa-paper-plane"></span></span>
+            <span class="badge text-bg-info"> Authorisation: Sent <span class="fas fa-paper-plane"></span></span>
         {% else %}
-            <span class="badge badge-danger">Authorisation: <span class="fas fa-times"></span></span>
+            <span class="badge text-bg-danger">Authorisation: <span class="fas fa-times"></span></span>
         {% endif %}
     {% endif %}
     {% if not event.dry_hire %}
         {% if event.riskassessment %}
-            <a href="{{ event.riskassessment.get_absolute_url }}"><span class="badge badge-success">RA: <span class="fas fa-check{% if event.riskassessment.reviewed_by %}-double{%endif%}"></span></a>
+            <a href="{{ event.riskassessment.get_absolute_url }}"><span class="badge text-bg-success">RA: <span class="fas fa-check{% if event.riskassessment.reviewed_by %}-double{%endif%}"></span></a>
         {% else %}
-            <span class="badge badge-danger">RA: <span class="fas fa-times"></span></span>
+            <span class="badge text-bg-danger">RA: <span class="fas fa-times"></span></span>
         {% endif %}
         {% if event.has_checklist %}
-            <span class="badge badge-success">Checklist: <span class="fas fa-check"></span> {% if event.checklists.count > 1 %}({{event.checklists.count}}){% endif %}</span>
+            <span class="badge text-bg-success">Checklist: <span class="fas fa-check"></span> {% if event.checklists.count > 1 %}({{event.checklists.count}}){% endif %}</span>
         {% else %}
-            <span class="badge badge-danger">Checklist: <span class="fas fa-times"></span></span>
+            <span class="badge text-bg-danger">Checklist: <span class="fas fa-times"></span></span>
         {% endif %}
         {% if event.has_power %}
-            <span class="badge badge-success">Power Record: <span class="fas fa-check"></span> {% if event.power_tests.count > 1 %}({{event.power_tests.count}}){% endif %}</span>
+            <span class="badge text-bg-success">Power Record: <span class="fas fa-check"></span> {% if event.power_tests.count > 1 %}({{event.power_tests.count}}){% endif %}</span>
         {% else %}
-            <span class="badge badge-danger">Power Record: <span class="fas fa-times"></span></span>
+            <span class="badge text-bg-danger">Power Record: <span class="fas fa-times"></span></span>
         {% endif %}
     {% endif %}
     {% if perms.RIGS.view_invoice %}
         {% if event.invoice %}
             {% if event.invoice.void %}
-            <span class="badge badge-secondary">Invoice: Void</span>
+            <span class="badge text-bg-secondary">Invoice: Void</span>
             {% elif event.invoice.is_closed %}
-            <span class="badge badge-success">Invoice: Paid</span>
+            <span class="badge text-bg-success">Invoice: Paid</span>
             {% else %}
-            <span class="badge badge-warning">Invoice: Outstanding</span>
+            <span class="badge text-bg-warning">Invoice: Outstanding</span>
             {% endif %}
         {% else %}
-        <span class="badge badge-info">Invoice: Not Generated</span>
+        <span class="badge text-bg-info">Invoice: Not Generated</span>
         {% endif %}
     {% endif %}
     {% if event.parking_and_access %}
-        <span class="badge badge-warning">Addititional Access Requirements</span>
+        <span class="badge text-bg-warning">Addititional Access Requirements</span>
     {% endif %}
 {% endif %}
 </div>

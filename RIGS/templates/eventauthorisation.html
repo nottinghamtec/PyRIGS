@@ -3,15 +3,13 @@
 {% load static %}
 
 {% block js %}
-    <script src="{% static 'js/tooltip.js' %}"></script>
     <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-        $('form').on('submit', function () {
-            $('#loading-modal').modal({
-                backdrop: 'static',
-                show: true
+        document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                var loading = document.getElementById('loading-modal');
+                if (loading) {
+                    bootstrap.Modal.getOrCreateInstance(loading, {backdrop: 'static'}).show();
+                }
             });
         });
     </script>

@@ -3,12 +3,6 @@
 {% load static %}
 
 {% block js %}
-<script src="{% static "js/tooltip.js" %}"></script>
-<script>
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-</script>
 {% endblock %}
 
 {% block content %}
@@ -65,7 +59,7 @@
                                 <span class="fas fa-exclamation"></span>
                             {% endif %}
                         </td>
-                        <td class="text-right">
+                        <td class="text-end">
                             <div class="btn-group">
                                 <a href="{% url 'invoice_event' event.pk %}"
                                    class="btn btn-primary">

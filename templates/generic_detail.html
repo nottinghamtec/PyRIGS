@@ -48,7 +48,7 @@
 
     {% if not is_ajax %}
         <div class="row py-2">
-            <div class="col-sm-12 text-right">
+            <div class="col-sm-12 text-end">
                 {% if can_edit %}
                 <div class="btn-group">
                     {% button 'edit' update_link object.pk %}
@@ -62,7 +62,7 @@
 {% if is_ajax %}
     {% block footer %}
         <div class="row py-2">
-            <div class="col-sm-12 text-right">
+            <div class="col-sm-12 text-end">
                 <div class="btn-group btn-page">
                     <a href="{% url detail_link object.pk %}" class="btn btn-primary"><span
                         class="fas fa-eye"></span> Open Page</a>

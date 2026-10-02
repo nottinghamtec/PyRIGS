@@ -14,11 +14,11 @@
 	<td>£<span class="sub-total" data-subtotal="{{item.total_cost}}">{{item.total_cost|floatformat:2}}</span></td>
     {% endif %}
 	{% if edit %}
-    <td class="vert-align text-right">
+    <td class="vert-align text-end">
         <div class="btn-group" role="group" aria-label="Action buttons">
 	        <button type="button" class="item-edit btn btn-sm btn-warning"
 			        data-pk="{{item.pk}}"
-			        data-toggle="modal" data-target="#itemModal">
+			        data-modal-target="#itemModal">
 		        <span class="fas fa-edit"></span>
 	        </button>
 	        <button type="button" class="item-delete btn btn-sm btn-danger"

@@ -361,7 +361,7 @@ class TrainingLevel(models.Model, RevisionMixin):
         else:
             icon = "".join([w[0] for w in str(self).split()])
         return mark_safe(
-            f"<span class='badge badge-{self.department_colour} badge-pill' data-toggle='tooltip' title='{str(self)}'>{icon}</span>"
+            f"<span class='badge text-bg-{self.department_colour} rounded-pill' data-bs-toggle='tooltip' title='{str(self)}'>{icon}</span>"
         )
 
 

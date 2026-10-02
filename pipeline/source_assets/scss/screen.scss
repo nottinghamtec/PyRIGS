@@ -102,6 +102,18 @@ html {
   }
 }
 
+// Bootstrap 4's contextual table classes also worked as background colours on non-table elements
+@each $color, $value in $table-variants {
+  .table-#{$color}:not(table):not(tr):not(td):not(th) {
+    background-color: var(--bs-table-bg);
+  }
+}
+
+// Bootstrap 4 gave labels a bottom margin, Bootstrap 5 expects .form-label
+label {
+  margin-bottom: 0.5rem;
+}
+
 .table tbody > tr > td.vert-align {
   vertical-align: middle;
 }
@@ -430,4 +442,8 @@ $darktheme: #121416;
     .CodeMirror-cursor {
         border-color: white !important;
     }
+}
+
+.ts-wrapper.has-items .ts-control > input::placeholder {
+    color: transparent;
 }

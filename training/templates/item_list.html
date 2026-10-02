@@ -3,25 +3,25 @@
 {% load button from filters %}
 
 {% block content %}
-<div class="col-12 text-right py-2 pr-0">
+<div class="col-12 text-end py-2 pe-0">
 {% button 'print' 'item_list_export' %}
 </div>
 <div id="accordion">
   {% for category in categories %}
   <div class="card">
     <div class="card-header" id="heading{{forloop.counter}}">
-        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{forloop.counter}}" aria-expanded="true" aria-controls="collapse{{forloop.counter}}">
+        <button class="btn btn-link collapsed" data-bs-toggle="collapse" data-bs-target="#collapse{{forloop.counter}}" aria-expanded="true" aria-controls="collapse{{forloop.counter}}">
           {{ category }}
         </button>
     </div>
-    <div id="collapse{{forloop.counter}}" class="collapse" aria-labelledby="heading{{forloop.counter}}" data-parent="#accordion">
+    <div id="collapse{{forloop.counter}}" class="collapse" aria-labelledby="heading{{forloop.counter}}" data-bs-parent="#accordion">
       <div class="card-body">
         <div class="list-group list-group-flush">
             {% for item in category.items.all %}
-                <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }} <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info float-right"><span class="fas fa-user"></span> Qualified Users</a>
+                <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }} <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info float-end"><span class="fas fa-user"></span> Qualified Users</a>
                 <br><small>{{ item.description }}</small>
                 {% if item.prerequisites.exists %}
-                    <div class="ml-3 font-italic">
+                    <div class="ms-3 fst-italic">
                     <p class="text-info mb-0">Competency Assessment Prerequisites:</p>
                     <ul>
                     {% for p in item.prerequisites.all %}

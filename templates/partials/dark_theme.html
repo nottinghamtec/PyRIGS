@@ -1,7 +1,5 @@
-{% load static %}
 <script>
-if({{ request.user.dark_theme|lower|default:'false' }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.querySelector('head').innerHTML += '<link rel="stylesheet" href="{% static "css/dark_screen.css" %}" type="text/css"/>';
-    document.body.setAttribute('data-theme', 'dark');
+if ({{ request.user.dark_theme|lower|default:'false' }} || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
 }
 </script>

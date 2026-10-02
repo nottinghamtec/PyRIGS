@@ -5,13 +5,13 @@
   </div>
   <div class="card-body">
     {% if create or edit or duplicate %}
-    <div class="form-group">
+    <div class="mb-3">
       {% include 'partials/form_field.html' with field=form.cable_type %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       {% include 'partials/form_field.html' with field=form.length append=form.length.help_text %}
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       {% include 'partials/form_field.html' with field=form.csa append=form.csa.help_text %}
     </div>
     {% else %}
