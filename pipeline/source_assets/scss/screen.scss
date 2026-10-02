@@ -109,6 +109,20 @@ html {
   }
 }
 
+// Bootstrap 4 columns used max-width, so `.form-control.col-sm-6` stayed narrow; Bootstrap 5's
+// `.form-control { width: 100% }` now wins over the column width
+@each $breakpoint, $_min in $grid-breakpoints {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+    @for $i from 1 through $grid-columns {
+      .form-control.col#{$infix}-#{$i},
+      .form-select.col#{$infix}-#{$i} {
+        width: calc(#{$i} / #{$grid-columns} * 100%);
+      }
+    }
+  }
+}
+
 // Bootstrap 4 gave labels a bottom margin, Bootstrap 5 expects .form-label
 label {
   margin-bottom: 0.5rem;
@@ -376,6 +390,42 @@ $dark-theme-colors: (
     .form-control:not(.btn), .form-select, .ts-control, .ts-dropdown {
         background-color: $darktheme;
         color: $gray-100;
+    }
+    // Tom Select hard-codes dark text colours
+    .ts-wrapper .ts-control,
+    .ts-wrapper .ts-control input,
+    .ts-dropdown,
+    .ts-dropdown .option,
+    .ts-dropdown .optgroup-header,
+    .ts-dropdown .no-results,
+    .ts-dropdown .create {
+        color: $gray-100;
+    }
+    .ts-wrapper .ts-control input::placeholder {
+        color: $gray-500;
+    }
+    .ts-wrapper.multi .ts-control > div {
+        background: $gray-700;
+        color: $gray-100;
+        border-color: $gray-600;
+    }
+    .ts-wrapper.multi .ts-control > div.active {
+        background: $primary;
+        color: #fff;
+    }
+    .ts-dropdown .active {
+        background-color: $gray-800;
+        color: $gray-100;
+    }
+    .ts-dropdown .active.create {
+        color: $gray-100;
+    }
+    .ts-dropdown .optgroup-header {
+        background: $darktheme;
+    }
+    ::placeholder {
+        color: $gray-500;
+        opacity: 1;
     }
     .btn-light, .status {
         --bs-btn-bg: #{$darktheme};
