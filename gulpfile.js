@@ -93,5 +93,12 @@ function watchFiles() {
   gulp.watch("**/templates/*.html", browserSyncReload);
 }
 
+// Rebuild the bundles when the sources change (used by the `assets` service in compose.override.yml)
+function watchSources() {
+  gulp.watch("pipeline/source_assets/scss/**/*.scss", styles);
+  gulp.watch("pipeline/source_assets/js/**/*.js", scripts);
+}
+
 exports.build = gulp.parallel(styles, scripts, fonts);
 exports.watch = gulp.parallel(watchFiles, browserSync);
+exports.watchAssets = gulp.series(exports.build, watchSources);
