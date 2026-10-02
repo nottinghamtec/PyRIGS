@@ -1,3 +1,4 @@
+# Local development only. Production is not deployed with this file.
 services:
   db:
     image: postgres:18.6
@@ -19,13 +20,15 @@ services:
       retries: 5
 
   pyrigs:
-    build: .
+    build:
+      context: .
+      target: dev
     restart: unless-stopped
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
       DOMAIN: ${DOMAIN:-example.com}
-      DEBUG: ${DEBUG:-false}
+      DEBUG: ${DEBUG:-true}
       STAGING: ${STAGING:-false}
       SESSION_COOKIE_SECURE_ENABLED: ${SESSION_COOKIE_SECURE_ENABLED:-true}
       CSRF_COOKIE_SECURE_ENABLED: ${CSRF_COOKIE_SECURE_ENABLED:-true}
@@ -46,20 +49,20 @@ services:
       HCAPTCHA_SITEKEY: ${HCAPTCHA_SITEKEY:-10000000-ffff-ffff-ffff-000000000001}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET:-0x0000000000000000000000000000000000000000}
       SENTRY_DSN: ${SENTRY_DSN:-}
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
+
+    volumes:
+      # The source is mounted rather than copied: the Django dev server reloads on every change
+      - .:/app
 
     healthcheck:
-      # gunicorn only starts listening once migrations and collectstatic have finished
+      # the dev server only starts listening once migrations have finished
       test: [ "CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), 2).close()" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 60s
-
-    volumes:
-      # shared with nginx, which serves /static/ directly
-      - static_files:/app/static
 
     depends_on:
       db:
@@ -70,41 +73,34 @@ services:
       - -c
       - |
         python manage.py migrate --noinput &&
-        python manage.py collectstatic --noinput &&
-        gunicorn \
-          --bind 0.0.0.0:8000 \
-          --workers 2 \
-          PyRIGS.wsgi
+        exec python manage.py runserver 0.0.0.0:8000
 
     develop:
-      # Create a `watch` configuration to update the app
       watch:
-        # Sync the working directory with the `/app` directory in the container
-        - action: sync
-          path: .
-          target: /app
-          # Exclude the project virtual environment
-          ignore:
-            - .venv/
-
-        # Rebuild the image on changes to the `pyproject.toml`
+        # `docker compose watch` rebuilds the image when the dependencies change
         - action: rebuild
           path: ./pyproject.toml
+        - action: rebuild
+          path: ./uv.lock
 
-  nginx:
-    image: nginx:stable-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-
+  # Rebuilds the CSS/JS bundles into pipeline/built_assets whenever the sources change
+  assets:
+    image: node:24-slim
+    working_dir: /app
     volumes:
-      - ./nginx/default.dev.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_files:/var/www/static:ro
-
-    depends_on:
-      pyrigs:
-        condition: service_healthy
+      - .:/app
+      - node_modules:/app/node_modules
+      - npm_cache:/root/.npm
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -d node_modules/.bin ] || [ package-lock.json -nt node_modules/.package-lock.json ]; then
+          npm ci
+        fi
+        exec npx gulp watchAssets
 
 volumes:
   postgres_data:
-  static_files:
+  node_modules:
+  npm_cache:

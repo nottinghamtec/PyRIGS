@@ -16,14 +16,23 @@ For setup information and other such helpful stuff check the [Wiki](https://gith
 - users: Our custom logic for registration and profiles. Semi-modular.
 
 # Running locally
-The compose stack runs the app behind a plain-HTTP nginx (`nginx/default.dev.conf`) on port 80.
+> [!WARNING]
+> `compose.yml` is for **development only** and must not be run in production. It mounts the source into the container, runs Django's development server with `DEBUG` on by default, and uses placeholder captcha keys. Production is deployed from the image built by the `prod` target of the `Dockerfile`.
+
+The compose stack runs Postgres, the Django development server and a gulp watcher that rebuilds the CSS/JS. Changes to Python code and templates reload the app automatically, and changes to `pipeline/source_assets` are rebuilt into `pipeline/built_assets` (refresh the browser to pick them up).
 
 1. Copy `.env.example` to `.env` and fill it in. For local use set at least:
+   ```
+   DEBUG=true
+   DJANGO_ALLOWED_HOSTS=localhost
+   ```
+   The sample data commands refuse to run unless `DEBUG` (or `STAGING`) is true.
 2. Start the stack (migrations run automatically on start):
    ```
    docker compose up -d --build
    ```
-3. Open <http://localhost/>.
+   The first start installs the node modules, so give the assets a minute to appear. After changing `pyproject.toml`, `uv.lock` or the `Dockerfile`, rebuild with `docker compose up -d --build` (or run `docker compose watch`).
+3. Open <http://localhost:8000/>.
 
 ## Creating a user
 ```

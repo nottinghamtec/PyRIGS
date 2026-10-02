@@ -113,6 +113,5 @@ screenshots/
 nginx/certs/
 nginx/certbot/
 nginx/*.conf
-!nginx/default.dev.conf
 *.pem
 *.key
