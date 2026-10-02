@@ -8,7 +8,7 @@
 # apt packages, Python dependencies and node modules are all cached separately.
 
 # ---- Frontend assets (multi-arch: official node image) ----
-FROM node:24-slim AS assets
+FROM node:26-slim AS assets
 WORKDIR /app
 
 COPY package.json package-lock.json ./

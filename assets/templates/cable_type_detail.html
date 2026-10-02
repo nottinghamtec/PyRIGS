@@ -25,7 +25,8 @@
             <div class="col mt-2 text-end">
                 {% button 'edit' url='cable_type_update' pk=object.id %}
             </div>
-            {% cache None cable_type_assets object %}
+            {# cached indefinitely: bump the "bs5" suffix whenever this markup changes #}
+            {% cache None cable_type_assets_bs5 object %}
                 <div class="col mt-2">
                     <div class="card">
                         <div class="card-header">Associated Assets</div>

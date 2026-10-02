@@ -7,7 +7,8 @@
 {% load cache %}
 
 {% block content %}
-{% cache None feed_data request.user %}
+{# The fragment is cached indefinitely (in the database in production), so bump the "bs5" suffix whenever its markup changes #}
+{% cache None feed_data_bs5 request.user %}
 <div class="list-group-item">
     <div class="d-flex">
     {% for version in object_list %}
