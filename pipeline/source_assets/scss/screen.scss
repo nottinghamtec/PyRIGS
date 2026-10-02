@@ -465,10 +465,6 @@ $dark-theme-colors: (
     .fc-daygrid-dot-event {
         color: white !important;
     }
-    .table {
-        border-collapse: separate !important;
-        border-spacing: 0;
-    }
     @each $color, $value in $dark-theme-colors {
         #event_row.table-#{$color} {
             border: 0.3em solid shade-color($value, 60%) !important;
