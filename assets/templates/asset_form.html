@@ -16,29 +16,17 @@
 
 {% block js %}
     {{ block.super }}
-    <script src="{% static 'js/autocompleter.js' %}"></script>
     <script>
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
         dur = matches ? 0 : 500;
         function checkIfCableHidden() {
-          if ($("#id_is_cable").prop('checked')) {
-            $("#cable-table").slideDown(dur);
+          if (document.getElementById("id_is_cable").checked) {
+            slideDown(document.getElementById("cable-table"), dur);
           } else {
-            $("#cable-table").slideUp(dur);
+            slideUp(document.getElementById("cable-table"), dur);
           }
         }
         checkIfCableHidden();
-    </script>
-    <script>
-        $('document').ready(function(){
-            $(document).find(".selectpicker").selectpicker().each(function(){initPicker($(this))});
-        });
-    </script>
-    <script src="{% static "js/tooltip.js" %}"></script>
-    <script>
-        $(function () {
-          $('[data-toggle="tooltip"]').tooltip();
-        });
     </script>
 {% endblock %}
 

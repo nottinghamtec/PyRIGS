@@ -1,12 +1,12 @@
 {% load button from filters %}
 <div class="row">
     <div class="col">
-        <form class="form-inline justify-content-end">
+        <form class="d-flex align-items-center flex-wrap gap-2 justify-content-end">
             {% csrf_token %}
             <div class="input-group">
                 <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
                        class="form-control" id="id_search_text"/>
-                <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+                {% button 'search' id="id_search" %}
             </div>
         </form>
     </div>

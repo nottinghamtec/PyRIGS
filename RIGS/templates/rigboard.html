@@ -4,29 +4,27 @@
 {% block content %}
 <div class="row align-items-center justify-content-between py-2 align-middle">
     <div class="col-sm-12 col-md align-middle d-flex flex-wrap">
-        Key: <span class="table-success mr-1 px-2 rounded">Ready</span><span
-            class="table-warning mr-1 px-2 rounded text-nowrap">Action Required</span><span
-            class="table-danger mr-1 px-2 rounded text-nowrap">Needs MIC</span><span
-            class="table-secondary mr-1 px-2 rounded">Cancelled</span><span
+        <span class="me-2">Key:</span><span class="table-success me-1 px-2 rounded">Ready</span><span
+            class="table-warning me-1 px-2 rounded text-nowrap">Action Required</span><span
+            class="table-danger me-1 px-2 rounded text-nowrap">Needs MIC</span><span
+            class="table-secondary me-1 px-2 rounded">Cancelled</span><span
             class="table-info px-2 rounded text-nowrap">Non-Rig</span>
     </div>
-    {% if perms.RIGS.add_event %}
-    <div class="col text-right">
+    <div class="col-12 col-md-auto d-flex flex-wrap justify-content-end gap-2 mt-2 mt-md-0">
+        {% if perms.RIGS.add_event %}
         {% button 'new' 'event_create' %}
+        {% endif %}
+        {% if not request.GET.legacy %}
+        {% if not request.GET.hide_cancelled %}
+        <a href="?hide_cancelled=true" class="btn btn-primary">Hide cancelled</a>
+        {% else %}
+        <a href="." class="btn btn-primary">Show cancelled</a>
+        {% endif %}
+        <a href="?legacy=true" class="btn btn-secondary">Legacy rigboard</a>
+        {% else %}
+        <a href="." class="btn btn-secondary">New rigboard</a>
+        {% endif %}
     </div>
-    {% endif %}
-    {% if not request.GET.legacy %}
-
-    {% if not request.GET.hide_cancelled %}
-    <a href="?hide_cancelled=true" class="btn btn-primary mr-3">Hide cancelled</a>
-    {% else %}
-    <a href="." class="btn btn-primary mr-3">Show cancelled</a>
-    {% endif %}
-
-    <a href="?legacy=true" class="btn btn-secondary">Legacy rigboard</a>
-    {% else %}
-    <a href="." class="btn btn-secondary">New rigboard</a>
-    {% endif %}
 </div>
 
 {% if request.GET.legacy %}

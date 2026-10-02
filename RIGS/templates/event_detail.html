@@ -7,10 +7,10 @@
     {{ block.super }}
 
     <script>
-    $(document).keydown(function(e) {
+    document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.keyCode == 80) {
             window.open("{% url 'event_print' object.pk %}", '_blank');
-            return false;
+            e.preventDefault();
         }
     });
     </script>
@@ -20,7 +20,7 @@
 <div class="row my-3 py-3">
     {% if not is_ajax %}
         {% if perms.RIGS.view_event %}
-        <div class="col-sm-12 text-right">
+        <div class="col-sm-12 text-end">
             {% include 'partials/event_detail_buttons.html' %}
         </div>
         {% endif %}
@@ -50,7 +50,7 @@
     {% endif %}
     {% endif %}
     {% if not is_ajax and perms.RIGS.view_event %}
-    <div class="col-sm-12 text-right">
+    <div class="col-sm-12 text-end">
         {% include 'partials/event_detail_buttons.html' %}
     </div>
     {% endif %}
@@ -73,13 +73,13 @@
         {% include 'partials/crew_list.html' %}
 
         {% if not is_ajax and perms.RIGS.view_event %}
-        <div class="col-sm-12 text-right">
+        <div class="col-sm-12 text-end">
             {% include 'partials/event_detail_buttons.html' %}
         </div>
         {% endif %}
     {% endif %}
     {% if not is_ajax and perms.RIGS.view_event %}
-        <div class="col-sm-12 text-right">
+        <div class="col-sm-12 text-end">
             {% include 'partials/last_edited.html' with target="event_history" %}
         </div>
     {% endif %}

@@ -10,23 +10,17 @@
 {% load static %}
 
 {% block js %}
-    <script src="{% static "js/tooltip.js" %}"></script>
-    <script>
-        $(function () {
-          $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
 {% endblock %}
 
 {% block content %}
-<form method="GET" class="ml-auto w-25 d-flex flex-column justify-content-end">
+<form method="GET" class="ms-auto w-25 d-flex flex-column justify-content-end">
     {% csrf_token %}
     <div class="input-group">
         <input type="search" name="q" placeholder="Search" value="{{ request.GET.q }}"
                class="form-control" id="id_search_text"/>
-        <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+        {% button 'search' id="id_search" %}
     </div>
-    <button type="submit" class="btn btn-primary mt-2 {% if request.GET.is_supervisor %}active{%endif%}" data-toggle="button" aria-pressed="{% if request.GET.is_supervisor %}true{%endif%}" name="is_supervisor" value="{% if request.GET.is_supervisor %}{% else %}True{% endif %}">
+    <button type="submit" class="btn btn-primary mt-2 {% if request.GET.is_supervisor %}active{%endif%}" data-bs-toggle="button" aria-pressed="{% if request.GET.is_supervisor %}true{%endif%}" name="is_supervisor" value="{% if request.GET.is_supervisor %}{% else %}True{% endif %}">
       Only Supervisors
     </button>
 </form>

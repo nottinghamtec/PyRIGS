@@ -1,33 +1,40 @@
+// Bootstrap 5 is consumed via @import (the Sass module system is not yet supported by Bootstrap's own build)
 @import "custom-variables";
 //Required
-@import "node_modules/bootstrap/scss/bootstrap-reboot";
-@import "node_modules/bootstrap/scss/bootstrap-grid";
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/variables-dark";
+@import "node_modules/bootstrap/scss/maps";
+@import "node_modules/bootstrap/scss/mixins";
+@import "node_modules/bootstrap/scss/utilities";
 //Optional
 @import "node_modules/bootstrap/scss/root";
+@import "node_modules/bootstrap/scss/reboot";
 @import "node_modules/bootstrap/scss/type";
 @import "node_modules/bootstrap/scss/images";
+@import "node_modules/bootstrap/scss/containers";
+@import "node_modules/bootstrap/scss/grid";
 @import "node_modules/bootstrap/scss/tables";
 @import "node_modules/bootstrap/scss/forms";
 @import "node_modules/bootstrap/scss/buttons";
 @import "node_modules/bootstrap/scss/transitions";
 @import "node_modules/bootstrap/scss/dropdown";
 @import "node_modules/bootstrap/scss/button-group";
-@import "node_modules/bootstrap/scss/input-group";
-@import "node_modules/bootstrap/scss/custom-forms";
 @import "node_modules/bootstrap/scss/nav";
 @import "node_modules/bootstrap/scss/navbar";
 @import "node_modules/bootstrap/scss/card";
 @import "node_modules/bootstrap/scss/pagination";
 @import "node_modules/bootstrap/scss/badge";
 @import "node_modules/bootstrap/scss/alert";
-@import "node_modules/bootstrap/scss/media";
 @import "node_modules/bootstrap/scss/list-group";
 @import "node_modules/bootstrap/scss/close";
 @import "node_modules/bootstrap/scss/modal";
 @import "node_modules/bootstrap/scss/tooltip";
 @import "node_modules/bootstrap/scss/popover";
+@import "node_modules/bootstrap/scss/progress";
 @import "node_modules/bootstrap/scss/spinners";
-@import "node_modules/bootstrap/scss/utilities";
+@import "node_modules/bootstrap/scss/helpers";
+@import "node_modules/bootstrap/scss/utilities/api";
 //FontAwesome
 $fa-font-path: '/static/fonts';
 @import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
@@ -96,6 +103,38 @@ html {
   }
 }
 
+// Bootstrap 4's contextual table classes also worked as background colours on non-table elements
+@each $color, $value in $table-variants {
+  .table-#{$color}:not(table):not(tr):not(td):not(th) {
+    background-color: var(--bs-table-bg);
+  }
+}
+
+// Bootstrap 4 columns used max-width, so `.form-control.col-sm-6` stayed narrow; Bootstrap 5's
+// `.form-control { width: 100% }` now wins over the column width
+@each $breakpoint, $_min in $grid-breakpoints {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+    @for $i from 1 through $grid-columns {
+      .form-control.col#{$infix}-#{$i},
+      .form-select.col#{$infix}-#{$i} {
+        width: calc(#{$i} / #{$grid-columns} * 100%);
+      }
+    }
+  }
+}
+
+// Links inside badges (e.g. "Reviewed by ...") sit on a coloured background, so keep the badge's text colour
+.badge a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+// Bootstrap 4 gave labels a bottom margin, Bootstrap 5 expects .form-label
+label {
+  margin-bottom: 0.5rem;
+}
+
 .table tbody > tr > td.vert-align {
   vertical-align: middle;
 }
@@ -152,7 +191,7 @@ ins {
 }
 
 .btn-light {
-    background-color: $gray-200 !important;
+    --bs-btn-bg: #{$gray-200};
 }
 
 .skip-link {
@@ -272,14 +311,12 @@ html.embedded {
   }
 }
 
-.card, .card-header, .btn, input, select, .CodeMirror, .editor-toolbar, .card-img-top {
+.CodeMirror, .editor-toolbar {
     border-radius: 0 !important;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
 }
 
-.bootstrap-select, button.btn.dropdown-toggle.bs-placeholder.btn-light {
-    padding-right: 1rem !important;
+.ts-wrapper.form-select, .ts-wrapper.form-control {
+    padding: 0;
 }
 // New implementation of class dropped in Bootstrap 3
 .dl-horizontal {
@@ -289,4 +326,222 @@ html.embedded {
 }
 .dl-horizontal > dd, .dl-horizontal .markdown > p {
     margin-bottom: 0 !important;
+}
+
+// Dark mode: Bootstrap 5.3 colour modes (set via data-bs-theme on <html>), with a few project-specific tweaks
+$darktheme: #121416;
+
+// Brighter brand colours for dark mode (the light-mode ones are pastel tints on a dark background)
+$dark-theme-colors: (
+    "success": #3AB54A,
+    "warning": #FFE89B,
+    "danger": #BF1E2E,
+    "info": #25AAE2,
+    "primary": #3A52A2,
+    "secondary": $secondary,
+    "light": $light,
+    "dark": $dark
+);
+
+[data-bs-theme="dark"] {
+    @each $name, $value in $dark-theme-colors {
+        --bs-#{$name}: #{$value};
+        --bs-#{$name}-rgb: #{to-rgb($value)};
+
+        .btn-#{$name} {
+            @include button-variant($value, $value);
+        }
+        .btn-outline-#{$name} {
+            @include button-outline-variant($value);
+        }
+        .text-bg-#{$name} {
+            color: color-contrast($value) !important;
+            background-color: RGBA(to-rgb($value), var(--bs-bg-opacity, 1)) !important;
+        }
+        // Contextual table classes (tables, rows, cells and the plain-element variant used for the rigboard key)
+        .table-#{$name} {
+            --bs-table-color: #{color-contrast(shade-color($value, 55%))};
+            --bs-table-bg: #{shade-color($value, 55%)};
+            --bs-table-border-color: #{shade-color($value, 35%)};
+            --bs-table-striped-bg: #{shade-color($value, 50%)};
+            --bs-table-hover-bg: #{shade-color($value, 45%)};
+            color: var(--bs-table-color);
+            border-color: var(--bs-table-border-color);
+        }
+    }
+    --bs-body-bg: #222;
+    --bs-body-color: #{$gray-100};
+    // Bootstrap derives these from $primary, which is too dim on the dark background
+    --bs-link-color: #6ea8fe;
+    --bs-link-color-rgb: #{to-rgb(#6ea8fe)};
+    --bs-link-hover-color: #8bb9fe;
+    --bs-link-hover-color-rgb: #{to-rgb(#8bb9fe)};
+    --bs-secondary-color: #c9c9c9;
+    --bs-tertiary-bg: #{$darktheme};
+
+    .navbar {
+        background-color: #111111 !important;
+    }
+    // Coloured card outlines (training levels): make them visible, including the "dark" and "light" ones
+    .card[class*="border-"] {
+        --bs-card-border-width: 2px;
+    }
+    .border-dark {
+        border-color: $gray-500 !important;
+    }
+    .dropdown-menu, .popover {
+        box-shadow: 0 0.5rem 1rem black;
+        --bs-dropdown-bg: #{$darktheme};
+        --bs-popover-bg: #{$darktheme};
+    }
+    .form-control:not(.btn), .form-select, .ts-control, .ts-dropdown {
+        background-color: $darktheme;
+        color: $gray-100;
+    }
+    // Tom Select hard-codes dark text colours
+    .ts-wrapper .ts-control,
+    .ts-wrapper .ts-control input,
+    .ts-dropdown,
+    .ts-dropdown .option,
+    .ts-dropdown .optgroup-header,
+    .ts-dropdown .no-results,
+    .ts-dropdown .create {
+        color: $gray-100;
+    }
+    .ts-wrapper .ts-control input::placeholder {
+        color: $gray-500;
+    }
+    .ts-wrapper.multi .ts-control > div {
+        background: $gray-700;
+        color: $gray-100;
+        border-color: $gray-600;
+    }
+    .ts-wrapper.multi .ts-control > div.active {
+        background: $primary;
+        color: #fff;
+    }
+    .ts-dropdown .active {
+        background-color: $gray-800;
+        color: $gray-100;
+    }
+    .ts-dropdown .active.create {
+        color: $gray-100;
+    }
+    .ts-dropdown .optgroup-header {
+        background: $darktheme;
+    }
+    ::placeholder {
+        color: $gray-500;
+        opacity: 1;
+    }
+    .btn-light, .status {
+        --bs-btn-bg: #{$darktheme};
+        --bs-btn-color: #{$gray-100};
+        --bs-btn-border-color: #{$darktheme};
+        --bs-btn-hover-bg: #{tint-color($darktheme, 8%)};
+        --bs-btn-hover-color: #{$gray-100};
+        --bs-btn-hover-border-color: #{$darktheme};
+        background-color: $darktheme !important;
+        color: $gray-100 !important;
+        border-color: $darktheme;
+    }
+    .btn-link {
+        color: white;
+    }
+    .input-group-text {
+        border-color: $darktheme;
+    }
+    .page-item.disabled {
+        opacity: 0.5;
+    }
+    .bg-light {
+        color: black;
+        background-color: $gray-200 !important;
+        border-radius: 0.2em;
+    }
+    .fc-day-today {
+        background-color: transparent !important;
+        border: 0.2em solid $info !important;
+    }
+    .fc-daygrid-dot-event {
+        color: white !important;
+    }
+    @each $color, $value in $dark-theme-colors {
+        #event_row.table-#{$color} {
+            border: 0.3em solid shade-color($value, 60%) !important;
+            background-color: #222 !important;
+            color: white !important;
+        }
+    }
+    del {
+      color: black;
+      background-color: $danger;
+      border-radius: 3px;
+    }
+    ins {
+      color: black;
+      background-color: $success;
+      border-radius: 3px;
+    }
+    pre {
+        background: $gray-600;
+        color: white;
+    }
+    .source {
+        color: white !important;
+    }
+    .embed_container {
+        border-color: #3853a4 !important;
+        background: #222;
+        color: $gray-100;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+      border: 1px solid $info;
+      -webkit-text-fill-color: white;
+      -webkit-box-shadow: 0 0 0px 1000px rgba($info, .3) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    .editor-toolbar > a {
+        color: white !important;
+    }
+    .editor-toolbar > a:hover {
+        background: transparent !important;
+    }
+    .editor-toolbar > a.active {
+        background: $info !important;
+    }
+    .cm-s-easymde {
+        color: white;
+        background-color: $darktheme;
+        border-color: #bbb;
+    }
+    .CodeMirror-cursor {
+        border-color: white !important;
+    }
+}
+
+.ts-wrapper.has-items .ts-control > input::placeholder {
+    color: transparent;
+}
+
+// FullCalendar (standard theme) colours, matching the site's light/dark modes
+.fc {
+  --fc-border-color: var(--bs-border-color);
+  --fc-page-bg-color: var(--bs-body-bg);
+  --fc-neutral-bg-color: var(--bs-tertiary-bg);
+  --fc-today-bg-color: rgba(var(--bs-warning-rgb), 0.15);
+  --fc-list-event-hover-bg-color: var(--bs-tertiary-bg);
+}
+
+.fc a {
+  color: inherit;
+  text-decoration: none;
 }

@@ -22,11 +22,10 @@ function fonts(done) {
 }
 
 function styles(done) {
-    const bs_select = ["bootstrap-select.css", "ajax-bootstrap-select.css"]
+    const bs_select = ["tom-select.bootstrap5.css"]
     return gulp.src(['pipeline/source_assets/scss/**/*.scss',
                     'node_modules/fullcalendar/main.css',
-                    'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
-                    'node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css',
+                    'node_modules/tom-select/dist/css/tom-select.bootstrap5.css',
                     'node_modules/easymde/dist/easymde.min.css'
                     ])
     .pipe(sourcemaps.init())
@@ -47,35 +46,24 @@ function styles(done) {
 
 function scripts() {
     const dest = 'pipeline/built_assets/js';
-    const base_scripts = ["src.js", "util.js", "alert.js", "collapse.js", "dropdown.js", "modal.js", "konami.js"];
-    const bs_select = ["bootstrap-select.js", "ajax-bootstrap-select.js"]
+    const base_scripts = ["src.js", "konami.js"];
+    const bs_select = ["tom-select.complete.js", "autocompleter.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
-    const jpop = ["jquery.min.js", "popper.min.js"]
-    return gulp.src(['node_modules/jquery/dist/jquery.min.js',
-                    /* JQuery Plugins */
-                    'node_modules/popper.js/dist/umd/popper.min.js',
-                    /* Bootstrap Plugins */
-                    'node_modules/bootstrap/js/dist/util.js',
-                    'node_modules/bootstrap/js/dist/tooltip.js',
-                    'node_modules/bootstrap/js/dist/popover.js',
-                    'node_modules/bootstrap/js/dist/dropdown.js',
-                    'node_modules/bootstrap/js/dist/collapse.js',
-                    'node_modules/bootstrap/js/dist/modal.js',
-                    'node_modules/bootstrap/js/dist/alert.js',
+    return gulp.src([/* Bootstrap bundle includes Popper */
+                    'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/moment/moment.js',
                     'node_modules/fullcalendar/main.js',
-                    'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
-                    'node_modules/ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js',
+                    'node_modules/tom-select/dist/js/tom-select.complete.js',
                     'node_modules/easymde/dist/easymde.min.js',
                     'node_modules/konami/konami.js',
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
     .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
-    .pipe(gulpif(function(file) { return jpop.includes(file.relative);}, con('jpop.js')))
+    .pipe(gulpif(function(file) { return ["bootstrap.bundle.js", "helpers.js"].includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
     // Only minify if filename does not already denote it as minified
     .pipe(gulpif(function(file) { return file.path.indexOf("min") === -1;},terser()))
@@ -105,5 +93,12 @@ function watchFiles() {
   gulp.watch("**/templates/*.html", browserSyncReload);
 }
 
+// Rebuild the bundles when the sources change (used by the `assets` service in compose.override.yml)
+function watchSources() {
+  gulp.watch("pipeline/source_assets/scss/**/*.scss", styles);
+  gulp.watch("pipeline/source_assets/js/**/*.js", scripts);
+}
+
 exports.build = gulp.parallel(styles, scripts, fonts);
 exports.watch = gulp.parallel(watchFiles, browserSync);
+exports.watchAssets = gulp.series(exports.build, watchSources);

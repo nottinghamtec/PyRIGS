@@ -11,6 +11,7 @@
 
     <meta name="color-scheme" content="light dark">
 
+    {% include 'partials/dark_theme.html' %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/screen.css' %}">
 </head>
 
@@ -20,8 +21,7 @@
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.level_tag }} alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     {{ message }}
                 </div>
             {% endfor %}
@@ -31,7 +31,6 @@
         {% endblock %}
     </div>
 </div>
-{% include 'partials/dark_theme.html' %}
 {% block js %}
 {% endblock %}
 </body>

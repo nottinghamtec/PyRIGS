@@ -27,7 +27,7 @@
 
             calendar = new FullCalendar.Calendar(calendarEl, {
 	          firstDay: 1,
-              themeSystem: 'bootstrap',
+              themeSystem: 'standard',
               aspectRatio: 1.5,
               eventTimeFormat: {
                 'hour': '2-digit',
@@ -38,14 +38,13 @@
               editable: false,
               dayMaxEventRows: true, // allow "more" link when too many events
               events: function(fetchInfo, successCallback, failureCallback) {
-                    $.ajax({
-                        url: '/api/event',
-                        dataType: 'json',
-                        data: {
-                            start: moment(fetchInfo.startStr).format("YYYY-MM-DD[T]HH:mm:ss"),
-                            end: moment(fetchInfo.endStr).format("YYYY-MM-DD[T]HH:mm:ss")
-                        },
-                        success: function(doc) {
+                    var params = new URLSearchParams({
+                        start: moment(fetchInfo.startStr).format("YYYY-MM-DD[T]HH:mm:ss"),
+                        end: moment(fetchInfo.endStr).format("YYYY-MM-DD[T]HH:mm:ss")
+                    });
+                    fetch('/api/event?' + params, {credentials: 'same-origin'})
+                        .then(function (response) { return response.json(); })
+                        .then(function (doc) {
                             var events = [];
                             colours = {
                                 'Provisional': '#FFE89B',
@@ -54,8 +53,8 @@
                                 'Cancelled': 'grey' ,
                                 'non-rig': '#25AAE2'
                             };
-                            $(doc).each(function() {
-                                end = $(this).attr('latest')
+                            doc.forEach(function (item) {
+                                end = item.latest
                                 allDay = false
                                 if(end.indexOf("T") < 0){ //If latest does not contain a time
                                    end = moment(end + " 23:59").format("YYYY-MM-DD[T]HH:mm:ss")
@@ -63,84 +62,64 @@
                                 }
 
                                 thisEvent = {
-                                    'start': $(this).attr('earliest'),
+                                    'start': item.earliest,
                                     'end': end,
                                     'className': 'modal-href',
-                                    'title': $(this).attr('title'),
-                                    'url': $(this).attr('url'),
+                                    'title': item.title,
+                                    'url': item.url,
                                     'allDay': allDay
                                 }
 
-                                if($(this).attr('is_rig')===true || $(this).attr('status') === "Cancelled"){
-                                    thisEvent['color'] = colours[$(this).attr('status')];
+                                if(item.is_rig===true || item.status === "Cancelled"){
+                                    thisEvent['color'] = colours[item.status];
                                 }else{
                                     thisEvent['color'] = colours['non-rig'];
                                 }
                                 events.push(thisEvent);
                             });
                             successCallback(events);
-                        }
-                    });
+                        })
+                        .catch(failureCallback);
                 },
                 datesSet: function(info) {
                     var view = info.view;
                     // Set the title of the view
-                    $('#calendar-header').text(view.title);
+                    document.getElementById('calendar-header').textContent = view.title;
 
                     // Enable/Disable "Today" button as required
-                    let $today = $('#today-button');
-                    if(moment().isBetween(view.currentStart, view.currentEnd)){
-                        //Today is within the current view
-                        $today.prop('disabled', true);
-                    }else{
-                        $today.prop('disabled', false);
-                    }
+                    //Today is within the current view
+                    document.getElementById('today-button').disabled = moment().isBetween(view.currentStart, view.currentEnd);
 
                     // Set active view select button
-                    let $month = $('#month-button');
-                    let $week = $('#week-button');
-                    let $day = $('#day-button');
-                    switch(view.type){
-                        case 'dayGridMonth':
-                            $month.addClass('active');
-                            $week.removeClass('active');
-                            $day.removeClass('active');
-                            break;
-
-                        case 'timeGridWeek':
-                            $month.removeClass('active');
-                            $week.addClass('active');
-                            $day.removeClass('active');
-                            break;
-
-                        case 'timeGridDay':
-                            $month.removeClass('active');
-                            $week.removeClass('active');
-                            $day.addClass('active');
-                            break;
-                    }
+                    var buttons = {
+                        dayGridMonth: document.getElementById('month-button'),
+                        timeGridWeek: document.getElementById('week-button'),
+                        timeGridDay: document.getElementById('day-button')
+                    };
+                    Object.keys(buttons).forEach(function (type) {
+                        buttons[type].classList.toggle('active', type === view.type);
+                    });
                     history.replaceState(null,null,"{% url 'web_calendar' %}"+viewToUrl[view.type]+'/'+moment(view.currentStart).format('YYYY-MM-DD')+'/');
                 }
             });
             calendar.render();
         });
-        $(document).ready(function() {
+        ready(function() {
             // set some button listeners
-            $('#next-button').click(function(){ calendar.next(); });
-            $('#prev-button').click(function(){ calendar.prev(); });
-            $('#today-button').click(function(){ calendar.today(); });
-            $('#month-button').click(function(){ calendar.changeView('dayGridMonth'); });
-            $('#week-button').click(function(){ calendar.changeView('timeGridWeek'); });
-            $('#day-button').click(function(){ calendar.changeView('timeGridDay'); });
-            $('#go-to-date-input').change(function(){
-                if(moment($('#go-to-date-input').val()).isValid()){
-                    $('#go-to-date-button').prop('disabled', false);
-                } else{
-                    $('#go-to-date-button').prop('disabled', true);
-                }
+            var click = function (id, fn) { document.getElementById(id).addEventListener('click', fn); };
+            click('next-button', function(){ calendar.next(); });
+            click('prev-button', function(){ calendar.prev(); });
+            click('today-button', function(){ calendar.today(); });
+            click('month-button', function(){ calendar.changeView('dayGridMonth'); });
+            click('week-button', function(){ calendar.changeView('timeGridWeek'); });
+            click('day-button', function(){ calendar.changeView('timeGridDay'); });
+            var dateInput = document.getElementById('go-to-date-input');
+            var dateButton = document.getElementById('go-to-date-button');
+            dateInput.addEventListener('change', function(){
+                dateButton.disabled = !moment(dateInput.value).isValid();
             });
-            $('#go-to-date-button').click(function(){
-                day = moment($('#go-to-date-input').val());
+            dateButton.addEventListener('click', function(){
+                day = moment(dateInput.value);
                 if(day.isValid()){
                     calendar.gotoDate(day.format("YYYY-MM-DD"));
                 } else{
@@ -164,25 +143,23 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-sm-12">
-            <div class="pull-left">
+        <div class="col-sm-12 d-flex flex-wrap justify-content-between align-items-center">
+            <div>
                 <span id="calendar-header" class="h2"></span>
             </div>
-            <div class="form-inline float-right btn-page my-3">
-                <div class="input-group mx-2">
+            <div class="d-flex align-items-center flex-wrap gap-2 btn-page my-3">
+                <div class="input-group w-auto">
                   <input type="date" class="form-control" id="go-to-date-input" placeholder="Go to date...">
-                  <span class="input-group-append">
-                    <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
-                  </span>
+                  <button class="btn btn-success" id="go-to-date-button" type="button" disabled>Go!</button>
                 </div>
-                <div class="btn-group mx-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-primary" id="today-button">Today</button>
                 </div>
-                <div class="btn-group mx-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-secondary" id="prev-button"><span class="fas fa-chevron-left"></span></button>
                   <button type="button" class="btn btn-secondary" id="next-button"><span class="fas fa-chevron-right"></span></button>
                 </div>
-                <div class="btn-group ml-2">
+                <div class="btn-group">
                   <button type="button" class="btn btn-light" id="month-button">Month</button>
                   <button type="button" class="btn btn-light" id="week-button">Week</button>
                   <button type="button" class="btn btn-light" id="day-button">Day</button>

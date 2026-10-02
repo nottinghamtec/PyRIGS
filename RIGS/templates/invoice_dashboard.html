@@ -4,8 +4,8 @@
 {% block content %}
 
 <form method="GET" action="{% url 'invoice_dashboard' %}">
-    <div class="form-row">
-        <div class="form-group col-md-4">
+    <div class="row g-2">
+        <div class="mb-3 col-md-4">
             <label for="time_filter">Time Filter</label>
             <select id="time_filter" name="time_filter" class="form-control">
                 <option value="week" {% if time_filter == 'week' %}selected{% endif %}>Last Week (7 days)</option>
@@ -18,8 +18,8 @@
 </form>
 
 <script>
-    $('#time_filter').change(function () {
-        $(this).closest('form').submit();
+    document.getElementById('time_filter').addEventListener('change', function () {
+        this.closest('form').submit();
     });
 </script>
 
@@ -27,7 +27,7 @@
 
 <!-- big cards in 2x2 grid with total_outstanding, total_events, total_invoices and total_payments, different backgrounds -->
 
-<div class="card-deck">
+<div class="row row-cols-1 row-cols-md-4 g-3">
     <div class="card">
         <a href="{% url 'invoice_waiting' %}" class="text-decoration-none text-white">
             <div class="card-body bg-primary">

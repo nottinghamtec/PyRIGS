@@ -10,7 +10,7 @@
         ({{ object.get_method_display }})
         from {{ object.date }} on invoice {{ object.invoice.pk }}?</p>
     <hr>
-    <div class="text-right">
+    <div class="text-end">
         <form action="{{ action_link }}" method="post">{% csrf_token %}
             <input type="hidden" name="next" value="{% url 'invoice_detail' object.invoice.pk %}"/>
             <input type="submit" value="Yes" class="btn btn-danger col-sm-1"/>

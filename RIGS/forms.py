@@ -201,7 +201,7 @@ class EventRiskAssessmentForm(forms.ModelForm):
                 field.widget = forms.CheckboxInput()
             elif field.__class__ == forms.BooleanField:
                 field.widget = forms.RadioSelect(
-                    choices=[(True, "Yes"), (False, "No")], attrs={"class": "custom-control-input", "required": "true"}
+                    choices=[(True, "Yes"), (False, "No")], attrs={"class": "form-check-input", "required": "true"}
                 )
 
     def clean(self):

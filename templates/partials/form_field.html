@@ -5,15 +5,11 @@
 {% if append or prepend %}
 <div class="input-group {{col}} flex-nowrap">
   {% if prepend %}
-  <div class="input-group-prepend">
-    <span class="input-group-text">{{ prepend }}</span>
-  </div>
+  <span class="input-group-text">{{ prepend }}</span>
   {% endif %}
   {% render_field field|add_class:'form-control' style=style %}
   {% if append %}
-  <div class="input-group-append">
-    <span class="input-group-text">{{ append }}</span>
-  </div>
+  <span class="input-group-text">{{ append }}</span>
   {% endif %}
 </div>
 {% else %}

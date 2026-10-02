@@ -1,12 +1,14 @@
-$font-family-sans-serif:  "Open Sans", sans-serif;
+$font-family-sans-serif: "Open Sans", sans-serif;
 //Make it look less primary school
 $font-size-base: 0.85rem;
-$theme-colors: (
-  "success": #5cb85c,
-  "warning": #f0ad4e,
-  "danger": #d9534f,
-  "info": #5bc0de,
-  "primary": #3A52A2
-) !default;
 $enable-shadows: true;
-$alert-color-level: 10;
+$enable-rounded: false;
+
+$primary: #3A52A2;
+$success: #5cb85c;
+$warning: #f0ad4e;
+$danger: #d9534f;
+$info: #5bc0de;
+
+// Pre-computed: Sass serialises the derived (tinted) colour as rgb(...%), which breaks the url-encoded SVG
+$form-switch-focus-color: #9da9d1;

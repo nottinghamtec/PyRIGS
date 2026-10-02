@@ -4,5 +4,5 @@
 	{% endfor %}
 {% endif %}
 <script>
-$('.modal').modal('hide');
+document.querySelectorAll('.modal').forEach(function (modal) { hideModal(modal); });
 </script>

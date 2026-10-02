@@ -27,7 +27,3 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
-
-    urlpatterns += [
-        path("bootstrap/", TemplateView.as_view(template_name="bootstrap.html")),
-    ]

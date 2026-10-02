@@ -5,7 +5,7 @@
     <div class="card-header {{ header_bg }} {{ header_text }} py-3">
         <div class="d-flex justify-content-between align-items-center">
             <span class="d-flex align-items-center">
-                <h5 class="mb-0 mr-3">
+                <h5 class="mb-0 me-3">
                     <a href="{% url 'event_detail' event.pk %}"
                         class="{{ header_text }} text-decoration-underline fw-bold">
                         <strong>{{ event.display_id }}</strong> - {{ event.name }}
@@ -106,7 +106,7 @@
                             <div class="d-flex align-items-center mt-1">
                                 {% if event.mic %}
                                 <img src="{{ event.mic.profile_picture }}" alt="{{ event.mic.name }}"
-                                    class="rounded-circle mr-1" width="32" height="32">
+                                    class="rounded-circle me-1" width="32" height="32">
                                 <span>
                                     {% if perms.RIGS.view_profile %}
                                     <a href="{% url 'profile_detail' event.mic.pk %}" class="modal-href">

@@ -4,37 +4,38 @@
 {% load linkornone from filters %}
 
 {% block js %}
-    <script src="{% static 'js/tooltip.js' %}"></script>
-    <script src="{% static 'js/popover.js' %}"></script>
     <script src="{% static 'js/clipboard.min.js' %}"></script>
     <script>
-        $(document).ready(function() {
-            $('#urlParamForm').change(function(){
-                url = "?";
-                $('#urlParamForm *').filter(':input').each(function(index, value){
-                    defaultVal = $(value).data('default');
-                    param = $(value).val();
-                    val = $(value).prop('checked');
-
+        ready(function() {
+            var form = document.getElementById('urlParamForm');
+            if (!form) { return; }
+            function updateUrls() {
+                var calUrl = document.getElementById('cal-url');
+                if (!calUrl) { return; }
+                var url = "?";
+                form.querySelectorAll('input, select, textarea').forEach(function(input){
+                    var defaultVal = input.dataset.default;
+                    // jQuery used to parse data-default into a boolean
+                    if (defaultVal === 'true') { defaultVal = true; } else if (defaultVal === 'false') { defaultVal = false; }
+                    var param = input.value;
+                    var val = input.checked;
                     if(val !== defaultVal){
                         url = url+param+"="+val+"&";
                     }
                 });
-                ics_url = $('#cal-url').data('url') + url.substring(0, url.length - 1);
-                $('#cal-url').text(ics_url);
-
-                gcal_url = $('#gcal-link').data('url') + encodeURIComponent(url.substring(0, url.length - 1));
-                $('#gcal-link').attr('href',gcal_url);
-            });
-
-            $('#urlParamForm').change(); //Do the initial setting
+                var ics_url = document.getElementById('cal-url').dataset.url + url.substring(0, url.length - 1);
+                document.getElementById('cal-url').textContent = ics_url;
+                var gcal_url = document.getElementById('gcal-link').dataset.url + encodeURIComponent(url.substring(0, url.length - 1));
+                document.getElementById('gcal-link').setAttribute('href', gcal_url);
+            }
+            form.addEventListener('change', updateUrls);
+            updateUrls(); //Do the initial setting
         });
-
         var clipboard = new ClipboardJS('.btn');
-
         clipboard.on('success', function(e) {
-            $(e.trigger).popover('show');
-            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            var popover = bootstrap.Popover.getOrCreateInstance(e.trigger, {trigger: 'manual'});
+            popover.show();
+            window.setTimeout(function () {popover.hide()}, 3000);
             e.clearSelection();
         });
     </script>
@@ -43,7 +44,7 @@
 {% block content %}
     {% if not is_ajax and object.pk == user.pk %}
         <div class="row py-3">
-            <div class="col text-right">
+            <div class="col text-end">
                 <div class="btn-group">
                     <a href="{% url 'profile_update_self' %}" class="btn btn-warning">
                         Edit Profile <span class="fas fa-edit"></span>
@@ -95,11 +96,11 @@
                             <dd class="col-8">
                                 {% if user.api_key %}
                                     <code id="api-key">{{user.api_key}}</code>
-                                    <button class="btn btn-secondary align-middle pr-1 btn-sm" data-clipboard-target="#api-key" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                    <button class="btn btn-secondary align-middle pe-1 btn-sm" data-clipboard-target="#api-key" data-bs-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
                                 {% else %}
                                     <span id="api-key">No API Key Generated</span>
                                 {% endif %}
-                                <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle pr-1">
+                                <a href="{% url 'reset_api_key' %}" class="btn btn-secondary align-middle pe-1">
                                     {% if user.api_key %}Reset API Key{% else %}Generate API Key{% endif %}
                                     <span class="fas fa-redo"></span>
                                 </a>
@@ -107,8 +108,8 @@
                             <dt class="col-4">Calendar Options</dt>
                             <dd class="col-8">
                                 <form id="urlParamForm">
-                                    <div class="form-group d-flex flex-column flex-lg-row">
-                                        <label class="checkbox-inline mr-lg-2">
+                                    <div class="mb-3 d-flex flex-column flex-lg-row">
+                                        <label class="checkbox-inline me-lg-2">
                                             <input type="checkbox" value="rig" data-default="true" checked> Rigs
                                         </label>
                                         <label class="checkbox-inline mx-lg-2">
@@ -123,10 +124,10 @@
                                         <label class="checkbox-inline mx-lg-2">
                                             <input type="checkbox" value="provisional" data-default="true" checked> Provisional
                                         </label>
-                                        <label class="checkbox-inline ml-lg-2">
+                                        <label class="checkbox-inline ms-lg-2">
                                             <input type="checkbox" value="confirmed" data-default="true" checked> Confirmed/Booked
                                         </label>
-                                        <label class="checkbox-inline ml-lg-2">
+                                        <label class="checkbox-inline ms-lg-2">
                                             <input type="checkbox" value="only_mic" data-default="false" > Only MIC
                                         </label>
                                     </div>
@@ -136,7 +137,7 @@
                             <dd class="col-8">
                                 {% if user.api_key %}
                                     <code id="cal-url" data-url="http{{ request.is_secure|yesno:"s,"}}://{{ request.get_host }}{% url 'ics_calendar' api_pk=user.pk api_key=user.api_key %}"></code>
-                                    <button class="btn btn-secondary align-middle btn-sm pr-1" data-clipboard-target="#cal-url" data-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
+                                    <button class="btn btn-secondary align-middle btn-sm pe-1" data-clipboard-target="#cal-url" data-bs-content="Copied to clipboard!"><span class="fas fa-clipboard"></span></button>
                                     <br>
                                     <small><a id="gcal-link" data-url="https://support.google.com/calendar/answer/37100" href="">Click here</a> for instructions on adding to google calendar.<br/>
                                         To sync from Google Calendar to mobile device, visit <a href="https://www.google.com/calendar/syncselect" target="_blank">this page</a> on your device and tick "RIGS Calendar".</small>

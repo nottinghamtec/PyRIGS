@@ -6,11 +6,11 @@
   </div>
   <div class="card-body">
     {% if create or edit or duplicate %}
-    <div class="form-group" id="purchased-from-group">
+    <div class="mb-3" id="purchased-from-group">
       <label for="{{ form.purchased_from.id_for_label }}">Supplier</label>
       <div class="row">
           <div class="col">
-              <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="selectpicker" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
+              <select id="{{ form.purchased_from.id_for_label }}" name="{{ form.purchased_from.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='supplier' %}">
                 {% if object.purchased_from %}
                 <option value="{{form.purchased_from.value}}" selected="selected" data-update_url="{% url 'supplier_update' form.purchased_from.value %}">{{ object.purchased_from }}</option>
                 {% endif %}
@@ -19,10 +19,10 @@
           <div class="col align-right">
             <div class="btn-group">
                 <a href="{% url 'supplier_create' %}" class="btn btn-success modal-href"
-                   data-target="#{{ form.purchased_from.id_for_label }}">
+                   data-select-target="#{{ form.purchased_from.id_for_label }}">
                     <span class="fas fa-plus"></span>
                 </a>
-                <a {% if form.supplier.value %}href="{% url 'supplier_update' form.purchased_from.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.purchased_from.id_for_label }}-update" data-target="#{{ form.purchased_from.id_for_label }}">
+                <a {% if form.supplier.value %}href="{% url 'supplier_update' form.purchased_from.value %}"{% endif %} class="btn btn-warning modal-href" id="{{ form.purchased_from.id_for_label }}-update" data-select-target="#{{ form.purchased_from.id_for_label }}">
                     <span class="fas fa-edit"></span>
                 </a>
             </div>
@@ -30,23 +30,23 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.purchase_price.id_for_label }}">Purchase Price</label>
       <div class="input-group">
-        <div class="input-group-prepend"><span class="input-group-text">£</span></div>
+        <span class="input-group-text">£</span>
         {% render_field form.purchase_price|add_class:'form-control'|set_data:"toggle:tooltip" value=object.purchase_price title="Ex. VAT" %}
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.salvage_value.id_for_label }}">Replacement Cost</label>
       <div class="input-group">
-        <div class="input-group-prepend"><span class="input-group-text">£</span></div>
+        <span class="input-group-text">£</span>
         {% render_field form.replacement_cost|add_class:'form-control'|set_data:"toggle:tooltip" value=object.replacement_cost title="Ex. VAT" %}
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
       <label for="{{ form.date_acquired.id_for_label }}" >Date Acquired</label>
       {% if object.date_acquired%}
       {% with date_acq=object.date_acquired|date:"Y-m-d" %}
@@ -58,7 +58,7 @@
                 {% endif %}
               </div>
 
-      <div class="form-group">
+      <div class="mb-3">
         <label for="{{ form.date_sold.id_for_label }}">Date Sold</label>
         {% with date_sol=object.form.date_sold|date:"Y-m-d" %}
         {% render_field form.date_sold|add_class:'form-control'|attr:'type="date"' value=date_sol %}

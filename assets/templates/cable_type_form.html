@@ -15,11 +15,11 @@
 <div class="row">
     <div class="col-sm-12">
         {% for field in form %}
-            <div class="form-group">
+            <div class="mb-3">
                 {% include 'partials/form_field.html' with field=field %}
             </div>
         {% endfor %}
-        <div class="text-right">
+        <div class="text-end">
             {% button 'submit' %}
         </div>
     </div>

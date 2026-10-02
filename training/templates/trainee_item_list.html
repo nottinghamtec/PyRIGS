@@ -16,33 +16,22 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/tooltip.js' %}"></script>
 <script>
-    $('document').ready(function(){
-        $('#edit').click(function (e) {
-         e.preventDefault();
-         var url = $(this).attr("href");
-         $.ajax({
-            url: url,
-            success: function(){
-                $link = $(this);
-                    // Anti modal inception
-                    if ($link.parents('#modal').length === 0) {
-                        modaltarget = $link.data('target');
-                        modalobject = "";
-                        $('#modal').load(url, function (e) {
-                            $('#modal').modal();
-                        });
-                    }
-                }
+    ready(function(){
+        var link = document.getElementById('edit');
+        if (!link) { return; }
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            modaltarget = undefined;
+            modalobject = "";
+            loadModal(this.getAttribute("href"));
         });
-     });
     });
 </script>
 {% endblock %}
 
 {% block content %}
-<p class="text-muted text-right">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
+<p class="text-muted text-end">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
 <div class="row pt-2">
     <div class="col">
         <div class="table-responsive">
@@ -82,7 +71,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col text-right">
+    <div class="col text-end">
         {% include 'partials/last_edited.html' with target="trainee_history" object=trainee %}
     </div>
 </div>

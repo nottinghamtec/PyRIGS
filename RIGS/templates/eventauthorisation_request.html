@@ -18,11 +18,11 @@
                 <dl class="dl-horizontal">
                     {% if object.person.email %}
                     <dt>Person Email</dt>
-                    <dd><span id="person-email" class="pr-1">{{ object.person.email }}</span> {% button 'copy' id='#person-email' %}</dd>
+                    <dd><span id="person-email" class="pe-1">{{ object.person.email }}</span> {% button 'copy' id='#person-email' %}</dd>
                     {% endif %}
                     {% if object.organisation.email %}
                     <dt>Organisation Email</dt>
-                    <dd><span id="org-email" class="pr-1">{{ object.organisation.email }}</span> {% button 'copy' id='#org-email' %}</dd>
+                    <dd><span id="org-email" class="pe-1">{{ object.organisation.email }}</span> {% button 'copy' id='#org-email' %}</dd>
                     {% endif %}
                 </dl>
                 {% else %}
@@ -32,7 +32,7 @@
             <form action="{{ form.action|default:request.path }}" method="POST" id="auth-request-form">
                 {% csrf_token %}
                 {% include 'form_errors.html' %}
-                <div class="form-group row">
+                <div class="mb-3 row">
                     <label class="col-sm-4 col-form-label"
                            for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
                     <div class="col-sm-8">
@@ -42,25 +42,24 @@
             </form>
         </div>
     </div>
-    <script src="{% static 'js/tooltip.js' %}"></script>
-    <script src="{% static 'js/popover.js' %}"></script>
     <script src="{% static 'js/clipboard.min.js' %}"></script>
     <script>
-        $('#auth-request-form').on('submit', function () {
-            $('#auth-request-form button').attr('disabled', true);
+        document.getElementById('auth-request-form').addEventListener('submit', function () {
+            this.querySelectorAll('button').forEach(function (button) { button.disabled = true; });
         });
         var clipboard = new ClipboardJS('.btn');
 
         clipboard.on('success', function(e) {
-            $(e.trigger).popover('show');
-            window.setTimeout(function () {$(e.trigger).popover('hide')}, 3000);
+            var popover = bootstrap.Popover.getOrCreateInstance(e.trigger, {trigger: 'manual'});
+            popover.show();
+            window.setTimeout(function () {popover.hide()}, 3000);
             e.clearSelection();
         });
     </script>
 {% endblock %}
 
 {% block footer %}
-<div class="form-row">
+<div class="row g-2">
     <div class="btn-group" role="group">
         <a type="button" target="_blank" href="{% url 'event_authorise_preview' object.pk %}" class="btn btn-info text-nowrap"><span class="fas fa-drafting-compass"></span> Preview</a>
         <button type="submit" class="form-control btn btn-primary" form="auth-request-form">

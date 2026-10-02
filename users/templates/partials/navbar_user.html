@@ -1,20 +1,20 @@
 <li class="nav-item dropdown align-self-end" id="user">
 {% if user.is_authenticated %}
-    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Hi {{ user.first_name }}
     </a>
     <ul class="dropdown-menu clearfix" id="userdropdown">
-        <li class="media">
+        <li class="d-flex">
             <a href="{% url 'profile_detail' %}">
-                <img src="{{ request.user.profile_picture }}" class="media-object float-left pr-2"/>
-                <div class="media-body">
+                <img src="{{ request.user.profile_picture }}" class="media-object float-start pe-2"/>
+                <div class="flex-grow-1">
                         <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
                         <p class="text-muted">{{ request.user.email }}</p>
                 </div>
             </a>
         </li>
         <div class="dropdown-divider"></div>
-        <li class="float-right">
+        <li class="float-end">
             <form method="post" action="{% url 'logout' %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</button>

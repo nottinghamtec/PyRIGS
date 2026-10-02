@@ -17,13 +17,13 @@
               <div class="card-body">
                 <p>
                 Searches for entire query in:
-                    <span class="badge badge-dark">name</span>
-                    <span class="badge badge-dark">description</span> and
-                    <span class="badge badge-dark">notes</span>
+                    <span class="badge text-bg-dark">name</span>
+                    <span class="badge text-bg-dark">description</span> and
+                    <span class="badge text-bg-dark">notes</span>
                 </p>
-                <p>You can search for an event by <span class="badge badge-dark">event_id</span> by entering an integer, or using the format <code>N01234</code></p>
-                <p>On the search results page you can also specify the date range for the <span class="badge badge-dark">start_date</span> of the event</p>
-                <p>Events are sorted in reverse <span class="badge badge-dark">start_date</span> order (most recent events at the top)</p>
+                <p>You can search for an event by <span class="badge text-bg-dark">event_id</span> by entering an integer, or using the format <code>N01234</code></p>
+                <p>On the search results page you can also specify the date range for the <span class="badge text-bg-dark">start_date</span> of the event</p>
+                <p>Events are sorted in reverse <span class="badge text-bg-dark">start_date</span> order (most recent events at the top)</p>
               </div>
               <div class="card-header">
                 <h3 class="card-title">Searching People/Organisations/Venues/Suppliers</h3>
@@ -31,14 +31,14 @@
               <div class="card-body">
                 <p>
                 Searches for entire search phrase in:
-                    <span class="badge badge-dark">name</span>
-                    <span class="badge badge-dark">email</span>
-                    <span class="badge badge-dark">address</span>
-                    <span class="badge badge-dark">notes</span> and
-                    <span class="badge badge-dark">phone</span>
+                    <span class="badge text-bg-dark">name</span>
+                    <span class="badge text-bg-dark">email</span>
+                    <span class="badge text-bg-dark">address</span>
+                    <span class="badge text-bg-dark">notes</span> and
+                    <span class="badge text-bg-dark">phone</span>
                 </p>
-                <p>You can search for an entry by <span class="badge badge-dark">id</span> by entering an integer</p>
-                <p>Entries are sorted in alphabetical order by <span class="badge badge-dark">name</span></p>
+                <p>You can search for an entry by <span class="badge text-bg-dark">id</span> by entering an integer</p>
+                <p>Entries are sorted in alphabetical order by <span class="badge text-bg-dark">name</span></p>
               </div>
               {% if perms.RIGS.view_invoice %}
               <div class="card-header">
@@ -47,12 +47,12 @@
               <div class="card-body">
                 <p>
                 Searches for entire search phrase in:
-                    <span class="badge badge-dark">event__name</span>
+                    <span class="badge text-bg-dark">event__name</span>
                 </p>
-                <p>You can search for an event's invoice by entering the <span class="badge badge-dark">event_id</span> using the format <code>N01234</code></p>
-                <p>You can search for an invoice by <span class="badge badge-dark">invoice_id</span> using the format <code>#01234</code></p>
-                <p>Entering a raw integer will search by both <span class="badge badge-dark">invoice_id</span> and <span class="badge badge-dark">event_id</span></p>
-                <p>Entries are sorted in reverse <span class="badge badge-dark">invoice_date</span> order</p>
+                <p>You can search for an event's invoice by entering the <span class="badge text-bg-dark">event_id</span> using the format <code>N01234</code></p>
+                <p>You can search for an invoice by <span class="badge text-bg-dark">invoice_id</span> using the format <code>#01234</code></p>
+                <p>Entering a raw integer will search by both <span class="badge text-bg-dark">invoice_id</span> and <span class="badge text-bg-dark">event_id</span></p>
+                <p>Entries are sorted in reverse <span class="badge text-bg-dark">invoice_date</span> order</p>
               </div>
               {% endif %}
               <div class="card-header">
@@ -61,13 +61,13 @@
               <div class="card-body">
                 <p>
                 Searches for entire search phrase in:
-                    <span class="badge badge-dark">description</span> and
-                    <span class="badge badge-dark">serial number</span>
+                    <span class="badge text-bg-dark">description</span> and
+                    <span class="badge text-bg-dark">serial number</span>
                 </p>
                 <p>
-                Will also attempt to exact match <span class="badge badge-dark">asset ID</span>
+                Will also attempt to exact match <span class="badge text-bg-dark">asset ID</span>
                 </p>
-                <p>Entries are sorted in alphanumerical order by <span class="badge badge-dark">asset ID</span></p>
+                <p>Entries are sorted in alphanumerical order by <span class="badge text-bg-dark">asset ID</span></p>
               </div>
             </div>
         </div>

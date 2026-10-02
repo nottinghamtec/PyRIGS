@@ -479,7 +479,7 @@ def test_checkin_person_picker_only_for_event_mic(client, admin_user, basic_even
     url = reverse("event_checkin", kwargs={"pk": basic_event.pk})
 
     client.force_login(admin_user)
-    assertContains(client.get(url), "selectpicker")
+    assertContains(client.get(url), "ts-select")
 
     client.force_login(other)
-    assertNotContains(client.get(url), "selectpicker")
+    assertNotContains(client.get(url), "ts-select")

@@ -136,11 +136,11 @@ class InvoiceDetail(generic.DetailView):
         invoice_date = self.object.invoice_date.strftime("%d/%m/%Y")
         context["page_title"] = f"Invoice {self.object.display_id} ({invoice_date})"
         if self.object.void:
-            context["page_title"] += "<span class='badge badge-warning float-right'>VOID</span>"
+            context["page_title"] += "<span class='badge text-bg-warning float-end'>VOID</span>"
         elif self.object.is_closed:
-            context["page_title"] += "<span class='badge badge-success float-right'>PAID</span>"
+            context["page_title"] += "<span class='badge text-bg-success float-end'>PAID</span>"
         else:
-            context["page_title"] += "<span class='badge badge-info float-right'>OUTSTANDING</span>"
+            context["page_title"] += "<span class='badge text-bg-info float-end'>OUTSTANDING</span>"
         return context
 
 

@@ -62,41 +62,41 @@
 <div class="row">
     <div class="col px-0">
         <form id="asset-search-form" method="GET">
-            <div class="form-row">
+            <div class="row g-2">
                 <div class="col">
                     <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
                         {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
-                        <label for="q" class="sr-only">Asset ID/Description/Serial Number:</label>
-                        <span class="input-group-append">{% button 'search' id="id_search" %}</span>
+                        <label for="q" class="visually-hidden">Asset ID/Description/Serial Number:</label>
+                        {% button 'search' id="id_search" %}
                     </div>
                 </div>
             </div>
-            <div class="form-row mt-2">
+            <div class="row g-2 mt-2">
                 <div class="col">
-                    <div id="category-group" class="form-group px-1">
-                        <label for="category" class="sr-only">Category</label>
-                        {% render_field form.category|attr:'multiple'|add_class:'selectpicker col-sm pl-0' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+                    <div id="category-group" class="mb-3 px-1">
+                        <label for="category" class="visually-hidden">Category</label>
+                        {% render_field form.category|attr:'multiple'|add_class:'ts-select col-sm ps-0' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
                     </div>
                 </div>
                 <div class="col">
-                    <div id="status-group" class="form-group px-1">
-                        <label for="status" class="sr-only">Status</label>
-                        {% render_field form.status|attr:'multiple'|add_class:'selectpicker col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+                    <div id="status-group" class="mb-3 px-1">
+                        <label for="status" class="visually-hidden">Status</label>
+                        {% render_field form.status|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
                     </div>
                 </div>
                 <div class="col">
-                    <div class="form-group d-flex flex-nowrap">
-                      <label for="cable_type" class="sr-only">Cable Type</label>
-                      {% render_field form.cable_type|attr:'multiple'|add_class:'selectpicker col-sm' data-none-selected-text="Cable Type" data-header="Cable Type" data-actions-box="true" %}
+                    <div class="mb-3 d-flex flex-nowrap">
+                      <label for="cable_type" class="visually-hidden">Cable Type</label>
+                      {% render_field form.cable_type|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Cable Type" data-header="Cable Type" data-actions-box="true" %}
                     </div>
                 </div>
                 <div class="col-auto">
-                    <div class="form-group d-flex flex-nowrap">
+                    <div class="mb-3 d-flex flex-nowrap">
                         <label for="date_acquired" class="text-nowrap mt-auto">Date Acquired</label>
                         {% render_field form.date_acquired|add_class:'form-control mx-2' %}
                     </div>
                 </div>
-                <div class="col-auto mr-auto">
+                <div class="col-auto me-auto">
                       <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
                 </div>
             </div>
@@ -104,7 +104,7 @@
     </div>
 </div>
 <div class="row my-2">
-    <div class="col text-right px-0">
+    <div class="col text-end px-0">
     {% button 'new' 'asset_create' style="width: 6em" %}
     {% if object_list %}
     <a class="btn btn-primary" href="{% url 'generate_labels' object_list|ids_from_objects %}"><span class="fas fa-barcode"></span> Generate Labels</a>
@@ -114,9 +114,9 @@
 <div class="row my-2">
     <div class="col bg-dark text-white rounded pt-3">
         {# TODO Gotta be a cleaner way to do this... #}
-        <p><span class="ml-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+        <p><span class="ms-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge text-bg-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ms-1 align-baseline">
   <span aria-hidden="true" class="fas fa-times" onclick="removeQString('category', '{{filter.id}}')"></span>
-</button></span>{%endfor%}{% for filter in status_filters %}<span class="badge badge-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ml-1 align-baseline">
+</button></span>{%endfor%}{% for filter in status_filters %}<span class="badge text-bg-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ms-1 align-baseline">
   <span aria-hidden="true" class="fas fa-times" onclick="removeQString('status', '{{filter.id}}')"></span>
 </button></span>{%endfor%}</p>
     </div>
@@ -125,7 +125,7 @@
     <div class="col px-0">
 <div class="table-responsive">
     <table class="table">
-      <thead class="thead-dark">
+      <thead class="table-dark">
         <tr>
           <th scope="col">Asset ID</th>
           <th scope="col">Description</th>
