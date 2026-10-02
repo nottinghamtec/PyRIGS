@@ -123,6 +123,12 @@ html {
   }
 }
 
+// Links inside badges (e.g. "Reviewed by ...") sit on a coloured background, so keep the badge's text colour
+.badge a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 // Bootstrap 4 gave labels a bottom margin, Bootstrap 5 expects .form-label
 label {
   margin-bottom: 0.5rem;
