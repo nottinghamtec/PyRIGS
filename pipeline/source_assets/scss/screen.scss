@@ -310,7 +310,44 @@ html.embedded {
 // Dark mode: Bootstrap 5.3 colour modes (set via data-bs-theme on <html>), with a few project-specific tweaks
 $darktheme: #121416;
 
+// Brighter brand colours for dark mode (the light-mode ones are pastel tints on a dark background)
+$dark-theme-colors: (
+    "success": #3AB54A,
+    "warning": #FFE89B,
+    "danger": #BF1E2E,
+    "info": #25AAE2,
+    "primary": #3A52A2,
+    "secondary": $secondary,
+    "light": $light,
+    "dark": $dark
+);
+
 [data-bs-theme="dark"] {
+    @each $name, $value in $dark-theme-colors {
+        --bs-#{$name}: #{$value};
+        --bs-#{$name}-rgb: #{to-rgb($value)};
+
+        .btn-#{$name} {
+            @include button-variant($value, $value);
+        }
+        .btn-outline-#{$name} {
+            @include button-outline-variant($value);
+        }
+        .text-bg-#{$name} {
+            color: color-contrast($value) !important;
+            background-color: RGBA(to-rgb($value), var(--bs-bg-opacity, 1)) !important;
+        }
+        // Contextual table classes (tables, rows, cells and the plain-element variant used for the rigboard key)
+        .table-#{$name} {
+            --bs-table-color: #{color-contrast(shade-color($value, 55%))};
+            --bs-table-bg: #{shade-color($value, 55%)};
+            --bs-table-border-color: #{shade-color($value, 35%)};
+            --bs-table-striped-bg: #{shade-color($value, 50%)};
+            --bs-table-hover-bg: #{shade-color($value, 45%)};
+            color: var(--bs-table-color);
+            border-color: var(--bs-table-border-color);
+        }
+    }
     --bs-body-bg: #222;
     --bs-body-color: #{$gray-100};
     --bs-link-color: #{$blue};
@@ -344,13 +381,6 @@ $darktheme: #121416;
     .btn-link {
         color: white;
     }
-    .badge, .btn-success, .bg-warning {
-        color: black;
-    }
-    .btn-primary, .btn-secondary, .btn-info {
-        --bs-btn-color: #fff;
-        color: $gray-100;
-    }
     .input-group-text {
         border-color: $darktheme;
     }
@@ -373,16 +403,7 @@ $darktheme: #121416;
         border-collapse: separate !important;
         border-spacing: 0;
     }
-    @each $color, $value in $theme-colors {
-        table.table-#{$color} > * {
-            --bs-table-bg: #222;
-            --bs-table-color: white;
-            color: white !important;
-            background-color: #222 !important;
-        }
-        table.table-#{$color} td, table.table-#{$color} th {
-            border: 0.3em solid shade-color($value, 60%) !important;
-        }
+    @each $color, $value in $dark-theme-colors {
         #event_row.table-#{$color} {
             border: 0.3em solid shade-color($value, 60%) !important;
             background-color: #222 !important;
