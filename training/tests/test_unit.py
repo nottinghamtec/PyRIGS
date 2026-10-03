@@ -215,3 +215,57 @@ def test_plain_trainee_cannot_log_session(client, trainee):
 def test_supervisor_does_not_see_deliverable_items(admin_client):
     response = admin_client.get(reverse("session_log"))
     assertNotContains(response, "What training items can I deliver training in?")
+
+
+def _haulage_setup(trainee, supervisor):
+    haul_level = models.TrainingLevel.objects.create(
+        level=models.TrainingLevel.SUPERVISOR, department=models.TrainingLevel.HAULAGE, description="x"
+    )
+    models.TrainingLevelQualification.objects.create(
+        trainee=models.Trainee.objects.get(pk=trainee.pk), level=haul_level, confirmed_on=timezone.now()
+    )
+    category = models.TrainingCategory.objects.create(reference_number=4, name="Haulage", training_level=haul_level)
+    return models.TrainingItem.objects.create(category=category, reference_number=1, name="Tail lifts")
+
+
+def test_haulage_supervisor_can_pass_out_without_supervisor_flag(client, trainee, supervisor, admin_user):
+    item = _haulage_setup(trainee, supervisor)
+    tech = models.Trainee.objects.get(pk=trainee.pk)
+    assert not tech.is_supervisor
+    assert tech.can_log_training
+    # Must be passed out in the item oneself
+    assert not tech.can_deliver_training(item, models.TrainingItemQualification.PASSED_OUT)
+    models.TrainingItemQualification.objects.create(
+        item=item,
+        depth=models.TrainingItemQualification.PASSED_OUT,
+        trainee=tech,
+        supervisor=models.Trainee.objects.get(pk=supervisor.pk),
+        date=datetime.date.today(),
+    )
+    assert tech.can_deliver_training(item, models.TrainingItemQualification.PASSED_OUT)
+    client.force_login(trainee)
+    url = reverse("session_log")
+    data = {
+        "trainees": [admin_user.pk],
+        "items_2": [item.pk],
+        "supervisor": trainee.pk,
+        "date": datetime.date.today().strftime("%Y-%m-%d"),
+    }
+    assert client.post(url, data).status_code == 302
+    assert models.TrainingItemQualification.objects.filter(
+        trainee=admin_user.pk, item=item, depth=models.TrainingItemQualification.PASSED_OUT
+    ).exists()
+
+
+def test_technician_level_does_not_allow_pass_out(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor)
+    assert not models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.PASSED_OUT
+    )
+
+
+def test_flagged_supervisor_can_deliver_anything(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor)
+    sup = models.Trainee.objects.get(pk=supervisor.pk)
+    for depth, _ in models.TrainingItemQualification.CHOICES:
+        assert sup.can_deliver_training(item, depth)

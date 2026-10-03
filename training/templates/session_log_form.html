@@ -61,11 +61,11 @@
             </button>
             <div class="collapse mt-3" id="deliverable_items">
                 <div class="card card-body">
-                    <p class="text-muted">You may deliver up to Training Complete in these items, as you are a technician who is passed out in them. Passing people out is for supervisors only.</p>
+                    <p class="text-muted">You may deliver training in these items. Passing people out is only possible where marked.</p>
                     {% for category, items in deliverable_items %}
                     <h5>{{ category }}</h5>
                     <ul>
-                        {% for item in items %}<li>{{ item.display_name }}</li>{% endfor %}
+                        {% for item in items %}<li>{{ item.display_name }}{% if item.can_pass_out %} <span class="text-muted">(including passing out)</span>{% endif %}</li>{% endfor %}
                     </ul>
                     {% empty %}
                     <p class="mb-0">You can't currently deliver training in any items. An item must be marked as technician-trainable, you must be passed out in it, and you must hold any technician level its category requires.</p>

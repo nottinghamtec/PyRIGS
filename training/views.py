@@ -299,12 +299,15 @@ class SessionLog(generic.FormView):
     def get_deliverable_items(self):
         """Active items the current user may deliver training in, grouped by category, using the same test as form validation"""
         trainee = models.Trainee.objects.get(pk=self.request.user.pk)
-        items = models.TrainingItem.objects.filter(active=True, technician_can_train=True).select_related(
-            "category", "category__training_level"
+        items = (
+            models.TrainingItem.objects.filter(active=True)
+            .filter(Q(technician_can_train=True) | Q(category__training_level__level=models.TrainingLevel.SUPERVISOR))
+            .select_related("category", "category__training_level")
         )
         grouped = {}
         for item in items:
-            if trainee.can_deliver_training(item, models.TrainingItemQualification.COMPLETE):
+            item.can_pass_out = trainee.can_deliver_training(item, models.TrainingItemQualification.PASSED_OUT)
+            if item.can_pass_out or trainee.can_deliver_training(item, models.TrainingItemQualification.COMPLETE):
                 grouped.setdefault(item.category, []).append(item)
         return list(grouped.items())
 

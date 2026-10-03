@@ -51,7 +51,7 @@ class Profile(AbstractUser):
     def can_log_training(self):
         from training.models import Trainee
 
-        return self.is_supervisor or Trainee.objects.get(pk=self.pk).is_technician
+        return self.is_supervisor or Trainee.objects.get(pk=self.pk).can_log_training
 
     @classmethod
     def make_api_key(cls):

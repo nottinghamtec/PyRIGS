@@ -56,12 +56,34 @@ class Trainee(Profile, RevisionMixin):
     def is_driver(self):
         return self.confirmed_levels.filter(level__department=TrainingLevel.HAULAGE).exists()
 
+    @property
+    def can_log_training(self):
+        """Whether this person may use the training logging pages at all"""
+        category_levels = TrainingCategory.objects.exclude(training_level=None).values("training_level")
+        return (
+            self.is_supervisor or self.is_technician or self.confirmed_levels.filter(level__in=category_levels).exists()
+        )
+
     def can_deliver_training(self, item, depth):
-        """Technicians may deliver training up to Training Complete on flagged items that they have been passed out on.
-        If the item's category specifies a training level, they must also hold that level, otherwise any technician will do."""
-        if depth == TrainingItemQualification.PASSED_OUT or not item.technician_can_train:
-            return False
+        """Whether this person may record training of the given depth in the item (i.e. be named as the supervisor)
+
+        - Supervisors may deliver anything.
+        - Passing out requires holding a Supervisor level set on the item's category (e.g. Haulage Supervisor)
+          and being passed out in the item oneself.
+        - Started/Complete require the item to be technician trainable and the person to be passed out in it
+          themselves, and to hold the category's level, or to be a technician if the category has none."""
+        if self.is_supervisor:
+            return True
         training_level = item.category.training_level
+        if depth == TrainingItemQualification.PASSED_OUT:
+            return (
+                training_level is not None
+                and training_level.level == TrainingLevel.SUPERVISOR
+                and self.confirmed_levels.filter(level=training_level).exists()
+                and self.is_user_qualified_in(item, TrainingItemQualification.PASSED_OUT)
+            )
+        if not item.technician_can_train:
+            return False
         if training_level is None:
             is_permitted = self.is_technician
         else:
@@ -95,7 +117,7 @@ class TrainingCategory(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        help_text="If this is set, technicians must hold this level (e.g. Sound Technician) to deliver training in technician-trainable items in this category. If not set, any technician may.",
+        help_text="If this is set, technicians must hold this level (e.g. Sound Technician) to deliver training in technician-trainable items in this category, and holders of a Supervisor level (e.g. Haulage Supervisor) may pass people out in it. If not set, any technician may deliver training in technician-trainable items.",
     )
 
     def __str__(self):
@@ -227,7 +249,7 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         errdict = {}
         # Validate supervisor can train in this item
         if hasattr(self, "supervisor"):  # This will be false if form validation fails
-            if not self.supervisor.can_deliver_training(self.item, self.depth) and not self.supervisor.is_supervisor:
+            if not self.supervisor.can_deliver_training(self.item, self.depth):
                 errdict["supervisor"] = "Selected supervisor must actually *be* a supervisor..."
         # Item requirements only apply to being passed out
         if self.depth == TrainingItemQualification.PASSED_OUT and not self.item.user_has_requirements(self.trainee):

@@ -80,12 +80,12 @@ class SessionLogForm(forms.Form):
             if supervisor.pk != self.user.pk:
                 self.add_error("supervisor", "You may only log sessions that you delivered yourself")
             else:
-                if cleaned_data.get("items_2"):
-                    self.add_error("items_2", "Technicians may not pass people out")
-                for depth in (models.TrainingItemQualification.STARTED, models.TrainingItemQualification.COMPLETE):
+                for depth, _ in models.TrainingItemQualification.CHOICES:
                     for item in cleaned_data.get(f"items_{depth}", []):
                         if not supervisor.can_deliver_training(item, depth):
-                            self.add_error(f"items_{depth}", f"You are not permitted to deliver training in {item}")
+                            self.add_error(
+                                f"items_{depth}", f"You are not permitted to deliver this training in {item}"
+                            )
         return cleaned_data
 
     def clean_date(self):
