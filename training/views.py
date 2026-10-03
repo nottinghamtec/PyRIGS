@@ -296,7 +296,6 @@ class SessionLog(generic.FormView):
         get_related(context["form"], context)
         return context
 
-
     def get_deliverable_items(self):
         """Active items the current user may deliver training in, grouped by category, using the same test as form validation"""
         trainee = models.Trainee.objects.get(pk=self.request.user.pk)
