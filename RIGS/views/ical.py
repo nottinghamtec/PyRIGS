@@ -49,7 +49,7 @@ class CalendarICS(ICalFeed):
             + ("Rig, " if params["rig"] else "")
             + ("Non-rig, " if params["non-rig"] else "")
             + ("Dry Hire " if params["dry-hire"] else "")
-            + "\n"
+            + " "
         )
         desc = (
             desc
