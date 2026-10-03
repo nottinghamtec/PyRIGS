@@ -22,9 +22,12 @@ class QualificationForm(forms.ModelForm):
         supervisor = self.cleaned_data.get("supervisor")
         if supervisor.pk == self.cleaned_data.get("trainee").pk:
             raise forms.ValidationError("One may not supervise oneself...")
+        if self.user is not None and not self.user.is_supervisor and supervisor.pk != self.user.pk:
+            raise forms.ValidationError("You may only record training that you delivered yourself")
         return supervisor
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields["date"].widget.format = "%Y-%m-%d"
 
@@ -62,6 +65,28 @@ class SessionLogForm(forms.Form):
     notes = forms.CharField(required=False, widget=forms.Textarea)
 
     related_models = {"supervisor": models.Trainee}
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self.user is not None and not self.user.is_supervisor:
+            self.fields["supervisor"].initial = self.user.pk
+
+    def clean(self):
+        cleaned_data = super().clean()
+        supervisor = cleaned_data.get("supervisor")
+        # Supervisors may log anything (as before); technicians only what they are permitted to deliver
+        if self.user is not None and not self.user.is_supervisor and supervisor is not None:
+            if supervisor.pk != self.user.pk:
+                self.add_error("supervisor", "You may only log sessions that you delivered yourself")
+            else:
+                if cleaned_data.get("items_2"):
+                    self.add_error("items_2", "Technicians may not pass people out")
+                for depth in (models.TrainingItemQualification.STARTED, models.TrainingItemQualification.COMPLETE):
+                    for item in cleaned_data.get(f"items_{depth}", []):
+                        if not supervisor.can_deliver_training(item, depth):
+                            self.add_error(f"items_{depth}", f"You are not permitted to deliver training in {item}")
+        return cleaned_data
 
     def clean_date(self):
         return QualificationForm.clean_date(self)

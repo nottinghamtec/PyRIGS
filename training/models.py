@@ -56,6 +56,18 @@ class Trainee(Profile, RevisionMixin):
     def is_driver(self):
         return self.confirmed_levels.filter(level__department=TrainingLevel.HAULAGE).exists()
 
+    def can_deliver_training(self, item, depth):
+        """Technicians may deliver training up to Training Complete on flagged items in their own department,
+        provided they have been passed out on the item themselves."""
+        if depth == TrainingItemQualification.PASSED_OUT or not item.technician_can_train:
+            return False
+        training_level = item.category.training_level
+        if training_level is None or training_level.department is None:
+            return False
+        return self.confirmed_levels.filter(
+            level__level=TrainingLevel.TECHNICIAN, level__department=training_level.department
+        ).exists() and self.is_user_qualified_in(item, TrainingItemQualification.PASSED_OUT)
+
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related("item", "trainee", "supervisor")
 
@@ -109,6 +121,10 @@ class TrainingItem(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
+    technician_can_train = models.BooleanField(
+        default=False,
+        help_text="Technicians in this item's department who are passed out on it may deliver training up to Training Complete",
+    )
     prerequisites = models.ManyToManyField("self", symmetrical=False, blank=True)
 
     objects = TrainingItemManager()
@@ -210,7 +226,9 @@ class TrainingItemQualification(models.Model, RevisionMixin):
         errdict = {}
         # Validate supervisor can train in this item
         if hasattr(self, "supervisor"):  # This will be false if form validation fails
-            if self.item.category.training_level:
+            if self.supervisor.can_deliver_training(self.item, self.depth):
+                pass
+            elif self.item.category.training_level:
                 if not self.supervisor.level_qualifications.filter(level=self.item.category.training_level):
                     errdict["supervisor"] = (
                         "Selected supervising person is missing requisite training level to train in this department"

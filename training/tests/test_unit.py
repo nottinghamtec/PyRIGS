@@ -95,3 +95,93 @@ def test_trainee_list_search(admin_client, admin_user, trainee, supervisor):
     response = admin_client.get(url, {"q": trainee.get_full_name()})
     assertContains(response, trainee.get_full_name())
     assertNotContains(response, supervisor.get_full_name())
+
+
+def _make_technician(trainee, department=models.TrainingLevel.SOUND):
+    tech_level = models.TrainingLevel.objects.create(
+        level=models.TrainingLevel.TECHNICIAN, department=department, description="x"
+    )
+    models.TrainingLevelQualification.objects.create(
+        trainee=models.Trainee.objects.get(pk=trainee.pk), level=tech_level, confirmed_on=timezone.now()
+    )
+    return tech_level
+
+
+def _technician_setup(trainee, supervisor, flag=True, department=models.TrainingLevel.SOUND):
+    tech_level = _make_technician(trainee, department)
+    category = models.TrainingCategory.objects.create(reference_number=6, name="Sound", training_level=tech_level)
+    item = models.TrainingItem.objects.create(
+        category=category, reference_number=1, name="FOH", technician_can_train=flag
+    )
+    today = datetime.date.today()
+    models.TrainingItemQualification.objects.create(
+        item=item,
+        depth=models.TrainingItemQualification.PASSED_OUT,
+        trainee=models.Trainee.objects.get(pk=trainee.pk),
+        supervisor=models.Trainee.objects.get(pk=supervisor.pk),
+        date=today,
+    )
+    return item
+
+
+def test_technician_can_deliver_training(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor)
+    tech = models.Trainee.objects.get(pk=trainee.pk)
+    assert tech.can_deliver_training(item, models.TrainingItemQualification.COMPLETE)
+    assert not tech.can_deliver_training(item, models.TrainingItemQualification.PASSED_OUT)
+
+
+def test_technician_cannot_train_unflagged_item(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor, flag=False)
+    assert not models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.COMPLETE
+    )
+
+
+def test_technician_cannot_train_without_passout(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor)
+    models.TrainingItemQualification.objects.filter(item=item).delete()
+    assert not models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.COMPLETE
+    )
+
+
+def test_technician_cannot_train_other_department(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor, department=models.TrainingLevel.LIGHTING)
+    other = models.TrainingLevel.objects.create(
+        level=models.TrainingLevel.TECHNICIAN, department=models.TrainingLevel.SOUND, description="x"
+    )
+    item.category.training_level = other
+    item.category.save()
+    assert not models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.COMPLETE
+    )
+
+
+def test_technician_session_log(client, trainee, supervisor, admin_user):
+    item = _technician_setup(trainee, supervisor)
+    client.force_login(trainee)
+    url = reverse("session_log")
+    assert client.get(url).status_code == 200
+    data = {
+        "trainees": [admin_user.pk],
+        "items_1": [item.pk],
+        "supervisor": trainee.pk,
+        "date": datetime.date.today().strftime("%Y-%m-%d"),
+    }
+    assert client.post(url, data).status_code == 302
+    assert models.TrainingItemQualification.objects.filter(
+        trainee=admin_user.pk, item=item, depth=models.TrainingItemQualification.COMPLETE
+    ).exists()
+    # Passing out is not allowed
+    response = client.post(url, {**data, "items_1": [], "items_2": [item.pk]})
+    assert response.status_code == 200
+    assert "items_2" in response.context["form"].errors
+    # Nor is naming someone else as the supervisor
+    response = client.post(url, {**data, "supervisor": supervisor.pk})
+    assert "supervisor" in response.context["form"].errors
+
+
+def test_plain_trainee_cannot_log_session(client, trainee):
+    client.force_login(trainee)
+    assert client.get(reverse("session_log")).status_code == 403

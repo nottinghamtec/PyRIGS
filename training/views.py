@@ -155,6 +155,7 @@ class AddQualification(generic.CreateView, ModalURLMixin):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["pk"] = self.kwargs["pk"]
+        kwargs["user"] = self.request.user
         return kwargs
 
 
@@ -162,6 +163,17 @@ class EditQualification(generic.UpdateView, ModalURLMixin):
     template_name = "edit_training_record.html"
     model = models.TrainingItemQualification
     form_class = forms.QualificationForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_supervisor:  # Technicians may only edit records they delivered
+            queryset = queryset.filter(supervisor=self.request.user.pk)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -250,6 +262,11 @@ class SessionLog(generic.FormView):
     template_name = "session_log_form.html"
     form_class = forms.SessionLogForm
     success_url = reverse_lazy("trainee_list")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def form_valid(self, form, *args, **kwargs):
         for trainee in form.cleaned_data.get("trainees", []):
