@@ -146,6 +146,25 @@ def test_technician_cannot_train_without_passout(trainee, supervisor):
     )
 
 
+def test_any_technician_can_train_if_category_has_no_level(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor, department=models.TrainingLevel.LIGHTING)
+    item.category.training_level = None
+    item.category.save()
+    assert models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.COMPLETE
+    )
+
+
+def test_non_technician_cannot_train_if_category_has_no_level(trainee, supervisor):
+    item = _technician_setup(trainee, supervisor)
+    item.category.training_level = None
+    item.category.save()
+    models.TrainingLevelQualification.objects.all().delete()
+    assert not models.Trainee.objects.get(pk=trainee.pk).can_deliver_training(
+        item, models.TrainingItemQualification.COMPLETE
+    )
+
+
 def test_technician_cannot_train_other_department(trainee, supervisor):
     item = _technician_setup(trainee, supervisor, department=models.TrainingLevel.LIGHTING)
     other = models.TrainingLevel.objects.create(
