@@ -82,6 +82,16 @@
     {% block content %}{% endblock %}
 </div>
 
+{% if not is_ajax %}
+<footer class="container pb-3 text-center text-body-secondary small">
+    {% if git_sha != "unknown" %}
+        Version <a href="https://github.com/nottinghamtec/PyRIGS/commit/{{ git_sha }}" class="text-reset"><code>{{ git_sha_short }}</code></a>
+    {% else %}
+        Version <code>unknown</code>
+    {% endif %}
+</footer>
+{% endif %}
+
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 
 <script src="{% static 'js/base.js' %}"></script>

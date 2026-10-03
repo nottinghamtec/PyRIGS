@@ -38,6 +38,12 @@ def ajax_context(request):
     return {"is_ajax": is_ajax(request)}
 
 
+def version_context(request):
+    """Template context processor exposing the running commit to every template."""
+    sha = settings.GIT_SHA
+    return {"git_sha": sha, "git_sha_short": sha[:7]}
+
+
 def get_related(
     form, context
 ):  # Get some other objects to include in the form. Used when there are errors but also nice and quick.

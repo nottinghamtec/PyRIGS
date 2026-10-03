@@ -97,6 +97,10 @@ COPY --from=assets --chown=app:app /app/pipeline/built_assets /app/pipeline/buil
 # DEBUG must never be on in a built image; enable it explicitly via the environment if needed
 ENV DEBUG=false
 
+# Declared last so a new commit SHA does not invalidate any of the layers above
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
+
 USER app
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "PyRIGS.wsgi"]

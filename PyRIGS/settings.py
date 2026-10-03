@@ -24,6 +24,8 @@ SECRET_KEY = env("SECRET_KEY", default="gxhy(a#5mhp289_=6xx$7jh=eh$ymxg^ymc+di*0
 DEBUG = env("DEBUG", cast=bool, default=True)
 STAGING = env("STAGING", cast=bool, default=False)
 CI = env("CI", cast=bool, default=False)
+# Commit the running image was built from (baked in at build time)
+GIT_SHA = env("GIT_SHA", default="unknown")
 
 ALLOWED_HOSTS = [
     host.strip() for host in env("DJANGO_ALLOWED_HOSTS", default="rigs.nottinghamtec.co.uk").split(",") if host.strip()
@@ -253,6 +255,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
                 "PyRIGS.views.ajax_context",
+                "PyRIGS.views.version_context",
             ],
             "debug": DEBUG,
         },
