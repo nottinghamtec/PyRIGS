@@ -64,12 +64,9 @@ class Trainee(Profile, RevisionMixin):
         training_level = item.category.training_level
         if training_level is None or training_level.department is None:
             return False
-        return (
-            self.confirmed_levels.filter(
-                level__level=TrainingLevel.TECHNICIAN, level__department=training_level.department
-            ).exists()
-            and self.is_user_qualified_in(item, TrainingItemQualification.PASSED_OUT)
-        )
+        return self.confirmed_levels.filter(
+            level__level=TrainingLevel.TECHNICIAN, level__department=training_level.department
+        ).exists() and self.is_user_qualified_in(item, TrainingItemQualification.PASSED_OUT)
 
     def get_records_of_depth(self, depth):
         return self.qualifications_obtained.filter(depth=depth).select_related("item", "trainee", "supervisor")
