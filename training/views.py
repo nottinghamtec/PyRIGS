@@ -291,8 +291,23 @@ class SessionLog(generic.FormView):
         context = super().get_context_data(**kwargs)
         context["depths"] = models.TrainingItemQualification.CHOICES
         context["page_title"] = "Log Training Session"
+        if not self.request.user.is_supervisor:
+            context["deliverable_items"] = self.get_deliverable_items()
         get_related(context["form"], context)
         return context
+
+
+    def get_deliverable_items(self):
+        """Active items the current user may deliver training in, grouped by category, using the same test as form validation"""
+        trainee = models.Trainee.objects.get(pk=self.request.user.pk)
+        items = models.TrainingItem.objects.filter(active=True, technician_can_train=True).select_related(
+            "category", "category__training_level"
+        )
+        grouped = {}
+        for item in items:
+            if trainee.can_deliver_training(item, models.TrainingItemQualification.COMPLETE):
+                grouped.setdefault(item.category, []).append(item)
+        return list(grouped.items())
 
 
 class ItemQualifications(generic.ListView):

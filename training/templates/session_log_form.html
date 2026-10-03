@@ -54,6 +54,26 @@
             {% button 'submit' %}
             </div>
         </form>
+        {% if request.user.can_log_training and not request.user.is_supervisor %}
+        <div class="mb-3">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#deliverable_items" aria-expanded="false" aria-controls="deliverable_items">
+                <span class="fas fa-question-circle"></span> What training items can I deliver training in?
+            </button>
+            <div class="collapse mt-3" id="deliverable_items">
+                <div class="card card-body">
+                    <p class="text-muted">You may deliver up to Training Complete in these items, as you are a technician who is passed out in them. Passing people out is for supervisors only.</p>
+                    {% for category, items in deliverable_items %}
+                    <h5>{{ category }}</h5>
+                    <ul>
+                        {% for item in items %}<li>{{ item.display_name }}</li>{% endfor %}
+                    </ul>
+                    {% empty %}
+                    <p class="mb-0">You can't currently deliver training in any items. An item must be marked as technician-trainable, you must be passed out in it, and you must hold any technician level its category requires.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

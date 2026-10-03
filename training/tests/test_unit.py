@@ -192,6 +192,12 @@ def test_technician_session_log(client, trainee, supervisor, admin_user):
     assert models.TrainingItemQualification.objects.filter(
         trainee=admin_user.pk, item=item, depth=models.TrainingItemQualification.COMPLETE
     ).exists()
+    # The list of deliverable items is shown, and only contains permitted items
+    response = client.get(url)
+    assertContains(response, "What training items can I deliver training in?")
+    assert [(c.pk, [i.pk for i in items]) for c, items in response.context["deliverable_items"]] == [
+        (item.category.pk, [item.pk])
+    ]
     # Passing out is not allowed
     response = client.post(url, {**data, "items_1": [], "items_2": [item.pk]})
     assert response.status_code == 200
@@ -204,3 +210,8 @@ def test_technician_session_log(client, trainee, supervisor, admin_user):
 def test_plain_trainee_cannot_log_session(client, trainee):
     client.force_login(trainee)
     assert client.get(reverse("session_log")).status_code == 403
+
+
+def test_supervisor_does_not_see_deliverable_items(admin_client):
+    response = admin_client.get(reverse("session_log"))
+    assertNotContains(response, "What training items can I deliver training in?")
