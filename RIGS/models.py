@@ -47,6 +47,12 @@ class Profile(AbstractUser):
 
     reversion_hide = True
 
+    @property
+    def can_log_training(self):
+        from training.models import Trainee
+
+        return self.is_supervisor or Trainee.objects.get(pk=self.pk).is_technician
+
     @classmethod
     def make_api_key(cls):
         size = 20

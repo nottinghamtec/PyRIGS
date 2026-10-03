@@ -1,7 +1,7 @@
 from django.urls import path
 
 from django.contrib.auth.decorators import login_required
-from training.decorators import is_supervisor
+from training.decorators import is_supervisor, is_supervisor_or_technician
 
 from training import views, models
 from versioning.views import VersionHistory
@@ -22,12 +22,12 @@ urlpatterns = [
     ),  # Not picked up automatically because proxy model (I think)
     path(
         "trainee/<int:pk>/add_qualification/",
-        is_supervisor()(views.AddQualification.as_view()),
+        is_supervisor_or_technician()(views.AddQualification.as_view()),
         name="add_qualification",
     ),
     path(
         "trainee/edit_qualification/<int:pk>/",
-        is_supervisor()(views.EditQualification.as_view()),
+        is_supervisor_or_technician()(views.EditQualification.as_view()),
         name="edit_qualification",
     ),
     path("levels/", login_required(views.LevelList.as_view()), name="level_list"),
@@ -47,5 +47,5 @@ urlpatterns = [
         name="confirm_level",
     ),
     path("trainee/<int:pk>/item_record", login_required(views.TraineeItemDetail.as_view()), name="trainee_item_detail"),
-    path("session_log", is_supervisor()(views.SessionLog.as_view()), name="session_log"),
+    path("session_log", is_supervisor_or_technician()(views.SessionLog.as_view()), name="session_log"),
 ]
