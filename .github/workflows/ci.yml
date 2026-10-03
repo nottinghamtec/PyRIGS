@@ -107,6 +107,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Registry references must be lowercase, but the repository name is not
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
       - id: build
         name: Build (and push by digest on master)
         uses: docker/build-push-action@v6
@@ -114,7 +118,7 @@ jobs:
           context: .
           platforms: ${{ matrix.platform }}
           build-args: GIT_SHA=${{ github.sha }}
-          outputs: type=image,name=ghcr.io/${{ github.repository }},push-by-digest=true,name-canonical=true,push=${{ github.event_name == 'push' }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=${{ github.event_name == 'push' }}
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
@@ -180,9 +184,8 @@ jobs:
 
       - name: Create multi-arch manifest
         working-directory: ${{ runner.temp }}/digests
-        env:
-          IMAGE: ghcr.io/${{ github.repository }}
         run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf "$IMAGE@sha256:%s " *)
