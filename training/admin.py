@@ -11,7 +11,16 @@ admin.site.register(models.TrainingLevelRequirement, VersionAdmin)
 
 @admin.register(models.TrainingItemQualification)
 class TrainingItemQualificationAdmin(VersionAdmin):
-    list_display = ["__str__", "trainee"]
+    list_display = ["item", "depth", "trainee", "supervisor", "date"]
+    list_filter = ["depth", "date", "item__category", "item"]
+    search_fields = [
+        "item__name",
+        "trainee__first_name",
+        "trainee__last_name",
+    ]
+    list_select_related = ["item", "item__category", "trainee", "supervisor"]
+    date_hierarchy = "date"
+    ordering = ["-date"]
 
 
 @admin.register(models.TrainingItem)
