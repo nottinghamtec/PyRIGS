@@ -311,7 +311,8 @@ html.embedded {
   }
 }
 
-.CodeMirror, .editor-toolbar {
+// The site has always used square cards, buttons and inputs; everything else keeps Bootstrap's rounding
+.card, .card-header, .btn, input, select, .CodeMirror, .editor-toolbar, .card-img-top {
     border-radius: 0 !important;
 }
 
@@ -353,6 +354,12 @@ $dark-theme-colors: (
         }
         .btn-outline-#{$name} {
             @include button-outline-variant($value);
+        }
+        // The brand colours above are tuned for backgrounds; text needs the lighter emphasis shade to be legible
+        @if $name != "light" and $name != "dark" {
+            .text-#{$name} {
+                color: var(--bs-#{$name}-text-emphasis) !important;
+            }
         }
         .text-bg-#{$name} {
             color: color-contrast($value) !important;
