@@ -12,7 +12,7 @@ admin.site.register(models.TrainingLevelRequirement, VersionAdmin)
 @admin.register(models.TrainingItemQualification)
 class TrainingItemQualificationAdmin(VersionAdmin):
     list_display = ["item", "depth", "trainee", "supervisor", "date"]
-    list_filter = ["depth", "date", "item__category", "item"]
+    list_filter = ["depth", "date", "item__category"]
     search_fields = [
         "item__name",
         "trainee__first_name",
