@@ -85,7 +85,7 @@ services:
 
   # Rebuilds the CSS/JS bundles into pipeline/built_assets whenever the sources change
   assets:
-    image: node:24-slim
+    image: node:25-slim
     working_dir: /app
     volumes:
       - .:/app
