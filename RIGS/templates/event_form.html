@@ -36,7 +36,7 @@
                 // If there were errors, apply the previous Rig/not-Rig selection
                 {% if form.errors %}
                     all('.form-hws').forEach(function (el) { slideDown(el, 0); });
-                    if (document.getElementById('{{form.is_rig.auto_id}}').getAttribute('checked') !== 'checked') {
+                    if (document.getElementById('{{form.is_rig.auto_id}}').checked === false) {
                         all('.form-is_rig').forEach(function (el) { el.style.display = 'none'; });
                     }
                 {% else %}
