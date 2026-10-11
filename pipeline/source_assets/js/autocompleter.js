@@ -50,7 +50,8 @@ function initPicker(select) {
     var noClear = 'noclear' in select.dataset;
     var multiple = select.multiple;
     var url = select.dataset.sourceurl;
-    var plugins = [];
+    // input_autogrow keeps the search box on the same line as the selected value (otherwise it wraps and doubles the height)
+    var plugins = ['input_autogrow'];
     if (multiple) {
         plugins.push('remove_button');
     } else if (!noClear) {
