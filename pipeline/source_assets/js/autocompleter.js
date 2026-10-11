@@ -70,18 +70,28 @@ function initPicker(select) {
     };
 
     if (url) {
+        // The server does the searching. Tom Select keeps every option it has ever loaded, so remember which
+        // ones the server returned for each query and only show those (otherwise results for "a" and "al"
+        // linger in the dropdown when searching for "ali hassan").
+        var results = {};
+        var normalise = function (query) { return query.trim().toLowerCase(); };
+
         Object.assign(settings, {
-            // Results come from the server so don't filter them locally
-            score: function () { return function () { return 1; }; },
+            score: function (query) {
+                var ids = results[normalise(query)];
+                return function (option) { return ids && ids.has(String(option.value)) ? 1 : 0; };
+            },
             shouldLoad: function (query) { return query.length > 0; },
             load: function (query, callback) {
                 var separator = url.indexOf('?') === -1 ? '?' : '&';
                 fetch(url + separator + 'q=' + encodeURIComponent(query), {credentials: 'same-origin'})
                     .then(function (response) { return response.json(); })
                     .then(function (data) {
-                        callback(data.map(function (item) {
+                        var options = data.map(function (item) {
                             return {value: item.pk, text: item.text, update_url: item.update};
-                        }));
+                        });
+                        results[normalise(query)] = new Set(options.map(function (option) { return String(option.value); }));
+                        callback(options);
                     })
                     .catch(function () { callback(); });
             }
@@ -94,6 +104,14 @@ function initPicker(select) {
     });
 
     var ts = new TomSelect(select, settings);
+    if (url) {
+        // Emptying the search box shouldn't list everything loaded so far (selected options are kept)
+        ts.on('type', function (query) {
+            if (query === '') {
+                ts.clearOptions();
+            }
+        });
+    }
     Object.keys(update_urls).forEach(function (value) {
         if (ts.options[value]) {
             ts.options[value].update_url = update_urls[value];
