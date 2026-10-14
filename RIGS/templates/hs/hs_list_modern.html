@@ -18,7 +18,15 @@
             {% endif %}
         </div>
     </div>
-    <a href="?legacy=1" class="small text-muted">Hate it? Legacy version</a>
+    <div class="d-flex flex-column align-items-end gap-1">
+        <form method="get" class="form-check form-switch mb-0">
+            <input type="checkbox" role="switch" class="form-check-input" id="only-action" name="action" value="1"
+                   {% if only_needing_action %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="only-action">Only show needing action</label>
+            <noscript><button type="submit" class="btn btn-sm btn-primary ms-2">Apply</button></noscript>
+        </form>
+        <a href="?legacy=1" class="small text-muted">Hate it? Legacy version</a>
+    </div>
 </div>
 
 {% for event in object_list %}
@@ -74,7 +82,7 @@
 </div>
 {% endwith %}
 {% empty %}
-<div class="alert alert-warning">No events found</div>
+<div class="alert alert-{% if only_needing_action %}success{% else %}warning{% endif %}">{% if only_needing_action %}Nothing needs action{% else %}No events found{% endif %}</div>
 {% endfor %}
 
 {% if is_paginated %}

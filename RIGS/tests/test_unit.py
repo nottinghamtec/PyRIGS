@@ -383,6 +383,29 @@ def test_hs_list(admin_client, basic_event):
     assertContains(response, "Legacy version")
 
 
+def test_hs_list_only_needing_action(admin_client, admin_user, basic_event, ra, venue):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    basic_event.save()
+    url = reverse("hs_list")
+
+    # Unreviewed RA on a confirmed event: amber, so shown
+    assertContains(admin_client.get(url, {"action": 1}), basic_event.name)
+
+    # Reviewed RA with everything else done: green, so hidden
+    ra.reviewed_by = admin_user
+    ra.save()
+    response = admin_client.get(url, {"action": 1})
+    assertNotContains(response, basic_event.name)
+    assertContains(response, "Nothing needs action")
+    assertContains(admin_client.get(url), basic_event.name)
+
+    # Outstanding power test records bring it back, once
+    models.PowerTestRecord.objects.create(event=basic_event, venue=venue)
+    models.PowerTestRecord.objects.create(event=basic_event, venue=venue)
+    assert admin_client.get(url, {"action": 1}).content.decode().count(basic_event.name) == 1
+
+
 def test_hs_list_legacy(admin_client, basic_event):
     response = admin_client.get(reverse("hs_list"), {"legacy": 1}, follow=True)
     assertContains(response, basic_event.name)

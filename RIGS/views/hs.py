@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.contrib import messages
+from django.db.models import Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -234,8 +235,12 @@ class HSList(generic.ListView):
     def get_template_names(self):
         return [self.legacy_template_name if self.use_legacy else self.modern_template_name]
 
+    @property
+    def only_needing_action(self):
+        return bool(self.request.GET.get("action")) and not self.use_legacy
+
     def get_queryset(self):
-        return (
+        queryset = (
             models.Event.objects.all()
             .exclude(status=models.Event.CANCELLED)
             .exclude(dry_hire=True)
@@ -243,11 +248,24 @@ class HSList(generic.ListView):
             .select_related("riskassessment", "riskassessment__reviewed_by", "mic")
             .prefetch_related("checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by")
         )
+        if self.only_needing_action:
+            # Mirrors Event.hs_rag_status: red or amber
+            queryset = queryset.filter(
+                Q(status__in=[models.Event.CONFIRMED, models.Event.BOOKED])
+                & (
+                    Q(mic__isnull=True)
+                    | Q(riskassessment__isnull=True)
+                    | Q(riskassessment__reviewed_by__isnull=True)
+                    | Exists(models.PowerTestRecord.objects.filter(event=OuterRef("pk"), reviewed_by__isnull=True))
+                )
+            )
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "H&S Overview"
         if not self.use_legacy:
+            context["only_needing_action"] = self.only_needing_action
             context["summary"] = self.get_summary(context["object_list"])
         return context
 
