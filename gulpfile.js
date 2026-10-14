@@ -23,8 +23,11 @@ function fonts(done) {
 
 function styles(done) {
     const bs_select = ["tom-select.bootstrap5.css"]
+    const fullcalendar = ["skeleton.css", "theme.css", "palette.css"]
     return gulp.src(['pipeline/source_assets/scss/**/*.scss',
-                    'node_modules/fullcalendar/main.css',
+                    'node_modules/fullcalendar/skeleton.css',
+                    'node_modules/fullcalendar/themes/classic/theme.css',
+                    'node_modules/fullcalendar/themes/classic/palette.css',
                     'node_modules/tom-select/dist/css/tom-select.bootstrap5.css',
                     'node_modules/easymde/dist/easymde.min.css'
                     ])
@@ -38,6 +41,7 @@ function styles(done) {
         silenceDeprecations: ['import'],
     }).on('error', sass.logError))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
+    .pipe(gulpif(function(file) { return file.path.includes('node_modules/fullcalendar/') && fullcalendar.includes(file.relative);}, con('main.css')))
     .pipe(postcss([ autoprefixer(), cssnano() ]))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('pipeline/built_assets/css'))
@@ -55,7 +59,8 @@ function scripts() {
                     'node_modules/html5sortable/dist/html5sortable.min.js',
                     'node_modules/clipboard/dist/clipboard.min.js',
                     'node_modules/moment/moment.js',
-                    'node_modules/fullcalendar/main.js',
+                    'node_modules/fullcalendar/all/global.js',
+                    'node_modules/fullcalendar/themes/classic/global.js',
                     'node_modules/tom-select/dist/js/tom-select.complete.js',
                     'node_modules/easymde/dist/easymde.min.js',
                     'node_modules/konami/konami.js',
@@ -63,6 +68,7 @@ function scripts() {
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))
     .pipe(gulpif(function(file) { return interaction.includes(file.relative);}, con('interaction.js')))
+    .pipe(gulpif(function(file) { return file.path.includes('node_modules/fullcalendar/');}, con('main.js')))
     .pipe(gulpif(function(file) { return ["bootstrap.bundle.js", "helpers.js"].includes(file.relative);}, con('jpop.js')))
     .pipe(flatten())
     // Only minify if filename does not already denote it as minified
