@@ -477,6 +477,16 @@ class Event(models.Model, RevisionMixin):
         return self.status == self.BOOKED or self.status == self.CONFIRMED
 
     @property
+    def hs_rag(self):
+        """Red/amber/green H&S status; None until the event is confirmed"""
+        if not self.confirmed:
+            return None
+        ra = getattr(self, "riskassessment", None)
+        if self.mic is None or ra is None:
+            return "red"
+        return "green" if ra.reviewed_by is not None else "amber"
+
+    @property
     def hs_done(self):
         return self.riskassessment is not None and self.has_checklist and self.has_power
 

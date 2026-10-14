@@ -261,7 +261,6 @@ class HSList(generic.ListView):
             items += list(event.checklists.all()) + list(event.power_tests.all())
             missing_ra += ra is None
             awaiting_review += sum(1 for item in items if item.reviewed_by is None)
-            event.hs_attention = ra is None or any(item.reviewed_by is None for item in items)
         return {"missing_ra": missing_ra, "awaiting_review": awaiting_review}
 
 

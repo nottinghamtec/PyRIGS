@@ -390,6 +390,35 @@ def test_hs_list_legacy(admin_client, basic_event):
     assertContains(response, "Power Records")
 
 
+def test_hs_rag(basic_event, admin_user, ra):
+    # Not confirmed: no RAG, whatever else is going on
+    basic_event.status = models.Event.PROVISIONAL
+    assert basic_event.hs_rag is None
+
+    # Confirmed with an RA but no MIC: red
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = None
+    assert basic_event.hs_rag == "red"
+
+    # MIC and an unreviewed RA: amber
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "amber"
+
+    # MIC and a reviewed RA: green
+    ra.reviewed_by = admin_user
+    ra.save()
+    basic_event.refresh_from_db()
+    basic_event.status = models.Event.BOOKED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "green"
+
+
+def test_hs_rag_no_ra(basic_event, admin_user):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "red"
+
+
 def review(client, profile, obj, request_url):
     time = timezone.now()
     response = client.get(reverse(request_url, kwargs={"pk": obj.pk}), follow=True)
