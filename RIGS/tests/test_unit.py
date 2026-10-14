@@ -399,6 +399,7 @@ def test_hs_rag(basic_event, admin_user, ra):
     basic_event.status = models.Event.CONFIRMED
     basic_event.mic = None
     assert basic_event.hs_rag == "red"
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no MIC assigned"
 
     # MIC and an unreviewed RA: amber
     basic_event.mic = admin_user
@@ -417,6 +418,9 @@ def test_hs_rag_no_ra(basic_event, admin_user):
     basic_event.status = models.Event.CONFIRMED
     basic_event.mic = admin_user
     assert basic_event.hs_rag == "red"
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no risk assessment"
+    basic_event.mic = None
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no MIC assigned and no risk assessment"
 
 
 def review(client, profile, obj, request_url):

@@ -22,18 +22,18 @@
 </div>
 
 {% for event in object_list %}
-{% with rag=event.hs_rag %}
+{% with rag=event.hs_rag_status.0 reason=event.hs_rag_status.1 %}
 <div class="card mb-3{% if rag == 'red' %} border-danger{% elif rag == 'amber' %} border-warning{% elif rag == 'green' %} border-success{% endif %}" id="event_row">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
             <a href="{% url 'event_detail' event.pk %}" class="fw-bold" id="event_number">{{ event }}</a>
             <span class="badge text-bg-secondary ms-1">{{ event.get_status_display }}</span>
             {% if rag == 'red' %}
-                <span class="badge text-bg-danger ms-1" title="Confirmed, but missing a MIC or a risk assessment"><span class="fas fa-circle-exclamation"></span> Red</span>
+                <span class="badge text-bg-danger ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-circle-exclamation"></span> Red</span>
             {% elif rag == 'amber' %}
-                <span class="badge text-bg-warning ms-1" title="Risk assessment awaiting review"><span class="fas fa-hourglass-half"></span> Amber</span>
+                <span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-hourglass-half"></span> Amber</span>
             {% elif rag == 'green' %}
-                <span class="badge text-bg-success ms-1" title="Risk assessment reviewed"><span class="fas fa-circle-check"></span> Green</span>
+                <span class="badge text-bg-success ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-circle-check"></span> Green</span>
             {% endif %}
         </div>
         <div class="small text-muted d-flex flex-wrap gap-3" id="event_dates">
