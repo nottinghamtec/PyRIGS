@@ -1,3 +1,6 @@
+// FontAwesome 7 is Sass-module based, so its font path has to be configured with @use (which must come first)
+@use "node_modules/@fortawesome/fontawesome-free/scss/variables" with ($font-path: '/static/fonts');
+
 // Bootstrap 5 is consumed via @import (the Sass module system is not yet supported by Bootstrap's own build)
 @import "custom-variables";
 //Required
@@ -36,7 +39,6 @@
 @import "node_modules/bootstrap/scss/helpers";
 @import "node_modules/bootstrap/scss/utilities/api";
 //FontAwesome
-$fa-font-path: '/static/fonts';
 @import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
 @import "node_modules/@fortawesome/fontawesome-free/scss/solid";
 
@@ -67,26 +69,6 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-}
-
-.fc-event-main {
-    color: black !important;
-}
-
-.fc-daygrid-dot-event {
-    color: black !important;
-}
-
-.fc-timeGridDay-view {
-    .fc-event-main {
-        font-size: large !important;
-    }
-}
-
-.fc-timeGridWeek-view {
-    .fc-event-main {
-        font-size: 0.9rem;
-    }
 }
 
 #content {
@@ -466,13 +448,6 @@ $dark-theme-colors: (
         background-color: $gray-200 !important;
         border-radius: 0.2em;
     }
-    .fc-day-today {
-        background-color: transparent !important;
-        border: 0.2em solid $info !important;
-    }
-    .fc-daygrid-dot-event {
-        color: white !important;
-    }
     @each $color, $value in $dark-theme-colors {
         #event_row.table-#{$color} {
             border: 0.3em solid shade-color($value, 60%) !important;
@@ -539,16 +514,19 @@ $dark-theme-colors: (
     color: transparent;
 }
 
-// FullCalendar (standard theme) colours, matching the site's light/dark modes
-.fc {
-  --fc-border-color: var(--bs-border-color);
-  --fc-page-bg-color: var(--bs-body-bg);
-  --fc-neutral-bg-color: var(--bs-tertiary-bg);
-  --fc-today-bg-color: rgba(var(--bs-warning-rgb), 0.15);
-  --fc-list-event-hover-bg-color: var(--bs-tertiary-bg);
+// FullCalendar (classic theme) colours, matching the site's light/dark modes
+// (doubled :root so these win over the theme's palette regardless of stylesheet order)
+:root:root {
+  --fc-classic-background: var(--bs-body-bg);
+  --fc-classic-foreground: var(--bs-body-color);
+  --fc-classic-muted-foreground: var(--bs-secondary-color);
+  --fc-classic-faint-foreground: var(--bs-tertiary-color);
+  --fc-classic-border: var(--bs-border-color);
+  --fc-classic-strong-border: var(--bs-border-color);
+  --fc-classic-faint: var(--bs-tertiary-bg);
+  --fc-classic-muted: var(--bs-secondary-bg);
+  --fc-classic-strong: var(--bs-secondary-bg);
+  --fc-classic-today: rgba(var(--bs-warning-rgb), 0.15);
+  --fc-classic-primary: var(--bs-primary);
 }
 
-.fc a {
-  color: inherit;
-  text-decoration: none;
-}
