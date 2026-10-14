@@ -5,7 +5,7 @@
 {% block title %}RIGS{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row home-links">
     <h1 class="col-sm-12 pb-3">R<small class="text-muted">ig</small> I<small class="text-muted">nformation</small> G<small class="text-muted">athering</small> S<small class="text-muted">ystem</small></h1>
     <h2 class="col-sm-12 pb-3">Welcome back {{ user.get_full_name }}, there {%if rig_count == 1 %}is one rig coming up{%else%}are {{ rig_count|apnumber }} rigs coming up.{%endif%}</h2>
     {% if now %}

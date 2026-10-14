@@ -3,21 +3,21 @@
     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Hi {{ user.first_name }}
     </a>
-    <ul class="dropdown-menu clearfix" id="userdropdown">
-        <li class="d-flex">
-            <a href="{% url 'profile_detail' %}">
-                <img src="{{ request.user.profile_picture }}" class="media-object float-start pe-2"/>
-                <div class="flex-grow-1">
-                        <b>{{ request.user.first_name }} {{ request.user.last_name }}</b>
-                        <p class="text-muted">{{ request.user.email }}</p>
+    <ul class="dropdown-menu dropdown-menu-end p-0" id="userdropdown">
+        <li>
+            <a href="{% url 'profile_detail' %}" class="d-flex align-items-center gap-3 p-3 text-decoration-none">
+                <img src="{{ request.user.profile_picture }}" alt="" width="48" height="48" class="rounded flex-shrink-0"/>
+                <div class="text-body">
+                    <div class="fw-bold">{{ request.user.first_name }} {{ request.user.last_name }}</div>
+                    <div class="small text-muted text-break">{{ request.user.email }}</div>
                 </div>
             </a>
         </li>
-        <div class="dropdown-divider"></div>
-        <li class="float-end">
+        <li><hr class="dropdown-divider m-0"></li>
+        <li class="p-2 text-end">
             <form method="post" action="{% url 'logout' %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
             </form>
         </li>
     </ul>
