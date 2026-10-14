@@ -224,6 +224,15 @@ class HSList(generic.ListView):
     paginate_by = 20
     model = models.Event
     template_name = "hs/hs_list.html"
+    modern_template_name = "hs/hs_list_modern.html"
+    legacy_template_name = "hs/hs_list_legacy.html"
+
+    @property
+    def use_legacy(self):
+        return bool(self.request.GET.get("legacy"))
+
+    def get_template_names(self):
+        return [self.legacy_template_name if self.use_legacy else self.modern_template_name]
 
     def get_queryset(self):
         return (
@@ -231,14 +240,29 @@ class HSList(generic.ListView):
             .exclude(status=models.Event.CANCELLED)
             .exclude(dry_hire=True)
             .order_by("-start_date")
-            .select_related("riskassessment")
-            .prefetch_related("checklists")
+            .select_related("riskassessment", "riskassessment__reviewed_by", "mic")
+            .prefetch_related("checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by")
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "H&S Overview"
+        if not self.use_legacy:
+            context["summary"] = self.get_summary(context["object_list"])
         return context
+
+    @staticmethod
+    def get_summary(events):
+        """Counts, for the events on this page, of what still needs doing"""
+        missing_ra = awaiting_review = 0
+        for event in events:
+            ra = getattr(event, "riskassessment", None)
+            items = [ra] if ra is not None else []
+            items += list(event.checklists.all()) + list(event.power_tests.all())
+            missing_ra += ra is None
+            awaiting_review += sum(1 for item in items if item.reviewed_by is None)
+            event.hs_attention = ra is None or any(item.reviewed_by is None for item in items)
+        return {"missing_ra": missing_ra, "awaiting_review": awaiting_review}
 
 
 class RAPrint(PrintView):

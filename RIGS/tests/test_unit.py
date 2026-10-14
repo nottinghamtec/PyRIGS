@@ -380,6 +380,14 @@ def test_hs_list(admin_client, basic_event):
     assertContains(response, basic_event.name)
     # assertContains(response, events[2].name)
     assertContains(response, "Create")
+    assertContains(response, "Legacy version")
+
+
+def test_hs_list_legacy(admin_client, basic_event):
+    response = admin_client.get(reverse("hs_list"), {"legacy": 1}, follow=True)
+    assertContains(response, basic_event.name)
+    assertContains(response, "Back to the new version")
+    assertContains(response, "Power Records")
 
 
 def review(client, profile, obj, request_url):

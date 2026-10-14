@@ -1,0 +1,76 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+
+{% block title %}H&amp;S Overview{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="d-flex flex-wrap gap-2">
+            {% if summary.missing_ra %}
+                <span class="badge text-bg-danger"><span class="fas fa-triangle-exclamation"></span> {{ summary.missing_ra }} missing a risk assessment</span>
+            {% endif %}
+            {% if summary.awaiting_review %}
+                <span class="badge text-bg-warning"><span class="fas fa-hourglass-half"></span> {{ summary.awaiting_review }} awaiting review</span>
+            {% endif %}
+            {% if not summary.missing_ra and not summary.awaiting_review %}
+                <span class="badge text-bg-success"><span class="fas fa-circle-check"></span> Everything on this page is up to date</span>
+            {% endif %}
+        </div>
+    </div>
+    <a href="?legacy=1" class="small text-muted">Hate it? Legacy version</a>
+</div>
+
+{% for event in object_list %}
+<div class="card mb-3 {% if event.hs_attention %}border-warning{% else %}border-success{% endif %}" id="event_row">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <a href="{% url 'event_detail' event.pk %}" class="fw-bold" id="event_number">{{ event }}</a>
+            <span class="badge text-bg-secondary ms-1">{{ event.get_status_display }}</span>
+        </div>
+        <div class="small text-muted d-flex flex-wrap gap-3" id="event_dates">
+            <span><span class="fas fa-calendar"></span>
+                {{ event.start_date|date:"D d/m/Y" }}{% if event.end_date and event.end_date != event.start_date %} &ndash; {{ event.end_date|date:"D d/m/Y" }}{% endif %}
+            </span>
+            <span><span class="fas fa-user"></span>
+                {% if event.mic is not None %}<a href="{% url 'profile_detail' event.mic.pk %}">{{ event.mic }}</a>{% else %}<span class="text-danger">No MIC</span>{% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="card-body py-2">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-clipboard-check"></span> Risk assessment</h6>
+                {% if event.riskassessment %}
+                    {% include 'partials/hs_item.html' with label="Risk assessment" object=event.riskassessment view='ra_detail' edit='ra_edit' review='ra_review' perm=perms.RIGS.review_riskassessment %}
+                {% else %}
+                    <a href="{% url 'event_ra' event.pk %}" class="btn btn-sm btn-info"><span class="fas fa-paperclip"></span> Create</a>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-list-check"></span> Checklists</h6>
+                {% for checklist in event.checklists.all %}
+                    {% include 'partials/hs_item.html' with label="Checklist" object=checklist view='ec_detail' edit='ec_edit' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
+                {% endfor %}
+                <a href="{% url 'event_ec' event.pk %}" class="btn btn-sm btn-info mt-1"><span class="fas fa-paperclip"></span> Create</a>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-plug"></span> Power tests</h6>
+                {% for record in event.power_tests.all %}
+                    {% include 'partials/hs_item.html' with label="Power test" object=record view='pt_detail' edit='pt_edit' review='pt_review' perm=perms.RIGS.review_power %}
+                {% endfor %}
+                <a href="{% url 'event_pt' event.pk %}" class="btn btn-sm btn-info mt-1"><span class="fas fa-paperclip"></span> Create</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-warning">No events found</div>
+{% endfor %}
+
+{% if is_paginated %}
+<div class="row justify-content-center">
+    {% paginator %}
+</div>
+{% endif %}
+{% endblock %}

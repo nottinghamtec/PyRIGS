@@ -1,0 +1,8 @@
+{% extends 'hs/hs_list.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-2">
+    <a href="{% url 'hs_list' %}" class="small"><span class="fas fa-wand-magic-sparkles"></span> Back to the new version</a>
+</div>
+{{ block.super }}
+{% endblock %}
