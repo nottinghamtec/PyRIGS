@@ -85,6 +85,18 @@ html {
   }
 }
 
+// Front page menus: a fixed-width icon column so labels line up whatever the icon
+.home-links .list-group-item-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+
+  > .fas {
+    flex: 0 0 1.25em;
+    text-align: center;
+  }
+}
+
 // Bootstrap 4's contextual table classes also worked as background colours on non-table elements
 @each $color, $value in $table-variants {
   .table-#{$color}:not(table):not(tr):not(td):not(th) {
