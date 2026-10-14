@@ -75,14 +75,12 @@ html {
   padding: 40px 15px;
 }
 
-#userdropdown > li {
-  padding: 0 0.3em;
+#userdropdown {
+  min-width: 16rem;
 }
 
-#userdropdown > li, #activity {
-  .media-object {
-    max-width: 3em;
-  }
+#activity .media-object {
+  max-width: 3em;
 }
 
 // Front page menus: a fixed-width icon column so labels line up whatever the icon
