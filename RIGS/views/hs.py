@@ -239,26 +239,35 @@ class HSList(generic.ListView):
     def only_needing_action(self):
         return bool(self.request.GET.get("action")) and not self.use_legacy
 
-    def get_queryset(self):
-        queryset = (
+    @staticmethod
+    def rag_filters():
+        """Querysets filters mirroring Event.hs_rag_status; only confirmed events get a red or amber"""
+        confirmed = Q(status__in=[models.Event.CONFIRMED, models.Event.BOOKED])
+        red = confirmed & (Q(mic__isnull=True) | Q(riskassessment__isnull=True))
+        unreviewed_power = Exists(models.PowerTestRecord.objects.filter(event=OuterRef("pk"), reviewed_by__isnull=True))
+        amber = (
+            confirmed
+            & Q(mic__isnull=False, riskassessment__isnull=False)
+            & (Q(riskassessment__reviewed_by__isnull=True) | unreviewed_power)
+        )
+        return red, amber
+
+    def get_base_queryset(self):
+        return (
             models.Event.objects.all()
             .exclude(status=models.Event.CANCELLED)
             .exclude(dry_hire=True)
             .order_by("-start_date")
-            .select_related("riskassessment", "riskassessment__reviewed_by", "mic")
-            .prefetch_related("checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by")
+        )
+
+    def get_queryset(self):
+        queryset = self.get_base_queryset().select_related("riskassessment", "riskassessment__reviewed_by", "mic")
+        queryset = queryset.prefetch_related(
+            "checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by"
         )
         if self.only_needing_action:
-            # Mirrors Event.hs_rag_status: red or amber
-            queryset = queryset.filter(
-                Q(status__in=[models.Event.CONFIRMED, models.Event.BOOKED])
-                & (
-                    Q(mic__isnull=True)
-                    | Q(riskassessment__isnull=True)
-                    | Q(riskassessment__reviewed_by__isnull=True)
-                    | Exists(models.PowerTestRecord.objects.filter(event=OuterRef("pk"), reviewed_by__isnull=True))
-                )
-            )
+            red, amber = self.rag_filters()
+            queryset = queryset.filter(red | amber)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -266,20 +275,14 @@ class HSList(generic.ListView):
         context["page_title"] = "H&S Overview"
         if not self.use_legacy:
             context["only_needing_action"] = self.only_needing_action
-            context["summary"] = self.get_summary(context["object_list"])
+            context["summary"] = self.get_summary()
         return context
 
-    @staticmethod
-    def get_summary(events):
-        """Counts, for the events on this page, of what still needs doing"""
-        missing_ra = awaiting_review = 0
-        for event in events:
-            ra = getattr(event, "riskassessment", None)
-            items = [ra] if ra is not None else []
-            items += list(event.checklists.all()) + list(event.power_tests.all())
-            missing_ra += ra is None
-            awaiting_review += sum(1 for item in items if item.reviewed_by is None)
-        return {"missing_ra": missing_ra, "awaiting_review": awaiting_review}
+    def get_summary(self):
+        """How many events (across every page) are currently red or amber"""
+        red, amber = self.rag_filters()
+        base = self.get_base_queryset()
+        return {"red": base.filter(red).count(), "amber": base.filter(amber).count()}
 
 
 class RAPrint(PrintView):

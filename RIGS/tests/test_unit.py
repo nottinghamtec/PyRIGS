@@ -406,6 +406,25 @@ def test_hs_list_only_needing_action(admin_client, admin_user, basic_event, ra, 
     assert admin_client.get(url, {"action": 1}).content.decode().count(basic_event.name) == 1
 
 
+def test_hs_list_summary_counts(admin_client, admin_user, basic_event, ra):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    basic_event.save()
+    url = reverse("hs_list")
+
+    response = admin_client.get(url)
+    assert response.context["summary"] == {"red": 0, "amber": 1}
+
+    # Reviewing the RA takes it out of the count
+    review(admin_client, admin_user, ra, "ra_review")
+    assert admin_client.get(url).context["summary"] == {"red": 0, "amber": 0}
+
+    # Losing the MIC makes it red instead
+    basic_event.mic = None
+    basic_event.save()
+    assert admin_client.get(url).context["summary"] == {"red": 1, "amber": 0}
+
+
 def test_hs_list_legacy(admin_client, basic_event):
     response = admin_client.get(reverse("hs_list"), {"legacy": 1}, follow=True)
     assertContains(response, basic_event.name)
