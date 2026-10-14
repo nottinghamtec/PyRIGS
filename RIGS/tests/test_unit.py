@@ -414,6 +414,27 @@ def test_hs_rag(basic_event, admin_user, ra):
     assert basic_event.hs_rag == "green"
 
 
+def test_hs_rag_outstanding_power_test(basic_event, admin_user, ra, power_test):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    ra.reviewed_by = admin_user
+    ra.save()
+    basic_event.refresh_from_db()
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+
+    # A reviewed RA is not enough while a power test record is outstanding
+    assert basic_event.hs_rag == "amber"
+    assert basic_event.hs_rag_status[1] == "Awaiting review: 1 power test record"
+
+    power_test.reviewed_by = admin_user
+    power_test.save()
+    basic_event = models.Event.objects.get(pk=basic_event.pk)
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "green"
+
+
 def test_hs_rag_no_ra(basic_event, admin_user):
     basic_event.status = models.Event.CONFIRMED
     basic_event.mic = admin_user
