@@ -1,3 +1,4 @@
+import colorsys
 import datetime
 import hashlib
 import random
@@ -449,6 +450,44 @@ class Event(models.Model, RevisionMixin):
             return total
         return Decimal("0.00")
 
+    @property
+    def items_with_section_totals(self):
+        """Items in order, with section headers carrying the total of the items beneath them."""
+        items = list(self.items.all())
+        section = None
+        section_count = 0
+        for index, item in enumerate(items):
+            item.in_section = section is not None and not item.is_section
+            if item.is_section:
+                # Each section gets its own hue, stepping round the colour wheel by the golden angle (see interaction.js, which rounds half up the same way)
+                item.section_hue = int(section_count * 137.5 + 0.5) % 360
+                section_count += 1
+            else:
+                item.section_hue = section.section_hue if section is not None else None
+            next_item = items[index + 1] if index + 1 < len(items) else None
+            # The last item of a section is followed by that section's sub-total
+            item.closes_section = section if item.in_section and (next_item is None or next_item.is_section) else None
+            if item.is_section:
+                section = item
+                section.section_total = Decimal("0.00")
+            elif section is not None:
+                section.section_total += item.total_cost
+        return items
+
+    @property
+    def print_item_rows(self):
+        """The rows of the printed item table: items, section headers and section sub-totals, numbered from 1 (0 is the table header)"""
+        rows = []
+        for item in self.items_with_section_totals:
+            rows.append({"kind": "section" if item.is_section else "item", "item": item})
+            if item.is_section:
+                rows[-1].update(_section_colours(item.section_hue))
+            if item.closes_section:
+                rows.append({"kind": "subtotal", "item": item.closes_section, **_section_colours(item.closes_section.section_hue)})
+        for index, row in enumerate(rows, start=1):
+            row["index"] = index
+        return rows
+
     @cached_property
     def vat_rate(self):
         return VatRate.objects.find_rate(self.start_date)
@@ -638,6 +677,16 @@ class Event(models.Model, RevisionMixin):
         super(Event, self).save(*args, **kwargs)
 
 
+def _section_colours(hue):
+    """Pastel background, and stronger text and rule colours, for a section's hue (as hex, for the printed paperwork)"""
+
+    def hex_colour(lightness, saturation):
+        red, green, blue = colorsys.hls_to_rgb(hue / 360, lightness, saturation)
+        return "#{:02x}{:02x}{:02x}".format(round(red * 255), round(green * 255), round(blue * 255))
+
+    return {"tint": hex_colour(0.91, 0.7), "accent": hex_colour(0.3, 0.55), "rule": hex_colour(0.6, 0.5)}
+
+
 @reversion.register
 class EventItem(models.Model, RevisionMixin):
     event = models.ForeignKey("Event", related_name="items", blank=True, on_delete=models.CASCADE)
@@ -646,6 +695,7 @@ class EventItem(models.Model, RevisionMixin):
     quantity = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.IntegerField()
+    is_section = models.BooleanField(default=False, help_text="Section headers have no cost or quantity, and show a total for the items beneath them")
 
     reversion_hide = True
 
