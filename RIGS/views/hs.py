@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.contrib import messages
+from django.db.models import Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -224,21 +225,64 @@ class HSList(generic.ListView):
     paginate_by = 20
     model = models.Event
     template_name = "hs/hs_list.html"
+    modern_template_name = "hs/hs_list_modern.html"
+    legacy_template_name = "hs/hs_list_legacy.html"
 
-    def get_queryset(self):
+    @property
+    def use_legacy(self):
+        return bool(self.request.GET.get("legacy"))
+
+    def get_template_names(self):
+        return [self.legacy_template_name if self.use_legacy else self.modern_template_name]
+
+    @property
+    def only_needing_action(self):
+        return bool(self.request.GET.get("action")) and not self.use_legacy
+
+    @staticmethod
+    def rag_filters():
+        """Querysets filters mirroring Event.hs_rag_status; only confirmed events get a red or amber"""
+        confirmed = Q(status__in=[models.Event.CONFIRMED, models.Event.BOOKED])
+        red = confirmed & (Q(mic__isnull=True) | Q(riskassessment__isnull=True))
+        unreviewed_power = Exists(models.PowerTestRecord.objects.filter(event=OuterRef("pk"), reviewed_by__isnull=True))
+        amber = (
+            confirmed
+            & Q(mic__isnull=False, riskassessment__isnull=False)
+            & (Q(riskassessment__reviewed_by__isnull=True) | unreviewed_power)
+        )
+        return red, amber
+
+    def get_base_queryset(self):
         return (
             models.Event.objects.all()
             .exclude(status=models.Event.CANCELLED)
             .exclude(dry_hire=True)
             .order_by("-start_date")
-            .select_related("riskassessment")
-            .prefetch_related("checklists")
         )
+
+    def get_queryset(self):
+        queryset = self.get_base_queryset().select_related("riskassessment", "riskassessment__reviewed_by", "mic")
+        queryset = queryset.prefetch_related(
+            "checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by"
+        )
+        if self.only_needing_action:
+            red, amber = self.rag_filters()
+            queryset = queryset.filter(red | amber)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "H&S Overview"
+        if not self.use_legacy:
+            context["only_needing_action"] = self.only_needing_action
+            context["summary"] = self.get_summary()
         return context
+
+    def get_summary(self):
+        """How many events (across every page) are currently red or amber"""
+        red, amber = self.rag_filters()
+        base = self.get_base_queryset()
+        return {"red": base.filter(red).count(), "amber": base.filter(amber).count()}
 
 
 class RAPrint(PrintView):

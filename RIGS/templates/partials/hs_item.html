@@ -1,0 +1,19 @@
+{# A single H&S document (risk assessment, checklist or power test) as a compact row. #}
+<div class="hs-item py-1">
+  <div class="d-flex align-items-center gap-2">
+    {% if object.reviewed_by %}
+        <span class="fas fa-circle-check text-success" title="Reviewed by {{ object.reviewed_by }} at {{ object.reviewed_at }}"></span>
+        <span class="small">{{ label }} <span class="text-muted">&middot; reviewed by <a href="{% url 'profile_detail' object.reviewed_by.pk %}">{{ object.reviewed_by }}</a></span></span>
+    {% else %}
+        <span class="fas fa-hourglass-half text-warning" title="Awaiting review"></span>
+        <span class="small">{{ label }} <span class="text-muted">&middot; awaiting review</span></span>
+    {% endif %}
+  </div>
+  <div class="btn-group btn-group-sm mt-1">
+        <a href="{% url view object.pk %}" class="btn btn-outline-primary" title="View"><span class="fas fa-eye"></span><span class="visually-hidden">View</span></a>
+        <a href="{% url edit object.pk %}" class="btn btn-outline-warning" title="Edit"><span class="fas fa-edit"></span><span class="visually-hidden">Edit</span></a>
+        {% if not object.reviewed_by and perm %}
+            <a href="{% url review object.pk %}" class="btn btn-success" title="Mark reviewed"><span class="fas fa-check"></span> Mark reviewed</a>
+        {% endif %}
+  </div>
+</div>

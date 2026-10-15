@@ -1,0 +1,93 @@
+{% extends 'base_rigs.html' %}
+{% load paginator from filters %}
+
+{% block title %}H&amp;S Overview{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="d-flex flex-wrap gap-2">
+            {% if summary.red %}
+                <span class="badge text-bg-danger" title="Confirmed events with no MIC or no risk assessment">{{ summary.red }} red</span>
+            {% endif %}
+            {% if summary.amber %}
+                <span class="badge text-bg-warning" title="Confirmed events with a risk assessment or power test record awaiting review">{{ summary.amber }} amber</span>
+            {% endif %}
+            {% if not summary.red and not summary.amber %}
+                <span class="badge text-bg-success"><span class="fas fa-circle-check"></span> Nothing needs action</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="d-flex flex-column align-items-end gap-1">
+        <form method="get" class="form-check form-switch mb-0">
+            <input type="checkbox" role="switch" class="form-check-input" id="only-action" name="action" value="1"
+                   {% if only_needing_action %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="only-action">Only show needing action</label>
+            <noscript><button type="submit" class="btn btn-sm btn-primary ms-2">Apply</button></noscript>
+        </form>
+        <a href="?legacy=1" class="small text-muted">Hate it? Legacy version</a>
+    </div>
+</div>
+
+{% for event in object_list %}
+{% with rag=event.hs_rag_status.0 reason=event.hs_rag_status.1 %}
+<div class="card mb-3{% if rag == 'red' %} border-danger{% elif rag == 'amber' %} border-warning{% elif rag == 'green' %} border-success{% endif %}" id="event_row">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <a href="{% url 'event_detail' event.pk %}" class="fw-bold" id="event_number">{{ event }}</a>
+            <span class="badge text-bg-secondary ms-1">{{ event.get_status_display }}</span>
+            {% if rag == 'red' %}
+                <span class="badge text-bg-danger ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-circle-exclamation"></span> Red</span>
+            {% elif rag == 'amber' %}
+                <span class="badge text-bg-warning ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-hourglass-half"></span> Amber</span>
+            {% elif rag == 'green' %}
+                <span class="badge text-bg-success ms-1" data-bs-toggle="tooltip" title="{{ reason }}"><span class="fas fa-circle-check"></span> Green</span>
+            {% endif %}
+        </div>
+        <div class="small text-muted d-flex flex-wrap gap-3" id="event_dates">
+            <span><span class="fas fa-calendar"></span>
+                {{ event.start_date|date:"D d/m/Y" }}{% if event.end_date and event.end_date != event.start_date %} &ndash; {{ event.end_date|date:"D d/m/Y" }}{% endif %}
+            </span>
+            <span><span class="fas fa-user"></span>
+                {% if event.mic is not None %}<a href="{% url 'profile_detail' event.mic.pk %}">{{ event.mic }}</a>{% else %}<span class="text-danger">No MIC</span>{% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="card-body py-2">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-clipboard-check"></span> Risk assessment</h6>
+                {% if event.riskassessment %}
+                    {% include 'partials/hs_item.html' with label="Risk assessment" object=event.riskassessment view='ra_detail' edit='ra_edit' review='ra_review' perm=perms.RIGS.review_riskassessment %}
+                {% else %}
+                    <a href="{% url 'event_ra' event.pk %}" class="btn btn-sm btn-info"><span class="fas fa-paperclip"></span> Create</a>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-list-check"></span> Checklists</h6>
+                {% for checklist in event.checklists.all %}
+                    {% include 'partials/hs_item.html' with label="Checklist" object=checklist view='ec_detail' edit='ec_edit' review='ec_review' perm=perms.RIGS.review_eventchecklist %}
+                {% endfor %}
+                <a href="{% url 'event_ec' event.pk %}" class="btn btn-sm btn-info mt-1"><span class="fas fa-paperclip"></span> Create</a>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted mb-1"><span class="fas fa-plug"></span> Power tests</h6>
+                {% for record in event.power_tests.all %}
+                    {% include 'partials/hs_item.html' with label="Power test" object=record view='pt_detail' edit='pt_edit' review='pt_review' perm=perms.RIGS.review_power %}
+                {% endfor %}
+                <a href="{% url 'event_pt' event.pk %}" class="btn btn-sm btn-info mt-1"><span class="fas fa-paperclip"></span> Create</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% empty %}
+<div class="alert alert-{% if only_needing_action %}success{% else %}warning{% endif %}">{% if only_needing_action %}Nothing needs action{% else %}No events found{% endif %}</div>
+{% endfor %}
+
+{% if is_paginated %}
+<div class="row justify-content-center">
+    {% paginator %}
+</div>
+{% endif %}
+{% endblock %}

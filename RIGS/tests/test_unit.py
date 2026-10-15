@@ -380,6 +380,110 @@ def test_hs_list(admin_client, basic_event):
     assertContains(response, basic_event.name)
     # assertContains(response, events[2].name)
     assertContains(response, "Create")
+    assertContains(response, "Legacy version")
+
+
+def test_hs_list_only_needing_action(admin_client, admin_user, basic_event, ra, venue):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    basic_event.save()
+    url = reverse("hs_list")
+
+    # Unreviewed RA on a confirmed event: amber, so shown
+    assertContains(admin_client.get(url, {"action": 1}), basic_event.name)
+
+    # Reviewed RA with everything else done: green, so hidden
+    ra.reviewed_by = admin_user
+    ra.save()
+    response = admin_client.get(url, {"action": 1})
+    assertNotContains(response, basic_event.name)
+    assertContains(response, "Nothing needs action")
+    assertContains(admin_client.get(url), basic_event.name)
+
+    # Outstanding power test records bring it back, once
+    models.PowerTestRecord.objects.create(event=basic_event, venue=venue)
+    models.PowerTestRecord.objects.create(event=basic_event, venue=venue)
+    assert admin_client.get(url, {"action": 1}).content.decode().count(basic_event.name) == 1
+
+
+def test_hs_list_summary_counts(admin_client, admin_user, basic_event, ra):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    basic_event.save()
+    url = reverse("hs_list")
+
+    response = admin_client.get(url)
+    assert response.context["summary"] == {"red": 0, "amber": 1}
+
+    # Reviewing the RA takes it out of the count
+    review(admin_client, admin_user, ra, "ra_review")
+    assert admin_client.get(url).context["summary"] == {"red": 0, "amber": 0}
+
+    # Losing the MIC makes it red instead
+    basic_event.mic = None
+    basic_event.save()
+    assert admin_client.get(url).context["summary"] == {"red": 1, "amber": 0}
+
+
+def test_hs_list_legacy(admin_client, basic_event):
+    response = admin_client.get(reverse("hs_list"), {"legacy": 1}, follow=True)
+    assertContains(response, basic_event.name)
+    assertContains(response, "Back to the new version")
+    assertContains(response, "Power Records")
+
+
+def test_hs_rag(basic_event, admin_user, ra):
+    # Not confirmed: no RAG, whatever else is going on
+    basic_event.status = models.Event.PROVISIONAL
+    assert basic_event.hs_rag is None
+
+    # Confirmed with an RA but no MIC: red
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = None
+    assert basic_event.hs_rag == "red"
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no MIC assigned"
+
+    # MIC and an unreviewed RA: amber
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "amber"
+
+    # MIC and a reviewed RA: green
+    ra.reviewed_by = admin_user
+    ra.save()
+    basic_event.refresh_from_db()
+    basic_event.status = models.Event.BOOKED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "green"
+
+
+def test_hs_rag_outstanding_power_test(basic_event, admin_user, ra, power_test):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    ra.reviewed_by = admin_user
+    ra.save()
+    basic_event.refresh_from_db()
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+
+    # A reviewed RA is not enough while a power test record is outstanding
+    assert basic_event.hs_rag == "amber"
+    assert basic_event.hs_rag_status[1] == "Awaiting review: 1 power test record"
+
+    power_test.reviewed_by = admin_user
+    power_test.save()
+    basic_event = models.Event.objects.get(pk=basic_event.pk)
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "green"
+
+
+def test_hs_rag_no_ra(basic_event, admin_user):
+    basic_event.status = models.Event.CONFIRMED
+    basic_event.mic = admin_user
+    assert basic_event.hs_rag == "red"
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no risk assessment"
+    basic_event.mic = None
+    assert basic_event.hs_rag_status[1] == "Confirmed event with no MIC assigned and no risk assessment"
 
 
 def review(client, profile, obj, request_url):
