@@ -95,8 +95,13 @@ function setupMDE(selector) {
         dirty = true;
     }
 
+    // Whether the modal is editing a section header, which has no price or quantity
+    var modalIsSection = false;
+
     function setSectionMode(isSection) {
-        field('item_is_section').checked = isSection;
+        modalIsSection = isSection;
+        field('item_name_label').textContent = isSection ? 'Section Name' : 'Item Name';
+        field('item_name').placeholder = field('item_name_label').textContent;
         field('item_price_fields').hidden = isSection;
         field('item_quantity').required = !isSection;
         field('item_cost').required = !isSection;
@@ -156,13 +161,13 @@ function setupMDE(selector) {
         return row;
     }
 
-    function openAddModal() {
+    function openAddModal(isSection) {
         itemForm.dataset.pk = newitem;
         field('item_name').value = '';
         field('item_description').value = '';
         field('item_quantity').value = '';
         field('item_cost').value = '';
-        setSectionMode(false);
+        setSectionMode(isSection === true);
         field('item-save-add').hidden = false;
         showModal(itemModal);
     }
@@ -414,10 +419,6 @@ function setupMDE(selector) {
         }
     });
 
-    field('item_is_section').addEventListener('change', function () {
-        setSectionMode(this.checked);
-    });
-
     itemModal.addEventListener('shown.bs.modal', function () {
         field('item_name').focus();
     });
@@ -430,7 +431,13 @@ function setupMDE(selector) {
         duplicateItem(this.dataset.pk);
     });
 
-    on(itemTable, 'click', '.item-add', openAddModal);
+    on(itemTable, 'click', '.item-add', function () {
+        openAddModal(false);
+    });
+
+    on(itemTable, 'click', '.item-add-section', function () {
+        openAddModal(true);
+    });
 
     on(itemTable, 'click', '.item-edit', function () {
         openEditModal(this.dataset.pk);
@@ -446,7 +453,10 @@ function setupMDE(selector) {
         var addAnother = e.submitter && e.submitter.id === 'item-save-add';
         if (addAnother) {
             // Listen before hiding, as the event can fire immediately without transitions
-            itemModal.addEventListener('hidden.bs.modal', openAddModal, {once: true});
+            var addAnotherSection = modalIsSection;
+            itemModal.addEventListener('hidden.bs.modal', function () {
+                openAddModal(addAnotherSection);
+            }, {once: true});
         }
         hideModal(itemModal);
 
@@ -462,7 +472,7 @@ function setupMDE(selector) {
         }
         fields.name = field('item_name').value;
         fields.description = field('item_description').value;
-        fields.is_section = field('item_is_section').checked;
+        fields.is_section = modalIsSection;
         fields.cost = fields.is_section ? 0 : field('item_cost').value;
         fields.quantity = fields.is_section ? 0 : field('item_quantity').value;
 
