@@ -574,14 +574,29 @@ $dark-theme-colors: (
       -webkit-box-shadow: 0 0 0px 1000px rgba($info, .3) inset;
       transition: background-color 5000s ease-in-out 0s;
     }
+    // EasyMDE's toolbar buttons are <button>s in current versions (<a> in older ones)
+    .editor-toolbar > button,
     .editor-toolbar > a {
         color: white !important;
     }
+    .editor-toolbar > button:hover,
     .editor-toolbar > a:hover {
-        background: transparent !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
     }
+    .editor-toolbar > button.active,
     .editor-toolbar > a.active {
         background: $info !important;
+        border-color: $info !important;
+    }
+    .editor-toolbar.disabled-for-preview > button:not(.no-disable) {
+        background: transparent !important;
+        opacity: 0.5;
+    }
+    .editor-preview,
+    .editor-preview-side {
+        background: $darktheme;
+        color: $gray-100;
     }
     .cm-s-easymde {
         color: white;
