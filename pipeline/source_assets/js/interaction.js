@@ -248,6 +248,9 @@ function setupMDE(selector) {
         markDirty();
     }
 
+    // Commits the inline edit that's currently open, if any, so submitting the form never misses it
+    var activeInlineEdit = null;
+
     var pointerIsDown = false;
     window.addEventListener('pointerdown', function () { pointerIsDown = true; }, true);
     window.addEventListener('pointerup', function () { pointerIsDown = false; }, true);
@@ -317,9 +320,17 @@ function setupMDE(selector) {
             input.select();
         }
 
-        var finished = false;
+        // Copy the input's value into the item. Safe to repeat, and the input may be left open for a moment
+        // before the row is redrawn, so anything typed in that time must still count.
+        function apply() {
+            if (input.isConnected && input.checkValidity() && input.value !== String(fields[key])) {
+                fields[key] = input.value;
+                markDirty();
+            }
+        }
+        var redrawQueued = false;
         function finish(save) {
-            if (finished) {
+            if (!input.isConnected) {
                 return;
             }
             if (save) {
@@ -327,19 +338,27 @@ function setupMDE(selector) {
                     input.reportValidity();
                     return;
                 }
-                if (input.value !== String(fields[key])) {
-                    fields[key] = input.value;
-                    markDirty();
-                }
+                apply();
             }
-            finished = true;
+            if (redrawQueued) {
+                return;
+            }
+            redrawQueued = true;
             // The edit is already in objectitems. Redrawing the row changes the page layout, which would move a
             // button (such as Save) out from under a click that caused this blur, so wait for the click to finish.
             afterPointerRelease(function () {
-                renderRow(pk, isDescription);
-                updatePrices();
+                // Take anything typed since, if the input was still open
+                if (save) {
+                    apply();
+                }
+                redrawQueued = false;
+                if (input.isConnected) {
+                    renderRow(pk, isDescription);
+                    updatePrices();
+                }
             });
         }
+        activeInlineEdit = apply;
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && isDescription && !(e.ctrlKey || e.metaKey)) {
                 // A new line
@@ -508,9 +527,20 @@ function setupMDE(selector) {
     });
 
     on(document, 'submit', '.itemised_form', function () {
+        if (activeInlineEdit) {
+            activeInlineEdit();
+        }
         renumber();
         field('id_items_json').value = JSON.stringify(objectitems);
         dirty = false;
+    });
+
+    // Coming back to the page with the browser's back button can restore it exactly as it was left, including
+    // item data from before it was saved, so load it fresh instead.
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            window.location.reload();
+        }
     });
 
     // Warn before losing unsaved changes
