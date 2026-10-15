@@ -138,7 +138,12 @@ function setupMDE(selector) {
         var row = field('item-' + pk);
         row.querySelector('.name').textContent = fields.name;
         if (includeDescription) {
-            row.querySelector('.description').innerHTML = renderDescription(fields.description);
+            // Rebuilt rather than updated in place, as editing a description inline replaces what's inside the box
+            var box = row.querySelector('.item-description');
+            var description = document.createElement('em');
+            description.className = 'description';
+            description.innerHTML = renderDescription(fields.description);
+            box.replaceChildren(description);
         }
         row.querySelector('.cost').textContent = parseFloat(fields.cost).toFixed(2);
         row.querySelector('.quantity').textContent = fields.quantity;
@@ -243,7 +248,23 @@ function setupMDE(selector) {
         markDirty();
     }
 
-    // Click a name, price or quantity to change it in place
+    var pointerIsDown = false;
+    window.addEventListener('pointerdown', function () { pointerIsDown = true; }, true);
+    window.addEventListener('pointerup', function () { pointerIsDown = false; }, true);
+    window.addEventListener('pointercancel', function () { pointerIsDown = false; }, true);
+
+    // Run fn now, or once the current mouse press / tap has been released and its click dispatched
+    function afterPointerRelease(fn) {
+        if (!pointerIsDown) {
+            fn();
+            return;
+        }
+        window.addEventListener('pointerup', function () {
+            window.setTimeout(fn, 0);
+        }, {once: true});
+    }
+
+    // Click a name, price, quantity or description to edit it in place
     function startInlineEdit(target) {
         if (!editable || target.querySelector('input, textarea')) {
             return;
@@ -312,8 +333,12 @@ function setupMDE(selector) {
                 }
             }
             finished = true;
-            renderRow(pk, isDescription);
-            updatePrices();
+            // The edit is already in objectitems. Redrawing the row changes the page layout, which would move a
+            // button (such as Save) out from under a click that caused this blur, so wait for the click to finish.
+            afterPointerRelease(function () {
+                renderRow(pk, isDescription);
+                updatePrices();
+            });
         }
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && isDescription && !(e.ctrlKey || e.metaKey)) {
