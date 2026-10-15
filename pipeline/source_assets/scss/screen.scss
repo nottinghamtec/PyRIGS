@@ -153,6 +153,79 @@ textarea {
   margin-left: 1em;
 }
 
+#item-table {
+  .drag-handle {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .dragging > * {
+    background-color: var(--bs-primary-bg-subtle) !important;
+  }
+
+  .inline-editable {
+    cursor: text;
+
+    &:hover {
+      background-color: rgba(var(--bs-emphasis-color-rgb), 0.075);
+    }
+  }
+
+  .item-description.inline-editable {
+    min-height: 1.5em;
+  }
+
+  .inline-input {
+    display: inline-block;
+    box-sizing: border-box;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: inherit;
+  }
+
+  // A section header, and the items beneath it
+  // Each section has its own pastel hue (--section-hue, set per row)
+  .section-row {
+    --section-bg: hsl(var(--section-hue, 220) 70% 90%);
+    --section-fg: hsl(var(--section-hue, 220) 40% 25%);
+    --bs-table-bg: var(--section-bg);
+    --bs-table-color: var(--section-fg);
+    --bs-table-hover-bg: var(--section-bg);
+    --bs-table-hover-color: var(--section-fg);
+    color: var(--section-fg);
+  }
+
+  // A section has no price or quantity: blank the cells without losing the row's background
+  .section-row .cost-cell,
+  .section-row .quantity {
+    color: transparent;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .section-row .name {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .section-row .sub-total-cell::before {
+    content: "Section total ";
+    font-size: 0.75em;
+    font-weight: normal;
+    opacity: 0.75;
+  }
+
+  .in-section > :first-child {
+    padding-left: 1.75rem;
+    box-shadow: inset 4px 0 0 hsl(var(--section-hue, 220) 55% 65%);
+  }
+}
+
+[data-bs-theme="dark"] #item-table .section-row {
+  --section-bg: hsl(var(--section-hue, 220) 30% 24%);
+  --section-fg: hsl(var(--section-hue, 220) 60% 85%);
+}
+
 .overflow-ellipsis {
   text-overflow: ellipsis;
   display: inline-block;
@@ -538,4 +611,9 @@ $dark-theme-colors: (
   --fc-classic-strong: var(--bs-secondary-bg);
   --fc-classic-today: rgba(var(--bs-warning-rgb), 0.15);
   --fc-classic-primary: var(--bs-primary);
+}
+
+.item-sorting {
+  cursor: grabbing;
+  user-select: none;
 }
