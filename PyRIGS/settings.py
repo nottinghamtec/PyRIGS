@@ -12,7 +12,9 @@ import datetime
 from pathlib import Path
 
 import sentry_sdk
+from django.core.exceptions import DisallowedHost
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import ignore_logger
 from envparse import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -114,6 +116,10 @@ DATABASES = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        # Bots hitting us with random Host headers are noise, not errors
+        "skip_disallowed_host": {"()": "PyRIGS.logging.SkipDisallowedHost"},
+    },
     "formatters": {
         "verbose": {
             "format": (
@@ -141,6 +147,7 @@ LOGGING = {
     "loggers": {
         # Again, default Django configuration to email unhandled exceptions
         "django.request": {
+            "filters": ["skip_disallowed_host"],
             "handlers": ["mail_admins"],
             "level": "ERROR",
             "propagate": True,
@@ -149,6 +156,10 @@ LOGGING = {
         "django": {
             "handlers": ["console"],
             "level": "ERROR",
+            "propagate": False,
+        },
+        "django.security.DisallowedHost": {
+            "handlers": ["null"],
             "propagate": False,
         },
         # Ignore dangling object references
@@ -177,7 +188,9 @@ sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=""),
     integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
+    ignore_errors=[DisallowedHost],
 )
+ignore_logger("django.security.DisallowedHost")
 
 # User system
 AUTH_USER_MODEL = "RIGS.Profile"
