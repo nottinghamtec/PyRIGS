@@ -1,8 +1,9 @@
 {% load markdown_tags %}
-<tr id="item-{{item.pk}}" data-pk="{{item.pk}}" class="item_row{% if item.is_section %} section-row{% endif %}{% if item.in_section %} in-section{% endif %}"{% if item.section_hue is not None %} style="--section-hue: {{ item.section_hue }}"{% endif %}>
+<tr id="item-{{item.pk}}" data-pk="{{item.pk}}" class="item_row{% if item.is_section %} section-row{% endif %}{% if item.in_section %} in-section{% endif %}"{% if item.section_hue is not None %} style="--section-hue: {{ item.section_hue }}{% if item.section_grey %}; --section-sat: 0{% endif %}"{% endif %}>
 	<th scope="row">
 		{% if edit %}<span class="fas fa-grip-vertical drag-handle text-muted me-2" title="Drag to reorder"></span>{% endif %}
 		<span class="name{% if edit %} inline-editable{% endif %}" data-field="name">{{ item.name }}</span>
+		{% if edit %}{% include 'partials/section_colour_menu.html' %}{% endif %}
         <div class="item-description{% if edit %} inline-editable{% endif %}" data-field="description"{% if edit %} title="Click to edit description"{% endif %}>
             <em class="description">{{item.description|markdown}}</em>
         </div>

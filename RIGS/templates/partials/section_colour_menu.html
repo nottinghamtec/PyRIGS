@@ -1,0 +1,24 @@
+{% load filters %}
+{# The swatches in the button and Automatic option take their colour from the row (--section-hue / --section-sat); the Automatic one is set to what Automatic would give when the menu opens (previewAutomaticColour) #}
+<div class="section-colour-wrap dropdown mt-1">
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle section-colour" data-bs-toggle="dropdown"
+            data-bs-popper-config='{"strategy":"fixed"}' aria-label="Section colour">
+        <span class="colour-swatch"></span>
+        <span class="section-colour-label">{{ item.colour|default:"automatic"|title }}</span>
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            <button type="button" class="dropdown-item section-colour-option" data-colour="">
+                <span class="colour-swatch"></span> Automatic
+            </button>
+        </li>
+        {% section_colours as colours %}
+        {% for key, label, hue in colours %}
+        <li>
+            <button type="button" class="dropdown-item section-colour-option" data-colour="{{ key }}" data-hue="{{ hue }}">
+                <span class="colour-swatch" style="{% if hue == 'grey' %}--section-hue: 0; --section-sat: 0{% else %}--section-hue: {{ hue }}; --section-sat: 1{% endif %}"></span> {{ label }}
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

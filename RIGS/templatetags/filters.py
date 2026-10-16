@@ -237,3 +237,9 @@ def invoices_outstanding():
 @register.simple_tag
 def total_invoices_todo():
     return len(models.Event.objects.waiting_invoices()) + len(models.Invoice.objects.outstanding_invoices())
+
+
+@register.simple_tag
+def section_colours():
+    """The colours a section header can be set to, as (key, label, hue)"""
+    return [(key, key.title(), hue) for key, hue in models.SECTION_COLOURS.items()]

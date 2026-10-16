@@ -85,6 +85,7 @@ class EventForm(forms.ModelForm):
         item.name = data["name"]
         item.description = data["description"]
         item.is_section = bool(data.get("is_section", False))
+        item.colour = data.get("colour", "") if item.is_section else ""
         if item.is_section:
             item.quantity = 0
             item.cost = 0

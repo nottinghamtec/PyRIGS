@@ -61,6 +61,7 @@
         <td>
             {% if edit %}<span class="fas fa-grip-vertical drag-handle text-muted me-2" title="Drag to reorder"></span>{% endif %}
             <span class="name{% if edit %} inline-editable{% endif %}" data-field="name"></span>
+            {% if edit %}{% include 'partials/section_colour_menu.html' %}{% endif %}
                 <div class="item-description{% if edit %} inline-editable{% endif %}" data-field="description"{% if edit %} title="Click to edit description"{% endif %}>
                     <em class="description"></em>
                 </div>

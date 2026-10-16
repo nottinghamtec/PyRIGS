@@ -295,6 +295,78 @@ class EventItemTestCase(TestCase):
         rml = get_template("event_print.xml").render({"object": self.e1, "filename": "test.pdf"})
         self.assertTrue(rml2pdf.parseString(rml).read().startswith(b"%PDF"))
 
+    def test_section_hues(self):
+        # Automatic sections stay clear of the hues a section can be set to, so those always mean the same thing
+        reserved = [hue for hue in models.SECTION_COLOURS.values() if isinstance(hue, int)]
+        hues = models.resolve_section_hues([None] * 60)
+        for hue in hues:
+            for chosen in reserved:
+                self.assertGreaterEqual(models._hue_distance(hue, chosen), models.SECTION_RESERVED_MARGIN)
+        # ...while still being varied
+        self.assertGreater(len(set(hues)), 10)
+
+        # A chosen colour is kept as it is, and automatic neighbours steer clear of it
+        hues = models.resolve_section_hues([models.SECTION_COLOURS["power"], None, models.SECTION_COLOURS["sound"]])
+        self.assertEqual(hues[0], 0)
+        self.assertEqual(hues[2], 242)
+        self.assertGreaterEqual(models._hue_distance(hues[1], hues[0]), models.SECTION_MIN_HUE_GAP)
+        self.assertGreaterEqual(models._hue_distance(hues[1], hues[2]), models.SECTION_MIN_HUE_GAP)
+
+        # Neighbouring sections are never similar, whichever are chosen
+        for overrides in (
+            [None] * 40,
+            [0, None, None, 52, None, 190, None, None, 242] * 3,
+            [None, 190, None, None, 242, 0, None] * 4,
+        ):
+            hues = models.resolve_section_hues(overrides)
+            for index, (hue, override) in enumerate(zip(hues, overrides)):
+                if override is not None:
+                    self.assertEqual(hue, override)
+                if index and (override is None or overrides[index - 1] is None):
+                    self.assertGreaterEqual(models._hue_distance(hue, hues[index - 1]), models.SECTION_MIN_HUE_GAP)
+
+    def test_grey_section(self):
+        # Grey never clashes with its neighbours, so automatic sections ignore it
+        hues = models.resolve_section_hues([None, models.GREY, None])
+        self.assertEqual(hues[1], models.GREY)
+        self.assertTrue(all(isinstance(hue, int) for hue in (hues[0], hues[2])))
+
+        e = self.e1
+        models.EventItem.objects.create(
+            event=e, name="Lights", quantity=0, cost=0, order=0, is_section=True, colour="lighting"
+        )
+        models.EventItem.objects.create(event=e, name="Par", quantity=1, cost=5, order=1)
+        items = e.items_with_section_totals
+        self.assertTrue(items[0].section_grey)
+        self.assertTrue(items[1].section_grey)
+
+        colours = models._section_colours(items[0].section_hue, items[0].section_grey)
+        for colour in colours.values():
+            self.assertEqual(colour[1:3], colour[3:5])
+            self.assertEqual(colour[3:5], colour[5:7])
+
+    def test_section_colours_equal_brightness(self):
+        # Every hue prints as the same greys on a black and white printer
+        def luminance(colour):
+            red, green, blue = (int(colour[i : i + 2], 16) / 255 for i in (1, 3, 5))
+            return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+        for part in ("tint", "accent", "rule"):
+            levels = [luminance(models._section_colours(hue)[part]) for hue in range(0, 360, 15)]
+            self.assertLess(max(levels) - min(levels), 0.01)
+
+    def test_section_colour_choice(self):
+        e = self.e1
+        models.EventItem.objects.create(
+            event=e, name="Sound", quantity=0, cost=0, order=0, is_section=True, colour="sound"
+        )
+        models.EventItem.objects.create(event=e, name="Other", quantity=0, cost=0, order=1, is_section=True)
+        items = e.items_with_section_totals
+        self.assertEqual(items[0].section_hue, models.SECTION_COLOURS["sound"])
+        self.assertGreaterEqual(
+            models._hue_distance(items[1].section_hue, items[0].section_hue), models.SECTION_MIN_HUE_GAP
+        )
+
 
 class EventPricingTestCase(TestCase):
     def setUp(self):

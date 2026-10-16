@@ -12,6 +12,94 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+// Neighbouring sections must be at least this many degrees of hue apart
+var SECTION_MIN_HUE_GAP = 60;
+// Automatic colouring keeps this far from each chosen colour, so those colours always mean the same thing
+var SECTION_RESERVED_MARGIN = 30;
+
+function hueDistance(a, b) {
+    var difference = Math.abs(a - b) % 360;
+    return Math.min(difference, 360 - difference);
+}
+
+// The hue of each section in order, given each one's chosen hue, 'grey' or null for automatic. Automatic sections
+// step round the colour wheel by the golden angle, skipping any hue too close to the section before, or to the next
+// one if that has a chosen colour, or any of the chosen colours' hues (reserved). Keep in step with
+// resolve_section_hues in RIGS/models.py.
+function resolveSectionHues(overrides, reserved) {
+    var hues = [];
+    var automaticCount = 0;
+    overrides.forEach(function (override, index) {
+        if (override !== null) {
+            hues.push(override);
+            return;
+        }
+        var previous = hues.length ? hues[hues.length - 1] : null;
+        var following = index + 1 < overrides.length ? overrides[index + 1] : null;
+        var candidate;
+        for (var attempt = 0; attempt < 50; attempt++) {
+            candidate = Math.floor(automaticCount * 137.5 + 0.5) % 360;
+            automaticCount++;
+            if (reserved.every(function (hue) {
+                return hueDistance(candidate, hue) >= SECTION_RESERVED_MARGIN;
+            }) && [previous, following].every(function (other) {
+                return typeof other !== 'number' || hueDistance(candidate, other) >= SECTION_MIN_HUE_GAP;
+            })) {
+                break;
+            }
+        }
+        hues.push(candidate);
+    });
+    return hues;
+}
+
+// Give a row a section's colour (a hue, 'grey', or null for none)
+function setSectionColour(row, hue) {
+    if (hue === null) {
+        row.style.removeProperty('--section-hue');
+        row.style.removeProperty('--section-sat');
+    } else {
+        row.style.setProperty('--section-hue', hue === 'grey' ? 0 : hue);
+        row.style.setProperty('--section-sat', hue === 'grey' ? 0 : 1);
+    }
+}
+
+// The section rows in order, with each one's chosen hue (or 'grey', or null for automatic), and the hues of all the
+// colours that can be chosen
+function sectionColours() {
+    var colourHues = {};
+    document.querySelectorAll('#new-item-row .section-colour-option[data-hue]').forEach(function (option) {
+        colourHues[option.dataset.colour] = option.dataset.hue === 'grey' ? 'grey' : Number(option.dataset.hue);
+    });
+    var rows = Array.from(document.querySelectorAll('#item-table-body tr.item_row')).filter(function (row) {
+        return objectitems[row.dataset.pk] && objectitems[row.dataset.pk].fields.is_section;
+    });
+    return {
+        rows: rows,
+        overrides: rows.map(function (row) {
+            var colour = objectitems[row.dataset.pk].fields.colour;
+            return colour in colourHues ? colourHues[colour] : null;
+        }),
+        reserved: Object.keys(colourHues).map(function (key) { return colourHues[key]; }).filter(function (hue) {
+            return typeof hue === 'number';
+        })
+    };
+}
+
+// Show the colour a section would get if it were set to Automatic, as the swatch of its Automatic menu item
+function previewAutomaticColour(row) {
+    var sections = sectionColours();
+    var index = sections.rows.indexOf(row);
+    var swatch = row.querySelector('.section-colour-option[data-colour=""] .colour-swatch');
+    if (index < 0 || !swatch) {
+        return;
+    }
+    var overrides = sections.overrides.slice();
+    overrides[index] = null;
+    swatch.style.setProperty('--section-hue', resolveSectionHues(overrides, sections.reserved)[index]);
+    swatch.style.setProperty('--section-sat', 1);
+}
+
 function updatePrices() {
     // individual rows
     var sum = 0;
@@ -20,6 +108,9 @@ function updatePrices() {
     var inSection = false;
     var sectionCount = 0;
     var sectionHue = null;
+    var sections = sectionColours();
+    var sectionRows = sections.rows;
+    var sectionHues = resolveSectionHues(sections.overrides, sections.reserved);
     var setSubTotal = function (element, value) {
         if (element) {
             element.textContent = parseFloat(value).toFixed(2);
@@ -36,19 +127,18 @@ function updatePrices() {
         var subTotal = row.querySelector('.sub-total');
         row.classList.toggle('in-section', inSection && !fields.is_section);
         if (fields.is_section) {
-            // Each section gets its own hue; keep in step with Event.items_with_section_totals
-            sectionHue = Math.round(sectionCount++ * 137.5) % 360;
+            sectionHue = sectionHues[sectionCount++];
             inSection = true;
-            row.style.setProperty('--section-hue', sectionHue);
+            setSectionColour(row, sectionHue);
             setSubTotal(sectionSubTotal, sectionTotal);
             sectionSubTotal = subTotal;
             sectionTotal = 0;
             return;
         }
         if (inSection) {
-            row.style.setProperty('--section-hue', sectionHue);
+            setSectionColour(row, sectionHue);
         } else {
-            row.style.removeProperty('--section-hue');
+            setSectionColour(row, null);
         }
         var sub = fields.cost * fields.quantity;
         setSubTotal(subTotal, sub);
@@ -148,6 +238,13 @@ function setupMDE(selector) {
         row.querySelector('.cost').textContent = parseFloat(fields.cost).toFixed(2);
         row.querySelector('.quantity').textContent = fields.quantity;
         row.classList.toggle('section-row', !!fields.is_section);
+        var colourLabel = row.querySelector('.section-colour-label');
+        if (colourLabel) {
+            var chosen = Array.from(row.querySelectorAll('.section-colour-option')).find(function (option) {
+                return option.dataset.colour === (fields.colour || '');
+            });
+            colourLabel.textContent = chosen ? chosen.textContent.trim() : 'Automatic';
+        }
     }
 
     // Add an empty row for pk, directly after afterRow (or at the end)
@@ -471,6 +568,22 @@ function setupMDE(selector) {
         deleteItem(this.dataset.pk);
     });
 
+    // Bootstrap fires this on the dropdown's button as the menu opens
+    itemTable.addEventListener('show.bs.dropdown', function (e) {
+        var row = e.target.closest('tr.item_row');
+        if (row) {
+            previewAutomaticColour(row);
+        }
+    });
+
+    on(itemTable, 'click', '.section-colour-option', function () {
+        var pk = this.closest('tr.item_row').dataset.pk;
+        objectitems[pk].fields.colour = this.dataset.colour;
+        renderRow(pk, false);
+        updatePrices();
+        markDirty();
+    });
+
     on(itemTable, 'click', '.item-duplicate', function () {
         duplicateItem(this.dataset.pk);
     });
@@ -505,7 +618,8 @@ function setupMDE(selector) {
         hideModal(itemModal);
 
         var fields;
-        if (pk == newitem) {
+        var isNew = pk == newitem;
+        if (isNew) {
             newitem--;
             // Create the new data structure and add it on.
             fields = {};
@@ -519,6 +633,14 @@ function setupMDE(selector) {
         fields.is_section = modalIsSection;
         fields.cost = fields.is_section ? 0 : field('item_cost').value;
         fields.quantity = fields.is_section ? 0 : field('item_quantity').value;
+        if (isNew && fields.is_section) {
+            // A new section called "Sound", "Lighting" etc. starts off in that colour. It can still be set back to automatic.
+            var colour = fields.name.trim().toLowerCase();
+            var known = Array.from(field('new-item-row').querySelectorAll('.section-colour-option')).some(function (option) {
+                return option.dataset.colour !== '' && option.dataset.colour === colour;
+            });
+            fields.colour = known ? colour : '';
+        }
 
         renumber();
         renderRow(pk, true);

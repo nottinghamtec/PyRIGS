@@ -465,16 +465,18 @@ class Event(models.Model, RevisionMixin):
     def items_with_section_totals(self):
         """Items in order, with section headers carrying the total of the items beneath them."""
         items = list(self.items.all())
+        sections = [item for item in items if item.is_section]
+        section_hues = iter(resolve_section_hues([SECTION_COLOURS.get(section.colour) for section in sections]))
         section = None
-        section_count = 0
         for index, item in enumerate(items):
             item.in_section = section is not None and not item.is_section
             if item.is_section:
-                # Each section gets its own hue, stepping round the colour wheel by the golden angle (see interaction.js, which rounds half up the same way)
-                item.section_hue = int(section_count * 137.5 + 0.5) % 360
-                section_count += 1
+                hue = next(section_hues)
+                item.section_grey = hue == GREY
+                item.section_hue = 0 if item.section_grey else hue
             else:
                 item.section_hue = section.section_hue if section is not None else None
+                item.section_grey = section.section_grey if section is not None else False
             next_item = items[index + 1] if index + 1 < len(items) else None
             # The last item of a section is followed by that section's sub-total
             item.closes_section = section if item.in_section and (next_item is None or next_item.is_section) else None
@@ -492,13 +494,13 @@ class Event(models.Model, RevisionMixin):
         for item in self.items_with_section_totals:
             rows.append({"kind": "section" if item.is_section else "item", "item": item})
             if item.is_section:
-                rows[-1].update(_section_colours(item.section_hue))
+                rows[-1].update(_section_colours(item.section_hue, item.section_grey))
             if item.closes_section:
                 rows.append(
                     {
                         "kind": "subtotal",
                         "item": item.closes_section,
-                        **_section_colours(item.closes_section.section_hue),
+                        **_section_colours(item.closes_section.section_hue, item.closes_section.section_grey),
                     }
                 )
         for index, row in enumerate(rows, start=1):
@@ -694,14 +696,86 @@ class Event(models.Model, RevisionMixin):
         super(Event, self).save(*args, **kwargs)
 
 
-def _section_colours(hue):
-    """Pastel background, and stronger text and rule colours, for a section's hue (as hex, for the printed paperwork)"""
+# Not a hue: a neutral grey, which never clashes with its neighbours
+GREY = "grey"
+# Hues (degrees round the colour wheel) that a section can be set to, picked from the hues the automatic colouring
+# produces, or grey. Keep in step with the colour select in the item templates (which reads these) and interaction.js.
+SECTION_COLOURS = {"power": 0, "sound": 242, "rigging": 52, "lighting": GREY}
+# How far apart (in degrees of hue) neighbouring sections must be
+SECTION_MIN_HUE_GAP = 60
+# Automatic colouring keeps this far (in degrees of hue) from each chosen colour, so that those colours always mean
+# the same thing (e.g. red is Power) and a section never looks like one it isn't
+SECTION_RESERVED_MARGIN = 30
 
-    def hex_colour(lightness, saturation):
-        red, green, blue = colorsys.hls_to_rgb(hue / 360, lightness, saturation)
-        return "#{:02x}{:02x}{:02x}".format(round(red * 255), round(green * 255), round(blue * 255))
 
-    return {"tint": hex_colour(0.91, 0.7), "accent": hex_colour(0.3, 0.55), "rule": hex_colour(0.6, 0.5)}
+def _hue_distance(a, b):
+    difference = abs(a - b) % 360
+    return min(difference, 360 - difference)
+
+
+def resolve_section_hues(overrides):
+    """
+    The hue of each section, in order, given each one's chosen hue, GREY, or None for automatic.
+
+    Automatic sections step round the colour wheel by the golden angle, skipping any hue too close to one of the
+    chosen colours, or to the section before, or to the next section if that one has a chosen colour. interaction.js
+    does the same, rounding half up.
+    """
+    reserved = [hue for hue in SECTION_COLOURS.values() if isinstance(hue, int)]
+    hues = []
+    automatic_count = 0
+    for index, override in enumerate(overrides):
+        if override is not None:
+            hues.append(override)
+            continue
+        previous = hues[-1] if hues else None
+        following = overrides[index + 1] if index + 1 < len(overrides) else None
+        for _ in range(50):
+            candidate = int(automatic_count * 137.5 + 0.5) % 360
+            automatic_count += 1
+            if all(_hue_distance(candidate, hue) >= SECTION_RESERVED_MARGIN for hue in reserved) and all(
+                not isinstance(other, int) or _hue_distance(candidate, other) >= SECTION_MIN_HUE_GAP
+                for other in (previous, following)
+            ):
+                break
+        hues.append(candidate)
+    return hues
+
+
+def _hue_to_hex(hue, luminance, saturation):
+    """The colour of this hue and saturation with the given relative luminance (0-1), as hex."""
+
+    def rgb(lightness):
+        return colorsys.hls_to_rgb(hue / 360, lightness, saturation)
+
+    def grey_level(lightness):
+        red, green, blue = rgb(lightness)
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+    low, high = 0.0, 1.0
+    for _ in range(30):
+        middle = (low + high) / 2
+        if grey_level(middle) < luminance:
+            low = middle
+        else:
+            high = middle
+    red, green, blue = rgb((low + high) / 2)
+    return "#{:02x}{:02x}{:02x}".format(round(red * 255), round(green * 255), round(blue * 255))
+
+
+def _section_colours(hue, grey=False):
+    """
+    Pastel background, and stronger text and rule colours, for a section's hue (as hex, for the printed paperwork).
+
+    Each is matched to the same brightness whatever the hue, so every section prints as the same greys on a
+    black and white printer.
+    """
+    saturation = 0 if grey else 1
+    return {
+        "tint": _hue_to_hex(hue, 0.9, 0.7 * saturation),
+        "accent": _hue_to_hex(hue, 0.22, 0.55 * saturation),
+        "rule": _hue_to_hex(hue, 0.55, 0.5 * saturation),
+    }
 
 
 @reversion.register
@@ -712,6 +786,13 @@ class EventItem(models.Model, RevisionMixin):
     quantity = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.IntegerField()
+    colour = models.CharField(
+        max_length=16,
+        blank=True,
+        default="",
+        choices=[(key, key.title()) for key in SECTION_COLOURS],
+        help_text="Section headers can be given one of a set of colours; otherwise it's automatic",
+    )
     is_section = models.BooleanField(
         default=False, help_text="Section headers have no cost or quantity, and show a total for the items beneath them"
     )
