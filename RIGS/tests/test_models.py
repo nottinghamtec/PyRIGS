@@ -294,6 +294,9 @@ class EventItemTestCase(TestCase):
         # The printed paperwork should render
         rml = get_template("event_print.xml").render({"object": self.e1, "filename": "test.pdf"})
         self.assertTrue(rml2pdf.parseString(rml).read().startswith(b"%PDF"))
+        # Section headers stay on the page of the row beneath them, and sub-totals with the row above
+        self.assertIn('<blockNosplit start="0,2" stop="-1,3"/>', rml)
+        self.assertIn('<blockNosplit start="0,3" stop="-1,4"/>', rml)
 
     def test_section_hues(self):
         # Automatic sections stay clear of the hues a section can be set to, so those always mean the same thing

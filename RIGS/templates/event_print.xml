@@ -7,10 +7,14 @@
     {% for row in object.print_item_rows %}
     {% if row.kind == "section" %}
     <blockSpan start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
+    {# Keep a header on the same page as the first row beneath it #}
+    {% if not forloop.last %}<blockNosplit start="0,{{ row.index }}" stop="-1,{{ row.index|add:1 }}"/>{% endif %}
     <blockBackground colorName="Tint" start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
     <lineStyle kind="LINEABOVE" colorName="DarkGray" start="0,{{ row.index }}" stop="-1,{{ row.index }}" thickness="1.5"/>
     {% elif row.kind == "subtotal" %}
     <blockSpan start="0,{{ row.index }}" stop="2,{{ row.index }}"/>
+    {# ...and a sub-total with the row above it #}
+    <blockNosplit start="0,{{ row.index|add:-1 }}" stop="-1,{{ row.index }}"/>
     <lineStyle kind="LINEABOVE" colorName="DarkGray" start="3,{{ row.index }}" stop="3,{{ row.index }}" thickness="1"/>
     {% endif %}
     {% endfor %}
