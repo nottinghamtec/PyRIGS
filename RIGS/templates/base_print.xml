@@ -12,7 +12,7 @@
             <color id="LightGray" RGB="#D3D3D3"/>
             <color id="DarkGray" RGB="#707070"/>
             <color id="Brand" RGB="#3853a4"/>
-            <color id="Tint" RGB="#e6eaf5"/>
+            <color id="Tint" RGB="#e8e8e8"/>
         </initialize>
 
         <paraStyle name="style.para" fontName="OpenSans" />
@@ -26,7 +26,7 @@
         {% block extrastyles %}
         {% endblock %}
 
-        <paraStyle name="style.section" fontName="OpenSans-Bold" textColor="Brand" />
+        <paraStyle name="style.section" fontName="OpenSans-Bold" />
         <paraStyle name="style.subtotal" fontName="OpenSans-Bold" alignment="right" />
         <paraStyle name="style.event_description" fontName="OpenSans" textColor="DarkGray" />
         <paraStyle name="style.item_description" fontName="OpenSans" textColor="DarkGray" leftIndent="10" />

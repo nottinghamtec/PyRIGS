@@ -180,7 +180,7 @@
     <tr>
     {% if row.kind == "section" %}
         <td>
-            <para style="style.section"><font color="{{ row.accent }}">{{ item.name|upper }}</font></para>
+            <para style="style.section">{{ item.name|upper }}</para>
             {% if item.description %}
                 {{ item.description|markdown:"rml" }}
             {% endif %}
@@ -189,7 +189,7 @@
         <td></td>
         <td></td>
     {% elif row.kind == "subtotal" %}
-        <td><para style="style.subtotal"><font color="{{ row.accent }}">{{ item.name }} sub-total</font></para></td>
+        <td><para style="style.subtotal">{{ item.name }} sub-total</para></td>
         <td></td>
         <td></td>
         <td><para><b>£{{ item.section_total|floatformat:2 }}</b></para></td>

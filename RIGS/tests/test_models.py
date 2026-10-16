@@ -340,21 +340,6 @@ class EventItemTestCase(TestCase):
         self.assertTrue(items[0].section_grey)
         self.assertTrue(items[1].section_grey)
 
-        colours = models._section_colours(items[0].section_hue, items[0].section_grey)
-        for colour in colours.values():
-            self.assertEqual(colour[1:3], colour[3:5])
-            self.assertEqual(colour[3:5], colour[5:7])
-
-    def test_section_colours_equal_brightness(self):
-        # Every hue prints as the same greys on a black and white printer
-        def luminance(colour):
-            red, green, blue = (int(colour[i : i + 2], 16) / 255 for i in (1, 3, 5))
-            return 0.2126 * red + 0.7152 * green + 0.0722 * blue
-
-        for part in ("tint", "accent", "rule"):
-            levels = [luminance(models._section_colours(hue)[part]) for hue in range(0, 360, 15)]
-            self.assertLess(max(levels) - min(levels), 0.01)
-
     def test_section_colour_choice(self):
         e = self.e1
         models.EventItem.objects.create(

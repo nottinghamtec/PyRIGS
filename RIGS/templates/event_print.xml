@@ -7,11 +7,11 @@
     {% for row in object.print_item_rows %}
     {% if row.kind == "section" %}
     <blockSpan start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
-    <blockBackground colorName="{{ row.tint }}" start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
-    <lineStyle kind="LINEABOVE" colorName="{{ row.rule }}" start="0,{{ row.index }}" stop="-1,{{ row.index }}" thickness="1.5"/>
+    <blockBackground colorName="Tint" start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
+    <lineStyle kind="LINEABOVE" colorName="DarkGray" start="0,{{ row.index }}" stop="-1,{{ row.index }}" thickness="1.5"/>
     {% elif row.kind == "subtotal" %}
     <blockSpan start="0,{{ row.index }}" stop="2,{{ row.index }}"/>
-    <lineStyle kind="LINEABOVE" colorName="{{ row.rule }}" start="3,{{ row.index }}" stop="3,{{ row.index }}" thickness="1"/>
+    <lineStyle kind="LINEABOVE" colorName="DarkGray" start="3,{{ row.index }}" stop="3,{{ row.index }}" thickness="1"/>
     {% endif %}
     {% endfor %}
 </blockTableStyle>

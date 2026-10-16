@@ -1,4 +1,3 @@
-import colorsys
 import datetime
 import hashlib
 import random
@@ -493,16 +492,8 @@ class Event(models.Model, RevisionMixin):
         rows = []
         for item in self.items_with_section_totals:
             rows.append({"kind": "section" if item.is_section else "item", "item": item})
-            if item.is_section:
-                rows[-1].update(_section_colours(item.section_hue, item.section_grey))
             if item.closes_section:
-                rows.append(
-                    {
-                        "kind": "subtotal",
-                        "item": item.closes_section,
-                        **_section_colours(item.closes_section.section_hue, item.closes_section.section_grey),
-                    }
-                )
+                rows.append({"kind": "subtotal", "item": item.closes_section})
         for index, row in enumerate(rows, start=1):
             row["index"] = index
         return rows
@@ -740,42 +731,6 @@ def resolve_section_hues(overrides):
                 break
         hues.append(candidate)
     return hues
-
-
-def _hue_to_hex(hue, luminance, saturation):
-    """The colour of this hue and saturation with the given relative luminance (0-1), as hex."""
-
-    def rgb(lightness):
-        return colorsys.hls_to_rgb(hue / 360, lightness, saturation)
-
-    def grey_level(lightness):
-        red, green, blue = rgb(lightness)
-        return 0.2126 * red + 0.7152 * green + 0.0722 * blue
-
-    low, high = 0.0, 1.0
-    for _ in range(30):
-        middle = (low + high) / 2
-        if grey_level(middle) < luminance:
-            low = middle
-        else:
-            high = middle
-    red, green, blue = rgb((low + high) / 2)
-    return "#{:02x}{:02x}{:02x}".format(round(red * 255), round(green * 255), round(blue * 255))
-
-
-def _section_colours(hue, grey=False):
-    """
-    Pastel background, and stronger text and rule colours, for a section's hue (as hex, for the printed paperwork).
-
-    Each is matched to the same brightness whatever the hue, so every section prints as the same greys on a
-    black and white printer.
-    """
-    saturation = 0 if grey else 1
-    return {
-        "tint": _hue_to_hex(hue, 0.9, 0.7 * saturation),
-        "accent": _hue_to_hex(hue, 0.22, 0.55 * saturation),
-        "rule": _hue_to_hex(hue, 0.55, 0.5 * saturation),
-    }
 
 
 @reversion.register
