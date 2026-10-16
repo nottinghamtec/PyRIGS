@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from django.apps import apps
 from django.contrib import messages
 from django.db.models import Exists, OuterRef, Q
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.views import generic
 from reversion import revisions as reversion
 
@@ -235,9 +239,31 @@ class HSList(generic.ListView):
     def get_template_names(self):
         return [self.legacy_template_name if self.use_legacy else self.modern_template_name]
 
+    @cached_property
+    def options(self):
+        """The display options in force (order, date range, only needing action).
+
+        Submitting the options form saves the choices on the user's account; otherwise their saved choices are used.
+        """
+        user = self.request.user
+        params = self.request.GET
+        order, date_range, only_action = user.hs_order, user.hs_range, user.hs_only_action
+        if self.use_legacy:
+            return {"order": "newest", "range": "all", "only_action": False}
+        if {"order", "range", "action"} & params.keys():
+            if params.get("order") in dict(models.Profile.HS_ORDER_CHOICES):
+                order = params["order"]
+            if params.get("range") in dict(models.Profile.HS_RANGE_CHOICES):
+                date_range = params["range"]
+            only_action = params.get("action") == "1"
+            if (order, date_range, only_action) != (user.hs_order, user.hs_range, user.hs_only_action):
+                user.hs_order, user.hs_range, user.hs_only_action = order, date_range, only_action
+                user.save(update_fields=["hs_order", "hs_range", "hs_only_action"])
+        return {"order": order, "range": date_range, "only_action": only_action}
+
     @property
     def only_needing_action(self):
-        return bool(self.request.GET.get("action")) and not self.use_legacy
+        return self.options["only_action"]
 
     @staticmethod
     def rag_filters():
@@ -253,15 +279,35 @@ class HSList(generic.ListView):
         return red, amber
 
     def get_base_queryset(self):
-        return (
+        """Events within the chosen date range; the order is applied separately"""
+        queryset = (
             models.Event.objects.all()
             .exclude(status=models.Event.CANCELLED)
             .exclude(dry_hire=True)
-            .order_by("-start_date")
+            .annotate(last_day=Coalesce("end_date", "start_date"))
         )
+        today = timezone.localdate()
+        if self.options["range"] == "upcoming":
+            queryset = queryset.filter(last_day__gte=today)
+        elif self.options["range"] == "recent":
+            queryset = queryset.filter(last_day__gte=today - timedelta(days=14))
+        return queryset
+
+    def get_ordering(self):
+        if self.use_legacy:
+            return ["-start_date"]
+        # Same order as the rigboard, soonest first (or the reverse)
+        fields = ["start_date", "end_date", "start_time", "end_time", "meet_at", "pk"]
+        if self.options["order"] == "newest":
+            return [f"-{field}" for field in fields]
+        return fields
 
     def get_queryset(self):
-        queryset = self.get_base_queryset().select_related("riskassessment", "riskassessment__reviewed_by", "mic")
+        queryset = (
+            self.get_base_queryset()
+            .order_by(*self.get_ordering())
+            .select_related("riskassessment", "riskassessment__reviewed_by", "mic")
+        )
         queryset = queryset.prefetch_related(
             "checklists", "checklists__reviewed_by", "power_tests", "power_tests__reviewed_by"
         )
@@ -275,6 +321,10 @@ class HSList(generic.ListView):
         context["page_title"] = "H&S Overview"
         if not self.use_legacy:
             context["only_needing_action"] = self.only_needing_action
+            context["order"] = self.options["order"]
+            context["date_range"] = self.options["range"]
+            context["order_choices"] = models.Profile.HS_ORDER_CHOICES
+            context["range_choices"] = models.Profile.HS_RANGE_CHOICES
             context["summary"] = self.get_summary()
         return context
 
