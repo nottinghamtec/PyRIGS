@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='hs_order',
-            field=models.CharField(choices=[('oldest', 'Oldest first'), ('newest', 'Newest first')], default='oldest', max_length=6),
+            field=models.CharField(choices=[('oldest', 'Earliest date first'), ('newest', 'Latest date first')], default='oldest', max_length=6),
         ),
         migrations.AddField(
             model_name='profile',

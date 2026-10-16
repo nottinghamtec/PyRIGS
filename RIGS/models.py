@@ -32,7 +32,7 @@ def filter_by_pk(filt, query):
 
 
 class Profile(AbstractUser):
-    HS_ORDER_CHOICES = [("oldest", "Oldest first"), ("newest", "Newest first")]
+    HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
     HS_RANGE_CHOICES = [
         ("upcoming", "Hide all past events"),
         ("recent", "Include last 2 weeks"),
