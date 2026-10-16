@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('RIGS', '0053_riskassessment_parking_and_access'),
+        ('RIGS', '0054_profile_hs_display_options'),
     ]
 
     operations = [

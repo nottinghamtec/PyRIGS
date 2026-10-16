@@ -494,7 +494,13 @@ class Event(models.Model, RevisionMixin):
             if item.is_section:
                 rows[-1].update(_section_colours(item.section_hue))
             if item.closes_section:
-                rows.append({"kind": "subtotal", "item": item.closes_section, **_section_colours(item.closes_section.section_hue)})
+                rows.append(
+                    {
+                        "kind": "subtotal",
+                        "item": item.closes_section,
+                        **_section_colours(item.closes_section.section_hue),
+                    }
+                )
         for index, row in enumerate(rows, start=1):
             row["index"] = index
         return rows
@@ -706,7 +712,9 @@ class EventItem(models.Model, RevisionMixin):
     quantity = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.IntegerField()
-    is_section = models.BooleanField(default=False, help_text="Section headers have no cost or quantity, and show a total for the items beneath them")
+    is_section = models.BooleanField(
+        default=False, help_text="Section headers have no cost or quantity, and show a total for the items beneath them"
+    )
 
     reversion_hide = True
 
