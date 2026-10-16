@@ -1,6 +1,6 @@
 import os
 import pytest
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -398,7 +398,7 @@ def test_hs_list_only_needing_action(admin_client, admin_user, basic_event, ra, 
     response = admin_client.get(url, {"action": 1})
     assertNotContains(response, basic_event.name)
     assertContains(response, "Nothing needs action")
-    assertContains(admin_client.get(url), basic_event.name)
+    assertContains(admin_client.get(url, {"action": 0}), basic_event.name)
 
     # Outstanding power test records bring it back, once
     models.PowerTestRecord.objects.create(event=basic_event, venue=venue)
@@ -423,6 +423,76 @@ def test_hs_list_summary_counts(admin_client, admin_user, basic_event, ra):
     basic_event.mic = None
     basic_event.save()
     assert admin_client.get(url).context["summary"] == {"red": 1, "amber": 0}
+
+
+@pytest.fixture
+def dated_events(db, admin_user):
+    """Confirmed events with no RA (so red): in 3 days, ended yesterday, ended 10 days ago, ended 30 days ago"""
+    today = timezone.localdate()
+    events = {}
+    for key, days in (("future", 3), ("yesterday", -1), ("ten_days", -10), ("thirty_days", -30)):
+        events[key] = models.Event.objects.create(
+            name=f"dated {key}", start_date=today + timedelta(days=days), status=models.Event.CONFIRMED, mic=admin_user
+        )
+    return events
+
+
+def names_on_page(response):
+    return [event.name for event in response.context["object_list"]]
+
+
+def test_hs_list_date_range(admin_client, dated_events):
+    url = reverse("hs_list")
+    upcoming = names_on_page(admin_client.get(url, {"range": "upcoming"}))
+    assert upcoming == ["dated future"]
+    recent = names_on_page(admin_client.get(url, {"range": "recent"}))
+    assert set(recent) == {"dated future", "dated yesterday", "dated ten_days"}
+    assert len(names_on_page(admin_client.get(url, {"range": "all"}))) == 4
+
+
+def test_hs_list_order(admin_client, dated_events):
+    url = reverse("hs_list")
+    oldest = names_on_page(admin_client.get(url, {"range": "all", "order": "oldest"}))
+    assert oldest == ["dated thirty_days", "dated ten_days", "dated yesterday", "dated future"]
+    newest = names_on_page(admin_client.get(url, {"range": "all", "order": "newest"}))
+    assert newest == list(reversed(oldest))
+
+
+def test_hs_list_counts_follow_range(admin_client, dated_events):
+    url = reverse("hs_list")
+    assert admin_client.get(url, {"range": "upcoming"}).context["summary"] == {"red": 1, "amber": 0}
+    assert admin_client.get(url, {"range": "recent"}).context["summary"] == {"red": 3, "amber": 0}
+    assert admin_client.get(url, {"range": "all"}).context["summary"] == {"red": 4, "amber": 0}
+
+
+def test_hs_list_options_are_remembered(admin_client, admin_user, dated_events):
+    url = reverse("hs_list")
+    admin_user.refresh_from_db()
+    assert (admin_user.hs_order, admin_user.hs_range, admin_user.hs_only_action) == ("oldest", "upcoming", False)
+
+    admin_client.get(url, {"range": "all", "order": "newest", "action": 1})
+    admin_user.refresh_from_db()
+    assert (admin_user.hs_order, admin_user.hs_range, admin_user.hs_only_action) == ("newest", "all", True)
+
+    # A later visit with no options uses what was saved
+    response = admin_client.get(url)
+    assert response.context["date_range"] == "all"
+    assert response.context["order"] == "newest"
+    assert response.context["only_needing_action"] is True
+    assert names_on_page(response)[0] == "dated future"
+
+    # Rubbish values are ignored rather than saved
+    admin_client.get(url, {"range": "nonsense", "order": "sideways", "action": 1})
+    admin_user.refresh_from_db()
+    assert (admin_user.hs_order, admin_user.hs_range) == ("newest", "all")
+
+
+def test_hs_list_legacy_ignores_options(admin_client, admin_user, dated_events):
+    admin_client.get(reverse("hs_list"), {"range": "upcoming", "order": "oldest", "action": 1})
+    response = admin_client.get(reverse("hs_list"), {"legacy": 1})
+    assert len(names_on_page(response)) == 4
+    admin_user.refresh_from_db()
+    assert (admin_user.hs_range, admin_user.hs_only_action) == ("upcoming", True)
 
 
 def test_hs_list_legacy(admin_client, basic_event):
