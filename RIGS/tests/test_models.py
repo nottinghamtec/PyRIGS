@@ -4,7 +4,9 @@ from decimal import Decimal
 import pytz
 import pytest
 from django.conf import settings
+from django.template.loader import get_template
 from django.test import TestCase
+from z3c.rml import rml2pdf
 from reversion import revisions as reversion
 
 from RIGS import models
@@ -269,6 +271,29 @@ class EventItemTestCase(TestCase):
 
         items = self.e1.items.all()
         self.assertListEqual([i1, i2], list(items))
+
+    def test_section_totals(self):
+        models.EventItem.objects.create(event=self.e1, name="Pre", quantity=1, cost=5, order=0)
+        models.EventItem.objects.create(event=self.e1, name="Lighting", quantity=0, cost=0, order=1, is_section=True)
+        models.EventItem.objects.create(event=self.e1, name="Par", quantity=2, cost=10, order=2)
+        models.EventItem.objects.create(event=self.e1, name="Sound", quantity=0, cost=0, order=3, is_section=True)
+        models.EventItem.objects.create(event=self.e1, name="Mic", quantity=3, cost=4, order=4)
+
+        items = self.e1.items_with_section_totals
+        self.assertEqual(items[1].section_total, 20)
+        self.assertEqual(items[3].section_total, 12)
+        # Sections don't alter the event total
+        self.assertEqual(self.e1.sum_total, 37)
+
+        kinds = [(row["kind"], row["index"]) for row in self.e1.print_item_rows]
+        self.assertEqual(
+            kinds,
+            [("item", 1), ("section", 2), ("item", 3), ("subtotal", 4), ("section", 5), ("item", 6), ("subtotal", 7)],
+        )
+
+        # The printed paperwork should render
+        rml = get_template("event_print.xml").render({"object": self.e1, "filename": "test.pdf"})
+        self.assertTrue(rml2pdf.parseString(rml).read().startswith(b"%PDF"))
 
 
 class EventPricingTestCase(TestCase):

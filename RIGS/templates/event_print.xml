@@ -1,5 +1,22 @@
 {% extends 'base_print.xml' %}
 
+{% block extrastyles %}
+<blockTableStyle id="itemTableSections">
+    <blockValign value="top"/>
+    <lineStyle kind="LINEBELOW" colorName="LightGrey" start="0,0" stop="-1,-1" thickness="1"/>
+    {% for row in object.print_item_rows %}
+    {% if row.kind == "section" %}
+    <blockSpan start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
+    <blockBackground colorName="{{ row.tint }}" start="0,{{ row.index }}" stop="-1,{{ row.index }}"/>
+    <lineStyle kind="LINEABOVE" colorName="{{ row.rule }}" start="0,{{ row.index }}" stop="-1,{{ row.index }}" thickness="1.5"/>
+    {% elif row.kind == "subtotal" %}
+    <blockSpan start="0,{{ row.index }}" stop="2,{{ row.index }}"/>
+    <lineStyle kind="LINEABOVE" colorName="{{ row.rule }}" start="3,{{ row.index }}" stop="3,{{ row.index }}" thickness="1"/>
+    {% endif %}
+    {% endfor %}
+</blockTableStyle>
+{% endblock %}
+
 {% block content %}
 {% include "event_print_page.xml" %}
 {% endblock %}

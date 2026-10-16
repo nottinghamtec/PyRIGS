@@ -8,7 +8,7 @@
             <form id="item-form">
                 <div class="modal-body">
                     <div class="mb-3 row g-2">
-                        <label for="item_name" class="col-sm-2 col-form-label">Item Name</label>
+                        <label for="item_name" id="item_name_label" class="col-sm-2 col-form-label">Item Name</label>
                         <div class="col-sm-10">
                             <input type="text" placeholder="Item Name" class="form-control" required maxlength="255"
                                    id="item_name"/>
@@ -21,7 +21,7 @@
                                       id="item_description" rows="8"></textarea>
                         </div>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-2" id="item_price_fields">
                         <div class="col-sm-6">
                             <div class="mb-3 row g-2">
                                 <label for="item_quantity" class="col-sm-4 col-form-label">Quantity</label>
@@ -48,7 +48,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary order-2">Save</button>
+                    <button type="submit" class="btn btn-outline-primary order-1" id="item-save-add">Save &amp; add another</button>
                 </div>
             </form>
         </div>

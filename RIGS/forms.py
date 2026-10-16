@@ -84,8 +84,13 @@ class EventForm(forms.ModelForm):
         # Take the data from the form and update the item object
         item.name = data["name"]
         item.description = data["description"]
-        item.quantity = data["quantity"]
-        item.cost = data["cost"]
+        item.is_section = bool(data.get("is_section", False))
+        if item.is_section:
+            item.quantity = 0
+            item.cost = 0
+        else:
+            item.quantity = data["quantity"]
+            item.cost = data["cost"]
         item.order = data["order"]
 
         if event:

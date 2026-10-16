@@ -151,7 +151,7 @@
 <setNextTemplate name="Main"/>
 
 
-<blockTable style="itemTable" colWidths="300,80,35,80">
+<blockTable style="itemTableSections" colWidths="300,80,35,80">
 <tr>
     {# Bold tags need to be in a para in order to render in reportlab #}
     <td>
@@ -175,8 +175,25 @@
         </para>
     </td>
 </tr>
-{% for item in object.items.all %}
+{% for row in object.print_item_rows %}
+    {% with item=row.item %}
     <tr>
+    {% if row.kind == "section" %}
+        <td>
+            <para style="style.section"><font color="{{ row.accent }}">{{ item.name|upper }}</font></para>
+            {% if item.description %}
+                {{ item.description|markdown:"rml" }}
+            {% endif %}
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+    {% elif row.kind == "subtotal" %}
+        <td><para style="style.subtotal"><font color="{{ row.accent }}">{{ item.name }} sub-total</font></para></td>
+        <td></td>
+        <td></td>
+        <td><para><b>£{{ item.section_total|floatformat:2 }}</b></para></td>
+    {% else %}
         <td>
             <para><b>{{ item.name }}</b></para>
             {% if item.description %}
@@ -186,7 +203,9 @@
         <td>£{{ item.cost|floatformat:2 }}</td>
         <td>{{ item.quantity }}</td>
         <td>£{{ item.total_cost|floatformat:2 }}</td>
+    {% endif %}
     </tr>
+    {% endwith %}
 {% endfor %}
 </blockTable>
 <keepTogether>
