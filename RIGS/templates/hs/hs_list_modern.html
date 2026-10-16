@@ -18,12 +18,28 @@
             {% endif %}
         </div>
     </div>
-    <div class="d-flex flex-column align-items-end gap-1">
-        <form method="get" class="form-check form-switch mb-0">
-            <input type="checkbox" role="switch" class="form-check-input" id="only-action" name="action" value="1"
-                   {% if only_needing_action %}checked{% endif %} onchange="this.form.submit()">
-            <label class="form-check-label" for="only-action">Only show needing action</label>
-            <noscript><button type="submit" class="btn btn-sm btn-primary ms-2">Apply</button></noscript>
+    <div class="d-flex flex-column align-items-end gap-2">
+        <form method="get" id="hs-options" class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Which events to show">
+                {% for value, label in range_choices %}
+                    <input type="radio" class="btn-check" name="range" id="range-{{ value }}" value="{{ value }}"
+                           {% if date_range == value %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="btn btn-outline-primary" for="range-{{ value }}">{{ label }}</label>
+                {% endfor %}
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Order">
+                {% for value, label in order_choices %}
+                    <input type="radio" class="btn-check" name="order" id="order-{{ value }}" value="{{ value }}"
+                           {% if order == value %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="btn btn-outline-secondary" for="order-{{ value }}">{{ label }}</label>
+                {% endfor %}
+            </div>
+            <div class="form-check form-switch mb-0">
+                <input type="checkbox" role="switch" class="form-check-input" id="only-action" name="action" value="1"
+                       {% if only_needing_action %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label" for="only-action">Only show needing action</label>
+            </div>
+            <noscript><button type="submit" class="btn btn-sm btn-primary">Apply</button></noscript>
         </form>
         <a href="?legacy=1" class="small text-muted">Hate it? Legacy version</a>
     </div>

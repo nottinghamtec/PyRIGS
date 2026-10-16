@@ -33,6 +33,13 @@ def filter_by_pk(filt, query):
 
 
 class Profile(AbstractUser):
+    HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
+    HS_RANGE_CHOICES = [
+        ("upcoming", "Hide all past events"),
+        ("recent", "Include last 2 weeks"),
+        ("all", "Show all events"),
+    ]
+
     initials = models.CharField(max_length=5, null=True, blank=False)
     phone = models.CharField(max_length=13, blank=True, default="")
     api_key = models.CharField(max_length=40, blank=True, editable=False, default="")
@@ -45,6 +52,10 @@ class Profile(AbstractUser):
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
     is_supervisor = models.BooleanField(default=False)
+    # Display options for the H&S overview, remembered between visits
+    hs_order = models.CharField(max_length=6, choices=HS_ORDER_CHOICES, default="oldest")
+    hs_range = models.CharField(max_length=8, choices=HS_RANGE_CHOICES, default="upcoming")
+    hs_only_action = models.BooleanField(default=False)
 
     reversion_hide = True
 
