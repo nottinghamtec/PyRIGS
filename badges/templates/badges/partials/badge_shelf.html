@@ -10,11 +10,49 @@
     </div>
     <div class="card-body">
         {% if awards %}
-        <div class="tec-badge-grid tec-badge-grid-compact">
+        <div class="tec-badge-grid tec-badge-grid-compact" id="badge-shelf">
             {% for award in awards %}
                 {% include "badges/partials/badge.html" with badge=award.badge earned=award compact=True %}
             {% endfor %}
         </div>
+        <div class="text-center mt-2">
+            <button type="button" class="btn btn-link btn-sm d-none" id="badge-shelf-toggle" aria-controls="badge-shelf" aria-expanded="false"></button>
+        </div>
+        <script>
+            /* Only show the first couple of rows; how many badges that is depends on the screen width */
+            ready(function() {
+                var ROWS = 2;
+                var shelf = document.getElementById('badge-shelf');
+                var toggle = document.getElementById('badge-shelf-toggle');
+                var expanded = false;
+                function layout() {
+                    var tiles = Array.from(shelf.children);
+                    tiles.forEach(function(tile) { tile.classList.remove('d-none'); });
+                    var rowTops = Array.from(new Set(tiles.map(function(tile) { return tile.offsetTop; }))).sort(function(a, b) { return a - b; });
+                    if (rowTops.length <= ROWS) {
+                        toggle.classList.add('d-none');
+                        return;
+                    }
+                    var hidden = tiles.filter(function(tile) { return tile.offsetTop > rowTops[ROWS - 1]; });
+                    if (!expanded) {
+                        hidden.forEach(function(tile) { tile.classList.add('d-none'); });
+                    }
+                    toggle.textContent = expanded ? 'Show fewer' : 'Show ' + hidden.length + ' other badge' + (hidden.length === 1 ? '' : 's') + '…';
+                    toggle.setAttribute('aria-expanded', expanded);
+                    toggle.classList.remove('d-none');
+                }
+                toggle.addEventListener('click', function() {
+                    expanded = !expanded;
+                    layout();
+                });
+                var timer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(layout, 100);
+                });
+                layout();
+            });
+        </script>
         {% else %}
         <p class="text-body-secondary mb-0">No badges yet.</p>
         {% endif %}
