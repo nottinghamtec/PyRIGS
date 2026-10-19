@@ -5,17 +5,27 @@ Used both for deciding which badges someone has earned and for building their Te
 """
 
 import datetime
+import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from functools import cached_property
 
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q, Sum
 from django.utils import timezone
 from reversion.models import Revision, Version
 
 from assets.models import Asset
 
-from RIGS.models import Event, EventChecklist, EventCheckIn, PowerTestRecord, Profile, RiskAssessment, Venue
+from RIGS.models import (
+    Event,
+    EventChecklist,
+    EventCheckIn,
+    EventItem,
+    PowerTestRecord,
+    Profile,
+    RiskAssessment,
+    Venue,
+)
 from training.models import TrainingItemQualification, TrainingLevelQualification
 
 # A check-in longer than this was almost certainly a forgotten check-out
@@ -54,6 +64,19 @@ def academic_year(date):
     """TEC's year runs from September, e.g. 2025/26."""
     start = date.year if date.month >= 9 else date.year - 1
     return f"{start}/{str(start + 1)[-2:]}"
+
+
+POSTCODE = re.compile(r"\b([A-Z]{1,2})\d[A-Z\d]? ?\d[A-Z]{2}\b")
+
+
+def postcode_area(address):
+    """The letters at the start of a UK postcode in an address (NG for Nottingham), if there is one."""
+    match = POSTCODE.search((address or "").upper())
+    return match.group(1) if match else None
+
+
+def risk_assessment(event):
+    return getattr(event, "riskassessment", None)
 
 
 @dataclass
@@ -147,7 +170,7 @@ class ProfileStats:
             Event.objects.filter(RIG_FILTER)
             .filter(Q(crew__person=self.profile) | Q(mic=self.profile, start_date__lte=self.today))
             .distinct()
-            .select_related("venue")
+            .select_related("venue", "organisation", "riskassessment")
             .order_by("start_date", "pk")
         )
 
@@ -248,7 +271,7 @@ class ProfileStats:
         return list(
             Event.objects.filter(RIG_FILTER, mic=self.profile, start_date__lte=self.today)
             .annotate(crew_count=Count("crew__person", distinct=True))
-            .select_related("venue")
+            .select_related("venue", "organisation")
             .order_by("start_date", "pk")
         )
 
@@ -291,6 +314,39 @@ class ProfileStats:
             .order_by("confirmed_on")
             .values_list("confirmed_on", flat=True)
         )
+
+    # --- What the rigs were like ---
+
+    @cached_property
+    def quote_text(self):
+        """{event id: everything on its quote, lower case}, for spotting kit like generators or truss."""
+        text = defaultdict(str)
+        rows = EventItem.objects.filter(event__in=[e.pk for e in self.rig_events], is_section=False)
+        for event_id, name, description in rows.values_list("event_id", "name", "description"):
+            text[event_id] += f" {name} {description}".lower()
+        return text
+
+    @cached_property
+    def mic_quote_totals(self):
+        rows = (
+            EventItem.objects.filter(event__in=[e.pk for e in self.mic_events])
+            .values("event")
+            .annotate(total=Sum(F("cost") * F("quantity")))
+        )
+        return {row["event"]: row["total"] or 0 for row in rows}
+
+    @cached_property
+    def three_phase_dates(self):
+        """Events this person was Power MIC for where the power test recorded a three-phase supply."""
+        return sorted(
+            PowerTestRecord.objects.filter(power_mic=self.profile, event__start_date__lte=self.today)
+            .filter(Q(fd_voltage_l2__isnull=False) | Q(fd_voltage_l3__isnull=False))
+            .values_list("event__start_date", flat=True)
+        )
+
+    def rigs_where(self, test):
+        """Start dates of this person's rigs that pass a test."""
+        return [event.start_date for event in self.rig_events if test(event)]
 
     # --- Things created and edited in RIGS ---
 

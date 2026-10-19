@@ -27,8 +27,10 @@ def member(db):
 
 @pytest.fixture
 def make_rig(member):
-    def make_rig(date, venue=None, status=models.Event.BOOKED, person=None, hours=4, vehicle="", **kwargs):
-        event = models.Event.objects.create(name=f"Rig {date}", start_date=date, status=status, venue=venue, **kwargs)
+    def make_rig(date, venue=None, status=models.Event.BOOKED, person=None, hours=4, vehicle="", name=None, **kwargs):
+        event = models.Event.objects.create(
+            name=name or f"Rig {date}", start_date=date, status=status, venue=venue, **kwargs
+        )
         start = timezone.make_aware(datetime.datetime.combine(date, datetime.time(18)))
         models.EventCheckIn.objects.create(
             event=event,
@@ -569,3 +571,87 @@ def test_leaderboard(member, member_client, make_rig):
     rows = response.context["rows"]
     assert [(row["profile"], row["badges"], row["headliner"]) for row in rows] == [(other, 2, True), (member, 1, False)]
     assert reverse("badge_leaderboard").encode() in member_client.get(reverse("badge_list")).content
+
+
+# --- Fleet, power, production, traditions and community ---
+
+
+def test_vehicle_badges(member, make_rig):
+    for n in range(10):
+        make_rig(datetime.date(2024, 1, 1 + n), vehicle="virgil + Erms" if n == 3 else "Virgil")
+    badges = earned(member)
+    assert badges["virgils-co-pilot"] == aware(2024, 1, 10)
+    assert badges["hitched"] == aware(2024, 1, 4)
+
+
+def test_risk_assessment_badges(member, make_rig):
+    for n in range(5):
+        rig = make_rig(datetime.date(2024, 3, 1 + n))
+        models.RiskAssessment.objects.create(event=rig, **{**RA_ANSWERS, "outside": True, "generators": n == 2})
+    badges = earned(member)
+    assert badges["great-outdoors"] == aware(2024, 3, 5)
+    assert badges["off-grid"] == aware(2024, 3, 3)
+    assert "big-power" not in badges and "flying-high" not in badges
+
+
+def test_quote_badges(member, make_rig):
+    rig = make_rig(datetime.date(2024, 4, 1), mic=member)
+    models.EventItem.objects.create(event=rig, name="Goalpost truss", cost=1500, quantity=1, order=1)
+    models.EventItem.objects.create(event=rig, name="NEXO system", cost=600, quantity=1, order=2)
+    huge = make_rig(datetime.date(2024, 4, 2), mic=member, name="Spring Marquee")
+    models.EventItem.objects.create(event=huge, name="Placeholder", cost=1_000_000, quantity=1, order=1)
+    badges = earned(member)
+    assert badges["goalposts"] == badges["big-rig"] == badges["big-ticket"] == aware(2024, 4, 1)  # £2,100
+    assert badges["under-canvas"] == aware(2024, 4, 2)  # From the event name
+
+
+def test_big_ticket_ignores_placeholder_quotes(member, make_rig):
+    rig = make_rig(datetime.date(2024, 4, 2), mic=member)
+    models.EventItem.objects.create(event=rig, name="Placeholder", cost=1_000_000, quantity=1, order=1)
+    assert "big-ticket" not in earned(member)
+
+
+def test_name_badges(member, make_rig):
+    for year in (2022, 2023, 2024):
+        make_rig(datetime.date(year, 11, 1), name=f"Summer Ball {year}")
+    make_rig(datetime.date(2024, 11, 2), name="Football Social")  # Not a ball
+    make_rig(datetime.date(2024, 11, 3), name="Varsity Opening")
+    badges = earned(member)
+    assert badges["annual-fixture"] == aware(2024, 11, 1)
+    assert "belle-of-the-ball" not in badges  # Only three
+    assert badges["varsity"] == aware(2024, 11, 3)
+
+
+def test_community_and_away_badges(member, make_rig):
+    society = models.Organisation.objects.create(name="Drama Soc", union_account=True)
+    company = models.Organisation.objects.create(name="Big Corp", union_account=False)
+    make_rig(datetime.date(2024, 5, 1), organisation=company, mic=member)
+    for n in range(9):
+        make_rig(
+            datetime.date(2024, 5, 2 + n),
+            organisation=models.Organisation.objects.create(name=f"Soc {n}", union_account=True),
+        )
+    make_rig(datetime.date(2024, 5, 20), organisation=society)
+    make_rig(
+        datetime.date(2024, 5, 21), venue=models.Venue.objects.create(name="Derby", address="1 Road, Derby DE1 1AA")
+    )
+    make_rig(
+        datetime.date(2024, 5, 22), venue=models.Venue.objects.create(name="Home", address="University Park, NG7 2RD")
+    )
+    badges = earned(member)
+    assert badges["outside-booking"] == aware(2024, 5, 1)
+    assert badges["society-darling"] == aware(2024, 5, 20)
+    assert badges["away-game"] == aware(2024, 5, 21)
+
+
+def test_early_call_and_three_phase(member):
+    rig = models.Event.objects.create(name="Dawn", start_date=datetime.date(2024, 6, 1), status=models.Event.BOOKED)
+    models.EventCheckIn.objects.create(
+        event=rig, person=member, time=aware(2024, 6, 1, 6, 30), end_time=aware(2024, 6, 1, 9)
+    )
+    models.PowerTestRecord.objects.create(
+        event=rig, venue=models.Venue.objects.create(name="V"), power_mic=member, fd_voltage_l2=230
+    )
+    badges = earned(member)
+    assert badges["early-call"] == aware(2024, 6, 1, 6, 30)
+    assert badges["three-phase"] == aware(2024, 6, 1)
