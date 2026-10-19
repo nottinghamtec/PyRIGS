@@ -92,7 +92,6 @@ class Leaderboard(BadgesVisibleMixin, generic.TemplateView):
         )
         people = Profile.objects.in_bulk([row["profile"] for row in counts])
         headliners = set(BadgeAward.objects.filter(slug=HEADLINER).values_list("profile", flat=True))
-        top = counts[0]["badges"] if counts else 0
         rows, previous = [], None
         for position, row in enumerate(counts, start=1):
             if row["badges"] != previous:
@@ -103,7 +102,7 @@ class Leaderboard(BadgesVisibleMixin, generic.TemplateView):
                     "tied": sum(1 for other in counts if other["badges"] == row["badges"]) > 1,
                     "profile": people[row["profile"]],
                     "badges": row["badges"],
-                    "width": round(100 * row["badges"] / top),
+                    "width": round(100 * row["badges"] / len(BADGES)),  # Out of every badge there is
                     "headliner": row["profile"] in headliners,
                 }
             )
