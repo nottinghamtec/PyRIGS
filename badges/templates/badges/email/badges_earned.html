@@ -1,0 +1,22 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+    <p>Hi {{ profile.first_name }},</p>
+
+    <p>{% if awards|length == 1 %}You've earned a new badge{% else %}You've earned {{ awards|length }} new badges{% endif %} on RIGS:</p>
+
+    <ul>
+        {% for award in awards %}
+        <li><strong>{{ award.badge.name }}</strong> ({{ award.badge.category.name }}): {{ award.badge.blurb }}</li>
+        {% endfor %}
+    </ul>
+
+    <p>See them on your profile:</p>
+    <a href="{{ profile_url }}" class="btn btn-info">View my badges</a>
+
+    <p>Or see <a href="{{ badges_url }}">what else is up for grabs</a>.</p>
+
+    <p>TEC PA &amp; Lighting</p>
+
+    <p><small>Don't want these emails? <a href="{{ settings_url }}">Turn them off in your profile</a>.</small></p>
+{% endblock %}

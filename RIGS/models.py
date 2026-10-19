@@ -50,6 +50,7 @@ class Profile(AbstractUser):
     # Currently only populated by the admin approval email. TODO: Populate it each time we send any email, might need that...
     last_emailed = models.DateTimeField(blank=True, null=True)
     dark_theme = models.BooleanField(default=False)
+    badge_emails = models.BooleanField(default=True, verbose_name="Email me when I earn a badge")
     is_supervisor = models.BooleanField(default=False)
     # Display options for the H&S overview, remembered between visits
     hs_order = models.CharField(max_length=6, choices=HS_ORDER_CHOICES, default="oldest")
