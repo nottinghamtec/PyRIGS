@@ -159,7 +159,14 @@ def test_duplicate_form_submission_is_deduplicated(admin_client):
     from RIGS.models import Person
 
     cache.clear()
-    data = {"name": "Dupe Tester", "email": "", "phone": "", "address": "", "notes": "", "csrfmiddlewaretoken": "nonce-a"}
+    data = {
+        "name": "Dupe Tester",
+        "email": "",
+        "phone": "",
+        "address": "",
+        "notes": "",
+        "csrfmiddlewaretoken": "nonce-a",
+    }
     first = admin_client.post(reverse("person_create"), data)
     second = admin_client.post(reverse("person_create"), data)
     assert first.status_code == 302
@@ -182,7 +189,14 @@ def test_duplicate_submission_while_in_flight_does_not_block(admin_client):
 
     cache.clear()
     cache.set(DuplicateSubmissionMiddleware.cache_key("nonce-c"), IN_FLIGHT, 60)
-    data = {"name": "Inflight Tester", "email": "", "phone": "", "address": "", "notes": "", "csrfmiddlewaretoken": "nonce-c"}
+    data = {
+        "name": "Inflight Tester",
+        "email": "",
+        "phone": "",
+        "address": "",
+        "notes": "",
+        "csrfmiddlewaretoken": "nonce-c",
+    }
     response = admin_client.post(reverse("person_create"), data)
     assert response.status_code == 409
     assert not Person.objects.filter(name="Inflight Tester").exists()
