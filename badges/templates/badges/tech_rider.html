@@ -1,0 +1,194 @@
+{% extends "base_rigs.html" %}
+{% load humanize %}
+
+{% block css %}
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+{% include "badges/partials/badge_styles.html" %}
+<style>
+    .rider-sheet {
+        --rider-paper: #fffdf6;
+        --rider-ink: #1b1b1b;
+        --rider-faint: #6b6b6b;
+        --rider-rule: #1b1b1b;
+        --rider-accent: #3853a4;
+        max-width: 56rem; margin: 0 auto; padding: 2.5rem;
+        background: var(--rider-paper); color: var(--rider-ink);
+        border: 1px solid var(--bs-border-color); box-shadow: 0 .5rem 2rem rgba(0, 0, 0, .12);
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .9rem;
+    }
+    [data-bs-theme="dark"] .rider-sheet {
+        --rider-paper: #1e2024; --rider-ink: #e9e6dc; --rider-faint: #9a978e; --rider-rule: #e9e6dc; --rider-accent: #8ea6ec;
+    }
+    .rider-sheet a { color: inherit; }
+    .rider-sheet h1, .rider-sheet h2 { font-family: "IBM Plex Sans Condensed", sans-serif; text-transform: uppercase; letter-spacing: .04em; }
+    .rider-sheet h1 { font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 700; margin: 0; line-height: 1; }
+    .rider-sheet h2 { font-size: 1.1rem; font-weight: 700; margin: 2rem 0 .75rem; padding-bottom: .25rem; border-bottom: 2px solid var(--rider-rule); }
+    .rider-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-bottom: 4px double var(--rider-rule); padding-bottom: 1rem; }
+    .rider-meta { text-align: right; color: var(--rider-faint); font-size: .8rem; }
+    .rider-fields { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1.5rem; margin: 1rem 0 0; }
+    .rider-fields dt { color: var(--rider-faint); font-weight: 400; text-transform: uppercase; }
+    .rider-fields dd { margin: 0; font-weight: 600; }
+    .rider-note { color: var(--rider-faint); margin-bottom: .5rem; }
+    .rider-table { width: 100%; border-collapse: collapse; }
+    .rider-table th { text-transform: uppercase; font-weight: 600; font-size: .75rem; color: var(--rider-faint); text-align: left; border-bottom: 1px solid var(--rider-rule); padding: .2rem .5rem .2rem 0; }
+    .rider-table td { padding: .3rem .5rem .3rem 0; border-bottom: 1px dashed var(--bs-border-color); vertical-align: top; }
+    .rider-table .num { text-align: right; font-weight: 600; white-space: nowrap; }
+    .rider-table .ch { width: 3rem; color: var(--rider-faint); }
+    .rider-bar { display: inline-block; height: .8rem; vertical-align: middle; min-width: 2px;
+        background: repeating-linear-gradient(90deg, var(--rider-accent) 0 .45rem, transparent .45rem .6rem); }
+    .rider-leaders { list-style: none; padding: 0; margin: 0; columns: 2 18rem; column-gap: 2.5rem; }
+    .rider-leaders li { display: flex; gap: .25rem; break-inside: avoid; padding: .1rem 0; }
+    .rider-leaders li::after { content: ""; order: 1; flex: 1; border-bottom: 1px dotted var(--rider-faint); margin-bottom: .3rem; }
+    .rider-leaders .qty { order: 2; font-weight: 600; }
+    .rider-current td { background: color-mix(in srgb, var(--rider-accent) 12%, transparent); }
+    .rider-laminate {
+        max-width: 40rem; margin: 2.5rem auto 0; position: relative; padding: 2.5rem 1.5rem 1.5rem;
+        border-radius: 1rem; border: 1px solid var(--bs-border-color);
+        background: linear-gradient(160deg, var(--bs-body-bg), var(--bs-tertiary-bg));
+        box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .15); font-family: var(--bs-body-font-family); color: var(--bs-body-color);
+    }
+    .rider-laminate::before { /* Lanyard slot */
+        content: ""; position: absolute; top: .9rem; left: 50%; width: 3.5rem; height: .55rem; margin-left: -1.75rem;
+        border-radius: 1rem; background: var(--bs-secondary-bg); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3);
+    }
+    .rider-laminate-title { text-align: center; font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 700; font-size: 1.6rem;
+        letter-spacing: .1em; padding: .25rem; margin-bottom: 1rem; background: var(--rider-accent); color: #fff; border-radius: .25rem; }
+    .rider-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; }
+    .rider-sign div { border-top: 1px solid var(--rider-rule); padding-top: .25rem; color: var(--rider-faint); font-size: .8rem; }
+    @media (max-width: 576px) { .rider-sheet { padding: 1.25rem; } .rider-meta { text-align: left; } }
+    @media print {
+        .navbar, footer, .skip-link, .no-print, .bg-primary { display: none !important; }
+        #main { padding: 0 !important; }
+        .rider-sheet { box-shadow: none; border: 0; max-width: none; padding: 0; }
+        .rider-sheet h2 { break-after: avoid; }
+        .rider-table tr, .rider-laminate { break-inside: avoid; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if preview %}
+<div class="alert alert-warning no-print">Tech Rider isn't live yet, so only people with the View Tech Rider permission (and superusers, if allowed in badge settings) can see it.{% if user.is_superuser %} Turn it on in <a href="{% url 'admin:badges_badgesettings_changelist' %}">badge settings</a>.{% endif %}</div>
+{% endif %}
+<div class="text-end mb-3 no-print">
+    <button type="button" class="btn btn-secondary" onclick="window.print()"><span class="fas fa-print"></span> Print rider</button>
+</div>
+
+<article class="rider-sheet">
+    <header class="rider-head">
+        <div>
+            <h1>Technical Rider</h1>
+            <dl class="rider-fields">
+                <dt>Artist</dt><dd>{{ subject.first_name }} {{ subject.last_name }}</dd>
+                <dt>Touring with TEC since</dt><dd>{% if stats.first_rig %}{{ stats.first_rig.start_date|date:"F Y" }}{% else %}Debut tour pending{% endif %}</dd>
+                <dt>Position</dt><dd>{{ position }}</dd>
+                {% if home_venue %}<dt>Home venue</dt><dd>{{ home_venue.0 }}</dd>{% endif %}
+            </dl>
+        </div>
+        <div class="rider-meta">
+            Doc. TEC-TR-{{ subject.pk|stringformat:"04d" }}<br>
+            Rev. {{ stats.this_year.label }}<br>
+            Issued {% now "j M Y" %}
+        </div>
+    </header>
+
+    <h2>1. Input list</h2>
+    <table class="rider-table">
+        <thead><tr><th class="ch">Ch</th><th>Source</th><th class="num">Qty</th><th>Notes</th></tr></thead>
+        <tbody>
+            {% for label, qty, note in inputs %}
+            <tr><td class="ch">{{ forloop.counter|stringformat:"02d" }}</td><td>{{ label }}</td><td class="num">{{ qty|intcomma }}</td><td>{{ note|default:"" }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if rigs_by_year %}
+    <h2>2. Tour history</h2>
+    <table class="rider-table">
+        <thead><tr><th>Season</th><th class="num">Rigs</th><th style="width: 60%"></th></tr></thead>
+        <tbody>
+            {% for year, count, width in rigs_by_year %}
+            <tr{% if year == stats.this_year.label %} class="rider-current"{% endif %}>
+                <td>{{ year }}{% if year == stats.this_year.label %} (current){% endif %}</td>
+                <td class="num">{{ count }}</td>
+                <td><span class="rider-bar" style="width: {{ width }}%"></span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if stats.venue_counts %}
+    <h2>3. Tour dates</h2>
+    <p class="rider-note">Venues played, most frequent first.</p>
+    <ol class="rider-leaders">
+        {% for venue, count in stats.venue_counts %}
+        <li><span>{{ venue }}</span><span class="qty">&times;{{ count }}</span></li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+
+    {% if stats.crewmates %}
+    <h2>4. Crew requirements</h2>
+    <p class="rider-note">The artist requires the following crew, in order of preference:</p>
+    <table class="rider-table">
+        <tbody>
+            {% for person, shared in stats.crewmates %}
+            <tr><td class="ch">{{ forloop.counter|stringformat:"02d" }}</td><td>{{ person.first_name }} {{ person.last_name }}</td><td class="num">{{ shared }} rig{{ shared|pluralize }} together</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if stats.roles %}
+    <p class="rider-note mt-2 mb-0">Usually positioned as:
+        {% for role, count in stats.roles|slice:":4" %}{{ role }} ({{ count }}){% if not forloop.last %}, {% endif %}{% endfor %}.
+    </p>
+    {% endif %}
+    {% endif %}
+
+    {% if notes %}
+    <h2>5. Notes for the promoter</h2>
+    <table class="rider-table">
+        <tbody>
+            {% for label, value, url in notes %}
+            <tr><td style="width: 35%">{{ label }}</td><td>{% if url %}<a href="{{ url }}">{{ value }}</a>{% else %}{{ value }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if timeline %}
+    <h2>6. Itinerary</h2>
+    <table class="rider-table">
+        <tbody>
+            {% for date, icon, title, detail in timeline %}
+            <tr>
+                <td style="width: 8rem" class="text-nowrap">{{ date|date:"d M Y" }}</td>
+                <td><span class="fas fa-{{ icon }} fa-fw" aria-hidden="true"></span> <strong>{{ title }}</strong> <span class="rider-note">{{ detail }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if show_badges %}
+    <section class="rider-laminate">
+        <div class="rider-laminate-title">ACCESS ALL AREAS</div>
+        <div class="text-center fw-semibold mb-3">{{ subject.first_name }} {{ subject.last_name }}</div>
+        {% if awards %}
+        <div class="tec-badge-grid tec-badge-grid-compact">
+            {% for award in awards %}
+                {% include "badges/partials/badge.html" with badge=award.badge earned=award compact=True %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center mb-0">No badges yet. See <a href="{% url 'badge_list' %}">what's up for grabs</a>.</p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <div class="rider-sign">
+        <div>Signed for the artist</div>
+        <div>Signed for TEC PA &amp; Lighting</div>
+    </div>
+</article>
+{% endblock %}

@@ -1,0 +1,25 @@
+{# A badge tile. Pass badge, earned (the award, if any), and optionally compact, or show_holders with holders (the catalogue's list of awards). #}
+<div class="tec-badge{% if compact %} tec-badge-compact{% endif %}{% if not earned %} tec-badge-locked{% endif %}" style="--badge-colour: {{ badge.category.colour }}"{% if compact %} title="{{ badge.blurb }}"{% endif %}>
+    <div class="tec-badge-medal" aria-hidden="true">
+        <span class="fas fa-{{ badge.icon }}"></span>
+        {% if not earned %}<span class="tec-badge-lock"><span class="fas fa-lock"></span></span>{% endif %}
+    </div>
+    <div class="tec-badge-name">{{ badge.name }}</div>
+    {% if not compact %}<div class="tec-badge-blurb">{{ badge.blurb }}</div>{% endif %}
+    <div class="tec-badge-foot">
+        {% if earned %}
+            <span class="tec-badge-earned"><span class="fas fa-check" aria-hidden="true"></span> {{ earned.awarded_at|date:"M Y" }}</span>
+        {% elif not compact %}
+            Not yet earned
+        {% endif %}
+        {% if show_holders %}
+            <div class="mt-1">
+            {% if holders %}
+                <button type="button" class="btn btn-link tec-holders-btn" data-holders="{{ badge.slug }}">Held by {{ holders|length }}</button>
+            {% else %}
+                Nobody yet
+            {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>

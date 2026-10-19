@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load linkornone from filters %}
+{% load badge_shelf from badge_tags %}
 
 {% block js %}
     <script src="{% static 'js/clipboard.min.js' %}"></script>
@@ -152,6 +153,13 @@
         {% endif %}
 
     </div>
+    {% if not is_ajax %}
+    <div class="row">
+        <div class="col-12">
+            {% badge_shelf object %}
+        </div>
+    </div>
+    {% endif %}
     <div class="row">
         <div class="col col-lg-6 mb-2">
             <div class="card">
