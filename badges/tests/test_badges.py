@@ -605,6 +605,11 @@ def test_quote_badges(member, make_rig):
     assert badges["under-canvas"] == aware(2024, 4, 2)  # From the event name
 
 
+def test_under_canvas_checks_venue_notes(member, make_rig):
+    make_rig(datetime.date(2024, 4, 3), venue=models.Venue.objects.create(name="Field", notes="Power to the marquee"))
+    assert earned(member)["under-canvas"] == aware(2024, 4, 3)
+
+
 def test_big_ticket_ignores_placeholder_quotes(member, make_rig):
     rig = make_rig(datetime.date(2024, 4, 2), mic=member)
     models.EventItem.objects.create(event=rig, name="Placeholder", cost=1_000_000, quantity=1, order=1)

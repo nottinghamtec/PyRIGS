@@ -192,13 +192,14 @@ def ra_rigs(n, *fields):
     return lambda s: nth(s.rigs_where(lambda e: (ra := risk_assessment(e)) and any(getattr(ra, f) for f in fields)), n)
 
 
-def quote_rigs(pattern, include_name=False):
-    """The first rig with something matching pattern on its quote (or in its name)."""
-    return lambda s: first(
-        s.rigs_where(
-            lambda e: re.search(pattern, s.quote_text.get(e.pk, "") + (" " + e.name.lower() if include_name else ""))
-        )
-    )
+def quote_rigs(pattern, anywhere=False):
+    """The first rig with something matching pattern on its quote (or, if anywhere, its name or venue notes too)."""
+
+    def text(s, event):
+        extra = f" {event.name} {event.venue.notes if event.venue else ''}".lower() if anywhere else ""
+        return s.quote_text.get(event.pk, "") + extra
+
+    return lambda s: first(s.rigs_where(lambda e: re.search(pattern, text(s, e))))
 
 
 def named_rigs(pattern, n=1):
@@ -306,7 +307,7 @@ _BADGES = [
     Badge("big-power", "Big Power", POWER, "tower-broadcast", "Five big-power rigs.", ra_rigs(5, "big_power")),
 
     Badge("great-outdoors", "Great Outdoors", PRODUCTION, "tree", "Five outdoor rigs.", ra_rigs(5, "outside")),
-    Badge("under-canvas", "Under Canvas", PRODUCTION, "tent", "Rigged in a marquee.", quote_rigs("marquee", include_name=True)),
+    Badge("under-canvas", "Under Canvas", PRODUCTION, "tent", "Rigged in a marquee.", quote_rigs("marquee", anywhere=True)),
     Badge("flying-high", "Flying High", PRODUCTION, "helicopter", "Worked on a rig with special structures.",
           ra_rigs(1, "special_structures", "suspended_structures")),
     Badge("turn-it-down", "Turn It Down", PRODUCTION, "volume-xmark", "Rigged where noise was monitored.", ra_rigs(1, "noise_monitoring")),
