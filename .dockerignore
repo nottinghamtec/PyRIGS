@@ -18,6 +18,7 @@
 !PyRIGS/**
 !RIGS/**
 !assets/**
+!badges/**
 !training/**
 !users/**
 !versioning/**
