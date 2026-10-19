@@ -75,6 +75,7 @@ INSTALLED_APPS = (
     "RIGS",
     "assets",
     "training",
+    "badges",
     "registration",
     "reversion",
     "widget_tweaks",
