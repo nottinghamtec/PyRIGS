@@ -1,0 +1,53 @@
+{% extends "base_rigs.html" %}
+
+{% block css %}
+{% include "badges/partials/badge_styles.html" %}
+<style>
+    .tec-leaderboard td { vertical-align: middle; }
+    .tec-leaderboard .tec-rank { width: 3.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .tec-leaderboard .tec-count { width: 5rem; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .tec-leaderboard .tec-bar-cell { width: 35%; }
+    .tec-leaderboard .progress { height: .5rem; }
+    .tec-leaderboard tr.tec-me > * { background: var(--bs-primary-bg-subtle); }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if preview %}
+    <div class="alert alert-warning">Badges aren't live yet, so only people with the View Badges permission (and superusers, if allowed in badge settings) can see them.{% if user.is_superuser %} Turn them on in <a href="{% url 'admin:badges_badgesettings_changelist' %}">badge settings</a>.{% endif %}</div>
+    {% endif %}
+
+    <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center mb-4">
+        <div class="tec-badge-medal mb-0" style="--badge-colour: {{ headliner.category.colour }}" aria-hidden="true"><span class="fas fa-{{ headliner.icon }}"></span></div>
+        <p class="mb-0 flex-grow-1">Whoever has the most badges is the <strong>Headliner</strong>, and holds the badge until someone overtakes them. Headliner doesn't count towards anyone's total.</p>
+        <a href="{% url 'badge_list' %}" class="btn btn-outline-secondary text-nowrap"><span class="fas fa-arrow-left"></span> All badges</a>
+    </div>
+
+    {% if rows %}
+    <div class="table-responsive">
+        <table class="table tec-leaderboard">
+            <thead>
+                <tr><th class="tec-rank">#</th><th>Member</th><th class="tec-bar-cell d-none d-md-table-cell"></th><th class="tec-count">Badges</th></tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr{% if row.profile.pk == user.pk %} class="tec-me"{% endif %}>
+                    <td class="tec-rank">{% if row.tied %}={% endif %}{{ row.rank }}</td>
+                    <td>
+                        {{ row.profile.first_name }} {{ row.profile.last_name }}
+                        {% if row.headliner %}<span class="badge text-bg-dark ms-1"><span class="fas fa-trophy"></span> Headliner</span>{% endif %}
+                        {% if row.profile.pk == user.pk %}<span class="text-body-secondary small ms-1">(you)</span>{% endif %}
+                    </td>
+                    <td class="tec-bar-cell d-none d-md-table-cell">
+                        <div class="progress" role="presentation"><div class="progress-bar" style="width: {{ row.width }}%"></div></div>
+                    </td>
+                    <td class="tec-count">{{ row.badges }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-body-secondary">Nobody has any badges yet.</p>
+    {% endif %}
+{% endblock %}

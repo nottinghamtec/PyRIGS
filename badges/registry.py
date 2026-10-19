@@ -3,6 +3,9 @@ Every badge, and the rule for earning it.
 
 A rule takes a ProfileStats and returns when the badge was achieved (a date or datetime), or None if it hasn't been.
 Changing a rule doesn't take badges away from anyone; run `award_badges --reset` to recompute from scratch.
+
+The exception is Headliner, which has no rule: it's worked out across everyone on each run (see awarding.py), and
+moves when someone else takes the top spot.
 """
 
 import datetime
@@ -33,7 +36,7 @@ class Badge:
     category: Category
     icon: str  # Font Awesome (solid) icon name
     blurb: str
-    rule: Callable
+    rule: Callable | None
 
 
 MILESTONES = Category("milestones", "Milestones", "#3853a4")
@@ -50,11 +53,14 @@ ADMIN = Category("admin", "Admin", "#57534e")
 STORE = Category("store", "Store", "#a16207")
 MOMENTS = Category("moments", "Moments", "#0369a1")
 SEASONS = Category("seasons", "Seasons", "#4d7c0f")
+NOVELTY = Category("novelty", "Novelty", "#111827")
 
 CATEGORIES = [
     MILESTONES, LEADERSHIP, EXPLORER, ROAD, TRAINING, DEPARTMENTS, TEACHING,
-    SAFETY, CREW, CLIENTS, ADMIN, STORE, MOMENTS, SEASONS,
+    SAFETY, CREW, CLIENTS, ADMIN, STORE, MOMENTS, SEASONS, NOVELTY,
 ]  # fmt: skip
+
+HEADLINER = "headliner"
 
 FULL_HOUSE_DEPARTMENTS = (TrainingLevel.SOUND, TrainingLevel.LIGHTING, TrainingLevel.POWER, TrainingLevel.RIGGING)
 
@@ -241,6 +247,8 @@ _BADGES = [
     Badge("marathon", "Marathon", SEASONS, "person-running", "Crewed an event lasting three days or more.",
           lambda s: first(e.end_date for e in s.rig_events if e.end_date and (e.end_date - e.start_date).days >= 2)),
     Badge("comeback-tour", "Comeback Tour", SEASONS, "rotate-left", "Back on the road after a year away.", comeback),
+
+    Badge(HEADLINER, "Headliner", NOVELTY, "trophy", "Top of the bill: more badges than anyone else. Yours until someone overtakes you!", None),
 ]
 # fmt: on
 

@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from RIGS.models import Profile
 
-from badges.awarding import award_badges, send_badge_emails
+from badges.awarding import award_badges, headliners, send_badge_emails
 from badges.models import BadgeAward, BadgeSettings
 
 
@@ -57,6 +57,10 @@ class Command(BaseCommand):
         self.stdout.write(f"{verb} {len(awards)} badge(s) to {people} person/people, {queued} queued for email.")
         for name, count in Counter(badge.name for _, badge, *_ in awards).most_common():
             self.stdout.write(f"  {name}: {count}")
+        leaders = Profile.objects.filter(
+            pk__in=headliners(awards if dry_run else (), ignore_saved=dry_run and options["reset"])
+        )
+        self.stdout.write("Headliner: " + (", ".join(str(leader) for leader in leaders) or "nobody yet"))
 
         if not live:
             self.stdout.write(

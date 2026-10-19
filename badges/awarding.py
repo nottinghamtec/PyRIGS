@@ -1,6 +1,6 @@
 import datetime
 import logging
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import premailer
 from django.conf import settings
@@ -14,7 +14,7 @@ from django.utils import timezone
 from RIGS.models import Profile
 
 from badges.models import BadgeAward, BadgeSettings
-from badges.registry import BADGES
+from badges.registry import BADGES, HEADLINER
 from badges.stats import ProfileStats, build_history, to_datetime
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def earned_badges(stats):
     """{slug: datetime achieved} for every badge this person has earned according to the current rules."""
     earned = {}
     for badge in BADGES.values():
-        achieved = badge.rule(stats)
+        achieved = badge.rule(stats) if badge.rule else None
         if achieved is not None:
             earned[badge.slug] = to_datetime(achieved)
     return earned
@@ -42,6 +42,7 @@ def award_badges(profiles=None, dry_run=False, reset=False, live=None):
     where emailed says whether the award is queued to be emailed.
     Existing awards are never removed unless reset is set, which wipes them first so everything is recomputed.
     Inactive accounts are skipped (and, with reset, lose any awards they had).
+    The exception is Headliner, which is moved to whoever's top at the end of every run.
 
     New awards are only queued for emailing if badges are live, this isn't a reset, and they were achieved recently.
     Pass live to pretend badges are (or aren't) live, e.g. to preview going live with a dry run.
@@ -81,7 +82,45 @@ def award_badges(profiles=None, dry_run=False, reset=False, live=None):
                 ],
                 ignore_conflicts=True,
             )
+        new_awards += _move_headliner(new_awards, dry_run, reset, notify)
     return new_awards
+
+
+def headliners(unsaved=(), ignore_saved=False):
+    """
+    Active members with the most badges, not counting Headliner itself. Everyone tied at the top counts.
+
+    unsaved adds awards a dry run would have made; ignore_saved leaves out what's in the database (a dry-run reset).
+    """
+    counts = Counter()
+    if not ignore_saved:
+        counts.update(
+            BadgeAward.objects.filter(profile__is_active=True).exclude(slug=HEADLINER).values_list("profile", flat=True)
+        )
+    counts.update(profile.pk for profile, badge, *_ in unsaved if badge.slug != HEADLINER and profile.is_active)
+    top = max(counts.values(), default=0)
+    return {pk for pk, count in counts.items() if count == top and top > 0}
+
+
+def _move_headliner(new_awards, dry_run, reset, notify):
+    """Give Headliner to anyone who's just reached the top and take it from anyone who isn't any more."""
+    leaders = headliners(new_awards if dry_run else (), ignore_saved=dry_run and reset)
+    holders = (
+        set() if dry_run and reset else set(BadgeAward.objects.filter(slug=HEADLINER).values_list("profile", flat=True))
+    )
+    gained, now = leaders - holders, timezone.now()
+    if not dry_run:
+        BadgeAward.objects.filter(slug=HEADLINER).exclude(profile__in=leaders).delete()
+        BadgeAward.objects.bulk_create(
+            BadgeAward(
+                profile_id=pk,
+                slug=HEADLINER,
+                awarded_at=now,
+                email=BadgeAward.EMAIL_PENDING if notify else BadgeAward.EMAIL_SKIPPED,
+            )
+            for pk in gained
+        )
+    return [(profile, BADGES[HEADLINER], now, notify) for profile in Profile.objects.filter(pk__in=gained)]
 
 
 def pending_emails(extra=()):

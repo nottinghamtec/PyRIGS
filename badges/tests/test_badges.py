@@ -167,17 +167,18 @@ def test_award_badges_dry_run_and_idempotence(member, make_rig):
     make_rig(rig_date)
     profiles = models.Profile.objects.filter(pk=member.pk)
 
-    assert [badge.slug for _, badge, *_ in award_badges(profiles, dry_run=True)] == ["opening-act"]
+    # Being the only one with badges makes them Headliner too
+    assert [badge.slug for _, badge, *_ in award_badges(profiles, dry_run=True)] == ["opening-act", "headliner"]
     assert not BadgeAward.objects.exists()
 
-    assert len(award_badges(profiles)) == 1
-    assert timezone.localtime(BadgeAward.objects.get().awarded_at).date() == rig_date
+    assert len(award_badges(profiles)) == 2
+    assert timezone.localtime(BadgeAward.objects.get(slug="opening-act").awarded_at).date() == rig_date
     assert award_badges(profiles) == []
 
     # Awards are never taken away, unless reset
     models.Event.objects.update(status=models.Event.CANCELLED)
     assert award_badges(profiles) == []
-    assert BadgeAward.objects.count() == 1
+    assert BadgeAward.objects.count() == 2
     award_badges(profiles, reset=True)
     assert not BadgeAward.objects.exists()
 
@@ -274,7 +275,8 @@ def test_only_recent_badges_are_emailed(member, make_rig, recent_rig, mailoutbox
     assert awards["mic-drop"].emailed_at is not None
     assert len(mailoutbox) == 1
     assert mailoutbox[0].to == [member.email]
-    assert mailoutbox[0].subject == "You've earned a badge: Mic Drop"
+    assert mailoutbox[0].subject == "You've earned 2 new badges"  # Mic Drop, and Headliner as they're top
+    assert "Mic Drop" in mailoutbox[0].body and "Headliner" in mailoutbox[0].body
     assert "Opening Act" not in mailoutbox[0].body
 
     call_command("award_badges", "--quiet")
@@ -286,7 +288,7 @@ def test_digest_lists_every_new_badge(member, recent_rig, mailoutbox):
     set_live(badges=True)
     call_command("award_badges", "--quiet")
     assert len(mailoutbox) == 1
-    assert mailoutbox[0].subject == "You've earned 2 new badges"
+    assert mailoutbox[0].subject == "You've earned 3 new badges"  # Including Headliner
     assert "Mic Drop" in mailoutbox[0].body and "Opening Act" in mailoutbox[0].body
     assert "&#x27;" not in mailoutbox[0].body
 
@@ -311,8 +313,8 @@ def test_reset_never_emails(member, recent_rig, mailoutbox):
 def test_dry_run_previews_going_live(member, recent_rig, mailoutbox, capsys):
     call_command("award_badges", "--dry-run", "--as-if-live")
     out = capsys.readouterr().out
-    assert "1 queued for email" in out
-    assert f"Email to {member} (would send): Opening Act" in out
+    assert "2 queued for email" in out
+    assert f"Email to {member} (would send): Opening Act, Headliner" in out
     assert not BadgeAward.objects.exists()
     assert mailoutbox == []
 
@@ -509,3 +511,61 @@ def test_permissions_can_come_from_a_group(member, member_client):
     group.permissions.add(Permission.objects.get(content_type__app_label="badges", codename="view_tech_rider"))
     member.groups.add(group)
     assert member_client.get(reverse("tech_rider")).status_code == 200
+
+
+# --- Headliner and leaderboard ---
+
+
+def headliner_holders():
+    return set(BadgeAward.objects.filter(slug="headliner").values_list("profile__username", flat=True))
+
+
+def test_headliner_goes_to_the_top_and_moves_on(member, make_rig, admin_user):
+    other = models.Profile.objects.create(username="other", email="other@example.com")
+    days_ago = lambda n: timezone.localdate() - datetime.timedelta(days=n)  # noqa: E731 (recent, so no anniversaries)
+    make_rig(days_ago(30))  # Member: Opening Act
+    award_badges()
+    assert headliner_holders() == {"member"}
+    assert BadgeAward.objects.filter(profile=member).count() == 2  # Opening Act and Headliner
+
+    make_rig(days_ago(20), person=other, mic=other)  # Other: Opening Act and Mic Drop
+    award_badges()
+    assert headliner_holders() == {"other"}  # Taken from member, who doesn't count it towards their own total
+
+    make_rig(days_ago(10), mic=member)  # Member catches up with Mic Drop
+    award_badges()
+    assert headliner_holders() == {"member", "other"}  # Ties share it
+
+
+def test_headliner_ignores_inactive_accounts(member, make_rig):
+    make_rig(datetime.date(2024, 1, 1))
+    award_badges()
+    member.is_active = False
+    member.save()
+    award_badges()
+    assert headliner_holders() == set()
+
+
+def test_headliner_dry_run_and_email(member, recent_rig, mailoutbox, capsys):
+    call_command("award_badges", "--dry-run")
+    assert f"Headliner: {member}" in capsys.readouterr().out
+    assert not BadgeAward.objects.exists()
+
+    set_live(badges=True)
+    call_command("award_badges", "--quiet")
+    assert "Headliner" in mailoutbox[0].body
+
+
+def test_leaderboard(member, member_client, make_rig):
+    other = models.Profile.objects.create(username="other", first_name="Oth", last_name="Er", email="o@example.com")
+    make_rig(timezone.localdate() - datetime.timedelta(days=30))
+    make_rig(timezone.localdate() - datetime.timedelta(days=20), person=other, mic=other)
+    award_badges()
+
+    url = reverse("badge_leaderboard")
+    assert member_client.get(url).status_code == 404
+    set_live(badges=True)
+    response = member_client.get(url)
+    rows = response.context["rows"]
+    assert [(row["profile"], row["badges"], row["headliner"]) for row in rows] == [(other, 2, True), (member, 1, False)]
+    assert reverse("badge_leaderboard").encode() in member_client.get(reverse("badge_list")).content

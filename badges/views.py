@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from django.contrib.auth.models import Permission
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,7 +10,7 @@ from django.views import generic
 from RIGS.models import EventChecklist, PowerTestRecord, Profile, RiskAssessment
 
 from badges.models import BadgeAward, BadgeSettings
-from badges.registry import BADGES, badges_by_category
+from badges.registry import BADGES, HEADLINER, badges_by_category
 from badges.stats import ProfileStats
 
 
@@ -46,14 +46,16 @@ def tech_rider_visible(user, settings=None):
     )
 
 
-class BadgeList(generic.TemplateView):
-    template_name = "badges/badge_list.html"
-
+class BadgesVisibleMixin:
     def dispatch(self, request, *args, **kwargs):
         self.settings = BadgeSettings.load()
         if not badges_visible(request.user, self.settings):
             raise Http404
         return super().dispatch(request, *args, **kwargs)
+
+
+class BadgeList(BadgesVisibleMixin, generic.TemplateView):
+    template_name = "badges/badge_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -73,6 +75,46 @@ class BadgeList(generic.TemplateView):
         context["badge_count"] = len(BADGES)
         context["preview"] = not self.settings.badges_live
         context["page_title"] = "Badges"
+        return context
+
+
+class Leaderboard(BadgesVisibleMixin, generic.TemplateView):
+    template_name = "badges/leaderboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        counts = (
+            BadgeAward.objects.filter(profile__is_active=True)
+            .exclude(slug=HEADLINER)  # Doesn't count towards itself
+            .values("profile")
+            .annotate(badges=Count("id"))
+            .order_by("-badges", "profile__first_name", "profile__last_name")
+        )
+        people = Profile.objects.in_bulk([row["profile"] for row in counts])
+        headliners = set(BadgeAward.objects.filter(slug=HEADLINER).values_list("profile", flat=True))
+        top = counts[0]["badges"] if counts else 0
+        rows, previous = [], None
+        for position, row in enumerate(counts, start=1):
+            if row["badges"] != previous:
+                rank, previous = position, row["badges"]
+            rows.append(
+                {
+                    "rank": rank,
+                    "tied": sum(1 for other in counts if other["badges"] == row["badges"]) > 1,
+                    "profile": people[row["profile"]],
+                    "badges": row["badges"],
+                    "width": round(100 * row["badges"] / top),
+                    "headliner": row["profile"] in headliners,
+                }
+            )
+        context.update(
+            {
+                "rows": rows,
+                "preview": not self.settings.badges_live,
+                "headliner": BADGES[HEADLINER],
+                "page_title": "Badge Leaderboard",
+            }
+        )
         return context
 
 
