@@ -1,0 +1,10 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-19" title="Badges" %}
+<p>
+    You can now earn <a href="{% url 'badge_list' %}">badges</a> for milestones, leading and crewing events,
+    training and teaching, safety, time on the road, and more. New badges are awarded every hour
+    and appear on your <a href="{% url 'profile_detail' pk=request.user.pk %}">profile</a>. You'll get an email when
+    you earn one, which you can turn off from your profile.
+</p>
+<p>The <a href="{% url 'badge_leaderboard' %}">leaderboard</a> shows how everyone is getting on, and whoever has the most badges holds the Headliner badge.</p>
+{% endchangelog_entry %}

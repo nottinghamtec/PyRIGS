@@ -1,6 +1,7 @@
 {% extends 'base_rigs.html' %}
 {% load humanize %}
 {% load static %}
+{% load changelog %}
 
 {% block title %}RIGS{% endblock %}
 
@@ -62,7 +63,9 @@
             </div>
         </div>
     </div>
-    <div class="col-sm mb-3">
+    {# Quick links and the changelog share the left column on desktop, while on mobile the changelog drops below recent changes #}
+    <div class="col-12 home-lower{% if not perms.RIGS.view_event %} home-lower-no-activity{% endif %}">
+    <div class="home-quick-links">
         <div class="card">
             <h4 class="card-header">Quick Links</h4>
             <div class="list-group list-group-flush">
@@ -77,9 +80,13 @@
         </div>
     </div>
     {% if perms.RIGS.view_event %}
-    <div class="col-sm">
+    <div class="home-activity">
         {% include 'activity_feed.html' %}
     </div>
     {% endif %}
+    <div class="home-changelog">
+        {% changelog %}
+    </div>
+    </div>
 </div><!---end row--->
 {% endblock %}

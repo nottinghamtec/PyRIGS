@@ -14,6 +14,7 @@ urlpatterns = [
     path("training/", include("training.urls")),
     path("", include("badges.urls")),
     path("", login_required(views.Index.as_view()), name="index"),
+    path("changelog/", login_required(views.Changelog.as_view()), name="changelog"),
     # API
     path("api/<str:model>/", login_required(views.SecureAPIRequest.as_view()), name="api_secure"),
     path("api/<str:model>/<int:pk>/", login_required(views.SecureAPIRequest.as_view()), name="api_secure"),

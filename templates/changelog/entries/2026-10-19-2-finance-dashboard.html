@@ -1,0 +1,13 @@
+{% if perms.RIGS.view_invoice %}
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-19" title="A bigger finance dashboard" %}
+<p>The <a href="{% url 'invoice_dashboard' %}">finance dashboard</a> has been expanded and is quicker to load. New sections include:</p>
+<ul>
+    <li>Income by payment method and by source, and income through the year against the year before.</li>
+    <li>How events move from completion to invoice to payment, with time to invoice and time to pay.</li>
+    <li>Top clients, who owes the most, aged debt, and when in the year the money comes in.</li>
+    <li>Records to check, flagging data that needs tidying up.</li>
+</ul>
+<p>The figures can be exported as CSV.</p>
+{% endchangelog_entry %}
+{% endif %}

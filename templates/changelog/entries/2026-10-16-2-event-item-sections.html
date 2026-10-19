@@ -1,0 +1,20 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-16" title="Sections in event items" %}
+<p>
+    Event items can now be split into sections. A section header is a title-only row, and each section shows a
+    sub-total for the items beneath it. Sections don't change an event's total.
+</p>
+<p>
+    Each section gets its own colour. It's chosen automatically, or you can pick a department colour from the
+    section's colour menu. Printed quotes and invoices show sections (though without the colours).
+</p>
+{% if perms.RIGS.change_event %}
+<p>Editing items is also easier:</p>
+<ul>
+    <li>Click a name, price, quantity or description to edit it in place.</li>
+    <li>Duplicate a row with one click, or use <em>Save &amp; add another</em> in the item form.</li>
+    <li>Drag rows by their handle, and they drop where you expect.</li>
+    <li>Undo a deleted item, and get a warning before leaving a page with unsaved changes.</li>
+</ul>
+{% endif %}
+{% endchangelog_entry %}

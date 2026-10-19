@@ -1,0 +1,35 @@
+{# The pager links go to the full changelog page; on the front page they swap this card's page in place instead #}
+<div class="card changelog">
+    <h4 class="card-header">What's New</h4>
+    <div class="changelog-page">
+        {% include "changelog/page.html" %}
+    </div>
+</div>
+<script>
+ready(function () {
+    document.querySelectorAll('.changelog').forEach(function (card) {
+        var container = card.querySelector('.changelog-page');
+        card.addEventListener('click', function (e) {
+            var link = e.target.closest('a.page-link');
+            if (!link || !container.contains(link)) {
+                return;
+            }
+            e.preventDefault();
+            container.setAttribute('aria-busy', 'true');
+            ajaxFetch(link.href)
+                .then(function (response) {
+                    if (!response.ok) { throw new Error(response.status); }
+                    return response.text();
+                })
+                .then(function (html) {
+                    setHtml(container, html);
+                    if (card.getBoundingClientRect().top < 0) {
+                        card.scrollIntoView({block: 'start'});
+                    }
+                })
+                .catch(function () { window.location = link.href; })
+                .finally(function () { container.removeAttribute('aria-busy'); });
+        });
+    });
+});
+</script>

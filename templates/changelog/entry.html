@@ -1,0 +1,24 @@
+{% load static %}
+<div class="list-group-item changelog-entry">
+    <div class="d-flex">
+        <div class="align-self-start me-3">
+            {% if author %}
+                <a href="{% url 'profile_detail' pk=author.pk %}" class="modal-href">
+                    <img class="changelog-avatar rounded" src="{{ author.profile_picture }}" alt="{{ author.name }}"/>
+                </a>
+            {% else %}
+                <img class="changelog-avatar rounded" src="{% static 'imgs/pyrigs-avatar.png' %}" alt=""/>
+            {% endif %}
+        </div>
+        <div class="flex-grow-1 changelog-content">
+            <div class="d-flex flex-wrap justify-content-between column-gap-2">
+                <h5 class="mb-1">{{ title|default:"Update" }}{% if is_new %} <span class="badge rounded-pill text-bg-danger align-middle changelog-new">New</span>{% endif %}</h5>
+                <small class="text-muted"><span class="fas fa-calendar"></span> <time datetime="{{ date|date:'Y-m-d' }}">{{ date|date:"j M Y" }}</time></small>
+            </div>
+            <small class="text-muted d-block mb-2">
+                {% if author %}<a href="{% url 'profile_detail' pk=author.pk %}" class="modal-href">{{ author.name }}</a>{% else %}{{ username }}{% endif %}
+            </small>
+            <div class="changelog-body">{{ body }}</div>
+        </div>
+    </div>
+</div>

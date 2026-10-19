@@ -1,0 +1,32 @@
+<div class="list-group list-group-flush">
+    {% for entry in page_obj %}
+        {{ entry }}
+    {% empty %}
+        <div class="list-group-item text-muted">Nothing new yet.</div>
+    {% endfor %}
+</div>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="card-footer" aria-label="Changelog pages">
+    <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="{% url 'changelog' %}?page={{ page_obj.previous_page_number }}" aria-label="Newer">&lsaquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link" aria-hidden="true">&lsaquo;</span></li>
+        {% endif %}
+        {% for number in page_range %}
+            {% if number == ellipsis %}
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            {% elif number == page_obj.number %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ number }}</span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="{% url 'changelog' %}?page={{ number }}">{{ number }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="{% url 'changelog' %}?page={{ page_obj.next_page_number }}" aria-label="Older">&rsaquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link" aria-hidden="true">&rsaquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

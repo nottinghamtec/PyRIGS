@@ -25,6 +25,7 @@ from django.template.loader import get_template
 from django.utils import timezone
 
 from RIGS import models
+from RIGS.templatetags import changelog
 from assets import models as asset_models
 from training import models as training_models
 
@@ -64,6 +65,16 @@ class Index(generic.TemplateView):  # Displays the current rig count along with 
             .exclude(status=models.Event.CANCELLED)
             .filter(is_rig=True, dry_hire=False)
         )
+        return context
+
+
+class Changelog(generic.TemplateView):
+    template_name = "changelog/changelog_page.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(changelog.changelog_page(self.request, self.request.GET.get("page")))
+        context["page_title"] = "What's New"
         return context
 
 

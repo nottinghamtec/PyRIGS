@@ -1,0 +1,13 @@
+{% if perms.RIGS.view_riskassessment %}
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-16" title="A new H&S overview" %}
+<p>The <a href="{% url 'hs_list' %}">H&amp;S overview</a> now shows a card for each event instead of one large table.</p>
+<ul>
+    <li>Each confirmed event has a red, amber or green H&amp;S status. Hover over it to see why.</li>
+    <li>Events stay amber while power test records are outstanding.</li>
+    <li>A toggle shows only events that need action, and the summary counts red and amber events across every page.</li>
+    <li>Choose the order and date range. RIGS remembers your choice.</li>
+</ul>
+<p>The old table is still available from a legacy link on the page.</p>
+{% endchangelog_entry %}
+{% endif %}

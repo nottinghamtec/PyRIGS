@@ -1,0 +1,6 @@
+{% if request.user.is_staff %}
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-06" title="Tidier qualification admin" %}
+<p>The training item and training level qualification lists in the admin site show more useful columns, so they're easier to scan.</p>
+{% endchangelog_entry %}
+{% endif %}

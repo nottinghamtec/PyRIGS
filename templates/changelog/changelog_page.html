@@ -1,0 +1,15 @@
+{% extends is_ajax|yesno:"base_ajax_nomodal.html,base_rigs.html" %}
+
+{% block title %}What's New{% endblock %}
+
+{% block content %}
+{% if is_ajax %}
+    {% include "changelog/page.html" %}
+{% else %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% include "changelog/changelog.html" %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

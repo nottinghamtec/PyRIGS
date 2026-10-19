@@ -95,6 +95,59 @@ html {
   }
 }
 
+// Front page lower section: stacked as quick links, recent changes, changelog on mobile;
+// on desktop the changelog sits under the quick links with recent changes alongside both
+.home-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "links" "activity" "changelog";
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @include media-breakpoint-up(sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "links activity" "changelog activity";
+    align-items: start;
+
+    &.home-lower-no-activity {
+      grid-template-areas: "links changelog";
+    }
+  }
+}
+
+.home-quick-links { grid-area: links; }
+.home-activity { grid-area: activity; }
+.home-changelog { grid-area: changelog; }
+
+.changelog-avatar {
+  width: 3em;
+  height: 3em;
+  object-fit: cover;
+}
+
+.changelog-new {
+  font-size: 0.6em;
+  vertical-align: 0.2em;
+}
+
+.changelog-content {
+  min-width: 0;
+}
+
+.changelog-page[aria-busy="true"] {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.changelog-body ul {
+  padding-left: 1.1rem;
+}
+
+.changelog-body > :last-child {
+  margin-bottom: 0;
+}
+
 // Bootstrap 4's contextual table classes also worked as background colours on non-table elements
 @each $color, $value in $table-variants {
   .table-#{$color}:not(table):not(tr):not(td):not(th) {

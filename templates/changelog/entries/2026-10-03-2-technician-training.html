@@ -1,0 +1,10 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-03" title="Technicians can log training" %}
+<p>
+    Technicians who are passed out on a training item can now log <em>Training Started</em> and
+    <em>Training Complete</em> for it, on items in their department that allow it.
+    {% if request.user.can_log_training %}<a href="{% url 'session_log' %}">Log Session</a>{% else %}Log Session{% endif %}
+    lists which items you can deliver training in.
+</p>
+<p>Haulage Supervisors now see the correct training items as well.</p>
+{% endchangelog_entry %}
