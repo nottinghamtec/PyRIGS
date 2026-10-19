@@ -12,6 +12,7 @@ urlpatterns = [
     path("", include("RIGS.urls")),
     path("assets/", include("assets.urls")),
     path("training/", include("training.urls")),
+    path("", include("badges.urls")),
     path("", login_required(views.Index.as_view()), name="index"),
     # API
     path("api/<str:model>/", login_required(views.SecureAPIRequest.as_view()), name="api_secure"),

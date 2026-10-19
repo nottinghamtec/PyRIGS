@@ -1,0 +1,13 @@
+{% autoescape off %}Hi {{ profile.first_name }},
+
+{% if awards|length == 1 %}You've earned a new badge{% else %}You've earned {{ awards|length }} new badges{% endif %} on RIGS:
+{% for award in awards %}
+- {{ award.badge.name }} ({{ award.badge.category.name }}): {{ award.badge.blurb }}{% endfor %}
+
+See them on your profile: {{ profile_url }}
+See what else is up for grabs: {{ badges_url }}
+
+TEC PA & Lighting
+
+Don't want these emails? Turn them off in your profile: {{ settings_url }}
+{% endautoescape %}

@@ -48,7 +48,7 @@ class ProfileDetail(generic.DetailView):
 class ProfileUpdateSelf(generic.UpdateView):
     template_name = "profile_form.html"
     model = get_user_model()
-    fields = ["first_name", "last_name", "email", "initials", "phone", "dark_theme"]
+    fields = ["first_name", "last_name", "email", "initials", "phone", "dark_theme", "badge_emails"]
 
     def get_queryset(self):
         pk = self.request.user.id

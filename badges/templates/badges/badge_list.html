@@ -1,0 +1,108 @@
+{% extends "base_rigs.html" %}
+
+{% block css %}
+{% include "badges/partials/badge_styles.html" %}
+<style>
+    .tec-badge-filter-earned .tec-badge-locked,
+    .tec-badge-filter-locked .tec-badge:not(.tec-badge-locked) { display: none; }
+    .tec-badge-filter-earned .tec-badge-category:not(:has(.tec-badge:not(.tec-badge-locked))),
+    .tec-badge-filter-locked .tec-badge-category:not(:has(.tec-badge-locked)) { display: none; }
+    .tec-badge-category { scroll-margin-top: 1rem; }
+    .tec-holders-list { max-height: 60vh; overflow-y: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if preview %}
+    <div class="alert alert-warning">Badges aren't live yet, so only people with the View Badges permission (and superusers, if allowed in badge settings) can see them.{% if user.is_superuser %} Turn them on in <a href="{% url 'admin:badges_badgesettings_changelist' %}">badge settings</a>.{% endif %}</div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+            <div class="flex-grow-1">
+                <div class="fs-5">You've earned <strong>{{ earned_count }}</strong> of {{ badge_count }} badges</div>
+                <div class="progress mt-2" role="progressbar" aria-label="Badges earned" aria-valuenow="{{ earned_count }}" aria-valuemin="0" aria-valuemax="{{ badge_count }}" style="height: .6rem">
+                    <div class="progress-bar" style="width: {% widthratio earned_count badge_count 100 %}%"></div>
+                </div>
+                <div class="small text-body-secondary mt-2">Badge awards are reprocessed regularly, so new ones will show up here soon after you earn them.</div>
+            </div>
+            <div class="btn-group" role="group" aria-label="Show badges">
+                <input type="radio" class="btn-check" name="badge-filter" id="filter-all" value="" checked>
+                <label class="btn btn-outline-secondary" for="filter-all">All</label>
+                <input type="radio" class="btn-check" name="badge-filter" id="filter-earned" value="earned">
+                <label class="btn btn-outline-secondary" for="filter-earned">Earned</label>
+                <input type="radio" class="btn-check" name="badge-filter" id="filter-locked" value="locked">
+                <label class="btn btn-outline-secondary" for="filter-locked">Not yet</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="badge-catalogue">
+    {% for category, badges, earned_in_category in categories %}
+    <section class="tec-badge-category mb-4" id="{{ category.slug }}">
+        <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+            <span class="d-inline-block rounded-circle" style="width: .75rem; height: .75rem; background: {{ category.colour }}"></span>
+            {{ category.name }}
+            <span class="text-body-secondary fw-normal small">{{ earned_in_category }}/{{ badges|length }}</span>
+        </h3>
+        <div class="tec-badge-grid">
+            {% for badge, holders, earned in badges %}
+                {% include "badges/partials/badge.html" with show_holders=True %}
+                {% if holders %}
+                <template id="holders-{{ badge.slug }}">
+                    <ul class="list-group list-group-flush">
+                        {% for award in holders %}
+                        <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                            <span>{{ award.profile.first_name }} {{ award.profile.last_name }}</span>
+                            <span class="text-body-secondary text-nowrap">{{ award.awarded_at|date:"M Y" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </template>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+    </div>
+
+    <div class="modal fade" id="holders-modal" tabindex="-1" aria-labelledby="holders-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="holders-title"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body tec-holders-list pt-0"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script>
+    ready(function() {
+        var catalogue = document.getElementById('badge-catalogue');
+        document.querySelectorAll('input[name="badge-filter"]').forEach(function(input) {
+            input.addEventListener('change', function() {
+                catalogue.classList.remove('tec-badge-filter-earned', 'tec-badge-filter-locked');
+                if (input.value) { catalogue.classList.add('tec-badge-filter-' + input.value); }
+            });
+        });
+
+        var modalEl = document.getElementById('holders-modal');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        catalogue.addEventListener('click', function(e) {
+            var button = e.target.closest('[data-holders]');
+            if (!button) { return; }
+            var tile = button.closest('.tec-badge');
+            var template = document.getElementById('holders-' + button.dataset.holders);
+            modalEl.querySelector('.modal-title').textContent = tile.querySelector('.tec-badge-name').textContent + ': ' + button.textContent.toLowerCase();
+            var body = modalEl.querySelector('.modal-body');
+            body.replaceChildren(template.content.cloneNode(true));
+            modal.show(button);
+        });
+    });
+</script>
+{% endblock %}

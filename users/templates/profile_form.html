@@ -40,6 +40,10 @@
 		             <label for="{{ form.dark_theme.id_for_label }}">Enable Dark Theme?</label>
                      {% render_field form.dark_theme %}
 		        </div>
+                <div class="mb-3">
+                     <label for="{{ form.badge_emails.id_for_label }}">{{ form.badge_emails.label }}?</label>
+                     {% render_field form.badge_emails %}
+                </div>
 		        <div class="mb-3">
                     <input class="btn btn-primary float-end" type="submit"/>
                 </div>
