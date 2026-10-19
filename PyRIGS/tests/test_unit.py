@@ -150,3 +150,39 @@ def test_search(admin_client, admin_user):
     assertContains(response, "No results found")
     response = admin_client.get(url, {"q": admin_user.first_name})
     assertContains(response, admin_user.first_name)
+
+
+@pytest.mark.django_db
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+def test_duplicate_form_submission_is_deduplicated(admin_client):
+    from django.core.cache import cache
+    from RIGS.models import Person
+
+    cache.clear()
+    data = {"name": "Dupe Tester", "email": "", "phone": "", "address": "", "notes": "", "csrfmiddlewaretoken": "nonce-a"}
+    first = admin_client.post(reverse("person_create"), data)
+    second = admin_client.post(reverse("person_create"), data)
+    assert first.status_code == 302
+    assert second.status_code == 302
+    assert second.url == first.url
+    assert Person.objects.filter(name="Dupe Tester").count() == 1
+
+    # A different render of the form is a different submission
+    data["csrfmiddlewaretoken"] = "nonce-b"
+    admin_client.post(reverse("person_create"), data)
+    assert Person.objects.filter(name="Dupe Tester").count() == 2
+
+
+@pytest.mark.django_db
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+def test_duplicate_submission_while_in_flight_does_not_block(admin_client):
+    from django.core.cache import cache
+    from RIGS.models import Person
+    from PyRIGS.middleware import DuplicateSubmissionMiddleware, IN_FLIGHT
+
+    cache.clear()
+    cache.set(DuplicateSubmissionMiddleware.cache_key("nonce-c"), IN_FLIGHT, 60)
+    data = {"name": "Inflight Tester", "email": "", "phone": "", "address": "", "notes": "", "csrfmiddlewaretoken": "nonce-c"}
+    response = admin_client.post(reverse("person_create"), data)
+    assert response.status_code == 409
+    assert not Person.objects.filter(name="Inflight Tester").exists()

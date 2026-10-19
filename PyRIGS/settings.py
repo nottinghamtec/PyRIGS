@@ -90,6 +90,7 @@ MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "PyRIGS.middleware.DuplicateSubmissionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -171,11 +172,9 @@ LOGGING = {
     },
 }
 
-# Tests lock up SQLite otherwise
-if STAGING or CI:
+# Tests lock up SQLite otherwise; local dev is a single process so an in-memory cache behaves like the shared one
+if STAGING or CI or DEBUG:
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
-elif DEBUG:
-    CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 else:
     CACHES = {
         "default": {
