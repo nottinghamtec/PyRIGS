@@ -1,0 +1,12 @@
+<div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+    <div>
+        <h4 class="card-title h5 mb-1">{{ title }}</h4>
+        {% if subtitle %}<p class="small text-body-secondary mb-0" id="{{ chart }}-subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+    <div class="btn-group btn-group-sm flex-shrink-0" role="group" aria-label="Show {{ title|lower }} as">
+        <button type="button" class="btn btn-outline-secondary active" aria-pressed="true" data-finance-view="chart" data-finance-target="{{ chart }}">Chart</button>
+        <button type="button" class="btn btn-outline-secondary" aria-pressed="false" data-finance-view="table" data-finance-target="{{ chart }}">Table</button>
+    </div>
+</div>
+<div class="finance-chart" data-chart-for="{{ chart }}"{% if height %} style="height: {{ height }}px"{% endif %}><canvas id="chart-{{ chart }}" role="img" aria-label="{{ title }}"></canvas></div>
+<div class="table-responsive finance-table-view" data-table-for="{{ chart }}" hidden></div>

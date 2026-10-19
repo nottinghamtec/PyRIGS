@@ -1,3 +1,4 @@
+import csv
 import datetime
 import re
 
@@ -5,7 +6,6 @@ import reversion
 from django import forms
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Sum
 from django.http import Http404, HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -14,16 +14,9 @@ from django.urls import reverse
 from django.views import generic
 from z3c.rml import rml2pdf
 
-from RIGS import models
+from RIGS import finance_stats, models
 
 forms.DateField.widget = forms.DateInput(attrs={"type": "date"})
-
-TIME_FILTERS = ["all", "year", "month", "week"]
-
-
-def days_between(d1, d2):
-    diff = d2 - d1
-    return diff.total_seconds() / datetime.timedelta(days=1).total_seconds()
 
 
 class InvoiceDashboard(generic.TemplateView):
@@ -33,78 +26,92 @@ class InvoiceDashboard(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Invoice Dashboard"
         context["description"] = "Overview of financial status of TEC rigs."
-
-        time_filter = self.request.GET.get("time_filter", "all")
-
-        if time_filter not in TIME_FILTERS:
-            time_filter = "all"
-
-        if time_filter == "all":
-            context["events"] = models.Event.objects.filter(is_rig=True)
-            context["invoices"] = models.Invoice.objects.all()
-            context["payments"] = models.Payment.objects.all()
-        elif time_filter == "year":
-            context["events"] = models.Event.objects.filter(
-                is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=365)
-            )
-            context["invoices"] = models.Invoice.objects.filter(
-                invoice_date__gte=datetime.date.today() - datetime.timedelta(days=365)
-            )
-            context["payments"] = models.Payment.objects.filter(
-                date__gte=datetime.date.today() - datetime.timedelta(days=365)
-            )
-        elif time_filter == "month":
-            context["events"] = models.Event.objects.filter(
-                is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=30)
-            )
-            context["invoices"] = models.Invoice.objects.filter(
-                invoice_date__gte=datetime.date.today() - datetime.timedelta(days=30)
-            )
-            context["payments"] = models.Payment.objects.filter(
-                date__gte=datetime.date.today() - datetime.timedelta(days=30)
-            )
-        elif time_filter == "week":
-            context["events"] = models.Event.objects.filter(
-                is_rig=True, start_date__gte=datetime.date.today() - datetime.timedelta(days=7)
-            )
-            context["invoices"] = models.Invoice.objects.filter(
-                invoice_date__gte=datetime.date.today() - datetime.timedelta(days=7)
-            )
-            context["payments"] = models.Payment.objects.filter(
-                date__gte=datetime.date.today() - datetime.timedelta(days=7)
-            )
-
-        context["time_filter"] = time_filter
-
-        context["total_outstanding"] = sum([i.balance for i in models.Invoice.objects.outstanding_invoices()])
-        context["total_waiting"] = sum([i.sum_total for i in models.Event.objects.waiting_invoices()])
-        context["total_events"] = len(context["events"])
-        context["total_invoices"] = len(context["invoices"])
-        context["total_payments"] = len(context["payments"])
-
-        payment_methods = dict(models.Payment.METHODS)
-
-        context["payment_methods"] = (
-            context["payments"].values("method").annotate(total=Sum("amount")).order_by("method")
-        )
-
-        for method in context["payment_methods"]:
-            method["method"] = payment_methods.get(method["method"], f"Unknown method ({method['method']})")
-
-        context["total_income"] = sum([i["total"] for i in context["payment_methods"]])
-
-        payments = context["payments"]
-        mean_duration = 0
-
-        for payment in payments:
-            mean_duration += days_between(payment.invoice.invoice_date, payment.date)
-
-        if len(payments) > 0:
-            mean_duration /= len(payments)
-
-        context["mean_invoice_to_payment"] = mean_duration
-
+        context.update(finance_stats.build_dashboard(self.request.GET.get("time_filter", "all"), datetime.date.today()))
         return context
+
+
+class InvoiceDashboardExport(generic.View):
+    """The invoices or payments behind the dashboard's chosen period, as a spreadsheet"""
+
+    def get(self, request, kind):
+        if kind not in ("invoices", "payments"):
+            raise Http404()
+        period = finance_stats.get_period(request.GET.get("time_filter", "all"), datetime.date.today())
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="rigs-{kind}-{period.key}.csv"'
+        writer = csv.writer(response)
+        if kind == "invoices":
+            writer.writerow(
+                [
+                    "Invoice",
+                    "Invoice date",
+                    "Event",
+                    "Event name",
+                    "Event date",
+                    "Client",
+                    "Internal",
+                    "Value (ex. VAT)",
+                    "Paid",
+                    "Balance",
+                    "Void",
+                ]
+            )
+            invoices = finance_stats.with_totals(period.filter(models.Invoice.objects.all(), "invoice_date"))
+            for invoice in invoices.select_related("event__organisation", "event__person").order_by(
+                "invoice_date", "pk"
+            ):
+                event = invoice.event
+                writer.writerow(
+                    [
+                        invoice.display_id,
+                        invoice.invoice_date.isoformat(),
+                        event.display_id,
+                        spreadsheet_safe(event.name),
+                        event.start_date.isoformat(),
+                        spreadsheet_safe(finance_stats.client_of(event)[1]),
+                        "Yes" if event.internal else "No",
+                        f"{invoice.value:.2f}",
+                        f"{invoice.paid:.2f}",
+                        f"{invoice.value - invoice.paid:.2f}",
+                        "Yes" if invoice.void else "No",
+                    ]
+                )
+        else:
+            writer.writerow(
+                [
+                    "Payment date",
+                    "Invoice",
+                    "Invoice date",
+                    "Event",
+                    "Event name",
+                    "Client",
+                    "Method",
+                    "Amount (ex. VAT)",
+                ]
+            )
+            payments = period.filter(models.Payment.objects.all(), "date")
+            for payment in payments.select_related("invoice__event__organisation", "invoice__event__person").order_by(
+                "date", "pk"
+            ):
+                event = payment.invoice.event
+                writer.writerow(
+                    [
+                        payment.date.isoformat(),
+                        payment.invoice.display_id,
+                        payment.invoice.invoice_date.isoformat(),
+                        event.display_id,
+                        spreadsheet_safe(event.name),
+                        spreadsheet_safe(finance_stats.client_of(event)[1]),
+                        finance_stats.PAYMENT_METHOD_NAMES.get(payment.method, payment.method),
+                        f"{payment.amount:.2f}",
+                    ]
+                )
+        return response
+
+
+def spreadsheet_safe(text):
+    """Stop names that start like a formula being run as one when the file is opened"""
+    return f"'{text}" if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 class InvoiceOutstanding(generic.ListView):

@@ -1,3 +1,4 @@
+import csv
 import os
 import pytest
 from datetime import date, timedelta
@@ -13,7 +14,7 @@ from pytest_django.asserts import assertRedirects, assertNotContains, assertCont
 
 from PyRIGS.tests.base import assert_times_almost_equal, assert_oembed, login
 from django.forms.models import model_to_dict
-from RIGS import forms, models
+from RIGS import finance_stats, forms, models
 
 pytestmark = pytest.mark.django_db
 
@@ -657,3 +658,150 @@ def test_checkin_person_picker_only_for_event_mic(client, admin_user, basic_even
 
     client.force_login(other)
     assertNotContains(client.get(url), "ts-select")
+
+
+def _invoiced_event(name, days_ago, cost, payments=(), status=models.Event.BOOKED):
+    event = models.Event.objects.create(
+        name=name, is_rig=True, status=status, start_date=date.today() - timedelta(days=days_ago)
+    )
+    models.EventItem.objects.create(event=event, name="Item", cost=cost, quantity=1, order=1)
+    invoice = models.Invoice.objects.create(event=event)
+    # Invoiced on the day of the event (the date is set automatically, so it's changed afterwards)
+    models.Invoice.objects.filter(pk=invoice.pk).update(invoice_date=event.start_date)
+    invoice.refresh_from_db()
+    for paid_after, amount, method in payments:
+        models.Payment.objects.create(
+            invoice=invoice, date=invoice.invoice_date + timedelta(days=paid_after), amount=amount, method=method
+        )
+    return invoice
+
+
+def test_invoice_dashboard_figures(admin_client):
+    _invoiced_event("Paid", 10, 100, [(1, 100, models.Payment.EXTERNAL)])
+    _invoiced_event("Part paid", 10, 50, [(2, 20, models.Payment.INTERNAL), (4, -5, models.Payment.ADJUSTMENT)])
+    # A mistyped year shouldn't wreck the figure; legacy and retired methods still get names
+    _invoiced_event("Typo", 10, 10, [(-730000, 10, "")])
+    _invoiced_event("Legacy", 10, 10, [(3, 10, "SU")])
+    _invoiced_event("Cancelled", 10, 0, status=models.Event.CANCELLED)
+    models.Event.objects.create(name="Future", is_rig=True, start_date=date.today() + timedelta(days=10))
+    waiting = models.Event.objects.create(name="Waiting", is_rig=True, start_date=date.today() - timedelta(days=1))
+    models.EventItem.objects.create(event=waiting, name="Item", cost=7, quantity=3, order=1)
+
+    response = admin_client.get(reverse("invoice_dashboard"))
+    context = response.context
+
+    assert context["total_outstanding"] == 35
+    assert context["outstanding_count"] == 1
+    assert context["total_waiting"] == 21
+    summary = context["summary"]
+    assert summary["events"] == 5  # Not the cancelled or future events
+    assert summary["income"] == 140
+    assert summary["adjustments"] == -5
+    assert summary["median_days_to_pay"] == 2
+    methods = [m["method"] for m in context["payment_methods"]]
+    assert methods[:2] == ["External", "Internal"]
+    assert set(methods[2:]) == {"Not recorded", "SU Core"}  # Adjustments aren't income
+    assert [(stage["label"], stage["count"]) for stage in context["funnel"]] == [
+        ("Events done", 5),
+        ("Invoiced", 4),
+        ("Paid in full", 3),
+    ]
+    checks = {check["title"]: check["count"] for check in context["data_quality"]}
+    assert checks == {"Payments with impossible dates": 1, "Empty invoices for cancelled events": 1}
+    # The impossible date is left out of the charts rather than stretching them over two thousand years
+    assert len(context["charts"]["income"]["labels"]) == 1
+    assertContains(response, 'id="finance-charts"')
+
+
+def test_invoice_dashboard_aged_debt(admin_client):
+    for days_ago, cost in [(10, 5), (60, 7), (200, 11), (400, 13), (800, 17)]:
+        _invoiced_event(f"Owed {days_ago}", days_ago, cost)
+
+    context = admin_client.get(reverse("invoice_dashboard")).context
+
+    assert [(band["count"], band["total"]) for band in context["aged_debt"]] == [(1, 5), (1, 7), (1, 11), (2, 30)]
+    checks = {check["title"]: check["count"] for check in context["data_quality"]}
+    assert checks["Invoices owed for over a year"] == 2
+    assert "Unusually large payments" not in {check["title"] for check in context["data_quality"]}
+
+
+def test_invoice_dashboard_flags_large_payments(admin_client):
+    _invoiced_event("Brian the Van", 10, 1000000, [(1, 1000000, "")])
+    checks = {check["title"]: check for check in admin_client.get(reverse("invoice_dashboard")).context["data_quality"]}
+    assert checks["Unusually large payments"]["count"] == 1
+
+
+@pytest.mark.parametrize("time_filter", ["week", "month", "year", "all", "ay2020", "nonsense"])
+def test_invoice_dashboard_periods(admin_client, time_filter):
+    _invoiced_event("Paid", 3, 100, [(1, 100, models.Payment.EXTERNAL)])
+    response = admin_client.get(reverse("invoice_dashboard"), {"time_filter": time_filter})
+    assert response.status_code == 200
+    assert response.context["period"].key == ("all" if time_filter == "nonsense" else time_filter)
+
+
+def test_finance_periods():
+    today = date(2026, 3, 1)
+    year = finance_stats.get_period("ay2025", today)
+    assert (year.start, year.end, year.label) == (date(2025, 9, 1), today, "Academic year 2025/26")
+    # A year still under way is compared with the same point in the last one
+    before = finance_stats.previous_period(year)
+    assert (before.start, before.end, before.label) == (date(2024, 9, 1), date(2025, 3, 1), "the same point in 2024/25")
+    finished = finance_stats.previous_period(finance_stats.get_period("ay2024", today))
+    assert (finished.start, finished.end) == (date(2023, 9, 1), date(2024, 8, 31))
+
+    week = finance_stats.get_period("week", today)
+    previous_week = finance_stats.previous_period(week)
+    assert previous_week.end == week.start - timedelta(days=1)
+    assert previous_week.end - previous_week.start == week.end - week.start
+
+    assert finance_stats.get_period("ay2030", today).key == "all"  # Hasn't started yet
+    assert finance_stats.previous_period(finance_stats.get_period("all", today)) is None
+
+
+def test_finance_deltas():
+    current = {"income": 120, "median_days_to_pay": 5}
+    previous = {"income": 100, "median_days_to_pay": 3}
+    income = finance_stats.delta(current, previous, "income", "last year")
+    assert (income["text"], income["tone"]) == ("20% up on last year", "success")
+    # Taking longer to be paid is worse, though the number went up
+    days = finance_stats.delta(current, previous, "median_days_to_pay", "last year", lower_is_better=True)
+    assert (days["text"], days["tone"]) == ("2 days up on last year", "danger")
+    assert finance_stats.delta(current, {"income": 0, "median_days_to_pay": None}, "income", "x") is None
+
+
+def test_invoice_dashboard_export(admin_client):
+    invoice = _invoiced_event("=HYPERLINK(1)", 10, 50, [(1, 20, models.Payment.INTERNAL)])
+
+    response = admin_client.get(
+        reverse("invoice_dashboard_export", kwargs={"kind": "invoices"}), {"time_filter": "year"}
+    )
+    assert response["Content-Type"] == "text/csv"
+    rows = list(csv.reader(response.content.decode().splitlines()))
+    assert rows[0][0] == "Invoice"
+    assert rows[1][0] == invoice.display_id
+    assert rows[1][3] == "'=HYPERLINK(1)"  # Not run as a formula when opened
+    assert rows[1][7:10] == ["50.00", "20.00", "30.00"]
+
+    response = admin_client.get(reverse("invoice_dashboard_export", kwargs={"kind": "payments"}))
+    rows = list(csv.reader(response.content.decode().splitlines()))
+    assert rows[1][6:] == ["Internal", "20.00"]
+
+    assert admin_client.get(reverse("invoice_dashboard_export", kwargs={"kind": "people"})).status_code == 404
+
+
+def test_invoice_dashboard_queries_dont_grow(admin_client):
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    def queries():
+        with CaptureQueriesContext(connection) as captured:
+            assert admin_client.get(reverse("invoice_dashboard")).status_code == 200
+        return len(captured)
+
+    for i in range(5):
+        _invoiced_event(f"E{i}", i + 2, 100, [(1, 40, models.Payment.EXTERNAL)])
+    queries()  # The first request also sets up the session and permissions
+    few = queries()
+    for i in range(30):
+        _invoiced_event(f"F{i}", i * 30 + 2, 100, [(1, 40, models.Payment.EXTERNAL)])
+    assert queries() == few

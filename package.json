@@ -13,6 +13,7 @@
     "autocompleter": "^10.0.0",
     "autoprefixer": "^10.6.1",
     "bootstrap": "^5.3.8",
+    "chart.js": "^4.5.1",
     "clipboard": "^2.0.8",
     "cssnano": "^9.8.0",
     "easymde": "^2.21.0",

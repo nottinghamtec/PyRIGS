@@ -186,6 +186,11 @@ urlpatterns = [
         name="invoice_dashboard",
     ),
     path(
+        "invoice/export/<str:kind>.csv",
+        permission_required_with_403("RIGS.view_invoice")(views.InvoiceDashboardExport.as_view()),
+        name="invoice_dashboard_export",
+    ),
+    path(
         "invoice/outstanding",
         permission_required_with_403("RIGS.view_invoice")(views.InvoiceOutstanding.as_view()),
         name="invoice_list",

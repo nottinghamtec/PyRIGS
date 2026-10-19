@@ -1,0 +1,14 @@
+<div class="col">
+    <div class="card h-100">
+        {% if url %}<a href="{{ url }}" class="text-decoration-none text-reset">{% endif %}
+        <div class="card-body">
+            <h2 class="h6 card-title text-body-secondary">{{ label }}</h2>
+            <p class="finance-stat-value mb-1">{% if currency %}£{% endif %}{{ value }}{% if unit %} {{ unit }}{% endif %}</p>
+            {% if delta %}
+                <p class="small mb-1 text-{{ delta.tone }}"><span class="fas {{ delta.icon }}" aria-hidden="true"></span> {{ delta.text }}</p>
+            {% endif %}
+            {% if note %}<p class="small mb-0 text-body-secondary">{{ note }}</p>{% endif %}
+        </div>
+        {% if url %}</a>{% endif %}
+    </div>
+</div>

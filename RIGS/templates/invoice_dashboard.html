@@ -1,106 +1,281 @@
 {% extends 'base_rigs.html' %}
 
-{% load humanize %}
-{% block content %}
+{% load humanize static %}
 
-<form method="GET" action="{% url 'invoice_dashboard' %}">
-    <div class="row g-2">
-        <div class="mb-3 col-md-4">
-            <label for="time_filter">Time Filter</label>
-            <select id="time_filter" name="time_filter" class="form-control">
-                <option value="week" {% if time_filter == 'week' %}selected{% endif %}>Last Week (7 days)</option>
-                <option value="month" {% if time_filter == 'month' %}selected{% endif %}>Last Month (30 days)</option>
-                <option value="year" {% if time_filter == 'year' %}selected{% endif %}>Last Year</option>
-                <option value="all" {% if time_filter == 'all' %}selected{% endif %}>All Time</option>
-            </select>
-        </div>
+{% block js %}
+{{ block.super }}
+<script src="{% static 'js/chart.umd.min.js' %}"></script>
+<script src="{% static 'js/finance_dashboard.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="finance-viz">
+
+<form method="GET" action="{% url 'invoice_dashboard' %}" class="row g-2 align-items-end mb-4">
+    <div class="col-md-4">
+        <label for="time_filter" class="form-label">Period</label>
+        <select id="time_filter" name="time_filter" class="form-select">
+            <optgroup label="Rolling">
+                {% for key, label in period_options.rolling %}
+                    <option value="{{ key }}" {% if key == period.key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Academic year (September to August)">
+                {% for key, label in period_options.academic_years %}
+                    <option value="{{ key }}" {% if key == period.key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </optgroup>
+            <option value="all" {% if period.key == 'all' %}selected{% endif %}>All time</option>
+        </select>
+    </div>
+    <noscript><div class="col-auto"><button type="submit" class="btn btn-primary">Show</button></div></noscript>
+    <div class="col-md-auto ms-md-auto">
+        <span class="form-label d-block">Download {{ period.label|lower }}</span>
+        <a class="btn btn-outline-secondary" href="{% url 'invoice_dashboard_export' 'invoices' %}?time_filter={{ period.key }}"><span class="fas fa-file-csv"></span> Invoices</a>
+        <a class="btn btn-outline-secondary" href="{% url 'invoice_dashboard_export' 'payments' %}?time_filter={{ period.key }}"><span class="fas fa-file-csv"></span> Payments</a>
     </div>
 </form>
 
-<script>
-    document.getElementById('time_filter').addEventListener('change', function () {
-        this.closest('form').submit();
-    });
-</script>
+<h3>Right now</h3>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
+    {% url 'invoice_waiting' as waiting_url %}
+    {% include 'partials/finance_stat.html' with label="Waiting to be invoiced" value=total_waiting|floatformat:"2g" currency=True url=waiting_url note="Finished events with no invoice yet" %}
+    {% url 'invoice_list' as outstanding_url %}
+    {% include 'partials/finance_stat.html' with label="Outstanding" value=total_outstanding|floatformat:"2g" currency=True url=outstanding_url note=outstanding_count|stringformat:"d"|add:" invoices with money owed" %}
+    {% with oldest=aged_debt|last %}
+    {% include 'partials/finance_stat.html' with label="Owed for over a year" value=oldest.total|floatformat:"2g" currency=True url="#aged-debt" note=oldest.count|stringformat:"d"|add:" invoices" %}
+    {% endwith %}
+    {% include 'partials/finance_stat.html' with label="Records to check" value=data_quality|length|default:"None" url="#data-quality" note="Payments and invoices that look wrong" %}
+</div>
 
-<h3>Overview</h3>
+<h3 class="mb-0">{{ period.label }}</h3>
+<p class="text-body-secondary">{% if previous_period %}Compared with {{ previous_period.label }}.{% else %}Since records began.{% endif %}</p>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+    {% include 'partials/finance_stat.html' with label="Events done" value=summary.events|intcomma delta=deltas.events note="Rigs that weren't cancelled" %}
+    {% include 'partials/finance_stat.html' with label="Invoices raised" value=summary.invoices|intcomma delta=deltas.invoices %}
+    {% with adjustments=summary.adjustments|floatformat:"2g" %}
+    {% include 'partials/finance_stat.html' with label="Income" value=summary.income|floatformat:"2g" currency=True delta=deltas.income note="Excludes £"|add:adjustments|add:" of TEC adjustments" %}
+    {% endwith %}
+    {% if summary.median_days_to_pay is None %}
+        {% include 'partials/finance_stat.html' with label="Median time to pay" value="No payments" %}
+    {% else %}
+        {% include 'partials/finance_stat.html' with label="Median time to pay" value=summary.median_days_to_pay|floatformat:"-1" unit="days" delta=deltas.median_days_to_pay note="From invoice date to payment" %}
+    {% endif %}
+    {% if invoicing_delay.median is None %}
+        {% include 'partials/finance_stat.html' with label="Median time to invoice" value="No invoices" %}
+    {% else %}
+        {% include 'partials/finance_stat.html' with label="Median time to invoice" value=invoicing_delay.median|floatformat:"-1" unit="days" note="From the end of the event" %}
+    {% endif %}
+</div>
 
-<!-- big cards in 2x2 grid with total_outstanding, total_events, total_invoices and total_payments, different backgrounds -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card"><div class="card-body">
+            {% if charts.income.datasets %}
+                {% include 'partials/finance_chart.html' with chart="income" title="Income by payment method" %}
+            {% else %}
+                <h4 class="card-title h5">Income by payment method</h4>
+                <p class="text-body-secondary mb-0">No payments in this period.</p>
+            {% endif %}
+        </div></div>
+    </div>
 
-<div class="row row-cols-1 row-cols-md-4 g-3">
-    <div class="card">
-        <a href="{% url 'invoice_waiting' %}" class="text-decoration-none text-white">
-            <div class="card-body bg-primary">
-                <h5 class="card-title text-center">Total Waiting</h5>
-                <p class="card-text text-center h3"><strong>£{{ total_waiting|floatformat:"2g" }}</strong></p>
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <h4 class="card-title h5">Payment sources</h4>
+            <table class="table table-sm finance-table align-middle">
+                <thead><tr><th>Method</th><th class="text-end">Income</th><th class="w-25">Share</th></tr></thead>
+                <tbody>
+                {% for row in payment_methods %}
+                    <tr>
+                        <td><span class="finance-swatch" style="background: var(--viz-series-{{ row.series }})"></span>{{ row.method }}</td>
+                        <td class="text-end">£{{ row.total|floatformat:"2g" }}</td>
+                        <td><div class="finance-share" title="{{ row.share|floatformat:0 }}%"><span style="width: {{ row.share|floatformat:0 }}%; background: var(--viz-series-{{ row.series }})"></span></div></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3" class="text-body-secondary">No payments in this period.</td></tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><th>Total income</th><th class="text-end">£{{ summary.income|floatformat:"2g" }}</th><th></th></tr>
+                    <tr class="text-body-secondary"><td>TEC adjustments (not income)</td><td class="text-end">£{{ summary.adjustments|floatformat:"2g" }}</td><td></td></tr>
+                </tfoot>
+            </table>
+            <h5 class="h6">Internal and external work</h5>
+            <p class="mb-1">
+                <strong>£{{ internal_split.internal|floatformat:"2g" }}</strong> from union accounts ({{ internal_split.internal_share|floatformat:0 }}%),
+                <strong>£{{ internal_split.external|floatformat:"2g" }}</strong> from everyone else.
+            </p>
+            <p class="small text-body-secondary mb-0">Internal work is for organisations with a union account.</p>
+        </div></div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="cumulative" title="Income through the year" subtitle="Built up week by week from 1 September, against the year before." %}
+        </div></div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="funnel" title="From event to payment" subtitle="Events done in this period, and how far each has got." height="180" %}
+            <ul class="small text-body-secondary mb-0">
+                {% for stage in funnel %}{% if stage.note %}<li>{{ stage.label }}: {{ stage.note }}</li>{% endif %}{% endfor %}
+            </ul>
+        </div></div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="invoicing-delay" title="Time to invoice" subtitle="Days from the end of each event to its invoice, for invoices raised in this period." height="220" %}
+        </div></div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="days-to-pay" title="Time to pay" subtitle="Days from invoice to payment, for payments in this period." height="220" %}
+        </div></div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="days-to-pay-by-year" title="Time to pay, year by year" subtitle="The median, and the middle half of payments, by when they were paid." height="220" %}
+        </div></div>
+    </div>
+</div>
+
+<h3 id="clients">Clients</h3>
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <h4 class="card-title h5">Top clients by income</h4>
+            <p class="small text-body-secondary">{{ period.label }}, excluding adjustments.</p>
+            <table class="table table-sm finance-table mb-0">
+                <tbody>
+                {% for client in top_clients %}
+                    <tr><td>{% if client.url %}<a href="{{ client.url }}">{{ client.name }}</a>{% else %}{{ client.name }}{% endif %}</td><td class="text-end">£{{ client.total|floatformat:"2g" }}</td></tr>
+                {% empty %}
+                    <tr><td class="text-body-secondary">No payments in this period.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <h4 class="card-title h5">Who owes the most</h4>
+            <p class="small text-body-secondary">Right now, across all outstanding invoices.</p>
+            <table class="table table-sm finance-table mb-0">
+                <tbody>
+                {% for client in outstanding_clients %}
+                    <tr><td>{% if client.url %}<a href="{{ client.url }}">{{ client.name }}</a>{% else %}{{ client.name }}{% endif %} <span class="text-body-secondary small">({{ client.count }} invoice{{ client.count|pluralize }})</span></td><td class="text-end">£{{ client.total|floatformat:"2g" }}</td></tr>
+                {% empty %}
+                    <tr><td class="text-body-secondary">Nothing is owed.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+</div>
+
+<h3 id="aged-debt">Aged debt</h3>
+<p class="text-body-secondary">Outstanding invoices by how long ago they were raised. Pick an age, or click a bar, to see just those.</p>
+<div class="row g-3 mb-4">
+    <div class="col-lg-5">
+        <div class="card h-100"><div class="card-body">
+            {% include 'partials/finance_chart.html' with chart="aged-debt" title="Owed, by age" height="200" %}
+        </div></div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card h-100"><div class="card-body">
+            <div class="btn-group btn-group-sm flex-wrap mb-3" role="group" aria-label="Show invoices aged">
+                <button type="button" class="btn btn-outline-secondary active" aria-pressed="true" data-aged-band="">All <span class="text-body-secondary">({{ outstanding_count }})</span></button>
+                {% for band in aged_debt %}
+                    <button type="button" class="btn btn-outline-secondary" aria-pressed="false" data-aged-band="{{ forloop.counter0 }}" {% if not band.count %}disabled{% endif %}>{{ band.label }} <span class="text-body-secondary">({{ band.count }})</span></button>
+                {% endfor %}
             </div>
-        </a>
-    </div>
-    <div class="card">
-        <a href="{% url 'invoice_list' %}" class="text-decoration-none text-dark">
-            <div class="card-body bg-info">
-                <h5 class="card-title text-center">Total Outstanding</h5>
-                <p class="card-text text-center h3"><strong>£{{ total_outstanding|floatformat:"2g" }}</strong></p>
+            <div class="table-responsive finance-scroll">
+                <table class="table table-sm finance-table mb-0" id="aged-debt-invoices">
+                    <thead><tr><th>Invoice</th><th>Event</th><th>Client</th><th class="text-end">Days</th><th class="text-end">Owed</th></tr></thead>
+                    <tbody>
+                    {% for band in aged_debt reversed %}
+                        {% for invoice in band.invoices %}
+                            <tr data-band="{{ forloop.parentloop.revcounter0 }}">
+                                <td><a href="{% url 'invoice_detail' invoice.pk %}">{{ invoice.display_id }}</a></td>
+                                <td><a href="{% url 'event_detail' invoice.event_id %}">{{ invoice.event.name|truncatechars:40 }}</a></td>
+                                <td>{% if invoice.client_url %}<a href="{{ invoice.client_url }}">{{ invoice.client_name|truncatechars:30 }}</a>{% else %}{{ invoice.client_name }}{% endif %}</td>
+                                <td class="text-end">{{ invoice.age_days|intcomma }}</td>
+                                <td class="text-end">£{{ invoice.outstanding_balance|floatformat:"2g" }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% empty %}
+                        <tr><td colspan="5" class="text-body-secondary">Nothing is owed.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </a>
+        </div></div>
     </div>
-    <div class="card">
-        <div class="card-body bg-danger">
-            <h5 class="card-title text-center">Total Events</h5>
-            <p class="card-text text-center h3"><strong>{{ total_events }}</strong></p>
+</div>
+
+{% if seasonality %}
+<h3 id="seasonality">When the money comes in</h3>
+<p class="text-body-secondary">Income each month of every academic year. Shading is by rank, so one exceptional month can't wash out the rest.</p>
+<div class="card mb-4"><div class="card-body table-responsive">
+    <table class="finance-heatmap finance-table small">
+        <thead>
+            <tr><th scope="col">Year</th>{% for month in seasonality.months %}<th scope="col" class="text-center fw-normal text-body-secondary">{{ month }}</th>{% endfor %}<th scope="col" class="text-end ps-3">Total</th></tr>
+        </thead>
+        <tbody>
+        {% for row in seasonality.rows %}
+            <tr>
+                <th scope="row" class="pe-2 fw-normal">{{ row.year }}</th>
+                {% for cell in row.cells %}
+                    <td class="cell step-{{ cell.step }}{% if cell.future %} future{% endif %}" title="{{ cell.label }}: £{{ cell.value|floatformat:'2g' }}"><span class="visually-hidden">£{{ cell.value|floatformat:"2g" }}</span></td>
+                {% endfor %}
+                <td class="text-end ps-3">£{{ row.total|floatformat:"0g" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p class="finance-heatmap-scale small text-body-secondary mt-2 mb-0" aria-hidden="true">
+        Less {% for step in "1234567" %}<span style="background: var(--viz-ramp-{{ step }})"></span> {% endfor %}More
+    </p>
+</div></div>
+{% endif %}
+
+<h3 id="data-quality">Records to check</h3>
+{% if data_quality %}
+    <p class="text-body-secondary">These look wrong, and some of them skew the figures above. Each links to the invoice to fix.</p>
+    <div class="row row-cols-1 row-cols-lg-2 g-3 mb-4">
+        {% for check in data_quality %}
+        <div class="col">
+            <div class="card h-100"><div class="card-body">
+                <div class="d-flex align-items-start gap-2">
+                    <span class="fas fa-triangle-exclamation text-warning mt-1" aria-hidden="true"></span>
+                    <h4 class="h6 card-title me-auto mb-1">{{ check.title }}</h4>
+                    <span class="badge rounded-pill text-bg-secondary">{{ check.count|intcomma }}</span>
+                </div>
+                <p class="small text-body-secondary">{{ check.description }}</p>
+                <ul class="list-unstyled small mb-0" data-quality-list>
+                    {% for item in check.items %}
+                        <li class="mb-1"{% if forloop.counter > 5 %} hidden{% endif %}><a href="{{ item.url }}">{{ item.label }}</a> <span class="text-body-secondary">{{ item.detail }}</span></li>
+                    {% endfor %}
+                </ul>
+                {% if check.items|length > 5 %}
+                    <button type="button" class="btn btn-link btn-sm px-0" data-quality-more>Show {{ check.items|length|add:"-5" }} more</button>
+                {% endif %}
+                {% if check.count > check.items|length %}
+                    <p class="small text-body-secondary mt-1 mb-0">The earliest {{ check.items|length }} of {{ check.count|intcomma }} are listed.</p>
+                {% endif %}
+            </div></div>
         </div>
+        {% endfor %}
     </div>
-    <div class="card">
-        <div class="card-body bg-success">
-            <h5 class="card-title text-center">Total Invoices</h5>
-            <p class="card-text text-center h3"><strong>{{ total_invoices }}</strong></p>
-        </div>
-    </div>
+{% else %}
+    <p class="text-body-secondary">Nothing looks out of place.</p>
+{% endif %}
+
+{{ charts|json_script:"finance-charts" }}
 </div>
-
-<br />
-
-<h3>Payments</h3>
-
-<br/>
-
-<h4>Sources</h4>
-
-<br/>
-
-{% for source in payment_methods %}
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title"><strong>{{ source.method }}</strong></h5>
-        <p class="card-text h3">£{{ source.total|floatformat:"2g" }}</p>
-    </div>
-</div>
-{% endfor %}
-
-<br/>
-
-<h4>Total</h4>
-
-<br/>
-
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title text-center">Total Income</h5>
-        <p class="card-text text-center h3"><strong>£{{ total_income|floatformat:"2g" }}</strong></p>
-    </div>
-</div>
-
-<br/>
-
-<h4>Invoice Payment Time</h4>
-
-<br/>
-
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title text-center">Average Time to Pay</h5>
-        <p class="card-text text-center h3"><strong>{{ mean_invoice_to_payment|floatformat:"2g" }} days</strong></p>
-    </div>
-</div>
-
 {% endblock %}

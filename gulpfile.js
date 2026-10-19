@@ -64,6 +64,9 @@ function scripts() {
                     'node_modules/tom-select/dist/js/tom-select.complete.js',
                     'node_modules/easymde/dist/easymde.min.js',
                     'node_modules/konami/konami.js',
+                    // With its source map, which the minified file points to and collectstatic insists on finding
+                    'node_modules/chart.js/dist/chart.umd.min.js',
+                    'node_modules/chart.js/dist/chart.umd.min.js.map',
                     'pipeline/source_assets/js/**/*.js',])
     .pipe(gulpif(function(file) { return base_scripts.includes(file.relative);}, con('base.js')))
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.js')))

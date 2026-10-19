@@ -670,3 +670,128 @@ $dark-theme-colors: (
   cursor: grabbing;
   user-select: none;
 }
+
+// Finance dashboard charts. The categorical slots and blue ramps are a colour-blind-checked palette; dark mode has
+// its own steps of the same hues rather than an automatic flip. Slot 0 is the neutral for "not recorded" and last year.
+.finance-viz {
+    --viz-surface: var(--bs-body-bg);
+    --viz-ink: var(--bs-body-color);
+    --viz-muted: #898781;
+    --viz-grid: #e1e0d9;
+    --viz-series-0: #898781;
+    --viz-series-1: #2a78d6;
+    --viz-series-2: #eb6834;
+    --viz-series-3: #1baf7a;
+    --viz-series-4: #eda100;
+    // Ordered bands (funnel stages, debt age): no lighter than step 250, so the lightest still shows on the card
+    --viz-ordinal-1: #86b6ef;
+    --viz-ordinal-2: #5598e7;
+    --viz-ordinal-3: #2a78d6;
+    --viz-ordinal-4: #1c5cab;
+    // Sequential, for the heatmap: lightest is least
+    --viz-ramp-1: #cde2fb;
+    --viz-ramp-2: #9ec5f4;
+    --viz-ramp-3: #6da7ec;
+    --viz-ramp-4: #3987e5;
+    --viz-ramp-5: #256abf;
+    --viz-ramp-6: #184f95;
+    --viz-ramp-7: #0d366b;
+}
+
+[data-bs-theme="dark"] .finance-viz {
+    --viz-grid: #2c2c2a;
+    --viz-series-1: #3987e5;
+    --viz-series-2: #d95926;
+    --viz-series-3: #199e70;
+    --viz-series-4: #c98500;
+    --viz-ordinal-1: #1c5cab;
+    --viz-ordinal-2: #2a78d6;
+    --viz-ordinal-3: #5598e7;
+    --viz-ordinal-4: #86b6ef;
+    // On a dark card the least should recede into it, so the ramp runs the other way
+    --viz-ramp-1: #0d366b;
+    --viz-ramp-2: #184f95;
+    --viz-ramp-3: #256abf;
+    --viz-ramp-4: #3987e5;
+    --viz-ramp-5: #6da7ec;
+    --viz-ramp-6: #9ec5f4;
+    --viz-ramp-7: #cde2fb;
+}
+
+.finance-viz {
+    .finance-chart {
+        position: relative;
+        height: 280px;
+    }
+
+    .finance-stat-value {
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .finance-swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 0.4rem;
+    }
+
+    .finance-share {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--viz-grid);
+
+        > span {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+        }
+    }
+
+    .finance-table td,
+    .finance-table th {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .finance-heatmap {
+        border-collapse: separate;
+        border-spacing: 2px;
+
+        td.cell {
+            min-width: 2.25rem;
+            height: 1.75rem;
+            border-radius: 3px;
+            background: var(--viz-grid);
+        }
+
+        @for $step from 1 through 7 {
+            td.cell.step-#{$step} {
+                background: var(--viz-ramp-#{$step});
+            }
+        }
+
+        td.cell.future {
+            background: transparent;
+        }
+    }
+
+    .finance-heatmap-scale span {
+        display: inline-block;
+        width: 1.5rem;
+        height: 0.75rem;
+        border-radius: 2px;
+    }
+}
+
+.finance-viz {
+    .finance-table-view {
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .finance-scroll {
+        max-height: 24rem;
+        overflow-y: auto;
+    }
+}
