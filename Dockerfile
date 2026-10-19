@@ -103,4 +103,4 @@ ENV GIT_SHA=$GIT_SHA
 
 USER app
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "PyRIGS.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "4", "PyRIGS.wsgi"]
