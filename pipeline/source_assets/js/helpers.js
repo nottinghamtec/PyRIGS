@@ -136,3 +136,42 @@ function slideDown(el, duration) {
 function isHidden(el) {
     return getComputedStyle(el).display === 'none';
 }
+
+// Stop a form being submitted twice (a double click on a slow page): once a submit has gone through, further
+// submits are swallowed and the submit buttons greyed out. The server also deduplicates on the form's CSRF token
+// (see PyRIGS/middleware.py), this just avoids sending the second request at all.
+function formSubmitting(form) {
+    return form.dataset.submitting === 'true';
+}
+
+function setFormSubmitting(form, submitting) {
+    form.dataset.submitting = submitting ? 'true' : 'false';
+    form.querySelectorAll('[type=submit]').forEach(function (button) {
+        button.classList.toggle('disabled', submitting);
+        button.setAttribute('aria-disabled', submitting ? 'true' : 'false');
+    });
+}
+
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement) || form.method.toLowerCase() !== 'post') {
+        return;
+    }
+    if (formSubmitting(form)) {
+        e.preventDefault();
+        return;
+    }
+    // Other handlers (ajax forms, confirmations) may cancel the submit, in which case it can be tried again
+    setTimeout(function () {
+        if (!e.defaultPrevented) {
+            setFormSubmitting(form, true);
+        }
+    }, 0);
+});
+
+// Coming back to a page from the back/forward cache must leave its forms usable
+window.addEventListener('pageshow', function () {
+    document.querySelectorAll('form[data-submitting=true]').forEach(function (form) {
+        setFormSubmitting(form, false);
+    });
+});
