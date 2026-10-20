@@ -40,9 +40,11 @@ def ajax_context(request):
 
 
 def version_context(request):
-    """Template context processor exposing the running commit to every template."""
+    """Template context processor exposing the running commit, and whether this connection is HTTP/3, to every template."""
     sha = settings.GIT_SHA
-    return {"git_sha": sha, "git_sha_short": sha[:7]}
+    # nginx terminates the connection and passes the protocol it was made over in X-HTTP-Version
+    http3 = request.headers.get("x-http-version", "").startswith("HTTP/3")
+    return {"git_sha": sha, "git_sha_short": sha[:7], "http3": http3}
 
 
 def get_related(
