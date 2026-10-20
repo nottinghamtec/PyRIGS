@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -271,3 +272,18 @@ class RIGSVersion(Version):
             id = self.changes.new.pk
 
         return f"{id} | {self.changes.new.__class__.__name__}"
+
+
+ACTIVITY_FEED_VERSION_KEY = "activity-feed-version"
+
+
+def activity_feed_version():
+    """Changes whenever a revision is saved, so the cached activity feed fragment can be told apart"""
+    return cache.get(ACTIVITY_FEED_VERSION_KEY, 0)
+
+
+def bump_activity_feed_version(sender=None, **kwargs):
+    try:
+        cache.incr(ACTIVITY_FEED_VERSION_KEY)
+    except ValueError:
+        cache.set(ACTIVITY_FEED_VERSION_KEY, 1, None)

@@ -6,7 +6,7 @@ from django.template.defaultfilters import title
 from django.views import generic
 from reversion import revisions as reversion
 
-from versioning.versioning import RIGSVersion
+from versioning.versioning import RIGSVersion, activity_feed_version
 
 
 class VersionHistory(generic.ListView):
@@ -88,6 +88,7 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Activity Feed"
+        context["feed_version"] = activity_feed_version()
         maxTimeDelta = datetime.timedelta(hours=1)
 
         items = []
