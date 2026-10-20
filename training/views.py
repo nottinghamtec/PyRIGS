@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.db.utils import IntegrityError
 
 from PyRIGS.views import is_ajax, ModalURLMixin, get_related, PrintListView
@@ -19,7 +19,10 @@ class ItemList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Training Items"
-        context["categories"] = models.TrainingCategory.objects.all()
+        items = models.TrainingItem.objects.select_related("category")
+        context["categories"] = models.TrainingCategory.objects.prefetch_related(
+            Prefetch("items", queryset=items.prefetch_related(Prefetch("prerequisites", queryset=items)))
+        )
         return context
 
 
