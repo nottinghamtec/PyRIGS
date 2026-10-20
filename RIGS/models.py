@@ -94,9 +94,7 @@ class Profile(AbstractUser):
 
     @property
     def latest_events(self):
-        return (
-            self.event_mic.with_listing_data().order_by("-start_date")
-        )
+        return self.event_mic.with_listing_data().order_by("-start_date")
 
     @classmethod
     def admins(cls):
@@ -848,10 +846,14 @@ class InvoiceManager(models.Manager):
     def outstanding_invoices(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
         sql = (
-            'SELECT inv.id, inv.event_id, inv.invoice_date, inv.void, items.cost AS cost, pay.payments AS payments, '
-            "COALESCE(pay.payment_count, 0) AS payment_count " + OUTSTANDING_INVOICES_FROM + " ORDER BY inv.invoice_date"
+            "SELECT inv.id, inv.event_id, inv.invoice_date, inv.void, items.cost AS cost, pay.payments AS payments, "
+            "COALESCE(pay.payment_count, 0) AS payment_count "
+            + OUTSTANDING_INVOICES_FROM
+            + " ORDER BY inv.invoice_date"
         )
-        return self.raw(sql).prefetch_related("payment_set", "event__items", "event__organisation", "event__person", "event__mic")
+        return self.raw(sql).prefetch_related(
+            "payment_set", "event__items", "event__organisation", "event__person", "event__mic"
+        )
 
     def outstanding_count(self):
         with connection.cursor() as cursor:
