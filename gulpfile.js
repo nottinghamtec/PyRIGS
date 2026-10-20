@@ -15,6 +15,9 @@ const cssnano = require('cssnano');
 const con = require('gulp-concat');
 const gulpif = require('gulp-if');
 
+// Inline sourcemaps made the built stylesheets about 5x larger, so only the watch tasks (local development) keep them
+let devBuild = false;
+
 function fonts(done) {
     return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.*', { encoding: false })
         .pipe(gulp.dest('pipeline/built_assets/fonts'))
@@ -31,7 +34,7 @@ function styles(done) {
                     'node_modules/tom-select/dist/css/tom-select.bootstrap5.css',
                     'node_modules/easymde/dist/easymde.min.css'
                     ])
-    .pipe(sourcemaps.init())
+    .pipe(gulpif(devBuild, sourcemaps.init()))
     // Bootstrap 4's SCSS can only be consumed via @import (its partials share global variables),
     // so that one deprecation stays silenced until we move to a Sass-module-aware framework.
     // quietDeps hides the remaining deprecations raised inside third-party stylesheets.
@@ -43,7 +46,7 @@ function styles(done) {
     .pipe(gulpif(function(file) { return bs_select.includes(file.relative);}, con('selects.css')))
     .pipe(gulpif(function(file) { return file.path.includes('node_modules/fullcalendar/') && fullcalendar.includes(file.relative);}, con('main.css')))
     .pipe(postcss([ autoprefixer(), cssnano() ]))
-    .pipe(sourcemaps.write())
+    .pipe(gulpif(devBuild, sourcemaps.write()))
     .pipe(gulp.dest('pipeline/built_assets/css'))
     .pipe(browsersync.stream());
 }
@@ -110,4 +113,9 @@ function watchSources() {
 
 exports.build = gulp.parallel(styles, scripts, fonts);
 exports.watch = gulp.parallel(watchFiles, browserSync);
-exports.watchAssets = gulp.series(exports.build, watchSources);
+function enableSourcemaps(done) {
+  devBuild = true;
+  done();
+}
+
+exports.watchAssets = gulp.series(enableSourcemaps, exports.build, watchSources);
