@@ -1,4 +1,4 @@
-{# A badge tile. Pass badge, earned (the award, if any), and optionally compact, or show_holders with holders (the catalogue's list of awards). #}
+{# A badge tile. Pass badge, earned (the award, if any), progress (done, needed and percent, for a badge not yet earned) and optionally compact, or show_holders with holders (the catalogue's list of awards). #}
 <div class="tec-badge{% if compact %} tec-badge-compact{% endif %}{% if not earned %} tec-badge-locked{% endif %}" style="--badge-colour: {{ badge.category.colour }}"{% if compact %} title="{{ badge.blurb }}"{% endif %}>
     <div class="tec-badge-medal" aria-hidden="true">
         <span class="fas fa-{{ badge.icon }}"></span>
@@ -9,6 +9,11 @@
     <div class="tec-badge-foot">
         {% if earned %}
             <span class="tec-badge-earned"><span class="fas fa-check" aria-hidden="true"></span> {{ earned.awarded_at|date:"M Y" }}</span>
+        {% elif progress %}
+            <div class="progress tec-badge-progress" role="progressbar" aria-label="Progress towards {{ badge.name }}" aria-valuenow="{{ progress.done }}" aria-valuemin="0" aria-valuemax="{{ progress.needed }}">
+                <div class="progress-bar" style="width: {{ progress.percent }}%"></div>
+            </div>
+            <div class="mt-1">{{ progress.done }} / {{ progress.needed }}</div>
         {% elif not compact %}
             Not yet earned
         {% endif %}

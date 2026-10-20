@@ -47,7 +47,7 @@
             <span class="text-body-secondary fw-normal small">{{ earned_in_category }}/{{ badges|length }}</span>
         </h3>
         <div class="tec-badge-grid">
-            {% for badge, holders, earned in badges %}
+            {% for badge, holders, earned, progress in badges %}
                 {% include "badges/partials/badge.html" with show_holders=True %}
                 {% if holders %}
                 <template id="holders-{{ badge.slug }}">

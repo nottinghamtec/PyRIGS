@@ -39,6 +39,11 @@ class Badge:
     blurb: str
     rule: Callable | None
 
+    @property
+    def progress(self):
+        """A function giving (done, needed) for someone's ProfileStats, for badges that are a count of something."""
+        return getattr(self.rule, "progress", None)
+
 
 MILESTONES = Category("milestones", "Milestones", "#3853a4")
 LEADERSHIP = Category("leadership", "Leadership", "#c2410c")
@@ -77,13 +82,24 @@ def first(values):
     return next(iter(values), None)
 
 
+def counted(rule, done, needed):
+    """Attach progress to a rule: done(stats) out of `needed`, for showing how close someone is to the badge."""
+    rule.progress = lambda s: (done(s), needed)
+    return rule
+
+
+def nth_where(dates, n):
+    """The nth entry of the sorted dates that dates(stats) gives."""
+    return counted(lambda s: nth(dates(s), n), lambda s: len(dates(s)), n)
+
+
 def nth_of(attr, n):
     """The nth entry of one of ProfileStats' sorted date lists."""
-    return lambda s: nth(getattr(s, attr), n)
+    return nth_where(lambda s: getattr(s, attr), n)
 
 
 def authored(n, *models):
-    return lambda s: nth(s.authored(*models), n)
+    return nth_where(lambda s: s.authored(*models), n)
 
 
 def anniversary(years):
@@ -115,6 +131,13 @@ def full_house(s):
     return None if None in dates else max(dates)
 
 
+counted(
+    full_house,
+    lambda s: sum(1 for d in FULL_HOUSE_DEPARTMENTS if level(TrainingLevel.TECHNICIAN, d)(s) is not None),
+    len(FULL_HOUSE_DEPARTMENTS),
+)
+
+
 def polymath(s):
     departments = set()
     for qual in s.level_quals:
@@ -123,6 +146,9 @@ def polymath(s):
             if len(departments) == 3:
                 return qual.confirmed_on
     return None
+
+
+counted(polymath, lambda s: len({q.level.department for q in s.level_quals if q.level.department is not None}), 3)
 
 
 def weekend_warrior(s):
@@ -155,7 +181,11 @@ def clients(same=None, different=None):
                 return date
         return None
 
-    return rule
+    def done(s):
+        counts = Counter(client for _, client in s.mic_clients)
+        return max(counts.values(), default=0) if same else len(counts)
+
+    return counted(rule, done, same or different)
 
 
 def event_days(event):
@@ -176,20 +206,22 @@ def comeback(s):
 def vehicle_rigs(pattern, n):
     """The nth rig where this person checked in with a vehicle matching pattern."""
 
-    def rule(s):
+    def dates(s):
         seen, dates = set(), []
         for checkin in s.checkins:
             if re.search(pattern, checkin.vehicle, re.IGNORECASE) and checkin.event_id not in seen:
                 seen.add(checkin.event_id)
                 dates.append(checkin.event.start_date)
-        return nth(sorted(dates), n)
+        return sorted(dates)
 
-    return rule
+    return nth_where(dates, n)
 
 
 def ra_rigs(n, *fields):
     """The nth rig whose risk assessment ticks any of these boxes."""
-    return lambda s: nth(s.rigs_where(lambda e: (ra := risk_assessment(e)) and any(getattr(ra, f) for f in fields)), n)
+    return nth_where(
+        lambda s: s.rigs_where(lambda e: (ra := risk_assessment(e)) and any(getattr(ra, f) for f in fields)), n
+    )
 
 
 def quote_rigs(pattern, anywhere=False):
@@ -204,7 +236,7 @@ def quote_rigs(pattern, anywhere=False):
 
 def named_rigs(pattern, n=1):
     """The nth rig with a name matching pattern."""
-    return lambda s: nth(s.rigs_where(lambda e: re.search(pattern, e.name, re.IGNORECASE)), n)
+    return nth_where(lambda s: s.rigs_where(lambda e: re.search(pattern, e.name, re.IGNORECASE)), n)
 
 
 def off_grid(s):
@@ -237,6 +269,13 @@ def society_darling(s):
     return None
 
 
+counted(
+    society_darling,
+    lambda s: len({e.organisation_id for e in s.rig_events if e.organisation_id and e.organisation.union_account}),
+    10,
+)
+
+
 def away_game(s):
     """A rig at a venue whose address has a postcode outside Nottingham (most venues don't have one recorded)."""
     return first(
@@ -253,8 +292,8 @@ _BADGES = [
     Badge("veteran", "Veteran", MILESTONES, "medal", "A quarter-century of shows.", nth_of("rig_dates", 25)),
     Badge("half-century", "Half Century", MILESTONES, "award", "Fifty rigs. Respect.", nth_of("rig_dates", 50)),
     Badge("centurion", "Centurion", MILESTONES, "crown", "One hundred rigs. Legendary.", nth_of("rig_dates", 100)),
-    Badge("clocked-on", "Clocked On", MILESTONES, "clock", "100 hours on site.", lambda s: s.hours_reached(100)),
-    Badge("lifer", "Lifer", MILESTONES, "hourglass-end", "500 hours on site.", lambda s: s.hours_reached(500)),
+    Badge("clocked-on", "Clocked On", MILESTONES, "clock", "100 hours on site.", counted(lambda s: s.hours_reached(100), lambda s: s.total_hours, 100)),
+    Badge("lifer", "Lifer", MILESTONES, "hourglass-end", "500 hours on site.", counted(lambda s: s.hours_reached(500), lambda s: s.total_hours, 500)),
     Badge("anniversary-1", "Anniversary I", MILESTONES, "cake-candles", "A year since your first rig.", anniversary(1)),
     Badge("anniversary-2", "Anniversary II", MILESTONES, "cake-candles", "Two years since your first rig.", anniversary(2)),
     Badge("anniversary-3", "Anniversary III", MILESTONES, "cake-candles", "Three years since your first rig.", anniversary(3)),
@@ -262,12 +301,13 @@ _BADGES = [
     Badge("mic-drop", "Mic Drop", LEADERSHIP, "microphone", "Your first event as MIC.", nth_of("mic_dates", 1)),
     Badge("ringleader", "Ringleader", LEADERSHIP, "bullhorn", "MIC'd ten events.", nth_of("mic_dates", 10)),
     Badge("big-top", "Big Top", LEADERSHIP, "people-group", "MIC'd an event with 8+ crew checked in.",
-          lambda s: first(e.start_date for e in s.mic_events if e.crew_count >= 8)),
+          counted(lambda s: first(e.start_date for e in s.mic_events if e.crew_count >= 8),
+                  lambda s: max((e.crew_count for e in s.mic_events), default=0), 8)),
 
     Badge("away-game", "Away Game", EXPLORER, "route", "Rigged outside Nottingham.", away_game),
     Badge("new-ground", "New Ground", EXPLORER, "map-pin", "Rigged at 5 different venues.", nth_of("new_venue_dates", 5)),
     Badge("well-travelled", "Well Travelled", EXPLORER, "map", "Rigged at 15 different venues.", nth_of("new_venue_dates", 15)),
-    Badge("home-venue", "Home Venue", EXPLORER, "house", "Ten rigs at the same venue.", lambda s: s.venue_reached(10)),
+    Badge("home-venue", "Home Venue", EXPLORER, "house", "Ten rigs at the same venue.", counted(lambda s: s.venue_reached(10), lambda s: s.most_rigs_at_venue, 10)),
 
     Badge("behind-the-wheel", "Behind the Wheel", ROAD, "truck", "Your first rig as a driver.", nth_of("drive_dates", 1)),
     Badge("road-warrior", "Road Warrior", ROAD, "truck-fast", "Drove for 25 rigs.", nth_of("drive_dates", 25)),
@@ -292,7 +332,7 @@ _BADGES = [
     Badge("passing-it-on", "Passing It On", TEACHING, "chalkboard-user", "Signed off your first training item.",
           lambda s: first(q.date for q in s.taught_quals)),
     Badge("professor", "Professor", TEACHING, "book-open", "Signed off 50 training items.",
-          lambda s: nth([q.date for q in s.taught_quals], 50)),
+          nth_where(lambda s: [q.date for q in s.taught_quals], 50)),
     Badge("kingmaker", "Kingmaker", TEACHING, "chess-king", "Confirmed someone's training level.", nth_of("levels_confirmed_for_others", 1)),
 
     Badge("risk-aware", "Risk Aware", SAFETY, "helmet-safety", "Wrote your first risk assessment.", authored(1, RiskAssessment)),
@@ -301,6 +341,12 @@ _BADGES = [
     Badge("live-wire", "Live Wire", SAFETY, "plug-circle-check", "Recorded your first power test.", authored(1, PowerTestRecord)),
     Badge("power-player", "Power Player", SAFETY, "bolt", "Power MIC on a risk assessment or power test.", nth_of("power_mic_dates", 1)),
     Badge("paper-trail", "Paper Trail", SAFETY, "file-shield", "Wrote 50 H&S documents of any kind.", authored(50)),
+    Badge("second-pair-of-eyes", "Second Pair of Eyes", SAFETY, "eye", "Reviewed your first H&S document.", nth_of("reviews", 1)),
+    Badge("safety-officer", "Safety Officer", SAFETY, "shield-halved", "Reviewed fifty H&S documents.", nth_of("reviews", 50)),
+    Badge("sharp-eyed", "Sharp Eyed", SAFETY, "magnifying-glass", "Updated your own H&S document after it had been reviewed.",
+          nth_of("amended_dates", 1)),
+    Badge("catch-of-the-day", "Catch of the Day", SAFETY, "triangle-exclamation", "Recorded a failed check on a checklist or power test.",
+          nth_of("failed_check_dates", 1)),
 
     Badge("off-grid", "Off Grid", POWER, "gas-pump", "Rigged on generator power.", off_grid),
     Badge("three-phase", "Three-Phase", POWER, "charging-station", "Power MIC on a three-phase supply.", nth_of("three_phase_dates", 1)),
@@ -316,8 +362,8 @@ _BADGES = [
     Badge("big-ticket", "Big Ticket", PRODUCTION, "sterling-sign", "MIC'd a £2,000+ job.",
           lambda s: first(e.start_date for e in s.mic_events if BIG_TICKET[0] <= s.mic_quote_totals.get(e.pk, 0) < BIG_TICKET[1])),
 
-    Badge("social-butterfly", "Social Butterfly", CREW, "users", "Rigged with 15 different people.", lambda s: s.crewmates_reached(distinct=15)),
-    Badge("dynamic-duo", "Dynamic Duo", CREW, "user-group", "Rigged with the same person 20 times.", lambda s: s.crewmates_reached(shared=20)),
+    Badge("social-butterfly", "Social Butterfly", CREW, "users", "Rigged with 15 different people.", counted(lambda s: s.crewmates_reached(distinct=15), lambda s: len(s.crewmate_counts), 15)),
+    Badge("dynamic-duo", "Dynamic Duo", CREW, "user-group", "Rigged with the same person 20 times.", counted(lambda s: s.crewmates_reached(shared=20), lambda s: max(s.crewmate_counts.values(), default=0), 20)),
 
     Badge("regular-customer", "Regular Customer", CLIENTS, "handshake", "MIC'd five events for the same client.", clients(same=5)),
     Badge("networker", "Networker", CLIENTS, "address-book", "MIC'd for ten different clients.", clients(different=10)),

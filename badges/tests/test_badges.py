@@ -11,6 +11,7 @@ from training.models import TrainingItem, TrainingCategory, TrainingItemQualific
 
 from badges.awarding import award_badges, earned_badges
 from badges.models import BadgeAward, BadgeSettings
+from badges.registry import BADGES
 from badges.stats import ProfileStats
 
 
@@ -660,3 +661,86 @@ def test_early_call_and_three_phase(member):
     badges = earned(member)
     assert badges["early-call"] == aware(2024, 6, 1, 6, 30)
     assert badges["three-phase"] == aware(2024, 6, 1)
+
+
+def test_every_counting_badge_reports_progress(member, make_rig):
+    for n in range(3):
+        make_rig(datetime.date(2024, 3, 1 + n))
+    stats = ProfileStats(member)
+    assert BADGES["regular"].progress(stats) == (3, 10)
+    assert BADGES["clocked-on"].progress(stats) == (12, 100)
+    assert BADGES["opening-act"].progress(stats) == (3, 1)
+    assert BADGES["off-grid"].progress is None
+
+
+def test_badge_list_shows_progress_towards_unearned_badges(member, member_client, make_rig):
+    for n in range(3):
+        make_rig(datetime.date(2024, 3, 1 + n))
+    set_live(badges=True)
+    content = member_client.get(reverse("badge_list")).content.decode()
+    assert "Progress towards Regular" in content
+    assert "3 / 10" in content
+    assert "Progress towards Opening Act" not in content  # Earned, and a one-off anyway
+
+
+def write(user, model, **fields):
+    with reversion.create_revision():
+        reversion.set_user(user)
+        return model.objects.create(**fields)
+
+
+def test_reviewing_badges_count_reviews_of_any_document(member, admin_user):
+    venue = models.Venue.objects.create(name="Hall")
+    event = models.Event.objects.create(name="Gig", start_date=datetime.date(2024, 1, 1), venue=venue)
+    ra = write(admin_user, models.RiskAssessment, event=event, **RA_ANSWERS)
+    checklist = write(
+        admin_user, models.EventChecklist, event=event, venue=venue, date=event.start_date, warning_signs=True
+    )
+    stats = ProfileStats(member)
+    assert "second-pair-of-eyes" not in earned_badges(stats)
+
+    for doc in (ra, checklist):
+        with reversion.create_revision():
+            reversion.set_user(member)
+            doc.reviewed_by, doc.reviewed_at = member, aware(2024, 1, 2)
+            doc.save()
+    stats = ProfileStats(member)
+    assert earned_badges(stats)["second-pair-of-eyes"] == aware(2024, 1, 2)
+    assert BADGES["safety-officer"].progress(stats) == (2, 50)
+    assert "second-pair-of-eyes" not in earned_badges(ProfileStats(admin_user))
+
+
+def test_catch_of_the_day_needs_a_failed_check(member):
+    venue = models.Venue.objects.create(name="Hall")
+    event = models.Event.objects.create(name="Gig", start_date=datetime.date(2024, 1, 1), venue=venue)
+    checklist = write(
+        member, models.EventChecklist, event=event, venue=venue, date=event.start_date, warning_signs=True, exits=True
+    )
+    assert "catch-of-the-day" not in earned(member)
+    with reversion.create_revision():
+        reversion.set_user(member)
+        checklist.exits = False
+        checklist.save()
+    assert "catch-of-the-day" in earned(member)
+
+
+def test_sharp_eyed_is_changing_a_document_after_review(member, admin_user):
+    event = models.Event.objects.create(name="Gig", start_date=datetime.date(2024, 1, 1))
+    ra = write(member, models.RiskAssessment, event=event, **RA_ANSWERS)
+    with reversion.create_revision():
+        reversion.set_user(member)
+        ra.general_notes = "Before review"
+        ra.save()
+    assert "sharp-eyed" not in earned(member)
+    with reversion.create_revision():
+        reversion.set_user(admin_user)
+        ra.reviewed_by, ra.reviewed_at = admin_user, timezone.now()
+        ra.save()
+    assert "sharp-eyed" not in earned(member)
+    with reversion.create_revision():
+        reversion.set_user(member)
+        ra.general_notes = "After review"
+        ra.reviewed_by = ra.reviewed_at = None
+        ra.save()
+    assert "sharp-eyed" in earned(member)
+    assert "sharp-eyed" not in earned(admin_user)

@@ -30,6 +30,17 @@ def granted(user, codename):
     )
 
 
+def progress_towards(badge, stats):
+    """How far along someone is with a badge that counts something, or None if it doesn't (or isn't worth showing)."""
+    if badge.progress is None:
+        return None
+    done, needed = badge.progress(stats)
+    if needed <= 1:
+        return None
+    done = min(done, needed)
+    return {"done": round(done), "needed": needed, "percent": round(100 * done / needed)}
+
+
 def badges_visible(user, settings=None):
     """Everyone once badges are live; before that, anyone given View Badges, and superusers if the settings allow."""
     settings = settings or BadgeSettings.load()
@@ -63,10 +74,19 @@ class BadgeList(BadgesVisibleMixin, generic.TemplateView):
         for award in BadgeAward.objects.select_related("profile").order_by("awarded_at"):
             holders[award.slug].append(award)
         mine = {award.slug: award for award in BadgeAward.objects.filter(profile=self.request.user)}
+        stats = ProfileStats(self.request.user)
         context["categories"] = [
             (
                 category,
-                [(badge, holders[badge.slug], mine.get(badge.slug)) for badge in badges],
+                [
+                    (
+                        badge,
+                        holders[badge.slug],
+                        mine.get(badge.slug),
+                        None if badge.slug in mine else progress_towards(badge, stats),
+                    )
+                    for badge in badges
+                ],
                 sum(1 for badge in badges if badge.slug in mine),
             )
             for category, badges in badges_by_category()

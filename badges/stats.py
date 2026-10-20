@@ -5,12 +5,13 @@ Used both for deciding which badges someone has earned and for building their Te
 """
 
 import datetime
+import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from functools import cached_property
 
-from django.db.models import Count, F, Q, Sum
+from django.db.models import BooleanField, Count, F, Q, Sum
 from django.utils import timezone
 from reversion.models import Revision, Version
 
@@ -84,6 +85,8 @@ class History:
     """What people have done in RIGS, from the version history."""
 
     created: dict  # {model: {user_id: [sorted datetimes]}}: objects each person created
+    created_objects: dict  # {model: {user_id: [(datetime, object id)]}}: as above, saying which objects
+    amended: dict  # {user_id: [sorted datetimes]}: when H&S documents they wrote were changed after being reviewed
     asset_edits: dict  # {user_id: [sorted datetimes]}: changes saved to the assets database
     cable_edits: dict  # {user_id: [sorted datetimes]}: as above, for cables only
     revisions: dict  # {user_id: [sorted datetimes]}: every change saved anywhere in RIGS
@@ -106,23 +109,37 @@ def build_history(user_id=None):
     """
     mine = {} if user_id is None else {"revision__user_id": user_id}
 
-    created = {}
+    created, created_objects, amended = {}, {}, defaultdict(dict)
     for model in CREATED_MODELS:
         versions = Version.objects.get_for_model(model)
         if mine:  # Only objects they've touched; we still need everyone's versions of those to find who was first
             versions = versions.filter(object_id__in=versions.filter(**mine).values("object_id"))
         first_versions = {}
-        rows = versions.order_by("revision__date_created", "pk").values_list(
-            "object_id", "revision__user_id", "revision__date_created"
-        )
-        for object_id, author_id, date in rows:
-            first_versions.setdefault(object_id, (author_id, date))
+        fields = ["object_id", "revision__user_id", "revision__date_created"]
+        if model in HS_MODELS:
+            fields.append("serialized_data")
+        rows = versions.order_by("revision__date_created", "pk").values_list(*fields)
+        signed_off = set()
+        for object_id, user_id_, date, *data in rows:
+            first_versions.setdefault(object_id, (user_id_, date))
+            if data:  # Any change after a reviewer has signed a document off counts as amending it
+                if object_id in signed_off:
+                    signed_off.discard(object_id)
+                    author_id = first_versions[object_id][0]
+                    if author_id is not None:
+                        amended[author_id].setdefault((model, object_id), date)
+                if json.loads(data[0])[0]["fields"].get("reviewed_by") is not None:
+                    signed_off.add(object_id)
         existing = {str(pk) for pk in model.objects.values_list("pk", flat=True)}
-        created[model] = _by_user(
-            (author_id, date)
+        authored = [
+            (author_id, date, object_id)
             for object_id, (author_id, date) in first_versions.items()
             if author_id is not None and object_id in existing and date >= HISTORY_START
-        )
+        ]
+        created[model] = _by_user((author_id, date) for author_id, date, _ in authored)
+        created_objects[model] = defaultdict(list)
+        for author_id, date, object_id in sorted(authored):
+            created_objects[model][author_id].append((date, object_id))
 
     # One edit per revision, however many assets it touched
     cables = {str(pk) for pk in Asset.objects.filter(is_cable=True).values_list("pk", flat=True)}
@@ -142,6 +159,10 @@ def build_history(user_id=None):
     ).values_list("user_id", "date_created")
     return History(
         created=created,
+        created_objects=created_objects,
+        amended=_by_user(
+            (author_id, date) for author_id, amendments in amended.items() for date in amendments.values()
+        ),
         asset_edits=_by_user(asset_revisions.values()),
         cable_edits=_by_user(cable_revisions.values()),
         revisions=_by_user(revisions),
@@ -253,6 +274,10 @@ class ProfileStats:
                 dates.append(event.start_date)
         return dates
 
+    @cached_property
+    def most_rigs_at_venue(self):
+        return self.venue_counts[0][1] if self.venue_counts else 0
+
     def venue_reached(self, count):
         """When any one venue first reached `count` rigs."""
         counts = Counter()
@@ -363,6 +388,35 @@ class ProfileStats:
             date for model in models or HS_MODELS for date in self.history.created[model].get(self.profile.pk, [])
         )
 
+    @cached_property
+    def reviews(self):
+        """When this person reviewed H&S documents."""
+        return sorted(
+            date
+            for model in HS_MODELS
+            for date in model.objects.filter(reviewed_by=self.profile, reviewed_at__isnull=False).values_list(
+                "reviewed_at", flat=True
+            )
+        )
+
+    @cached_property
+    def amended_dates(self):
+        return self.history.amended.get(self.profile.pk, [])
+
+    @cached_property
+    def failed_check_dates(self):
+        """When this person wrote a checklist or power test that recorded a failed check (a box answered No)."""
+        dates = []
+        for model in (EventChecklist, PowerTestRecord):
+            booleans = [
+                f.name for f in model._meta.get_fields() if isinstance(f, BooleanField) and f.null and not f.is_relation
+            ]
+            written = dict((pk, date) for date, pk in self.history.created_objects[model].get(self.profile.pk, []))
+            for obj in model.objects.filter(pk__in=list(written)):
+                if any(getattr(obj, name) is False for name in booleans):
+                    dates.append(written[str(obj.pk)])
+        return sorted(dates)
+
     @property
     def asset_edits(self):
         return self.history.asset_edits.get(self.profile.pk, [])
@@ -415,6 +469,11 @@ class ProfileStats:
             people[event.pk].discard(self.profile.pk)
         return people
 
+    @cached_property
+    def crewmate_counts(self):
+        """{person id: rigs shared with them}."""
+        return Counter(person_id for people in self.event_people.values() for person_id in people)
+
     def crewmates_reached(self, distinct=None, shared=None):
         """When this person first rigged with `distinct` different people, or with one person `shared` times."""
         seen = Counter()
@@ -432,8 +491,7 @@ class ProfileStats:
     @cached_property
     def crewmates(self):
         """The people this person has rigged with most, as [(profile, shared rigs)]."""
-        counts = Counter(person_id for people in self.event_people.values() for person_id in people)
-        top = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:5]
+        top = sorted(self.crewmate_counts.items(), key=lambda item: (-item[1], item[0]))[:5]
         people = Profile.objects.in_bulk([person_id for person_id, _ in top])
         return [(people[person_id], shared) for person_id, shared in top if person_id in people]
 
