@@ -145,3 +145,11 @@ def drop_invoice_counts(sender, **kwargs):
 for model in (models.Event, models.EventItem, models.Invoice, models.Payment):
     post_save.connect(drop_invoice_counts, sender=model)
     post_delete.connect(drop_invoice_counts, sender=model)
+
+
+def drop_vat_rates(sender, **kwargs):
+    models.clear_vat_rates()
+
+
+post_save.connect(drop_vat_rates, sender=models.VatRate)
+post_delete.connect(drop_vat_rates, sender=models.VatRate)

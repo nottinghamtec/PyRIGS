@@ -225,7 +225,12 @@ class InvoiceArchive(generic.ListView):
         return context
 
     def get_queryset(self):
-        return self.model.objects.search(self.request.GET.get("q")).order_by("-invoice_date")
+        return (
+            self.model.objects.search(self.request.GET.get("q"))
+            .order_by("-invoice_date")
+            .select_related("event__organisation", "event__person", "event__mic")
+            .prefetch_related("payment_set", "event__items")
+        )
 
 
 class InvoiceWaiting(generic.ListView):
