@@ -188,7 +188,7 @@ else:
 sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=""),
     integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
+    traces_sample_rate=0.1,
     ignore_errors=[DisallowedHost],
 )
 ignore_logger("django.security.DisallowedHost")
