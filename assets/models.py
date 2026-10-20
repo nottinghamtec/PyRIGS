@@ -71,11 +71,19 @@ class Connector(models.Model):
         return self.description
 
 
+class CableTypeManager(models.Manager):
+    def get_queryset(self):
+        # A cable type is only ever shown by name, which needs both connectors
+        return super().get_queryset().select_related("plug", "socket")
+
+
 class CableType(models.Model):
     circuits = models.IntegerField(default=1)
     cores = models.IntegerField(default=3)
     plug = models.ForeignKey(Connector, on_delete=models.CASCADE, related_name="plug")
     socket = models.ForeignKey(Connector, on_delete=models.CASCADE, related_name="socket")
+
+    objects = CableTypeManager()
 
     class Meta:
         ordering = ["plug", "socket", "-circuits"]

@@ -67,7 +67,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         elif self.hide_hidden_status:
             queryset = queryset.filter(status__in=models.AssetStatus.objects.filter(should_show=True))
 
-        return queryset.select_related("category", "status")
+        return queryset.select_related("category", "status", "cable_type__plug", "cable_type__socket")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
