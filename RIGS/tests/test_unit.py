@@ -4,6 +4,7 @@ import pytest
 from datetime import date, timedelta
 
 from django.conf import settings
+from django.utils.html import escape
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from django.utils.safestring import SafeText
@@ -562,7 +563,7 @@ def review(client, profile, obj, request_url):
     response = client.get(reverse(request_url, kwargs={"pk": obj.pk}), follow=True)
     obj.refresh_from_db()
     assertContains(response, "Reviewed by")
-    assertContains(response, profile.name)
+    assertContains(response, escape(profile.name))
     assert_times_almost_equal(time, obj.reviewed_at)
 
 
