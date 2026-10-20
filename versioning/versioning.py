@@ -221,9 +221,7 @@ class RIGSVersionManager(VersionQuerySet):
 
         return (
             self.filter(content_type__in=content_types)
-            .select_related(
-                "revision",
-            )
+            .select_related("revision", "revision__user")
             .order_by("-revision__date_created")
         )
 
