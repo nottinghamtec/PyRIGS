@@ -7,7 +7,6 @@ from io import BytesIO
 from pypdf import PdfReader, PdfWriter
 from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.core.cache import cache
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db.models.signals import post_save
 from django.template.loader import get_template
@@ -15,7 +14,6 @@ from django.urls import reverse
 from django.utils import timezone
 from premailer import Premailer
 from registration.signals import user_activated
-from reversion import revisions as reversion
 from z3c.rml import rml2pdf
 
 from RIGS import models
@@ -137,11 +135,3 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 
 
 user_activated.connect(send_admin_awaiting_approval_email)
-
-
-def update_cache(sender, instance, created, **kwargs):
-    cache.clear()
-
-
-for model in reversion.get_registered_models():
-    post_save.connect(update_cache, sender=model)
