@@ -10,7 +10,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal
 
-from django.db.models import DecimalField, F, Min, OuterRef, Q, Subquery, Sum, Value
+from django.db.models import Count, DecimalField, F, Min, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce, TruncMonth
 from django.urls import reverse
 
@@ -215,7 +215,9 @@ def summarise(period, today):
     return {
         "period": period,
         "events": period.filter(finished_rigs(today), "start_date").count(),
-        "invoices": period.filter(models.Invoice.objects.all(), "invoice_date").count(),
+        **period.filter(models.Invoice.objects.all(), "invoice_date").aggregate(
+            invoices=Count("pk", filter=Q(void=False)), void_invoices=Count("pk", filter=Q(void=True))
+        ),
         "payments": len(durations),
         # Adjustments are corrections rather than money received, so they're kept apart from income
         "income": sum((total for method, total in by_method.items() if method != models.Payment.ADJUSTMENT), ZERO),

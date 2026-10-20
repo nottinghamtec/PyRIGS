@@ -684,6 +684,8 @@ def test_invoice_dashboard_figures(admin_client):
     _invoiced_event("Legacy", 10, 10, [(3, 10, "SU")])
     _invoiced_event("Cancelled", 10, 0, status=models.Event.CANCELLED)
     models.Event.objects.create(name="Future", is_rig=True, start_date=date.today() + timedelta(days=10))
+    voided = _invoiced_event("Voided", 10, 30)
+    models.Invoice.objects.filter(pk=voided.pk).update(void=True)
     waiting = models.Event.objects.create(name="Waiting", is_rig=True, start_date=date.today() - timedelta(days=1))
     models.EventItem.objects.create(event=waiting, name="Item", cost=7, quantity=3, order=1)
 
@@ -694,7 +696,9 @@ def test_invoice_dashboard_figures(admin_client):
     assert context["outstanding_count"] == 1
     assert context["total_waiting"] == 21
     summary = context["summary"]
-    assert summary["events"] == 5  # Not the cancelled or future events
+    assert summary["events"] == 6  # Not the cancelled or future events
+    assert (summary["invoices"], summary["void_invoices"]) == (5, 1)
+    assertContains(response, "Excludes 1 voided")
     assert summary["income"] == 140
     assert summary["adjustments"] == -5
     assert summary["median_days_to_pay"] == 2
@@ -702,7 +706,7 @@ def test_invoice_dashboard_figures(admin_client):
     assert methods[:2] == ["External", "Internal"]
     assert set(methods[2:]) == {"Not recorded", "SU Core"}  # Adjustments aren't income
     assert [(stage["label"], stage["count"]) for stage in context["funnel"]] == [
-        ("Events done", 5),
+        ("Events done", 6),
         ("Invoiced", 4),
         ("Paid in full", 3),
     ]

@@ -52,7 +52,9 @@
 <p class="text-body-secondary">{% if previous_period %}Compared with {{ previous_period.label }}.{% else %}Since records began.{% endif %}</p>
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
     {% include 'partials/finance_stat.html' with label="Events done" value=summary.events|intcomma delta=deltas.events note="Rigs that weren't cancelled" %}
-    {% include 'partials/finance_stat.html' with label="Invoices raised" value=summary.invoices|intcomma delta=deltas.invoices %}
+    {% with voided=summary.void_invoices|stringformat:"d" %}
+    {% include 'partials/finance_stat.html' with label="Invoices raised" value=summary.invoices|intcomma delta=deltas.invoices note="Excludes "|add:voided|add:" voided" %}
+    {% endwith %}
     {% with adjustments=summary.adjustments|floatformat:"2g" %}
     {% include 'partials/finance_stat.html' with label="Income" value=summary.income|floatformat:"2g" currency=True delta=deltas.income note="Excludes £"|add:adjustments|add:" of TEC adjustments" %}
     {% endwith %}
