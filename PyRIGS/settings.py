@@ -109,6 +109,9 @@ DATABASES = {
         "PASSWORD": env("DATABASE_PASSWORD", default="rigs"),
         "HOST": env("DATABASE_HOST", default="127.0.0.1"),
         "PORT": env("DATABASE_PORT", 5432),
+        # Keep connections open between requests rather than authenticating a new one every time
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
