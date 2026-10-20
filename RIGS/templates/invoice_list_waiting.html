@@ -60,14 +60,13 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
+                            <form id="invoice-form-{{ event.pk }}" method="post" action="{% url 'invoice_event' event.pk %}">{% csrf_token %}</form>
+                            <form id="invoice-void-form-{{ event.pk }}" method="post" action="{% url 'invoice_event_void' event.pk %}">{% csrf_token %}</form>
                             <div class="btn-group">
-                                <a href="{% url 'invoice_event' event.pk %}"
-                                   class="btn btn-primary">
+                                <button type="submit" form="invoice-form-{{ event.pk }}" class="btn btn-primary">
                                     <span class="fas fa-pound-sign"></span> Create Invoice
-                                </a>
-                                <a href="{% url 'invoice_event_void' event.pk %}"
-                                   class="btn btn-warning">& Void
-                                </a>
+                                </button>
+                                <button type="submit" form="invoice-void-form-{{ event.pk }}" class="btn btn-warning">& Void</button>
                             </div>
                         </td>
                     </tr>

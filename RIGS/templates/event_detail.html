@@ -17,6 +17,9 @@
 {% endblock %}
 
 {% block content %}
+{% if perms.RIGS.add_invoice and not object.invoice %}
+    <form id="invoice-create-form" method="post" action="{% url 'invoice_event' object.pk %}">{% csrf_token %}</form>
+{% endif %}
 <div class="row my-3 py-3">
     {% if not is_ajax %}
         {% if perms.RIGS.view_event %}

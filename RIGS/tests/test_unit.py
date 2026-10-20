@@ -809,3 +809,62 @@ def test_invoice_dashboard_queries_dont_grow(admin_client):
     for i in range(30):
         _invoiced_event(f"F{i}", i * 30 + 2, 100, [(1, 40, models.Payment.EXTERNAL)])
     assert queries() == few
+
+
+def _invoice_history(invoice):
+    from reversion.models import Version
+
+    return list(Version.objects.get_for_object(invoice).select_related("revision__user"))
+
+
+def test_invoice_void_is_recorded(admin_client, admin_user):
+    invoice = _invoiced_event("Voided", 10, 30)
+    url = reverse("invoice_void", kwargs={"pk": invoice.pk})
+
+    assert admin_client.get(url).status_code == 405
+    invoice.refresh_from_db()
+    assert not invoice.void
+
+    assertRedirects(admin_client.post(url), reverse("invoice_list"))
+    invoice.refresh_from_db()
+    assert invoice.void
+    latest = _invoice_history(invoice)[0]
+    assert (latest.revision.user, latest.revision.comment) == (admin_user, "Invoice voided")
+    assertContains(admin_client.get(reverse("activity_feed")), invoice.display_id)
+
+    admin_client.post(url)
+    invoice.refresh_from_db()
+    assert not invoice.void
+    assert _invoice_history(invoice)[0].revision.comment == "Invoice unvoided"
+
+
+@pytest.mark.parametrize("url_name,void", [("invoice_event", False), ("invoice_event_void", True)])
+def test_invoice_creation_is_recorded(admin_client, admin_user, url_name, void):
+    event = models.Event.objects.create(name="To invoice", is_rig=True, start_date=date.today() - timedelta(days=2))
+    url = reverse(url_name, kwargs={"pk": event.pk})
+
+    assert admin_client.get(url).status_code == 405
+    assert not models.Invoice.objects.filter(event=event).exists()
+
+    response = admin_client.post(url)
+    invoice = models.Invoice.objects.get(event=event)
+    assertRedirects(response, reverse("invoice_detail", kwargs={"pk": invoice.pk}))
+    assert invoice.void == void
+    history = _invoice_history(invoice)
+    assert len(history) == 1
+    assert history[0].revision.user == admin_user
+    assert history[0].revision.comment == ("Invoice created and voided" if void else "Invoice created")
+
+
+def test_event_invoice_button(admin_client):
+    event = models.Event.objects.create(name="To invoice", is_rig=True, start_date=date.today() - timedelta(days=2))
+    url = reverse("event_detail", kwargs={"pk": event.pk})
+
+    response = admin_client.get(url)
+    assertContains(response, 'id="invoice-create-form"', count=1)
+    assertContains(response, 'form="invoice-create-form"')
+
+    invoice = models.Invoice.objects.create(event=event)
+    response = admin_client.get(url)
+    assertNotContains(response, "invoice-create-form")
+    assertContains(response, reverse("invoice_detail", kwargs={"pk": invoice.pk}))

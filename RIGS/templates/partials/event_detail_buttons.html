@@ -35,17 +35,17 @@
         {% endif %}
 
         {% if perms.RIGS.add_invoice %}
-            <a id="invoiceDropdownLabel" href="{% url 'invoice_event' event.pk %}" class="btn
-                        {% if event.invoice and event.invoice.is_closed %}
-                            btn-success
-                        {% elif event.invoice %}
-                            btn-warning
-                        {% else %}
-                            btn-danger
-                        {% endif %}
-                        " title="Invoice Rig"><span
-                    class="fas fa-pound-sign"></span>
-                <span class="d-none d-sm-inline">Invoice</span></a>
+            {% if event.invoice %}
+                <a id="invoiceDropdownLabel" href="{% url 'invoice_detail' event.invoice.pk %}" class="btn
+                            {% if event.invoice.is_closed %}btn-success{% else %}btn-warning{% endif %}
+                            " title="Invoice Rig"><span
+                        class="fas fa-pound-sign"></span>
+                    <span class="d-none d-sm-inline">Invoice</span></a>
+            {% else %}
+                <button type="submit" form="invoice-create-form" id="invoiceDropdownLabel" class="btn btn-danger" title="Invoice Rig"><span
+                        class="fas fa-pound-sign"></span>
+                    <span class="d-none d-sm-inline">Invoice</span></button>
+            {% endif %}
         {% endif %}
 
         <a href="https://nottinghamtec.sharepoint.com/:l:/s/Office/JAAo7384Ro8-TKhPoZMLLMLNASrutYAeLOeQYPZO8DT-Zog?nav=MDkwZTAwN2YtODVkZi00YzBhLWFhMzEtNGYxNTc4MzgyYzRj" class="btn btn-danger"><span class="fas fa-file-invoice-dollar"></span> <span class="d-none d-sm-inline">Subhire Insurance Form</span></a>

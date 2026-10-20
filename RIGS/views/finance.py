@@ -175,11 +175,16 @@ class InvoicePrint(generic.View):
 
 
 class InvoiceVoid(generic.View):
-    def get(self, *args, **kwargs):
-        pk = kwargs.get("pk")
-        object = get_object_or_404(models.Invoice, pk=pk)
+    http_method_names = ["post"]
+
+    @transaction.atomic()
+    @reversion.create_revision()
+    def post(self, *args, **kwargs):
+        reversion.set_user(self.request.user)
+        object = get_object_or_404(models.Invoice, pk=kwargs.get("pk"))
         object.void = not object.void
         object.save()
+        reversion.set_comment("Invoice voided" if object.void else "Invoice unvoided")
 
         if object.void:
             return HttpResponseRedirect(reverse("invoice_list"))
@@ -242,21 +247,26 @@ class InvoiceWaiting(generic.ListView):
 
 
 class InvoiceEvent(generic.View):
+    http_method_names = ["post"]
+
     @transaction.atomic()
     @reversion.create_revision()
-    def get(self, *args, **kwargs):
+    def post(self, *args, **kwargs):
         reversion.set_user(self.request.user)
-        epk = kwargs.get("pk")
-        event = models.Event.objects.get(pk=epk)
+        event = get_object_or_404(models.Event, pk=kwargs.get("pk"))
         invoice, created = models.Invoice.objects.get_or_create(event=event)
 
         if created:
             invoice.invoice_date = datetime.date.today()
+            reversion.set_comment("Invoice created")
             messages.success(self.request, "Invoice created successfully")
 
         if kwargs.get("void"):
             invoice.void = not invoice.void
             invoice.save()
+            reversion.set_comment(
+                "Invoice created and voided" if created else ("Invoice voided" if invoice.void else "Invoice unvoided")
+            )
             messages.warning(self.request, "Invoice voided")
 
         return HttpResponseRedirect(reverse("invoice_detail", kwargs={"pk": invoice.pk}))

@@ -4,16 +4,17 @@
 {% block content %}
 <div class="row py-4">
     <div class="col-sm-12 text-end px-0">
+        <form id="invoice-void-form" method="post" action="{% url 'invoice_void' object.pk %}">{% csrf_token %}</form>
         <div class="btn-group">
             <a href="{% url 'event_detail' object.event.pk %}" class="btn btn-primary">Open Event Page <span class="fas fa-eye"></span></a>
             <a href="{% url 'invoice_delete' object.pk %}" class="btn btn-danger" title="Delete Invoice">
                 <span class="fas fa-times"></span> <span
                         class="d-none d-sm-inline">Delete</span>
             </a>
-            <a href="{% url 'invoice_void' object.pk %}" class="btn btn-warning" title="Void Invoice">
+            <button type="submit" form="invoice-void-form" class="btn btn-warning" title="{% if object.void %}Unvoid{% else %}Void{% endif %} Invoice">
                 <span class="fas fa-ban"></span> <span
-                        class="d-none d-sm-inline">Void</span>
-            </a>
+                        class="d-none d-sm-inline">{% if object.void %}Unvoid{% else %}Void{% endif %}</span>
+            </button>
             {% button 'print' url='invoice_print' pk=object.pk %}
         </div>
     </div>
