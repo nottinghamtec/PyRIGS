@@ -120,6 +120,12 @@ html {
 .home-activity { grid-area: activity; }
 .home-changelog { grid-area: changelog; }
 
+.activity-skeleton-avatar {
+  display: block;
+  width: 3em;
+  height: 3em;
+}
+
 .changelog-avatar {
   width: 3em;
   height: 3em;

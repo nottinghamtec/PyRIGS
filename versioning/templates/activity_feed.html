@@ -1,19 +1,14 @@
 {% block js %}
 {% include 'partials/version_scripts.html' %}
 <script>
-  const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
-  //TODO Maybe this should be a reduce rather than remove
-  dur = matches ? 0 : 600;
   ready(function() {
     var activity = document.getElementById('activity');
     var loading = document.getElementById('activity_loading');
-    activity.style.display = 'none';
     ajaxFetch("{% url 'activity_feed' %}")
       .then(function (response) { return response.text(); })
       .then(function (html) {
         setHtml(activity, html);
-        slideUp(loading, dur);
-        window.setTimeout(function () { slideDown(activity, dur); }, dur);
+        loading.remove();
       });
   });
 </script>
@@ -22,10 +17,26 @@
 <div class="card">
   <h4 class="card-header">Recent Changes</h4>
   <div class="list-group list-group-flush">
-    <div id="activity_loading" class="list-group-item text-center">
-      <div class="spinner-border text-primary" role="status">
-         <span class="visually-hidden">Loading...</span>
+    <div id="activity_loading" class="placeholder-glow" role="status" aria-busy="true">
+      <span class="visually-hidden">Loading...</span>
+      {% for _ in "123456789012" %}
+      <div class="list-group-item">
+        <div class="d-flex">
+          <div class="me-3"><span class="placeholder rounded activity-skeleton-avatar"></span></div>
+          <div class="flex-grow-1">
+            <h5 class="d-flex justify-content-between">
+              <span class="placeholder col-3"></span>
+              <span class="placeholder col-3"></span>
+            </h5>
+            <p class="mb-0">
+              <span class="placeholder col-{% cycle '10' '8' '11' '9' %}"></span>
+              <span class="placeholder col-{% cycle '6' '9' '5' '7' %}"></span>
+              <span class="placeholder col-{% cycle '8' '4' '10' '6' %}"></span>
+            </p>
+          </div>
+        </div>
       </div>
+      {% endfor %}
     </div>
     <div id="activity">
     </div>
