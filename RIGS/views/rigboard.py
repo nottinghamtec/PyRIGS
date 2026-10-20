@@ -45,7 +45,7 @@ class RigboardIndex(generic.TemplateView):
             objects = objects.exclude(status=models.Event.CANCELLED)
 
         # call out method to get current events
-        context["events"] = objects.select_related("riskassessment", "invoice").prefetch_related("checklists")
+        context["events"] = objects.select_related(*models.LISTING_SELECT).prefetch_related(*models.LISTING_PREFETCH)
         context["page_title"] = "Rigboard"
         return context
 
@@ -206,6 +206,8 @@ class EventArchive(generic.ListView):
         context["end"] = self.request.GET.get("end", datetime.date.today().strftime("%Y-%m-%d"))
         context["statuses"] = models.Event.EVENT_STATUS_CHOICES
         context["page_title"] = "Event Archive"
+        if not context["paginator"].count:
+            messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
         return context
 
     def get_queryset(self):
@@ -236,13 +238,7 @@ class EventArchive(generic.ListView):
 
         qs = objects.filter(filter).order_by("-start_date")
 
-        # Preselect related for efficiency
-        qs.select_related("person", "organisation", "venue", "mic")
-
-        if not qs.exists():
-            messages.add_message(self.request, messages.WARNING, "No events have been found matching those criteria.")
-
-        return qs
+        return qs.select_related(*models.LISTING_SELECT).prefetch_related(*models.LISTING_PREFETCH)
 
 
 class EventAuthorise(generic.UpdateView):

@@ -200,3 +200,13 @@ def test_duplicate_submission_while_in_flight_does_not_block(admin_client):
     response = admin_client.post(reverse("person_create"), data)
     assert response.status_code == 409
     assert not Person.objects.filter(name="Inflight Tester").exists()
+
+
+@pytest.mark.parametrize(
+    "version, shown",
+    [("HTTP/3.0", True), ("HTTP/2.0", False), ("HTTP/1.1", False), (None, False)],
+)
+def test_footer_shows_h3_only_for_http3(admin_client, version, shown):
+    extra = {"HTTP_X_HTTP_VERSION": version} if version else {}
+    response = admin_client.get(reverse("index"), **extra)
+    assert ("Connected over HTTP/3" in response.content.decode()) is shown

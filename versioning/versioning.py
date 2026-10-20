@@ -1,3 +1,6 @@
+import uuid
+
+from django.core.cache import cache
 from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -221,9 +224,7 @@ class RIGSVersionManager(VersionQuerySet):
 
         return (
             self.filter(content_type__in=content_types)
-            .select_related(
-                "revision",
-            )
+            .select_related("revision", "revision__user")
             .order_by("-revision__date_created")
         )
 
@@ -273,3 +274,27 @@ class RIGSVersion(Version):
             id = self.changes.new.pk
 
         return f"{id} | {self.changes.new.__class__.__name__}"
+
+
+ACTIVITY_FEED_VERSION_KEY = "activity-feed-version"
+
+
+def new_activity_feed_version():
+    return uuid.uuid4().hex
+
+
+def activity_feed_version():
+    """Identifies the current state of the activity feed, so the cached fragment can be told apart.
+
+    Always a value no earlier fragment was cached under: if the cache has lost the key (expiry, culling, a restart of
+    an in-memory cache), a fresh one is made rather than falling back to a default that old fragments may carry."""
+    version = cache.get(ACTIVITY_FEED_VERSION_KEY)
+    if version is None:
+        cache.add(ACTIVITY_FEED_VERSION_KEY, new_activity_feed_version(), None)
+        version = cache.get(ACTIVITY_FEED_VERSION_KEY) or new_activity_feed_version()
+    return version
+
+
+def bump_activity_feed_version(sender=None, **kwargs):
+    # Explicitly no timeout: cache.incr() would re-set the key with the default 5 minute timeout
+    cache.set(ACTIVITY_FEED_VERSION_KEY, new_activity_feed_version(), None)

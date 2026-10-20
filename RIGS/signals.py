@@ -7,18 +7,20 @@ from io import BytesIO
 from pypdf import PdfReader, PdfWriter
 from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.core.cache import cache
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.db.models.signals import post_save
+from django.core.cache import cache
+from django.db.models.signals import post_delete, post_save
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
 from premailer import Premailer
 from registration.signals import user_activated
-from reversion import revisions as reversion
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
+
+from reversion import signals as reversion_signals
 
 from RIGS import models
+from versioning.versioning import bump_activity_feed_version
 
 
 def send_eventauthorisation_success_email(instance):
@@ -34,7 +36,7 @@ def send_eventauthorisation_success_email(instance):
 
     rml = template.render(context)
 
-    buffer = rml2pdf.parseString(rml)
+    buffer = render_rml(rml)
     merger.append(PdfReader(buffer))
     buffer.close()
 
@@ -139,9 +141,22 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 user_activated.connect(send_admin_awaiting_approval_email)
 
 
-def update_cache(sender, instance, created, **kwargs):
-    cache.clear()
+# Items are left out: an event's form saves them in bulk and drops the counts once afterwards
+def drop_invoice_counts(sender, **kwargs):
+    cache.delete(models.INVOICE_COUNTS_CACHE_KEY)
 
 
-for model in reversion.get_registered_models():
-    post_save.connect(update_cache, sender=model)
+for model in (models.Event, models.Invoice, models.Payment):
+    post_save.connect(drop_invoice_counts, sender=model)
+    post_delete.connect(drop_invoice_counts, sender=model)
+
+
+def drop_vat_rates(sender, **kwargs):
+    models.clear_vat_rates()
+
+
+post_save.connect(drop_vat_rates, sender=models.VatRate)
+post_delete.connect(drop_vat_rates, sender=models.VatRate)
+
+
+reversion_signals.post_revision_commit.connect(bump_activity_feed_version)

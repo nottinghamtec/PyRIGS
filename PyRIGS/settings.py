@@ -94,8 +94,6 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "htmlmin.middleware.HtmlMinifyMiddleware",
-    "htmlmin.middleware.MarkRequestMiddleware",
 )
 
 ROOT_URLCONF = "PyRIGS.urls"
@@ -111,6 +109,9 @@ DATABASES = {
         "PASSWORD": env("DATABASE_PASSWORD", default="rigs"),
         "HOST": env("DATABASE_HOST", default="127.0.0.1"),
         "PORT": env("DATABASE_PORT", 5432),
+        # Keep connections open between requests rather than authenticating a new one every time
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
@@ -187,7 +188,7 @@ else:
 sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=""),
     integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
+    traces_sample_rate=0.1,
     ignore_errors=[DisallowedHost],
 )
 ignore_logger("django.security.DisallowedHost")

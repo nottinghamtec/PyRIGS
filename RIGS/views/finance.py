@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse
 from django.views import generic
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from RIGS import finance_stats, models
 
@@ -164,7 +164,7 @@ class InvoicePrint(generic.View):
 
         rml = template.render(context)
 
-        buffer = rml2pdf.parseString(rml)
+        buffer = render_rml(rml)
 
         pdfData = buffer.read()
 
@@ -225,7 +225,12 @@ class InvoiceArchive(generic.ListView):
         return context
 
     def get_queryset(self):
-        return self.model.objects.search(self.request.GET.get("q")).order_by("-invoice_date")
+        return (
+            self.model.objects.search(self.request.GET.get("q"))
+            .order_by("-invoice_date")
+            .select_related("event__organisation", "event__person", "event__mic")
+            .prefetch_related("payment_set", "event__items")
+        )
 
 
 class InvoiceWaiting(generic.ListView):

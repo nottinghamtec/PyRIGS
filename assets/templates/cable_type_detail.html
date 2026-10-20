@@ -1,6 +1,5 @@
 {% extends 'base_assets.html' %}
 {% load button from filters %}
-{% load cache %}
 
 {% block content %}
     <div class="row">
@@ -25,8 +24,6 @@
             <div class="col mt-2 text-end">
                 {% button 'edit' url='cable_type_update' pk=object.id %}
             </div>
-            {# cached indefinitely: bump the "bs5" suffix whenever this markup changes #}
-            {% cache None cable_type_assets_bs5 object %}
                 <div class="col mt-2">
                     <div class="card">
                         <div class="card-header">Associated Assets</div>
@@ -35,7 +32,6 @@
                         {% endwith %}
                     </div>
                 </div>
-            {% endcache %}
         </div>
     </div>
 {% endblock %}

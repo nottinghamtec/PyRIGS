@@ -115,3 +115,28 @@ def test_deleted_relation(admin_client, admin_user):
     response = admin_client.get(request_url, follow=True)
     assertContains(response, "Test Person")
     assert response.status_code == 200
+
+
+def test_activity_feed_version_is_stored_without_a_timeout():
+    from unittest import mock
+    from django.core.cache import cache
+    from versioning.versioning import bump_activity_feed_version, activity_feed_version
+
+    with mock.patch.object(cache, "set", wraps=cache.set) as spy:
+        bump_activity_feed_version()
+    # cache.incr() would store it again with the default 5 minute timeout, after which the feed reverted to a stale one
+    assert spy.call_args.args[2] is None
+
+    first = activity_feed_version()
+    bump_activity_feed_version()
+    assert activity_feed_version() != first
+
+
+def test_activity_feed_version_after_losing_the_key_is_new():
+    from django.core.cache import cache
+    from versioning.versioning import bump_activity_feed_version, activity_feed_version
+
+    bump_activity_feed_version()
+    first = activity_feed_version()
+    cache.clear()
+    assert activity_feed_version() not in ("", 0, None, first)

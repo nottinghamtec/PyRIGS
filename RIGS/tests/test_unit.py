@@ -4,6 +4,7 @@ import pytest
 from datetime import date, timedelta
 
 from django.conf import settings
+from django.utils.html import escape
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from django.utils.safestring import SafeText
@@ -562,7 +563,7 @@ def review(client, profile, obj, request_url):
     response = client.get(reverse(request_url, kwargs={"pk": obj.pk}), follow=True)
     obj.refresh_from_db()
     assertContains(response, "Reviewed by")
-    assertContains(response, profile.name)
+    assertContains(response, escape(profile.name))
     assert_times_almost_equal(time, obj.reviewed_at)
 
 
@@ -794,10 +795,12 @@ def test_invoice_dashboard_export(admin_client):
 
 
 def test_invoice_dashboard_queries_dont_grow(admin_client):
+    from django.core.cache import cache
     from django.db import connection
     from django.test.utils import CaptureQueriesContext
 
     def queries():
+        cache.delete(models.INVOICE_COUNTS_CACHE_KEY)  # Every call pays for the navbar counts the same way
         with CaptureQueriesContext(connection) as captured:
             assert admin_client.get(reverse("invoice_dashboard")).status_code == 200
         return len(captured)

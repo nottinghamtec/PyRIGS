@@ -10,7 +10,7 @@ from itertools import chain
 from io import BytesIO
 
 from pypdf import PdfReader, PdfWriter
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from django.conf import settings
 from django.contrib import messages
@@ -40,9 +40,11 @@ def ajax_context(request):
 
 
 def version_context(request):
-    """Template context processor exposing the running commit to every template."""
+    """Template context processor exposing the running commit, and whether this connection is HTTP/3, to every template."""
     sha = settings.GIT_SHA
-    return {"git_sha": sha, "git_sha_short": sha[:7]}
+    # nginx terminates the connection and passes the protocol it was made over in X-HTTP-Version
+    http3 = request.headers.get("x-http-version", "").startswith("HTTP/3")
+    return {"git_sha": sha, "git_sha_short": sha[:7], "http3": http3}
 
 
 def get_related(
@@ -294,12 +296,12 @@ class Search(generic.ListView):
         query = request.GET.get("q", None)
 
         if query is not None:
-            event_results = models.Event.objects.search(query)
+            event_results = models.Event.objects.search(query).select_related("person", "organisation", "venue", "mic")
             person_results = models.Person.objects.search(query)
             organisation_results = models.Organisation.objects.search(query)
             venue_results = models.Venue.objects.search(query)
-            invoice_results = models.Invoice.objects.search(query)
-            asset_results = asset_models.Asset.objects.search(query)
+            invoice_results = models.Invoice.objects.search(query).select_related("event")
+            asset_results = asset_models.Asset.objects.search(query).select_related("category", "status")
             supplier_results = asset_models.Supplier.objects.search(query)
             trainee_results = training_models.Trainee.objects.search(query)
             training_item_results = training_models.TrainingItem.objects.search(query)
@@ -363,7 +365,7 @@ def get_info_string(user):
 def render_pdf_response(template, context, append_terms):
     merger = PdfWriter()
     rml = template.render(context)
-    buffer = rml2pdf.parseString(rml)
+    buffer = render_rml(rml)
     merger.append(PdfReader(buffer))
     buffer.close()
 

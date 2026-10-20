@@ -16,7 +16,7 @@ from pypdf import PdfReader, PdfWriter
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from barcode import Code39
 from barcode.writer import ImageWriter
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from PyRIGS.views import (
     GenericListView,
@@ -67,7 +67,7 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         elif self.hide_hidden_status:
             queryset = queryset.filter(status__in=models.AssetStatus.objects.filter(should_show=True))
 
-        return queryset.select_related("category", "status")
+        return queryset.select_related("category", "status", "cable_type__plug", "cable_type__socket")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -427,7 +427,7 @@ class GenerateLabels(generic.View):
         merger = PdfWriter()
 
         rml = template.render(context)
-        buffer = rml2pdf.parseString(rml)
+        buffer = render_rml(rml)
         merger.append(PdfReader(buffer))
         buffer.close()
 

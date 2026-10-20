@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import random
 import string
+import time
 from collections import Counter
 from decimal import Decimal
 from urllib.parse import urlparse
@@ -12,7 +13,8 @@ from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.core.cache import cache
+from django.db import connection, models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -92,11 +94,7 @@ class Profile(AbstractUser):
 
     @property
     def latest_events(self):
-        return (
-            self.event_mic.order_by("-start_date")
-            .select_related("person", "organisation", "venue", "mic", "riskassessment", "invoice")
-            .prefetch_related("checklists")
-        )
+        return self.event_mic.with_listing_data().order_by("-start_date")
 
     @classmethod
     def admins(cls):
@@ -166,7 +164,7 @@ class Person(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by("-start_date").select_related("person", "organisation", "venue", "mic")
+        return self.event_set.with_listing_data().order_by("-start_date")
 
     def get_absolute_url(self):
         return reverse("person_detail", kwargs={"pk": self.pk})
@@ -203,23 +201,41 @@ class Organisation(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by("-start_date").select_related("person", "organisation", "venue", "mic")
+        return self.event_set.with_listing_data().order_by("-start_date")
 
     def get_absolute_url(self):
         return reverse("organisation_detail", kwargs={"pk": self.pk})
+
+
+VAT_RATES_TTL = 60
+_vat_rates = {"loaded_at": None, "rates": []}
+
+
+def clear_vat_rates():
+    _vat_rates["loaded_at"] = None
 
 
 class VatManager(models.Manager):
     def current_rate(self):
         return self.find_rate(timezone.now())
 
+    def _rates(self):
+        """Every rate, newest first. There are only a handful, so each process keeps them for a minute rather than
+        asking the database once per event listed."""
+        loaded_at = _vat_rates["loaded_at"]
+        if loaded_at is None or time.monotonic() - loaded_at > VAT_RATES_TTL:
+            _vat_rates["rates"] = list(self.order_by("-start_at"))
+            _vat_rates["loaded_at"] = time.monotonic()
+        return _vat_rates["rates"]
+
     def find_rate(self, date):
-        try:
-            return self.filter(start_at__lte=date).latest()
-        except VatRate.DoesNotExist:
-            r = VatRate
-            r.rate = 0
-            return r
+        date = models.DateField().to_python(date)
+        for rate in self._rates():
+            if rate.start_at <= date:
+                return rate
+        r = VatRate
+        r.rate = 0
+        return r
 
 
 @reversion.register
@@ -262,13 +278,21 @@ class Venue(models.Model, RevisionMixin):
 
     @property
     def latest_events(self):
-        return self.event_set.order_by("-start_date").select_related("person", "organisation", "venue", "mic")
+        return self.event_set.with_listing_data().order_by("-start_date")
 
     def get_absolute_url(self):
         return reverse("venue_detail", kwargs={"pk": self.pk})
 
 
+LISTING_SELECT = ("person", "organisation", "venue", "mic", "riskassessment", "invoice", "authorisation")
+LISTING_PREFETCH = ("items", "checklists", "power_tests", "invoice__payment_set")
+
+
 class EventManager(models.Manager):
+    def with_listing_data(self):
+        """Everything an event row in a listing shows, fetched up front instead of once per event"""
+        return self.get_queryset().select_related(*LISTING_SELECT).prefetch_related(*LISTING_PREFETCH)
+
     def current_events(self):
         events = (
             self.filter(
@@ -451,6 +475,10 @@ class Event(models.Model, RevisionMixin):
 
     @property
     def sum_total(self):
+        if "items" in getattr(self, "_prefetched_objects_cache", {}):
+            # Listings prefetch the items, so add them up here rather than asking the database again per event
+            total = sum((item.cost * item.quantity for item in self.items.all()), Decimal("0.00"))
+            return Decimal(total).quantize(Decimal("0.01"))
         total = self.items.aggregate(
             sum_total=models.Sum(
                 models.F("cost") * models.F("quantity"),
@@ -788,23 +816,49 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
+OUTSTANDING_INVOICES_FROM = (
+    'FROM "RIGS_invoice" AS inv '
+    'LEFT JOIN (SELECT event_id, SUM(cost * quantity) AS cost FROM "RIGS_eventitem" GROUP BY event_id) AS items '
+    "ON items.event_id = inv.event_id "
+    'LEFT JOIN (SELECT invoice_id, COUNT(amount) AS payment_count, SUM(amount) AS payments FROM "RIGS_payment" '
+    "GROUP BY invoice_id) AS pay ON pay.invoice_id = inv.id "
+    "WHERE NOT inv.void AND (((items.cost > 0.0) AND (COALESCE(pay.payment_count, 0) = 0)) "
+    "OR (items.cost - pay.payments) <> 0.0)"
+)
+
+INVOICE_COUNTS_CACHE_KEY = "nav-invoice-counts"
+
+
+def invoice_counts():
+    """Counts shown in the navbar on every page: events waiting to be invoiced and invoices still owed on.
+
+    Cached briefly and dropped whenever something that feeds them is saved (see ``RIGS.signals``)."""
+    counts = cache.get(INVOICE_COUNTS_CACHE_KEY)
+    if counts is None:
+        waiting = Event.objects.waiting_invoices().count()
+        outstanding = Invoice.objects.outstanding_count()
+        counts = {"waiting": waiting, "outstanding": outstanding, "todo": waiting + outstanding}
+        cache.set(INVOICE_COUNTS_CACHE_KEY, counts, 60)
+    return counts
+
+
 class InvoiceManager(models.Manager):
     def outstanding_invoices(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
         sql = (
-            "SELECT * FROM "
-            "(SELECT "
-            '(SELECT COUNT(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id="RIGS_invoice".id) AS "payment_count", '
-            '(SELECT SUM(ei.cost * ei.quantity) FROM "RIGS_eventitem" AS ei WHERE ei.event_id="RIGS_invoice".event_id) AS "cost", '
-            '(SELECT SUM(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id="RIGS_invoice".id) AS "payments", '
-            '"RIGS_invoice"."id", "RIGS_invoice"."event_id", "RIGS_invoice"."invoice_date", "RIGS_invoice"."void" FROM "RIGS_invoice") '
-            "AS sub "
-            "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
-            "ORDER BY invoice_date"
+            "SELECT inv.id, inv.event_id, inv.invoice_date, inv.void, items.cost AS cost, pay.payments AS payments, "
+            "COALESCE(pay.payment_count, 0) AS payment_count "
+            + OUTSTANDING_INVOICES_FROM
+            + " ORDER BY inv.invoice_date"
+        )
+        return self.raw(sql).prefetch_related(
+            "payment_set", "event__items", "event__organisation", "event__person", "event__mic"
         )
 
-        query = self.raw(sql)
-        return query
+    def outstanding_count(self):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) " + OUTSTANDING_INVOICES_FROM)
+            return cursor.fetchone()[0]
 
     def search(self, query=None):
         qs = self.get_queryset()
@@ -855,6 +909,8 @@ class Invoice(models.Model, RevisionMixin):
 
     @property
     def payment_total(self):
+        if "payment_set" in getattr(self, "_prefetched_objects_cache", {}):
+            return sum((payment.amount for payment in self.payment_set.all()), Decimal("0.00"))
         total = self.payment_set.aggregate(total=models.Sum("amount"))["total"]
         if total:
             return total
