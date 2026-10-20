@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse
 from django.views import generic
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from RIGS import finance_stats, models
 
@@ -164,7 +164,7 @@ class InvoicePrint(generic.View):
 
         rml = template.render(context)
 
-        buffer = rml2pdf.parseString(rml)
+        buffer = render_rml(rml)
 
         pdfData = buffer.read()
 

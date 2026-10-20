@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from premailer import Premailer
 from registration.signals import user_activated
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from reversion import signals as reversion_signals
 
@@ -36,7 +36,7 @@ def send_eventauthorisation_success_email(instance):
 
     rml = template.render(context)
 
-    buffer = rml2pdf.parseString(rml)
+    buffer = render_rml(rml)
     merger.append(PdfReader(buffer))
     buffer.close()
 

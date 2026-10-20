@@ -10,7 +10,7 @@ from itertools import chain
 from io import BytesIO
 
 from pypdf import PdfReader, PdfWriter
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from django.conf import settings
 from django.contrib import messages
@@ -363,7 +363,7 @@ def get_info_string(user):
 def render_pdf_response(template, context, append_terms):
     merger = PdfWriter()
     rml = template.render(context)
-    buffer = rml2pdf.parseString(rml)
+    buffer = render_rml(rml)
     merger.append(PdfReader(buffer))
     buffer.close()
 

@@ -16,7 +16,7 @@ from pypdf import PdfReader, PdfWriter
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from barcode import Code39
 from barcode.writer import ImageWriter
-from z3c.rml import rml2pdf
+from PyRIGS.pdf import render_rml
 
 from PyRIGS.views import (
     GenericListView,
@@ -427,7 +427,7 @@ class GenerateLabels(generic.View):
         merger = PdfWriter()
 
         rml = template.render(context)
-        buffer = rml2pdf.parseString(rml)
+        buffer = render_rml(rml)
         merger.append(PdfReader(buffer))
         buffer.close()
 
