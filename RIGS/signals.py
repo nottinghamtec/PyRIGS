@@ -138,11 +138,12 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 user_activated.connect(send_admin_awaiting_approval_email)
 
 
+# Items are left out: an event's form saves them in bulk and drops the counts once afterwards
 def drop_invoice_counts(sender, **kwargs):
     cache.delete(models.INVOICE_COUNTS_CACHE_KEY)
 
 
-for model in (models.Event, models.EventItem, models.Invoice, models.Payment):
+for model in (models.Event, models.Invoice, models.Payment):
     post_save.connect(drop_invoice_counts, sender=model)
     post_delete.connect(drop_invoice_counts, sender=model)
 

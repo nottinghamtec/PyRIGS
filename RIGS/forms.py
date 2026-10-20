@@ -3,6 +3,7 @@ from datetime import timedelta
 import simplejson
 from django import forms
 from django.conf import settings
+from django.core.cache import cache
 from django.core import serializers
 from django.utils import timezone
 from django.utils.html import format_html
@@ -65,21 +66,25 @@ class EventForm(forms.ModelForm):
     def process_items_json(self, event=None):
         data = simplejson.loads(self.cleaned_data["items_json"])
         items = {}
+        existing = {}
+        if event:
+            existing = models.EventItem.objects.filter(event=event, pk__in=[int(key) for key in data]).in_bulk()
         for key in data:
             pk = int(key)
-            items[pk] = self._get_or_initialise_item(pk, data[key]["fields"], event)
+            items[pk] = self._get_or_initialise_item(pk, data[key]["fields"], event, existing.get(pk))
 
         return items
 
-    def _get_or_initialise_item(self, pk, data, event):
-        try:
-            item = models.EventItem.objects.get(pk=pk, event=event)
-        except models.EventItem.DoesNotExist:
+    ITEM_FIELDS = ("name", "description", "is_section", "colour", "quantity", "cost", "order")
+
+    def _get_or_initialise_item(self, pk, data, event, item=None):
+        if item is None:
             # This occurs for one of two reasons
             # 1) The event has been duplicated, so the item PKs belong to another event
             # 2) The items are brand new, with negative PK values
             # In either case, we want to create the items
             item = models.EventItem()
+        before = [getattr(item, field) for field in self.ITEM_FIELDS] if item.pk else None
 
         # Take the data from the form and update the item object
         item.name = data["name"]
@@ -96,9 +101,8 @@ class EventForm(forms.ModelForm):
 
         if event:
             item.event = event
-            item.full_clean()
-        else:
-            item.full_clean("event")
+        item.full_clean(exclude=["event"])
+        item.changed = before != [getattr(item, field) for field in self.ITEM_FIELDS]
 
         return item
 
@@ -136,7 +140,10 @@ class EventForm(forms.ModelForm):
                     item.delete()
 
             for key in items:
-                items[key].save()
+                if items[key].changed:
+                    items[key].save()
+
+            cache.delete(models.INVOICE_COUNTS_CACHE_KEY)
 
         return m
 
