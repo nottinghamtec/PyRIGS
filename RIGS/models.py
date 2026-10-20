@@ -12,7 +12,8 @@ from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.core.cache import cache
+from django.db import connection, models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -788,23 +789,45 @@ class EventAuthorisation(models.Model, RevisionMixin):
         return f"{self.event.display_id} (requested by {self.sent_by.initials})"
 
 
+OUTSTANDING_INVOICES_FROM = (
+    'FROM "RIGS_invoice" AS inv '
+    'LEFT JOIN (SELECT event_id, SUM(cost * quantity) AS cost FROM "RIGS_eventitem" GROUP BY event_id) AS items '
+    "ON items.event_id = inv.event_id "
+    'LEFT JOIN (SELECT invoice_id, COUNT(amount) AS payment_count, SUM(amount) AS payments FROM "RIGS_payment" '
+    "GROUP BY invoice_id) AS pay ON pay.invoice_id = inv.id "
+    "WHERE NOT inv.void AND (((items.cost > 0.0) AND (COALESCE(pay.payment_count, 0) = 0)) "
+    "OR (items.cost - pay.payments) <> 0.0)"
+)
+
+INVOICE_COUNTS_CACHE_KEY = "nav-invoice-counts"
+
+
+def invoice_counts():
+    """Counts shown in the navbar on every page: events waiting to be invoiced and invoices still owed on.
+
+    Cached briefly and dropped whenever something that feeds them is saved (see ``RIGS.signals``)."""
+    counts = cache.get(INVOICE_COUNTS_CACHE_KEY)
+    if counts is None:
+        waiting = Event.objects.waiting_invoices().count()
+        outstanding = Invoice.objects.outstanding_count()
+        counts = {"waiting": waiting, "outstanding": outstanding, "todo": waiting + outstanding}
+        cache.set(INVOICE_COUNTS_CACHE_KEY, counts, 60)
+    return counts
+
+
 class InvoiceManager(models.Manager):
     def outstanding_invoices(self):
         # Manual query is the only way I have found to do this efficiently. Not ideal but needs must
         sql = (
-            "SELECT * FROM "
-            "(SELECT "
-            '(SELECT COUNT(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id="RIGS_invoice".id) AS "payment_count", '
-            '(SELECT SUM(ei.cost * ei.quantity) FROM "RIGS_eventitem" AS ei WHERE ei.event_id="RIGS_invoice".event_id) AS "cost", '
-            '(SELECT SUM(p.amount) FROM "RIGS_payment" AS p WHERE p.invoice_id="RIGS_invoice".id) AS "payments", '
-            '"RIGS_invoice"."id", "RIGS_invoice"."event_id", "RIGS_invoice"."invoice_date", "RIGS_invoice"."void" FROM "RIGS_invoice") '
-            "AS sub "
-            "WHERE (((cost > 0.0) AND (payment_count=0)) OR (cost - payments) <> 0.0) AND void = '0'"
-            "ORDER BY invoice_date"
+            'SELECT inv.id, inv.event_id, inv.invoice_date, inv.void, items.cost AS cost, pay.payments AS payments, '
+            "COALESCE(pay.payment_count, 0) AS payment_count " + OUTSTANDING_INVOICES_FROM + " ORDER BY inv.invoice_date"
         )
+        return self.raw(sql)
 
-        query = self.raw(sql)
-        return query
+    def outstanding_count(self):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) " + OUTSTANDING_INVOICES_FROM)
+            return cursor.fetchone()[0]
 
     def search(self, query=None):
         qs = self.get_queryset()

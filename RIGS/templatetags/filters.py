@@ -224,19 +224,9 @@ def button(type, url=None, pk=None, clazz="", icon=None, text="", id=None, style
     return {"target": url, "pk": pk, "class": clazz, "icon": icon, "text": text, "id": id, "style": style}
 
 
-@register.simple_tag  # TODO Can these be done with annotation/aggregation?
-def invoices_waiting():
-    return len(models.Event.objects.waiting_invoices())
-
-
 @register.simple_tag
-def invoices_outstanding():
-    return len(models.Invoice.objects.outstanding_invoices())
-
-
-@register.simple_tag
-def total_invoices_todo():
-    return len(models.Event.objects.waiting_invoices()) + len(models.Invoice.objects.outstanding_invoices())
+def invoice_counts():
+    return models.invoice_counts()
 
 
 @register.simple_tag

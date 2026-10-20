@@ -8,7 +8,8 @@ from pypdf import PdfReader, PdfWriter
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.db.models.signals import post_save
+from django.core.cache import cache
+from django.db.models.signals import post_delete, post_save
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
@@ -135,3 +136,12 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
 
 
 user_activated.connect(send_admin_awaiting_approval_email)
+
+
+def drop_invoice_counts(sender, **kwargs):
+    cache.delete(models.INVOICE_COUNTS_CACHE_KEY)
+
+
+for model in (models.Event, models.EventItem, models.Invoice, models.Payment):
+    post_save.connect(drop_invoice_counts, sender=model)
+    post_delete.connect(drop_invoice_counts, sender=model)

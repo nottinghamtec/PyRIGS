@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
-{% load invoices_waiting from filters %}
-{% load invoices_outstanding from filters %}
-{% load total_invoices_todo from filters %}
+{% load invoice_counts from filters %}
 
 {% block titleheader %}
 
@@ -39,18 +37,16 @@
     {% endif %}
     {% if perms.RIGS.view_invoice %}
     <li class="nav-item dropdown">
-      {% total_invoices_todo as todo %}
-      {% invoices_waiting as waiting %}
-      {% invoices_outstanding as outstanding %}
+      {% invoice_counts as counts %}
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownInvoices" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Invoices <span class="badge {% if todo == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ todo }}</span>
+        Invoices <span class="badge {% if counts.todo == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ counts.todo }}</span>
       </a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownInvoices">
         <a class="dropdown-item" href="{% url 'invoice_dashboard' %}"><span class="fas fa-chart-line"></span> Dashboard</a>
         {% if perms.RIGS.add_invoice %}
-        <a class="dropdown-item text-nowrap" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting <span class="badge {% if waiting == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ waiting }}</span></a>
+        <a class="dropdown-item text-nowrap" href="{% url 'invoice_waiting' %}"><span class="fas fa-briefcase text-danger"></span> Waiting <span class="badge {% if counts.waiting == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ counts.waiting }}</span></a>
         {% endif %}
-        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding <span class="badge {% if outstanding == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ outstanding }}</span></a>
+        <a class="dropdown-item" href="{% url 'invoice_list' %}"><span class="fas fa-pound-sign text-warning"></span> Outstanding <span class="badge {% if counts.outstanding == 0 %}text-bg-success{% else %}text-bg-danger{% endif %} rounded-pill">{{ counts.outstanding }}</span></a>
         <a class="dropdown-item" href="{% url 'invoice_archive' %}"><span class="fas fa-book"></span> Archive</a>
       </div>
     </li>
