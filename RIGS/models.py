@@ -287,7 +287,7 @@ class Venue(models.Model, RevisionMixin):
 
 
 LISTING_SELECT = ("person", "organisation", "venue", "mic", "riskassessment", "invoice", "authorisation")
-LISTING_PREFETCH = ("items", "checklists", "power_tests")
+LISTING_PREFETCH = ("items", "checklists", "power_tests", "invoice__payment_set")
 
 
 class EventManager(models.Manager):

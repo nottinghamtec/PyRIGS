@@ -294,12 +294,12 @@ class Search(generic.ListView):
         query = request.GET.get("q", None)
 
         if query is not None:
-            event_results = models.Event.objects.search(query)
+            event_results = models.Event.objects.search(query).select_related("person", "organisation", "venue", "mic")
             person_results = models.Person.objects.search(query)
             organisation_results = models.Organisation.objects.search(query)
             venue_results = models.Venue.objects.search(query)
-            invoice_results = models.Invoice.objects.search(query)
-            asset_results = asset_models.Asset.objects.search(query)
+            invoice_results = models.Invoice.objects.search(query).select_related("event")
+            asset_results = asset_models.Asset.objects.search(query).select_related("category", "status")
             supplier_results = asset_models.Supplier.objects.search(query)
             trainee_results = training_models.Trainee.objects.search(query)
             training_item_results = training_models.TrainingItem.objects.search(query)
