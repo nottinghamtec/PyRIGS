@@ -269,3 +269,17 @@ def test_flagged_supervisor_can_deliver_anything(trainee, supervisor):
     sup = models.Trainee.objects.get(pk=supervisor.pk)
     for depth, _ in models.TrainingItemQualification.CHOICES:
         assert sup.can_deliver_training(item, depth)
+
+
+def test_training_item_picker_searches_name_and_number(admin_client, training_item):
+    training_item.name = "Basic Survival"
+    training_item.save()
+    url = reverse("api_secure", kwargs={"model": "training_item"})
+    fields = "display_id,name,description"
+
+    def found(term):
+        return [r["value"] for r in admin_client.get(url, {"q": term, "fields": fields}).json()]
+
+    assert found("survival") == [training_item.pk]
+    assert found("1.1") == [training_item.pk]
+    assert found("die") == [training_item.pk]

@@ -38,7 +38,7 @@
             {% for depth in depths %}
             <div class="mb-3 row" id="{{depth.0}}">
               <label for="ts-select" class="col-sm-2 text-{% colour_from_depth depth.0 %} py-1">{{ depth.1 }} Items</label>
-              <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="ts-select col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,description&filters=active" data-noclear="true">
+              <select multiple name="items_{{depth.0}}" id="items_{{depth.0}}_id" class="ts-select col-sm-10 px-0" data-live-search="true" data-sourceurl="{% url 'api_secure' model='training_item' %}?fields=display_id,name,description&filters=active" data-noclear="true">
               </select>
             </div>
             {% endfor %}
