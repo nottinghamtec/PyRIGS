@@ -75,9 +75,33 @@ def test_trainee_detail(admin_client, trainee, admin_user):
     assertContains(response, f"{trainee.get_full_name()}'s Training Record")
 
 
+def test_trainee_item_detail_legacy(admin_client, trainee):
+    response = get_response(admin_client, "trainee_item_detail_legacy", {"pk": trainee.pk})
+    assert response.status_code == 200
+
+
 def test_trainee_item_detail(admin_client, trainee):
     response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
     assertContains(response, "Nothing found")
+
+
+def test_trainee_item_detail_shows_untracked_and_groups(admin_client, trainee, supervisor, training_item):
+    models.TrainingItemQualification.objects.create(
+        item=training_item, trainee=trainee, supervisor=supervisor, depth=0, date="2024-01-01", notes="first"
+    )
+    models.TrainingItemQualification.objects.create(
+        item=training_item, trainee=trainee, supervisor=supervisor, depth=2, date="2024-02-01", notes="second"
+    )
+    response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
+    assertContains(response, "1/1")
+    assertContains(response, "first")
+    assertContains(response, "second")
+    assert response.content.decode().count('class="record-item"') == 1
+
+
+def test_trainee_item_detail_untracked_item(admin_client, trainee, training_item):
+    response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
+    assertContains(response, 'class="record-item not-started"')
 
 
 def test_item_list(admin_client, training_item):

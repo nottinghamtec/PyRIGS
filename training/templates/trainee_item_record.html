@@ -1,0 +1,146 @@
+{% extends 'base_training.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+<style>
+    .record { --record-muted: var(--bs-secondary-color); }
+    .record a:not(.btn) { text-decoration: none; color: inherit; }
+    .record a:not(.btn):hover { text-decoration: underline; }
+    .record-toolbar .form-control { max-width: 18rem; }
+    .record-category { margin-top: 2rem; }
+    .record-category h2 { display: flex; justify-content: space-between; align-items: baseline; font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--record-muted); padding-bottom: .4rem; margin: 0; border-bottom: 1px solid var(--bs-border-color); }
+    .record-item { border-bottom: 1px solid var(--bs-border-color-translucent); padding: .55rem 0; }
+    .record-item-head { display: grid; grid-template-columns: 2.75rem 1fr auto; align-items: center; column-gap: .75rem; }
+    .record-id { color: var(--record-muted); font-variant-numeric: tabular-nums; font-size: .875rem; }
+    .record-status { display: flex; align-items: center; gap: .6rem; font-size: .8rem; color: var(--record-muted); white-space: nowrap; }
+    .record-pips { display: inline-flex; gap: 3px; }
+    .record-pips span { width: 1.1rem; height: .3rem; border-radius: 2px; background: var(--bs-border-color); }
+    .record-pips span.on { background: var(--depth-colour); }
+    .depth-0 { --depth-colour: var(--bs-warning); }
+    .depth-1 { --depth-colour: var(--bs-success); }
+    .depth-2 { --depth-colour: var(--bs-info); }
+    .record-status.depth-0, .record-status.depth-1, .record-status.depth-2 { color: var(--depth-colour); }
+    .record-entry .depth::before { content: ""; display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; margin-right: .5rem; background: var(--depth-colour); vertical-align: .05rem; }
+    .record-name { font-weight: 500; }
+    .record-item.not-started .record-name { color: var(--record-muted); font-weight: 400; }
+    .record-entries { margin: .3rem 0 0 3.5rem; font-size: .85rem; }
+    .record-entry { display: grid; grid-template-columns: 9.5rem 6.5rem 1fr auto 1.25rem; grid-template-areas: "depth date who note edit" "text text text text text"; align-items: baseline; column-gap: .75rem; padding: .15rem 0; color: var(--record-muted); }
+    .record-entry .depth { grid-area: depth; }
+    .record-entry .date { grid-area: date; }
+    .record-entry .who { grid-area: who; }
+    .record-entry .note-slot { grid-area: note; white-space: nowrap; }
+    .record-entry .edit-slot { grid-area: edit; }
+    .record-entry .note-toggle { background: none; border: 0; padding: 0; font: inherit; color: var(--record-muted); }
+    .record-entry .note-toggle:hover, .record-entry.open .note-toggle { color: var(--bs-body-color); }
+    .record-entry .note-toggle > :first-child { font-size: .7rem; transition: transform .15s; }
+    .record-entry.open .note-toggle > :first-child { transform: rotate(90deg); }
+    .record-entry .note-text { display: none; grid-area: text; white-space: pre-line; color: var(--bs-body-color); margin: .3rem 0 .4rem; padding-left: .75rem; border-left: 2px solid var(--bs-border-color); }
+    .record-entry.open .note-text { display: block; }
+    .record-entry .edit-record { opacity: 0; }
+    .record-entry:hover .edit-record, .record-entry .edit-record:focus { opacity: 1; }
+    @media (hover: none) { .record-entry .edit-record { opacity: 1; } }
+    @media (max-width: 575.98px) {
+        .record-entry { grid-template-columns: 1fr auto 1.25rem; grid-template-areas: "depth date edit" "who note edit" "text text text"; }
+        .record-entry .date, .record-entry .note-slot { text-align: right; }
+    }
+    .record.hide-not-started .not-started { display: none; }
+</style>
+{% endblock %}
+
+{% block preload_js %}
+<script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+<script>
+    ready(function(){
+        var record = document.querySelector('.record');
+        document.querySelectorAll('.edit-record').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                modaltarget = undefined;
+                modalobject = "";
+                loadModal(this.getAttribute("href"));
+            });
+        });
+        document.querySelectorAll('.note-toggle').forEach(function (t) {
+            t.addEventListener('click', function () {
+                var entry = t.closest('.record-entry');
+                t.setAttribute('aria-expanded', entry.classList.toggle('open'));
+            });
+        });
+        var toggle = document.getElementById('toggle-notes');
+        toggle.addEventListener('click', function () {
+            var entries = document.querySelectorAll('.record-entry.has-note');
+            var expand = Array.prototype.some.call(entries, function (e) { return !e.classList.contains('open'); });
+            entries.forEach(function (e) { e.classList.toggle('open', expand); });
+            toggle.textContent = expand ? 'Collapse notes' : 'Expand notes';
+        });
+        document.getElementById('hide-not-started').addEventListener('change', function () {
+            record.classList.toggle('hide-not-started', this.checked);
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+{% if deactivated %}
+<div class="alert alert-warning">This user's account has been deactivated.</div>
+{% endif %}
+<div class="record">
+    <div class="record-toolbar d-flex flex-wrap gap-3 align-items-center justify-content-between">
+        <div class="text-body-secondary"><span class="text-body fw-semibold">{{ tracked_items }}</span> of {{ total_items }} items started</div>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div class="form-check form-switch mb-0 small">
+                <input class="form-check-input" type="checkbox" role="switch" id="hide-not-started">
+                <label class="form-check-label" for="hide-not-started">Hide not started</label>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-notes">Expand notes</button>
+            <a href="{% url 'trainee_item_detail_legacy' trainee.pk %}{% if query %}?q={{ query|urlencode }}{% endif %}" class="btn btn-sm btn-outline-secondary"><span class="fas fa-table"></span> Legacy view</a>
+            <form method="get" role="search">
+                <input type="search" name="q" value="{{ query }}" class="form-control form-control-sm" placeholder="Search…" title="Search by item, category, ID or supervisor" aria-label="Search" id="id_search_text">
+            </form>
+        </div>
+    </div>
+
+    {% for entry in categories %}
+    <section class="record-category">
+        <h2><span>{{ entry.category }}</span><span class="fw-normal">{{ entry.tracked }}/{{ entry.items|length }}</span></h2>
+        {% for item in entry.items %}
+        <div class="record-item{% if not item.records %} not-started{% endif %}">
+            <div class="record-item-head">
+                <span class="record-id">{{ item.display_id }}</span>
+                <a href="{% url 'item_list' %}#item-{{ item.pk }}" class="record-name">{{ item.name }}{% if not item.active %} <small class="text-body-secondary">(inactive)</small>{% endif %}</a>
+                <span class="record-status{% if item.records %} depth-{{ item.best }}{% endif %}">
+                    {{ item.best_display|default:"" }}
+                    <span class="record-pips" aria-hidden="true"><span{% if item.records %} class="on"{% endif %}></span><span{% if item.best >= 1 %} class="on"{% endif %}></span><span{% if item.best >= 2 %} class="on"{% endif %}></span></span>
+                </span>
+            </div>
+            {% if item.records %}
+            <div class="record-entries">
+                {% for qual in item.records %}
+                <div class="record-entry{% if qual.notes %} has-note{% endif %}">
+                    <span class="depth depth-{{ qual.depth }}">{{ qual.get_depth_display }}</span>
+                    <span class="date">{{ qual.date|date:"j M Y" }}</span>
+                    <a href="{{ qual.supervisor.get_absolute_url }}" class="who text-truncate">{{ qual.supervisor }}</a>
+                    <span class="note-slot">{% if qual.notes %}<button type="button" class="note-toggle" aria-expanded="false"><span class="fas fa-chevron-right"></span> Notes</button>{% endif %}</span>
+                    <span class="edit-slot">{% if request.user.is_supervisor %}<a href="{% url 'edit_qualification' qual.pk %}" class="edit-record" title="Edit"><span class="fas fa-pen"></span></a>{% endif %}</span>
+                    {% if qual.notes %}<div class="note-text">{{ qual.notes }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% empty %}
+    <p class="text-body-secondary text-center my-5">Nothing found</p>
+    {% endfor %}
+
+    <div class="d-flex justify-content-end align-items-center mt-4 small">
+        {% include 'partials/last_edited.html' with target="trainee_history" object=trainee %}
+    </div>
+</div>
+{% endblock %}

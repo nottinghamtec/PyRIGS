@@ -47,5 +47,10 @@ urlpatterns = [
         name="confirm_level",
     ),
     path("trainee/<int:pk>/item_record", login_required(views.TraineeItemDetail.as_view()), name="trainee_item_detail"),
+    path(
+        "trainee/<int:pk>/item_record/legacy",
+        login_required(views.TraineeItemDetailLegacy.as_view()),
+        name="trainee_item_detail_legacy",
+    ),
     path("session_log", is_supervisor_or_technician()(views.SessionLog.as_view()), name="session_log"),
 ]

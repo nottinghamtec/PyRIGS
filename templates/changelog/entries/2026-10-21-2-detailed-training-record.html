@@ -1,0 +1,27 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-21" title="A cleaner detailed training record" %}
+<p>The <a href="{% url 'trainee_item_detail' pk=request.user.pk %}">detailed training record</a> has been redesigned so it's easier to see where someone is with each training item.</p>
+<details>
+    <summary>See what's changed</summary>
+    <ul class="mt-2">
+        <li>
+            <strong>One heading per item</strong>: every training log for an item is grouped under it, newest first, instead of being spread across separate rows.
+        </li>
+        <li>
+            <strong>Every item is listed</strong>: items that haven't been started yet are shown greyed out, so gaps are easy to spot. Use <em>Hide not started</em> to hide them.
+        </li>
+        <li>
+            <strong>Progress at a glance</strong>: each item shows the furthest point reached, with a coloured bar using the same colours as before. Each log has a matching coloured dot.
+        </li>
+        <li>
+            <strong>Notes are tucked away</strong>: notes start collapsed. Open them one at a time, or all at once with <em>Expand notes</em>.
+        </li>
+        <li>
+            <strong>Links to the item list</strong>: item names on the detailed record and requirement items on level pages link to that item on the item list.
+        </li>
+        <li>
+            <strong>The old table is still there</strong>: use the <em>Legacy view</em> button if you prefer it.
+        </li>
+    </ul>
+</details>
+{% endchangelog_entry %}
