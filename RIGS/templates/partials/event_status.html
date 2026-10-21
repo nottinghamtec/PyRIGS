@@ -27,12 +27,12 @@
             <span class="badge text-bg-danger">RA: <span class="fas fa-times"></span></span>
         {% endif %}
         {% if event.has_checklist %}
-            <span class="badge text-bg-success">Checklist: <span class="fas fa-check"></span> {% if event.checklists.count > 1 %}({{event.checklists.count}}){% endif %}</span>
+            <span class="badge text-bg-success">Checklist: <span class="fas fa-check{% if event.checklists_reviewed %}-double{% endif %}"></span> {% if event.checklists.count > 1 %}({{event.checklists.count}}){% endif %}</span>
         {% else %}
             <span class="badge text-bg-danger">Checklist: <span class="fas fa-times"></span></span>
         {% endif %}
         {% if event.has_power %}
-            <span class="badge text-bg-success">Power Record: <span class="fas fa-check"></span> {% if event.power_tests.count > 1 %}({{event.power_tests.count}}){% endif %}</span>
+            <span class="badge text-bg-success">Power Record: <span class="fas fa-check{% if event.power_tests_reviewed %}-double{% endif %}"></span> {% if event.power_tests.count > 1 %}({{event.power_tests.count}}){% endif %}</span>
         {% else %}
             <span class="badge text-bg-danger">Power Record: <span class="fas fa-times"></span></span>
         {% endif %}

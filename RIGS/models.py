@@ -601,6 +601,14 @@ class Event(models.Model, RevisionMixin):
         return self.power_tests.exists()
 
     @property
+    def checklists_reviewed(self):
+        return not self.checklists.filter(reviewed_by__isnull=True).exists()
+
+    @property
+    def power_tests_reviewed(self):
+        return not self.power_tests.filter(reviewed_by__isnull=True).exists()
+
+    @property
     def has_start_time(self):
         return self.start_time is not None
 
