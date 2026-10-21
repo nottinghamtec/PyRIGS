@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import random
+import re
 import string
 import time
 from collections import Counter
@@ -33,6 +34,30 @@ def filter_by_pk(filt, query):
     return filt
 
 
+TRAILING_EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF]\uFE0F?$")
+
+
+def normalise_initials(value):
+    if not value:
+        return value
+    value = value.strip()
+    # A gift to Alex Daniel: a single trailing emoji survives normalisation
+    emoji = TRAILING_EMOJI.search(value)
+    if emoji:
+        value = value[: emoji.start()]
+    value = "".join(c for c in value.upper() if c.isalnum())
+    return value + (emoji.group(0) if emoji else "")
+
+
+def validate_initials(value, exclude_pk=None, check_clash=True):
+    value = normalise_initials(value)
+    if not value:
+        raise ValidationError("Initials must contain letters or numbers.")
+    if check_clash and Profile.objects.filter(is_active=True, initials__iexact=value).exclude(pk=exclude_pk).exists():
+        raise ValidationError("These initials are already in use by another active user. Please use different initials.")
+    return value
+
+
 class Profile(AbstractUser):
     HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
     HS_RANGE_CHOICES = [
@@ -60,6 +85,18 @@ class Profile(AbstractUser):
     hs_only_action = models.BooleanField(default=False)
 
     reversion_hide = True
+
+    def clean(self):
+        super().clean()
+        if self.initials:
+            try:
+                self.initials = validate_initials(self.initials, exclude_pk=self.pk, check_clash=self.is_active)
+            except ValidationError as error:
+                raise ValidationError({"initials": error.messages})
+
+    def save(self, *args, **kwargs):
+        self.initials = normalise_initials(self.initials)
+        super().save(*args, **kwargs)
 
     @property
     def can_log_training(self):

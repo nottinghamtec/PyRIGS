@@ -871,3 +871,17 @@ def test_event_invoice_button(admin_client):
     response = admin_client.get(url)
     assertNotContains(response, "invoice-create-form")
     assertContains(response, reverse("invoice_detail", kwargs={"pk": invoice.pk}))
+
+
+def test_normalise_initials():
+    from RIGS.models import normalise_initials
+
+    assert normalise_initials("ab") == "AB"
+    assert normalise_initials("R.A.W") == "RAW"
+    assert normalise_initials("D A W") == "DAW"
+    assert normalise_initials("K_C") == "KC"
+    assert normalise_initials("AD🎤") == "AD🎤"
+    assert normalise_initials("ad 🎤") == "AD🎤"
+    assert normalise_initials("AD🎤🎤") == "AD🎤"
+    assert normalise_initials("") == ""
+    assert normalise_initials(None) is None
