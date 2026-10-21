@@ -371,7 +371,12 @@ class EventManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(notes__icontains=query)
+            or_lookup = (
+                Q(name__icontains=query)
+                | Q(description__icontains=query)
+                | Q(notes__icontains=query)
+                | Q(purchase_order__icontains=query)
+            )
 
             or_lookup = filter_by_pk(or_lookup, query)
 
