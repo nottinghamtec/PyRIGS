@@ -34,7 +34,7 @@ def filter_by_pk(filt, query):
     return filt
 
 
-TRAILING_EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF]\uFE0F?$")
+TRAILING_EMOJI = re.compile("[\U0001f000-\U0001faff\u2600-\u27bf\u2b00-\u2bff]\ufe0f?$")
 
 
 def normalise_initials(value):
@@ -54,7 +54,9 @@ def validate_initials(value, exclude_pk=None, check_clash=True):
     if not value:
         raise ValidationError("Initials must contain letters or numbers.")
     if check_clash and Profile.objects.filter(is_active=True, initials__iexact=value).exclude(pk=exclude_pk).exists():
-        raise ValidationError("These initials are already in use by another active user. Please use different initials.")
+        raise ValidationError(
+            "These initials are already in use by another active user. Please use different initials."
+        )
     return value
 
 

@@ -184,7 +184,9 @@ class AssetRemoveParent(LoginRequiredMixin, AssetIDUrlMixin, generic.View):
         parent = asset.parent
         asset.parent = None
         asset.save()
-        messages.success(request, f"Removed {asset.asset_id} from {parent.asset_id}" if parent else "No parent to remove")
+        messages.success(
+            request, f"Removed {asset.asset_id} from {parent.asset_id}" if parent else "No parent to remove"
+        )
         return redirect(parent.get_absolute_url() if parent else asset.get_absolute_url())
 
 
