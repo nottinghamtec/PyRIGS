@@ -171,3 +171,33 @@ def test_asset_list_audit_status_filter(admin_client, test_asset, test_cable):
     assert ids("audited") == {"91991", "9666"}
     assert ids("never") == {"4242"}
     assert ids("stale") == {"9666"}
+
+
+def test_supplier_detail_assets_paginated_and_filtered(admin_client, test_asset):
+    supplier = models.Supplier.objects.create(name="Gadgetron Corporation")
+    hidden = models.AssetStatus.objects.create(name="Binned", should_show=False)
+    for i in range(25):
+        models.Asset.objects.create(
+            asset_id=f"7{i:03d}",
+            description="Bulk",
+            status=test_asset.status,
+            category=test_asset.category,
+            date_acquired=datetime.date(2020, 1, 1),
+            replacement_cost=10,
+            purchased_from=supplier,
+        )
+    models.Asset.objects.create(
+        asset_id="8001",
+        description="Gone",
+        status=hidden,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+        purchased_from=supplier,
+    )
+    url = reverse("supplier_detail", kwargs={"pk": supplier.pk})
+    response = admin_client.get(url)
+    assert len(response.context["object_list"]) == 20
+    assert response.context["paginator"].count == 25
+    assert len(admin_client.get(url, {"page": 2}).context["object_list"]) == 5
+    assert admin_client.get(url, {"all": 1}).context["paginator"].count == 26

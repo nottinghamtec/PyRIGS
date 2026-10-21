@@ -5,6 +5,7 @@ from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
+from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
@@ -266,6 +267,17 @@ class SupplierDetail(GenericDetailView):
         context["detail_link"] = "supplier_detail"
         context["associated"] = "partials/associated_assets.html"
         context["associated2"] = ""
+        show_all = self.request.GET.get("all") == "1"
+        assets = self.object.assets.select_related("category", "status")
+        if not show_all:
+            assets = assets.filter(status__should_show=True)
+        paginator = Paginator(assets, 20)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+        context["show_all"] = show_all
+        context["paginator"] = paginator
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+        context["object_list"] = page_obj.object_list
         if is_ajax(self.request):
             context["override"] = "base_ajax.html"
         else:
