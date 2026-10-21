@@ -212,3 +212,41 @@ def test_remove_parent(admin_client, test_asset, test_cable):
     assertRedirects(response, reverse("asset_detail", kwargs={"pk": test_asset.asset_id}))
     test_cable.refresh_from_db()
     assert test_cable.parent is None
+
+
+def make_asset(test_asset, asset_id):
+    return models.Asset.objects.create(
+        asset_id=asset_id,
+        description="Chain",
+        status=test_asset.status,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+    )
+
+
+def test_circular_parent_chains_rejected(test_asset):
+    from django.core.exceptions import ValidationError
+
+    b = make_asset(test_asset, "5001")
+    c = make_asset(test_asset, "5002")
+
+    test_asset.parent = test_asset
+    with pytest.raises(ValidationError):
+        test_asset.clean()
+    test_asset.parent = None
+
+    b.parent = test_asset
+    b.clean()
+    b.save()
+    c.parent = b
+    c.clean()
+    c.save()
+
+    test_asset.refresh_from_db()
+    test_asset.parent = b
+    with pytest.raises(ValidationError):
+        test_asset.clean()
+    test_asset.parent = c
+    with pytest.raises(ValidationError):
+        test_asset.clean()
