@@ -75,9 +75,33 @@ def test_trainee_detail(admin_client, trainee, admin_user):
     assertContains(response, f"{trainee.get_full_name()}'s Training Record")
 
 
+def test_trainee_item_detail_legacy(admin_client, trainee):
+    response = get_response(admin_client, "trainee_item_detail_legacy", {"pk": trainee.pk})
+    assert response.status_code == 200
+
+
 def test_trainee_item_detail(admin_client, trainee):
     response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
     assertContains(response, "Nothing found")
+
+
+def test_trainee_item_detail_shows_untracked_and_groups(admin_client, trainee, supervisor, training_item):
+    models.TrainingItemQualification.objects.create(
+        item=training_item, trainee=trainee, supervisor=supervisor, depth=0, date="2024-01-01", notes="first"
+    )
+    models.TrainingItemQualification.objects.create(
+        item=training_item, trainee=trainee, supervisor=supervisor, depth=2, date="2024-02-01", notes="second"
+    )
+    response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
+    assertContains(response, "1/1")
+    assertContains(response, "first")
+    assertContains(response, "second")
+    assert response.content.decode().count('class="record-item"') == 1
+
+
+def test_trainee_item_detail_untracked_item(admin_client, trainee, training_item):
+    response = get_response(admin_client, "trainee_item_detail", {"pk": trainee.pk})
+    assertContains(response, 'class="record-item not-started"')
 
 
 def test_item_list(admin_client, training_item):
@@ -269,3 +293,67 @@ def test_flagged_supervisor_can_deliver_anything(trainee, supervisor):
     sup = models.Trainee.objects.get(pk=supervisor.pk)
     for depth, _ in models.TrainingItemQualification.CHOICES:
         assert sup.can_deliver_training(item, depth)
+
+
+def test_training_item_picker_searches_name_and_number(admin_client, training_item):
+    training_item.name = "Basic Survival"
+    training_item.save()
+    url = reverse("api_secure", kwargs={"model": "training_item"})
+    fields = "display_id,name,description"
+
+    def found(term):
+        return [r["value"] for r in admin_client.get(url, {"q": term, "fields": fields}).json()]
+
+    assert found("survival") == [training_item.pk]
+    assert found("1.1") == [training_item.pk]
+    assert found("die") == [training_item.pk]
+
+
+def test_deactivated_trainee_record(client, django_user_model, trainee, supervisor):
+    trainee.is_active = False
+    trainee.is_approved = False
+    trainee.save()
+    url = reverse("trainee_detail", kwargs={"pk": trainee.pk})
+
+    regular = django_user_model.objects.create_user(
+        username="regular", email="regular@example.com", password="pw", is_approved=True
+    )
+    client.force_login(regular)
+    response = client.get(url)
+    assert response.status_code == 200
+    assertContains(response, "has been deactivated")
+    assertNotContains(response, "Training Levels")
+
+    supervisor.is_supervisor = True
+    supervisor.save()
+    client.force_login(supervisor)
+    response = client.get(url)
+    assert response.status_code == 200
+    assertContains(response, "has been deactivated")
+    assertContains(response, "Training Levels")
+
+
+def test_deactivated_trainee_item_record_and_level(client, django_user_model, trainee, supervisor, level):
+    trainee.is_active = False
+    trainee.is_approved = False
+    trainee.save()
+    urls = [
+        reverse("trainee_item_detail", kwargs={"pk": trainee.pk}),
+        reverse("level_detail", kwargs={"pk": level.pk, "u": trainee.pk}),
+    ]
+
+    regular = django_user_model.objects.create_user(
+        username="regular2", email="regular2@example.com", password="pw", is_approved=True
+    )
+    client.force_login(regular)
+    for url in urls:
+        response = client.get(url)
+        assert response.status_code == 200
+        assertContains(response, "has been deactivated")
+
+    supervisor.is_supervisor = True
+    supervisor.save()
+    client.force_login(supervisor)
+    for url in urls:
+        assert client.get(url).status_code == 200
+    assertContains(client.get(urls[0]), "has been deactivated")

@@ -25,12 +25,7 @@ class ProfileRegistrationFormUniqueEmail(RegistrationFormUniqueEmail):
         fields = ("username", "email", "first_name", "last_name", "initials")
 
     def clean_initials(self):
-        """
-        Validate that the supplied initials are unique.
-        """
-        if models.Profile.objects.filter(initials__iexact=self.cleaned_data["initials"]):
-            raise forms.ValidationError("These initials are already in use. Please supply different initials.")
-        return self.cleaned_data["initials"]
+        return models.validate_initials(self.cleaned_data["initials"])
 
 
 class CheckApprovedForm(AuthenticationForm):

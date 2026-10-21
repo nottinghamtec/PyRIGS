@@ -871,3 +871,27 @@ def test_event_invoice_button(admin_client):
     response = admin_client.get(url)
     assertNotContains(response, "invoice-create-form")
     assertContains(response, reverse("invoice_detail", kwargs={"pk": invoice.pk}))
+
+
+def test_normalise_initials():
+    from RIGS.models import normalise_initials
+
+    assert normalise_initials("ab") == "AB"
+    assert normalise_initials("R.A.W") == "RAW"
+    assert normalise_initials("D A W") == "DAW"
+    assert normalise_initials("K_C") == "KC"
+    assert normalise_initials("AD🎤") == "AD🎤"
+    assert normalise_initials("ad 🎤") == "AD🎤"
+    assert normalise_initials("AD🎤🎤") == "AD🎤"
+    assert normalise_initials("") == ""
+    assert normalise_initials(None) is None
+
+
+def test_event_api_includes_display_id(admin_client):
+    from RIGS import models
+
+    event = models.Event.objects.create(name="Same Day", start_date=date(2030, 1, 1), is_rig=True)
+    response = admin_client.get(
+        reverse("api_secure", kwargs={"model": "event"}), {"start": "2030-01-01T00:00:00", "end": "2030-01-01T23:59:59"}
+    )
+    assert [e["display_id"] for e in response.json()] == [event.display_id]

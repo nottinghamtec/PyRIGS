@@ -1,8 +1,15 @@
+{% load paginator from filters %}
 <div class="col-12 pt-2">
   <div class="card">
-      <div class="card-header">Associated Assets</div>
-      {% with object.assets.all as object_list %}
-          {% include 'partials/asset_list_table.html' %}
-      {% endwith %}
+      <div class="card-header d-flex justify-content-between">
+        <span>Associated Assets</span>
+        {% if show_all %}
+        <a href="?">Show active only</a>
+        {% else %}
+        <a href="?all=1">Show all</a>
+        {% endif %}
+      </div>
+      {% include 'partials/asset_list_table.html' %}
+      {% if is_paginated %}{% paginator %}{% endif %}
   </div>
 </div>

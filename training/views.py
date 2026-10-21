@@ -1,5 +1,6 @@
 import reversion
 
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views import generic
 from django.utils import timezone
@@ -40,15 +41,42 @@ class ItemListExport(PrintListView):
         return context
 
 
+def get_trainee(pk):
+    return get_object_or_404(models.Trainee._base_manager, pk=pk)
+
+
+def is_deactivated(trainee):
+    return not (trainee.is_active and trainee.is_approved)
+
+
+def can_view_deactivated(user):
+    return user.is_supervisor or user.is_superuser
+
+
+def deactivated_response(request, trainee):
+    return render(
+        request,
+        "trainee_deactivated.html",
+        {"object": trainee, "page_title": f"{trainee.get_full_name()}'s Training Record"},
+    )
+
+
 class TraineeDetail(views.ProfileDetail):
     template_name = "trainee_detail.html"
     model = models.Trainee
 
     def get_queryset(self):
-        return self.model.objects.prefetch_related("qualifications_obtained")
+        return self.model._base_manager.prefetch_related("qualifications_obtained")
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if is_deactivated(self.object) and not can_view_deactivated(request.user):
+            return deactivated_response(request, self.object)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["deactivated"] = is_deactivated(self.object)
         if self.request.user.pk == self.object.pk:
             context["page_title"] = "Your Training Record"
         else:
@@ -59,23 +87,70 @@ class TraineeDetail(views.ProfileDetail):
         return context
 
 
-class TraineeItemDetail(generic.ListView):
+class TraineeItemDetailLegacy(generic.ListView):
     model = models.TrainingItemQualification
     template_name = "trainee_item_list.html"
 
+    def get(self, request, *args, **kwargs):
+        self.trainee = get_trainee(self.kwargs["pk"])
+        if is_deactivated(self.trainee) and not can_view_deactivated(request.user):
+            return deactivated_response(request, self.trainee)
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         return (
-            models.Trainee.objects.get(pk=self.kwargs["pk"])
-            .qualifications_obtained.search(self.request.GET.get("q"))
+            self.trainee.qualifications_obtained.search(self.request.GET.get("q"))
             .order_by("item__category__reference_number", "item__reference_number")
             .select_related("item", "trainee")
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        trainee = models.Trainee.objects.get(pk=self.kwargs["pk"])
-        context["trainee"] = models.Trainee.objects.get(pk=self.kwargs["pk"])
+        trainee = self.trainee
+        context["trainee"] = trainee
+        context["deactivated"] = is_deactivated(trainee)
         context["page_title"] = f"Detailed Training Record for <a href='{trainee.get_absolute_url()}'>{trainee}</a>"
+        return context
+
+
+class TraineeItemDetail(TraineeItemDetailLegacy):
+    template_name = "trainee_item_record.html"
+
+    def get_queryset(self):
+        return self.trainee.qualifications_obtained.select_related("supervisor").order_by("-date", "-pk")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = (self.request.GET.get("q") or "").strip()
+        by_item = {}
+        for qual in self.object_list:
+            by_item.setdefault(qual.item_id, []).append(qual)
+
+        items = models.TrainingItem.objects.select_related("category").filter(Q(active=True) | Q(pk__in=by_item))
+        if query:
+            matching = self.trainee.qualifications_obtained.search(query).values("item")
+            items = items.filter(
+                Q(pk__in=matching) | Q(name__icontains=query) | Q(category__name__icontains=query) | Q(display_id=query)
+            ).distinct()
+
+        categories = []
+        tracked = 0
+        for item in items.order_by("category__reference_number", "reference_number"):
+            item.records = by_item.get(item.pk, [])
+            best = max(item.records, key=lambda q: q.depth) if item.records else None
+            item.best = best.depth if best else None
+            item.best_display = best.get_depth_display() if best else None
+            tracked += bool(item.records)
+            if not categories or categories[-1]["category"].pk != item.category_id:
+                categories.append({"category": item.category, "items": []})
+            categories[-1]["items"].append(item)
+        for entry in categories:
+            entry["tracked"] = sum(1 for i in entry["items"] if i.records)
+
+        context["categories"] = categories
+        context["total_items"] = sum(len(c["items"]) for c in categories)
+        context["tracked_items"] = tracked
+        context["query"] = query
         return context
 
 
@@ -83,13 +158,20 @@ class LevelDetail(generic.DetailView):
     template_name = "level_detail.html"
     model = models.TrainingLevel
 
+    def get(self, request, *args, **kwargs):
+        if "u" in kwargs:
+            trainee = get_trainee(kwargs["u"])
+            if is_deactivated(trainee) and not can_view_deactivated(request.user):
+                return deactivated_response(request, trainee)
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = f"Training Level {self.object} {self.object.get_icon}"
         context["users_with"] = map(
             lambda qual: qual.trainee, models.TrainingLevelQualification.objects.filter(level=self.object)
         )
-        context["u"] = models.Trainee.objects.get(pk=self.kwargs["u"]) if "u" in self.kwargs else self.request.user
+        context["u"] = get_trainee(self.kwargs["u"]) if "u" in self.kwargs else self.request.user
         return context
 
 

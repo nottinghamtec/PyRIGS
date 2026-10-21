@@ -1,15 +1,17 @@
 import base64
+import datetime
 from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
+from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import generic
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import get_template
 
 from pypdf import PdfReader, PdfWriter
@@ -58,6 +60,14 @@ class AssetList(LoginRequiredMixin, generic.ListView):
 
         if form.cleaned_data["date_acquired"]:
             queryset = queryset.filter(date_acquired=form.cleaned_data["date_acquired"])
+
+        audit_status = form.cleaned_data["audit_status"]
+        if audit_status == "audited":
+            queryset = queryset.filter(last_audited_at__isnull=False)
+        elif audit_status == "never":
+            queryset = queryset.filter(last_audited_at__isnull=True)
+        elif audit_status == "stale":
+            queryset = queryset.filter(last_audited_at__lt=timezone.now() - datetime.timedelta(days=365))
 
         if form.cleaned_data["category"]:
             queryset = queryset.filter(category__in=form.cleaned_data["category"])
@@ -165,6 +175,21 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
         return reverse("asset_detail", kwargs={"pk": self.object.asset_id})
 
 
+class AssetRemoveParent(LoginRequiredMixin, AssetIDUrlMixin, generic.View):
+    http_method_names = ["post"]
+    pk_url_kwarg = "pk"
+
+    def post(self, request, *args, **kwargs):
+        asset = self.get_object()
+        parent = asset.parent
+        asset.parent = None
+        asset.save()
+        messages.success(
+            request, f"Removed {asset.asset_id} from {parent.asset_id}" if parent else "No parent to remove"
+        )
+        return redirect(parent.get_absolute_url() if parent else asset.get_absolute_url())
+
+
 class DuplicateMixin:
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -257,6 +282,17 @@ class SupplierDetail(GenericDetailView):
         context["detail_link"] = "supplier_detail"
         context["associated"] = "partials/associated_assets.html"
         context["associated2"] = ""
+        show_all = self.request.GET.get("all") == "1"
+        assets = self.object.assets.select_related("category", "status")
+        if not show_all:
+            assets = assets.filter(status__should_show=True)
+        paginator = Paginator(assets, 20)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+        context["show_all"] = show_all
+        context["paginator"] = paginator
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+        context["object_list"] = page_obj.object_list
         if is_ajax(self.request):
             context["override"] = "base_ajax.html"
         else:

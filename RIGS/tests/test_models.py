@@ -432,3 +432,102 @@ class EventAuthorisationTestCase(TestCase):
                 sent_by=self.profile,
             )
         self.assertIsNotNone(auth.last_edited_at)
+
+
+def test_active_users_cannot_share_initials(db, django_user_model):
+    from django.core.exceptions import ValidationError
+
+    a = django_user_model.objects.create_user(username="a", email="a@example.com", initials="ZZ")
+    b = django_user_model.objects.create_user(username="b", email="b@example.com", initials="YY")
+    b.initials = "z z"
+    with pytest.raises(ValidationError) as excinfo:
+        b.full_clean(exclude=["password"])
+    assert "initials" in excinfo.value.message_dict
+
+    a.is_active = False
+    a.save()
+    b.full_clean(exclude=["password"])
+
+    b.save()
+    a.is_active = True
+    with pytest.raises(ValidationError):
+        a.full_clean(exclude=["password"])
+
+
+def test_profile_edit_and_admin_reject_duplicate_initials(client, admin_user, django_user_model):
+    from django.urls import reverse
+    from users.forms import ProfileChangeForm
+
+    other = django_user_model.objects.create_user(username="other", email="other@example.com", initials="QQ")
+    client.force_login(other)
+    response = client.post(
+        reverse("profile_update_self"),
+        {"first_name": "A", "last_name": "B", "email": "other@example.com", "initials": admin_user.initials},
+    )
+    assert response.status_code == 200
+    assert "initials" in response.context["form"].errors
+    assert admin_user.initials not in response.context["saved_profile"].name
+
+    other.is_active = False
+    other.save()
+    form = ProfileChangeForm(
+        {"username": "other", "initials": admin_user.initials, "is_active": "on", "email": "other@example.com"},
+        instance=other,
+    )
+    assert not form.is_valid()
+    assert "initials" in form.errors
+
+
+def test_initials_normalised_and_empty_rejected(db, django_user_model):
+    from django.core.exceptions import ValidationError
+
+    user = django_user_model.objects.create_user(username="n", email="n@example.com", initials="AB")
+    user.initials = "r.a.w"
+    user.full_clean(exclude=["password"])
+    assert user.initials == "RAW"
+
+    user.initials = "..."
+    with pytest.raises(ValidationError) as excinfo:
+        user.full_clean(exclude=["password"])
+    assert "initials" in excinfo.value.message_dict
+
+
+def test_initials_migration_resolves_collisions(db, django_user_model):
+    import importlib
+    from django.apps import apps
+
+    migration = importlib.import_module("RIGS.migrations.0058_normalise_initials")
+    earlier = django_user_model.objects.create_user(username="ben", email="e@example.com", first_name="Ben")
+    later = django_user_model.objects.create_user(username="bella", email="l@example.com", first_name="Bella")
+    inactive = django_user_model.objects.create_user(username="old", email="o@example.com", is_active=False)
+    messy = django_user_model.objects.create_user(username="messy", email="m@example.com", first_name="Ross")
+    django_user_model.objects.filter(pk=earlier.pk).update(initials="bb", date_joined="2024-01-01T00:00Z")
+    django_user_model.objects.filter(pk=later.pk).update(initials="B B", date_joined="2025-01-01T00:00Z")
+    django_user_model.objects.filter(pk=inactive.pk).update(initials="b.b", date_joined="2015-01-01T00:00Z")
+    django_user_model.objects.filter(pk=messy.pk).update(initials="r.a.w", date_joined="2023-01-01T00:00Z")
+
+    migration.normalise_initials(apps, None)
+
+    values = {u.username: u.initials for u in django_user_model.objects.all()}
+    assert values["ben"] == "BB"
+    assert values["bella"] == "BEB"
+    assert values["old"] == "BB"
+    assert values["messy"] == "RAW"
+
+
+def test_registration_and_edit_share_initials_rules(db, django_user_model):
+    from users.forms import ProfileRegistrationFormUniqueEmail
+
+    django_user_model.objects.create_user(username="act", email="act@example.com", initials="AA")
+    django_user_model.objects.create_user(username="dead", email="dead@example.com", initials="DD", is_active=False)
+
+    def registration_error(initials):
+        form = ProfileRegistrationFormUniqueEmail(
+            {"username": "new", "email": "new@example.com", "first_name": "N", "last_name": "N", "initials": initials}
+        )
+        form.is_valid()
+        return form.errors.get("initials")
+
+    assert registration_error("a.a")
+    assert registration_error("...")
+    assert not registration_error("dd")

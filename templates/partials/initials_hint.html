@@ -1,0 +1,23 @@
+<div id="{{ input_id }}-hint" class="form-text" hidden>Initials will be normalised to <strong id="{{ input_id }}-hint-value"></strong></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var input = document.getElementById('{{ input_id }}');
+        var hint = document.getElementById('{{ input_id }}-hint');
+        var value = document.getElementById('{{ input_id }}-hint-value');
+        if (!input) { return; }
+        function normalise(text) {
+            text = text.trim();
+            var emoji = text.match(/[\u{1F000}-\u{1FAFF}☀-➿⬀-⯿]️?$/u);
+            if (emoji) { text = text.slice(0, emoji.index); }
+            text = Array.from(text.toUpperCase()).filter(function (c) { return /[\p{L}\p{N}]/u.test(c); }).join('');
+            return text + (emoji ? emoji[0] : '');
+        }
+        function update() {
+            var normalised = normalise(input.value);
+            value.textContent = normalised;
+            hint.hidden = normalised === '' || normalised === input.value;
+        }
+        input.addEventListener('input', update);
+        update();
+    });
+</script>

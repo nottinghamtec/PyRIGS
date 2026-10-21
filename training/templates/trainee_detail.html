@@ -29,6 +29,9 @@
 {% endblock %}
 
 {% block content %}
+{% if deactivated %}
+<div class="alert alert-warning">This user's account has been deactivated.</div>
+{% endif %}
 <div class="row">
     <div class="col-sm-12 text-end">
         <div class="btn-group">

@@ -184,6 +184,16 @@ class Asset(models.Model, RevisionMixin):
         if self.date_sold and self.date_acquired > self.date_sold:
             errdict["date_sold"] = ["Cannot sell an item before it is acquired"]
 
+        if self.parent_id and self.pk:
+            seen = set()
+            ancestor = self.parent
+            while ancestor is not None and ancestor.pk not in seen:
+                if ancestor.pk == self.pk:
+                    errdict["parent"] = ["That would make the asset its own ancestor, creating a circular parent chain"]
+                    break
+                seen.add(ancestor.pk)
+                ancestor = ancestor.parent
+
         self.asset_id = self.asset_id.upper()
         asset_search = re.search("^([a-zA-Z0-9]*?[a-zA-Z]?)([0-9]+)$", self.asset_id)
         if asset_search is None:

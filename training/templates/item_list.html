@@ -18,7 +18,7 @@
       <div class="card-body">
         <div class="list-group list-group-flush">
             {% for item in category.items.all %}
-                <li class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }} <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info float-end"><span class="fas fa-user"></span> Qualified Users</a>
+                <li id="item-{{ item.pk }}" class="list-group-item {% if not item.active%}text-warning{%endif%}">{{ item }} <a href="{% url 'item_qualification' item.pk %}" class="btn btn-info float-end"><span class="fas fa-user"></span> Qualified Users</a>
                 <br><small>{{ item.description }}</small>
                 {% if item.prerequisites.exists %}
                     <div class="ms-3 fst-italic">
@@ -38,4 +38,20 @@
   </div>
   {% endfor %}
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+    ready(function(){
+        if (!location.hash) { return; }
+        var target = document.querySelector(location.hash);
+        var panel = target && target.closest('.collapse');
+        if (!panel) { return; }
+        panel.addEventListener('shown.bs.collapse', function () {
+            target.scrollIntoView({block: 'center'});
+            target.classList.add('list-group-item-info');
+        }, {once: true});
+        bootstrap.Collapse.getOrCreateInstance(panel, {parent: '#accordion'}).show();
+    });
+</script>
 {% endblock %}

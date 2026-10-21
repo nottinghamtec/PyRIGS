@@ -22,6 +22,7 @@
                             		<label for="{{ field.id_for_label }}" class="col-form-label col-sm-4">{{ field.label }}</label>
                             		<div class="controls col-sm-8">
                             			{% render_field field class+="form-control" placeholder=field.label %}
+                            			{% if field.name == "initials" %}{% include 'partials/initials_hint.html' with input_id=field.id_for_label %}{% endif %}
                             		</div>
                             	</div>
                             {% endfor %}

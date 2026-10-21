@@ -56,6 +56,11 @@ class ProfileUpdateSelf(generic.UpdateView):
 
         return self.model.objects.filter(pk=pk)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["saved_profile"] = self.model.objects.get(pk=self.object.pk)
+        return context
+
     def get_success_url(self):
         url = reverse_lazy("profile_detail")
         return url

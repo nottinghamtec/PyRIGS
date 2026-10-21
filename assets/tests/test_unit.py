@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+from django.utils import timezone
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects
 
@@ -145,3 +148,105 @@ def assert_asset_form_errors(response):
     assertFormError(response.context["form"], "date_sold", "Cannot sell an item before it is acquired")
     assertFormError(response.context["form"], "purchase_price", "A price cannot be negative")
     assertFormError(response.context["form"], "replacement_cost", "A price cannot be negative")
+
+
+def test_asset_list_audit_status_filter(admin_client, test_asset, test_cable):
+    now = timezone.now()
+    models.Asset.objects.filter(pk=test_asset.pk).update(last_audited_at=now)
+    models.Asset.objects.filter(pk=test_cable.pk).update(last_audited_at=now - datetime.timedelta(days=400))
+    models.Asset.objects.create(
+        asset_id="4242",
+        description="Unaudited",
+        status=test_asset.status,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+    )
+
+    def ids(audit_status):
+        response = admin_client.get(reverse("asset_list"), {"audit_status": audit_status})
+        return {a.asset_id for a in response.context["object_list"]}
+
+    assert ids("") == {"91991", "9666", "4242"}
+    assert ids("audited") == {"91991", "9666"}
+    assert ids("never") == {"4242"}
+    assert ids("stale") == {"9666"}
+
+
+def test_supplier_detail_assets_paginated_and_filtered(admin_client, test_asset):
+    supplier = models.Supplier.objects.create(name="Gadgetron Corporation")
+    hidden = models.AssetStatus.objects.create(name="Binned", should_show=False)
+    for i in range(25):
+        models.Asset.objects.create(
+            asset_id=f"7{i:03d}",
+            description="Bulk",
+            status=test_asset.status,
+            category=test_asset.category,
+            date_acquired=datetime.date(2020, 1, 1),
+            replacement_cost=10,
+            purchased_from=supplier,
+        )
+    models.Asset.objects.create(
+        asset_id="8001",
+        description="Gone",
+        status=hidden,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+        purchased_from=supplier,
+    )
+    url = reverse("supplier_detail", kwargs={"pk": supplier.pk})
+    response = admin_client.get(url)
+    assert len(response.context["object_list"]) == 20
+    assert response.context["paginator"].count == 25
+    assert len(admin_client.get(url, {"page": 2}).context["object_list"]) == 5
+    assert admin_client.get(url, {"all": 1}).context["paginator"].count == 26
+
+
+def test_remove_parent(admin_client, test_asset, test_cable):
+    test_cable.parent = test_asset
+    test_cable.save()
+    url = reverse("asset_remove_parent", kwargs={"pk": test_cable.asset_id})
+    assert admin_client.get(url).status_code == 405
+    response = admin_client.post(url)
+    assertRedirects(response, reverse("asset_detail", kwargs={"pk": test_asset.asset_id}))
+    test_cable.refresh_from_db()
+    assert test_cable.parent is None
+
+
+def make_asset(test_asset, asset_id):
+    return models.Asset.objects.create(
+        asset_id=asset_id,
+        description="Chain",
+        status=test_asset.status,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+    )
+
+
+def test_circular_parent_chains_rejected(test_asset):
+    from django.core.exceptions import ValidationError
+
+    b = make_asset(test_asset, "5001")
+    c = make_asset(test_asset, "5002")
+
+    test_asset.parent = test_asset
+    with pytest.raises(ValidationError):
+        test_asset.clean()
+    test_asset.parent = None
+
+    b.parent = test_asset
+    b.clean()
+    b.save()
+    c.parent = b
+    c.clean()
+    c.save()
+
+    test_asset.refresh_from_db()
+    test_asset.parent = b
+    with pytest.raises(ValidationError):
+        test_asset.clean()
+    test_asset.parent = c
+    with pytest.raises(ValidationError):
+        test_asset.clean()

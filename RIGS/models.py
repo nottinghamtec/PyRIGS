@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import random
+import re
 import string
 import time
 from collections import Counter
@@ -33,6 +34,32 @@ def filter_by_pk(filt, query):
     return filt
 
 
+TRAILING_EMOJI = re.compile("[\U0001f000-\U0001faff\u2600-\u27bf\u2b00-\u2bff]\ufe0f?$")
+
+
+def normalise_initials(value):
+    if not value:
+        return value
+    value = value.strip()
+    # A gift to Alex Daniel: a single trailing emoji survives normalisation
+    emoji = TRAILING_EMOJI.search(value)
+    if emoji:
+        value = value[: emoji.start()]
+    value = "".join(c for c in value.upper() if c.isalnum())
+    return value + (emoji.group(0) if emoji else "")
+
+
+def validate_initials(value, exclude_pk=None, check_clash=True):
+    value = normalise_initials(value)
+    if not value:
+        raise ValidationError("Initials must contain letters or numbers.")
+    if check_clash and Profile.objects.filter(is_active=True, initials__iexact=value).exclude(pk=exclude_pk).exists():
+        raise ValidationError(
+            "These initials are already in use by another active user. Please use different initials."
+        )
+    return value
+
+
 class Profile(AbstractUser):
     HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
     HS_RANGE_CHOICES = [
@@ -60,6 +87,18 @@ class Profile(AbstractUser):
     hs_only_action = models.BooleanField(default=False)
 
     reversion_hide = True
+
+    def clean(self):
+        super().clean()
+        if self.initials:
+            try:
+                self.initials = validate_initials(self.initials, exclude_pk=self.pk, check_clash=self.is_active)
+            except ValidationError as error:
+                raise ValidationError({"initials": error.messages})
+
+    def save(self, *args, **kwargs):
+        self.initials = normalise_initials(self.initials)
+        super().save(*args, **kwargs)
 
     @property
     def can_log_training(self):
@@ -371,7 +410,12 @@ class EventManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = Q(name__icontains=query) | Q(description__icontains=query) | Q(notes__icontains=query)
+            or_lookup = (
+                Q(name__icontains=query)
+                | Q(description__icontains=query)
+                | Q(notes__icontains=query)
+                | Q(purchase_order__icontains=query)
+            )
 
             or_lookup = filter_by_pk(or_lookup, query)
 
@@ -594,6 +638,14 @@ class Event(models.Model, RevisionMixin):
     @property
     def has_power(self):
         return self.power_tests.exists()
+
+    @property
+    def checklists_reviewed(self):
+        return not self.checklists.filter(reviewed_by__isnull=True).exists()
+
+    @property
+    def power_tests_reviewed(self):
+        return not self.power_tests.filter(reviewed_by__isnull=True).exists()
 
     @property
     def has_start_time(self):

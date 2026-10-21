@@ -25,6 +25,11 @@ urlpatterns = [
         name="asset_update",
     ),
     path(
+        "asset/id/<asset:pk>/remove_parent/",
+        permission_required_with_403("assets.change_asset")(views.AssetRemoveParent.as_view()),
+        name="asset_remove_parent",
+    ),
+    path(
         "asset/id/<asset:pk>/duplicate/",
         permission_required_with_403("assets.add_asset")(views.AssetDuplicate.as_view()),
         name="asset_duplicate",
