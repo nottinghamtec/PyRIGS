@@ -885,3 +885,13 @@ def test_normalise_initials():
     assert normalise_initials("AD🎤🎤") == "AD🎤"
     assert normalise_initials("") == ""
     assert normalise_initials(None) is None
+
+
+def test_event_api_includes_display_id(admin_client):
+    from RIGS import models
+
+    event = models.Event.objects.create(name="Same Day", start_date=date(2030, 1, 1), is_rig=True)
+    response = admin_client.get(
+        reverse("api_secure", kwargs={"model": "event"}), {"start": "2030-01-01T00:00:00", "end": "2030-01-01T23:59:59"}
+    )
+    assert [e["display_id"] for e in response.json()] == [event.display_id]

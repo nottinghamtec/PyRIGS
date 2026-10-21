@@ -22,6 +22,47 @@
     <script src="{% static 'js/interaction.js' %}"></script>
 
     <script>
+        ready(function () {
+            var startInput = document.getElementById('{{ form.start_date.id_for_label }}');
+            var endInput = document.getElementById('{{ form.end_date.id_for_label }}');
+            var container = document.getElementById('same-day-events');
+            var list = document.getElementById('same-day-events-list');
+            var currentPk = {{ object.pk|default:"null" }};
+            var requestId = 0;
+
+            function refresh() {
+                var start = startInput.value;
+                var end = endInput.value || start;
+                if (!start) {
+                    container.classList.add('d-none');
+                    return;
+                }
+                var thisRequest = ++requestId;
+                var url = '{% url "api_secure" model="event" %}?start=' + encodeURIComponent(start + 'T00:00:00') + '&end=' + encodeURIComponent(end + 'T23:59:59');
+                fetch(url, {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (events) {
+                    if (thisRequest !== requestId) { return; }
+                    list.replaceChildren();
+                    events.filter(function (e) { return e.pk !== currentPk; }).forEach(function (e) {
+                        var li = document.createElement('li');
+                        var a = document.createElement('a');
+                        a.href = e.url;
+                        a.target = '_blank';
+                        a.textContent = e.display_id + ' ' + e.title;
+                        li.appendChild(a);
+                        li.appendChild(document.createTextNode(' (' + e.status + ')'));
+                        list.appendChild(li);
+                    });
+                    container.classList.toggle('d-none', list.children.length === 0);
+                }).catch(function () {});
+            }
+
+            startInput.addEventListener('change', refresh);
+            endInput.addEventListener('change', refresh);
+            refresh();
+        });
+    </script>
+
+    <script>
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
         ready(function () {
             dur = matches ? 0 : 500;
@@ -254,6 +295,15 @@
                                     <div class="col-sm-12 col-md-5" data-bs-toggle="tooltip" title="End time of event, leave blank if unknown">
                                         {% render_field form.end_time class+="form-control" step="60" %}
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-none" id="same-day-events">
+                            <div class="col-sm-10">
+                                <div class="alert alert-info mb-0">
+                                    <strong>Other events on these dates</strong>
+                                    <ul class="mb-0" id="same-day-events-list"></ul>
                                 </div>
                             </div>
                         </div>

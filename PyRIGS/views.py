@@ -196,6 +196,7 @@ class SecureAPIRequest(generic.View):
                 data = {
                     "pk": item.pk,
                     "title": item.name,
+                    "display_id": item.display_id,
                     "is_rig": item.is_rig,
                     "status": str(item.get_status_display()),
                     "earliest": item.earliest_time.isoformat(),
