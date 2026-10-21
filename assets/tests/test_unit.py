@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+from django.utils import timezone
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects
 
@@ -145,3 +148,26 @@ def assert_asset_form_errors(response):
     assertFormError(response.context["form"], "date_sold", "Cannot sell an item before it is acquired")
     assertFormError(response.context["form"], "purchase_price", "A price cannot be negative")
     assertFormError(response.context["form"], "replacement_cost", "A price cannot be negative")
+
+
+def test_asset_list_audit_status_filter(admin_client, test_asset, test_cable):
+    now = timezone.now()
+    models.Asset.objects.filter(pk=test_asset.pk).update(last_audited_at=now)
+    models.Asset.objects.filter(pk=test_cable.pk).update(last_audited_at=now - datetime.timedelta(days=400))
+    models.Asset.objects.create(
+        asset_id="4242",
+        description="Unaudited",
+        status=test_asset.status,
+        category=test_asset.category,
+        date_acquired=datetime.date(2020, 1, 1),
+        replacement_cost=10,
+    )
+
+    def ids(audit_status):
+        response = admin_client.get(reverse("asset_list"), {"audit_status": audit_status})
+        return {a.asset_id for a in response.context["object_list"]}
+
+    assert ids("") == {"91991", "9666", "4242"}
+    assert ids("audited") == {"91991", "9666"}
+    assert ids("never") == {"4242"}
+    assert ids("stale") == {"9666"}

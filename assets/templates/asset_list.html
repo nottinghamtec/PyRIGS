@@ -84,6 +84,12 @@
                         {% render_field form.status|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
                     </div>
                 </div>
+                <div class="col">
+                    <div id="audit-status-group" class="mb-3 px-1" style="margin-bottom: 0;">
+                        <label for="id_audit_status" class="visually-hidden">Audit status</label>
+                        {% render_field form.audit_status|add_class:'form-select' %}
+                    </div>
+                </div>
                 <div class="col mt-2">
                     <div class="form-check form-check-inline">
                       {% render_field form.is_cable|add_class:'form-check-input' %}

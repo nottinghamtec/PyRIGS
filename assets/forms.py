@@ -39,6 +39,15 @@ class AssetSearchForm(forms.Form):
     is_cable = forms.BooleanField(required=False)
     cable_type = forms.ModelMultipleChoiceField(models.CableType.objects.all(), required=False)
     date_acquired = forms.DateField(required=False)
+    audit_status = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Any audit status"),
+            ("audited", "Audited"),
+            ("never", "Never audited"),
+            ("stale", "Audited over a year ago"),
+        ],
+    )
 
 
 class SupplierForm(forms.ModelForm):

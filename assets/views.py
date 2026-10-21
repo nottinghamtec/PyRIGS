@@ -1,4 +1,5 @@
 import base64
+import datetime
 from io import BytesIO
 
 from django.contrib import messages
@@ -58,6 +59,14 @@ class AssetList(LoginRequiredMixin, generic.ListView):
 
         if form.cleaned_data["date_acquired"]:
             queryset = queryset.filter(date_acquired=form.cleaned_data["date_acquired"])
+
+        audit_status = form.cleaned_data["audit_status"]
+        if audit_status == "audited":
+            queryset = queryset.filter(last_audited_at__isnull=False)
+        elif audit_status == "never":
+            queryset = queryset.filter(last_audited_at__isnull=True)
+        elif audit_status == "stale":
+            queryset = queryset.filter(last_audited_at__lt=timezone.now() - datetime.timedelta(days=365))
 
         if form.cleaned_data["category"]:
             queryset = queryset.filter(category__in=form.cleaned_data["category"])
