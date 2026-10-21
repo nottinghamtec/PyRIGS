@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import generic
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import get_template
 
 from pypdf import PdfReader, PdfWriter
@@ -173,6 +173,19 @@ class AssetCreate(LoginRequiredMixin, generic.CreateView):
 
     def get_success_url(self):
         return reverse("asset_detail", kwargs={"pk": self.object.asset_id})
+
+
+class AssetRemoveParent(LoginRequiredMixin, AssetIDUrlMixin, generic.View):
+    http_method_names = ["post"]
+    pk_url_kwarg = "pk"
+
+    def post(self, request, *args, **kwargs):
+        asset = self.get_object()
+        parent = asset.parent
+        asset.parent = None
+        asset.save()
+        messages.success(request, f"Removed {asset.asset_id} from {parent.asset_id}" if parent else "No parent to remove")
+        return redirect(parent.get_absolute_url() if parent else asset.get_absolute_url())
 
 
 class DuplicateMixin:

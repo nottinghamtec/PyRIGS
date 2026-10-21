@@ -201,3 +201,14 @@ def test_supplier_detail_assets_paginated_and_filtered(admin_client, test_asset)
     assert response.context["paginator"].count == 25
     assert len(admin_client.get(url, {"page": 2}).context["object_list"]) == 5
     assert admin_client.get(url, {"all": 1}).context["paginator"].count == 26
+
+
+def test_remove_parent(admin_client, test_asset, test_cable):
+    test_cable.parent = test_asset
+    test_cable.save()
+    url = reverse("asset_remove_parent", kwargs={"pk": test_cable.asset_id})
+    assert admin_client.get(url).status_code == 405
+    response = admin_client.post(url)
+    assertRedirects(response, reverse("asset_detail", kwargs={"pk": test_asset.asset_id}))
+    test_cable.refresh_from_db()
+    assert test_cable.parent is None

@@ -30,8 +30,14 @@
       {% if object.asset_parent.all %}
       <div style="max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; ">
       {% for child in object.asset_parent.all %}
-      <dd>
+      <dd class="d-flex justify-content-between align-items-center mb-1">
         <a href="{% url 'asset_detail' child.asset_id %}">{{ child }}</a>
+        {% if perms.assets.change_asset %}
+        <form method="post" action="{% url 'asset_remove_parent' child.asset_id %}" class="ms-2" onsubmit="return confirm('Remove {{ child.asset_id|escapejs }} from this parent?');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap" title="Remove {{ child.asset_id }} from this parent"><span class="fas fa-unlink"></span> Remove</button>
+        </form>
+        {% endif %}
       </dd>
       {% endfor %}
       </div>
