@@ -283,3 +283,53 @@ def test_training_item_picker_searches_name_and_number(admin_client, training_it
     assert found("survival") == [training_item.pk]
     assert found("1.1") == [training_item.pk]
     assert found("die") == [training_item.pk]
+
+
+def test_deactivated_trainee_record(client, django_user_model, trainee, supervisor):
+    trainee.is_active = False
+    trainee.is_approved = False
+    trainee.save()
+    url = reverse("trainee_detail", kwargs={"pk": trainee.pk})
+
+    regular = django_user_model.objects.create_user(
+        username="regular", email="regular@example.com", password="pw", is_approved=True
+    )
+    client.force_login(regular)
+    response = client.get(url)
+    assert response.status_code == 200
+    assertContains(response, "has been deactivated")
+    assertNotContains(response, "Training Levels")
+
+    supervisor.is_supervisor = True
+    supervisor.save()
+    client.force_login(supervisor)
+    response = client.get(url)
+    assert response.status_code == 200
+    assertContains(response, "has been deactivated")
+    assertContains(response, "Training Levels")
+
+
+def test_deactivated_trainee_item_record_and_level(client, django_user_model, trainee, supervisor, level):
+    trainee.is_active = False
+    trainee.is_approved = False
+    trainee.save()
+    urls = [
+        reverse("trainee_item_detail", kwargs={"pk": trainee.pk}),
+        reverse("level_detail", kwargs={"pk": level.pk, "u": trainee.pk}),
+    ]
+
+    regular = django_user_model.objects.create_user(
+        username="regular2", email="regular2@example.com", password="pw", is_approved=True
+    )
+    client.force_login(regular)
+    for url in urls:
+        response = client.get(url)
+        assert response.status_code == 200
+        assertContains(response, "has been deactivated")
+
+    supervisor.is_supervisor = True
+    supervisor.save()
+    client.force_login(supervisor)
+    for url in urls:
+        assert client.get(url).status_code == 200
+    assertContains(client.get(urls[0]), "has been deactivated")

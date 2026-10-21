@@ -31,6 +31,9 @@
 {% endblock %}
 
 {% block content %}
+{% if deactivated %}
+<div class="alert alert-warning">This user's account has been deactivated.</div>
+{% endif %}
 <p class="text-muted text-end">Search by supervisor name, item name or item ID</p>{% include 'partials/list_search.html' %}
 <div class="row pt-2">
     <div class="col">
