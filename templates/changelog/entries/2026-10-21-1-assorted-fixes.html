@@ -1,0 +1,53 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-21" title="A batch of small fixes and improvements" %}
+<p>Eleven long-standing requests have been dealt with, mostly across events, assets and training.</p>
+<details>
+    <summary>See what's changed</summary>
+    <ul class="mt-2">
+        <li>
+            <strong>Search events by PO</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/560">#560</a>): searching the event list now also matches purchase order numbers.
+        </li>
+        <li>
+            <strong>Reviewed checklists and power records</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/548">#548</a>): the Checklist and Power Record chips show a double tick once everything has been reviewed, just like the RA chip.
+        </li>
+        <li>
+            <strong>Other events on the same dates</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/455">#455</a>): the event form lists other events happening on the dates you pick.
+        </li>
+        <li>
+            <strong>Initials are tidied up</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/483">#483</a>): initials are now stored in upper case with no spaces or punctuation, and the registration and profile forms show what they will become as you type. No two active users can share initials any more, and existing clashes have been sorted out (a user's initials may have changed).
+        </li>
+        <li>
+            <strong>Asset list audit filter</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/534">#534</a>): filter the asset list by audited, never audited, or audited over a year ago.
+        </li>
+        <li>
+            <strong>Active assets only when picking a parent</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/465">#465</a>): searching for a parent asset no longer offers assets that are hidden by status.
+        </li>
+        <li>
+            <strong>Remove children from a parent asset</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/351">#351</a>): each child on an asset's page has a Remove button, so you no longer have to edit the child.
+        </li>
+        <li>
+            <strong>No more circular parent chains</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/368">#368</a>): an asset can no longer end up as its own parent, directly or through other assets.
+        </li>
+        <li>
+            <strong>Supplier pages</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/394">#394</a>): the assets bought from a supplier are paginated and default to active assets, with a link to show everything.
+        </li>
+        <li>
+            <strong>Training item search</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/543">#543</a>): when logging a session or adding a qualification, training items can now be found by name as well as by number and description.
+        </li>
+        <li>
+            <strong>Deactivated users' training records</strong>
+            (<a href="https://github.com/nottinghamtec/PyRIGS/issues/535">#535</a>): no more 404s. Supervisors see the record with a note that the account is deactivated; everyone else just sees that the account is deactivated.
+        </li>
+    </ul>
+</details>
+{% endchangelog_entry %}
