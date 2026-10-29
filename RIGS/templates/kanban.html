@@ -1,0 +1,93 @@
+{% extends 'base_rigs.html' %}
+{% load static %}
+{% load button from filters %}
+
+{% block js %}
+{{ block.super }}
+<script src="{% static 'js/kanban.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row align-items-center justify-content-between py-2">
+    <div class="col-12 col-md text-body-secondary small">
+        Drag a rig between columns to change its status, or onto <strong>Cancel</strong> or <strong>Invoice</strong>
+        when they appear.
+        {% if beyond_horizon %}<a href="?horizon=all">{{ beyond_horizon }} later rig{{ beyond_horizon|pluralize }} not shown.</a>{% endif %}
+    </div>
+    <div class="col-12 col-md-auto d-flex flex-wrap justify-content-end align-items-center gap-2 mt-2 mt-md-0">
+        <form method="GET" class="d-flex align-items-center gap-2" id="kanban-horizon">
+            <label for="horizon" class="text-nowrap">Showing</label>
+            <select id="horizon" name="horizon" class="form-select">
+                {% for key, label in horizons %}
+                <option value="{{ key }}" {% if key == horizon %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <noscript><button type="submit" class="btn btn-primary">Show</button></noscript>
+        </form>
+        {% if perms.RIGS.add_event %}
+        {% button 'new' 'event_create' %}
+        {% endif %}
+        <a href="{% url 'rigboard' %}" class="btn btn-secondary"><span class="fas fa-list"></span> List view</a>
+    </div>
+</div>
+
+<div id="kanban" class="kanban" style="--kanban-columns: {{ columns|length }}"
+    data-status-url="{% url 'event_kanban_status' 0 %}" data-invoice-url="{% url 'event_kanban_invoice' 0 %}"
+    data-cancelled-status="3">
+    {% csrf_token %}
+    <div class="kanban-grid">
+        {% for key, title in columns %}
+        <div class="kanban-column-header kanban-col-{{ key }}" data-column-header="{{ key }}">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>{{ title }}</span>
+                <span class="badge rounded-pill text-bg-secondary" data-column-count="{{ key }}"></span>
+            </div>
+            {% if key == 'invoiced' %}
+            <a href="{% url 'invoice_list' %}" class="small fw-normal">All outstanding invoices</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% for lane in lanes %}
+        <div class="kanban-lane-header" data-lane-header="{{ lane.key }}">
+            <span class="fas fa-{% if lane.key == 'internal' %}users{% elif lane.key == 'university' %}university{% else %}handshake{% endif %} fa-fw"></span>
+            {{ lane.title }} <span class="badge rounded-pill text-bg-secondary" data-lane-count="{{ lane.key }}">{{ lane.count }}</span>
+        </div>
+        {% for cell in lane.cells %}
+        <section class="kanban-cell kanban-col-{{ cell.key }}" data-lane="{{ lane.key }}" data-column="{{ cell.key }}"
+            aria-label="{{ lane.title }}: {{ cell.title }}">
+            {% for event in cell.events %}
+            {% include 'partials/kanban_card.html' %}
+            {% endfor %}
+            {% if cell.older %}
+            <a href="{% if cell.key == 'invoiced' %}{% url 'invoice_list' %}{% else %}{% url 'invoice_waiting' %}{% endif %}"
+                class="kanban-older small">
+                <span class="fas fa-history fa-fw"></span>
+                +{{ cell.older }} older rig{{ cell.older|pluralize }} {% if cell.key == 'invoiced' %}still owed on{% else %}not yet invoiced{% endif %}
+            </a>
+            {% endif %}
+        </section>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="kanban-dropzones" aria-hidden="true">
+    {% if perms.RIGS.change_event %}
+    <div class="kanban-dropzone kanban-dropzone-cancel" data-dropzone="cancel">
+        <span class="fas fa-ban fa-2x"></span>
+        <span>Cancel event</span>
+        <small>Takes it off the board</small>
+    </div>
+    {% endif %}
+    {% if perms.RIGS.add_invoice %}
+    <div class="kanban-dropzone kanban-dropzone-invoice" data-dropzone="invoice">
+        <span class="fas fa-file-invoice-dollar fa-2x"></span>
+        <span>Create invoice</span>
+        <small>Raises an invoice for this rig</small>
+    </div>
+    {% endif %}
+</div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3" id="kanban-toasts"></div>
+{% endblock %}

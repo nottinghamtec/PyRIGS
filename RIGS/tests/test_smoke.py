@@ -62,6 +62,7 @@ def world(admin_user, basic_event, ra, checklist, power_test, venue):
 # (url name, kwargs as {kwarg: world key attribute})
 PAGES = [
     ("rigboard", {}),
+    ("event_kanban", {}),
     ("web_calendar", {}),
     ("event_archive", {}),
     ("hs_list", {}),

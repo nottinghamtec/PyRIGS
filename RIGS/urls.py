@@ -62,6 +62,17 @@ urlpatterns = [
     ),
     # Rigboard
     path("rigboard/", login_required(views.RigboardIndex.as_view()), name="rigboard"),
+    path("rigboard/kanban/", login_required(views.EventKanban.as_view()), name="event_kanban"),
+    path(
+        "rigboard/kanban/<int:pk>/status/",
+        permission_required_with_403("RIGS.change_event")(views.EventKanbanStatus.as_view()),
+        name="event_kanban_status",
+    ),
+    path(
+        "rigboard/kanban/<int:pk>/invoice/",
+        permission_required_with_403("RIGS.add_invoice")(views.EventKanbanInvoice.as_view()),
+        name="event_kanban_invoice",
+    ),
     path("rigboard/calendar/", login_required()(views.WebCalendar.as_view()), name="web_calendar"),
     re_path(
         r"^rigboard/calendar/(?P<view>(month|week|day))/$",
