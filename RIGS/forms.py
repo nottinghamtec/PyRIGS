@@ -170,6 +170,7 @@ class EventForm(forms.ModelForm):
             "purchase_order",
             "collector",
             "forum_url",
+            "default_response_sent",
             "parking_and_access",
         ]
 

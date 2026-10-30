@@ -85,6 +85,7 @@ class Profile(AbstractUser):
     hs_order = models.CharField(max_length=6, choices=HS_ORDER_CHOICES, default="oldest")
     hs_range = models.CharField(max_length=8, choices=HS_RANGE_CHOICES, default="upcoming")
     hs_only_action = models.BooleanField(default=False)
+    kanban_finance = models.BooleanField(default=True, verbose_name="Show invoice columns on the Kanban")
 
     reversion_hide = True
 
@@ -499,6 +500,11 @@ class Event(models.Model, RevisionMixin):
     auth_request_to = models.EmailField(blank=True, default="")
 
     forum_url = models.URLField(default="", blank=True, validators=[validate_forum_url])
+
+    default_response_sent = models.BooleanField(
+        default=False,
+        help_text="Has the client been sent our default response to their request?",
+    )
 
     @property
     def display_id(self):

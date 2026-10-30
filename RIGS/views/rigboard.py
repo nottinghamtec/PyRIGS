@@ -153,6 +153,7 @@ class EventDuplicate(EventUpdate):
         new.based_on = old  # Make the new event based on the old event
         new.purchase_order = None  # Remove old PO
         new.status = new.PROVISIONAL  # Return status to provisional
+        new.default_response_sent = False
 
         # Clear checked in by if it's a dry hire
         if new.dry_hire is True:

@@ -352,6 +352,14 @@
                         </div>
 
                         <div class="form-is_rig {% if object.pk and not object.is_rig %}hidden{% endif %}">
+                            <div class="mb-3" data-bs-toggle="tooltip" title="{{ form.default_response_sent.help_text }}">
+                                <div class="col-sm-offset-4 col-sm-8">
+                                    <label>
+                                        {{ form.default_response_sent.label }} {% render_field form.default_response_sent %}
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="mb-3" data-bs-toggle="tooltip" title="The Member in Charge of this event">
                                 <label for="{{ form.mic.id_for_label }}"
                                        class="col-sm-4 col-form-label">{{ form.mic.label }}</label>
