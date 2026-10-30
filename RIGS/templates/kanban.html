@@ -86,7 +86,8 @@
         {% endfor %}
 
         {% for lane in lanes %}
-        <div class="kanban-lane-header" data-lane-header="{{ lane.key }}">
+        <div class="kanban-lane-header" data-lane-header="{{ lane.key }}" role="button" tabindex="0" aria-expanded="true">
+            <span class="fas fa-chevron-down fa-fw kanban-lane-chevron"></span>
             <span class="fas fa-{% if lane.key == 'internal' %}users{% elif lane.key == 'university' %}university{% elif lane.key == 'dry_hire' %}truck{% else %}handshake{% endif %} fa-fw"></span>
             {{ lane.title }} <span class="badge rounded-pill text-bg-secondary" data-lane-count="{{ lane.key }}">{{ lane.count }}</span>
         </div>

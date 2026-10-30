@@ -379,6 +379,69 @@
         }
     });
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function animateLane(cells, collapsing) {
+        cells.forEach((cell) => {
+            if (cell.animation) {
+                cell.animation.cancel();
+            }
+            if (!collapsing) {
+                cell.classList.remove("kanban-lane-collapsed");
+            }
+        });
+        if (reducedMotion.matches) {
+            cells.forEach((cell) => cell.classList.toggle("kanban-lane-collapsed", collapsing));
+            return;
+        }
+        // Measure every cell before animating any, so each is stretched to the same full row height
+        const heights = cells.map((cell) => cell.offsetHeight);
+        cells.forEach((cell, i) => {
+            const frames = [
+                {height: `${heights[i]}px`, opacity: 1},
+                {
+                    height: 0, minHeight: 0, opacity: 0, paddingTop: 0, paddingBottom: 0,
+                    borderTopWidth: 0, borderBottomWidth: 0,
+                },
+            ];
+            if (!collapsing) {
+                frames.reverse();
+            }
+            cell.style.overflow = "hidden";
+            const animation = cell.animate(frames, {duration: 200, easing: "ease-in-out"});
+            cell.animation = animation;
+            const done = () => {
+                if (cell.animation !== animation) {
+                    return;
+                }
+                cell.style.overflow = "";
+                cell.animation = null;
+                cell.classList.toggle("kanban-lane-collapsed", collapsing);
+            };
+            animation.onfinish = done;
+            setTimeout(() => {
+                animation.finish();
+                done();
+            }, 250);
+        });
+    }
+
+    function toggleLane(header) {
+        const collapsed = header.classList.toggle("kanban-lane-collapsed");
+        header.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        animateLane([...board.querySelectorAll(`.kanban-cell[data-lane="${header.dataset.laneHeader}"]`)], collapsed);
+    }
+
+    board.querySelectorAll(".kanban-lane-header").forEach((header) => {
+        header.addEventListener("click", () => toggleLane(header));
+        header.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleLane(header);
+            }
+        });
+    });
+
     board.querySelectorAll(".kanban-card").forEach(updateMenu);
     recount();
 })();

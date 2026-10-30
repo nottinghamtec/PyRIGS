@@ -930,6 +930,29 @@ $dark-theme-colors: (
         padding-bottom: 0.25rem;
         border-bottom: 2px solid var(--brand);
         font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+
+        .kanban-lane-chevron {
+            transition: transform 0.15s;
+        }
+
+        &.kanban-lane-collapsed .kanban-lane-chevron {
+            transform: rotate(-90deg);
+        }
+    }
+
+    // Kept in the grid at zero height rather than display: none, so the row gap doesn't snap away at the end
+    .kanban-cell.kanban-lane-collapsed {
+        height: 0;
+        min-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-top-width: 0;
+        border-bottom-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        visibility: hidden;
     }
 
     .kanban-cell {
