@@ -5,8 +5,10 @@ from diff_match_patch import diff_match_patch
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import EmailField, IntegerField, TextField, CharField, BooleanField
+from django.utils import timezone
 from django.utils.functional import cached_property
-from reversion.models import Version, VersionQuerySet
+from django.core import serializers
+from reversion.models import Revision, Version, VersionQuerySet
 
 
 class RevisionMixin:
@@ -229,6 +231,10 @@ class RIGSVersionManager(VersionQuerySet):
         )
 
 
+CONVERTED_PREFIX = "Converted enquiry "
+DELETED_PREFIX = "Deleted enquiry "
+
+
 class RIGSVersion(Version):
     class Meta:
         proxy = True
@@ -261,6 +267,18 @@ class RIGSVersion(Version):
             old=self.parent._object_version.object if self.parent else None,
             follow=True,
         )
+
+    @property
+    def converted_enquiry_name(self):
+        """The name of the enquiry this event was made from, if that's how it came about"""
+        comment = self.revision.comment
+        return comment[len(CONVERTED_PREFIX) :] if comment.startswith(CONVERTED_PREFIX) else None
+
+    @property
+    def deleted_enquiry_name(self):
+        """The name of the enquiry, if this version is the record of it being deleted"""
+        comment = self.revision.comment
+        return comment[len(DELETED_PREFIX) :] if comment.startswith(DELETED_PREFIX) else None
 
     @property
     def display_id(self):
@@ -298,3 +316,20 @@ def activity_feed_version():
 def bump_activity_feed_version(sender=None, **kwargs):
     # Explicitly no timeout: cache.incr() would re-set the key with the default 5 minute timeout
     cache.set(ACTIVITY_FEED_VERSION_KEY, new_activity_feed_version(), None)
+
+
+def record_deletion(obj, user, comment):
+    """Keep a version of an object that is about to be deleted, as reversion drops versions of deleted objects"""
+    revision = Revision.objects.create(
+        date_created=timezone.now(), user=user if getattr(user, "pk", None) else None, comment=comment
+    )
+    Version.objects.create(
+        revision=revision,
+        object_id=str(obj.pk),
+        content_type=ContentType.objects.get_for_model(obj),
+        db="default",
+        format="json",
+        serialized_data=serializers.serialize("json", [obj]),
+        object_repr=str(obj),
+    )
+    bump_activity_feed_version()

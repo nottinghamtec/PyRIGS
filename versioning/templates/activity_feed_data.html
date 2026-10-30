@@ -8,7 +8,7 @@
 
 {% block content %}
 {# The fragment is cached for an hour (in the database in production), so bump the "bs5" suffix whenever its markup changes (new revisions change feed_version) #}
-{% cache 3600 feed_data_bs5 request.user feed_version %}
+{% cache 3600 feed_data_bs7 request.user feed_version %}
 <div class="list-group-item">
     <div class="d-flex">
     {% for version in object_list %}
@@ -36,12 +36,18 @@
                     </h5>
             {% endif %}
                     <p>
+                    {% if version.converted_enquiry_name and version.changes.old == None %}
+                        Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id }}</a>
+                    {% elif version.deleted_enquiry_name is not None %}
+                        Deleted enquiry {{ version.deleted_enquiry_name }}
+                    {% else %}
                     {% if version.changes.old == None %}
                         Created
                     {% else %}
                         Changed {% include 'partials/version_changes.html' %} in
                     {% endif %}
                     {% include 'partials/object_button.html' with object=version.changes.new %}
+                    {% endif %}
                     </p>
     {% endfor %}
     </div>

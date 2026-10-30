@@ -83,6 +83,26 @@ urlpatterns = [
         permission_required_with_403("RIGS.add_invoice")(views.EventKanbanInvoice.as_view()),
         name="event_kanban_invoice",
     ),
+    path(
+        "rigboard/kanban/enquiries/add/",
+        permission_required_with_403("RIGS.add_event")(views.EnquiryCreate.as_view()),
+        name="enquiry_create",
+    ),
+    path(
+        "rigboard/kanban/enquiries/<int:pk>/edit/",
+        permission_required_with_403("RIGS.change_event")(views.EnquiryUpdate.as_view()),
+        name="enquiry_update",
+    ),
+    path(
+        "rigboard/kanban/enquiries/<int:pk>/convert/",
+        permission_required_with_403("RIGS.add_event")(views.EnquiryConvert.as_view()),
+        name="enquiry_convert",
+    ),
+    path(
+        "rigboard/kanban/enquiries/<int:pk>/delete/",
+        permission_required_with_403("RIGS.change_event")(views.EnquiryDelete.as_view()),
+        name="enquiry_delete",
+    ),
     path("rigboard/calendar/", login_required()(views.WebCalendar.as_view()), name="web_calendar"),
     re_path(
         r"^rigboard/calendar/(?P<view>(month|week|day))/$",

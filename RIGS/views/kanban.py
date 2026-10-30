@@ -3,6 +3,7 @@ import datetime
 from collections import Counter
 
 import reversion
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import connection, transaction
 from django.db.models import Q
@@ -11,7 +12,9 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import generic
 
-from RIGS import models
+from PyRIGS.views import get_related, is_ajax
+from RIGS import forms, models
+from versioning.versioning import CONVERTED_PREFIX, DELETED_PREFIX, record_deletion
 
 # Finished events leave the board this long after they end, so the finance columns stay short
 FALL_OFF = datetime.timedelta(weeks=2)
@@ -242,6 +245,7 @@ class EventKanban(generic.TemplateView):
             }
             for lane, title in LANES
         ]
+        context["enquiries"] = models.Enquiry.objects.select_related("created_by", "person", "organisation")
         context["status_choices"] = [
             (status, label) for status, label in models.Event.EVENT_STATUS_CHOICES if status in STATUS_COLUMNS
         ]
@@ -340,3 +344,81 @@ class EventKanbanInvoice(generic.View):
                 },
             }
         )
+
+
+class EnquiryFormMixin:
+    """Enquiries are edited in the modal, which closes and takes you to the Kanban once saved"""
+
+    model = models.Enquiry
+    form_class = forms.EnquiryForm
+    template_name = "enquiry_form.html"
+
+    def get_success_url(self):
+        kanban = reverse("event_kanban")
+        if is_ajax(self.request):
+            messages.info(self.request, f"window.location.href = '{kanban}'")
+            return reverse("closemodal")
+        return kanban
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        get_related(context["form"], context)
+        return context
+
+
+class EnquiryCreate(EnquiryFormMixin, generic.CreateView):
+    def get_initial(self):
+        return {"start_date": datetime.date.today()}
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "New Enquiry"
+        return context
+
+
+class EnquiryUpdate(EnquiryFormMixin, generic.UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Edit Enquiry: {self.object.name}"
+        return context
+
+
+class EnquiryConvert(generic.View):
+    """Make an enquiry into a provisional event, to be filled in on the edit page"""
+
+    http_method_names = ["post"]
+
+    @transaction.atomic()
+    def post(self, request, pk):
+        enquiry = get_object_or_404(models.Enquiry.objects.select_for_update(), pk=pk)
+        name = enquiry.name
+        try:
+            event = enquiry.convert()
+        except ValidationError as e:
+            return JsonResponse(
+                {"error": " ".join(e.messages), "edit_url": reverse("enquiry_update", kwargs={"pk": pk})}, status=409
+            )
+        reversion.set_user(request.user)
+        reversion.set_comment(f"{CONVERTED_PREFIX}{name}")
+        return JsonResponse(
+            {
+                "pk": event.pk,
+                "display_id": event.display_id,
+                "url": reverse("event_update", kwargs={"pk": event.pk}),
+            }
+        )
+
+
+class EnquiryDelete(generic.View):
+    http_method_names = ["post"]
+
+    @transaction.atomic()
+    def post(self, request, pk):
+        enquiry = get_object_or_404(models.Enquiry, pk=pk)
+        record_deletion(enquiry, request.user, f"{DELETED_PREFIX}{enquiry.name}")
+        enquiry.delete()
+        return JsonResponse({"deleted": pk})

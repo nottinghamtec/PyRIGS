@@ -176,6 +176,23 @@ class EventForm(forms.ModelForm):
         ]
 
 
+class EnquiryForm(forms.ModelForm):
+    related_models = {
+        "person": models.Person,
+        "organisation": models.Organisation,
+    }
+
+    class Meta:
+        model = models.Enquiry
+        fields = ["name", "start_date", "end_date", "person", "organisation", "notes"]
+        widgets = {"notes": forms.Textarea(attrs={"rows": 4})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["start_date"].widget.format = "%Y-%m-%d"
+        self.fields["end_date"].widget.format = "%Y-%m-%d"
+
+
 class BaseClientEventAuthorisationForm(forms.ModelForm):
     tos = forms.BooleanField(required=True, label="Terms of hire")
     name = forms.CharField(label="Your Name")

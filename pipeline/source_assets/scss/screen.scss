@@ -857,16 +857,42 @@ $dark-theme-colors: (
 }
 
 .kanban {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
     overflow-x: auto;
     padding-bottom: 0.5rem;
 
     .kanban-grid {
         display: grid;
+        flex: 1 0 calc(var(--kanban-columns) * 12rem);
         grid-template-columns: repeat(var(--kanban-columns), minmax(12rem, 1fr));
         gap: 0.5rem;
     }
 
+    // Enquiries have no client yet so sit outside the lanes, ahead of provisional
+    .kanban-enquiries {
+        display: flex;
+        flex: 0 0 13rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .kanban-enquiry-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.4rem;
+        border-radius: var(--bs-border-radius);
+        background: var(--bs-secondary-bg-subtle);
+    }
+
+    .kanban-enquiry-notes {
+        overflow-wrap: anywhere;
+    }
+
     // Each column's colour runs from tentative (amber) through booked (blue) to needing money (red/orange) and paid
+    .kanban-col-enquiry { --kanban-colour: var(--bs-purple); }
     .kanban-col-provisional { --kanban-colour: var(--bs-warning); }
     .kanban-col-confirmed { --kanban-colour: var(--bs-info); }
     .kanban-col-booked { --kanban-colour: var(--bs-primary); }

@@ -1454,3 +1454,55 @@ class EventCheckIn(models.Model):
 
     def active(self):
         return self.end_time is None
+
+
+@reversion.register
+class Enquiry(models.Model, RevisionMixin):
+    """A placeholder for a rig that has only just been asked about, kept apart from events until it firms up"""
+
+    name = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    notes = models.TextField(blank=True, default="", help_text="Who asked, how to get hold of them, what they want")
+    person = models.ForeignKey(Person, blank=True, null=True, on_delete=models.SET_NULL)
+    organisation = models.ForeignKey(Organisation, blank=True, null=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["start_date", "pk"]
+        verbose_name_plural = "enquiries"
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def activity_feed_string(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("enquiry_update", kwargs={"pk": self.pk})
+
+    def clean(self):
+        if self.end_date and self.start_date and self.start_date > self.end_date:
+            raise ValidationError({"end_date": "The enquiry can't finish before it has started."})
+
+    @property
+    def has_client(self):
+        return bool(self.person_id or self.organisation_id)
+
+    def convert(self):
+        """Turn into a provisional event, which is where it gets its N number, and remove the enquiry"""
+        if not self.has_client:
+            raise ValidationError("An enquiry needs a client before it can become a rig")
+        event = Event.objects.create(
+            person=self.person,
+            organisation=self.organisation,
+            name=self.name,
+            start_date=self.start_date,
+            end_date=self.end_date,
+            description=self.notes,
+            status=Event.PROVISIONAL,
+        )
+        self.delete()
+        return event

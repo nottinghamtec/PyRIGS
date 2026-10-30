@@ -18,7 +18,11 @@
                 <td>{{ version.display_id }}</td>
                 <td>{% include 'partials/linked_name.html' with profile=version.revision.user %}</td>
                 <td>
-                    {% if version.changes.old == None %}
+                    {% if version.converted_enquiry_name and version.changes.old == None %}
+                        Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id }}</a>
+                    {% elif version.deleted_enquiry_name is not None %}
+                        Deleted enquiry {{ version.deleted_enquiry_name }}
+                    {% elif version.changes.old == None %}
                         Created {{version.changes.new|to_class_name}}
                     {% elif version.changes.new == None %}
                         Deleted {{version.changes.old|to_class_name}}

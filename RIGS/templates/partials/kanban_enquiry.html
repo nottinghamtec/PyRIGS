@@ -1,0 +1,52 @@
+<article class="card kanban-card kanban-enquiry shadow-sm" data-enquiry="{{ enquiry.pk }}" data-display-id="{{ enquiry.name }}"
+    data-edit-url="{% url 'enquiry_update' enquiry.pk %}"{% if enquiry.has_client %} data-has-client{% endif %}
+    {% if perms.RIGS.add_event %}draggable="true"{% endif %}>
+    <div class="card-body p-2">
+        <div class="d-flex justify-content-between align-items-start gap-1">
+            {% if perms.RIGS.change_event %}
+            <a href="{% url 'enquiry_update' enquiry.pk %}" class="modal-href kanban-card-title text-reset text-decoration-none fw-bold">{{ enquiry.name }}</a>
+            {% else %}
+            <span class="kanban-card-title fw-bold">{{ enquiry.name }}</span>
+            {% endif %}
+            {% if perms.RIGS.add_event or perms.RIGS.change_event %}
+            <div class="dropdown kanban-card-menu">
+                <button class="btn btn-sm btn-link text-body-secondary p-0 px-1" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false" aria-label="Actions for {{ enquiry.name }}">
+                    <span class="fas fa-ellipsis-v"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    {% if perms.RIGS.add_event %}
+                    <li><button class="dropdown-item" type="button" data-kanban-action="convert"><span
+                                class="fas fa-arrow-right fa-fw"></span> Make provisional</button></li>
+                    {% endif %}
+                    {% if perms.RIGS.change_event %}
+                    <li><a class="dropdown-item modal-href" href="{% url 'enquiry_update' enquiry.pk %}"><span
+                                class="fas fa-edit fa-fw"></span> Edit</a></li>
+                    <li><button class="dropdown-item text-danger" type="button" data-kanban-action="delete-enquiry"><span
+                                class="fas fa-trash fa-fw"></span> Delete</button></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="small text-body-secondary">
+            <span class="fas fa-calendar fa-fw"></span>
+            {{ enquiry.start_date|date:"D j M" }}{% if enquiry.end_date and enquiry.end_date != enquiry.start_date %} &ndash; {{ enquiry.end_date|date:"D j M" }}{% endif %}
+        </div>
+        {% if enquiry.organisation or enquiry.person %}
+        <div class="small text-body-secondary text-truncate">
+            <span class="fas fa-user fa-fw"></span> {% firstof enquiry.organisation.name enquiry.person.name %}
+        </div>
+        {% else %}
+        <div class="small text-warning-emphasis"><span class="fas fa-exclamation-circle fa-fw"></span> No client yet</div>
+        {% endif %}
+        {% if enquiry.notes %}
+        <div class="small text-body-secondary kanban-enquiry-notes">{{ enquiry.notes|truncatechars:120 }}</div>
+        {% endif %}
+        {% if enquiry.created_by %}
+        <div class="small text-body-secondary text-truncate">
+            <span class="fas fa-user-edit fa-fw"></span> {{ enquiry.created_by.get_full_name|default:enquiry.created_by.username }}
+        </div>
+        {% endif %}
+    </div>
+</article>

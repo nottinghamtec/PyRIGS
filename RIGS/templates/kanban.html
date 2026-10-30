@@ -2,6 +2,16 @@
 {% load static %}
 {% load button from filters %}
 
+{% block css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+{{ block.super }}
+<script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
 {% block js %}
 {{ block.super }}
 <script src="{% static 'js/kanban.js' %}"></script>
@@ -37,6 +47,7 @@
     <div class="d-flex flex-wrap gap-2">
         {% if perms.RIGS.add_event %}
         {% button 'new' 'event_create' %}
+        <a href="{% url 'enquiry_create' %}" class="btn btn-primary modal-href"><span class="fas fa-lightbulb"></span> New enquiry</a>
         {% endif %}
         <a href="{% url 'rigboard' %}" class="btn btn-secondary"><span class="fas fa-list"></span> List view</a>
     </div>
@@ -45,8 +56,22 @@
 <div id="kanban" class="kanban" style="--kanban-columns: {{ columns|length }}"
     data-status-url="{% url 'event_kanban_status' 0 %}" data-invoice-url="{% url 'event_kanban_invoice' 0 %}"
     data-response-url="{% url 'event_kanban_response' 0 %}" data-can-change="{% if perms.RIGS.change_event %}1{% endif %}"
+    data-convert-url="{% url 'enquiry_convert' 0 %}" data-delete-url="{% url 'enquiry_delete' 0 %}"
     data-cancelled-status="3">
     {% csrf_token %}
+    <aside class="kanban-enquiries kanban-col-enquiry" aria-label="Enquiries">
+        <div class="kanban-column-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Enquiries</span>
+                <span class="badge rounded-pill text-bg-secondary" data-enquiry-count>{{ enquiries|length }}</span>
+            </div>
+        </div>
+        <div class="kanban-enquiry-list">
+            {% for enquiry in enquiries %}
+            {% include 'partials/kanban_enquiry.html' %}
+            {% endfor %}
+        </div>
+    </aside>
     <div class="kanban-grid">
         {% for key, title in columns %}
         <div class="kanban-column-header kanban-col-{{ key }}" data-column-header="{{ key }}">

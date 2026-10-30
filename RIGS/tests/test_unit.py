@@ -1158,7 +1158,7 @@ def test_kanban_flags_on_the_page_and_in_responses(admin_client):
     response = admin_client.get(reverse("event_kanban"))
     for flag in ("default_response", "details", "mic"):
         assertContains(response, f'data-flag="{flag}"')
-    assertContains(response, "kanban-card-flagged")
+    assertContains(response, "kanban-card-urgent")
     assertContains(response, "Basic details are missing: venue, client, start time")
 
     response = admin_client.post(
@@ -1343,11 +1343,11 @@ def test_needing_mic_only_lists_upcoming_rigs_that_need_one():
 def test_home_page_adopt_a_rig(admin_client):
     event = models.Event.objects.create(name="Orphan", start_date=date.today() + timedelta(days=2))
     response = admin_client.get(reverse("index"))
-    assert "Adopt a rig" in response.content.decode()
+    assert 'id="adopt-a-rig"' in response.content.decode()
     assert reverse("event_adopt", kwargs={"pk": event.pk}) in response.content.decode()
     event.mic = models.Profile.objects.create(username="mic", initials="MIC")
     event.save()
-    assert "Adopt a rig" not in admin_client.get(reverse("index")).content.decode()
+    assert 'id="adopt-a-rig"' not in admin_client.get(reverse("index")).content.decode()
 
 
 def test_adopt_a_rig_makes_you_the_mic(admin_client, admin_user):
@@ -1398,3 +1398,145 @@ def test_event_duplicate_drops_the_sharepoint_link(admin_client):
     )
     response = admin_client.get(reverse("event_duplicate", kwargs={"pk": event.pk}))
     assert response.context["object"].sharepoint_url == ""
+
+
+def test_enquiry_needs_only_a_name_and_date(admin_client):
+    response = admin_client.post(reverse("enquiry_create"), {"name": "Maybe a ball", "start_date": "2030-05-01"})
+    assert response.status_code == 302
+    enquiry = models.Enquiry.objects.get()
+    assert enquiry.name == "Maybe a ball"
+    assert enquiry.end_date is None
+    assert enquiry.created_by is not None
+    assert models.Event.objects.count() == 0
+
+
+def test_enquiry_cannot_finish_before_it_starts(admin_client):
+    response = admin_client.post(
+        reverse("enquiry_create"), {"name": "Backwards", "start_date": "2030-05-02", "end_date": "2030-05-01"}
+    )
+    assert response.status_code == 200
+    assert models.Enquiry.objects.count() == 0
+
+
+def test_enquiries_show_on_the_kanban_outside_the_lanes(admin_client):
+    models.Enquiry.objects.create(name="Placeholder", start_date=date.today() + timedelta(days=90))
+    response = admin_client.get(reverse("event_kanban"))
+    assert [e.name for e in response.context["enquiries"]] == ["Placeholder"]
+    assert "Placeholder" in response.content.decode()
+    assert models.Event.objects.count() == 0
+
+
+def test_enquiry_converts_to_a_provisional_event(admin_client):
+    client = models.Organisation.objects.create(name="Ball Committee")
+    enquiry = models.Enquiry.objects.create(
+        name="Maybe a ball",
+        start_date=date(2030, 5, 1),
+        end_date=date(2030, 5, 2),
+        notes="Ask for Sam",
+        organisation=client,
+    )
+    response = admin_client.post(reverse("enquiry_convert", kwargs={"pk": enquiry.pk}))
+    event = models.Event.objects.get()
+    assert response.json()["url"] == reverse("event_update", kwargs={"pk": event.pk})
+    assert response.json()["display_id"] == event.display_id
+    assert (event.name, event.start_date, event.end_date, event.description) == (
+        "Maybe a ball",
+        date(2030, 5, 1),
+        date(2030, 5, 2),
+        "Ask for Sam",
+    )
+    assert event.organisation == client
+    assert event.status == models.Event.PROVISIONAL
+    assert event.is_rig
+    assert not models.Enquiry.objects.exists()
+
+
+def test_enquiry_needs_a_client_before_it_converts(admin_client):
+    enquiry = models.Enquiry.objects.create(name="No client", start_date=date(2030, 5, 1))
+    response = admin_client.post(reverse("enquiry_convert", kwargs={"pk": enquiry.pk}))
+    assert response.status_code == 409
+    assert response.json()["edit_url"] == reverse("enquiry_update", kwargs={"pk": enquiry.pk})
+    assert models.Event.objects.count() == 0
+    assert models.Enquiry.objects.count() == 1
+    person = models.Person.objects.create(name="Sam")
+    admin_client.post(
+        reverse("enquiry_update", kwargs={"pk": enquiry.pk}),
+        {"name": "No client", "start_date": "2030-05-01", "person": person.pk},
+    )
+    assert admin_client.post(reverse("enquiry_convert", kwargs={"pk": enquiry.pk})).status_code == 200
+    assert models.Event.objects.get().person == person
+
+
+def test_enquiry_edit_and_delete(admin_client):
+    enquiry = models.Enquiry.objects.create(name="Old", start_date=date(2030, 5, 1))
+    admin_client.post(reverse("enquiry_update", kwargs={"pk": enquiry.pk}), {"name": "New", "start_date": "2030-06-01"})
+    enquiry.refresh_from_db()
+    assert (enquiry.name, enquiry.start_date) == ("New", date(2030, 6, 1))
+    assert admin_client.post(reverse("enquiry_delete", kwargs={"pk": enquiry.pk})).status_code == 200
+    assert not models.Enquiry.objects.exists()
+
+
+def test_enquiries_need_event_permissions(client, django_user_model):
+    client.force_login(django_user_model.objects.create(username="viewer"))
+    enquiry = models.Enquiry.objects.create(name="Old", start_date=date(2030, 5, 1))
+    assert client.post(reverse("enquiry_create"), {"name": "x", "start_date": "2030-05-01"}).status_code == 403
+    assert client.post(reverse("enquiry_convert", kwargs={"pk": enquiry.pk})).status_code == 403
+    assert client.post(reverse("enquiry_delete", kwargs={"pk": enquiry.pk})).status_code == 403
+    assert models.Enquiry.objects.count() == 1
+
+
+def test_enquiries_show_in_recent_changes(admin_client):
+    admin_client.post(reverse("enquiry_create"), {"name": "Maybe a ball", "start_date": "2030-05-01"})
+    assert "Maybe a ball" in admin_client.get(reverse("activity_feed")).content.decode()
+    assert "Created Enquiry" in admin_client.get(reverse("activity_table")).content.decode()
+
+
+def test_converted_enquiries_say_so_in_recent_changes(admin_client):
+    admin_client.post(reverse("enquiry_create"), {"name": "Maybe a ball", "start_date": "2030-05-01"})
+    enquiry = models.Enquiry.objects.get()
+    enquiry.organisation = models.Organisation.objects.create(name="Ball Committee")
+    enquiry.save()
+    admin_client.post(reverse("enquiry_convert", kwargs={"pk": enquiry.pk}))
+    event = models.Event.objects.get()
+    for url in (reverse("activity_feed"), reverse("activity_table")):
+        content = " ".join(admin_client.get(url).content.decode().split())
+        assert "Converted enquiry Maybe a ball to rig <a" in content
+        assert f">{event.display_id}</a>" in content
+
+
+def test_enquiry_form_shows_the_saved_dates(admin_client):
+    enquiry = models.Enquiry.objects.create(name="Dated", start_date=date(2030, 5, 1), end_date=date(2030, 5, 3))
+    content = admin_client.get(reverse("enquiry_update", kwargs={"pk": enquiry.pk})).content.decode()
+    assert 'value="2030-05-01"' in content
+    assert 'value="2030-05-03"' in content
+
+
+def test_enquiry_modal_closes_and_heads_to_the_kanban(admin_client):
+    ajax = {"HTTP_X_REQUESTED_WITH": "XMLHttpRequest"}
+    form = admin_client.get(reverse("enquiry_create"), **ajax).content.decode()
+    assert "modal-dialog" in form
+    response = admin_client.post(
+        reverse("enquiry_create"), {"name": "From a modal", "start_date": "2030-05-01"}, **ajax
+    )
+    assert response.status_code == 302
+    assert response.url == reverse("closemodal")
+    closing = admin_client.get(response.url, **ajax).content.decode()
+    assert reverse("event_kanban") in closing
+    assert models.Enquiry.objects.get().name == "From a modal"
+
+
+def test_enquiry_links_open_in_modals_from_the_kanban_and_home_page(admin_client):
+    for page in ("event_kanban", "index"):
+        content = admin_client.get(reverse(page)).content.decode()
+        before, after = content.split(f'href="{reverse("enquiry_create")}"', 1)
+        assert "modal-href" in before.rsplit("<a", 1)[1] + after.split(">", 1)[0]
+
+
+def test_deleted_enquiries_show_in_recent_changes(admin_client):
+    admin_client.post(reverse("enquiry_create"), {"name": "Maybe a ball", "start_date": "2030-05-01"})
+    enquiry = models.Enquiry.objects.get()
+    admin_client.post(reverse("enquiry_delete", kwargs={"pk": enquiry.pk}))
+    assert not models.Enquiry.objects.exists()
+    for url in (reverse("activity_feed"), reverse("activity_table")):
+        content = " ".join(admin_client.get(url).content.decode().split())
+        assert "Deleted enquiry Maybe a ball" in content

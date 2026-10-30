@@ -5,6 +5,16 @@
 
 {% block title %}RIGS{% endblock %}
 
+{% block css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+{{ block.super }}
+<script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row home-links">
     <h1 class="col-sm-12 pb-3">R<small class="text-muted">ig</small> I<small class="text-muted">nformation</small> G<small class="text-muted">athering</small> S<small class="text-muted">ystem</small></h1>
@@ -28,6 +38,7 @@
                 <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><span class="fas fa-calendar align-middle"></span><span class="align-middle"> Calendar</span></a>
                 {% if perms.RIGS.add_event %}
                     <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Event</span></a>
+                    <a class="list-group-item list-group-item-action modal-href" href="{% url 'enquiry_create' %}"><span class="fas fa-lightbulb align-middle text-warning"></span><span class="align-middle"> New Enquiry</span></a>
                 {% endif %}
                 <a class="list-group-item list-group-item-action" href="{% url 'event_archive' %}"><span class="fas fa-book align-middle"></span><span class="align-middle"> Event Archive</span></a>
             </div>

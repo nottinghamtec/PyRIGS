@@ -28,7 +28,7 @@
 
     function post(kind, card, data) {
         card.classList.add("kanban-card-busy");
-        return fetch(url(kind, card.dataset.event), {
+        return fetch(url(kind, card.dataset.event || card.dataset.enquiry), {
             method: "POST",
             credentials: "same-origin",
             headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
@@ -75,6 +75,9 @@
     }
 
     function recount() {
+        board.querySelectorAll("[data-enquiry-count]").forEach((badge) => {
+            badge.textContent = board.querySelectorAll(".kanban-enquiry").length;
+        });
         board.querySelectorAll("[data-column-count]").forEach((badge) => {
             badge.textContent = board.querySelectorAll(
                 `.kanban-cell[data-column="${badge.dataset.columnCount}"] .kanban-card`
@@ -189,6 +192,32 @@
         });
     }
 
+    function convert(card) {
+        if (!card.hasAttribute("data-has-client")) {
+            toast(`"${card.dataset.displayId}" needs a client before it can become a rig`, "warning", {
+                label: "Add a client",
+                href: card.dataset.editUrl,
+                sticky: true,
+            });
+            return Promise.resolve();
+        }
+        return post("convert", card).then((data) => {
+            toast(`${data.display_id} created, taking you to it`, "success");
+            window.location.href = data.url;
+        });
+    }
+
+    function deleteEnquiry(card) {
+        if (!window.confirm(`Delete the enquiry "${card.dataset.displayId}"?`)) {
+            return;
+        }
+        post("delete", card).then(() => {
+            card.remove();
+            recount();
+            toast(`Enquiry "${card.dataset.displayId}" deleted`, "secondary");
+        });
+    }
+
     function cancel(card) {
         const lane = laneOf(card);
         return post("status", card, { status: cancelled }).then((data) => {
@@ -254,6 +283,9 @@
         if (!dragged) {
             return false;
         }
+        if (dragged.dataset.enquiry) {
+            return target.dataset.column === "provisional";
+        }
         if (target.dataset.dropzone) {
             return !dragged.hasAttribute("data-invoiced");
         }
@@ -312,7 +344,9 @@
             }
             e.preventDefault();
             const card = dragged;
-            if (target.dataset.dropzone === "cancel") {
+            if (card.dataset.enquiry) {
+                convert(card);
+            } else if (target.dataset.dropzone === "cancel") {
                 cancel(card);
             } else if (target.dataset.dropzone === "invoice") {
                 invoice(card);
@@ -332,6 +366,10 @@
         const action = button.dataset.kanbanAction;
         if (action === "status") {
             setStatus(card, button.dataset.status);
+        } else if (action === "convert") {
+            convert(card);
+        } else if (action === "delete-enquiry") {
+            deleteEnquiry(card);
         } else if (action === "response") {
             markResponse(card, true);
         } else if (action === "cancel") {
