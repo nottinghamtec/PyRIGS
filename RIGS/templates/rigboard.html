@@ -20,6 +20,7 @@
         {% else %}
         <a href="." class="btn btn-primary">Show cancelled</a>
         {% endif %}
+        <a href="{% url 'event_kanban' %}" class="btn btn-secondary"><span class="fas fa-columns"></span> Kanban</a>
         <a href="?legacy=true" class="btn btn-secondary">Legacy rigboard</a>
         {% else %}
         <a href="." class="btn btn-secondary">New rigboard</a>

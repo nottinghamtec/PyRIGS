@@ -895,3 +895,220 @@ def test_event_api_includes_display_id(admin_client):
         reverse("api_secure", kwargs={"model": "event"}), {"start": "2030-01-01T00:00:00", "end": "2030-01-01T23:59:59"}
     )
     assert [e["display_id"] for e in response.json()] == [event.display_id]
+
+
+def kanban_events():
+    today = date.today()
+    su = models.Organisation.objects.create(name="SU Society", union_account=True)
+    external = models.Organisation.objects.create(name="External Ltd")
+    return {
+        "provisional": models.Event.objects.create(name="Future Prov", start_date=today + timedelta(days=5)),
+        "booked": models.Event.objects.create(
+            name="Future Booked", start_date=today + timedelta(days=5), status=models.Event.BOOKED, organisation=su
+        ),
+        "cancelled": models.Event.objects.create(
+            name="Future Cancelled", start_date=today + timedelta(days=5), status=models.Event.CANCELLED
+        ),
+        "non_rig": models.Event.objects.create(name="Meeting", start_date=today + timedelta(days=5), is_rig=False),
+        "awaiting": models.Event.objects.create(
+            name="Just Finished", start_date=today - timedelta(days=3), organisation=external
+        ),
+        "old": models.Event.objects.create(name="Long Gone", start_date=today - timedelta(days=30)),
+        "uni_org": models.Event.objects.create(
+            name="Uni Dept",
+            start_date=today + timedelta(days=6),
+            status=models.Event.CONFIRMED,
+            organisation=models.Organisation.objects.create(name="Physics", email="physics@Nottingham.ac.uk"),
+        ),
+        "uni_person": models.Event.objects.create(
+            name="Uni Person",
+            start_date=today + timedelta(days=7),
+            status=models.Event.CONFIRMED,
+            person=models.Person.objects.create(name="Lecturer", email="lecturer@nottingham.ac.uk"),
+        ),
+        "uni_internal": models.Event.objects.create(
+            name="SU With Uni Email",
+            start_date=today + timedelta(days=7),
+            status=models.Event.CONFIRMED,
+            organisation=models.Organisation.objects.create(
+                name="SU Dept", email="su@nottingham.ac.uk", union_account=True
+            ),
+        ),
+    }
+
+
+def kanban_cell(response, lane, column):
+    for row in response.context["lanes"]:
+        if row["key"] == lane:
+            return [event.name for cell in row["cells"] if cell["key"] == column for event in cell["events"]]
+
+
+def test_kanban_columns_and_lanes(admin_client):
+    events = kanban_events()
+    invoiced = models.Event.objects.create(name="Invoiced", start_date=date.today() - timedelta(days=10))
+    models.EventItem.objects.create(event=invoiced, name="Desk", cost=10, quantity=1, order=1)
+    models.Invoice.objects.create(event=invoiced)
+    paid = models.Event.objects.create(name="Paid", start_date=date.today() - timedelta(days=10))
+    models.Invoice.objects.create(event=paid)
+    void = models.Event.objects.create(name="Void", start_date=date.today() - timedelta(days=10))
+    models.Invoice.objects.create(event=void, void=True)
+
+    response = admin_client.get(reverse("event_kanban"))
+    assert response.status_code == 200
+    assert kanban_cell(response, "external", "provisional") == ["Future Prov"]
+    assert kanban_cell(response, "internal", "booked") == ["Future Booked"]
+    assert kanban_cell(response, "internal", "confirmed") == ["SU With Uni Email"]
+    assert kanban_cell(response, "external", "booked") == []
+    assert kanban_cell(response, "university", "confirmed") == ["Uni Dept", "Uni Person"]
+    assert kanban_cell(response, "external", "awaiting_invoice") == ["Just Finished"]
+    assert kanban_cell(response, "external", "invoiced") == ["Invoiced"]
+    assert kanban_cell(response, "external", "paid") == ["Paid"]
+    names = [event.name for lane in response.context["lanes"] for cell in lane["cells"] for event in cell["events"]]
+    for gone in ("Future Cancelled", "Meeting", "Long Gone", "Void"):
+        assert gone not in names
+    assert kanban_older(response, "external", "awaiting_invoice") == 1
+    assert events["old"].pk
+
+
+def kanban_older(response, lane, column):
+    for row in response.context["lanes"]:
+        if row["key"] == lane:
+            return next(cell["older"] for cell in row["cells"] if cell["key"] == column)
+
+
+def test_kanban_only_paid_rigs_leave_unreported(admin_client):
+    long_ago = date.today() - timedelta(days=60)
+    su = models.Organisation.objects.create(name="SU Society", union_account=True)
+    uni = models.Organisation.objects.create(name="Physics", email="physics@nottingham.ac.uk")
+
+    def old_event(name, organisation=None, cost=0, paid=None, invoice=True, void=False, **kwargs):
+        event = models.Event.objects.create(name=name, start_date=long_ago, organisation=organisation, **kwargs)
+        if cost:
+            models.EventItem.objects.create(event=event, name="Desk", cost=cost, quantity=1, order=1)
+        if invoice:
+            inv = models.Invoice.objects.create(event=event, void=void)
+            if paid:
+                models.Payment.objects.create(invoice=inv, date=long_ago, amount=paid)
+        return event
+
+    old_event("Not Invoiced", su, invoice=False)
+    old_event("Owed", su, cost=100)
+    old_event("Part Paid", uni, cost=100, paid=40)
+    old_event("Paid", uni, cost=100, paid=100)
+    old_event("Void", su, cost=100, void=True)
+    old_event("Cancelled", su, invoice=False, status=models.Event.CANCELLED)
+
+    response = admin_client.get(reverse("event_kanban"))
+    names = [event.name for lane in response.context["lanes"] for cell in lane["cells"] for event in cell["events"]]
+    assert names == []
+    assert kanban_older(response, "internal", "awaiting_invoice") == 1
+    assert kanban_older(response, "internal", "invoiced") == 1
+    assert kanban_older(response, "university", "invoiced") == 1
+    assert kanban_older(response, "university", "paid") == 0
+    assertContains(response, "+1 older rig still owed on", count=2)
+    assertContains(response, "+1 older rig not yet invoiced", count=1)
+    assertNotContains(response, "leave the board")
+
+
+def test_kanban_hides_finance_without_permission(client, django_user_model):
+    kanban_events()
+    user = django_user_model.objects.create_user(username="viewer", password="pw", is_approved=True)
+    client.force_login(user)
+    response = client.get(reverse("event_kanban"))
+    assert [key for key, _ in response.context["columns"]] == ["provisional", "confirmed", "booked"]
+    assertNotContains(response, "Just Finished")
+    assertNotContains(response, 'data-dropzone="invoice"')
+
+
+def test_kanban_status_change(admin_client):
+    event = kanban_events()["provisional"]
+    url = reverse("event_kanban_status", kwargs={"pk": event.pk})
+    response = admin_client.post(url, {"status": models.Event.BOOKED})
+    assert response.status_code == 200
+    assert response.json()["column"] == "booked"
+    assert response.json()["previous_status"] == models.Event.PROVISIONAL
+    event.refresh_from_db()
+    assert event.status == models.Event.BOOKED
+
+    response = admin_client.post(url, {"status": models.Event.CANCELLED})
+    event.refresh_from_db()
+    assert event.status == models.Event.CANCELLED
+
+    assert admin_client.post(url, {"status": 99}).status_code == 400
+    assert admin_client.post(url, {"status": "x"}).status_code == 400
+
+
+def test_kanban_status_change_refused_once_invoiced(admin_client):
+    event = kanban_events()["awaiting"]
+    models.Invoice.objects.create(event=event)
+    response = admin_client.post(
+        reverse("event_kanban_status", kwargs={"pk": event.pk}), {"status": models.Event.CANCELLED}
+    )
+    assert response.status_code == 409
+    event.refresh_from_db()
+    assert event.status == models.Event.PROVISIONAL
+
+
+def test_kanban_invoice(admin_client):
+    event = kanban_events()["awaiting"]
+    models.EventItem.objects.create(event=event, name="Desk", cost=10, quantity=1, order=1)
+    url = reverse("event_kanban_invoice", kwargs={"pk": event.pk})
+    response = admin_client.post(url)
+    assert response.status_code == 200
+    data = response.json()
+    invoice = models.Invoice.objects.get(event=event)
+    assert data["created"] is True
+    assert data["column"] == "invoiced"
+    assert data["invoice"]["url"] == reverse("invoice_detail", kwargs={"pk": invoice.pk})
+
+    response = admin_client.post(url)
+    assert response.json()["created"] is False
+    assert models.Invoice.objects.filter(event=event).count() == 1
+
+
+def test_kanban_invoice_refused_when_cancelled(admin_client):
+    event = kanban_events()["cancelled"]
+    response = admin_client.post(reverse("event_kanban_invoice", kwargs={"pk": event.pk}))
+    assert response.status_code == 409
+    assert not models.Invoice.objects.filter(event=event).exists()
+
+
+def test_kanban_actions_need_permission(client, django_user_model):
+    event = kanban_events()["provisional"]
+    user = django_user_model.objects.create_user(username="viewer", password="pw", is_approved=True)
+    client.force_login(user)
+    response = client.post(reverse("event_kanban_status", kwargs={"pk": event.pk}), {"status": models.Event.BOOKED})
+    assert response.status_code == 403
+    response = client.post(reverse("event_kanban_invoice", kwargs={"pk": event.pk}))
+    assert response.status_code == 403
+    event.refresh_from_db()
+    assert event.status == models.Event.PROVISIONAL
+
+
+def test_kanban_horizon(admin_client):
+    today = date.today()
+    soon = models.Event.objects.create(name="Soon", start_date=today + timedelta(days=10))
+    later = models.Event.objects.create(name="In Four Months", start_date=today + timedelta(days=120))
+    models.Event.objects.create(name="In Two Years", start_date=today + timedelta(days=730))
+
+    def shown(**params):
+        response = admin_client.get(reverse("event_kanban"), params)
+        return response, kanban_cell(response, "external", "provisional")
+
+    response, names = shown()
+    assert response.context["horizon"] == "6m"
+    assert names == [soon.name, later.name]
+    assert response.context["beyond_horizon"] == 1
+
+    assert shown(horizon="1m")[1] == [soon.name]
+    assert shown(horizon="all")[1] == [soon.name, later.name, "In Two Years"]
+    assert "beyond_horizon" not in shown(horizon="all")[0].context
+    assert shown(horizon="nonsense")[0].context["horizon"] == "6m"
+
+
+def test_months_after():
+    from RIGS.views.kanban import months_after
+
+    assert months_after(date(2026, 1, 31), 1) == date(2026, 2, 28)
+    assert months_after(date(2026, 11, 15), 3) == date(2027, 2, 15)
+    assert months_after(date(2026, 6, 1), 12) == date(2027, 6, 1)

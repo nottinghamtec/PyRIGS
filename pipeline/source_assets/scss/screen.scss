@@ -32,6 +32,7 @@
 @import "node_modules/bootstrap/scss/list-group";
 @import "node_modules/bootstrap/scss/close";
 @import "node_modules/bootstrap/scss/modal";
+@import "node_modules/bootstrap/scss/toasts";
 @import "node_modules/bootstrap/scss/tooltip";
 @import "node_modules/bootstrap/scss/popover";
 @import "node_modules/bootstrap/scss/progress";
@@ -852,5 +853,170 @@ $dark-theme-colors: (
     .finance-scroll {
         max-height: 24rem;
         overflow-y: auto;
+    }
+}
+
+.kanban {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+
+    .kanban-grid {
+        display: grid;
+        grid-template-columns: repeat(var(--kanban-columns), minmax(12rem, 1fr));
+        gap: 0.5rem;
+    }
+
+    // Each column's colour runs from tentative (amber) through booked (blue) to needing money (red/orange) and paid
+    .kanban-col-provisional { --kanban-colour: var(--bs-warning); }
+    .kanban-col-confirmed { --kanban-colour: var(--bs-info); }
+    .kanban-col-booked { --kanban-colour: var(--bs-primary); }
+    .kanban-col-awaiting_invoice { --kanban-colour: var(--bs-danger); }
+    .kanban-col-invoiced { --kanban-colour: var(--bs-orange); }
+    .kanban-col-paid { --kanban-colour: var(--bs-success); }
+
+    .kanban-column-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 0.5rem 0.75rem;
+        border-top: 4px solid var(--kanban-colour);
+        border-radius: var(--bs-border-radius);
+        background: var(--bs-tertiary-bg);
+        font-weight: 600;
+    }
+
+    .kanban-older {
+        padding: 0.25rem 0.4rem;
+        border: 1px dashed var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        color: var(--bs-body-color);
+        text-decoration: none;
+
+        &:hover {
+            background: var(--bs-tertiary-bg);
+        }
+    }
+
+    .kanban-lane-header {
+        grid-column: 1 / -1;
+        margin-top: 0.75rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 2px solid var(--brand);
+        font-weight: 600;
+    }
+
+    .kanban-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-height: 4rem;
+        padding: 0.4rem;
+        border: 2px dashed transparent;
+        border-radius: var(--bs-border-radius);
+        background: var(--bs-secondary-bg-subtle);
+        transition: border-color 0.15s, background-color 0.15s;
+
+        &.kanban-target {
+            border-color: var(--bs-primary-border-subtle);
+        }
+
+        &.kanban-over {
+            border-color: var(--bs-primary);
+            background: var(--bs-primary-bg-subtle);
+        }
+    }
+
+    .kanban-card {
+        &[draggable] {
+            cursor: grab;
+        }
+
+        .kanban-card-title {
+            overflow-wrap: anywhere;
+        }
+
+        &.kanban-card-dragging {
+            opacity: 0.4;
+        }
+
+        &.kanban-card-busy {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        &.kanban-card-moved {
+            animation: kanban-moved 1s ease-out;
+        }
+    }
+}
+
+@keyframes kanban-moved {
+    from { box-shadow: 0 0 0 3px var(--bs-primary); }
+    to { box-shadow: 0 0 0 3px transparent; }
+}
+
+body.kanban-dragging .kanban-cell:not(.kanban-target) {
+    opacity: 0.6;
+}
+
+.kanban-dropzones {
+    position: fixed;
+    left: 50%;
+    bottom: 1rem;
+    z-index: 1050;
+    display: flex;
+    gap: 1rem;
+    transform: translate(-50%, 150%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+
+    body.kanban-dragging & {
+        transform: translate(-50%, 0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .kanban-dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        width: 13rem;
+        padding: 1rem;
+        border: 3px dashed;
+        border-radius: var(--bs-border-radius-lg);
+        background: var(--bs-body-bg);
+        box-shadow: var(--bs-box-shadow-lg);
+        font-weight: 600;
+        transition: transform 0.15s, background-color 0.15s;
+
+        small {
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        &.kanban-over {
+            transform: scale(1.06);
+        }
+    }
+
+    .kanban-dropzone-cancel {
+        color: var(--bs-danger-text-emphasis);
+        border-color: var(--bs-danger);
+
+        &.kanban-over {
+            background: var(--bs-danger-bg-subtle);
+        }
+    }
+
+    .kanban-dropzone-invoice {
+        color: var(--bs-success-text-emphasis);
+        border-color: var(--bs-success);
+
+        &.kanban-over {
+            background: var(--bs-success-bg-subtle);
+        }
     }
 }
