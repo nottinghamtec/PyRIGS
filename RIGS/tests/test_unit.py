@@ -1315,3 +1315,59 @@ def test_kanban_mark_response_sent_needs_permission(client, django_user_model):
     assertNotContains(page, 'data-kanban-action="response"')
     event.refresh_from_db()
     assert event.default_response_sent is False
+
+
+def test_kanban_missing_mic_is_urgent(admin_client):
+    event = models.Event.objects.create(name="No MIC", start_date=date.today() + timedelta(days=5))
+    response = admin_client.get(reverse("event_kanban"))
+    assert 'class="card kanban-card shadow-sm kanban-card-urgent"' in response.content.decode()
+    assert "No MIC" in response.content.decode()
+    event.mic = models.Profile.objects.create(username="mic", initials="MIC")
+    event.save()
+    response = admin_client.get(reverse("event_kanban"))
+    assert "kanban-card-urgent" not in response.content.decode().split('id="kanban"')[1]
+
+
+def test_needing_mic_only_lists_upcoming_rigs_that_need_one():
+    today = date.today()
+    mic = models.Profile.objects.create(username="mic", initials="MIC")
+    wanted = models.Event.objects.create(name="Wanted", start_date=today + timedelta(days=2))
+    models.Event.objects.create(name="Has MIC", start_date=today + timedelta(days=2), mic=mic)
+    models.Event.objects.create(name="Dry", start_date=today + timedelta(days=2), dry_hire=True)
+    models.Event.objects.create(name="Cancelled", start_date=today + timedelta(days=2), status=models.Event.CANCELLED)
+    models.Event.objects.create(name="Past", start_date=today - timedelta(days=2))
+    models.Event.objects.create(name="Meeting", start_date=today + timedelta(days=2), is_rig=False)
+    assert list(models.Event.objects.needing_mic()) == [wanted]
+
+
+def test_home_page_adopt_a_rig(admin_client):
+    event = models.Event.objects.create(name="Orphan", start_date=date.today() + timedelta(days=2))
+    response = admin_client.get(reverse("index"))
+    assert "Adopt a rig" in response.content.decode()
+    assert reverse("event_adopt", kwargs={"pk": event.pk}) in response.content.decode()
+    event.mic = models.Profile.objects.create(username="mic", initials="MIC")
+    event.save()
+    assert "Adopt a rig" not in admin_client.get(reverse("index")).content.decode()
+
+
+def test_adopt_a_rig_makes_you_the_mic(admin_client, admin_user):
+    event = models.Event.objects.create(name="Orphan", start_date=date.today() + timedelta(days=2))
+    response = admin_client.post(reverse("event_adopt", kwargs={"pk": event.pk}))
+    assert response.status_code == 302
+    event.refresh_from_db()
+    assert event.mic == admin_user
+
+
+def test_adopt_a_rig_does_not_steal_someone_elses(admin_client):
+    other = models.Profile.objects.create(username="other", initials="OTH")
+    event = models.Event.objects.create(name="Taken", start_date=date.today() + timedelta(days=2), mic=other)
+    admin_client.post(reverse("event_adopt", kwargs={"pk": event.pk}))
+    event.refresh_from_db()
+    assert event.mic == other
+
+
+def test_adopt_a_rig_needs_permission(client, django_user_model):
+    client.force_login(django_user_model.objects.create(username="viewer"))
+    event = models.Event.objects.create(name="Orphan", start_date=date.today() + timedelta(days=2))
+    assert client.post(reverse("event_adopt", kwargs={"pk": event.pk})).status_code == 403
+    assert models.Event.objects.get(pk=event.pk).mic is None

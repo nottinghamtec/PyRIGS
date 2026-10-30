@@ -101,7 +101,8 @@
                 const clickable = canChange && flag.action;
                 const tip = clickable ? `${flag.tip} ${flag.action_tip}` : flag.tip;
                 const element = document.createElement(clickable ? "button" : "span");
-                element.className = `kanban-flag text-warning${clickable ? " btn btn-link p-0" : ""}`;
+                const colour = flag.level === "danger" ? "text-danger" : "text-warning";
+                element.className = `kanban-flag ${colour}${clickable ? " btn btn-link p-0" : ""}`;
                 element.dataset.flag = flag.key;
                 element.dataset.bsToggle = "tooltip";
                 element.title = tip;
@@ -120,7 +121,9 @@
                 return element;
             })
         );
-        card.classList.toggle("kanban-card-flagged", flags.length > 0);
+        const urgent = flags.some((flag) => flag.level === "danger");
+        card.classList.toggle("kanban-card-urgent", urgent);
+        card.classList.toggle("kanban-card-flagged", flags.length > 0 && !urgent);
     }
 
     function updateMenu(card) {

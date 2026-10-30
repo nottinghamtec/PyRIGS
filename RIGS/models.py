@@ -376,6 +376,17 @@ class EventManager(models.Manager):
         )
         return events
 
+    def needing_mic(self):
+        """Upcoming rigs that need a MIC and haven't got one, soonest first"""
+        today = timezone.now().date()
+        return (
+            self.filter(is_rig=True, dry_hire=False, mic__isnull=True)
+            .exclude(status=Event.CANCELLED)
+            .filter(models.Q(end_date__gte=today) | models.Q(end_date__isnull=True, start_date__gte=today))
+            .select_related("venue", "organisation", "person")
+            .order_by("start_date", "start_time", "pk")
+        )
+
     def rig_count(self):
         event_count = self.filter(
             (

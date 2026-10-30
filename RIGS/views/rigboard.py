@@ -7,6 +7,7 @@ import urllib
 import hmac
 import hashlib
 
+import reversion
 from envparse import env
 
 from django.conf import settings
@@ -15,9 +16,10 @@ from django.contrib.staticfiles import finders
 from django.core import signing
 from django.core.exceptions import SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import get_template
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -30,6 +32,27 @@ from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_rela
 from RIGS import models, forms
 
 __author__ = "ghost"
+
+
+class EventAdopt(generic.View):
+    """Take on an event that has no MIC yet"""
+
+    http_method_names = ["post"]
+
+    @transaction.atomic()
+    def post(self, request, pk):
+        event = get_object_or_404(models.Event.objects.select_for_update(), pk=pk)
+        if not event.needs_mic or event.cancelled:
+            messages.error(request, f"{event.display_id} doesn't need a MIC")
+        elif event.mic_id and event.mic_id != request.user.pk:
+            messages.warning(request, f"{event.display_id} has already been adopted by {event.mic.name}")
+        elif not event.mic_id:
+            event.mic = request.user
+            event.save()
+            reversion.set_user(request.user)
+            reversion.set_comment("Adopted from the home page")
+            messages.success(request, f"You are now the MIC for {event.display_id} {event.name}")
+        return redirect("index")
 
 
 class RigboardIndex(generic.TemplateView):

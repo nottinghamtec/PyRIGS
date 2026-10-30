@@ -129,7 +129,7 @@ def flags_for(event, today):
             }
         )
     if event.needs_mic and not event.mic_id:
-        flags.append({"key": "mic", "icon": "fa-user-slash", "tip": "No MIC has been assigned yet"})
+        flags.append({"key": "mic", "icon": "fa-user-slash", "tip": "No MIC has been assigned yet", "level": "danger"})
     return flags
 
 
@@ -214,6 +214,7 @@ class EventKanban(generic.TemplateView):
                 continue
             event.live_invoice = live_invoice(event)
             event.flags = flags_for(event, today)
+            event.urgent = any(flag.get("level") == "danger" for flag in event.flags)
             event.movable = not (finished and event.live_invoice)
             cells[(lane_for(event), column_for(event, today, show_finance))].append(event)
 

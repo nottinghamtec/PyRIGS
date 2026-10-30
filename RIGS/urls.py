@@ -60,6 +60,11 @@ urlpatterns = [
         permission_required_with_403("RIGS.change_venue")(views.VenueUpdate.as_view()),
         name="venue_update",
     ),
+    path(
+        "events/<int:pk>/adopt/",
+        permission_required_with_403("RIGS.change_event")(views.EventAdopt.as_view()),
+        name="event_adopt",
+    ),
     # Rigboard
     path("rigboard/", login_required(views.RigboardIndex.as_view()), name="rigboard"),
     path("rigboard/kanban/", login_required(views.EventKanban.as_view()), name="event_kanban"),

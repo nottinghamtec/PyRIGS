@@ -940,6 +940,11 @@ $dark-theme-colors: (
             border-left: 4px solid var(--bs-warning);
         }
 
+        &.kanban-card-urgent {
+            border-left: 4px solid var(--bs-danger);
+            background: var(--bs-danger-bg-subtle);
+        }
+
         .kanban-flag {
             cursor: help;
             line-height: 1;

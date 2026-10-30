@@ -56,6 +56,9 @@ def get_related(
             context[field] = model.objects.get(pk=value)
 
 
+ADOPT_LIMIT = 8
+
+
 class Index(generic.TemplateView):  # Displays the current rig count along with a few other bits and pieces
     template_name = "index.html"
 
@@ -67,6 +70,10 @@ class Index(generic.TemplateView):  # Displays the current rig count along with 
             .exclude(status=models.Event.CANCELLED)
             .filter(is_rig=True, dry_hire=False)
         )
+        needs_mic = list(models.Event.objects.needing_mic())
+        context["needs_mic"] = needs_mic[:ADOPT_LIMIT]
+        context["needs_mic_total"] = len(needs_mic)
+        context["needs_mic_more"] = max(len(needs_mic) - ADOPT_LIMIT, 0)
         return context
 
 

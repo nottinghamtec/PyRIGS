@@ -86,6 +86,33 @@
     </div>
     {% endif %}
     <div class="home-changelog">
+        {% if needs_mic_total and perms.RIGS.view_event %}
+        <div class="card mb-3 border-danger" id="adopt-a-rig">
+            <h4 class="card-header text-bg-danger"><span class="fas fa-user-slash"></span> Adopt a rig</h4>
+            <div class="card-body pb-0">
+                <p class="small mb-2">{{ needs_mic_total }} upcoming rig{{ needs_mic_total|pluralize }} still need{{ needs_mic_total|pluralize:"s," }} a MIC.</p>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for event in needs_mic %}
+                <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                    <div class="text-truncate">
+                        <a href="{% url 'event_detail' event.pk %}"><strong>{{ event.display_id }}</strong> {{ event.name }}</a><br>
+                        <small class="text-body-secondary">{{ event.start_date|date:"D j M" }}{% if event.venue %} &middot; {{ event.venue.name }}{% endif %}</small>
+                    </div>
+                    {% if perms.RIGS.change_event %}
+                    <form method="post" action="{% url 'event_adopt' event.pk %}" class="flex-shrink-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><span class="fas fa-hand-holding-heart"></span> Adopt</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% if needs_mic_more %}
+            <div class="card-footer small"><a href="{% url 'event_kanban' %}">and {{ needs_mic_more }} more on the Kanban</a></div>
+            {% endif %}
+        </div>
+        {% endif %}
         {% changelog %}
     </div>
     </div>

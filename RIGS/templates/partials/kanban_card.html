@@ -1,5 +1,5 @@
 {% with can_move=event.movable %}
-<article class="card kanban-card shadow-sm{% if event.flags %} kanban-card-flagged{% endif %}" data-event="{{ event.pk }}"
+<article class="card kanban-card shadow-sm{% if event.urgent %} kanban-card-urgent{% elif event.flags %} kanban-card-flagged{% endif %}" data-event="{{ event.pk }}"
     data-display-id="{{ event.display_id }}"
     data-sort="{{ event.start_date|date:'Y-m-d' }}-{{ event.pk|stringformat:'08d' }}" data-status="{{ event.status }}"
     {% if event.live_invoice and show_finance %}data-invoiced{% endif %}
@@ -13,12 +13,12 @@
                 <div class="kanban-card-flags d-flex gap-1">
                     {% for flag in event.flags %}
                     {% if flag.action and perms.RIGS.change_event %}
-                    <button type="button" class="kanban-flag btn btn-link p-0 text-warning" data-flag="{{ flag.key }}"
+                    <button type="button" class="kanban-flag btn btn-link p-0 {% if flag.level == 'danger' %}text-danger{% else %}text-warning{% endif %}" data-flag="{{ flag.key }}"
                         data-kanban-action="{{ flag.action }}" data-bs-toggle="tooltip"
                         title="{{ flag.tip }} {{ flag.action_tip }}" aria-label="{{ flag.tip }} {{ flag.action_tip }}"><span
                             class="fas {{ flag.icon }}"></span></button>
                     {% else %}
-                    <span class="kanban-flag text-warning" data-flag="{{ flag.key }}" data-bs-toggle="tooltip"
+                    <span class="kanban-flag {% if flag.level == 'danger' %}text-danger{% else %}text-warning{% endif %}" data-flag="{{ flag.key }}" data-bs-toggle="tooltip"
                         title="{{ flag.tip }}" tabindex="0" role="img" aria-label="{{ flag.tip }}"><span
                             class="fas {{ flag.icon }}"></span></span>
                     {% endif %}
@@ -66,6 +66,7 @@
         {% endif %}
         <div class="d-flex flex-wrap gap-1 mt-1 kanban-card-badges">
             {% if event.dry_hire %}<span class="badge text-bg-secondary">Dry Hire</span>{% endif %}
+            {% if event.urgent %}<span class="badge text-bg-danger"><span class="fas fa-user-slash"></span> No MIC</span>{% endif %}
             {% if show_finance %}
             {% if event.live_invoice %}
             <a href="{% url 'invoice_detail' event.live_invoice.pk %}" class="badge text-bg-info text-decoration-none">
