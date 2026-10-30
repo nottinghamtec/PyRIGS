@@ -79,6 +79,11 @@
                 <dd class="col-sm-6">{{ object.purchase_order }}</dd>
             {% endif %}
 
+            {% if object.sharepoint_url %}
+            <dt class="col-6">SharePoint</dt>
+            <dd class="col-6"><a href="{{ object.sharepoint_url }}" target="_blank" rel="noopener noreferrer">Open folder</a></dd>
+            {% endif %}
+
             <dt class="col-6">Forum Thread</dt>
             {% if object.forum_url %}
             <dd class="col-6"><a href="{{object.forum_url}}">{{object.forum_url}}</a></dd>

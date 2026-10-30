@@ -5,7 +5,7 @@ from datetime import date, time, timedelta
 
 from django.conf import settings
 from django.utils.html import escape
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 from django.utils.safestring import SafeText
 from RIGS.templatetags.markdown_tags import markdown_filter
@@ -1371,3 +1371,30 @@ def test_adopt_a_rig_needs_permission(client, django_user_model):
     event = models.Event.objects.create(name="Orphan", start_date=date.today() + timedelta(days=2))
     assert client.post(reverse("event_adopt", kwargs={"pk": event.pk})).status_code == 403
     assert models.Event.objects.get(pk=event.pk).mic is None
+
+
+def test_sharepoint_url_must_be_on_sharepoint(admin_client):
+    event = models.Event.objects.create(name="Linked", start_date=date.today())
+    event.sharepoint_url = "https://example.com/folder"
+    with pytest.raises(ValidationError):
+        event.full_clean()
+    event.sharepoint_url = "https://nottinghamtec.sharepoint.com/:f:/s/Office/abc?e=def"
+    event.full_clean()
+
+
+def test_sharepoint_button_only_when_set(admin_client):
+    event = models.Event.objects.create(name="Linked", start_date=date.today())
+    url = reverse("event_detail", kwargs={"pk": event.pk})
+    assert "Go to SharePoint" not in admin_client.get(url).content.decode()
+    event.sharepoint_url = "https://nottinghamtec.sharepoint.com/:f:/s/Office/abc"
+    event.save()
+    content = admin_client.get(url).content.decode()
+    assert content.count('class="btn btn-sharepoint"') >= 2
+
+
+def test_event_duplicate_drops_the_sharepoint_link(admin_client):
+    event = models.Event.objects.create(
+        name="Original", start_date=date.today(), sharepoint_url="https://nottinghamtec.sharepoint.com/:f:/s/Office/abc"
+    )
+    response = admin_client.get(reverse("event_duplicate", kwargs={"pk": event.pk}))
+    assert response.context["object"].sharepoint_url == ""

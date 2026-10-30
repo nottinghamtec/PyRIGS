@@ -406,6 +406,14 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3" data-bs-toggle="tooltip" title="The link to this event's folder on SharePoint">
+                                <label for="{{ form.sharepoint_url.id_for_label }}"
+                                       class="col-sm-4 col-form-label">{{ form.sharepoint_url.label }}</label>
+                                <div class="col-sm-12">
+                                    {% render_field form.sharepoint_url class+="form-control" placeholder="Paste the folder link" %}
+                                </div>
+                            </div>
+
                             <div class="mb-3" data-bs-toggle="tooltip" title="The thread for this event on the TEC Forum">
                                 <label for="{{ form.forum_url.id_for_label }}"
                                        class="col-sm-4 col-form-label">Forum Thread</label>

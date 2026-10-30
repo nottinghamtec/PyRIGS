@@ -450,6 +450,14 @@ def validate_forum_url(value):
         raise ValidationError("URL must point to a location on the TEC Forum")
 
 
+def validate_sharepoint_url(value):
+    if not value:
+        return
+    host = urlparse(value).hostname or ""
+    if host != "sharepoint.com" and not host.endswith(".sharepoint.com"):
+        raise ValidationError("URL must point to a location on SharePoint")
+
+
 @reversion.register(follow=["items"])
 class Event(models.Model, RevisionMixin):
     # Done to make it much nicer on the database
@@ -511,6 +519,15 @@ class Event(models.Model, RevisionMixin):
     auth_request_to = models.EmailField(blank=True, default="")
 
     forum_url = models.URLField(default="", blank=True, validators=[validate_forum_url])
+
+    sharepoint_url = models.URLField(
+        default="",
+        blank=True,
+        max_length=1000,
+        validators=[validate_sharepoint_url],
+        verbose_name="SharePoint folder",
+        help_text="The link to this event's folder on SharePoint",
+    )
 
     default_response_sent = models.BooleanField(
         default=False,

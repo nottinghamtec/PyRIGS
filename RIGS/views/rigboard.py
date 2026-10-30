@@ -177,6 +177,7 @@ class EventDuplicate(EventUpdate):
         new.purchase_order = None  # Remove old PO
         new.status = new.PROVISIONAL  # Return status to provisional
         new.default_response_sent = False
+        new.sharepoint_url = ""
 
         # Clear checked in by if it's a dry hire
         if new.dry_hire is True:

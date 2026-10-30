@@ -1,5 +1,11 @@
 {% load button from filters %}
 <div class="btn-group py-3">
+    {% if event.sharepoint_url %}
+    <a href="{{ event.sharepoint_url }}" class="btn btn-sharepoint" target="_blank" rel="noopener noreferrer" title="Go to SharePoint">
+        <svg class="sharepoint-icon" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="currentColor"><circle cx="13" cy="8" r="6"/><circle cx="8" cy="15" r="5" opacity=".8"/><circle cx="14.5" cy="19" r="4" opacity=".6"/></svg>
+        <span class="d-none d-sm-inline">Go to SharePoint</span>
+    </a>
+    {% endif %}
     {% button 'edit' 'event_update' event.pk %}
     {% if event.is_rig %}
     {% button 'print' 'event_print' event.pk %}

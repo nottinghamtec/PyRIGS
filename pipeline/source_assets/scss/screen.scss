@@ -1040,3 +1040,19 @@ body.kanban-dragging .kanban-cell:not(.kanban-target) {
         }
     }
 }
+
+.btn-sharepoint {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #03787c;
+  --bs-btn-border-color: #03787c;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #026366;
+  --bs-btn-hover-border-color: #026366;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #025457;
+  --bs-btn-active-border-color: #025457;
+
+  .sharepoint-icon {
+    vertical-align: -0.125em;
+  }
+}
