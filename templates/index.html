@@ -24,6 +24,7 @@
             <h4 class="card-header">Rigboard</h4>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><span class="fas fa-list align-middle"></span><span class="align-middle"> Rigboard</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'event_kanban' %}"><span class="fas fa-columns align-middle"></span><span class="align-middle"> Kanban</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><span class="fas fa-calendar align-middle"></span><span class="align-middle"> Calendar</span></a>
                 {% if perms.RIGS.add_event %}
                     <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Event</span></a>
