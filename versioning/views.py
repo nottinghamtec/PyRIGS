@@ -1,6 +1,7 @@
 import datetime
 
 from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import title
 from django.views import generic
@@ -77,30 +78,80 @@ class ActivityTable(generic.ListView):
 class ActivityFeed(generic.ListView):  # Appears on homepage
     model = RIGSVersion
     template_name = "activity_feed_data.html"
-    paginate_by = 25
+    group_limit = 12
+    version_limit = 500
+    collapse_threshold = 3
+    collapsible_models = ("trainingitemqualification", "invoice")
 
     def get_queryset(self):
         return RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user)).order_by(
             "-revision__date_created"
+        )[: self.version_limit]
+
+    def build_groups(self, versions):
+        """Groups consecutive versions by the same user within an hour of each other, newest first"""
+        maxTimeDelta = datetime.timedelta(hours=1)
+        groups = []
+        for version in versions:
+            if groups:
+                last = groups[-1]["versions"][-1]
+                together = last.revision.date_created - version.revision.date_created < maxTimeDelta
+                if together and version.revision.user_id == last.revision.user_id:
+                    groups[-1]["versions"].append(version)
+                    continue
+            if len(groups) >= self.group_limit:
+                break
+            groups.append({"revision": version.revision, "versions": [version]})
+        return groups
+
+    def collapse_runs(self, versions):
+        """Folds long runs of versions of the same kind of object into one expandable entry"""
+        entries = []
+        run = []
+
+        def flush():
+            if len(run) > self.collapse_threshold:
+                model = ContentType.objects.get_for_id(run[0].content_type_id).model_class()
+                entries.append(
+                    {
+                        "collapsed": True,
+                        "versions": list(run),
+                        "count": len(run),
+                        "verb": "Created" if run[0].changes.old is None else "Changed",
+                        "name": model._meta.verbose_name_plural,
+                    }
+                )
+            else:
+                entries.extend({"collapsed": False, "version": v} for v in run)
+            run.clear()
+
+        for version in versions:
+            plain = (
+                ContentType.objects.get_for_id(version.content_type_id).model not in self.collapsible_models
+                or version.converted_enquiry_name
+                or version.deleted_enquiry_name is not None
+            )
+            if plain or (run and not self.same_kind(run[0], version)):
+                flush()
+            if plain:
+                entries.append({"collapsed": False, "version": version})
+            else:
+                run.append(version)
+        flush()
+        return entries
+
+    @staticmethod
+    def same_kind(first, other):
+        return first.content_type_id == other.content_type_id and (first.changes.old is None) == (
+            other.changes.old is None
         )
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Activity Feed"
         context["feed_version"] = activity_feed_version()
-        maxTimeDelta = datetime.timedelta(hours=1)
-
-        items = []
-
-        for thisVersion in context["object_list"]:
-            thisVersion.withPrevious = False
-            if len(items) >= 1:
-                timeDiff = items[-1].revision.date_created - thisVersion.revision.date_created
-                timeTogether = timeDiff < maxTimeDelta
-                sameUser = thisVersion.revision.user_id == items[-1].revision.user_id
-                thisVersion.withPrevious = timeTogether & sameUser
-
-            items.append(thisVersion)
-
+        groups = self.build_groups(context["object_list"])
+        for group in groups:
+            group["entries"] = self.collapse_runs(group["versions"])
+        context["groups"] = groups
         return context

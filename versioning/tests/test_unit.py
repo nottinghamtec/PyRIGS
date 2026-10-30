@@ -140,3 +140,26 @@ def test_activity_feed_version_after_losing_the_key_is_new():
     first = activity_feed_version()
     cache.clear()
     assert activity_feed_version() not in ("", 0, None, first)
+
+
+def test_activity_feed_collapses_bulk_invoices(admin_client):
+    models.VatRate.objects.create(start_at="2014-03-05", rate=0.20, comment="test1")
+    with reversion.create_revision():
+        events = [models.Event.objects.create(name=f"Bulk E{i}", start_date="2014-03-05") for i in range(5)]
+    with reversion.create_revision():
+        for event in events:
+            models.Invoice.objects.create(event=event)
+
+    response = admin_client.get(reverse("activity_feed"), follow=True)
+    assertContains(response, "Created 5 invoices")
+    assert response.content.decode().count("<details") == 1
+
+
+def test_activity_feed_does_not_collapse_other_models(admin_client):
+    with reversion.create_revision():
+        for i in range(6):
+            models.Person.objects.create(name=f"Bulk Person {i}")
+
+    response = admin_client.get(reverse("activity_feed"), follow=True)
+    assertContains(response, "Bulk Person 5")
+    assert "<details" not in response.content.decode()
