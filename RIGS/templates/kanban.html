@@ -17,6 +17,8 @@
 <script src="{% static 'js/kanban.js' %}"></script>
 {% endblock %}
 
+{% block container_class %}container-fluid px-lg-4{% endblock %}
+
 {% block content %}
 <p class="text-body-secondary small mb-2">
     Drag a rig between columns to change its status, or onto the <strong>Cancel</strong> and <strong>Invoice</strong>

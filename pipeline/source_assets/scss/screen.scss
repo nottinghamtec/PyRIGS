@@ -865,7 +865,7 @@ $dark-theme-colors: (
 
     .kanban-grid {
         display: grid;
-        flex: 1 0 calc(var(--kanban-columns) * 12rem);
+        flex: var(--kanban-columns) 0 calc(var(--kanban-columns) * 12rem);
         grid-template-columns: repeat(var(--kanban-columns), minmax(12rem, 1fr));
         gap: 0.5rem;
     }
@@ -873,7 +873,7 @@ $dark-theme-colors: (
     // Enquiries have no client yet so sit outside the lanes, ahead of provisional
     .kanban-enquiries {
         display: flex;
-        flex: 0 0 13rem;
+        flex: 1 0 12rem;
         flex-direction: column;
         gap: 0.5rem;
     }

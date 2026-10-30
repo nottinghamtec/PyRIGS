@@ -57,7 +57,7 @@
   </div>
 </nav>
 {% endblock %}
-<div class="container py-4" id="main">
+<div class="{% block container_class %}container{% endblock %} py-4" id="main">
     {% block content-header %}
         {% if error %}
             <div class="error">{{ error }}</div>{% endif %}
