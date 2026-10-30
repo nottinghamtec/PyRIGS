@@ -1,0 +1,24 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-10-30" title="A Kanban view of the rigboard" %}
+<p>The new <a href="{% url 'event_kanban' %}">Kanban</a> page (under the Rigboard menu) shows every rig as a card in a column for where it's up to, from provisional through to paid, so you can see what needs doing at a glance.</p>
+<details>
+    <summary>See what's changed</summary>
+    <ul class="mt-2">
+        <li>
+            <strong>Drag to change status</strong>: drag a rig between Provisional, Confirmed and Booked. Each card's <span class="fas fa-ellipsis-v"></span> menu does the same, for phones and keyboards.
+        </li>
+        <li>
+            <strong>Cancel or invoice in one move</strong>: while you're dragging, <em>Cancel event</em> and <em>Create invoice</em> boxes appear at the bottom of the screen. Cancelling can be undone straight away, and creating an invoice gives you a link to it.
+        </li>
+        <li>
+            <strong>Split by client</strong>: rigs are grouped into Internal (SU accounts), University (non-SU clients with an @nottingham.ac.uk email) and External.
+        </li>
+        <li>
+            <strong>Follow the money</strong>: once a rig has finished it moves to Awaiting invoice, then Invoiced, then Paid. Paid rigs drop off two weeks after they end. Older rigs that still haven't been invoiced or paid are counted at the bottom of their column, with a link to the full list. You'll only see these columns if you can see invoices.
+        </li>
+        <li>
+            <strong>Choose how far ahead to look</strong>: the board shows the next 6 months by default. Use <em>Showing</em> to switch to the next month, the next year, or everything.
+        </li>
+    </ul>
+</details>
+{% endchangelog_entry %}
