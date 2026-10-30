@@ -1,7 +1,7 @@
 import csv
 import os
 import pytest
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 
 from django.conf import settings
 from django.utils.html import escape
@@ -1015,9 +1015,182 @@ def test_kanban_hides_finance_without_permission(client, django_user_model):
     user = django_user_model.objects.create_user(username="viewer", password="pw", is_approved=True)
     client.force_login(user)
     response = client.get(reverse("event_kanban"))
-    assert [key for key, _ in response.context["columns"]] == ["provisional", "confirmed", "booked"]
-    assertNotContains(response, "Just Finished")
+    assert [key for key, _ in response.context["columns"]] == ["provisional", "confirmed", "booked", "done"]
+    assert kanban_cell(response, "external", "done") == ["Just Finished"]
     assertNotContains(response, 'data-dropzone="invoice"')
+    assertNotContains(response, 'id="finance"')
+
+
+def test_kanban_finance_preference(admin_client, admin_user):
+    event = kanban_events()["awaiting"]
+    invoiced = models.Event.objects.create(name="Invoiced", start_date=date.today() - timedelta(days=5))
+    models.Invoice.objects.create(event=invoiced)
+    url = reverse("event_kanban")
+
+    response = admin_client.get(url)
+    assert response.context["show_finance"] is True
+    assertContains(response, 'data-dropzone="invoice"')
+
+    response = admin_client.get(url, {"finance": "0"})
+    admin_user.refresh_from_db()
+    assert admin_user.kanban_finance is False
+    assert [key for key, _ in response.context["columns"]][3:] == ["done"]
+    assert sorted(kanban_cell(response, "external", "done")) == sorted(["Just Finished", "Invoiced"])
+    assert event.name in kanban_cell(response, "external", "done")
+    assert response.context["lanes"][0]["cells"][-1]["older"] == 0
+    assertNotContains(response, 'data-dropzone="invoice"')
+    assertNotContains(response, "older rig")
+
+    # Remembered without being asked again, until it is switched back on
+    assert [key for key, _ in admin_client.get(url).context["columns"]][3:] == ["done"]
+    response = admin_client.get(url, {"finance": "1"})
+    admin_user.refresh_from_db()
+    assert admin_user.kanban_finance is True
+    assert "done" not in [key for key, _ in response.context["columns"]]
+
+
+def test_kanban_dry_hires_have_their_own_lane(admin_client):
+    today = date.today()
+    su = models.Organisation.objects.create(name="SU Society", union_account=True)
+    models.Event.objects.create(
+        name="SU Dry Hire", start_date=today + timedelta(days=3), organisation=su, dry_hire=True
+    )
+    models.Event.objects.create(name="Plain Dry Hire", start_date=today + timedelta(days=4), dry_hire=True)
+    models.Event.objects.create(name="SU Rig", start_date=today + timedelta(days=3), organisation=su)
+
+    response = admin_client.get(reverse("event_kanban"))
+    assert [lane["key"] for lane in response.context["lanes"]][-1] == "dry_hire"
+    assert kanban_cell(response, "dry_hire", "provisional") == ["SU Dry Hire", "Plain Dry Hire"]
+    assert kanban_cell(response, "internal", "provisional") == ["SU Rig"]
+
+
+def test_kanban_invoice_before_the_event_keeps_its_column(admin_client):
+    today = date.today()
+    event = models.Event.objects.create(
+        name="Invoiced Early", start_date=today + timedelta(days=5), status=models.Event.BOOKED
+    )
+    models.EventItem.objects.create(event=event, name="Desk", cost=10, quantity=1, order=1)
+    models.Invoice.objects.create(event=event)
+    voided = models.Event.objects.create(name="Voided Early", start_date=today + timedelta(days=5))
+    models.Invoice.objects.create(event=voided, void=True)
+
+    response = admin_client.get(reverse("event_kanban"))
+    assert kanban_cell(response, "external", "booked") == ["Invoiced Early"]
+    assert kanban_cell(response, "external", "provisional") == ["Voided Early"]
+    assertContains(response, "Invoiced #")
+    assertContains(response, "data-invoiced", count=1)
+
+    # It can still change status, but can't be cancelled while the invoice stands
+    url = reverse("event_kanban_status", kwargs={"pk": event.pk})
+    response = admin_client.post(url, {"status": models.Event.CONFIRMED})
+    assert response.status_code == 200
+    assert response.json()["column"] == "confirmed"
+    assert admin_client.post(url, {"status": models.Event.CANCELLED}).status_code == 409
+    event.refresh_from_db()
+    assert event.status == models.Event.CONFIRMED
+
+    # Once it has happened it moves on with the rest
+    event.start_date = today - timedelta(days=1)
+    event.save()
+    response = admin_client.get(reverse("event_kanban"))
+    assert kanban_cell(response, "external", "invoiced") == ["Invoiced Early"]
+
+
+def test_kanban_invoice_ahead_of_the_event(admin_client):
+    event = models.Event.objects.create(name="Early", start_date=date.today() + timedelta(days=5))
+    response = admin_client.post(reverse("event_kanban_invoice", kwargs={"pk": event.pk}))
+    assert response.json()["created"] is True
+    assert response.json()["column"] == "provisional"
+
+
+def test_kanban_invoice_refused_when_voided(admin_client):
+    event = models.Event.objects.create(name="Voided", start_date=date.today() + timedelta(days=5))
+    models.Invoice.objects.create(event=event, void=True)
+    response = admin_client.post(reverse("event_kanban_invoice", kwargs={"pk": event.pk}))
+    assert response.status_code == 409
+
+
+def kanban_flags(**kwargs):
+    from RIGS.views.kanban import flags_for
+
+    defaults = {
+        "name": "Flag Test",
+        "start_date": date.today() + timedelta(days=5),
+        "start_time": time(18, 0),
+        "venue": models.Venue.objects.get_or_create(name="Venue")[0],
+        "organisation": models.Organisation.objects.get_or_create(name="Client")[0],
+        "mic": models.Profile.objects.get_or_create(username="mic", initials="MIC")[0],
+        "forum_url": "https://forum.nottinghamtec.co.uk/t/1",
+        "default_response_sent": True,
+    }
+    event = models.Event.objects.create(**{**defaults, **kwargs})
+    return [flag["key"] for flag in flags_for(event, date.today())]
+
+
+def test_kanban_flags():
+    assert kanban_flags() == []
+    assert kanban_flags(default_response_sent=False) == ["default_response"]
+    assert kanban_flags(default_response_sent=False, status=models.Event.CONFIRMED) == []
+    assert kanban_flags(venue=None) == ["details"]
+    assert kanban_flags(organisation=None) == ["details"]
+    assert kanban_flags(start_time=None) == ["details"]
+    assert kanban_flags(mic=None) == ["mic"]
+    assert kanban_flags(mic=None, status=models.Event.BOOKED) == ["mic"]
+    assert kanban_flags(forum_url="") == []
+    assert kanban_flags(forum_url="", status=models.Event.CONFIRMED) == ["forum"]
+    assert kanban_flags(forum_url="", status=models.Event.BOOKED) == ["forum"]
+
+
+def test_kanban_flags_for_dry_hires():
+    assert kanban_flags(dry_hire=True, venue=None, mic=None, forum_url="", status=models.Event.BOOKED) == []
+    assert kanban_flags(dry_hire=True, default_response_sent=False) == ["default_response"]
+    assert kanban_flags(dry_hire=True, organisation=None) == ["details"]
+
+
+def test_kanban_flags_only_for_upcoming_events():
+    today = date.today()
+    assert kanban_flags(start_date=today - timedelta(days=3), default_response_sent=False, mic=None) == []
+    assert kanban_flags(status=models.Event.CANCELLED, default_response_sent=False, mic=None) == []
+
+
+def test_kanban_flags_on_the_page_and_in_responses(admin_client):
+    event = models.Event.objects.create(name="Needs Chasing", start_date=date.today() + timedelta(days=5))
+    response = admin_client.get(reverse("event_kanban"))
+    for flag in ("default_response", "details", "mic"):
+        assertContains(response, f'data-flag="{flag}"')
+    assertContains(response, "kanban-card-flagged")
+    assertContains(response, "Basic details are missing: venue, client, start time")
+
+    response = admin_client.post(
+        reverse("event_kanban_status", kwargs={"pk": event.pk}), {"status": models.Event.CONFIRMED}
+    )
+    assert [flag["key"] for flag in response.json()["flags"]] == ["details", "forum", "mic"]
+
+
+def test_event_duplicate_needs_a_new_default_response(admin_client):
+    event = models.Event.objects.create(name="Original", start_date=date.today(), default_response_sent=True)
+    response = admin_client.get(reverse("event_duplicate", kwargs={"pk": event.pk}))
+    assert response.context["object"].default_response_sent is False
+    event.refresh_from_db()
+    assert event.default_response_sent is True
+
+
+def test_kanban_default_response_migration_leaves_only_current_provisionals_flagged():
+    from importlib import import_module
+
+    from django.apps import apps
+
+    migration = import_module("RIGS.migrations.0059_kanban_fields")
+    today = date.today()
+    current = models.Event.objects.create(name="Current", start_date=today + timedelta(days=5))
+    past = models.Event.objects.create(name="Past", start_date=today - timedelta(days=5))
+    booked = models.Event.objects.create(
+        name="Booked", start_date=today + timedelta(days=5), status=models.Event.BOOKED
+    )
+    migration.mark_existing_responses_sent(apps, None)
+    flags = dict(models.Event.objects.values_list("name", "default_response_sent"))
+    assert flags == {"Current": False, "Past": True, "Booked": True}
+    assert current.pk and past.pk and booked.pk
 
 
 def test_kanban_status_change(admin_client):
@@ -1112,3 +1285,33 @@ def test_months_after():
     assert months_after(date(2026, 1, 31), 1) == date(2026, 2, 28)
     assert months_after(date(2026, 11, 15), 3) == date(2027, 2, 15)
     assert months_after(date(2026, 6, 1), 12) == date(2027, 6, 1)
+
+
+def test_kanban_mark_response_sent(admin_client):
+    event = models.Event.objects.create(name="Awaiting Reply", start_date=date.today() + timedelta(days=5))
+    url = reverse("event_kanban_response", kwargs={"pk": event.pk})
+    page = admin_client.get(reverse("event_kanban"))
+    assertContains(page, 'data-kanban-action="response"')
+
+    response = admin_client.post(url)
+    assert response.status_code == 200
+    assert "default_response" not in [flag["key"] for flag in response.json()["flags"]]
+    event.refresh_from_db()
+    assert event.default_response_sent is True
+
+    response = admin_client.post(url, {"sent": "0"})
+    assert "default_response" in [flag["key"] for flag in response.json()["flags"]]
+    event.refresh_from_db()
+    assert event.default_response_sent is False
+
+
+def test_kanban_mark_response_sent_needs_permission(client, django_user_model):
+    event = models.Event.objects.create(name="Awaiting Reply", start_date=date.today() + timedelta(days=5))
+    user = django_user_model.objects.create_user(username="viewer", password="pw", is_approved=True)
+    client.force_login(user)
+    assert client.post(reverse("event_kanban_response", kwargs={"pk": event.pk})).status_code == 403
+    page = client.get(reverse("event_kanban"))
+    assertContains(page, 'data-flag="default_response"')
+    assertNotContains(page, 'data-kanban-action="response"')
+    event.refresh_from_db()
+    assert event.default_response_sent is False

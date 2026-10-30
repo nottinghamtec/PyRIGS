@@ -873,6 +873,7 @@ $dark-theme-colors: (
     .kanban-col-awaiting_invoice { --kanban-colour: var(--bs-danger); }
     .kanban-col-invoiced { --kanban-colour: var(--bs-orange); }
     .kanban-col-paid { --kanban-colour: var(--bs-success); }
+    .kanban-col-done { --kanban-colour: var(--bs-secondary); }
 
     .kanban-column-header {
         position: sticky;
@@ -933,6 +934,20 @@ $dark-theme-colors: (
 
         .kanban-card-title {
             overflow-wrap: anywhere;
+        }
+
+        &.kanban-card-flagged {
+            border-left: 4px solid var(--bs-warning);
+        }
+
+        .kanban-flag {
+            cursor: help;
+            line-height: 1;
+        }
+
+        button.kanban-flag {
+            cursor: pointer;
+            border: 0;
         }
 
         &.kanban-card-dragging {

@@ -69,6 +69,11 @@ urlpatterns = [
         name="event_kanban_status",
     ),
     path(
+        "rigboard/kanban/<int:pk>/response/",
+        permission_required_with_403("RIGS.change_event")(views.EventKanbanResponse.as_view()),
+        name="event_kanban_response",
+    ),
+    path(
         "rigboard/kanban/<int:pk>/invoice/",
         permission_required_with_403("RIGS.add_invoice")(views.EventKanbanInvoice.as_view()),
         name="event_kanban_invoice",

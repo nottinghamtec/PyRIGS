@@ -22,20 +22,22 @@ STATUS_COLUMNS = {
     models.Event.BOOKED: "booked",
 }
 
-# (key, title, shown only to those who can see invoices)
+# (key, title, when it is shown). Those who don't want finance data get a single Done column in place of the rest.
 COLUMNS = (
-    ("provisional", "Provisional", False),
-    ("confirmed", "Confirmed", False),
-    ("booked", "Booked", False),
-    ("awaiting_invoice", "Awaiting invoice", True),
-    ("invoiced", "Invoiced", True),
-    ("paid", "Paid", True),
+    ("provisional", "Provisional", "always"),
+    ("confirmed", "Confirmed", "always"),
+    ("booked", "Booked", "always"),
+    ("awaiting_invoice", "Awaiting invoice", "finance"),
+    ("invoiced", "Invoiced", "finance"),
+    ("paid", "Paid", "finance"),
+    ("done", "Done", "no_finance"),
 )
 
 LANES = (
     ("internal", "Internal (SU accounts)"),
     ("university", "University"),
     ("external", "External"),
+    ("dry_hire", "Dry hires"),
 )
 
 UNIVERSITY_EMAIL = "@nottingham.ac.uk"
@@ -62,18 +64,78 @@ def has_finished(event, today):
     return (event.end_date or event.start_date) < today
 
 
-def column_for(event, today):
-    """Where an event sits on the board: its status until it has finished, then how far its invoice has got"""
+def finance_visible(user):
+    return user.has_perm("RIGS.view_invoice") and user.kanban_finance
+
+
+def live_invoice(event):
+    """The event's invoice, unless it has been voided"""
+    invoice = getattr(event, "invoice", None)
+    return invoice if invoice is not None and not invoice.void else None
+
+
+def column_for(event, today, show_finance):
+    """Where an event sits on the board: its status until it has finished, then how far its invoice has got.
+
+    An invoice raised before the event is over doesn't move it, it just shows as a pill on the card."""
     if event.cancelled:
         return "cancelled"
-    if hasattr(event, "invoice"):
-        return "paid" if event.invoice.is_closed else "invoiced"
-    if has_finished(event, today):
-        return "awaiting_invoice"
-    return STATUS_COLUMNS[event.status]
+    if not has_finished(event, today):
+        return STATUS_COLUMNS[event.status]
+    if not show_finance:
+        return "done"
+    invoice = live_invoice(event)
+    if invoice:
+        return "paid" if invoice.is_closed else "invoiced"
+    return "awaiting_invoice"
+
+
+def flags_for(event, today):
+    """Things to chase on an event that hasn't happened yet: (key, icon, tooltip) for each"""
+    if event.cancelled or has_finished(event, today):
+        return []
+    flags = []
+    if event.status == models.Event.PROVISIONAL and not event.default_response_sent:
+        flags.append(
+            {
+                "key": "default_response",
+                "icon": "fa-envelope",
+                "tip": "The client hasn't been sent our default response yet.",
+                "action": "response",
+                "action_tip": "Click to mark it as sent.",
+            }
+        )
+    missing = []
+    if not event.dry_hire and not event.venue_id:
+        missing.append("venue")
+    if not (event.organisation_id or event.person_id):
+        missing.append("client")
+    if event.start_time is None:
+        missing.append("start time")
+    if missing:
+        flags.append(
+            {
+                "key": "details",
+                "icon": "fa-exclamation-circle",
+                "tip": f"Basic details are missing: {', '.join(missing)}",
+            }
+        )
+    if event.status in (models.Event.CONFIRMED, models.Event.BOOKED) and not event.dry_hire and not event.forum_url:
+        flags.append(
+            {
+                "key": "forum",
+                "icon": "fa-comments",
+                "tip": "There's no forum thread yet, so MIC and crew availability can't have been polled",
+            }
+        )
+    if event.needs_mic and not event.mic_id:
+        flags.append({"key": "mic", "icon": "fa-user-slash", "tip": "No MIC has been assigned yet"})
+    return flags
 
 
 def lane_for(event):
+    if event.dry_hire:
+        return "dry_hire"
     if event.internal:
         return "internal"
     emails = (client.email for client in (event.organisation, event.person) if client)
@@ -87,7 +149,6 @@ def board_events(today):
     return (
         models.Event.objects.filter(is_rig=True)
         .exclude(status=models.Event.CANCELLED)
-        .exclude(invoice__void=True)
         .filter(Q(end_date__gte=cutoff) | Q(end_date__isnull=True, start_date__gte=cutoff))
         .select_related("person", "organisation", "venue", "mic", "invoice")
         .prefetch_related("items", "invoice__payment_set")
@@ -121,8 +182,20 @@ class EventKanban(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = datetime.date.today()
-        show_finance = self.request.user.has_perm("RIGS.view_invoice")
-        columns = [(key, title) for key, title, finance in COLUMNS if show_finance or not finance]
+        user = self.request.user
+        can_see_finance = user.has_perm("RIGS.view_invoice")
+        choice = self.request.GET.get("finance")
+        if can_see_finance and choice in ("0", "1") and user.kanban_finance != (choice == "1"):
+            user.kanban_finance = choice == "1"
+            user.save(update_fields=["kanban_finance"])
+        show_finance = finance_visible(user)
+        columns = [
+            (key, title)
+            for key, title, shown in COLUMNS
+            if shown == "always"
+            or (shown == "finance" and show_finance)
+            or (shown == "no_finance" and not show_finance)
+        ]
         cells = {(lane, column): [] for lane, _ in LANES for column, _ in columns}
 
         horizons = {key: months for key, _, months in HORIZONS}
@@ -136,13 +209,18 @@ class EventKanban(generic.TemplateView):
             events = events.filter(start_date__lte=limit)
 
         for event in events:
-            column = column_for(event, today)
-            if column in STATUS_COLUMNS.values() or show_finance:
-                event.movable = column not in ("invoiced", "paid")
-                cells[(lane_for(event), column)].append(event)
+            finished = has_finished(event, today)
+            if finished and hasattr(event, "invoice") and event.invoice.void:
+                continue
+            event.live_invoice = live_invoice(event)
+            event.flags = flags_for(event, today)
+            event.movable = not (finished and event.live_invoice)
+            cells[(lane_for(event), column_for(event, today, show_finance))].append(event)
 
         older = older_counts(today) if show_finance else Counter()
 
+        context["show_finance"] = show_finance
+        context["can_see_finance"] = can_see_finance
         context["horizon"] = horizon
         context["horizons"] = [(key, label) for key, label, _ in HORIZONS]
         context["columns"] = columns
@@ -170,8 +248,15 @@ class EventKanban(generic.TemplateView):
         return context
 
 
-def event_json(event, today):
-    return {"pk": event.pk, "display_id": event.display_id, "status": event.status, "column": column_for(event, today)}
+def event_json(event, user):
+    today = datetime.date.today()
+    return {
+        "pk": event.pk,
+        "display_id": event.display_id,
+        "status": event.status,
+        "column": column_for(event, today, finance_visible(user)),
+        "flags": flags_for(event, today),
+    }
 
 
 class EventKanbanStatus(generic.View):
@@ -188,7 +273,8 @@ class EventKanbanStatus(generic.View):
             return JsonResponse({"error": "No status given"}, status=400)
         if status not in dict(models.Event.EVENT_STATUS_CHOICES):
             return JsonResponse({"error": "Unknown status"}, status=400)
-        if models.Invoice.objects.filter(event=event).exists():
+        invoiced = models.Invoice.objects.filter(event=event, void=False).exists()
+        if invoiced and (status == models.Event.CANCELLED or has_finished(event, datetime.date.today())):
             return JsonResponse({"error": f"{event.display_id} has already been invoiced"}, status=409)
 
         previous = event.status
@@ -199,7 +285,29 @@ class EventKanbanStatus(generic.View):
             return JsonResponse({"error": " ".join(e.messages)}, status=400)
         reversion.set_user(request.user)
         reversion.set_comment(f"Status changed to {event.get_status_display()} on the Kanban")
-        return JsonResponse({**event_json(event, datetime.date.today()), "previous_status": previous})
+        return JsonResponse({**event_json(event, request.user), "previous_status": previous})
+
+
+class EventKanbanResponse(generic.View):
+    """Mark the client as having been sent our default response, or undo that"""
+
+    http_method_names = ["post"]
+
+    @transaction.atomic()
+    def post(self, request, pk):
+        event = get_object_or_404(models.Event.objects.select_for_update(), pk=pk)
+        sent = request.POST.get("sent", "1") != "0"
+        if event.default_response_sent != sent:
+            event.default_response_sent = sent
+            try:
+                event.save()
+            except ValidationError as e:
+                return JsonResponse({"error": " ".join(e.messages)}, status=400)
+            reversion.set_user(request.user)
+            reversion.set_comment(
+                "Default response marked as sent on the Kanban" if sent else "Default response unmarked on the Kanban"
+            )
+        return JsonResponse(event_json(event, request.user))
 
 
 class EventKanbanInvoice(generic.View):
@@ -211,18 +319,23 @@ class EventKanbanInvoice(generic.View):
         if event.cancelled:
             return JsonResponse({"error": f"{event.display_id} is cancelled"}, status=409)
         invoice, created = models.Invoice.objects.get_or_create(event=event)
+        if invoice.void:
+            return JsonResponse(
+                {"error": f"{event.display_id} has a void invoice, which needs un-voiding first"}, status=409
+            )
         if created:
             reversion.set_user(request.user)
             reversion.set_comment("Invoice created on the Kanban")
         return JsonResponse(
             {
-                **event_json(event, datetime.date.today()),
+                **event_json(event, request.user),
                 "created": created,
                 "invoice": {
                     "pk": invoice.pk,
                     "display_id": invoice.display_id,
                     "url": reverse("invoice_detail", kwargs={"pk": invoice.pk}),
-                    "void": invoice.void,
+                    "balance": f"{invoice.balance:.2f}",
+                    "closed": invoice.is_closed,
                 },
             }
         )

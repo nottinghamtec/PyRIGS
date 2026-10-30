@@ -8,22 +8,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="row align-items-center justify-content-between py-2">
-    <div class="col-12 col-md text-body-secondary small">
-        Drag a rig between columns to change its status, or onto <strong>Cancel</strong> or <strong>Invoice</strong>
-        when they appear.
-        {% if beyond_horizon %}<a href="?horizon=all">{{ beyond_horizon }} later rig{{ beyond_horizon|pluralize }} not shown.</a>{% endif %}
-    </div>
-    <div class="col-12 col-md-auto d-flex flex-wrap justify-content-end align-items-center gap-2 mt-2 mt-md-0">
-        <form method="GET" class="d-flex align-items-center gap-2" id="kanban-horizon">
-            <label for="horizon" class="text-nowrap">Showing</label>
+<p class="text-body-secondary small mb-2">
+    Drag a rig between columns to change its status, or onto the <strong>Cancel</strong> and <strong>Invoice</strong>
+    boxes that appear. Icons on a card flag something to chase: hover over one to see what.
+    {% if beyond_horizon %}<a href="?horizon=all">{{ beyond_horizon }} later rig{{ beyond_horizon|pluralize }} not shown.</a>{% endif %}
+</p>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <form method="GET" class="d-flex flex-wrap align-items-center gap-3" id="kanban-options">
+        <div class="input-group w-auto">
+            <label class="input-group-text mb-0" for="horizon"><span class="fas fa-calendar-alt me-2"></span>Showing</label>
             <select id="horizon" name="horizon" class="form-select">
                 {% for key, label in horizons %}
                 <option value="{{ key }}" {% if key == horizon %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-            <noscript><button type="submit" class="btn btn-primary">Show</button></noscript>
-        </form>
+        </div>
+        {% if can_see_finance %}
+        <input type="hidden" name="finance" value="0">
+        <div class="form-check form-switch d-flex align-items-center gap-2 mb-0 ps-0">
+            <input class="form-check-input m-0" type="checkbox" role="switch" id="finance" name="finance" value="1"
+                {% if show_finance %}checked{% endif %}>
+            <label class="form-check-label text-nowrap mb-0" for="finance">Invoice columns</label>
+        </div>
+        {% endif %}
+        <noscript><button type="submit" class="btn btn-primary">Show</button></noscript>
+    </form>
+    <div class="d-flex flex-wrap gap-2">
         {% if perms.RIGS.add_event %}
         {% button 'new' 'event_create' %}
         {% endif %}
@@ -33,6 +44,7 @@
 
 <div id="kanban" class="kanban" style="--kanban-columns: {{ columns|length }}"
     data-status-url="{% url 'event_kanban_status' 0 %}" data-invoice-url="{% url 'event_kanban_invoice' 0 %}"
+    data-response-url="{% url 'event_kanban_response' 0 %}" data-can-change="{% if perms.RIGS.change_event %}1{% endif %}"
     data-cancelled-status="3">
     {% csrf_token %}
     <div class="kanban-grid">
@@ -50,7 +62,7 @@
 
         {% for lane in lanes %}
         <div class="kanban-lane-header" data-lane-header="{{ lane.key }}">
-            <span class="fas fa-{% if lane.key == 'internal' %}users{% elif lane.key == 'university' %}university{% else %}handshake{% endif %} fa-fw"></span>
+            <span class="fas fa-{% if lane.key == 'internal' %}users{% elif lane.key == 'university' %}university{% elif lane.key == 'dry_hire' %}truck{% else %}handshake{% endif %} fa-fw"></span>
             {{ lane.title }} <span class="badge rounded-pill text-bg-secondary" data-lane-count="{{ lane.key }}">{{ lane.count }}</span>
         </div>
         {% for cell in lane.cells %}
@@ -80,7 +92,7 @@
         <small>Takes it off the board</small>
     </div>
     {% endif %}
-    {% if perms.RIGS.add_invoice %}
+    {% if perms.RIGS.add_invoice and show_finance %}
     <div class="kanban-dropzone kanban-dropzone-invoice" data-dropzone="invoice">
         <span class="fas fa-file-invoice-dollar fa-2x"></span>
         <span>Create invoice</span>

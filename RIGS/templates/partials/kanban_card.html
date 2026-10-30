@@ -1,36 +1,54 @@
 {% with can_move=event.movable %}
-<article class="card kanban-card shadow-sm" data-event="{{ event.pk }}" data-display-id="{{ event.display_id }}"
+<article class="card kanban-card shadow-sm{% if event.flags %} kanban-card-flagged{% endif %}" data-event="{{ event.pk }}"
+    data-display-id="{{ event.display_id }}"
     data-sort="{{ event.start_date|date:'Y-m-d' }}-{{ event.pk|stringformat:'08d' }}" data-status="{{ event.status }}"
-    {% if can_move and perms.RIGS.change_event or can_move and perms.RIGS.add_invoice %}draggable="true"{% endif %}>
+    {% if event.live_invoice and show_finance %}data-invoiced{% endif %}
+    {% if can_move and perms.RIGS.change_event or can_move and show_finance and perms.RIGS.add_invoice %}draggable="true"{% endif %}>
     <div class="card-body p-2">
         <div class="d-flex justify-content-between align-items-start gap-1">
             <a href="{% url 'event_detail' event.pk %}" class="kanban-card-title text-reset text-decoration-none">
                 <span class="fw-bold">{{ event.display_id }}</span> {{ event.name }}
             </a>
-            {% if can_move %}{% if perms.RIGS.change_event or perms.RIGS.add_invoice %}
-            <div class="dropdown kanban-card-menu">
-                <button class="btn btn-sm btn-link text-body-secondary p-0 px-1" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false" aria-label="Move {{ event.display_id }}">
-                    <span class="fas fa-ellipsis-v"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    {% if perms.RIGS.change_event %}
-                    {% for status, label in status_choices %}
-                    <li data-kanban-status-option="{{ status }}"><button class="dropdown-item" type="button"
-                            data-kanban-action="status" data-status="{{ status }}">Move to {{ label }}</button></li>
+            <div class="d-flex align-items-start gap-1">
+                <div class="kanban-card-flags d-flex gap-1">
+                    {% for flag in event.flags %}
+                    {% if flag.action and perms.RIGS.change_event %}
+                    <button type="button" class="kanban-flag btn btn-link p-0 text-warning" data-flag="{{ flag.key }}"
+                        data-kanban-action="{{ flag.action }}" data-bs-toggle="tooltip"
+                        title="{{ flag.tip }} {{ flag.action_tip }}" aria-label="{{ flag.tip }} {{ flag.action_tip }}"><span
+                            class="fas {{ flag.icon }}"></span></button>
+                    {% else %}
+                    <span class="kanban-flag text-warning" data-flag="{{ flag.key }}" data-bs-toggle="tooltip"
+                        title="{{ flag.tip }}" tabindex="0" role="img" aria-label="{{ flag.tip }}"><span
+                            class="fas {{ flag.icon }}"></span></span>
+                    {% endif %}
                     {% endfor %}
-                    {% endif %}
-                    {% if perms.RIGS.add_invoice %}
-                    <li><button class="dropdown-item" type="button" data-kanban-action="invoice"><span
-                                class="fas fa-file-invoice-dollar fa-fw"></span> Create invoice</button></li>
-                    {% endif %}
-                    {% if perms.RIGS.change_event %}
-                    <li><button class="dropdown-item text-danger" type="button" data-kanban-action="cancel"><span
-                                class="fas fa-ban fa-fw"></span> Cancel event</button></li>
-                    {% endif %}
-                </ul>
+                </div>
+                {% if can_move %}{% if perms.RIGS.change_event or perms.RIGS.add_invoice %}
+                <div class="dropdown kanban-card-menu">
+                    <button class="btn btn-sm btn-link text-body-secondary p-0 px-1" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" aria-label="Move {{ event.display_id }}">
+                        <span class="fas fa-ellipsis-v"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if perms.RIGS.change_event %}
+                        {% for status, label in status_choices %}
+                        <li data-kanban-status-option="{{ status }}"><button class="dropdown-item" type="button"
+                                data-kanban-action="status" data-status="{{ status }}">Move to {{ label }}</button></li>
+                        {% endfor %}
+                        {% endif %}
+                        {% if perms.RIGS.add_invoice and show_finance and not event.live_invoice %}
+                        <li><button class="dropdown-item" type="button" data-kanban-action="invoice"><span
+                                    class="fas fa-file-invoice-dollar fa-fw"></span> Create invoice</button></li>
+                        {% endif %}
+                        {% if perms.RIGS.change_event and not event.live_invoice %}
+                        <li><button class="dropdown-item text-danger" type="button" data-kanban-action="cancel"><span
+                                    class="fas fa-ban fa-fw"></span> Cancel event</button></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}{% endif %}
             </div>
-            {% endif %}{% endif %}
         </div>
         <div class="small text-body-secondary">
             <span class="fas fa-calendar fa-fw"></span>
@@ -48,11 +66,10 @@
         {% endif %}
         <div class="d-flex flex-wrap gap-1 mt-1 kanban-card-badges">
             {% if event.dry_hire %}<span class="badge text-bg-secondary">Dry Hire</span>{% endif %}
-            {% if event.needs_mic and not event.mic %}<span class="badge text-bg-danger">Needs MIC</span>{% endif %}
-            {% if perms.RIGS.view_invoice %}
-            {% if event.invoice %}
-            <a href="{% url 'invoice_detail' event.invoice.pk %}" class="badge text-bg-info text-decoration-none">
-                Invoice {{ event.invoice.display_id }}{% if not event.invoice.is_closed %} &middot; £{{ event.invoice.balance|floatformat:2 }} due{% endif %}
+            {% if show_finance %}
+            {% if event.live_invoice %}
+            <a href="{% url 'invoice_detail' event.live_invoice.pk %}" class="badge text-bg-info text-decoration-none">
+                Invoiced {{ event.live_invoice.display_id }}{% if not event.live_invoice.is_closed %} &middot; £{{ event.live_invoice.balance|floatformat:2 }} due{% endif %}
             </a>
             {% elif event.sum_total %}
             <span class="badge text-bg-light border">£{{ event.sum_total|floatformat:2 }}</span>

@@ -3,9 +3,9 @@
 (function () {
     "use strict";
 
-    const horizon = document.getElementById("horizon");
-    if (horizon) {
-        horizon.addEventListener("change", () => horizon.form.submit());
+    const options = document.getElementById("kanban-options");
+    if (options) {
+        options.addEventListener("change", () => options.submit());
     }
 
     const board = document.getElementById("kanban");
@@ -14,6 +14,7 @@
     }
     const csrf = board.querySelector("[name=csrfmiddlewaretoken]").value;
     const cancelled = board.dataset.cancelledStatus;
+    const canChange = board.dataset.canChange === "1";
     const statusColumns = ["provisional", "confirmed", "booked"];
     const statusNames = {};
     board.querySelectorAll("[data-kanban-action=status]").forEach((button) => {
@@ -86,6 +87,42 @@
         });
     }
 
+    // Icons for what still needs chasing on a card, as the server works them out
+    function renderFlags(card, flags) {
+        const holder = card.querySelector(".kanban-card-flags");
+        holder.querySelectorAll("[data-bs-toggle=tooltip]").forEach((el) => {
+            const tooltip = bootstrap.Tooltip.getInstance(el);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+        });
+        holder.replaceChildren(
+            ...flags.map((flag) => {
+                const clickable = canChange && flag.action;
+                const tip = clickable ? `${flag.tip} ${flag.action_tip}` : flag.tip;
+                const element = document.createElement(clickable ? "button" : "span");
+                element.className = `kanban-flag text-warning${clickable ? " btn btn-link p-0" : ""}`;
+                element.dataset.flag = flag.key;
+                element.dataset.bsToggle = "tooltip";
+                element.title = tip;
+                element.setAttribute("aria-label", tip);
+                if (clickable) {
+                    element.type = "button";
+                    element.dataset.kanbanAction = flag.action;
+                } else {
+                    element.tabIndex = 0;
+                    element.setAttribute("role", "img");
+                }
+                const icon = document.createElement("span");
+                icon.className = `fas ${flag.icon}`;
+                element.append(icon);
+                new bootstrap.Tooltip(element);
+                return element;
+            })
+        );
+        card.classList.toggle("kanban-card-flagged", flags.length > 0);
+    }
+
     function updateMenu(card) {
         card.querySelectorAll("[data-kanban-status-option]").forEach((option) => {
             option.hidden =
@@ -127,10 +164,25 @@
     function setStatus(card, status, target) {
         return post("status", card, { status: status }).then((data) => {
             card.dataset.status = data.status;
+            renderFlags(card, data.flags);
             place(card, target || cell(laneOf(card), data.column));
             updateMenu(card);
             recount();
             toast(`${data.display_id} moved to ${statusNames[data.status] || data.column}`, "success");
+        });
+    }
+
+    function markResponse(card, sent) {
+        return post("response", card, { sent: sent ? "1" : "0" }).then((data) => {
+            renderFlags(card, data.flags);
+            if (sent) {
+                toast(`${data.display_id} marked as response sent`, "success", {
+                    label: "Undo",
+                    onClick: () => markResponse(card, false),
+                });
+            } else {
+                toast(`${data.display_id} marked as response not sent`, "secondary");
+            }
         });
     }
 
@@ -144,6 +196,7 @@
                 onClick: () =>
                     post("status", card, { status: data.previous_status }).then((restored) => {
                         card.dataset.status = restored.status;
+                        renderFlags(card, restored.flags);
                         place(card, cell(lane, restored.column));
                         updateMenu(card);
                         recount();
@@ -156,21 +209,31 @@
     function invoice(card) {
         return post("invoice", card).then((data) => {
             const target = cell(laneOf(card), data.column);
-            card.removeAttribute("draggable");
-            const menu = card.querySelector(".kanban-card-menu");
-            if (menu) {
-                menu.remove();
-            }
-            if (data.invoice.void || !target) {
-                card.remove();
+            card.setAttribute("data-invoiced", "");
+            if (!statusColumns.includes(data.column)) {
+                // Finished: it moves on to the finance columns and can't be moved by hand any more
+                card.removeAttribute("draggable");
+                const menu = card.querySelector(".kanban-card-menu");
+                if (menu) {
+                    menu.remove();
+                }
             } else {
-                const badge = document.createElement("a");
-                badge.href = data.invoice.url;
-                badge.className = "badge text-bg-info text-decoration-none";
-                badge.textContent = `Invoice ${data.invoice.display_id}`;
-                card.querySelector(".kanban-card-badges").append(badge);
-                place(card, target);
+                // Invoiced ahead of the event: it keeps its place, but can't be cancelled or invoiced again
+                card.querySelectorAll("[data-kanban-action=invoice], [data-kanban-action=cancel]").forEach((button) =>
+                    button.closest("li").remove()
+                );
             }
+            const badge = document.createElement("a");
+            badge.href = data.invoice.url;
+            badge.className = "badge text-bg-info text-decoration-none";
+            badge.textContent = `Invoiced ${data.invoice.display_id}`;
+            if (!data.invoice.closed) {
+                badge.textContent += ` \u00b7 \u00a3${data.invoice.balance} due`;
+            }
+            const badges = card.querySelector(".kanban-card-badges");
+            badges.querySelectorAll(".text-bg-light").forEach((price) => price.remove());
+            badges.append(badge);
+            place(card, target);
             recount();
             const message = data.created
                 ? `Invoice ${data.invoice.display_id} created for ${data.display_id}`
@@ -189,7 +252,7 @@
             return false;
         }
         if (target.dataset.dropzone) {
-            return true;
+            return !dragged.hasAttribute("data-invoiced");
         }
         return (
             dragged.querySelector("[data-kanban-action=status]") !== null &&
@@ -266,6 +329,8 @@
         const action = button.dataset.kanbanAction;
         if (action === "status") {
             setStatus(card, button.dataset.status);
+        } else if (action === "response") {
+            markResponse(card, true);
         } else if (action === "cancel") {
             cancel(card);
         } else if (action === "invoice") {
