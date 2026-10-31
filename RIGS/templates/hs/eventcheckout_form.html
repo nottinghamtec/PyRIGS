@@ -1,0 +1,27 @@
+{% extends 'base_rigs.html' %}
+{% load widget_tweaks %}
+{% load button from filters %}
+
+{% block content %}
+    <div class="col-12">
+        {% include 'form_errors.html' %}
+        <p>
+            You are checked in to <strong>{{ event.display_id }} {{ event.name }}</strong> since
+            <strong>{{ object.time }}</strong>. Enter the time you actually finished and checked out.
+        </p>
+        <form id="checkout" role="form" method="POST" action="{{ request.path }}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.end_time.id_for_label }}" class="col-sm-4 col-form-label">{{ form.end_time.label }}</label>
+                <div class="col-sm-8">
+                    {% render_field form.end_time class+="form-control" %}
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-sm-12 text-end">
+                    {% button 'submit' %}
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

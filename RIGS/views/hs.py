@@ -414,3 +414,39 @@ class EventCheckOut(generic.RedirectView):
             checkin.end_time = timezone.now()
             checkin.save()
         return self.request.META.get("HTTP_REFERER", "/")
+
+
+class EventCheckOutCorrect(generic.UpdateView):
+    model = models.EventCheckIn
+    template_name = "hs/eventcheckout_form.html"
+    form_class = forms.EventCheckOutForm
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.person != request.user and obj.event.mic != request.user:
+            return redirect("event_detail", pk=obj.event_id)
+        if obj.end_time:
+            messages.info(request, "You are already checked out of this event.")
+            return redirect("event_detail", pk=obj.event_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["event"] = self.object.event
+        context["page_title"] = f"Check Out of Event {self.object.event.display_id}"
+        return context
+
+
+class CurrentlyCheckedIn(generic.ListView):
+    template_name = "hs/currently_checked_in.html"
+    context_object_name = "checkins"
+
+    def get_queryset(self):
+        return (
+            models.EventCheckIn.objects.filter(end_time__isnull=True).select_related("person", "event").order_by("time")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Currently Checked In"
+        return context

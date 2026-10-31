@@ -1,0 +1,9 @@
+Hi {{user.get_full_name|default:user.username}},
+
+You've been checked in to the following for over {{hours}} hours. If you've finished, please check out with the time you actually left:
+
+{% for item in checkins %}{{item.checkin.event.display_id}} {{item.checkin.event.name}} (checked in {{item.checkin.time}})
+{{item.url}}
+
+{% endfor %}
+The TEC Rig Information Gathering System

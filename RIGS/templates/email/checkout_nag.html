@@ -1,0 +1,17 @@
+{% extends 'base_client_email.html' %}
+
+{% block content %}
+    <p>Hi {{user.get_full_name|default:user.username}},</p>
+
+    <p>You've been checked in to the following for over {{hours}} hours. If you've finished, please check out with the time you actually left, rather than the time you're doing it now:</p>
+
+    {% for item in checkins %}
+    <p>
+        <strong>{{item.checkin.event.display_id}} {{item.checkin.event.name}}</strong><br>
+        Checked in {{item.checkin.time}}<br>
+        <a href="{{item.url}}" class="btn btn-info">Check Out</a>
+    </p>
+    {% endfor %}
+
+    <p>TEC PA &amp; Lighting</p>
+{% endblock %}

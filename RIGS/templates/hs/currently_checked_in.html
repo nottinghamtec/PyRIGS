@@ -1,0 +1,41 @@
+{% extends 'base_rigs.html' %}
+
+{% block title %}Currently Checked In{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <h2>Currently Checked In</h2>
+            {% if checkins %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Person</th>
+                            <th scope="col">Event</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Vehicle</th>
+                            <th scope="col">Checked in</th>
+                            <th scope="col">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for checkin in checkins %}
+                        <tr>
+                            <td>{{ checkin.person.name }}</td>
+                            <td><a href="{% url 'event_detail' checkin.event.pk %}">{{ checkin.event }}</a></td>
+                            <td>{{ checkin.role }}</td>
+                            <td>{{ checkin.vehicle }}</td>
+                            <td>{{ checkin.time }}</td>
+                            <td>{{ checkin.time|timesince }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Nobody is currently checked in.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

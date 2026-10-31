@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import RedirectView
 
-from PyRIGS.decorators import api_key_required, has_oembed, permission_required_with_403
+from PyRIGS.decorators import api_key_required, has_oembed, permission_required_with_403, user_passes_test_with_403
 from . import views
 
 urlpatterns = [
@@ -208,6 +208,12 @@ urlpatterns = [
     ),
     path("event/<int:pk>/checkin/", login_required(views.EventCheckIn.as_view()), name="event_checkin"),
     path("event/checkout/", login_required(views.EventCheckOut.as_view()), name="event_checkout"),
+    path(
+        "checkins/current/",
+        user_passes_test_with_403(lambda u: u.is_superuser)(views.CurrentlyCheckedIn.as_view()),
+        name="currently_checked_in",
+    ),
+    path("checkin/<int:pk>/checkout/", login_required(views.EventCheckOutCorrect.as_view()), name="checkin_checkout"),
     path("event/<int:pk>/checkin/edit/", login_required(views.EventCheckInEdit.as_view()), name="edit_checkin"),
     path(
         "event/<int:pk>/checkin/add/",

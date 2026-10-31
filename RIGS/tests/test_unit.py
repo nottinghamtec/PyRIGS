@@ -1540,3 +1540,60 @@ def test_deleted_enquiries_show_in_recent_changes(admin_client):
     for url in (reverse("activity_feed"), reverse("activity_table")):
         content = " ".join(admin_client.get(url).content.decode().split())
         assert "Deleted enquiry Maybe a ball" in content
+
+
+def test_checkout_nags(admin_user, basic_event, mailoutbox):
+    from django.core.management import call_command
+
+    now = timezone.now()
+    other = models.Event.objects.create(name="TE E2", start_date=now)
+    old1 = models.EventCheckIn.objects.create(event=basic_event, person=admin_user, time=now - timedelta(hours=40))
+    old2 = models.EventCheckIn.objects.create(event=other, person=admin_user, time=now - timedelta(hours=37))
+    models.EventCheckIn.objects.create(event=other, person=admin_user, time=now - timedelta(hours=2))
+    models.EventCheckIn.objects.create(
+        event=basic_event, person=admin_user, time=now - timedelta(hours=50), end_time=now - timedelta(hours=45)
+    )
+    call_command("send_checkout_nags")
+    assert len(mailoutbox) == 1
+    for checkin in (old1, old2):
+        assert reverse("checkin_checkout", kwargs={"pk": checkin.pk}) in mailoutbox[0].body
+
+
+def test_checkout_correct_requires_time(admin_client, admin_user, basic_event):
+    checkin = models.EventCheckIn.objects.create(
+        event=basic_event, person=admin_user, time=timezone.now() - timedelta(hours=40)
+    )
+    url = reverse("checkin_checkout", kwargs={"pk": checkin.pk})
+    response = admin_client.get(url)
+    assert response.status_code == 200
+    assert 'value="' not in response.content.decode().split('name="end_time"')[1].split(">")[0]
+    assert admin_client.post(url, {"end_time": ""}).status_code == 200
+    checkin.refresh_from_db()
+    assert checkin.end_time is None
+    future = (timezone.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+    admin_client.post(url, {"end_time": future})
+    checkin.refresh_from_db()
+    assert checkin.end_time is None
+    past = (timezone.now() - timedelta(hours=30)).strftime("%Y-%m-%d %H:%M:%S")
+    admin_client.post(url, {"end_time": past})
+    checkin.refresh_from_db()
+    assert checkin.end_time is not None
+
+
+def test_currently_checked_in(client, admin_client, admin_user, django_user_model, basic_event):
+    now = timezone.now()
+    models.EventCheckIn.objects.create(event=basic_event, person=admin_user, time=now - timedelta(hours=1))
+    models.EventCheckIn.objects.create(event=basic_event, person=admin_user, time=now - timedelta(hours=5))
+    models.EventCheckIn.objects.create(
+        event=basic_event, person=admin_user, time=now - timedelta(hours=9), end_time=now
+    )
+    url = reverse("currently_checked_in")
+    response = admin_client.get(url)
+    assert response.status_code == 200
+    assert [c.time for c in response.context["checkins"]] == sorted(c.time for c in response.context["checkins"])
+    assert len(response.context["checkins"]) == 2
+    user = django_user_model.objects.create_user(
+        username="plain", password="x", email="p@example.com", is_approved=True
+    )
+    client.force_login(user)
+    assert client.get(url).status_code == 403

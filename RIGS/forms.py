@@ -321,3 +321,21 @@ class EditCheckInForm(forms.ModelForm):
     class Meta:
         model = models.EventCheckIn
         fields = "__all__"
+
+
+class EventCheckOutForm(forms.ModelForm):
+    class Meta:
+        model = models.EventCheckIn
+        fields = ["end_time"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["end_time"].required = True
+        self.fields["end_time"].label = "Time you checked out"
+        self.initial["end_time"] = None
+
+    def clean_end_time(self):
+        end_time = self.cleaned_data["end_time"]
+        if end_time > timezone.now():
+            raise forms.ValidationError("May not check out in the future.")
+        return end_time

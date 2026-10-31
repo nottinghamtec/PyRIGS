@@ -20,6 +20,10 @@
         {% if show_badges %}<li><a class="dropdown-item py-2" href="{% url 'badge_list' %}"><span class="fas fa-award"></span> Badges</a></li>{% endif %}
         {% if show_tech_rider %}<li><a class="dropdown-item py-2" href="{% url 'tech_rider' %}"><span class="fas fa-scroll"></span> Tech Rider</a></li>{% endif %}
         {% endif %}
+        {% if user.is_superuser %}
+        <li><hr class="dropdown-divider m-0"></li>
+        <li><a class="dropdown-item py-2" href="{% url 'currently_checked_in' %}"><span class="fas fa-clipboard-list"></span> Check-in Report</a></li>
+        {% endif %}
         <li><hr class="dropdown-divider m-0"></li>
         <li class="p-2 text-end">
             <form method="post" action="{% url 'logout' %}" class="d-inline">
