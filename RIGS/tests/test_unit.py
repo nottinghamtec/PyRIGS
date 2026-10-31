@@ -1597,3 +1597,23 @@ def test_currently_checked_in(client, admin_client, admin_user, django_user_mode
     )
     client.force_login(user)
     assert client.get(url).status_code == 403
+
+
+def test_checkout_nags_active_members_only(django_user_model, basic_event, mailoutbox):
+    from django.core.management import call_command
+
+    old = timezone.now() - timedelta(hours=40)
+    inactive = django_user_model.objects.create_user(username="inactive", password="x", email="i@example.com", is_approved=True, is_active=False)
+    unapproved = django_user_model.objects.create_user(username="unapproved", password="x", email="u@example.com", is_approved=False)
+    active = django_user_model.objects.create_user(username="active", password="x", email="a@example.com", is_approved=True)
+    for person in (inactive, unapproved, active):
+        models.EventCheckIn.objects.create(event=basic_event, person=person, time=old)
+    call_command("send_checkout_nags")
+    assert [m.to for m in mailoutbox] == [["a@example.com"]]
+
+
+def test_currently_checked_in_flags_inactive(admin_client, django_user_model, basic_event):
+    gone = django_user_model.objects.create_user(username="gone", password="x", email="g@example.com", is_approved=False, is_active=False)
+    models.EventCheckIn.objects.create(event=basic_event, person=gone, time=timezone.now() - timedelta(hours=3))
+    response = admin_client.get(reverse("currently_checked_in"))
+    assertContains(response, "Inactive", count=1)

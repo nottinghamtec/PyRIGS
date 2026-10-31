@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         cutoff = timezone.now() - datetime.timedelta(hours=NAG_AFTER_HOURS)
-        checkins = models.EventCheckIn.objects.filter(end_time__isnull=True, time__lte=cutoff).select_related("person", "event").order_by("time")
+        checkins = models.EventCheckIn.objects.filter(end_time__isnull=True, time__lte=cutoff, person__is_active=True, person__is_approved=True).select_related("person", "event").order_by("time")
         by_person = {}
         for checkin in checkins:
             by_person.setdefault(checkin.person, []).append(

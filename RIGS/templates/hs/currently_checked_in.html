@@ -21,8 +21,8 @@
                     </thead>
                     <tbody>
                     {% for checkin in checkins %}
-                        <tr>
-                            <td>{{ checkin.person.name }}</td>
+                        <tr{% if not checkin.person.is_active or not checkin.person.is_approved %} class="text-muted"{% endif %}>
+                            <td>{{ checkin.person.name }}{% if not checkin.person.is_active or not checkin.person.is_approved %} <span class="badge text-bg-secondary">Inactive</span>{% endif %}</td>
                             <td><a href="{% url 'event_detail' checkin.event.pk %}">{{ checkin.event }}</a></td>
                             <td>{{ checkin.role }}</td>
                             <td>{{ checkin.vehicle }}</td>
