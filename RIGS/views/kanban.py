@@ -10,10 +10,12 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.views import generic
 
 from PyRIGS.views import get_related, is_ajax
 from RIGS import forms, models
+from RIGS import prefill as prefill_module
 from versioning.versioning import CONVERTED_PREFIX, DELETED_PREFIX, record_deletion
 
 # Finished events leave the board this long after they end, so the finance columns stay short
@@ -250,6 +252,9 @@ class EventKanban(generic.TemplateView):
             (status, label) for status, label in models.Event.EVENT_STATUS_CHOICES if status in STATUS_COLUMNS
         ]
         context["page_title"] = "Kanban"
+        prefill = self.request.GET.get("prefill")
+        if prefill and user.has_perm("RIGS.add_event") and prefill_module.decode(prefill):
+            context["prefill_modal_url"] = f"{reverse('enquiry_create')}?{urlencode({'prefill': prefill})}"
         return context
 
 
@@ -368,7 +373,7 @@ class EnquiryFormMixin:
 
 class EnquiryCreate(EnquiryFormMixin, generic.CreateView):
     def get_initial(self):
-        return {"start_date": datetime.date.today()}
+        return {"start_date": datetime.date.today(), **prefill_module.enquiry_initial(self.request.GET.get("prefill"))}
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user

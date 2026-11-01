@@ -30,6 +30,7 @@ from django.views.decorators.csrf import csrf_exempt
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
 from RIGS import models, forms
+from RIGS import prefill as prefill_module
 
 __author__ = "ghost"
 
@@ -114,6 +115,22 @@ class EventCreate(generic.CreateView):
     model = models.Event
     form_class = forms.EventForm
     template_name = "event_form.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        prefill = self.request.GET.get("prefill")
+        if prefill:
+            filled = prefill_module.event_initial(prefill)
+            if filled:
+                initial.update(filled)
+                messages.info(
+                    self.request, "This event has been pre-filled from an enquiry. Check the details before saving."
+                )
+            else:
+                messages.warning(
+                    self.request, "The pre-filled details could not be read, so the form has been left blank."
+                )
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

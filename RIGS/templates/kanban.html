@@ -130,4 +130,12 @@
 </div>
 
 <div class="toast-container position-fixed top-0 end-0 p-3" id="kanban-toasts"></div>
+{% if prefill_modal_url %}
+{{ prefill_modal_url|json_script:"kanban-prefill-url" }}
+<script>
+    ready(function () {
+        loadModal(JSON.parse(document.getElementById('kanban-prefill-url').textContent));
+    });
+</script>
+{% endif %}
 {% endblock %}
