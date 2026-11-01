@@ -314,6 +314,7 @@ urlpatterns = [
     re_path(
         r"^ical/(?P<api_pk>\d+)/(?P<api_key>\w+)/rigs.ics$", api_key_required(views.CalendarICS()), name="ics_calendar"
     ),
+    path("lookup/<str:kind>/", views.LookupView.as_view(), name="lookup"),
     # Legacy URLs
     path("rig/show/<int:pk>/", RedirectView.as_view(permanent=True, pattern_name="event_detail")),
     path("bookings/", RedirectView.as_view(permanent=True, pattern_name="rigboard")),
