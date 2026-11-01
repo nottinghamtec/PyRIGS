@@ -64,6 +64,12 @@
 
     <script>
         const matches = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(update: slow)").matches;
+        var refreshEditors = function () {
+            ['#id_description', '#id_notes'].forEach(function (selector) {
+                var element = document.querySelector(selector);
+                if (element && element.mde_editor) { element.mde_editor.codemirror.refresh(); }
+            });
+        };
         ready(function () {
             dur = matches ? 0 : 500;
             var all = function (selector) { return document.querySelectorAll(selector); };
@@ -74,8 +80,8 @@
                 {% endif %}
             //Creation
             {% else %}
-                // If there were errors, apply the previous Rig/not-Rig selection
-                {% if form.errors %}
+                // If there were errors, or the form was pre-filled, show the sections straight away and apply the Rig/not-Rig selection
+                {% if form.errors or prefilled %}
                     all('.form-hws').forEach(function (el) { slideDown(el, 0); });
                     if (document.getElementById('{{form.is_rig.auto_id}}').checked === false) {
                         all('.form-is_rig').forEach(function (el) { el.style.display = 'none'; });
@@ -87,6 +93,7 @@
                 //Button handling
                 all('#is_rig-selector button').forEach(function (button) {
                     button.addEventListener('click', function () {
+                        window.setTimeout(refreshEditors, dur + 50);
                         var wasHidden = isHidden(document.querySelector('.form-non_rig'));
                         all('.form-non_rig').forEach(function (el) { slideDown(el, dur); }); //Non rig stuff also needed for rig, so always slide down
                         if (this.dataset.is_rig === '1') {
@@ -111,6 +118,7 @@
             setupMDE('#id_description');
             setupMDE('#id_notes');
             setupMDE('#item_description');
+            refreshEditors();
 
             document.getElementById('itemModal').addEventListener('shown.bs.modal', function () {
                 var description = document.getElementById('item_description');
@@ -154,7 +162,7 @@
 
         {# Contact details #}
         <div class="col-md-6 mt-3">
-            <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+            <div class="card form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %} mb-3" {% if not object.pk and not form.errors and not prefilled %}style="display: none;"{% endif%}>
                 <div class="card-header">Contact Details</div>
                 <div class="card-body">
                     <div class="mb-3" data-bs-toggle="tooltip" title="The main contact for the event, can be left blank if purely an organisation">
@@ -212,7 +220,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card form-hws form-non_rig mb-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+            <div class="card form-hws form-non_rig mb-3" {% if not object.pk and not form.errors and not prefilled %}style="display: none;"{% endif%}>
                 <div class="card-header">Event Description</div>
                 <div class="card-body">
                     <div class="mb-3" data-bs-toggle="tooltip" title="A short description of the event, shown on rigboard and on paperwork">
@@ -229,7 +237,7 @@
 
         {# Event details #}
         <div class="col-md-6 my-3">
-            <div class="card card-default form-hws form-non_rig" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+            <div class="card card-default form-hws form-non_rig" {% if not object.pk and not form.errors and not prefilled %}style="display: none;"{% endif%}>
                 <div class="card-header">Event Details</div>
                 <div class="card-body">
                     <div id="form-hws">
@@ -435,7 +443,7 @@
 
         {# Notes and item shit #}
         <div class="col-sm-12">
-            <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+            <div class="card card-default form-hws form-is_rig  {% if object.pk and not object.is_rig %}hidden{% endif %}" {% if not object.pk and not form.errors and not prefilled %}style="display: none;"{% endif%}>
                 <div class="card-body">
                     <div class="col-sm-12">
                         <div class="mb-3" data-bs-toggle="tooltip" title="Notes on the event. This is only visible to keyholders, and is not displayed on the paperwork">
@@ -447,7 +455,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 text-end form-hws form-non_rig my-3" {% if not object.pk and not form.errors %}style="display: none;"{% endif%}>
+        <div class="col-sm-12 text-end form-hws form-non_rig my-3" {% if not object.pk and not form.errors and not prefilled %}style="display: none;"{% endif%}>
             {% button 'submit' %}
         </div>
     </div>

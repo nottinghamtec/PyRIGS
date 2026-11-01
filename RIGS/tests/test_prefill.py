@@ -78,17 +78,17 @@ def test_event_initial_links_existing_records_and_notes(records):
     assert (initial["venue"], initial["organisation"], initial["person"]) == tuple(
         records[k].pk for k in ("venue", "organisation", "person")
     )
-    assert "Contact: Tom Hale tom@example.org 07700 900456" in initial["description"]
-    assert "Venue:" not in initial["description"]
-    assert "Enquiry thread: https://forum.nottinghamtec.co.uk/t/x/1" in initial["description"]
+    assert "Contact: Tom Hale tom@example.org 07700 900456" in initial["notes"]
+    assert "Venue:" not in initial["notes"]
+    assert "Enquiry thread: https://forum.nottinghamtec.co.uk/t/x/1" in initial["notes"]
 
 
 def test_unknown_ids_are_ignored_and_names_go_into_the_text(records):
     data = payload(records) | {"venue_id": 99999, "organisation_id": 99999, "organisation_name": "Mystery Club"}
     initial = prefill.event_initial(encode(data))
     assert "venue" not in initial and "organisation" not in initial
-    assert "Client: Mystery Club" in initial["description"]
-    assert "Venue: the barn at Sutton Bonington" in initial["description"]
+    assert "Client: Mystery Club" in initial["notes"]
+    assert "Venue: the barn at Sutton Bonington" in initial["notes"]
 
 
 def test_enquiry_has_no_times_or_venue_fields_so_they_go_in_the_notes(records):
@@ -105,7 +105,9 @@ def test_event_create_form_is_prefilled(admin_client, records):
     assert form["name"].value() == "Allotment Society Halloween Party"
     assert form["venue"].value() == records["venue"].pk
     assert response.context["venue"] == records["venue"]
-    assert "pre-filled" in response.content.decode()
+    assert "Enquiry thread: https://forum.nottinghamtec.co.uk/t/x/1" in form["notes"].value()
+    assert not form["description"].value()
+    assert "has been pre-filled from an enquiry" in response.content.decode()
 
 
 def test_event_create_with_garbage_prefill_still_renders(admin_client):
@@ -137,3 +139,31 @@ def test_kanban_does_not_open_a_modal_without_permission(client, django_user_mod
     client.force_login(user)
     response = client.get(reverse("event_kanban"), {"prefill": encode(payload(records))})
     assert "prefill_modal_url" not in (response.context or {})
+
+
+def _hidden_sections(response):
+    import re
+
+    return re.findall(r'class="[^"]*form-hws[^"]*"[^>]*style="display: none;"', response.content.decode())
+
+
+def test_prefilled_event_form_shows_its_sections_without_clicking_rig(admin_client, records):
+    response = admin_client.get(reverse("event_create"), {"prefill": encode(payload(records))})
+    assert response.context["prefilled"] is True
+    assert _hidden_sections(response) == []
+    assert 'name="is_rig"' in response.content.decode()
+    assert response.context["form"]["is_rig"].value() is True
+
+
+def test_plain_event_form_still_waits_for_the_rig_button(admin_client):
+    response = admin_client.get(reverse("event_create"))
+    assert response.context["prefilled"] is False
+    assert len(_hidden_sections(response)) == 5
+
+
+def test_prefill_is_only_applied_on_get(admin_client, records):
+    url = reverse("event_create") + "?prefill=" + encode(payload(records))
+    response = admin_client.post(url, {"name": ""})
+    assert response.status_code == 200
+    assert response.context["prefilled"] is False
+    assert "has been pre-filled from an enquiry" not in response.content.decode()

@@ -116,13 +116,16 @@ class EventCreate(generic.CreateView):
     form_class = forms.EventForm
     template_name = "event_form.html"
 
+    prefilled = False
+
     def get_initial(self):
         initial = super().get_initial()
         prefill = self.request.GET.get("prefill")
-        if prefill:
+        if prefill and self.request.method == "GET":
             filled = prefill_module.event_initial(prefill)
             if filled:
                 initial.update(filled)
+                self.prefilled = True
                 messages.info(
                     self.request, "This event has been pre-filled from an enquiry. Check the details before saving."
                 )
@@ -135,6 +138,7 @@ class EventCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "New Event"
+        context["prefilled"] = self.prefilled
         context["edit"] = True
         context["currentVAT"] = models.VatRate.objects.current_rate()
 

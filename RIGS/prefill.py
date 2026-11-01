@@ -95,7 +95,7 @@ def event_initial(value):
     initial.update(links)
     text = _text(data, links)
     if text:
-        initial["description"] = text
+        initial["notes"] = text
     return initial
 
 
