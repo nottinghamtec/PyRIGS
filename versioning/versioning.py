@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.core import serializers
 from reversion.models import Revision, Version, VersionQuerySet
+from reversion.revisions import _get_options
 
 
 class RevisionMixin:
@@ -156,7 +157,7 @@ class ModelComparison:
 
     @cached_property
     def item_changes(self):
-        if self.follow and self.version.object is not None:
+        if self.follow and self.version.object is not None and _get_options(self.version.object.__class__).follow:
             from RIGS.models import EventAuthorisation
             from training.models import TrainingLevelQualification, TrainingItemQualification
 

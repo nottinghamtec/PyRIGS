@@ -135,6 +135,27 @@ class RIGSVersionTestCase(TestCase):
         # Mainly to check for exceptions:
         self.assertTrue(len(diff.field_changes) > 0)
 
+    def test_reauthorisation_does_not_diff_event_items(self):
+        with reversion.create_revision():
+            models.EventItem.objects.create(event=self.event, name="TI I1", quantity=1, cost=1.00, order=1)
+            self.event.save()
+
+        with reversion.create_revision():
+            auth = models.EventAuthorisation.objects.create(
+                event=self.event, email="a@b.test", name="Auth", amount=1, sent_by=self.profile
+            )
+            self.event.save()
+
+        with reversion.create_revision():
+            auth.amount = 2
+            auth.save()
+
+        current_version = versioning.RIGSVersion.objects.get_for_object(auth).latest("revision_id")
+
+        self.assertEqual([c.field.name for c in current_version.changes.field_changes], ["amount"])
+        self.assertIsNone(current_version.changes.item_changes)
+        self.assertFalse(current_version.changes.items_changed)
+
     def test_event_items(self):
         with reversion.create_revision():
             reversion.set_user(self.profile)
