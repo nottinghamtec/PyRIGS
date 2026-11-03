@@ -166,6 +166,7 @@ class ModelComparison:
                 self.version.parent.revision.version_set.exclude(content_type=item_type)
                 .exclude(content_type=ContentType.objects.get_for_model(TrainingItemQualification))
                 .exclude(content_type=ContentType.objects.get_for_model(TrainingLevelQualification))
+                .exclude(content_type=ContentType.objects.get_for_model(EventAuthorisation))
             )
             new_item_versions = self.version.revision.version_set.exclude(content_type=item_type).exclude(
                 content_type=ContentType.objects.get_for_model(EventAuthorisation)
@@ -181,18 +182,19 @@ class ModelComparison:
                 if version._model is None:
                     continue
                 compare = ModelComparison(old=version._object_version.object, **comparisonParams)
-                item_dict[version.object_id] = compare
+                item_dict[(version.content_type_id, version.object_id)] = compare
 
             for version in new_item_versions:  # go through the new versions
                 if version._model is None:
                     continue
+                key = (version.content_type_id, version.object_id)
                 try:
-                    compare = item_dict[version.object_id]  # see if there's a matching old version
+                    compare = item_dict[key]  # see if there's a matching old version
                     compare.new = version._object_version.object  # then add the new version to the dictionary
                 except KeyError:  # there's no matching old version, so add this item to the dictionary by itself
                     compare = ModelComparison(new=version._object_version.object, **comparisonParams)
 
-                item_dict[version.object_id] = compare  # update the dictionary with the changes
+                item_dict[key] = compare  # update the dictionary with the changes
 
             changes = []
             for _, compare in list(item_dict.items()):

@@ -156,6 +156,24 @@ class RIGSVersionTestCase(TestCase):
         self.assertIsNone(current_version.changes.item_changes)
         self.assertFalse(current_version.changes.items_changed)
 
+    def test_editing_authorised_event_does_not_diff_authorisation(self):
+        with reversion.create_revision():
+            models.EventAuthorisation.objects.create(
+                pk=9001, event=self.event, email="a@b.test", name="Auth", amount=1, sent_by=self.profile
+            )
+            self.event.save()
+
+        with reversion.create_revision():
+            models.EventItem.objects.create(pk=9002, event=self.event, name="TI I1", quantity=1, cost=1.00, order=1)
+            self.event.save()
+
+        current_version = versioning.RIGSVersion.objects.get_for_object(self.event).latest("revision_id")
+
+        diffs = current_version.changes.item_changes
+        self.assertEqual(len(diffs), 1)
+        self.assertIsNone(diffs[0].old)
+        self.assertEqual(diffs[0].new.name, "TI I1")
+
     def test_event_items(self):
         with reversion.create_revision():
             reversion.set_user(self.profile)
