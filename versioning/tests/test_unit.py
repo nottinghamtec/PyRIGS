@@ -2,7 +2,7 @@ from datetime import date
 
 from django.urls import reverse
 from reversion import revisions as reversion
-from pytest_django.asserts import assertContains
+from pytest_django.asserts import assertContains, assertNotContains
 
 from RIGS import models
 from assets import models as amodels
@@ -65,6 +65,24 @@ def test_history_loads_successfully(admin_client, admin_user):
     request_url = reverse("asset_history", kwargs={"pk": assets[1].asset_id})
     response = admin_client.get(request_url, follow=True)
     assert response.status_code == 200
+
+
+def test_activity_feed_labels_authorisations(admin_client, admin_user):
+    event = create_events(admin_user)[1]
+    with reversion.create_revision():
+        authorisation = models.EventAuthorisation.objects.create(
+            event=event, email="a@b.test", name="Auth Name", amount=1, sent_by=admin_user
+        )
+    response = admin_client.get(reverse("activity_feed"), follow=True)
+    assertContains(response, "Authorised")
+    assertNotContains(response, "Reauthorised")
+
+    with reversion.create_revision():
+        authorisation.amount = 2
+        authorisation.save()
+    response = admin_client.get(reverse("activity_feed"), follow=True)
+    assertContains(response, "Reauthorised")
+    assertContains(response, "for £2 by Auth Name")
 
 
 def test_activity_feed_loads_successfully(admin_client):
