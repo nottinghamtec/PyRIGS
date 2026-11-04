@@ -2,6 +2,7 @@ import datetime
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import title
 from django.views import generic
@@ -16,12 +17,13 @@ class VersionHistory(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        return (
-            RIGSVersion.objects.get_for_object(self.get_object())
-            .select_related("revision", "revision__user")
-            .all()
-            .order_by("-revision__date_created")
-        )
+        obj = self.get_object()
+        versions = RIGSVersion.objects.get_for_object(obj)
+        if hasattr(obj, "related_history_versions"):
+            versions = RIGSVersion.objects.filter(
+                Q(pk__in=versions.values("pk")) | Q(pk__in=obj.related_history_versions().values("pk"))
+            )
+        return versions.select_related("revision", "revision__user").order_by("-revision__date_created")
 
     def get_object(self, **kwargs):
         # Goddamit, almost got away without specific hacks

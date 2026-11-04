@@ -7,8 +7,8 @@
 {% load cache %}
 
 {% block content %}
-{# The fragment is cached for an hour (in the database in production), so bump the "bs9" suffix whenever its markup changes (new revisions change feed_version) #}
-{% cache 3600 feed_data_bs9 request.user feed_version %}
+{# The fragment is cached for an hour (in the database in production), so bump the "bs10" suffix whenever its markup changes (new revisions change feed_version) #}
+{% cache 3600 feed_data_bs10 request.user feed_version %}
 {% for group in groups %}
 <div class="list-group-item">
     <div class="d-flex">
@@ -44,7 +44,11 @@
                     Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id }}</a>
                 {% elif version.deleted_enquiry_name is not None %}
                     Deleted enquiry {{ version.deleted_enquiry_name }}
-                {% elif version.changes.new|to_class_name == "EventAuthorisation" %}
+                {% elif version.changes.new|to_class_name == "PATTestBatch" %}
+                    {% if version.changes.old == None %}Uploaded PAT results{% else %}Updated PAT results in{% endif %}
+                    <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.original_filename }}</a>
+                    ({{ version.changes.new.records.count }} imported)
+                                {% elif version.changes.new|to_class_name == "EventAuthorisation" %}
                     {% if version.changes.old == None %}Authorised{% else %}Reauthorised{% endif %}
                     {% include 'partials/object_button.html' with object=version.changes.new %}
                     for £{{ version.changes.new.amount }} by {{ version.changes.new.name }}

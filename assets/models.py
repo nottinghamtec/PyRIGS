@@ -225,6 +225,16 @@ class Asset(models.Model, RevisionMixin):
     def display_name(self):
         return f"{self.display_id} | {self.description}"
 
+    def related_history_versions(self):
+        """Versions of other objects that belong in this asset's history"""
+        from django.contrib.contenttypes.models import ContentType
+        from versioning.versioning import RIGSVersion
+
+        return RIGSVersion.objects.filter(
+            content_type=ContentType.objects.get_for_model(PATTestRecord),
+            object_id__in=[str(pk) for pk in self.pat_tests.values_list("pk", flat=True)],
+        )
+
     @property
     def latest_pat_test(self):
         return self.pat_tests.order_by("-tested_at").first()
@@ -255,6 +265,7 @@ def pat_upload_path(instance, filename):
     return f"pat/{timezone.now():%Y/%m}/{uuid.uuid4().hex}.sss"
 
 
+@reversion.register
 class PATTestBatch(models.Model):
     file = models.FileField(upload_to=pat_upload_path)
     original_filename = models.CharField(max_length=255)
@@ -272,8 +283,19 @@ class PATTestBatch(models.Model):
     def __str__(self):
         return f"{self.original_filename} ({self.uploaded_at:%Y-%m-%d})"
 
+    def get_absolute_url(self):
+        return reverse("pat_batch_detail", kwargs={"pk": self.pk})
+
+    @property
+    def activity_feed_string(self):
+        return self.original_filename
+
+    @property
+    def display_id(self):
+        return self.original_filename
 
 
+@reversion.register
 class PATTestRecord(models.Model):
     NOT_TESTED = "not_tested"
     FAILED = "failed"
@@ -295,6 +317,8 @@ class PATTestRecord(models.Model):
     next_full_test_date = models.DateField(null=True, blank=True)
     next_visual_test_date = models.DateField(null=True, blank=True)
     details = models.JSONField(default=dict, blank=True)
+
+    reversion_hide = True
 
     class Meta:
         ordering = ["-tested_at"]

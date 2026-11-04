@@ -647,7 +647,7 @@ class PATBatchReprocess(generic.View):
             messages.error(request, "That conflict no longer exists")
             return redirect("pat_batch_detail", pk=batch.pk)
         try:
-            summary = pat.reprocess(batch, accept)
+            summary = pat.reprocess(batch, request.user, accept)
         except SSSParseError:
             messages.error(request, "The stored file could no longer be read")
             return redirect("pat_batch_detail", pk=batch.pk)

@@ -1,4 +1,54 @@
 {% load to_class_name from filters %}
+{% if object|to_class_name == "Asset" %}
+{% include 'partials/pat_styles.html' %}
+<div class="table-responsive">
+    <table class="table table-hover pat-table">
+        <colgroup><col style="width: 13rem"><col style="width: 9rem"><col style="width: 10rem"><col></colgroup>
+        <thead class="table-dark">
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Version ID</th>
+            <th scope="col">User</th>
+            <th scope="col">Changes</th>
+        </tr>
+        </thead>
+        {% for version in object_list %}
+            {% if version.changes.new|to_class_name == "PATTestRecord" %}
+            <tbody class="pat-result">
+                <tr class="pat-summary">
+                    <th scope="row">{{ version.revision.date_created }}</th>
+                    <td>{{ version.display_id }}</td>
+                    <td>{{ version.revision.user.name|default:"System" }}</td>
+                    <td>{% include 'partials/pat_history_entry.html' with test=version.changes.new old=version.changes.old %}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="p-0 border-0">
+                        <div class="collapse" id="pat-v{{ version.pk }}">
+                            <div class="pat-detail-wrap">{% include 'partials/pat_test_details.html' with test=version.changes.new %}</div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            {% else %}
+            <tbody>
+                <tr>
+                    <th scope="row">{{ version.revision.date_created }}</th>
+                    <td>{{ version.display_id }}</td>
+                    <td>{{ version.revision.user.name|default:"System" }}</td>
+                    <td>
+                        {% if version.changes.old is None %}
+                            {{object|to_class_name}} Created
+                        {% else %}
+                            {% include 'partials/version_changes.html' %}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>
+{% else %}
 <div class="table-responsive">
     <table class="table table-striped">
         <thead class="table-dark">
@@ -27,3 +77,4 @@
         </tbody>
     </table>
 </div>
+{% endif %}
