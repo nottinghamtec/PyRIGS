@@ -19,6 +19,17 @@ services:
       timeout: 5s
       retries: 5
 
+  # S3-compatible object store for uploaded files (PAT results); objects are plain files in the volume
+  s3:
+    image: ghcr.io/versity/versitygw:latest
+    restart: unless-stopped
+    environment:
+      ROOT_ACCESS_KEY: ${AWS_ACCESS_KEY_ID:-pyrigs}
+      ROOT_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY:-pyrigs-dev-secret}
+    command: [ "--port", ":7070", "posix", "/data" ]
+    volumes:
+      - s3_data:/data
+
   pyrigs:
     build:
       context: .
@@ -49,6 +60,12 @@ services:
       HCAPTCHA_SITEKEY: ${HCAPTCHA_SITEKEY:-10000000-ffff-ffff-ffff-000000000001}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET:-0x0000000000000000000000000000000000000000}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-pyrigs-media}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://s3:7070}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-1}
+      AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-path}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-pyrigs}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-pyrigs-dev-secret}
     ports:
       - "8000:8000"
 
@@ -67,12 +84,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      s3:
+        condition: service_started
 
     command:
       - sh
       - -c
       - |
         python manage.py migrate --noinput &&
+        python manage.py ensure_media_bucket &&
         exec python manage.py runserver 0.0.0.0:8000
 
     develop:
@@ -102,5 +122,6 @@ services:
 
 volumes:
   postgres_data:
+  s3_data:
   node_modules:
   npm_cache:

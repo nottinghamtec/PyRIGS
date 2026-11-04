@@ -115,3 +115,4 @@ nginx/certbot/
 nginx/*.conf
 *.pem
 *.key
+media/
