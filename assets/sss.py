@@ -1,5 +1,6 @@
 import calendar
 import struct
+import uuid
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
@@ -20,13 +21,18 @@ VISUAL_RESULT = 0xFD
 
 FRAME_HEADER = struct.Struct("<BHHH")
 MACHINE_INFO = struct.Struct("<20s20s")
-TEST_HEADER = struct.Struct("<B16s64x16s16sBBBBBH16s128s1xB30sB15x")
+# flags, asset id, 48 unused bytes, test GUID, site, location, h/m/s/d/m/y, operator, comments, unused byte,
+# retest months, program, visual retest months, 15 bytes that are the same in every normal test
+TEST_HEADER = struct.Struct("<B16s48x16s16s16sBBBBBH16s128s1xB30sB15x")
 VISUAL_RESULT_BODY = struct.Struct("<16s16sHB")
 
 FLAG_PASS = 0x01
 FLAG_FAIL = 0x02
+FLAG_POLARITY_FAIL = 0x04  # polarity results are also flagged this way, sometimes without FLAG_FAIL
 FLAG_LESS_THAN = 0x10
 FLAG_GREATER_THAN = 0x20
+
+POLARITY_TEST = 0x91
 
 # type byte -> (kind, [(field name, unit or None for string)...]); every body ends with one flag byte
 PHYSICAL_TESTS = {
@@ -35,7 +41,7 @@ PHYSICAL_TESTS = {
     0x18: ("Point to point", [("resistance", "ohm")]),
     0x20: ("Insulation", [("voltage", "V"), ("resistance", "Mohm")]),
     0x83: ("Substitute leakage", [("current", "mA")]),
-    0x91: ("Polarity", []),
+    POLARITY_TEST: ("Polarity", []),
     0x92: ("Mains voltage", [("voltage", "V")]),
     0x96: ("Touch / leakage current", [("load current", "mA"), None, ("leakage current", "mA")]),
     0x9A: ("RCD", [("test current", "mA"), ("angle", "deg"), ("trip time", "ms")]),
@@ -43,6 +49,21 @@ PHYSICAL_TESTS = {
 STRING_COMMENT = 0xFC
 STRING_COMMENT_LENGTH = 86
 FLOAT_SIZE = 2
+
+# The program a test was run with is stored in front of its results: a length, a flag for the standard visual
+# checks, then one entry per step, each a type byte followed by this many bytes of settings.
+PROGRAM_STEP_SIZES = {
+    0x11: 4,
+    0x16: 4,
+    0x20: 6,
+    0x83: 4,
+    0x53: 4,
+    POLARITY_TEST: 0,
+    0x9A: 6,
+    STRING_COMMENT: 55,
+    VISUAL_RESULT: 32,
+}
+PROGRAM_TEXT_LENGTH = 54
 
 
 class SSSParseError(ValueError):
@@ -63,12 +84,14 @@ class TestStep:
     qualifier: str = ""
     measurements: tuple = ()
     text: str = ""
+    flags: int = 0
 
     def as_dict(self):
         return {
             "kind": self.kind,
             "status": self.status,
             "qualifier": self.qualifier,
+            "flags": self.flags,
             "measurements": [{"name": m.name, "value": str(m.value), "unit": m.unit} for m in self.measurements],
             "text": self.text,
         }
@@ -88,6 +111,11 @@ class TestResult:
     visual_retest_months: int
     visual_checks: tuple = ()
     steps: tuple = ()
+    flags: int = 0
+    guid: str = ""
+    standard_visual_checks: bool = True
+    program_steps: tuple = ()
+    raw: dict = field(default_factory=dict)
 
     @property
     def passed(self):
@@ -110,6 +138,13 @@ class TestResult:
             "site": self.site,
             "location": self.location,
             "program": self.program,
+            "guid": self.guid,
+            "flags": self.flags,
+            "retest_months": self.retest_months,
+            "visual_retest_months": self.visual_retest_months,
+            "standard_visual_checks": self.standard_visual_checks,
+            "program_steps": list(self.program_steps),
+            "raw": self.raw,
             "visual_checks": [step.as_dict() for step in self.visual_checks],
             "steps": [step.as_dict() for step in self.steps],
         }
@@ -139,8 +174,8 @@ def decode_float(raw):
     return Decimal(raw & 0x3FFF).scaleb(-(raw >> 14))
 
 
-def decode_flags(byte):
-    if byte & FLAG_FAIL:
+def decode_flags(byte, fail_mask=FLAG_FAIL):
+    if byte & fail_mask:
         status = FAIL
     elif byte & FLAG_PASS:
         status = PASS
@@ -212,14 +247,15 @@ def parse_results(body, pos):
             value = decode_float(raw)
             unit = decode_text(unit)
             measurements = (Measurement("value", value, unit),) if unit else ()
-            visual_checks.append(TestStep(decode_text(name), status, qualifier, measurements))
+            visual_checks.append(TestStep(decode_text(name), status, qualifier, measurements, flags=flags))
         elif kind == STRING_COMMENT:
             if pos + STRING_COMMENT_LENGTH + 1 > len(body):
                 return None
             text = decode_text(body[pos : pos + STRING_COMMENT_LENGTH])
-            status, qualifier = decode_flags(body[pos + STRING_COMMENT_LENGTH])
+            flags = body[pos + STRING_COMMENT_LENGTH]
+            status, qualifier = decode_flags(flags)
             pos += STRING_COMMENT_LENGTH + 1
-            steps.append(TestStep("Comment", status, qualifier, text=text))
+            steps.append(TestStep("Comment", status, qualifier, text=text, flags=flags))
         elif kind in PHYSICAL_TESTS:
             name, layout = PHYSICAL_TESTS[kind]
             size = len(layout) * FLOAT_SIZE + 1
@@ -230,12 +266,104 @@ def parse_results(body, pos):
                 if spec is not None:
                     (raw,) = struct.unpack_from("<H", body, pos + offset * FLOAT_SIZE)
                     measurements.append(Measurement(spec[0], decode_float(raw), spec[1]))
-            status, qualifier = decode_flags(body[pos + size - 1])
+            fail_mask = FLAG_FAIL | FLAG_POLARITY_FAIL if kind == POLARITY_TEST else FLAG_FAIL
+            flags = body[pos + size - 1]
+            status, qualifier = decode_flags(flags, fail_mask)
             pos += size
-            steps.append(TestStep(name, status, qualifier, tuple(measurements)))
+            steps.append(TestStep(name, status, qualifier, tuple(measurements), flags=flags))
         else:
             return None
     return tuple(visual_checks), tuple(steps)
+
+
+def program_float(raw):
+    return str(decode_float(struct.unpack("<H", raw)[0]))
+
+
+def parse_program(definition):
+    """
+    Decode the program a test was run with. Returns (standard_visual_checks, steps), or None if it has an entry we
+    don't understand. Limits are the program's base limits: the tester can allow more for longer leads.
+    """
+    if len(definition) < 2:
+        return None
+    body = definition[2:]
+    pos = 1 if body[:1] == b"\x01" else 0
+    standard_visual_checks = pos == 1
+    steps = []
+    while pos < len(body):
+        kind = body[pos]
+        size = PROGRAM_STEP_SIZES.get(kind)
+        if size is None or pos + 1 + size > len(body):
+            return None
+        settings = body[pos + 1 : pos + 1 + size]
+        pos += 1 + size
+        if kind == 0x11:
+            steps.append(
+                {"kind": "Earth resistance", "limit": program_float(settings[1:3]), "limit_type": "max", "unit": "ohm"}
+            )
+        elif kind == 0x16:
+            steps.append(
+                {
+                    "kind": "IEC lead continuity",
+                    "limit": program_float(settings[1:3]),
+                    "limit_type": "max",
+                    "unit": "ohm",
+                    "repeats": settings[3] + 1,
+                }
+            )
+        elif kind == 0x20:
+            steps.append(
+                {
+                    "kind": "Insulation",
+                    "voltage": program_float(settings[0:2]),
+                    "limit": program_float(settings[3:5]),
+                    "limit_type": "min",
+                    "unit": "Mohm",
+                }
+            )
+        elif kind == 0x9A:
+            steps.append(
+                {
+                    "kind": "RCD",
+                    "test_current": program_float(settings[0:2]),
+                    "angle": program_float(settings[2:4]),
+                    "limit": program_float(settings[4:6]),
+                    "limit_type": "max",
+                    "unit": "ms",
+                }
+            )
+        elif kind == POLARITY_TEST:
+            steps.append({"kind": "Polarity"})
+        elif kind == STRING_COMMENT:
+            steps.append({"kind": "Comment", "text": decode_text(settings[:PROGRAM_TEXT_LENGTH])})
+        elif kind == VISUAL_RESULT:
+            steps.append({"kind": "Visual check", "text": decode_text(settings[:16])})
+        elif kind == 0x83:
+            steps.append({"kind": "Substitute leakage"})
+        else:
+            steps.append({"kind": f"Test 0x{kind:02x}"})
+    return standard_visual_checks, tuple(steps)
+
+
+def locate_results(body):
+    """Find the marker that ends the program definition and parse the results after it."""
+    start = TEST_HEADER.size
+    candidates = []
+    if len(body) >= start + 2:
+        # The definition starts with a length that counts everything after it, up to and including the marker
+        (length,) = struct.unpack_from("<H", body, start)
+        candidates.append(start + length + 1)
+    marker = body.find(bytes([RESULTS_MARKER]), start)
+    while marker != -1:
+        candidates.append(marker)
+        marker = body.find(bytes([RESULTS_MARKER]), marker + 1)
+    for marker in candidates:
+        if marker < len(body) and body[marker] == RESULTS_MARKER:
+            parsed = parse_results(body, marker + 1)
+            if parsed is not None:
+                return marker, parsed
+    return None, None
 
 
 def parse_test_result(body):
@@ -244,6 +372,7 @@ def parse_test_result(body):
     (
         flags,
         asset_id,
+        guid,
         site,
         location,
         hour,
@@ -264,13 +393,11 @@ def parse_test_result(body):
     except ValueError:
         raise SSSParseError(f"Test record for '{asset_id}' has an invalid date") from None
 
-    parsed = None
-    marker = body.find(bytes([RESULTS_MARKER]), TEST_HEADER.size)
-    while marker != -1 and parsed is None:
-        parsed = parse_results(body, marker + 1)
-        marker = body.find(bytes([RESULTS_MARKER]), marker + 1)
+    marker, parsed = locate_results(body)
     if parsed is None:
         raise SSSParseError(f"Could not read the test results for '{asset_id}'")
+    definition = body[TEST_HEADER.size : marker]
+    program_steps = parse_program(definition)
 
     status, _ = decode_flags(flags)
     return TestResult(
@@ -286,6 +413,11 @@ def parse_test_result(body):
         visual_retest_months=visual_retest_months,
         visual_checks=parsed[0],
         steps=parsed[1],
+        flags=flags,
+        guid=str(uuid.UUID(bytes_le=guid)) if any(guid) else "",
+        standard_visual_checks=program_steps[0] if program_steps else True,
+        program_steps=program_steps[1] if program_steps else (),
+        raw={} if program_steps else {"program_definition": definition.hex()},
     )
 
 

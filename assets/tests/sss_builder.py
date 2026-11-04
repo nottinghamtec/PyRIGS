@@ -1,4 +1,5 @@
 import struct
+import uuid
 from datetime import datetime
 
 from assets import sss
@@ -22,8 +23,40 @@ def machine_info(model="Apollo 500 Plus", serial="31S-0387"):
     return frame(bytes([sss.RECORD_MACHINE_INFO]) + text(model, 20) + text(serial, 20))
 
 
-def polarity(passed=True):
-    return bytes([0x91, sss.FLAG_PASS if passed else sss.FLAG_FAIL])
+def polarity(passed=True, flags=None):
+    if flags is None:
+        flags = sss.FLAG_PASS if passed else sss.FLAG_FAIL
+    return bytes([0x91, flags])
+
+
+def program_definition(*entries, standard_visual_checks=True):
+    payload = (b"\x01" if standard_visual_checks else b"") + b"".join(entries)
+    # the length counts everything after itself, up to and including the results marker
+    return struct.pack("<H", len(payload) + 1) + payload
+
+
+def def_earth(limit=(100, 3), mode=5):
+    return bytes([0x11, mode]) + encode_float(*limit) + b"\x00"
+
+
+def def_continuity(limit=(100, 3), mode=5, ways=1):
+    return bytes([0x16, mode]) + encode_float(*limit) + bytes([ways - 1])
+
+
+def def_insulation(voltage=(5000, 1), limit=(1000, 3), mode=2):
+    return bytes([0x20]) + encode_float(*voltage) + bytes([mode]) + encode_float(*limit) + b"\x00"
+
+
+def def_rcd(current=(3000, 2), angle=(0, 3), limit=(2000, 1)):
+    return bytes([0x9A]) + encode_float(*current) + encode_float(*angle) + encode_float(*limit)
+
+
+def def_polarity():
+    return bytes([0x91])
+
+
+def def_prompt(value="Change Connector"):
+    return bytes([sss.STRING_COMMENT]) + text(value, 54) + b"\x00"
 
 
 def lead_continuity(value=4, exponent=2, passed=True):
@@ -39,8 +72,9 @@ def insulation(voltage=500, mohm=1999, exponent=2, greater_than=True, passed=Tru
     return bytes([0x20]) + encode_float(voltage, 0) + encode_float(mohm, exponent) + bytes([flags])
 
 
-def comment(value):
-    return bytes([sss.STRING_COMMENT]) + text(value, sss.STRING_COMMENT_LENGTH) + bytes([sss.FLAG_PASS])
+def comment(value, passed=True):
+    flags = sss.FLAG_PASS if passed else sss.FLAG_FAIL
+    return bytes([sss.STRING_COMMENT]) + text(value, sss.STRING_COMMENT_LENGTH) + bytes([flags])
 
 
 def visual(name="Plug", passed=True):
@@ -60,10 +94,14 @@ def test_result(
     steps=None,
     visuals=None,
     before_marker=b"",
+    guid=None,
+    definition=None,
 ):
+    guid = guid or uuid.uuid5(uuid.NAMESPACE_OID, f"{asset_id}{tested_at.isoformat()}")
     header = sss.TEST_HEADER.pack(
         sss.FLAG_PASS if passed else sss.FLAG_FAIL,
         text(asset_id, 16),
+        guid.bytes_le,
         text("TEC PA", 16),
         text("Storeroom", 16),
         tested_at.hour,
@@ -80,7 +118,8 @@ def test_result(
     )
     steps = steps if steps is not None else [lead_continuity(), insulation(), polarity()]
     visuals = visuals if visuals is not None else [visual("Plug"), visual("Flex")]
-    content = bytes([sss.RECORD_TEST_RESULT]) + header + before_marker + bytes([sss.RESULTS_MARKER])
+    definition = program_definition() if definition is None else definition
+    content = bytes([sss.RECORD_TEST_RESULT]) + header + definition + before_marker + bytes([sss.RESULTS_MARKER])
     content += b"".join(visuals) + b"".join(steps)
     return frame(content, terminated=True)
 

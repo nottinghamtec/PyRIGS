@@ -137,3 +137,88 @@ def test_unrecognised_test_type_is_rejected():
 def test_truncated_result_is_rejected():
     with pytest.raises(sss.SSSParseError, match="Could not read the test results"):
         parse_one(steps=[b.lead_continuity()[:-1]])
+
+
+@pytest.mark.parametrize(
+    "flags,expected",
+    [(0x01, sss.PASS), (0x02, sss.FAIL), (0x03, sss.FAIL), (0x04, sss.FAIL), (0x06, sss.FAIL), (0x00, sss.INFO)],
+)
+def test_polarity_flags(flags, expected):
+    result = parse_one(steps=[b.polarity(flags=flags)])
+    assert result.steps[0].status == expected
+
+
+def test_polarity_bit_does_not_mean_failure_for_other_tests():
+    step = bytes([0x16]) + b.encode_float(4, 2) + bytes([sss.FLAG_POLARITY_FAIL])
+    assert parse_one(steps=[step]).steps[0].status == sss.UNKNOWN
+
+
+def test_everything_the_tester_records_is_kept():
+    result = parse_one(program="Class 1 Appliance", retest_months=6, visual_retest_months=3, steps=[b.insulation()])
+    details = result.details()
+    assert details["guid"] == str(b.uuid.uuid5(b.uuid.NAMESPACE_OID, "43342025-09-28T20:03:34"))
+    assert details["flags"] == sss.FLAG_PASS
+    assert details["retest_months"] == 6
+    assert details["visual_retest_months"] == 3
+    assert details["raw"] == {}
+    assert details["steps"][0]["flags"] == sss.FLAG_PASS | sss.FLAG_GREATER_THAN
+    assert details["visual_checks"][0]["flags"] == sss.FLAG_PASS
+
+
+def test_program_is_decoded():
+    definition = b.program_definition(
+        b.def_earth(limit=(100, 3)),
+        b.def_insulation(voltage=(5000, 1), limit=(1000, 3)),
+        b.def_prompt("Plug in thru"),
+        b.def_continuity(limit=(200, 3), ways=4),
+        b.def_rcd(),
+        b.def_polarity(),
+    )
+    details = parse_one(definition=definition).details()
+    assert details["standard_visual_checks"] is True
+    assert details["raw"] == {}
+    assert details["program_steps"] == [
+        {"kind": "Earth resistance", "limit": "0.100", "limit_type": "max", "unit": "ohm"},
+        {"kind": "Insulation", "voltage": "500.0", "limit": "1.000", "limit_type": "min", "unit": "Mohm"},
+        {"kind": "Comment", "text": "Plug in thru"},
+        {"kind": "IEC lead continuity", "limit": "0.200", "limit_type": "max", "unit": "ohm", "repeats": 4},
+        {
+            "kind": "RCD",
+            "test_current": "30.00",
+            "angle": "0.000",
+            "limit": "200.0",
+            "limit_type": "max",
+            "unit": "ms",
+        },
+        {"kind": "Polarity"},
+    ]
+
+
+def test_program_without_standard_visual_checks():
+    definition = b.program_definition(b.def_polarity(), standard_visual_checks=False)
+    assert parse_one(definition=definition).details()["standard_visual_checks"] is False
+
+
+def test_program_text_may_contain_the_marker_byte():
+    definition = b.program_definition(b.def_prompt("caf\u00fe"))
+    result = parse_one(definition=definition)
+    assert result.details()["program_steps"] == [{"kind": "Comment", "text": "caf\u00fe"}]
+    assert [s.kind for s in result.steps] == ["IEC lead continuity", "Insulation", "Polarity"]
+
+
+def test_undecodable_program_keeps_the_raw_bytes():
+    definition = b.program_definition(b.def_polarity(), bytes([0x77, 1, 2]))
+    details = parse_one(definition=definition).details()
+    assert details["program_steps"] == []
+    assert details["raw"] == {"program_definition": definition.hex()}
+
+
+def test_wrong_length_field_falls_back_to_finding_the_marker():
+    definition = b"\xff\x00" + b.program_definition(b.def_polarity())[2:]
+    result = parse_one(definition=definition)
+    assert [s.kind for s in result.steps] == ["IEC lead continuity", "Insulation", "Polarity"]
+
+
+def test_missing_guid_is_blank():
+    guid = b.uuid.UUID(int=0)
+    assert parse_one(guid=guid).guid == ""
