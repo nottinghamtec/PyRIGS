@@ -228,12 +228,18 @@ class Asset(models.Model, RevisionMixin):
     def related_history_versions(self):
         """Versions of other objects that belong in this asset's history"""
         from django.contrib.contenttypes.models import ContentType
-        from versioning.versioning import RIGSVersion
+        from versioning.versioning import PAT_DELETED_PREFIX, RIGSVersion
 
-        return RIGSVersion.objects.filter(
-            content_type=ContentType.objects.get_for_model(PATTestRecord),
-            object_id__in=[str(pk) for pk in self.pat_tests.values_list("pk", flat=True)],
+        record_type = ContentType.objects.get_for_model(PATTestRecord)
+        ids = {str(pk) for pk in self.pat_tests.values_list("pk", flat=True)}
+        # Results that were deleted are gone from the table, but the revision that deleted them kept a copy
+        deleted = RIGSVersion.objects.filter(
+            content_type=record_type,
+            revision__comment__startswith=PAT_DELETED_PREFIX,
+            serialized_data__regex=rf'"asset": {self.pk}[,}}]',
         )
+        ids.update(deleted.values_list("object_id", flat=True))
+        return RIGSVersion.objects.filter(content_type=record_type, object_id__in=ids)
 
     @property
     def latest_pat_test(self):

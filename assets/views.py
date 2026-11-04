@@ -686,3 +686,37 @@ class PATBatchDownload(generic.View):
     def get(self, request, pk):
         batch = get_object_or_404(models.PATTestBatch, pk=pk)
         return FileResponse(batch.file.open("rb"), as_attachment=True, filename=batch.original_filename)
+
+
+class PATBatchDelete(generic.FormView):
+    template_name = "pat_batch_confirm_delete.html"
+    form_class = forms.PATBatchDeleteForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.batch = get_object_or_404(models.PATTestBatch, pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        records = self.batch.records.all()
+        affected = models.Asset.objects.filter(pat_tests__batch=self.batch).distinct()
+        # assets with results from other uploads go back to their latest remaining result; these would have none
+        untested = affected.exclude(pat_tests__in=models.PATTestRecord.objects.exclude(batch=self.batch))
+        context.update(
+            {
+                "page_title": f"Delete PAT upload {self.batch.original_filename}",
+                "batch": self.batch,
+                "record_count": records.count(),
+                "asset_count": affected.count(),
+                "untested_assets": list(untested.order_by("asset_id_prefix", "asset_id_number")[:30]),
+                "untested_count": untested.count(),
+            }
+        )
+        context["more_count"] = context["untested_count"] - len(context["untested_assets"])
+        return context
+
+    def form_valid(self, form):
+        name = self.batch.original_filename
+        count = pat.delete_batch(self.batch, self.request.user, form.cleaned_data["reason"])
+        messages.success(self.request, f"Deleted {name} and its {count} results")
+        return redirect("pat_batch_list")

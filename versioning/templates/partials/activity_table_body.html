@@ -14,7 +14,7 @@
         {% for version in object_list %}
             <tr>
                 <th scope="row">{{ version.revision.date_created }}</th>
-                <td><a href="{{ version.changes.new.get_absolute_url }}">{{ version.display_name }}</a></td>
+                <td>{% if version.pat_deletion or not version.object_exists %}{{ version.display_name }}{% else %}<a href="{{ version.changes.new.get_absolute_url }}">{{ version.display_name }}</a>{% endif %}</td>
                 <td>{{ version.display_id }}</td>
                 <td>{% include 'partials/linked_name.html' with profile=version.revision.user %}</td>
                 <td>
@@ -22,8 +22,10 @@
                         Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id }}</a>
                     {% elif version.deleted_enquiry_name is not None %}
                         Deleted enquiry {{ version.deleted_enquiry_name }}
+                    {% elif version.pat_deletion %}
+                        {{ version.revision.comment }}
                     {% elif version.changes.new|to_class_name == "PATTestBatch" %}
-                        {% if version.changes.old == None %}Uploaded PAT results{% else %}Updated PAT results{% endif %} ({{ version.changes.new.records.count }} imported){% if version.revision.comment %}: {{ version.revision.comment }}{% endif %}
+                        {% if version.changes.old == None %}Uploaded PAT results{% else %}Updated PAT results{% endif %}{% if version.object_exists %} ({{ version.changes.new.records.count }} imported){% else %} (since deleted){% endif %}{% if version.revision.comment %}: {{ version.revision.comment }}{% endif %}
                                         {% elif version.changes.new|to_class_name == "EventAuthorisation" %}
                         {% if version.changes.old == None %}Authorised{% else %}Reauthorised{% endif %} for £{{ version.changes.new.amount }} by {{ version.changes.new.name }}
                         {% if version.changes.old != None %}({% include 'partials/version_changes.html' %}){% endif %}

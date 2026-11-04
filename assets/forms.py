@@ -123,3 +123,14 @@ class PATUploadForm(forms.Form):
         except SSSParseError as e:
             raise forms.ValidationError(f"Couldn't read that file: {e}") from None
         return upload
+
+
+class PATBatchDeleteForm(forms.Form):
+    reason = forms.CharField(
+        max_length=500,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        help_text="This is kept in the audit trail, so say why these results are being removed",
+    )
+
+    def clean_reason(self):
+        return " ".join(self.cleaned_data["reason"].split())

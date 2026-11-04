@@ -7,6 +7,7 @@ from reversion import revisions as reversion
 
 from assets import models
 from assets.sss import parse_sss
+from versioning.versioning import PAT_DELETED_PREFIX, record_deletions
 
 RESULT_LABELS = {True: "Pass", False: "Fail", None: "Unknown"}
 
@@ -192,3 +193,19 @@ def reprocess(batch, user, accept=None, refresh=False):
         batch.conflicts = plan.conflicts
         batch.save(update_fields=["unmatched_asset_ids", "conflicts"])
     return summarise(plan, batch)
+
+
+@transaction.atomic
+def delete_batch(batch, user, reason):
+    """
+    Delete an upload and the results imported from it, keeping a revision that records who did it and why,
+    with a snapshot of the upload and of every result. The stored file is kept.
+    """
+    records = list(batch.records.select_related("asset"))
+    record_deletions(
+        [batch, *records],
+        user,
+        f"{PAT_DELETED_PREFIX}{batch.original_filename} ({len(records)} results): {reason}",
+    )
+    batch.delete()
+    return len(records)

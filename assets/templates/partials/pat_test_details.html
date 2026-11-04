@@ -63,7 +63,7 @@
   {% endif %}
 
   <div class="text-body-secondary mt-3">
-    Tested with {{ test.batch.machine_model }} {{ test.batch.machine_serial }}, from <a href="{% url 'pat_batch_detail' test.batch_id %}">{{ test.batch.original_filename }}</a>
+    {% if test.batch %}Tested with {{ test.batch.machine_model }} {{ test.batch.machine_serial }}, from <a href="{% url 'pat_batch_detail' test.batch_id %}">{{ test.batch.original_filename }}</a>{% else %}From an upload that has since been deleted{% endif %}
     <details class="mt-1">
       <summary>Technical details</summary>
       <div class="mt-1">Test ID <code>{{ test.details.guid|default:"-" }}</code>, tester flags <code>{{ test.details.flags|stringformat:"#04x" }}</code></div>

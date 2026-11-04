@@ -13,7 +13,21 @@
         </tr>
         </thead>
         {% for version in object_list %}
-            {% if version.changes.new|to_class_name == "PATTestRecord" %}
+            {% if version.changes.new|to_class_name == "PATTestRecord" and version.pat_deletion %}
+            <tbody>
+                <tr>
+                    <th scope="row">{{ version.revision.date_created }}</th>
+                    <td>{{ version.display_id }}</td>
+                    <td>{{ version.revision.user.name|default:"System" }}</td>
+                    <td>
+                        <strong>PAT test deleted</strong>
+                        {% include 'partials/pat_result_badge.html' with passed=version.changes.new.passed %}
+                        {{ version.changes.new.details.program }}, tested {{ version.changes.new.tested_at|date:"j M Y, H:i" }}
+                        <div class="text-body-secondary small">{{ version.revision.comment }}</div>
+                    </td>
+                </tr>
+            </tbody>
+            {% elif version.changes.new|to_class_name == "PATTestRecord" %}
             <tbody class="pat-result">
                 <tr class="pat-summary">
                     <th scope="row">{{ version.revision.date_created }}</th>

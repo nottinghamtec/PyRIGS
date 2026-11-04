@@ -1,0 +1,34 @@
+{% extends 'base_assets.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+  <h2>Delete PAT upload {{ batch.original_filename }}</h2>
+  <p>This removes the upload and <strong>{{ record_count }} result{{ record_count|pluralize }}</strong> for <strong>{{ asset_count }} asset{{ asset_count|pluralize }}</strong>.
+     Each asset's PAT status will go back to its latest remaining result.</p>
+  {% if untested_count %}
+  <p><strong>{{ untested_count }} asset{{ untested_count|pluralize }}</strong> would have no PAT results left and show as never tested:
+    {% for asset in untested_assets %}<a href="{% url 'asset_detail' asset.asset_id %}">{{ asset.asset_id }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if more_count %}, and {{ more_count }} more{% endif %}.
+  </p>
+  {% endif %}
+  <p class="mb-0">A record of who deleted this, when and why is kept in the activity history, along with a copy of every result. The original <code>.sss</code> file stays in storage.</p>
+  <hr>
+  <dl class="row mb-3">
+    <dt class="col-sm-2">Uploaded</dt><dd class="col-sm-10">{{ batch.uploaded_at }} by {{ batch.uploaded_by|default:"-" }}</dd>
+    <dt class="col-sm-2">Tester</dt><dd class="col-sm-10">{{ batch.machine_model }} {{ batch.machine_serial }}</dd>
+  </dl>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="{{ form.reason.id_for_label }}" class="form-label fw-bold">Why are you deleting it?</label>
+      {% render_field form.reason class="form-control" %}
+      <div class="form-text text-body">{{ form.reason.help_text }}</div>
+      {% for error in form.reason.errors %}<div class="text-danger fw-bold">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="text-end">
+      <button type="submit" class="btn btn-danger"><span class="fas fa-trash"></span> Delete upload and {{ record_count }} result{{ record_count|pluralize }}</button>
+      <a href="{% url 'pat_batch_detail' batch.pk %}" class="btn btn-success">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

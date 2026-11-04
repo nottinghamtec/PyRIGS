@@ -3,6 +3,9 @@
 {% block content %}
 <div class="row my-2">
   <div class="col text-end pe-0">
+    {% if perms.assets.delete_pattestbatch %}
+    <a class="btn btn-outline-danger" href="{% url 'pat_batch_delete' object.pk %}"><span class="fas fa-trash"></span> Delete Upload</a>
+    {% endif %}
     {% if perms.assets.view_pattestbatch %}
     <a class="btn btn-primary" href="{% url 'pat_batch_download' object.pk %}"><span class="fas fa-download"></span> Download Original</a>
     {% endif %}
