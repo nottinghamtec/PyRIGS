@@ -20,13 +20,6 @@ def messages_of(response):
     return [str(m) for m in response.context["messages"]]
 
 
-@pytest.fixture
-def pat_asset(test_asset):
-    test_asset.asset_id = "4334"
-    test_asset.save()
-    return test_asset
-
-
 def test_upload_imports_matched_results(admin_client, pat_asset):
     data = b.sss_file(b.test_result(asset_id="4334"), b.test_result(asset_id="9999"))
     response = upload(admin_client, data)
@@ -226,8 +219,8 @@ def test_failure_reasons_and_notes(admin_client, pat_asset):
     record = models.PATTestRecord.objects.get()
     assert record.failure_reasons == [
         "Visual check failed: Flex",
-        "Failed: Insulation (voltage 500 V, resistance <0.30 Mohm)",
-        "Failed: Polarity",
+        "Insulation failed (voltage 500 V, resistance <0.30 Mohm)",
+        "Polarity failed",
     ]
     assert record.notes == ["Bent pin"]
 
@@ -245,7 +238,7 @@ def test_repeated_tests_say_which_repeat_failed(admin_client, pat_asset):
         steps += [b.polarity(passed), b.lead_continuity(), b.comment("Change Connector")]
     upload(admin_client, b.sss_file(b.test_result(passed=False, steps=steps)))
     record = models.PATTestRecord.objects.get()
-    assert record.failure_reasons == ["Failed: Polarity [3 of 4]"]
+    assert record.failure_reasons == ["Polarity failed [3 of 4]"]
 
 
 def test_failure_reasons_are_shown_on_asset_and_batch_pages(admin_client, pat_asset):
@@ -256,7 +249,7 @@ def test_failure_reasons_are_shown_on_asset_and_batch_pages(admin_client, pat_as
         reverse("pat_batch_detail", kwargs={"pk": batch.pk}),
     ]:
         content = admin_client.get(url).content.decode()
-        assert "Failed: Polarity" in content
+        assert "Polarity failed" in content
         assert "Visual check failed: Flex" in content
 
 
@@ -352,7 +345,7 @@ def test_conflict_can_be_accepted(admin_client, pat_asset):
     record = models.PATTestRecord.objects.get()
     assert record.passed is False
     assert record.batch == batch
-    assert "Failed: Polarity" in record.failure_reasons
+    assert "Polarity failed" in record.failure_reasons
     batch.refresh_from_db()
     assert batch.conflicts == []
     assert any("Replaced 1" in m for m in messages_of(response))
@@ -398,3 +391,42 @@ def test_rematch_keeps_still_missing_assets_listed(admin_client, pat_asset):
 def test_duplicate_within_one_file_is_imported_once(admin_client, pat_asset):
     upload(admin_client, b.sss_file(b.test_result(tested_at=WHEN), b.test_result(tested_at=WHEN)))
     assert models.PATTestRecord.objects.count() == 1
+
+
+def test_polarity_flag_without_the_fail_bit_is_a_failure(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result(passed=False, steps=[b.lead_continuity(), b.polarity(flags=0x04)])))
+    record = models.PATTestRecord.objects.get()
+    assert record.passed is False
+    assert record.failure_reasons == ["Polarity failed"]
+
+
+def test_operator_failing_a_prompt_is_described(admin_client, pat_asset):
+    steps = [b.polarity(), b.comment("Change Connector"), b.polarity(), b.comment("Change Connector", passed=False)]
+    upload(admin_client, b.sss_file(b.test_result(passed=False, steps=steps)))
+    record = models.PATTestRecord.objects.get()
+    assert record.failure_reasons == ["Failed by the operator at the prompt 'Change Connector' [2 of 2]"]
+
+
+def test_many_failed_visual_checks_are_one_reason(admin_client, pat_asset):
+    visuals = [b.visual("Plug", False), b.visual("Flex", False), b.visual("Socket", False), b.visual("Switch")]
+    upload(admin_client, b.sss_file(b.test_result(passed=False, steps=[], visuals=visuals)))
+    record = models.PATTestRecord.objects.get()
+    assert record.failure_reasons == ["Visual checks failed: Plug, Flex, Socket"]
+
+
+def test_flagged_steps_on_an_overall_pass_are_a_note_not_a_failure(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result(passed=True, steps=[b.lead_continuity(), b.polarity(flags=0x06)])))
+    record = models.PATTestRecord.objects.get()
+    assert record.failure_reasons == []
+    assert record.notes == ["Recorded as a pass overall, but the tester also flagged: Polarity failed"]
+    assert record.passed is True
+
+
+def test_test_program_is_shown(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result(program="Class 1 Appliance W/ thru")))
+    url = reverse("asset_detail", kwargs={"pk": pat_asset.asset_id})
+    assert b"Class 1 Appliance W/ thru" in admin_client.get(url).content
+    batch = models.PATTestBatch.objects.get()
+    assert (
+        b"Class 1 Appliance W/ thru" in admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk})).content
+    )

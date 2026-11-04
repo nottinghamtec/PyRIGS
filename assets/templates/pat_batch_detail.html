@@ -66,24 +66,19 @@
   </div>
 </div>
 {% endif %}
+{% include 'partials/pat_styles.html' %}
 <h3>{{ records|length }} results imported</h3>
-<div class="row">
-  <table class="table table-striped">
+<div class="table-responsive">
+  <table class="table table-hover align-middle pat-table">
+    <colgroup>
+      <col style="width: 2.75rem"><col style="width: 7rem"><col style="width: 6.5rem"><col style="width: 9rem"><col style="width: 12rem"><col style="width: 6rem"><col style="width: 7rem"><col>
+    </colgroup>
     <thead>
-      <tr><th>Asset</th><th>Tested</th><th>Result</th><th>Operator</th><th>Next full test</th><th>Details</th></tr>
+      <tr><th></th><th>Asset</th><th>Result</th><th>Tested</th><th>Program</th><th>Operator</th><th>Next full test</th><th>Details</th></tr>
     </thead>
-    <tbody>
-      {% for record in records %}
-      <tr>
-        <td><a href="{% url 'asset_detail' record.asset.asset_id %}">{{ record.asset }}</a></td>
-        <td>{{ record.tested_at }}</td>
-        <td>{% if record.passed %}<span class="badge text-bg-success">Pass</span>{% elif record.passed is None %}<span class="badge text-bg-secondary">Unknown</span>{% else %}<span class="badge text-bg-danger">Fail</span>{% endif %}</td>
-        <td>{{ record.operator|default:"-" }}</td>
-        <td>{{ record.next_full_test_date|default_if_none:"-" }}</td>
-        <td>{% include 'partials/pat_reasons.html' with test=record %}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
+    {% for record in records %}
+      {% include 'partials/pat_result_rows.html' with test=record colspan=8 show_asset=True %}
+    {% endfor %}
   </table>
 </div>
 {% endblock %}

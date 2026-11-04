@@ -111,3 +111,10 @@ def make_asset(category, status):
         return models.Asset.objects.create(asset_id=asset_id, **{**defaults, **kwargs})
 
     return make
+
+
+@pytest.fixture
+def pat_asset(test_asset):
+    test_asset.asset_id = "4334"
+    test_asset.save()
+    return test_asset

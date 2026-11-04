@@ -1,0 +1,75 @@
+{# pass in "test", a PATTestRecord #}
+{% with rows=test.display_steps visual=test.display_visual_checks program=test.display_program %}
+<div class="pat-detail small {% if test.passed %}pat-ok{% elif test.passed is None %}pat-unknown{% else %}pat-bad{% endif %}">
+
+  {% if test.failure_reasons %}
+  <div class="alert alert-danger py-2 mb-3">
+    <div class="fw-bold mb-1"><span class="fas fa-exclamation-triangle"></span> Why it failed</div>
+    <ul class="mb-0 ps-3">{% for reason in test.failure_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  {% if test.notes %}
+  <div class="pat-note mb-3">
+    <div class="fw-bold mb-1"><span class="fas fa-comment"></span> Notes</div>
+    <ul class="mb-0 ps-3">{% for note in test.notes %}<li>{{ note|linebreaksbr }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3"><div class="pat-label">Tested</div><div>{{ test.tested_at|date:"j M Y, H:i" }}</div><div class="text-body-secondary">by {{ test.operator|default:"-" }}</div></div>
+    <div class="col-6 col-lg-3"><div class="pat-label">Where</div><div>{{ test.details.location|default:"-" }}</div>{% if test.details.site %}<div class="text-body-secondary">{{ test.details.site }}</div>{% endif %}</div>
+    <div class="col-6 col-lg-3"><div class="pat-label">Next full test</div><div>{{ test.next_full_test_date|default_if_none:"-" }}</div>{% if test.details.retest_months %}<div class="text-body-secondary">every {{ test.details.retest_months }} month{{ test.details.retest_months|pluralize }}</div>{% endif %}</div>
+    <div class="col-6 col-lg-3"><div class="pat-label">Next visual test</div><div>{{ test.next_visual_test_date|default_if_none:"-" }}</div>{% if test.details.visual_retest_months %}<div class="text-body-secondary">every {{ test.details.visual_retest_months }} month{{ test.details.visual_retest_months|pluralize }}</div>{% endif %}</div>
+  </div>
+
+  {% if program.items %}
+  <div class="mb-3">
+    <div class="pat-label">Test program: {{ test.details.program|default:"-" }}{% if program.sections > 1 %} <span class="text-body-secondary text-lowercase">(repeated for {{ program.sections }} sections)</span>{% endif %}</div>
+    {% for item in program.items %}<span class="pat-chip{% if item.prompt %} pat-prompt{% endif %}">{% if item.prompt %}<span class="fas fa-plug"></span> {% endif %}{{ item.text }}</span>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if visual %}
+  <div class="mb-3">
+    <div class="pat-label">Visual inspection</div>
+    {% for check in visual %}
+    <span class="badge me-1 mb-1 {% if check.status == 'PASS' %}text-bg-success{% elif check.status == 'FAIL' %}text-bg-danger{% else %}text-bg-secondary{% endif %}"><span class="fas {% if check.status == 'PASS' %}fa-check{% elif check.status == 'FAIL' %}fa-times{% else %}fa-info{% endif %}"></span> {{ check.kind }}{% if check.reading %}: {{ check.reading }}{% endif %}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if rows %}
+  <div class="pat-label">Electrical tests</div>
+  <table class="table table-sm align-middle mb-1">
+    <thead><tr><th>Test</th><th>Reading</th><th>Limit</th><th class="text-end">Result</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+        {% if row.section %}
+        <tr><td colspan="4" class="pat-label pt-3 border-0">{{ row.section }}</td></tr>
+        {% elif row.prompt %}
+        <tr class="{% if row.status == 'FAIL' %}table-danger{% else %}text-body-secondary{% endif %}"><td colspan="3"><span class="fas fa-plug"></span> Prompt: {{ row.prompt }}</td><td class="text-end">{% if row.status == 'FAIL' %}{% include 'partials/pat_step_status.html' with status=row.status %}{% endif %}</td></tr>
+        {% else %}
+        <tr{% if row.status == 'FAIL' %} class="table-danger"{% endif %}>
+          <td>{{ row.kind }}{% if row.repeat %} <span class="text-body-secondary">({{ row.repeat }})</span>{% endif %}</td>
+          <td>{% if row.reading %}<strong>{{ row.reading }}</strong>{% if row.setup %} <span class="text-body-secondary">at {{ row.setup }}</span>{% endif %}{% else %}-{% endif %}</td>
+          <td>{{ row.limit|default:"-" }}</td>
+          <td class="text-end">{% include 'partials/pat_step_status.html' with status=row.status %}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if test.has_limits %}<div class="text-body-secondary mb-2">Limits are the program's base limits. The tester can allow more for longer leads, so a reading above its limit can still pass.</div>{% endif %}
+  {% endif %}
+
+  <div class="text-body-secondary mt-3">
+    Tested with {{ test.batch.machine_model }} {{ test.batch.machine_serial }}, from <a href="{% url 'pat_batch_detail' test.batch_id %}">{{ test.batch.original_filename }}</a>
+    <details class="mt-1">
+      <summary>Technical details</summary>
+      <div class="mt-1">Test ID <code>{{ test.details.guid|default:"-" }}</code>, tester flags <code>{{ test.details.flags|stringformat:"#04x" }}</code></div>
+      {% if rows %}<div>Step flags: {% for row in rows %}{% if not row.prompt %}<code>{{ row.flags|stringformat:"#04x" }}</code>{% if not forloop.last %} {% endif %}{% endif %}{% endfor %}</div>{% endif %}
+      {% if test.details.raw.program_definition %}<div class="mt-1">Program definition we couldn't decode: <code class="text-break">{{ test.details.raw.program_definition }}</code></div>{% endif %}
+    </details>
+  </div>
+</div>
+{% endwith %}
