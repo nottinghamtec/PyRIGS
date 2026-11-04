@@ -33,6 +33,9 @@
         {% endif %}
     </ul>
 </div>
+{% if perms.assets.view_pattestbatch %}
+    <li class="nav-item"><a class="nav-link" href="{% url 'pat_batch_list' %}">PAT</a></li>
+{% endif %}
 {% if perms.assets.view_asset %}
     <li class="nav-item"><a class="nav-link" href="{% url 'assets_activity_table' %}">Recent Changes</a></li>
     <li class="nav-item"><a class="nav-link" href="{% url 'asset_audit_list' %}">Audit</a></li>

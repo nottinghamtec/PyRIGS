@@ -1,9 +1,12 @@
 import re
+import uuid
+from collections import Counter
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 from reversion import revisions as reversion
 
 from RIGS.models import Profile, ContactableManager
@@ -221,3 +224,113 @@ class Asset(models.Model, RevisionMixin):
     @property
     def display_name(self):
         return f"{self.display_id} | {self.description}"
+
+    @property
+    def latest_pat_test(self):
+        return self.pat_tests.order_by("-tested_at").first()
+
+    @property
+    def pat_status(self):
+        return PATTestRecord.status_for(self.latest_pat_test)
+
+
+def pat_upload_path(instance, filename):
+    return f"pat/{timezone.now():%Y/%m}/{uuid.uuid4().hex}.sss"
+
+
+class PATTestBatch(models.Model):
+    file = models.FileField(upload_to=pat_upload_path)
+    original_filename = models.CharField(max_length=255)
+    sha256 = models.CharField(max_length=64, db_index=True)
+    machine_model = models.CharField(max_length=40, blank=True)
+    machine_serial = models.CharField(max_length=40, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="pat_uploads")
+    unmatched_asset_ids = models.JSONField(default=list, blank=True)
+    conflicts = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+
+    def __str__(self):
+        return f"{self.original_filename} ({self.uploaded_at:%Y-%m-%d})"
+
+
+class PATTestRecord(models.Model):
+    NOT_TESTED = "not_tested"
+    FAILED = "failed"
+    OVERDUE = "overdue"
+    IN_DATE = "in_date"
+    STATUS_LABELS = {
+        NOT_TESTED: "Never PAT tested",
+        FAILED: "Failed PAT",
+        OVERDUE: "PAT overdue",
+        IN_DATE: "PAT in date",
+    }
+
+    batch = models.ForeignKey(PATTestBatch, on_delete=models.CASCADE, related_name="records")
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="pat_tests")
+    tested_at = models.DateTimeField()
+    passed = models.BooleanField(null=True)
+    operator = models.CharField(max_length=16, blank=True)
+    comments = models.TextField(blank=True)
+    next_full_test_date = models.DateField(null=True, blank=True)
+    next_visual_test_date = models.DateField(null=True, blank=True)
+    details = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ["-tested_at"]
+        constraints = [models.UniqueConstraint(fields=["asset", "tested_at"], name="unique_pat_test_per_asset_time")]
+
+    def __str__(self):
+        return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
+
+    @classmethod
+    def status_for(cls, record):
+        if record is None:
+            return cls.NOT_TESTED
+        if record.passed is False:
+            return cls.FAILED
+        if record.next_full_test_date and record.next_full_test_date < timezone.localdate():
+            return cls.OVERDUE
+        return cls.IN_DATE
+
+    @property
+    def status(self):
+        return self.status_for(self)
+
+    @staticmethod
+    def describe_failure(item):
+        reading = ""
+        measurements = item.get("measurements", [])
+        if measurements:
+            parts = []
+            for index, m in enumerate(measurements):
+                qualifier = item.get("qualifier", "") if index == len(measurements) - 1 else ""
+                parts.append(f"{m['name']} {qualifier}{m['value']} {m['unit']}")
+            reading = f" ({', '.join(parts)})"
+        return f"{item['kind']}{reading}"
+
+    @property
+    def failure_reasons(self):
+        reasons = []
+        for check in self.details.get("visual_checks", []):
+            if check["status"] == "FAIL":
+                reasons.append(f"Visual check failed: {self.describe_failure(check)}")
+        steps = self.details.get("steps", [])
+        totals = Counter(step["kind"] for step in steps)
+        seen = Counter()
+        for step in steps:
+            seen[step["kind"]] += 1
+            if step["status"] == "FAIL":
+                repeat = f" [{seen[step['kind']]} of {totals[step['kind']]}]" if totals[step["kind"]] > 1 else ""
+                reasons.append(f"Failed: {self.describe_failure(step)}{repeat}")
+        return reasons
+
+    @property
+    def notes(self):
+        return [self.comments] if self.comments else []
+
+    @property
+    def status_label(self):
+        return self.STATUS_LABELS[self.status]

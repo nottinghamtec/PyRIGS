@@ -1,0 +1,26 @@
+<div class="card {% if pat_status == 'in_date' %}border-success{% elif pat_status == 'not_tested' %}border-secondary{% else %}border-danger{% endif %}">
+  <div class="card-header d-flex justify-content-between">
+    <span>PAT Testing</span>
+    <span class="badge {% if pat_status == 'in_date' %}text-bg-success{% elif pat_status == 'not_tested' %}text-bg-secondary{% else %}text-bg-danger{% endif %}">{{ pat_status_label }}</span>
+  </div>
+  {% if pat_tests %}
+  <table class="table table-sm mb-0">
+    <thead>
+      <tr><th>Tested</th><th>Result</th><th>Operator</th><th>Next full test</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      {% for test in pat_tests %}
+      <tr>
+        <td>{{ test.tested_at }}</td>
+        <td>{% if test.passed %}<span class="badge text-bg-success">Pass</span>{% elif test.passed is None %}<span class="badge text-bg-secondary">Unknown</span>{% else %}<span class="badge text-bg-danger">Fail</span>{% endif %}</td>
+        <td>{{ test.operator|default:"-" }}</td>
+        <td>{{ test.next_full_test_date|default_if_none:"-" }}</td>
+        <td>{% include 'partials/pat_reasons.html' %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="card-body"><p class="mb-0">No PAT results have been uploaded for this asset.</p></div>
+  {% endif %}
+</div>

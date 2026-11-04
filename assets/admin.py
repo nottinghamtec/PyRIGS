@@ -41,3 +41,9 @@ class CableTypeAdmin(admin.ModelAdmin):
 @admin.register(assets.Connector)
 class ConnectorAdmin(admin.ModelAdmin):
     list_display = ["id", "__str__", "current_rating", "voltage_rating", "num_pins"]
+
+
+@admin.register(assets.PATTestBatch)
+class PATTestBatchAdmin(admin.ModelAdmin):
+    list_display = ["id", "original_filename", "machine_serial", "uploaded_at", "uploaded_by"]
+    readonly_fields = ["sha256", "uploaded_at", "uploaded_by"]

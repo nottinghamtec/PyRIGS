@@ -65,6 +65,31 @@ urlpatterns = [
         permission_required_with_403("assets.change_asset")(views.AssetAudit.as_view()),
         name="asset_audit",
     ),
+    path(
+        "pat/upload/",
+        permission_required_with_403("assets.add_pattestbatch")(views.PATUpload.as_view()),
+        name="pat_upload",
+    ),
+    path(
+        "pat/",
+        permission_required_with_403("assets.view_pattestbatch")(views.PATBatchList.as_view()),
+        name="pat_batch_list",
+    ),
+    path(
+        "pat/<int:pk>/",
+        permission_required_with_403("assets.view_pattestbatch")(views.PATBatchDetail.as_view()),
+        name="pat_batch_detail",
+    ),
+    path(
+        "pat/<int:pk>/reprocess/",
+        permission_required_with_403("assets.add_pattestbatch")(views.PATBatchReprocess.as_view()),
+        name="pat_batch_reprocess",
+    ),
+    path(
+        "pat/<int:pk>/download/",
+        permission_required_with_403("assets.view_pattestbatch")(views.PATBatchDownload.as_view()),
+        name="pat_batch_download",
+    ),
     path("supplier/list/", login_required(views.SupplierList.as_view()), name="supplier_list"),
     path("supplier/<int:pk>/", login_required(views.SupplierDetail.as_view()), name="supplier_detail"),
     path(

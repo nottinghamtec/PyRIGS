@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import generic
@@ -29,7 +29,8 @@ from PyRIGS.views import (
     is_ajax,
     OEmbedView,
 )
-from assets import forms, models
+from assets import forms, models, pat
+from assets.sss import SSSParseError
 
 
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -123,6 +124,10 @@ class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = f"Asset {self.object.display_id}"
+        pat_tests = list(self.object.pat_tests.all()[:5])
+        context["pat_tests"] = pat_tests
+        context["pat_status"] = models.PATTestRecord.status_for(pat_tests[0] if pat_tests else None)
+        context["pat_status_label"] = models.PATTestRecord.STATUS_LABELS[context["pat_status"]]
         return context
 
 
@@ -473,3 +478,95 @@ class GenerateLabels(generic.View):
         response["Content-Disposition"] = f'filename="{name}"'
         response.write(merged.getvalue())
         return response
+
+
+class PATUpload(generic.FormView):
+    template_name = "pat_upload.html"
+    form_class = forms.PATUploadForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Upload PAT Results"
+        return context
+
+    def form_valid(self, form):
+        summary = pat.import_sss(
+            form.parsed, form.content, form.cleaned_data["file"].name, form.sha256, self.request.user
+        )
+        report_pat_import(self.request, summary)
+        if summary.batch is None:
+            messages.warning(self.request, "Nothing was imported and the file wasn't stored")
+            return redirect("pat_upload")
+        return redirect("pat_batch_detail", pk=summary.batch.pk)
+
+
+def report_pat_import(request, summary):
+    if summary.imported:
+        messages.success(request, f"Imported {len(summary.imported)} PAT results")
+    if summary.replaced:
+        messages.success(request, f"Replaced {len(summary.replaced)} existing results with the version in this file")
+    if summary.duplicates:
+        messages.info(request, f"Skipped {len(summary.duplicates)} results that were already recorded")
+    if summary.conflicts:
+        messages.warning(
+            request,
+            f"{len(summary.conflicts)} results have the same asset and time as ones already recorded but a "
+            "different outcome. They weren't imported; review them below.",
+        )
+    if summary.unmatched:
+        advice = (
+            "create them, then use Re-match on this page" if summary.batch else "create them and upload the file again"
+        )
+        messages.warning(
+            request,
+            f"{len(set(summary.unmatched))} asset IDs in the file don't exist in RIGS and were skipped; {advice}",
+        )
+
+
+class PATBatchReprocess(generic.View):
+    def post(self, request, pk):
+        batch = get_object_or_404(models.PATTestBatch, pk=pk)
+        accept = request.POST.get("accept") or None
+        if accept and accept not in {conflict["key"] for conflict in batch.conflicts}:
+            messages.error(request, "That conflict no longer exists")
+            return redirect("pat_batch_detail", pk=batch.pk)
+        try:
+            summary = pat.reprocess(batch, accept)
+        except SSSParseError:
+            messages.error(request, "The stored file could no longer be read")
+            return redirect("pat_batch_detail", pk=batch.pk)
+        report_pat_import(request, summary)
+        if not (summary.imported or summary.replaced):
+            messages.info(request, "Nothing new to import")
+        return redirect("pat_batch_detail", pk=batch.pk)
+
+
+class PATBatchList(generic.ListView):
+    model = models.PATTestBatch
+    template_name = "pat_batch_list.html"
+    paginate_by = 40
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("uploaded_by")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "PAT Uploads"
+        return context
+
+
+class PATBatchDetail(generic.DetailView):
+    model = models.PATTestBatch
+    template_name = "pat_batch_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"PAT Upload {self.object.original_filename}"
+        context["records"] = self.object.records.select_related("asset")
+        return context
+
+
+class PATBatchDownload(generic.View):
+    def get(self, request, pk):
+        batch = get_object_or_404(models.PATTestBatch, pk=pk)
+        return FileResponse(batch.file.open("rb"), as_attachment=True, filename=batch.original_filename)

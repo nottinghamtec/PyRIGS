@@ -1,0 +1,87 @@
+{% extends 'base_assets.html' %}
+
+{% block content %}
+<div class="row my-2">
+  <div class="col text-end pe-0">
+    <a class="btn btn-primary" href="{% url 'pat_batch_download' object.pk %}"><span class="fas fa-download"></span> Download Original</a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <dl>
+      <dt>File</dt><dd>{{ object.original_filename }}</dd>
+      <dt>Tester</dt><dd>{{ object.machine_model }} {{ object.machine_serial }}</dd>
+      <dt>Uploaded</dt><dd>{{ object.uploaded_at }} by {{ object.uploaded_by|default:"-" }}</dd>
+      <dt>SHA-256</dt><dd><code>{{ object.sha256 }}</code></dd>
+    </dl>
+  </div>
+  {% if object.unmatched_asset_ids %}
+  <div class="col-md-6 mb-3">
+    <div class="card border-warning">
+      <div class="card-header">Asset IDs not found in RIGS</div>
+      <div class="card-body">
+        <p>{{ object.unmatched_asset_ids|join:", " }}</p>
+        {% if perms.assets.add_pattestbatch %}
+        <form method="POST" action="{% url 'pat_batch_reprocess' object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning btn-sm"><span class="fas fa-sync"></span> Re-match</button>
+          <span class="small text-muted">Create the missing assets first, then re-match to import their results.</span>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% if object.conflicts %}
+<div class="card border-danger mb-3">
+  <div class="card-header">Conflicts with results already recorded</div>
+  <div class="card-body">
+    <p>These have the same asset and test time as a recorded result but a different outcome or readings, so they weren't imported. The recorded result is kept unless you choose to replace it.</p>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Asset</th><th>Tested</th><th>Recorded</th><th>This file</th><th>Differs in</th><th></th></tr></thead>
+      <tbody>
+        {% for conflict in object.conflicts %}
+        <tr>
+          <td><a href="{% url 'asset_detail' conflict.asset_id %}">{{ conflict.asset_id }}</a></td>
+          <td>{{ conflict.tested_at }}</td>
+          <td>{{ conflict.existing }}</td>
+          <td>{{ conflict.new }}</td>
+          <td>{{ conflict.differs }}</td>
+          <td>
+            {% if perms.assets.add_pattestbatch %}
+            <form method="POST" action="{% url 'pat_batch_reprocess' object.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="accept" value="{{ conflict.key }}">
+              <button type="submit" class="btn btn-outline-danger btn-sm">Replace recorded result</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+<h3>{{ records|length }} results imported</h3>
+<div class="row">
+  <table class="table table-striped">
+    <thead>
+      <tr><th>Asset</th><th>Tested</th><th>Result</th><th>Operator</th><th>Next full test</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+      <tr>
+        <td><a href="{% url 'asset_detail' record.asset.asset_id %}">{{ record.asset }}</a></td>
+        <td>{{ record.tested_at }}</td>
+        <td>{% if record.passed %}<span class="badge text-bg-success">Pass</span>{% elif record.passed is None %}<span class="badge text-bg-secondary">Unknown</span>{% else %}<span class="badge text-bg-danger">Fail</span>{% endif %}</td>
+        <td>{{ record.operator|default:"-" }}</td>
+        <td>{{ record.next_full_test_date|default_if_none:"-" }}</td>
+        <td>{% include 'partials/pat_reasons.html' with test=record %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
