@@ -103,25 +103,64 @@ def test_stored_filename_does_not_use_upload_name(admin_client, pat_asset):
     assert "evil" not in batch.file.name
 
 
-def test_views_require_permission(client, django_user_model, pat_asset):
+def plain_user_client(client, django_user_model):
     user = django_user_model.objects.create_user(username="nobody", password="x")
     client.force_login(user)
+    return client
+
+
+def test_changing_actions_require_permission(client, django_user_model, pat_asset):
+    plain_user_client(client, django_user_model)
     batch = models.PATTestBatch.objects.create(original_filename="a.sss", sha256="0" * 64, file="pat/a.sss")
     for name, kwargs in [
         ("pat_upload", {}),
-        ("pat_batch_list", {}),
-        ("pat_batch_detail", {"pk": batch.pk}),
         ("pat_batch_download", {"pk": batch.pk}),
         ("pat_batch_reprocess", {"pk": batch.pk}),
     ]:
         assert client.get(reverse(name, kwargs=kwargs)).status_code == 403
     assert client.post(reverse("pat_batch_reprocess", kwargs={"pk": batch.pk})).status_code == 403
+    assert client.post(reverse("pat_upload")).status_code == 403
+
+
+def test_uploads_are_visible_to_any_logged_in_user(client, django_user_model, pat_asset):
+    plain_user_client(client, django_user_model)
+    batch = models.PATTestBatch.objects.create(
+        original_filename="a.sss",
+        sha256="0" * 64,
+        file="pat/a.sss",
+        unmatched_asset_ids=["7777"],
+        conflicts=[
+            {
+                "key": "4334|x",
+                "asset_id": "4334",
+                "tested_at": "x",
+                "existing": "Pass",
+                "new": "Fail",
+                "differs": "result",
+            }
+        ],
+    )
+    for url in [reverse("pat_batch_list"), reverse("pat_batch_detail", kwargs={"pk": batch.pk})]:
+        response = client.get(url)
+        assert response.status_code == 200
+        assert b"a.sss" in response.content
+        assert b">PAT</a>" in response.content
+        for hidden in [b"Download Original", b"Re-match", b"Replace recorded result", b"Upload Results"]:
+            assert hidden not in response.content
+
+
+def test_download_button_shown_with_view_permission(admin_client, pat_asset):
+    batch = models.PATTestBatch.objects.create(original_filename="a.sss", sha256="0" * 64, file="pat/a.sss")
+    response = admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk}))
+    assert b"Download Original" in response.content
 
 
 def test_views_require_login(client):
-    response = client.get(reverse("pat_batch_list"))
-    assert response.status_code == 302
-    assert "login" in response.url
+    batch = models.PATTestBatch.objects.create(original_filename="a.sss", sha256="0" * 64, file="pat/a.sss")
+    for name, kwargs in [("pat_batch_list", {}), ("pat_batch_detail", {"pk": batch.pk}), ("pat_upload", {})]:
+        response = client.get(reverse(name, kwargs=kwargs))
+        assert response.status_code == 302
+        assert "login" in response.url
 
 
 def test_batch_pages_render(admin_client, pat_asset):

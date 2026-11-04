@@ -72,12 +72,12 @@ urlpatterns = [
     ),
     path(
         "pat/",
-        permission_required_with_403("assets.view_pattestbatch")(views.PATBatchList.as_view()),
+        login_required(views.PATBatchList.as_view()),
         name="pat_batch_list",
     ),
     path(
         "pat/<int:pk>/",
-        permission_required_with_403("assets.view_pattestbatch")(views.PATBatchDetail.as_view()),
+        login_required(views.PATBatchDetail.as_view()),
         name="pat_batch_detail",
     ),
     path(
