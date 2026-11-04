@@ -1,0 +1,103 @@
+{% load widget_tweaks %}
+{% load button from filters %}
+<form id="asset-search-form" method="GET">
+    <div class="row g-2">
+        <div class="col">
+            <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
+                {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
+                <label for="id_q" class="visually-hidden">Asset ID/Description/Serial Number:</label>
+                {% button 'search' id="id_search" %}
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mt-2">
+        <div class="col-md">
+            <div id="category-group" class="px-1">
+                <label for="id_category" class="visually-hidden">Category</label>
+                {% render_field form.category|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
+            </div>
+        </div>
+        <div class="col-md">
+            <div id="status-group" class="px-1">
+                <label for="id_status" class="visually-hidden">Status</label>
+                {% render_field form.status|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
+            </div>
+        </div>
+        {% if cables %}
+        <div class="col-md">
+            <div class="px-1">
+                <label for="id_cable_type" class="visually-hidden">Cable Type</label>
+                {% render_field form.cable_type|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Cable Types" data-header="Cable Types" data-actions-box="true" %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-md">
+            <div id="pat-status-group" class="px-1">
+                <label for="id_pat_status" class="visually-hidden">PAT status</label>
+                {% render_field form.pat_status|add_class:'form-select' %}
+            </div>
+        </div>
+        <div class="col-md">
+            <div id="order-group" class="px-1">
+                <label for="id_order" class="visually-hidden">Sort order</label>
+                {% render_field form.order|add_class:'form-select' %}
+            </div>
+        </div>
+    </div>
+    <div class="collapse mt-2{% if advanced_open or form.acquired_to.errors %} show{% endif %}" id="more-filters">
+        <div class="row g-2">
+            <div class="col-md">
+                <div id="audit-status-group" class="px-1">
+                    <label for="id_audit_status" class="visually-hidden">Audit status</label>
+                    {% render_field form.audit_status|add_class:'form-select' %}
+                </div>
+            </div>
+            <div class="col-md">
+                <div id="collection-group" class="px-1">
+                    <label for="id_collection" class="visually-hidden">Collection</label>
+                    {% render_field form.collection|add_class:'form-select' %}
+                </div>
+            </div>
+            <div class="col-md">
+                <div id="supplier-group" class="px-1">
+                    <label for="id_supplier" class="visually-hidden">Supplier</label>
+                    {% render_field form.supplier|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Suppliers" data-header="Suppliers" data-actions-box="true" %}
+                </div>
+            </div>
+        </div>
+        <div class="row g-2 mt-1 align-items-end">
+            <div class="col-md-auto">
+                <label for="id_acquired_from" class="form-label mb-0 small">Acquired from</label>
+                {% render_field form.acquired_from|add_class:'form-control' type='date' %}
+            </div>
+            <div class="col-md-auto">
+                <label for="id_acquired_to" class="form-label mb-0 small">Acquired until</label>
+                {% render_field form.acquired_to|add_class:'form-control' type='date' %}
+                {% for error in form.acquired_to.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+            {% if not cables %}
+            <div class="col-md-auto">
+                <div class="form-check">
+                    {% render_field form.is_cable|add_class:'form-check-input' %}
+                    <label class="form-check-label" for="id_is_cable">Only cables</label>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row g-2 mt-2">
+        <div class="col-auto">
+            <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#more-filters" aria-expanded="{% if advanced_open %}true{% else %}false{% endif %}" aria-controls="more-filters">
+                <span class="fas fa-sliders-h"></span> More filters{% if advanced_count %} <span class="badge text-bg-info">{{ advanced_count }}</span>{% endif %}
+            </button>
+        </div>
+        {% if active_filters %}
+        <div class="col-auto">
+            <a class="btn btn-link" href="{{ request.path }}">Clear all</a>
+        </div>
+        {% endif %}
+    </div>
+</form>

@@ -231,7 +231,13 @@ class Asset(models.Model, RevisionMixin):
 
     @property
     def pat_status(self):
+        if hasattr(self, "pat_last_tested"):
+            return PATTestRecord.status_from(self.pat_last_tested, self.pat_last_passed, self.pat_next_due)
         return PATTestRecord.status_for(self.latest_pat_test)
+
+    @property
+    def pat_status_label(self):
+        return PATTestRecord.STATUS_LABELS[self.pat_status]
 
 
 def pat_upload_path(instance, filename):
@@ -286,14 +292,20 @@ class PATTestRecord(models.Model):
         return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
 
     @classmethod
+    def status_from(cls, tested_at, passed, next_full_test_date):
+        if tested_at is None:
+            return cls.NOT_TESTED
+        if passed is False:
+            return cls.FAILED
+        if next_full_test_date and next_full_test_date < timezone.localdate():
+            return cls.OVERDUE
+        return cls.IN_DATE
+
+    @classmethod
     def status_for(cls, record):
         if record is None:
             return cls.NOT_TESTED
-        if record.passed is False:
-            return cls.FAILED
-        if record.next_full_test_date and record.next_full_test_date < timezone.localdate():
-            return cls.OVERDUE
-        return cls.IN_DATE
+        return cls.status_from(record.tested_at, record.passed, record.next_full_test_date)
 
     @property
     def status(self):

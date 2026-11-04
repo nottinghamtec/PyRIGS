@@ -37,12 +37,23 @@ class AssetAuditForm(AssetForm):
 
 
 class AssetSearchForm(forms.Form):
+    ORDER_CHOICES = [
+        ("", "Sort: Asset ID"),
+        ("description", "Sort: Description"),
+        ("-date_acquired", "Sort: Newest acquired"),
+        ("date_acquired", "Sort: Oldest acquired"),
+        ("audit", "Sort: Longest since audit"),
+        ("pat_due", "Sort: PAT due soonest"),
+    ]
+
     q = forms.CharField(required=False)
     category = forms.ModelMultipleChoiceField(models.AssetCategory.objects.all(), required=False)
     status = forms.ModelMultipleChoiceField(models.AssetStatus.objects.all(), required=False)
+    supplier = forms.ModelMultipleChoiceField(models.Supplier.objects.all(), required=False)
     is_cable = forms.BooleanField(required=False)
     cable_type = forms.ModelMultipleChoiceField(models.CableType.objects.all(), required=False)
-    date_acquired = forms.DateField(required=False)
+    acquired_from = forms.DateField(required=False)
+    acquired_to = forms.DateField(required=False)
     audit_status = forms.ChoiceField(
         required=False,
         choices=[
@@ -52,6 +63,33 @@ class AssetSearchForm(forms.Form):
             ("stale", "Audited over a year ago"),
         ],
     )
+    pat_status = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Any PAT status"),
+            ("needs", "Needs PAT (overdue)"),
+            ("failed", "Failed last PAT"),
+            ("in_date", "PAT in date"),
+            ("never", "Never PAT tested"),
+        ],
+    )
+    collection = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Any collection status"),
+            ("top", "Not in a collection"),
+            ("child", "In a collection"),
+            ("parent", "Is a collection"),
+        ],
+    )
+    order = forms.ChoiceField(required=False, choices=ORDER_CHOICES)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start, end = cleaned_data.get("acquired_from"), cleaned_data.get("acquired_to")
+        if start and end and start > end:
+            self.add_error("acquired_to", "The end date can't be before the start date")
+        return cleaned_data
 
 
 class SupplierForm(forms.ModelForm):

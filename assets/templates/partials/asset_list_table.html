@@ -7,6 +7,7 @@
           <th scope="col">Description</th>
           <th scope="col">Category</th>
           <th scope="col">Status</th>
+          {% if show_pat %}<th scope="col" class="d-none d-md-table-cell">PAT</th>{% endif %}
           <th scope="col" class="d-none d-sm-table-cell">Quick Links</th>
         </tr>
       </thead>
@@ -17,13 +18,14 @@
                 <td class="assetDesc"><span class="text-truncate d-inline-block align-middle">{{ item.description }}</span></td>
                 <td class="assetCategory align-middle">{{ item.category }}</td>
                 <td class="assetStatus align-middle">{{ item.status }}</td>
+                {% if show_pat %}<td class="assetPat align-middle d-none d-md-table-cell">{% include 'partials/pat_badge.html' with status=item.pat_status label=item.pat_status_label %}</td>{% endif %}
                 <td class="d-none d-sm-table-cell">
                     {% include 'partials/asset_list_buttons.html' %}
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6">Nothing found</td>
+                <td colspan="7">Nothing found</td>
             </tr>
         {% endfor %}
         </tbody>
