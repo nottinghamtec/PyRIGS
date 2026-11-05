@@ -96,6 +96,24 @@ html {
   }
 }
 
+// Front page create actions: pinned to the bottom of each card so the three footers line up
+.home-links .home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+
+  > .btn,
+  > .home-action-disabled {
+    flex: 1 1 0;
+    white-space: nowrap;
+  }
+
+  .home-action-disabled {
+    cursor: not-allowed;
+  }
+}
+
 // Front page lower section: stacked as quick links, recent changes, changelog on mobile;
 // on desktop the changelog sits under the quick links with recent changes alongside both
 .home-lower {

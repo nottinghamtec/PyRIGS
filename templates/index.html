@@ -29,48 +29,68 @@
     </div>
     {% endif %}
     <div class="col-sm-4 mb-3">
-        <div class="card">
+        <div class="card h-100">
             <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/rigs.jpg' %}" alt="Some lights and haze, very purple" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Rigboard</h4>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><span class="fas fa-list align-middle"></span><span class="align-middle"> Rigboard</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'event_kanban' %}"><span class="fas fa-columns align-middle"></span><span class="align-middle"> Kanban</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><span class="fas fa-calendar align-middle"></span><span class="align-middle"> Calendar</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'rigboard' %}"><span class="fas fa-list"></span><span>Rigboard</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'event_kanban' %}"><span class="fas fa-columns"></span><span>Kanban</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'web_calendar' %}"><span class="fas fa-calendar"></span><span>Calendar</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'event_archive' %}"><span class="fas fa-book"></span><span>Event Archive</span></a>
+            </div>
+            <div class="card-footer home-actions">
                 {% if perms.RIGS.add_event %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'event_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Event</span></a>
-                    <a class="list-group-item list-group-item-action modal-href" href="{% url 'enquiry_create' %}"><span class="fas fa-lightbulb align-middle text-warning"></span><span class="align-middle"> New Enquiry</span></a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'event_create' %}"><span class="fas fa-plus"></span> New Event</a>
+                {% else %}
+                <span class="home-action-disabled" title="You need permission to add events" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-plus"></span> New Event</span></span>
                 {% endif %}
-                <a class="list-group-item list-group-item-action" href="{% url 'event_archive' %}"><span class="fas fa-book align-middle"></span><span class="align-middle"> Event Archive</span></a>
+                {% if perms.RIGS.add_event %}
+                <a class="btn btn-sm btn-outline-success modal-href" href="{% url 'enquiry_create' %}"><span class="fas fa-lightbulb"></span> New Enquiry</a>
+                {% else %}
+                <span class="home-action-disabled" title="You need permission to add events" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-lightbulb"></span> New Enquiry</span></span>
+                {% endif %}
             </div>
         </div>
     </div>
     <div class="col-sm-4 mb-3">
-        <div class="card">
+        <div class="card h-100">
             <img class="card-img-top d-none d-sm-block" src="{% if todays_date == '04-01' %}{% static 'imgs/tappytaptap.gif' %}{%else%}{% static 'imgs/assets.jpg' %}{%endif%}" alt="M32 sound desk close up of the faders" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Asset Database</h4>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><span class="fas fa-tag align-middle"></span><span class="align-middle"> Asset List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'asset_index' %}"><span class="fas fa-tag"></span><span>Asset List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'cable_list' %}"><span class="fas fa-plug"></span><span>Cable List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'cable_type_list' %}"><span class="fas fa-project-diagram"></span><span>Cable Types</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><span class="fas fa-parachute-box"></span><span>Supplier List</span></a>
+            </div>
+            <div class="card-footer home-actions">
                 {% if perms.assets.add_asset %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'asset_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Asset</span></a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'asset_create' %}"><span class="fas fa-plus"></span> New Asset</a>
+                {% else %}
+                <span class="home-action-disabled" title="You need permission to add assets" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-plus"></span> New Asset</span></span>
                 {% endif %}
-                <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><span class="fas fa-parachute-box align-middle"></span><span class="align-middle"> Supplier List</span></a>
                 {% if perms.assets.add_supplier %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'supplier_create' %}"><span class="fas fa-plus align-middle text-success"></span><span class="align-middle"> New Supplier</span></a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> New Supplier</a>
+                {% else %}
+                <span class="home-action-disabled" title="You need permission to add suppliers" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-plus"></span> New Supplier</span></span>
                 {% endif %}
             </div>
         </div>
     </div>
     <div class="col-sm-4 mb-3">
-        <div class="card">
+        <div class="card h-100">
             <img class="card-img-top d-none d-sm-block" src="{% static 'imgs/training.jpg' %}" alt="People watching a presentation" style="height: 150px; object-fit: cover;">
             <h4 class="card-header">Training Database</h4>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature align-middle text-info"></span><span class="align-middle"> My Training Record</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span><span class="align-middle"> Trainee List</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span> <span class="align-middle">Level List</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span> <span class="align-middle">Item List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'trainee_detail' request.user.pk %}"><span class="fas fa-file-signature"></span><span>My Training Record</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'trainee_list' %}"><span class="fas fa-users"></span><span>Trainee List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'level_list' %}"><span class="fas fa-layer-group"></span><span>Level List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'item_list' %}"><span class="fas fa-sitemap"></span><span>Item List</span></a>
+            </div>
+            <div class="card-footer home-actions">
                 {% if request.user.can_log_training %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'session_log' %}"><span class="fas fa-users"></span> <span class="align-middle">Log Session</span></a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'session_log' %}"><span class="fas fa-chalkboard-teacher"></span> Log Session</a>
+                {% else %}
+                <span class="home-action-disabled" title="Only supervisors and trainers can log sessions" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-chalkboard-teacher"></span> Log Session</span></span>
                 {% endif %}
             </div>
         </div>
