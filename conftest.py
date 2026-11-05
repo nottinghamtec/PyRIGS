@@ -13,7 +13,55 @@ import importlib.metadata as _importlib_metadata
 importlib.metadata = _importlib_metadata
 
 
-def pytest_configure():
+POSTGRES_IMAGE = "postgres:18.6"
+_postgres_container = None
+
+
+def _start_postgres_container():
+    global _postgres_container
+    try:
+        from testcontainers.community.postgres import PostgresContainer
+
+        _postgres_container = PostgresContainer(POSTGRES_IMAGE, username="rigs", password="rigs", dbname="rigs")
+        _postgres_container.start()
+    except Exception as error:
+        pytest.exit(
+            f"Could not start a Postgres container for the tests ({error}). "
+            "Start Docker, or point DATABASE_ENGINE/DATABASE_HOST/... at an existing Postgres server.",
+            returncode=1,
+        )
+
+    database = {
+        "DATABASE_ENGINE": "postgresql",
+        "DATABASE_NAME": "rigs",
+        "DATABASE_USERNAME": "rigs",
+        "DATABASE_PASSWORD": "rigs",
+        "DATABASE_HOST": _postgres_container.get_container_host_ip(),
+        "DATABASE_PORT": str(_postgres_container.get_exposed_port(5432)),
+    }
+    os.environ.update(database)
+
+    from django.db import connections
+
+    settings.DATABASES["default"].update(
+        {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": database["DATABASE_NAME"],
+            "USER": database["DATABASE_USERNAME"],
+            "PASSWORD": database["DATABASE_PASSWORD"],
+            "HOST": database["DATABASE_HOST"],
+            "PORT": database["DATABASE_PORT"],
+        }
+    )
+    connections.close_all()
+    if hasattr(connections._connections, "default"):
+        delattr(connections._connections, "default")
+
+
+def pytest_configure(config):
+    if "DATABASE_ENGINE" not in os.environ and not hasattr(config, "workerinput"):
+        _start_postgres_container()
+
     settings.PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
     settings.WHITENOISE_USE_FINDERS = True
     settings.WHITENOISE_AUTOREFRESH = True
@@ -22,6 +70,11 @@ def pytest_configure():
         os.path.join(settings.BASE_DIR, "static/"),
     ]
     django.setup()
+
+
+def pytest_unconfigure(config):
+    if _postgres_container is not None:
+        _postgres_container.stop()
 
 
 @pytest.fixture  # Overrides the one from pytest-django

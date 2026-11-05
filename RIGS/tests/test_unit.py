@@ -344,7 +344,7 @@ def search(client, url, found, notfound, arguments):
 def test_search(admin_client):
     persons = {
         1: models.Person.objects.create(name="Right Person", phone="1234"),
-        2: models.Person.objects.create(name="Wrong Person", phone="5678"),
+        2: models.Person.objects.create(name="Wrong Person", phone="0000"),
     }
     organisations = {
         1: models.Organisation.objects.create(name="Right Organisation", email="test@example.com"),
@@ -352,7 +352,7 @@ def test_search(admin_client):
     }
     venues = {
         1: models.Venue.objects.create(name="Right Venue", address="1 Test Street, EX1"),
-        2: models.Venue.objects.create(name="Wrong Venue", address="2 Check Way, TS2"),
+        2: models.Venue.objects.create(name="Wrong Venue", address="Check Way"),
     }
     events = {
         1: models.Event.objects.create(

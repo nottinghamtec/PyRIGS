@@ -103,7 +103,7 @@ WSGI_APPLICATION = "PyRIGS.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.{}".format(env("DATABASE_ENGINE", default="sqlite3")),
+        "ENGINE": "django.db.backends.{}".format(env("DATABASE_ENGINE", default="postgresql")),
         "NAME": env("DATABASE_NAME", default="rigs"),
         "USER": env("DATABASE_USERNAME", default="rigs"),
         "PASSWORD": env("DATABASE_PASSWORD", default="rigs"),
