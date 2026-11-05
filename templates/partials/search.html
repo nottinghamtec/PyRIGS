@@ -1,9 +1,11 @@
+{% load shortcut_label from command_palette %}
 {% if user.is_authenticated %}
-<form id="searchForm" class="d-flex align-items-center flex-wrap gap-2 flex-nowrap mx-md-3 px-2 border border-light rounded" role="form" method="GET" action="{% url 'search' %}">
-    <div class="input-group">
-        <input id="id_search_input" type="search" name="q" class="form-control form-control-sm" placeholder="Search..." value="{{ request.GET.q }}" />
-        <button class="btn btn-info btn-sm"><span class="fas fa-search"></span><span class="visually-hidden"> Search</span></button>
+<form id="searchForm" class="navbar-search mx-lg-3 my-2 my-lg-0" role="search" method="GET" action="{% url 'search' %}">
+    <span class="fas fa-search navbar-search-icon" aria-hidden="true"></span>
+    <input id="id_search_input" type="search" name="q" class="form-control" placeholder="Search RIGS" aria-label="Search RIGS" value="{{ request.GET.q }}" />
+    <div class="navbar-search-actions">
+        <a href="{% url 'search_help' %}" class="modal-href" title="Search help"><span class="fas fa-question-circle"></span><span class="visually-hidden">Search help</span></a>
+        <button type="button" data-command-palette-open title="Jump to… ({% shortcut_label "K" %})"><kbd class="command-palette-shortcut">{% shortcut_label "K" %}</kbd><span class="visually-hidden">Open the command picker</span></button>
     </div>
-    <a href="{% url 'search_help' %}" class="nav-link modal-href ms-1"><span class="fas fa-question-circle"></span></a>
 </form>
 {% endif %}

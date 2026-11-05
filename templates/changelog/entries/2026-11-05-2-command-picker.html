@@ -1,0 +1,9 @@
+{% load changelog command_palette %}
+{% changelog_entry author="joebanks" date="2026-11-05" title="Jump anywhere with the command picker" %}
+<p>Press {% shortcut_keys "K" %} on any page, or the shortcut badge in the search bar, to open the command picker.</p>
+<ul class="mt-2">
+    <li>Start typing to find a page or action, like <em>Kanban</em>, <em>New Event</em> or <em>My Training Record</em>, and press <kbd>Enter</kbd> to go there, or {% shortcut_keys "Enter" %} to open it in a new tab.</li>
+    <li>Type an event number such as <code>N01234</code> to open that event directly, or pick <em>Search for…</em> to run a full search.</li>
+    <li>It only lists things you have access to, and the ones you use most recently appear first.</li>
+</ul>
+{% endchangelog_entry %}

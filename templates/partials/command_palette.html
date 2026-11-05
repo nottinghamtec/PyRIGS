@@ -1,0 +1,28 @@
+{% load command_palette %}
+{% shortcut_label "K" as shortcut %}
+{% command_list as commands %}
+{{ commands|json_script:"command-palette-data" }}
+<div class="modal" id="command-palette" tabindex="-1" aria-label="Command picker" aria-hidden="true"
+     data-shortcut="{{ shortcut }}" data-search-url="{% url 'search' %}" data-event-url="{% url 'event_detail' 0 %}">
+    <div class="modal-dialog modal-dialog-scrollable command-palette-dialog">
+        <div class="modal-content">
+            <div class="modal-header gap-2 p-2">
+                <span class="fas fa-terminal text-body-secondary ms-2" aria-hidden="true"></span>
+                <input type="text" class="form-control border-0 shadow-none" id="command-palette-input"
+                       placeholder="Jump to…" autocomplete="off" spellcheck="false"
+                       role="combobox" aria-expanded="true" aria-controls="command-palette-list" aria-autocomplete="list">
+                <kbd class="d-none d-sm-inline">Esc</kbd>
+            </div>
+            <div class="modal-body p-0">
+                <ul class="list-group list-group-flush" id="command-palette-list" role="listbox" aria-label="Commands"></ul>
+            </div>
+            <div class="modal-footer py-1 small text-body-secondary justify-content-start d-none d-sm-flex">
+                <span><kbd>↑</kbd> <kbd>↓</kbd> move</span>
+                <span><kbd>Enter</kbd> go</span>
+                <span>{% shortcut_keys "Enter" %} new tab</span>
+                <span>Type <code>N01234</code> to open an event</span>
+            </div>
+        </div>
+    </div>
+    <form method="post" id="command-palette-post" class="d-none">{% csrf_token %}</form>
+</div>
