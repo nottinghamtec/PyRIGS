@@ -144,7 +144,9 @@ def test_invoices_only_shown_to_finance(admin_user, basic_user, today):
 
 
 def test_trainees_are_searchable(admin_user):
-    assert admin_user.pk in [result.object.pk for result in results("Event Test", admin_user) if result.kind == "trainee"]
+    assert admin_user.pk in [
+        result.object.pk for result in results("Event Test", admin_user) if result.kind == "trainee"
+    ]
 
 
 def test_empty_query_returns_nothing(admin_user, today):
@@ -172,9 +174,7 @@ def test_search_page_escapes_the_query(admin_client):
 
 
 def test_search_page_paginates_in_the_database(admin_client, today):
-    models.Event.objects.bulk_create(
-        [models.Event(name=f"Pantomime night {i}", start_date=today) for i in range(25)]
-    )
+    models.Event.objects.bulk_create([models.Event(name=f"Pantomime night {i}", start_date=today) for i in range(25)])
     response = admin_client.get(reverse("search"), {"q": "pantomime"})
     assert response.context["count"] == 25
     assert len(response.context["object_list"]) == 20
