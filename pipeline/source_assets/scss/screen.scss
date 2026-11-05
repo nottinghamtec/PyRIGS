@@ -1281,3 +1281,18 @@ body.kanban-dragging .kanban-cell:not(.kanban-target) {
     font-size: 0.65rem;
   }
 }
+
+.command-palette-quick-key {
+  min-width: 2.4em;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.7rem;
+  text-align: center;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  box-shadow: none;
+
+  .command-palette-item.active & {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+}

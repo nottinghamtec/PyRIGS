@@ -26,6 +26,12 @@ def modifier_key(context):
 
 
 @register.simple_tag(takes_context=True)
+def alt_key(context):
+    """⌥ on Apple devices, Alt everywhere else."""
+    return "⌥" if is_apple_device(context.get("request")) else "Alt"
+
+
+@register.simple_tag(takes_context=True)
 def shortcut_keys(context, *keys):
     """A keyboard shortcut as <kbd> keys, with the modifier key for the viewer's device, e.g. {% shortcut_keys "K" %}."""
     return format_html_join(" ", "<kbd>{}</kbd>", ((key,) for key in (modifier_key(context), *keys)))

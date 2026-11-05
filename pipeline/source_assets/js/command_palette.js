@@ -4,6 +4,7 @@
     const RECENT_KEY = "rigs.commandPalette.recent";
     const RECENT_LIMIT = 5;
     const HINT_KEY = "rigs.commandPalette.hintDismissed";
+    const QUICK_KEYS = 9;
     const EVENT_ID = /^n?0*(\d+)$/i;
 
     function readRecent() {
@@ -102,6 +103,7 @@
         const postForm = document.getElementById("command-palette-post");
         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         const shortcut = modalElement.dataset.shortcut;
+        const altLabel = modalElement.dataset.alt === "⌥" ? "⌥" : "Alt ";
         let visible = [];
         let active = 0;
 
@@ -190,6 +192,14 @@
                     hint.textContent = command.section;
                     item.appendChild(hint);
                 }
+                if (index < QUICK_KEYS) {
+                    const quick = document.createElement("kbd");
+                    quick.className = "command-palette-quick-key";
+                    quick.textContent = `${altLabel}${index + 1}`;
+                    quick.setAttribute("aria-hidden", "true");
+                    item.appendChild(quick);
+                    item.setAttribute("aria-keyshortcuts", `Alt+${index + 1}`);
+                }
                 list.appendChild(item);
             });
             if (!visible.length) {
@@ -232,6 +242,13 @@
         });
 
         input.addEventListener("keydown", (event) => {
+            const quick = event.altKey && !event.ctrlKey && !event.metaKey && event.code.match(/^(?:Digit|Numpad)([1-9])$/);
+            if (quick) {
+                event.preventDefault();
+                const index = Number(quick[1]) - 1;
+                if (index < visible.length) run(visible[index], event.shiftKey);
+                return;
+            }
             if (event.key === "ArrowDown") {
                 event.preventDefault();
                 active = visible.length ? (active + 1) % visible.length : 0;

@@ -107,3 +107,11 @@ def test_shortcuts_match_the_viewers_device(admin_client, user_agent, keys, labe
     assert f'data-shortcut="{label}"' in content
     other = "Ctrl" if "⌘" in label else "⌘"
     assert f"<kbd>{other}</kbd>" not in content
+
+
+@pytest.mark.parametrize("user_agent, alt", [(MAC, "⌥"), (WINDOWS, "Alt")])
+def test_quick_jump_keys_match_the_viewers_device(admin_client, user_agent, alt):
+    content = admin_client.get(reverse("index"), HTTP_USER_AGENT=user_agent).content.decode()
+    assert f'data-alt="{alt}"' in content
+    assert f"<kbd>{alt}</kbd> <kbd>1</kbd>–<kbd>9</kbd> jump" in content
+    assert f"press <kbd>{alt}</kbd> and a number" in content

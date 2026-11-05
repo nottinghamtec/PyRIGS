@@ -1,9 +1,10 @@
 {% load command_palette %}
 {% shortcut_label "K" as shortcut %}
+{% alt_key as alt %}
 {% command_list as commands %}
 {{ commands|json_script:"command-palette-data" }}
 <div class="modal" id="command-palette" tabindex="-1" aria-label="Command picker" aria-hidden="true"
-     data-shortcut="{{ shortcut }}" data-search-url="{% url 'search' %}" data-event-url="{% url 'event_detail' 0 %}">
+     data-shortcut="{{ shortcut }}" data-alt="{{ alt }}" data-search-url="{% url 'search' %}" data-event-url="{% url 'event_detail' 0 %}">
     <div class="modal-dialog modal-dialog-scrollable command-palette-dialog">
         <div class="modal-content">
             <div class="modal-header gap-2 p-2">
@@ -20,6 +21,7 @@
                 <span><kbd>↑</kbd> <kbd>↓</kbd> move</span>
                 <span><kbd>Enter</kbd> go</span>
                 <span>{% shortcut_keys "Enter" %} new tab</span>
+                <span><kbd>{{ alt }}</kbd> <kbd>1</kbd>–<kbd>9</kbd> jump</span>
                 <span>Type <code>N01234</code> to open an event</span>
             </div>
         </div>
