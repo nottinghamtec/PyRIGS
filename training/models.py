@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
+from PyRIGS.search_fields import search_indexes, search_vector_field
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
 
@@ -149,6 +150,7 @@ class TrainingItem(models.Model):
         help_text="Technicians in this item's department who are passed out on it may deliver training up to Training Complete",
     )
     prerequisites = models.ManyToManyField("self", symmetrical=False, blank=True)
+    search_vector = search_vector_field(name="A", description="B")
 
     objects = TrainingItemManager()
 
@@ -195,6 +197,7 @@ class TrainingItem(models.Model):
         return user.qualifications_obtained.only("item", "depth").filter(item=item, depth__gte=depth).exists()
 
     class Meta:
+        indexes = search_indexes("trainingitem", trigram_fields=["name"])
         constraints = [
             models.UniqueConstraint(
                 fields=["reference_number", "active", "category"], name="unique_reference_number_active_category"

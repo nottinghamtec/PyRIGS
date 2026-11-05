@@ -9,6 +9,8 @@ from reversion import revisions as reversion
 from RIGS.models import Profile, ContactableManager
 from versioning.versioning import RevisionMixin
 
+from PyRIGS.search_fields import search_indexes, search_vector_field
+
 
 class AssetCategory(models.Model):
     name = models.CharField(max_length=80)
@@ -48,11 +50,13 @@ class Supplier(models.Model, RevisionMixin):
     address = models.TextField(blank=True, default="")
 
     notes = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
 
     class Meta:
         ordering = ["name"]
+        indexes = search_indexes("supplier", trigram_fields=["name"])
 
     def get_absolute_url(self):
         return reverse("supplier_detail", kwargs={"pk": self.pk})
@@ -167,11 +171,14 @@ class Asset(models.Model, RevisionMixin):
 
     reversion_perm = "assets.asset_finance"
 
+    search_vector = search_vector_field(description="A", nickname="A", serial_number="B", comments="C")
+
     objects = AssetManager()
 
     class Meta:
         ordering = ["asset_id_prefix", "asset_id_number"]
         permissions = [("asset_finance", "Can see financial data for assets")]
+        indexes = search_indexes("asset", trigram_fields=["description", "nickname"])
 
     def __str__(self):
         return f"{self.asset_id} | {self.description}"

@@ -134,7 +134,9 @@ class ModelComparison:
         changes = []
         for field in self.fields:
             field_name = field.name
-            if field_name not in self.excluded_keys:  # if we're excluding this field, skip over it
+            if field_name not in self.excluded_keys and not getattr(
+                field, "generated", False
+            ):  # if we're excluding this field, skip over it
                 try:
                     oldValue = getattr(self.old, field_name, None)
                 except ObjectDoesNotExist:

@@ -12,62 +12,44 @@
         <div class="col-sm-12">
             <div class="card card-default">
               <div class="card-header">
-                <h3 class="card-title">Searching Events</h3>
+                <h3 class="card-title">How search works</h3>
               </div>
               <div class="card-body">
-                <p>
-                Searches for entire query in:
-                    <span class="badge text-bg-dark">name</span>
-                    <span class="badge text-bg-dark">description</span> and
-                    <span class="badge text-bg-dark">notes</span>
-                </p>
-                <p>You can search for an event by <span class="badge text-bg-dark">event_id</span> by entering an integer, or using the format <code>N01234</code></p>
-                <p>On the search results page you can also specify the date range for the <span class="badge text-bg-dark">start_date</span> of the event</p>
-                <p>Events are sorted in reverse <span class="badge text-bg-dark">start_date</span> order (most recent events at the top)</p>
+                <p>Search looks through events, people, organisations, venues, suppliers, assets, trainees and training items{% if perms.RIGS.view_invoice %}, as well as invoices{% endif %}, and shows the best matches first.</p>
+                <ul>
+                    <li>Words are matched by their root, so <code>lights</code> finds <em>lighting</em> and <code>rigged</code> finds <em>rigging</em>. Accents are ignored, so <code>cafe</code> finds <em>Café</em>.</li>
+                    <li>Every word has to match somewhere, but not necessarily next to each other.</li>
+                    <li>Names are also matched loosely, so small typos and partial names (<code>Portlnd</code>, <code>Portl</code>) still find <em>Portland</em>.</li>
+                    <li>A match in a name counts for more than a match in a description, which counts for more than one in the notes.</li>
+                    <li>Events nearer to today are ranked above similar matches from years ago.</li>
+                    <li>If a word doesn't appear anywhere, you might be offered a <em>Did you mean</em> suggestion.</li>
+                </ul>
               </div>
               <div class="card-header">
-                <h3 class="card-title">Searching People/Organisations/Venues/Suppliers</h3>
+                <h3 class="card-title">Search syntax</h3>
               </div>
               <div class="card-body">
-                <p>
-                Searches for entire search phrase in:
-                    <span class="badge text-bg-dark">name</span>
-                    <span class="badge text-bg-dark">email</span>
-                    <span class="badge text-bg-dark">address</span>
-                    <span class="badge text-bg-dark">notes</span> and
-                    <span class="badge text-bg-dark">phone</span>
-                </p>
-                <p>You can search for an entry by <span class="badge text-bg-dark">id</span> by entering an integer</p>
-                <p>Entries are sorted in alphabetical order by <span class="badge text-bg-dark">name</span></p>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr><td><code>"main stage"</code></td><td>Words in quotes must appear together, in that order</td></tr>
+                        <tr><td><code>marquee -cancelled</code></td><td>A word starting with <code>-</code> must not appear</td></tr>
+                        <tr><td><code>marquee or tent</code></td><td>Either word can match</td></tr>
+                    </tbody>
+                </table>
               </div>
-              {% if perms.RIGS.view_invoice %}
               <div class="card-header">
-                <h3 class="card-title">Searching Invoices</h3>
+                <h3 class="card-title">Searching by ID</h3>
               </div>
               <div class="card-body">
-                <p>
-                Searches for entire search phrase in:
-                    <span class="badge text-bg-dark">event__name</span>
-                </p>
-                <p>You can search for an event's invoice by entering the <span class="badge text-bg-dark">event_id</span> using the format <code>N01234</code></p>
-                <p>You can search for an invoice by <span class="badge text-bg-dark">invoice_id</span> using the format <code>#01234</code></p>
-                <p>Entering a raw integer will search by both <span class="badge text-bg-dark">invoice_id</span> and <span class="badge text-bg-dark">event_id</span></p>
-                <p>Entries are sorted in reverse <span class="badge text-bg-dark">invoice_date</span> order</p>
-              </div>
-              {% endif %}
-              <div class="card-header">
-                <h3 class="card-title">Searching Assets</h3>
-              </div>
-              <div class="card-body">
-                <p>
-                Searches for entire search phrase in:
-                    <span class="badge text-bg-dark">description</span> and
-                    <span class="badge text-bg-dark">serial number</span>
-                </p>
-                <p>
-                Will also attempt to exact match <span class="badge text-bg-dark">asset ID</span>
-                </p>
-                <p>Entries are sorted in alphanumerical order by <span class="badge text-bg-dark">asset ID</span></p>
+                <ul>
+                    <li>Events: <code>N01234</code> or <code>1234</code></li>
+                    {% if perms.RIGS.view_invoice %}<li>Invoices: <code>#01234</code>, or the event's <code>N01234</code>. A plain number matches both</li>{% endif %}
+                    <li>Assets: the exact asset ID or serial number</li>
+                    <li>Training items: <code>1.2</code></li>
+                    <li>Trainees: their initials</li>
+                    <li>People, organisations, venues and suppliers: their ID number, or the start or end of their phone number</li>
+                </ul>
+                <p>An exact ID match always comes first.</p>
               </div>
             </div>
         </div>

@@ -22,6 +22,8 @@ from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from versioning.versioning import RevisionMixin
 
+from PyRIGS.search_fields import search_indexes, search_vector_field
+
 
 def filter_by_pk(filt, query):
     # try and parse an int
@@ -86,8 +88,12 @@ class Profile(AbstractUser):
     hs_range = models.CharField(max_length=8, choices=HS_RANGE_CHOICES, default="upcoming")
     hs_only_action = models.BooleanField(default=False)
     kanban_finance = models.BooleanField(default=True, verbose_name="Show invoice columns on the Kanban")
+    search_vector = search_vector_field(first_name="A", last_name="A", initials="A")
 
     reversion_hide = True
+
+    class Meta(AbstractUser.Meta):
+        indexes = search_indexes("profile", trigram_fields=["first_name", "last_name"])
 
     def clean(self):
         super().clean()
@@ -180,8 +186,12 @@ class Person(models.Model, RevisionMixin):
     email = models.EmailField(blank=True, default="")
     address = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("person", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -217,8 +227,12 @@ class Organisation(models.Model, RevisionMixin):
     address = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
     union_account = models.BooleanField(default=False)
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("organisation", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -307,8 +321,12 @@ class Venue(models.Model, RevisionMixin):
     three_phase_available = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default="")
     address = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("venue", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -761,7 +779,12 @@ class Event(models.Model, RevisionMixin):
             earliest = tz.localize(earliest)
         return not self.dry_hire and not self.status == Event.CANCELLED and earliest <= timezone.now()
 
+    search_vector = search_vector_field(name="A", purchase_order="B", description="B", notes="C")
+
     objects = EventManager()
+
+    class Meta:
+        indexes = search_indexes("event", trigram_fields=["name"])
 
     def get_absolute_url(self):
         return reverse("event_detail", kwargs={"pk": self.pk})
