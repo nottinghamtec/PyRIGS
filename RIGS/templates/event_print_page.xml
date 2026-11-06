@@ -308,8 +308,9 @@
     </keepTogether>
 {% endif %}
 
+{% if quote or object.vat > 0 or object.internal and object.authorised %}
 <keepTogether>
-    <blockTable style="infoTable">>
+    <blockTable style="infoTable">
     {% if quote %}
         <tr><td><spacer length="15" /></td></tr>
         <tr>
@@ -338,11 +339,11 @@
         </tr>
     {% endif %}
 
+    {% if object.internal and object.authorised %}
     <tr><td><spacer length="15" /></td></tr>
 
     <tr>
         <td>
-            {% if object.internal and object.authorised %}
                 <para>
                     Event authorised online by {{ object.authorisation.name }} ({{ object.authorisation.email }}) at
                     {{ object.authorisation.last_edited_at }}.
@@ -360,10 +361,11 @@
                         <td>£ {{ object.authorisation.amount|floatformat:2 }}</td>
                     </tr>
                 </blockTable>
-            {% endif %}
         </td>
     </tr>
+    {% endif %}
     </blockTable>
 </keepTogether>
+{% endif %}
 
 <namedString id="lastPage"><pageNumber/></namedString>

@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 from django.utils.safestring import SafeText
 from RIGS.templatetags.markdown_tags import markdown_filter
+from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from pytest_django.asserts import assertRedirects, assertNotContains, assertContains
@@ -1546,6 +1547,18 @@ def test_invoice_page_opens_the_pdf_on_the_print_shortcut(admin_client, basic_ev
     invoice = models.Invoice.objects.create(event=basic_event)
     content = admin_client.get(reverse("invoice_detail", kwargs={"pk": invoice.pk})).content.decode()
     assert f"""window.open("{reverse("invoice_print", kwargs={"pk": invoice.pk})}", '_blank')""" in content
+
+
+def test_invoice_without_closing_details_has_no_empty_table_to_spill_onto_a_blank_page(basic_event):
+    invoice = models.Invoice.objects.create(event=basic_event)
+
+    def rendered():
+        event = models.Event.objects.get(pk=basic_event.pk)
+        return get_template("event_print.xml").render({"object": event, "invoice": invoice, "filename": "x"})
+
+    assert 'style="infoTable"' not in rendered()
+    models.EventItem.objects.create(event=basic_event, name="Item", quantity=1, cost=100, order=1)
+    assert "VAT Registration Number" in rendered().split('style="infoTable"')[1]
 
 
 def test_checkout_nags(admin_user, basic_event, mailoutbox):
