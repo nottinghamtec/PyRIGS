@@ -80,8 +80,12 @@ html {
   min-width: 16rem;
 }
 
-#activity .media-object {
-  max-width: 3em;
+.media-object {
+  display: block;
+  width: 3em;
+  height: 3em;
+  object-fit: cover;
+  background-color: var(--bs-secondary-bg);
 }
 
 // Front page menus: a fixed-width icon column so labels line up whatever the icon
