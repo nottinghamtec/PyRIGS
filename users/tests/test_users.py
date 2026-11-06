@@ -4,8 +4,11 @@ import time
 from django.core import mail
 from django.test import LiveServerTestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+
+from pytest_django.asserts import assertRedirects, assertTemplateUsed
 
 from PyRIGS.tests.base import create_browser
 from RIGS import models
@@ -158,3 +161,24 @@ class UserRegistrationTest(LiveServerTestCase):
         self.assertEqual(profileObject.email, "test@example.com")
 
         # All is well
+
+
+def test_login_page_shown_to_anonymous_users(client):
+    response = client.get(reverse("login"), {"next": reverse("item_list")})
+    assert response.status_code == 200
+    assertTemplateUsed(response, "registration/login.html")
+
+
+def test_login_page_redirects_authenticated_users_to_next(admin_client):
+    response = admin_client.get(reverse("login"), {"next": reverse("item_list")})
+    assertRedirects(response, reverse("item_list"), fetch_redirect_response=False)
+
+
+def test_login_page_redirects_authenticated_users_home_without_next(admin_client):
+    response = admin_client.get(reverse("login"))
+    assertRedirects(response, "/", fetch_redirect_response=False)
+
+
+def test_login_page_ignores_external_next_for_authenticated_users(admin_client):
+    response = admin_client.get(reverse("login"), {"next": "https://example.com/"})
+    assertRedirects(response, "/", fetch_redirect_response=False)

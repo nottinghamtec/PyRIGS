@@ -13,7 +13,11 @@ urlpatterns = [
         RegistrationView.as_view(form_class=forms.ProfileRegistrationFormUniqueEmail),
         name="registration_register",
     ),
-    path("user/login/", LoginView.as_view(authentication_form=forms.CheckApprovedForm), name="login"),
+    path(
+        "user/login/",
+        LoginView.as_view(authentication_form=forms.CheckApprovedForm, redirect_authenticated_user=True),
+        name="login",
+    ),
     path("user/login/embed/", xframe_options_exempt(views.LoginEmbed.as_view()), name="login_embed"),
     # User editing
     path("user/edit/", login_required(views.ProfileUpdateSelf.as_view()), name="profile_update_self"),
