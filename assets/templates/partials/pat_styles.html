@@ -1,0 +1,32 @@
+{# include once per page that shows PAT results #}
+<style>
+  .pat-table { table-layout: fixed; }
+  .pat-table td, .pat-table th { overflow-wrap: anywhere; }
+  .pat-table tr.pat-summary { cursor: pointer; }
+  .pat-chevron { display: inline-block; transition: transform .2s ease; }
+  .pat-toggle[aria-expanded="true"] .pat-chevron { transform: rotate(90deg); }
+  .pat-table tbody.pat-result:hover > tr.pat-summary > * { background-color: rgba(var(--bs-emphasis-color-rgb), .05); }
+  /* the padding lives on the collapsing element's child so the open/close animation stays smooth */
+  .pat-detail-wrap { padding: .25rem .75rem 1rem 2.75rem; }
+  .pat-detail { padding: 1rem 1.25rem; border: 1px solid var(--bs-border-color); border-left-width: 4px; border-radius: .5rem; background-color: rgba(var(--bs-emphasis-color-rgb), .04); }
+  .pat-detail.pat-ok { border-left-color: var(--bs-success); }
+  .pat-detail.pat-bad { border-left-color: var(--bs-danger); }
+  .pat-detail.pat-unknown { border-left-color: var(--bs-secondary); }
+  .pat-detail .pat-note { padding: .5rem 1rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background-color: rgba(var(--bs-emphasis-color-rgb), .05); }
+  .pat-detail .table { --bs-table-bg: transparent; --bs-table-hover-bg: transparent; margin-bottom: 0; }
+  .pat-detail .pat-label { font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--bs-secondary-color); margin-bottom: .25rem; }
+  .pat-detail .pat-chip { display: inline-block; margin: 0 .35rem .35rem 0; padding: .15rem .55rem; border: 1px solid var(--bs-border-color); border-radius: 1rem; background-color: rgba(var(--bs-emphasis-color-rgb), .05); }
+  .pat-detail .pat-chip.pat-prompt { border-style: dashed; color: var(--bs-secondary-color); }
+  @media (prefers-reduced-motion: reduce) { .pat-chevron { transition: none; } }
+</style>
+<script>
+  if (!window.patRowsBound) {
+    window.patRowsBound = true;
+    document.addEventListener('click', function (event) {
+      var row = event.target.closest('tr.pat-summary');
+      if (!row || event.target.closest('a, button, input, select, summary')) return;
+      var toggle = row.querySelector('.pat-toggle');
+      if (toggle) toggle.click();
+    });
+  }
+</script>

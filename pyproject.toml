@@ -30,6 +30,7 @@ dependencies = [
     "z3c.rml~=5.0",
     "django-queryable-properties~=1.12",
     "django-mass-edit~=3.5",
+    "django-storages[s3]~=1.14",
 ]
 
 [dependency-groups]

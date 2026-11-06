@@ -1,9 +1,12 @@
 import re
+import uuid
+from collections import Counter
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 from reversion import revisions as reversion
 
 from RIGS.models import Profile, ContactableManager
@@ -228,3 +231,297 @@ class Asset(models.Model, RevisionMixin):
     @property
     def display_name(self):
         return f"{self.display_id} | {self.description}"
+
+    def related_history_versions(self):
+        """Versions of other objects that belong in this asset's history"""
+        from django.contrib.contenttypes.models import ContentType
+        from versioning.versioning import PAT_DELETED_PREFIX, RIGSVersion
+
+        record_type = ContentType.objects.get_for_model(PATTestRecord)
+        ids = {str(pk) for pk in self.pat_tests.values_list("pk", flat=True)}
+        # Results that were deleted are gone from the table, but the revision that deleted them kept a copy
+        deleted = RIGSVersion.objects.filter(
+            content_type=record_type,
+            revision__comment__startswith=PAT_DELETED_PREFIX,
+            serialized_data__regex=rf'"asset": {self.pk}[,}}]',
+        )
+        ids.update(deleted.values_list("object_id", flat=True))
+        return RIGSVersion.objects.filter(content_type=record_type, object_id__in=ids)
+
+    @property
+    def latest_pat_test(self):
+        return self.pat_tests.order_by("-tested_at").first()
+
+    @property
+    def pat_status(self):
+        if hasattr(self, "pat_last_tested"):
+            return PATTestRecord.status_from(self.pat_last_tested, self.pat_last_passed, self.pat_next_due)
+        return PATTestRecord.status_for(self.latest_pat_test)
+
+    @property
+    def pat_status_label(self):
+        return PATTestRecord.STATUS_LABELS[self.pat_status]
+
+
+PAT_UNIT_LABELS = {"ohm": "Ω", "Mohm": "MΩ", "deg": "°"}
+
+
+def pat_unit(unit):
+    return PAT_UNIT_LABELS.get(unit, unit)
+
+
+def pat_value(value, unit):
+    return f"{value} {pat_unit(unit)}".strip()
+
+
+def pat_upload_path(instance, filename):
+    return f"pat/{timezone.now():%Y/%m}/{uuid.uuid4().hex}.sss"
+
+
+@reversion.register
+class PATTestBatch(models.Model):
+    file = models.FileField(upload_to=pat_upload_path)
+    original_filename = models.CharField(max_length=255)
+    sha256 = models.CharField(max_length=64, db_index=True)
+    machine_model = models.CharField(max_length=40, blank=True)
+    machine_serial = models.CharField(max_length=40, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="pat_uploads")
+    unmatched_asset_ids = models.JSONField(default=list, blank=True)
+    conflicts = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+
+    def __str__(self):
+        return f"{self.original_filename} ({self.uploaded_at:%Y-%m-%d})"
+
+    def get_absolute_url(self):
+        return reverse("pat_batch_detail", kwargs={"pk": self.pk})
+
+    @property
+    def activity_feed_string(self):
+        return self.original_filename
+
+    @property
+    def display_id(self):
+        return self.original_filename
+
+
+@reversion.register
+class PATTestRecord(models.Model):
+    NOT_TESTED = "not_tested"
+    FAILED = "failed"
+    OVERDUE = "overdue"
+    IN_DATE = "in_date"
+    STATUS_LABELS = {
+        NOT_TESTED: "Never PAT tested",
+        FAILED: "Failed PAT",
+        OVERDUE: "PAT overdue",
+        IN_DATE: "PAT in date",
+    }
+
+    batch = models.ForeignKey(PATTestBatch, on_delete=models.CASCADE, related_name="records")
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="pat_tests")
+    tested_at = models.DateTimeField()
+    passed = models.BooleanField(null=True)
+    operator = models.CharField(max_length=16, blank=True)
+    comments = models.TextField(blank=True)
+    next_full_test_date = models.DateField(null=True, blank=True)
+    next_visual_test_date = models.DateField(null=True, blank=True)
+    details = models.JSONField(default=dict, blank=True)
+
+    reversion_hide = True
+
+    class Meta:
+        ordering = ["-tested_at"]
+        constraints = [models.UniqueConstraint(fields=["asset", "tested_at"], name="unique_pat_test_per_asset_time")]
+
+    def __str__(self):
+        return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
+
+    @classmethod
+    def status_from(cls, tested_at, passed, next_full_test_date):
+        if tested_at is None:
+            return cls.NOT_TESTED
+        if passed is False:
+            return cls.FAILED
+        if next_full_test_date and next_full_test_date < timezone.localdate():
+            return cls.OVERDUE
+        return cls.IN_DATE
+
+    @classmethod
+    def status_for(cls, record):
+        if record is None:
+            return cls.NOT_TESTED
+        return cls.status_from(record.tested_at, record.passed, record.next_full_test_date)
+
+    @property
+    def status(self):
+        return self.status_for(self)
+
+    @staticmethod
+    def describe_reading(item):
+        measurements = item.get("measurements", [])
+        if not measurements:
+            return ""
+        parts = []
+        for index, m in enumerate(measurements):
+            qualifier = item.get("qualifier", "") if index == len(measurements) - 1 else ""
+            parts.append(f"{m['name']} {qualifier}{m['value']} {m['unit']}")
+        return f" ({', '.join(parts)})"
+
+    def expected_counts(self):
+        """How many times the program says each kind of test should run"""
+        counts = Counter()
+        for step in self.details.get("program_steps", []):
+            if step["kind"] not in ("Comment", "Visual check"):
+                counts[step["kind"]] += step.get("repeats", 1)
+        return counts
+
+    def flagged(self):
+        """Everything the tester marked as failed in this result, whatever its overall verdict was."""
+        reasons = []
+        visual = [check for check in self.details.get("visual_checks", []) if check["status"] == "FAIL"]
+        if len(visual) == 1:
+            reasons.append(f"Visual check failed: {visual[0]['kind']}{self.describe_reading(visual[0])}")
+        elif visual:
+            reasons.append(f"Visual checks failed: {', '.join(check['kind'] for check in visual)}")
+        steps = self.details.get("steps", [])
+        totals = Counter(step["kind"] for step in steps)
+        expected = self.expected_counts()
+        seen = Counter()
+        for step in steps:
+            seen[step["kind"]] += 1
+            if step["status"] != "FAIL":
+                continue
+            of = max(totals[step["kind"]], expected[step["kind"]])
+            repeat = f" [{seen[step['kind']]} of {of}]" if of > 1 else ""
+            if step["kind"] == "Comment":
+                reasons.append(f"Failed by the operator at the prompt '{step['text']}'{repeat}")
+            else:
+                reasons.append(f"{step['kind']} failed{self.describe_reading(step)}{repeat}")
+        return reasons
+
+    @property
+    def failure_reasons(self):
+        return self.flagged() if self.passed is not True else []
+
+    @property
+    def notes(self):
+        notes = [self.comments] if self.comments else []
+        flagged = self.flagged() if self.passed is True else []
+        if flagged:
+            notes.append(f"Recorded as a pass overall, but the tester also flagged: {'; '.join(flagged)}")
+        return notes
+
+    @property
+    def program(self):
+        return self.details.get("program", "")
+
+    @staticmethod
+    def describe_limit(program_step):
+        if "limit" not in program_step:
+            return ""
+        operator = "≤" if program_step["limit_type"] == "max" else "≥"
+        return f"{operator} {pat_value(program_step['limit'], program_step['unit'])}"
+
+    @property
+    def has_limits(self):
+        return any("limit" in step for step in self.details.get("program_steps", []))
+
+    def display_program(self):
+        """What the test program defines, with a repeated cycle (like each connector of a Socapex) shown once"""
+        items = []
+        for step in self.details.get("program_steps", []):
+            kind = step["kind"]
+            if kind == "Visual check":
+                continue
+            if kind == "Comment":
+                items.append({"text": f"Prompt: {step['text']}" if step.get("text") else "Prompt", "prompt": True})
+                continue
+            text = kind
+            if step.get("repeats", 1) > 1:
+                text += f" ×{step['repeats']}"
+            if "voltage" in step:
+                text += f" at {pat_value(step['voltage'], 'V')}"
+            if "test_current" in step:
+                text += f" at {pat_value(step['test_current'], 'mA')}, {pat_value(step['angle'], 'deg')}"
+            limit = self.describe_limit(step)
+            if limit:
+                text += f", {limit}"
+            items.append({"text": text, "prompt": False})
+        texts = [item["text"] for item in items]
+        for period in range(1, len(texts) // 2 + 1):
+            if all(texts[i] == texts[i % period] for i in range(len(texts))):
+                return {"items": items[:period], "sections": -(-len(texts) // period)}
+        return {"items": items, "sections": 1}
+
+    def display_visual_checks(self):
+        return [
+            {
+                "kind": check["kind"],
+                "status": check["status"],
+                "reading": ", ".join(pat_value(m["value"], m["unit"]) for m in check.get("measurements", [])),
+            }
+            for check in self.details.get("visual_checks", [])
+        ]
+
+    def display_steps(self):
+        """The recorded steps as rows to show, each lined up with the limit its program set for it"""
+        steps = self.details.get("steps", [])
+        expected = []
+        for program_step in self.details.get("program_steps", []):
+            if program_step["kind"] not in ("Comment", "Visual check"):
+                expected += [program_step] * program_step.get("repeats", 1)
+        totals = Counter(step["kind"] for step in steps if step["kind"] != "Comment")
+        # the tester stops at a failure, so more can be expected than were run
+        for kind, count in self.expected_counts().items():
+            totals[kind] = max(totals[kind], count)
+        # A prompt (like "Change Connector") splits the test into sections
+        sections = sum(1 for step in steps if step["kind"] == "Comment") + 1
+        seen = Counter()
+        position = 0
+        section = 0
+        start_section = sections > 1
+        rows = []
+        for step in steps:
+            if step["kind"] == "Comment":
+                rows.append({"prompt": step["text"] or "Prompt", "status": step["status"]})
+                start_section = True
+                continue
+            if start_section and sections > 1:
+                section += 1
+                rows.append({"section": f"Section {section} of {sections}"})
+                start_section = False
+            seen[step["kind"]] += 1
+            limit = ""
+            for index in range(position, len(expected)):
+                if expected[index]["kind"] == step["kind"]:
+                    limit = self.describe_limit(expected[index])
+                    position = index + 1
+                    break
+            measurements = step.get("measurements", [])
+            reading = ""
+            if measurements:
+                qualifier = f"{step['qualifier']} " if step.get("qualifier") else ""
+                reading = qualifier + pat_value(measurements[-1]["value"], measurements[-1]["unit"])
+            numbered = totals[step["kind"]] > 1 and not (sections > 1 and totals[step["kind"]] == sections)
+            rows.append(
+                {
+                    "prompt": "",
+                    "section": "",
+                    "kind": step["kind"],
+                    "repeat": f"{seen[step['kind']]} of {totals[step['kind']]}" if numbered else "",
+                    "reading": reading,
+                    "setup": ", ".join(pat_value(m["value"], m["unit"]) for m in measurements[:-1]),
+                    "limit": limit,
+                    "status": step["status"],
+                    "flags": step.get("flags", 0),
+                }
+            )
+        return rows
+
+    @property
+    def status_label(self):
+        return self.STATUS_LABELS[self.status]

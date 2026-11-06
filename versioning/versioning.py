@@ -238,6 +238,7 @@ class RIGSVersionManager(VersionQuerySet):
 
 CONVERTED_PREFIX = "Converted enquiry "
 DELETED_PREFIX = "Deleted enquiry "
+PAT_DELETED_PREFIX = "Deleted PAT results "
 
 
 class RIGSVersion(Version):
@@ -286,6 +287,16 @@ class RIGSVersion(Version):
         return comment[len(DELETED_PREFIX) :] if comment.startswith(DELETED_PREFIX) else None
 
     @property
+    def object_exists(self):
+        """Whether the object this is a version of is still there"""
+        return self.content_type.model_class()._base_manager.filter(pk=self.object_id).exists()
+
+    @property
+    def pat_deletion(self):
+        """Whether this version is the record of a PAT upload (or one of its results) being deleted"""
+        return self.revision.comment.startswith(PAT_DELETED_PREFIX)
+
+    @property
     def display_id(self):
         return f"V{self.pk} | R{self.revision.pk}"
 
@@ -323,18 +334,28 @@ def bump_activity_feed_version(sender=None, **kwargs):
     cache.set(ACTIVITY_FEED_VERSION_KEY, new_activity_feed_version(), None)
 
 
-def record_deletion(obj, user, comment):
-    """Keep a version of an object that is about to be deleted, as reversion drops versions of deleted objects"""
+def record_deletions(objects, user, comment):
+    """
+    Keep a version of each of some objects that are about to be deleted, in one revision.
+    Reversion drops the versions of objects that no longer exist when a revision is saved, so this can't be left to it.
+    """
     revision = Revision.objects.create(
         date_created=timezone.now(), user=user if getattr(user, "pk", None) else None, comment=comment
     )
-    Version.objects.create(
-        revision=revision,
-        object_id=str(obj.pk),
-        content_type=ContentType.objects.get_for_model(obj),
-        db="default",
-        format="json",
-        serialized_data=serializers.serialize("json", [obj]),
-        object_repr=str(obj),
+    Version.objects.bulk_create(
+        Version(
+            revision=revision,
+            object_id=str(obj.pk),
+            content_type=ContentType.objects.get_for_model(obj),
+            db="default",
+            format="json",
+            serialized_data=serializers.serialize("json", [obj]),
+            object_repr=str(obj),
+        )
+        for obj in objects
     )
     bump_activity_feed_version()
+
+
+def record_deletion(obj, user, comment):
+    record_deletions([obj], user, comment)

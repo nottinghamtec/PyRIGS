@@ -6,8 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum
-from django.http import HttpResponse
+from django.db.models import Exists, F, OuterRef, Q, Subquery, Sum
+from django.http import FileResponse, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import generic
@@ -29,7 +29,13 @@ from PyRIGS.views import (
     is_ajax,
     OEmbedView,
 )
-from assets import forms, models
+from assets import forms, models, pat
+from assets.sss import SSSParseError
+
+
+def latest_pat(field):
+    latest = models.PATTestRecord.objects.filter(asset=OuterRef("pk")).order_by("-tested_at")
+    return Subquery(latest.values(field)[:1])
 
 
 class AssetList(LoginRequiredMixin, generic.ListView):
@@ -37,6 +43,15 @@ class AssetList(LoginRequiredMixin, generic.ListView):
     template_name = "asset_list.html"
     paginate_by = 40
     hide_hidden_status = True
+    advanced_filters = {
+        "audit_status",
+        "supplier",
+        "collection",
+        "acquired_from",
+        "acquired_to",
+        "is_cable",
+        "cable_type",
+    }
 
     def get_initial(self):
         initial = {"status": models.AssetStatus.objects.filter(should_show=True)}
@@ -50,18 +65,25 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         form = self.form
         if not form.is_valid():
             return self.model.objects.none()
+        data = form.cleaned_data
 
         # TODO Feedback to user when search fails
-        query_string = form.cleaned_data["q"] or ""
-        queryset = models.Asset.objects.search(query=query_string)
+        query_string = data["q"] or ""
+        queryset = models.Asset.objects.search(query=query_string).annotate(
+            pat_last_tested=latest_pat("tested_at"),
+            pat_last_passed=latest_pat("passed"),
+            pat_next_due=latest_pat("next_full_test_date"),
+        )
 
-        if form.cleaned_data["is_cable"]:
+        if data["is_cable"]:
             queryset = queryset.filter(is_cable=True)
 
-        if form.cleaned_data["date_acquired"]:
-            queryset = queryset.filter(date_acquired=form.cleaned_data["date_acquired"])
+        if data["acquired_from"]:
+            queryset = queryset.filter(date_acquired__gte=data["acquired_from"])
+        if data["acquired_to"]:
+            queryset = queryset.filter(date_acquired__lte=data["acquired_to"])
 
-        audit_status = form.cleaned_data["audit_status"]
+        audit_status = data["audit_status"]
         if audit_status == "audited":
             queryset = queryset.filter(last_audited_at__isnull=False)
         elif audit_status == "never":
@@ -69,22 +91,117 @@ class AssetList(LoginRequiredMixin, generic.ListView):
         elif audit_status == "stale":
             queryset = queryset.filter(last_audited_at__lt=timezone.now() - datetime.timedelta(days=365))
 
-        if form.cleaned_data["category"]:
-            queryset = queryset.filter(category__in=form.cleaned_data["category"])
+        queryset = self.filter_pat(queryset, data["pat_status"])
 
-        if len(form.cleaned_data["status"]) > 0:
-            queryset = queryset.filter(status__in=form.cleaned_data["status"])
+        collection = data["collection"]
+        if collection == "top":
+            queryset = queryset.filter(parent__isnull=True)
+        elif collection == "child":
+            queryset = queryset.filter(parent__isnull=False)
+        elif collection == "parent":
+            queryset = queryset.filter(Exists(models.Asset.objects.filter(parent=OuterRef("pk"))))
+
+        if data["category"]:
+            queryset = queryset.filter(category__in=data["category"])
+
+        if data["supplier"]:
+            queryset = queryset.filter(purchased_from__in=data["supplier"])
+
+        if len(data["status"]) > 0:
+            queryset = queryset.filter(status__in=data["status"])
         elif self.hide_hidden_status:
             queryset = queryset.filter(status__in=models.AssetStatus.objects.filter(should_show=True))
 
+        queryset = self.order(queryset, data["order"])
         return queryset.select_related("category", "status", "cable_type__plug", "cable_type__socket")
+
+    @staticmethod
+    def filter_pat(queryset, pat_status):
+        today = timezone.localdate()
+        failed = Q(pat_last_passed=False)
+        tested = Q(pat_last_tested__isnull=False)
+        if pat_status == "needs":
+            # Only things that have been tested before: never-tested assets may not need a PAT at all
+            return queryset.filter(tested, pat_next_due__lt=today).exclude(failed)
+        if pat_status == "failed":
+            return queryset.filter(failed)
+        if pat_status == "in_date":
+            return queryset.filter(tested).exclude(failed).exclude(pat_next_due__lt=today)
+        if pat_status == "never":
+            return queryset.filter(pat_last_tested__isnull=True)
+        return queryset
+
+    @staticmethod
+    def order(queryset, order):
+        orderings = {
+            "description": ["description"],
+            "-date_acquired": ["-date_acquired"],
+            "date_acquired": ["date_acquired"],
+            "audit": [F("last_audited_at").asc(nulls_first=True)],
+            "pat_due": [F("pat_next_due").asc(nulls_last=True)],
+        }
+        if order not in orderings:
+            return queryset
+        return queryset.order_by(*orderings[order], "asset_id_prefix", "asset_id_number")
+
+    def remove_filter_url(self, key, value=None):
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        if value is None:
+            params.pop(key, None)
+        else:
+            remaining = [v for v in params.getlist(key) if v != str(value)]
+            if remaining:
+                params.setlist(key, remaining)
+            else:
+                params.pop(key, None)
+        query = params.urlencode()
+        return f"{self.request.path}?{query}" if query else self.request.path
+
+    def get_active_filters(self):
+        if not self.request.GET or not self.form.is_valid():
+            return []
+        data = self.form.cleaned_data
+        chips = []
+
+        def add(key, label, value=None):
+            chips.append(
+                {
+                    "key": key,
+                    "label": label,
+                    "url": self.remove_filter_url(key, value),
+                    "advanced": key in self.advanced_filters,
+                }
+            )
+
+        if data["q"]:
+            add("q", f"Search: {data['q']}")
+        for key, title in [
+            ("category", "Category"),
+            ("status", "Status"),
+            ("supplier", "Supplier"),
+            ("cable_type", "Cable type"),
+        ]:
+            for obj in data[key]:
+                add(key, f"{title}: {obj}", obj.pk)
+        if data["is_cable"]:
+            add("is_cable", "Only cables")
+        if data["acquired_from"]:
+            add("acquired_from", f"Acquired from {data['acquired_from']:%d/%m/%Y}")
+        if data["acquired_to"]:
+            add("acquired_to", f"Acquired until {data['acquired_to']:%d/%m/%Y}")
+        for key in ("audit_status", "pat_status", "collection"):
+            if data[key]:
+                add(key, dict(self.form.fields[key].choices)[data[key]])
+        return chips
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.form
-        if hasattr(self.form, "cleaned_data"):
-            context["category_filters"] = self.form.cleaned_data.get("category")
-            context["status_filters"] = self.form.cleaned_data.get("status")
+        context["active_filters"] = self.get_active_filters()
+        context["advanced_count"] = sum(chip["advanced"] for chip in context["active_filters"])
+        context["advanced_open"] = context["advanced_count"] > 0
+        context["show_pat"] = True
         context["categories"] = models.AssetCategory.objects.all()
         context["statuses"] = models.AssetStatus.objects.all()
         context["page_title"] = "Asset List"
@@ -123,6 +240,10 @@ class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = f"Asset {self.object.display_id}"
+        pat_tests = list(self.object.pat_tests.all()[:5])
+        context["pat_tests"] = pat_tests
+        context["pat_status"] = models.PATTestRecord.status_for(pat_tests[0] if pat_tests else None)
+        context["pat_status_label"] = models.PATTestRecord.STATUS_LABELS[context["pat_status"]]
         return context
 
 
@@ -473,3 +594,129 @@ class GenerateLabels(generic.View):
         response["Content-Disposition"] = f'filename="{name}"'
         response.write(merged.getvalue())
         return response
+
+
+class PATUpload(generic.FormView):
+    template_name = "pat_upload.html"
+    form_class = forms.PATUploadForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Upload PAT Results"
+        return context
+
+    def form_valid(self, form):
+        summary = pat.import_sss(
+            form.parsed, form.content, form.cleaned_data["file"].name, form.sha256, self.request.user
+        )
+        report_pat_import(self.request, summary)
+        if summary.batch is None:
+            messages.warning(self.request, "Nothing was imported and the file wasn't stored")
+            return redirect("pat_upload")
+        return redirect("pat_batch_detail", pk=summary.batch.pk)
+
+
+def report_pat_import(request, summary):
+    if summary.imported:
+        messages.success(request, f"Imported {len(summary.imported)} PAT results")
+    if summary.replaced:
+        messages.success(request, f"Replaced {len(summary.replaced)} existing results with the version in this file")
+    if summary.duplicates:
+        messages.info(request, f"Skipped {len(summary.duplicates)} results that were already recorded")
+    if summary.conflicts:
+        messages.warning(
+            request,
+            f"{len(summary.conflicts)} results have the same asset and time as ones already recorded but a "
+            "different outcome. They weren't imported; review them below.",
+        )
+    if summary.unmatched:
+        advice = (
+            "create them, then use Re-match on this page" if summary.batch else "create them and upload the file again"
+        )
+        messages.warning(
+            request,
+            f"{len(set(summary.unmatched))} asset IDs in the file don't exist in RIGS and were skipped; {advice}",
+        )
+
+
+class PATBatchReprocess(generic.View):
+    def post(self, request, pk):
+        batch = get_object_or_404(models.PATTestBatch, pk=pk)
+        accept = request.POST.get("accept") or None
+        if accept and accept not in {conflict["key"] for conflict in batch.conflicts}:
+            messages.error(request, "That conflict no longer exists")
+            return redirect("pat_batch_detail", pk=batch.pk)
+        try:
+            summary = pat.reprocess(batch, request.user, accept)
+        except SSSParseError:
+            messages.error(request, "The stored file could no longer be read")
+            return redirect("pat_batch_detail", pk=batch.pk)
+        report_pat_import(request, summary)
+        if not (summary.imported or summary.replaced):
+            messages.info(request, "Nothing new to import")
+        return redirect("pat_batch_detail", pk=batch.pk)
+
+
+class PATBatchList(generic.ListView):
+    model = models.PATTestBatch
+    template_name = "pat_batch_list.html"
+    paginate_by = 40
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("uploaded_by")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "PAT Uploads"
+        return context
+
+
+class PATBatchDetail(generic.DetailView):
+    model = models.PATTestBatch
+    template_name = "pat_batch_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"PAT Upload {self.object.original_filename}"
+        context["records"] = self.object.records.select_related("asset")
+        return context
+
+
+class PATBatchDownload(generic.View):
+    def get(self, request, pk):
+        batch = get_object_or_404(models.PATTestBatch, pk=pk)
+        return FileResponse(batch.file.open("rb"), as_attachment=True, filename=batch.original_filename)
+
+
+class PATBatchDelete(generic.FormView):
+    template_name = "pat_batch_confirm_delete.html"
+    form_class = forms.PATBatchDeleteForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.batch = get_object_or_404(models.PATTestBatch, pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        records = self.batch.records.all()
+        affected = models.Asset.objects.filter(pat_tests__batch=self.batch).distinct()
+        # assets with results from other uploads go back to their latest remaining result; these would have none
+        untested = affected.exclude(pat_tests__in=models.PATTestRecord.objects.exclude(batch=self.batch))
+        context.update(
+            {
+                "page_title": f"Delete PAT upload {self.batch.original_filename}",
+                "batch": self.batch,
+                "record_count": records.count(),
+                "asset_count": affected.count(),
+                "untested_assets": list(untested.order_by("asset_id_prefix", "asset_id_number")[:30]),
+                "untested_count": untested.count(),
+            }
+        )
+        context["more_count"] = context["untested_count"] - len(context["untested_assets"])
+        return context
+
+    def form_valid(self, form):
+        name = self.batch.original_filename
+        count = pat.delete_batch(self.batch, self.request.user, form.cleaned_data["reason"])
+        messages.success(self.request, f"Deleted {name} and its {count} results")
+        return redirect("pat_batch_list")
