@@ -37,6 +37,9 @@
     {% if perms.RIGS.view_riskassessment %}
     <li class="nav-item"><a class="nav-link" href="{% url 'hs_list' %}">H&S</a></li>
     {% endif %}
+    {% if perms.RIGS.view_event %}
+    <li class="nav-item d-lg-none d-xl-block"><a class="nav-link text-nowrap" href="{% url 'activity_all' %}">Recent Changes</a></li>
+    {% endif %}
     {% if perms.RIGS.view_invoice %}
     <li class="nav-item dropdown">
       {% invoice_counts as counts %}

@@ -359,6 +359,15 @@ def test_all_activity_covers_every_app(admin_client, admin_user):
     assert reverse("activity_all") in content_of(admin_client.get(reverse("index")))
 
 
+def test_navbar_links_to_recent_changes_for_people_who_can_see_them(client, django_user_model):
+    link = f'<a class="nav-link text-nowrap" href="{reverse("activity_all")}"'
+    login_with(client, django_user_model, "view_event")
+    assert link in client.get(reverse("rigboard")).content.decode()
+    client.logout()
+    login_with(client, django_user_model, username="other")
+    assert link not in client.get(reverse("rigboard")).content.decode()
+
+
 def test_csv_export_applies_filters_and_neutralises_formulae(admin_client, admin_user):
     event = make_event(admin_user, name="=HYPERLINK(1)")
     saved(event, admin_user, status=models.Event.BOOKED)
