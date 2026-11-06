@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.auth.admin import UserAdmin
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db import transaction
 from django.db.models import Count
 from django.forms import ModelForm
@@ -150,6 +150,15 @@ class AssociateAdmin(VersionAdmin):
 
 @admin.register(models.Profile)
 class ProfileAdmin(UserAdmin, AssociateAdmin):
+    def revision_view(self, request, object_id, version_id, extra_context=None):
+        raise PermissionDenied
+
+    def recover_view(self, request, version_id, extra_context=None):
+        raise PermissionDenied
+
+    def recoverlist_view(self, request, extra_context=None):
+        raise PermissionDenied
+
     list_display = (
         "username",
         "name",

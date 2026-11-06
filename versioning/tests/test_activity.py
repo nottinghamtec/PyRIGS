@@ -1,4 +1,5 @@
 import importlib
+import json
 from datetime import date, timedelta
 from unittest import mock
 
@@ -56,6 +57,55 @@ def content_of(response):
 
 def csv_of(response):
     return b"".join(response.streaming_content).decode()
+
+
+def test_profile_versions_leave_out_credentials(admin_user):
+    with reversion.create_revision():
+        admin_user.phone = "0123456"
+        admin_user.api_key = "secret-key"
+        admin_user.save()
+    fields = json.loads(Version.objects.get_for_object(admin_user).first().serialized_data)[0]["fields"]
+    assert "phone" in fields
+    assert not {"password", "api_key", "last_login"} & set(fields)
+
+
+def test_logging_in_does_not_create_a_revision(client, django_user_model):
+    user = django_user_model.objects.create_user("loginuser", password="password", is_approved=True)
+    with reversion.create_revision():
+        user.phone = "012"
+        user.save()
+    before = Revision.objects.count()
+    client.post(reverse("login"), {"username": "loginuser", "password": "password"})
+    user.refresh_from_db()
+    assert user.last_login is not None
+    assert Revision.objects.count() == before
+
+
+def test_profiles_cannot_be_reverted_in_the_admin(admin_client, admin_user):
+    with reversion.create_revision():
+        admin_user.save()
+    version = Version.objects.get_for_object(admin_user).first()
+    url = reverse("admin:RIGS_profile_revision", args=[admin_user.pk, version.pk])
+    assert admin_client.get(url).status_code == 403
+    assert admin_client.get(reverse("admin:RIGS_profile_recoverlist")).status_code == 403
+
+
+def test_scrub_migration_removes_credentials_from_old_versions(admin_user):
+    with reversion.create_revision():
+        admin_user.phone = "0123456"
+        admin_user.save()
+    version = Version.objects.get_for_object(admin_user).first()
+    data = json.loads(version.serialized_data)
+    data[0]["fields"].update({"password": "hash", "api_key": "key", "last_login": None})
+    Version.objects.filter(pk=version.pk).update(serialized_data=json.dumps(data))
+
+    migration = importlib.import_module("versioning.migrations.0003_scrub_profile_versions")
+    migration.scrub_profile_versions(global_apps, None)
+
+    version.refresh_from_db()
+    fields = json.loads(version.serialized_data)[0]["fields"]
+    assert fields["phone"] == "0123456"
+    assert not {"password", "api_key", "last_login"} & set(fields)
 
 
 def test_action_migration_understands_the_old_comments():

@@ -62,6 +62,7 @@ def validate_initials(value, exclude_pk=None, check_clash=True):
     return value
 
 
+@reversion.register(exclude=("password", "api_key", "last_login"), ignore_duplicates=True)
 class Profile(AbstractUser):
     HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
     HS_RANGE_CHOICES = [
