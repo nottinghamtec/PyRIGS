@@ -1,0 +1,14 @@
+{% if session.total == 1 %}
+    {% with row=session.first %}
+    <span class="badge text-bg-{{ row.colour }}">{{ row.depth }}</span>
+    {{ row.item|default:"Deleted item" }} for {% include 'partials/qualification_trainee.html' with trainee=row.trainees.0 %}
+    <small class="d-block text-body-secondary">{% if session.supervisors %}By {{ session.supervisors|join:", " }} on {% else %}On {% endif %}{{ session.first_date|date:"j M Y" }}</small>
+    {% endwith %}
+{% else %}
+    <button type="button" class="session-toggle" aria-expanded="false" aria-controls="session-{{ version.pk }}">
+        <span class="fas fa-chevron-right" aria-hidden="true"></span>
+        <span>{{ session.total }} qualification{{ session.total|pluralize }} for {{ session.trainee_count }} {{ session.trainee_count|pluralize:"person,people" }} in {{ session.item_count }} item{{ session.item_count|pluralize }}</span>
+    </button>
+    <small class="d-block text-body-secondary">{% if session.supervisors %}By {{ session.supervisors|join:", " }} {% endif %}{% if session.first_date == session.last_date %}on {{ session.first_date|date:"j M Y" }}{% else %}from {{ session.first_date|date:"j M Y" }} to {{ session.last_date|date:"j M Y" }}{% endif %}</small>
+{% endif %}
+{% if session.notes %}<small class="d-block text-body-secondary">{{ session.notes }}</small>{% endif %}

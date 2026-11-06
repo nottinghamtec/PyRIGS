@@ -1,0 +1,18 @@
+<table class="table table-sm session-table">
+    <thead>
+    <tr>
+        <th scope="col" class="session-col-stage">Stage</th>
+        <th scope="col" class="session-col-item">Item</th>
+        <th scope="col">People</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in session.rows %}
+        <tr>
+            <td><span class="badge text-bg-{{ row.colour }}">{{ row.depth }}</span></td>
+            <td>{{ row.item|default:"Deleted item" }}</td>
+            <td>{% for trainee in row.trainees %}{% include 'partials/qualification_trainee.html' with last=forloop.last %}{% endfor %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

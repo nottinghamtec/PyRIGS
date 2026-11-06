@@ -11,8 +11,10 @@ from django.db.models import (
     BooleanField,
     CharField,
     EmailField,
+    Exists,
     IntegerField,
     OuterRef,
+    Q,
     Subquery,
     TextField,
 )
@@ -290,6 +292,9 @@ class RIGSVersion(Version):
 
     hidden_fields = frozenset()
     earliest = None
+    session = None
+    session_template = None
+    session_detail_template = None
 
     # Gets the most recent previous version
     @cached_property
@@ -571,4 +576,45 @@ def prepare_versions(versions, user):
         for version in followed:
             version.__dict__["revision_versions"] = by_revision[version.revision_id]
 
+    return versions
+
+
+def session_models(models):
+    return [model for model in models if hasattr(model, "summarise_sessions")]
+
+
+def collapse_sessions(versions, models):
+    """Keep one version of each model per revision for models that summarise a whole session in one row"""
+    content_types = [ContentType.objects.get_for_model(model).pk for model in session_models(models)]
+    if not content_types:
+        return versions
+    earlier = Version.objects.filter(
+        revision_id=OuterRef("revision_id"), content_type_id=OuterRef("content_type_id"), pk__lt=OuterRef("pk")
+    )
+    return versions.filter(~Q(content_type_id__in=content_types) | ~Exists(earlier))
+
+
+def attach_sessions(versions, collapsed=True):
+    by_model = defaultdict(list)
+    for version in versions:
+        if hasattr(version._model, "summarise_sessions") and version.action is None:
+            by_model[version._model].append(version)
+
+    for model, model_versions in by_model.items():
+        members = defaultdict(list)
+        if collapsed:
+            content_type = _get_content_type(model, "default")
+            for member in RIGSVersion.objects.filter(
+                revision_id__in={version.revision_id for version in model_versions}, content_type=content_type
+            ):
+                members[member.revision_id].append(member)
+        sessions = [(version, members[version.revision_id] if collapsed else [version]) for version in model_versions]
+        sessions = [(version, group) for version, group in sessions if len(group) > 1 or not version.parent]
+        summaries = model.summarise_sessions(
+            [[member._object_version.object for member in group] for _, group in sessions]
+        )
+        for (version, _), summary in zip(sessions, summaries):
+            version.session = summary
+            version.session_template = model.session_template
+            version.session_detail_template = model.session_detail_template
     return versions

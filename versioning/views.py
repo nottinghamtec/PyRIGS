@@ -19,6 +19,8 @@ from versioning.versioning import (
     ModelComparison,
     RIGSVersion,
     activity_feed_version,
+    attach_sessions,
+    collapse_sessions,
     feed_audience,
     filter_models,
     get_models,
@@ -209,7 +211,15 @@ class ActivityTable(generic.ListView):
     def filter_form(self):
         return ActivityFilterForm(self.request.GET, models=self.visible_models)
 
+    @property
+    def show_sessions(self):
+        return self.request.GET.get("export") != "csv" and not self.request.GET.get("q")
+
     def get_queryset(self):
+        versions = self.filtered_versions()
+        return collapse_sessions(versions, self.visible_models) if self.show_sessions else versions
+
+    def filtered_versions(self):
         versions = RIGSVersion.objects.get_for_multiple_models(self.visible_models)
         if not self.filter_form.is_valid():
             return versions
@@ -271,7 +281,9 @@ class ActivityTable(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["object_list"] = prepare_versions(context["object_list"], self.request.user)
+        context["object_list"] = attach_sessions(
+            prepare_versions(context["object_list"], self.request.user), collapsed=self.show_sessions
+        )
         context["page_title"] = f"{title(self.kwargs.get('heading', self.kwargs['app']))} Activity Stream"
         context["filter_form"] = self.filter_form
         query = self.request.GET.copy()

@@ -1,24 +1,26 @@
 {% load to_class_name from filters %}
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table activity-table">
         <thead class="table-dark">
         <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Object</th>
-            <th scope="col">Version ID</th>
-            <th scope="col">User</th>
+            <th scope="col" class="activity-col-date">Date</th>
+            <th scope="col" class="activity-col-object">Object</th>
+            <th scope="col" class="activity-col-version">Version ID</th>
+            <th scope="col" class="activity-col-user">User</th>
             <th scope="col">Changes</th>
         </tr>
         </thead>
         <tbody>
         {% for version in object_list %}
-            <tr>
+            <tr class="{% cycle 'activity-row-striped' '' as stripe %}">
                 <th scope="row">{{ version.revision.date_created }}</th>
-                <td>{% if version.object_url %}<a href="{{ version.object_url }}">{{ version.display_name }}</a>{% else %}{{ version.display_name }}{% endif %}</td>
+                <td>{% if version.session %}{{ version.session.title }}{% elif version.object_url %}<a href="{{ version.object_url }}">{{ version.display_name }}</a>{% else %}{{ version.display_name }}{% endif %}</td>
                 <td>{{ version.display_id }}</td>
                 <td>{% if version.revision.user %}{% include 'partials/linked_name.html' with profile=version.revision.user %}{% else %}System{% endif %}</td>
                 <td>
-                    {% if version.converted_enquiry_name and version.changes.old == None %}
+                    {% if version.session %}
+                        {% include version.session_template with session=version.session %}
+                    {% elif version.converted_enquiry_name and version.changes.old == None %}
                         Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.object_url }}">{{ version.changes.new.display_id }}</a>
                     {% elif version.deleted_name %}
                         Deleted {{ version.deleted_name }}
@@ -33,6 +35,17 @@
                     {% include 'partials/version_notes.html' %}
                 </td>
             </tr>
+            {% if version.session.total > 1 %}
+            <tr class="session-detail {{ stripe }}" id="session-{{ version.pk }}">
+                <td colspan="5">
+                    <div class="session-detail-reveal">
+                        <div class="session-detail-content">
+                            {% include version.session_detail_template with session=version.session %}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
         {% endfor %}
         </tbody>
     </table>

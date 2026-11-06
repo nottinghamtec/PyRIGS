@@ -248,6 +248,51 @@ class TrainingItemQualification(models.Model, RevisionMixin):
 
     objects = TrainingItemQualificationManager()
 
+    session_template = "partials/qualification_session.html"
+    session_detail_template = "partials/qualification_session_detail.html"
+
+    @classmethod
+    def summarise_sessions(cls, sessions):
+        qualifications = [qualification for session in sessions for qualification in session]
+        people = Profile._base_manager.in_bulk(
+            {q.trainee_id for q in qualifications} | {q.supervisor_id for q in qualifications}
+        )
+        items = TrainingItem._base_manager.select_related("category").in_bulk({q.item_id for q in qualifications})
+        return [cls.summarise_session(session, people, items) for session in sessions]
+
+    @classmethod
+    def summarise_session(cls, qualifications, people, items):
+        rows = {}
+        for qualification in qualifications:
+            key = (qualification.item_id, qualification.depth)
+            row = rows.setdefault(
+                key,
+                {
+                    "item": items.get(qualification.item_id),
+                    "depth": qualification.get_depth_display(),
+                    "colour": cls.get_colour_from_depth(qualification.depth),
+                    "trainees": [],
+                },
+            )
+            row["trainees"].append(people.get(qualification.trainee_id))
+        trainees = {qualification.trainee_id for qualification in qualifications}
+        supervisors = {people[q.supervisor_id].name for q in qualifications if q.supervisor_id in people}
+        dates = sorted({qualification.date for qualification in qualifications})
+        notes = {qualification.notes for qualification in qualifications}
+        first = next(iter(rows.values()))
+        return {
+            "title": "Training session" if len(qualifications) > 1 else "Training qualification",
+            "total": len(qualifications),
+            "trainee_count": len(trainees),
+            "item_count": len({qualification.item_id for qualification in qualifications}),
+            "rows": sorted(rows.values(), key=lambda row: (str(row["item"]), row["depth"])),
+            "first": first,
+            "supervisors": sorted(supervisors),
+            "first_date": dates[0],
+            "last_date": dates[-1],
+            "notes": notes.pop() if len(notes) == 1 else "",
+        }
+
     def clean(self):
         errdict = {}
         # Validate supervisor can train in this item

@@ -13,6 +13,7 @@ from reversion.models import Revision, Version
 
 from RIGS import models
 from assets import models as amodels
+from training import models as training_models
 from versioning.models import RevisionAction
 from versioning.versioning import RIGSVersion, activity_feed_version, get_models, revision_committed
 
@@ -394,6 +395,95 @@ def test_ical_feed_does_not_query_versions_for_each_event(client, admin_user, dj
     with CaptureQueriesContext(connection) as queries:
         assert client.get(url).status_code == 200
     assert len([query for query in queries if '"reversion_version"' in query["sql"]]) <= 1
+
+
+def log_session(supervisor, trainees, items, depth=None, notes="Rigging night"):
+    depth = training_models.TrainingItemQualification.PASSED_OUT if depth is None else depth
+    with reversion.create_revision():
+        reversion.set_user(supervisor)
+        for trainee in trainees:
+            for item in items:
+                training_models.TrainingItemQualification.objects.create(
+                    trainee=trainee, item=item, supervisor=supervisor, depth=depth, date=date.today(), notes=notes
+                )
+
+
+def session_people(django_user_model):
+    make = django_user_model.objects.create
+    supervisor = make(username="sup", first_name="Sue", last_name="Pervisor", is_approved=True, is_supervisor=True)
+    trainees = [make(username=f"t{i}", first_name=f"Trainee{i}", last_name="T", is_approved=True) for i in range(3)]
+    category = training_models.TrainingCategory.objects.create(reference_number=1, name="Basics")
+    items = [
+        training_models.TrainingItem.objects.create(reference_number=i, name=f"Skill {i}", category=category)
+        for i in range(2)
+    ]
+    Trainee = training_models.Trainee
+    return Trainee._base_manager.get(pk=supervisor.pk), [Trainee._base_manager.get(pk=t.pk) for t in trainees], items
+
+
+def test_training_sessions_take_one_row(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees, items)
+    response = admin_client.get(reverse("activity_all"))
+    assert len(response.context["object_list"]) == 1
+    assert response.context["paginator"].count == 1
+
+    content = content_of(response)
+    assert "Training session" in content
+    assert "6 qualifications for 3 people in 2 items" in content
+    assert "Sue Pervisor" in content
+    assert "Skill 0" in content and "Trainee2 T" in content
+    assert "Rigging night" in content
+    assert "TrainingItemQualification" not in content
+    assert "</a>," in content
+    assert 'class="session-detail' in content
+    assert 'aria-expanded="false"' in content
+    assert 'colspan="5"' in content
+
+
+def test_single_qualifications_are_readable(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees[:1], items[:1])
+    content = content_of(admin_client.get(reverse("activity_all")))
+    assert "Passed Out" in content and "Skill 0" in content and "Trainee0 T" in content
+    assert "Sue Pervisor" in content
+    assert 'class="session-detail' not in content
+
+
+def test_searching_finds_individual_qualifications(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees, items)
+    response = admin_client.get(reverse("activity_all"), {"q": "Skill 0"})
+    assert response.context["paginator"].count == 3
+    assert all(version.session["total"] == 1 for version in response.context["object_list"])
+
+
+def test_export_keeps_every_qualification(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees, items)
+    body = csv_of(admin_client.get(reverse("activity_all"), {"export": "csv"}))
+    assert len(body.strip().splitlines()) == 7
+
+
+def test_editing_a_qualification_still_shows_the_change(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees[:1], items[:1])
+    qualification = training_models.TrainingItemQualification.objects.get()
+    saved(qualification, supervisor, notes="Corrected")
+    versions = admin_client.get(reverse("activity_all")).context["object_list"]
+    assert [bool(version.session) for version in versions] == [False, True]
+
+
+def test_session_rows_do_not_add_a_query_per_person(admin_client, django_user_model):
+    supervisor, trainees, items = session_people(django_user_model)
+    log_session(supervisor, trainees, items[:1])
+    url = reverse("activity_all")
+    with CaptureQueriesContext(connection) as few:
+        admin_client.get(url)
+    log_session(supervisor, trainees, items[1:], depth=training_models.TrainingItemQualification.COMPLETE)
+    with CaptureQueriesContext(connection) as more:
+        admin_client.get(url)
+    assert len(more) <= len(few) + 2
 
 
 def test_every_visible_model_is_tracked_for_deletion():
