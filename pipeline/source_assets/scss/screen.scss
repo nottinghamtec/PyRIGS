@@ -146,21 +146,19 @@ html {
 .version-badge {
   display: inline-block;
   margin: 0 .1rem .1rem 0;
-  padding: .05rem .5rem;
-  border: 1px solid var(--bs-info-border-subtle);
-  border-radius: 1rem;
-  background-color: var(--bs-info-bg-subtle);
-  color: var(--bs-info-text-emphasis);
+  padding: .1rem .45rem;
+  border-radius: .25rem;
+  background-color: var(--bs-primary);
+  color: #fff;
   font-size: .8125em;
   font-weight: 500;
   white-space: nowrap;
   cursor: help;
-  transition: background-color .12s ease-in-out, border-color .12s ease-in-out;
+  transition: background-color .12s ease-in-out;
 
   &:hover,
   &:focus-visible {
-    border-color: var(--bs-info);
-    background-color: var(--bs-info-border-subtle);
+    background-color: shade-color($primary, 20%);
   }
 }
 
