@@ -2,18 +2,21 @@ import csv
 import datetime
 
 from django.apps import apps
+from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
-from django.http import Http404, StreamingHttpResponse
+from django.http import Http404, HttpResponseRedirect, StreamingHttpResponse
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import title
 from django.urls import NoReverseMatch, reverse
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.functional import cached_property
 from django.views import generic
 
 from versioning.forms import ActivityFilterForm
 from versioning.versioning import (
+    ModelComparison,
     RIGSVersion,
     activity_feed_version,
     feed_audience,
@@ -90,13 +93,97 @@ class VersionHistory(HistoryObjectMixin, generic.ListView):
     template_name = "version_history.html"
     paginate_by = 25
 
+    def get(self, request, *args, **kwargs):
+        at = parse_date(request.GET.get("at", ""))
+        if at is None or self.version_url_name is None:
+            return super().get(request, *args, **kwargs)
+        version = self.object_versions().filter(revision__date_created__date__lte=at).first()
+        if version is None:
+            messages.warning(request, f"There is no history from {at:%d/%m/%Y} or earlier.")
+            return HttpResponseRedirect(request.path)
+        return HttpResponseRedirect(
+            reverse(self.version_url_name, kwargs={"pk": self.kwargs["pk"], "version_id": version.pk})
+        )
+
+    @cached_property
+    def version_url_name(self):
+        return self.url_name("version", version_id=0)
+
+    @cached_property
+    def timeline_models(self):
+        related = [apps.get_model(label) for label in getattr(self.history_model, "reversion_timeline", ())]
+        return filter_models(related, self.request.user)
+
     def get_queryset(self, **kwargs):
-        return self.object_versions().order_by("-revision__date_created", "-pk")
+        versions = self.object_versions()
+        if self.timeline_models:
+            versions = RIGSVersion.objects.filter(
+                Q(pk__in=versions.values("pk"))
+                | Q(
+                    content_type__in=[ContentType.objects.get_for_model(model) for model in self.timeline_models],
+                    serialized_data__regex=rf'"event": {self.history_object.pk}[,}}]',
+                )
+            ).select_related("revision", "revision__user", "revision__action")
+        return versions.order_by("-revision__date_created", "-pk")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["object_list"] = prepare_versions(context["object_list"], self.request.user)
+        for version in context["object_list"]:
+            version.is_own = version._model is self.history_model
+        context["timeline"] = bool(self.timeline_models)
+        context["version_url_name"] = self.version_url_name
+        context["compare_url_name"] = self.url_name("compare")
         return context
+
+
+class VersionDetail(HistoryObjectMixin, generic.TemplateView):
+    template_name = "version_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        version = get_object_or_404(self.object_versions(), pk=self.kwargs["version_id"])
+        context["version"] = prepare_versions([version], self.request.user)[0]
+        return context
+
+
+class VersionCompare(HistoryObjectMixin, generic.TemplateView):
+    template_name = "version_compare.html"
+
+    def get_version(self, name):
+        version_id = self.request.GET.get(name, "")
+        if not version_id.isdecimal():
+            raise Http404
+        return get_object_or_404(self.object_versions(), pk=version_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        first, second = sorted((self.get_version("from"), self.get_version("to")), key=lambda version: version.pk)
+        first, second = prepare_versions([first, second], self.request.user)
+        context["from_version"] = first
+        context["to_version"] = second
+        context["comparison"] = ModelComparison(
+            old=first._object_version.object,
+            new=second._object_version.object,
+            version=second,
+            follow=True,
+            parent=first,
+        )
+        return context
+
+
+class EventSinceAuthorised(generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        Event = apps.get_model("RIGS", "Event")
+        event = get_object_or_404(Event, pk=kwargs["pk"])
+        history = reverse("event_history", kwargs={"pk": event.pk})
+        authorisation = getattr(event, "authorisation", None)
+        authorised_at = authorisation.last_edited_at if authorisation else None
+        versions = RIGSVersion.objects.get_for_object(event)
+        authorised = versions.filter(revision__date_created__lte=authorised_at).first() if authorised_at else None
+        if authorised is None:
+            return history
+        return f"{reverse('event_compare', kwargs={'pk': event.pk})}?from={authorised.pk}&to={versions.first().pk}"
 
 
 def csv_safe(value):

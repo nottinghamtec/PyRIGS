@@ -478,6 +478,13 @@ def validate_sharepoint_url(value):
 
 @reversion.register(follow=["items"])
 class Event(models.Model, RevisionMixin):
+    reversion_timeline = (
+        "RIGS.EventAuthorisation",
+        "RIGS.RiskAssessment",
+        "RIGS.EventChecklist",
+        "RIGS.PowerTestRecord",
+        "RIGS.Invoice",
+    )
     # Done to make it much nicer on the database
     PROVISIONAL = 0
     CONFIRMED = 1

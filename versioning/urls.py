@@ -16,6 +16,11 @@ urlpatterns = [
         name="activity_all",
         kwargs={"app": "rigboard", "heading": "All", "models": views.get_models()},
     ),
+    path(
+        "event/<int:pk>/history/since-authorised/",
+        permission_required_with_403("RIGS.change_event")(views.EventSinceAuthorised.as_view()),
+        name="event_since_authorised",
+    ),
 ]
 
 for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training")]:
@@ -46,6 +51,18 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
                 f"{prefix}{modelname}/<str:pk>/history/",
                 permission(views.VersionHistory.as_view()),
                 name=f"{modelname}_history",
+                kwargs=kwargs,
+            ),
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/compare/",
+                permission(views.VersionCompare.as_view()),
+                name=f"{modelname}_compare",
+                kwargs=kwargs,
+            ),
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/<int:version_id>/",
+                permission(views.VersionDetail.as_view()),
+                name=f"{modelname}_version",
                 kwargs=kwargs,
             ),
         ]

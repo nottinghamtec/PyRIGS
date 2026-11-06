@@ -300,6 +300,91 @@ def test_deleted_objects_keep_their_history(admin_client, admin_user):
     assert admin_client.get(reverse("event_history", kwargs={"pk": pk + 1000})).status_code == 404
 
 
+def test_event_timeline_includes_related_records(admin_client, admin_user):
+    event = make_event(admin_user)
+    other = make_event(admin_user, name="Unrelated")
+    saved(models.Invoice(event=event), admin_user)
+    saved(models.Invoice(event=other), admin_user)
+    saved(
+        models.EventAuthorisation(event=event, email="a@b.test", name="Auth", amount=1, sent_by=admin_user), admin_user
+    )
+    versions = admin_client.get(reverse("event_history", kwargs={"pk": event.pk})).context["object_list"]
+    assert {version._model.__name__ for version in versions} == {"Event", "EventAuthorisation", "Invoice"}
+    assert sum(version._model is models.Invoice for version in versions) == 1
+
+
+def test_event_timeline_leaves_out_records_you_cannot_see(client, django_user_model, admin_user):
+    event = make_event(admin_user)
+    saved(models.Invoice(event=event), admin_user)
+    login_with(client, django_user_model, "change_event", "view_event")
+    versions = client.get(reverse("event_history", kwargs={"pk": event.pk})).context["object_list"]
+    assert [version._model.__name__ for version in versions] == ["Event"]
+
+
+def test_version_snapshot_and_as_of_date(admin_client, admin_user):
+    event = make_event(admin_user, name="Old Name")
+    Revision.objects.update(date_created=timezone.now() - timedelta(days=10))
+    saved(event, admin_user, name="New Name")
+    first = RIGSVersion.objects.get_for_object(event).last()
+
+    url = reverse("event_version", kwargs={"pk": event.pk, "version_id": first.pk})
+    assert "Old Name" in content_of(admin_client.get(url))
+
+    at = (date.today() - timedelta(days=5)).isoformat()
+    history = reverse("event_history", kwargs={"pk": event.pk})
+    assert admin_client.get(history, {"at": at}).url == url
+    too_early = (date.today() - timedelta(days=50)).isoformat()
+    assert admin_client.get(history, {"at": too_early}).url == history
+
+
+def test_versions_of_other_objects_cannot_be_opened(admin_client, admin_user):
+    event = make_event(admin_user)
+    other = RIGSVersion.objects.get_for_object(make_event(admin_user, name="Other")).first()
+    url = reverse("event_version", kwargs={"pk": event.pk, "version_id": other.pk})
+    assert admin_client.get(url).status_code == 404
+    compare = reverse("event_compare", kwargs={"pk": event.pk})
+    own = RIGSVersion.objects.get_for_object(event).first()
+    assert admin_client.get(compare, {"from": own.pk, "to": other.pk}).status_code == 404
+    assert admin_client.get(compare, {"from": "x", "to": own.pk}).status_code == 404
+
+
+def test_compare_any_two_versions_in_either_order(admin_client, admin_user):
+    event = make_event(admin_user, status=models.Event.PROVISIONAL)
+    saved(event, admin_user, status=models.Event.CONFIRMED)
+    saved(event, admin_user, status=models.Event.BOOKED)
+    versions = list(RIGSVersion.objects.get_for_object(event).order_by("pk"))
+    url = reverse("event_compare", kwargs={"pk": event.pk})
+    for pair in ((versions[0], versions[2]), (versions[2], versions[0])):
+        comparison = admin_client.get(url, {"from": pair[0].pk, "to": pair[1].pk}).context["comparison"]
+        assert comparison.field_changes[0].old == "Provisional"
+        assert comparison.field_changes[0].new == "Booked"
+
+
+def test_changes_since_authorised(admin_client, admin_user):
+    union = models.Organisation.objects.create(name="Union", union_account=True)
+    event = make_event(admin_user, name="Before Sign Off", organisation=union)
+    saved(
+        models.EventAuthorisation(event=event, email="a@b.test", name="Auth", amount=1, sent_by=admin_user), admin_user
+    )
+    saved(event, admin_user, name="After Sign Off")
+    saved(models.EventItem(event=event, name="Late Item", quantity=1, cost=1, order=1), admin_user)
+    saved(event, admin_user)
+
+    response = admin_client.get(reverse("event_since_authorised", kwargs={"pk": event.pk}), follow=True)
+    content = content_of(response)
+    assert "Before Sign Off" in content and "After Sign Off" in content
+    assert "Late Item" in content
+    assert reverse("event_since_authorised", kwargs={"pk": event.pk}) in content_of(
+        admin_client.get(reverse("event_detail", kwargs={"pk": event.pk}))
+    )
+
+
+def test_changes_since_authorised_needs_an_authorisation(admin_client, admin_user):
+    event = make_event(admin_user)
+    response = admin_client.get(reverse("event_since_authorised", kwargs={"pk": event.pk}))
+    assert response.url == reverse("event_history", kwargs={"pk": event.pk})
+
+
 def test_ical_feed_does_not_query_versions_for_each_event(client, admin_user, django_user_model):
     for i in range(8):
         make_event(admin_user, name=f"Calendar {i}", is_rig=True)

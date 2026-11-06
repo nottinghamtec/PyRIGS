@@ -47,6 +47,11 @@
 
             <dt>Requested by</dt>
             <dd>{{ object.authorisation.sent_by }}</dd>
+
+            {% if object.authorisation and perms.RIGS.change_event %}
+            <dt>Changes</dt>
+            <dd><a href="{% url 'event_since_authorised' pk=object.pk %}">Show what changed since it was authorised</a></dd>
+            {% endif %}
         </dl>
     </div>
 </div>

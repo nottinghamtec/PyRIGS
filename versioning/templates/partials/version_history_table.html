@@ -1,10 +1,13 @@
 {% load to_class_name from filters %}
+{% if compare_url_name %}<form method="get" action="{% url compare_url_name pk=history_pk %}">{% endif %}
 <div class="table-responsive">
     <table class="table table-striped">
         <thead class="table-dark">
         <tr>
+            {% if compare_url_name %}<th scope="col" colspan="2">Compare</th>{% endif %}
             <th scope="col">Date</th>
             <th scope="col">Version ID</th>
+            {% if timeline %}<th scope="col">Object</th>{% endif %}
             <th scope="col">User</th>
             <th scope="col">Changes</th>
         </tr>
@@ -12,8 +15,17 @@
         <tbody>
         {% for version in object_list %}
             <tr>
+                {% if compare_url_name %}
+                {% if version.is_own %}
+                <td><input class="form-check-input" type="radio" name="from" value="{{ version.pk }}" aria-label="Compare from version {{ version.pk }}" {% if forloop.counter == 2 %}checked{% endif %}></td>
+                <td><input class="form-check-input" type="radio" name="to" value="{{ version.pk }}" aria-label="Compare to version {{ version.pk }}" {% if forloop.first %}checked{% endif %}></td>
+                {% else %}
+                <td colspan="2"></td>
+                {% endif %}
+                {% endif %}
                 <th scope="row">{{ version.revision.date_created }}</th>
-                <td>{{ version.display_id }}</td>
+                <td>{% if version_url_name and version.is_own %}<a href="{% url version_url_name pk=history_pk version_id=version.pk %}">{{ version.display_id }}</a>{% else %}{{ version.display_id }}{% endif %}</td>
+                {% if timeline %}<td>{% if version.object_url %}<a href="{{ version.object_url }}">{{ version.changes.new|to_class_name }}</a>{% else %}{{ version.changes.new|to_class_name }}{% endif %}</td>{% endif %}
                 <td>{{ version.revision.user.name|default:'System' }}</td>
                 <td>
                     {% if version.deleted_name %}
@@ -30,3 +42,4 @@
         </tbody>
     </table>
 </div>
+{% if compare_url_name %}<button type="submit" class="btn btn-outline-secondary mb-3">Compare selected versions</button></form>{% endif %}
