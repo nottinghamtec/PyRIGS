@@ -497,6 +497,13 @@ def test_feed_cache_separates_finance_and_non_finance_users(client, django_user_
     assert "999" not in content_of(client.get(reverse("activity_feed")))
 
 
+def test_command_palette_offers_history_of_the_current_page(admin_client, admin_user):
+    event = make_event(admin_user)
+    history = reverse("event_history", kwargs={"pk": event.pk})
+    assert history in admin_client.get(reverse("event_detail", kwargs={"pk": event.pk})).content.decode()
+    assert history not in admin_client.get(reverse("rigboard")).content.decode()
+
+
 def test_ical_feed_does_not_query_versions_for_each_event(client, admin_user, django_user_model):
     for i in range(8):
         make_event(admin_user, name=f"Calendar {i}", is_rig=True)

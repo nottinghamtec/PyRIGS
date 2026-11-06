@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
 
 @dataclass
@@ -268,7 +268,34 @@ COMMANDS = [
 ]
 
 
+def page_history_command(request):
+    from versioning.versioning import get_models
+
+    match = request.resolver_match
+    if match is None or match.url_name is None or not match.url_name.endswith("_detail") or "pk" not in match.kwargs:
+        return None
+    name = match.url_name.removesuffix("_detail")
+    model = next((model for model in get_models() if model._meta.model_name == name), None)
+    if model is None or not request.user.has_perm(f"{model._meta.app_label}.change_{name}"):
+        return None
+    try:
+        url = reverse(f"{name}_history", kwargs={"pk": match.kwargs["pk"]})
+    except NoReverseMatch:
+        return None
+    title = f"{model._meta.verbose_name.title()} History"
+    return {
+        "title": title,
+        "section": "This Page",
+        "url": url,
+        "icon": "fa-history",
+        "keywords": "history revisions versions changes timeline",
+        "method": "get",
+    }
+
+
 def commands_for(request):
     if not request.user.is_authenticated:
         return []
-    return [command.as_dict(request) for command in COMMANDS if command.allowed(request)]
+    commands = [command.as_dict(request) for command in COMMANDS if command.allowed(request)]
+    history = page_history_command(request)
+    return [history, *commands] if history else commands
