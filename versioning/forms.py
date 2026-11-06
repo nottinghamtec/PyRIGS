@@ -2,11 +2,6 @@ from django import forms
 from django.contrib.auth import get_user_model
 
 
-class UserChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.name
-
-
 class ActivityFilterForm(forms.Form):
     q = forms.CharField(
         required=False,
@@ -14,13 +9,7 @@ class ActivityFilterForm(forms.Form):
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Object or comment"}),
     )
     model = forms.ChoiceField(required=False, label="Type", widget=forms.Select(attrs={"class": "form-select"}))
-    user = UserChoiceField(
-        queryset=get_user_model().objects.none(),
-        required=False,
-        label="Person",
-        empty_label="Anyone",
-        widget=forms.Select(attrs={"class": "form-select"}),
-    )
+    user = forms.ModelChoiceField(queryset=get_user_model().objects.none(), required=False, label="Person")
     start = forms.DateField(
         required=False, label="From", widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
@@ -41,6 +30,8 @@ class ActivityFilterForm(forms.Form):
             ((name, model._meta.verbose_name.title()) for name, model in self.models.items()),
             key=lambda choice: choice[1],
         )
-        self.fields["user"].queryset = (
-            get_user_model().objects.filter(revision__isnull=False).distinct().order_by("first_name", "last_name")
-        )
+        self.fields["user"].queryset = get_user_model().objects.filter(revision__isnull=False).distinct()
+
+    @property
+    def selected_user(self):
+        return self.cleaned_data.get("user") if self.is_valid() else None

@@ -310,6 +310,40 @@ def test_activity_table_filters(admin_client, admin_user, django_user_model):
     assert len(titles(end=date.today().isoformat())) == 2
 
 
+def test_person_filter_searches_instead_of_listing_everyone(admin_client, admin_user, django_user_model):
+    other = django_user_model.objects.create(username="other", first_name="Unlisted", last_name="Actor")
+    make_event(other, name="Their Rig")
+    html = admin_client.get(reverse("activity_table")).content.decode()
+    assert reverse("activity_people") in html
+    assert "Unlisted Actor" not in html.split("<table")[0].split("<form")[-1]
+
+    selected = admin_client.get(reverse("activity_table"), {"user": other.pk}).content.decode()
+    assert f'<option value="{other.pk}" selected="selected">{other.name}</option>' in selected
+
+
+def test_person_search_only_finds_people_with_changes(admin_client, django_user_model):
+    actor = django_user_model.objects.create(username="a", first_name="Ada", last_name="Lovelace", initials="AL")
+    django_user_model.objects.create(username="b", first_name="Ada", last_name="Quiet", initials="AQ")
+    make_event(actor)
+    url = reverse("activity_people")
+
+    assert admin_client.get(url, {"q": "ada lov"}).json() == [{"pk": actor.pk, "text": actor.name}]
+    assert [person["pk"] for person in admin_client.get(url, {"q": "AL"}).json()] == [actor.pk]
+    assert [person["pk"] for person in admin_client.get(url, {"q": "ada"}).json()] == [actor.pk]
+    assert admin_client.get(url, {"q": "  "}).json() == []
+
+
+@pytest.mark.parametrize("codename", ["view_event", "view_asset", "view_trainingitemqualification"])
+def test_person_search_works_without_profile_permission(client, django_user_model, codename):
+    login_with(client, django_user_model, codename)
+    assert client.get(reverse("activity_people"), {"q": "x"}).status_code == 200
+
+
+def test_person_search_needs_access_to_a_changes_page(client, django_user_model):
+    login_with(client, django_user_model)
+    assert client.get(reverse("activity_people"), {"q": "x"}).status_code == 403
+
+
 def test_activity_table_filters_survive_paging(admin_client, admin_user):
     for i in range(30):
         make_event(admin_user, name=f"Paged {i}")

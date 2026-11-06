@@ -9,7 +9,11 @@
     </div>
     <div class="col-md-3">
         <label class="form-label" for="{{ filter_form.user.id_for_label }}">{{ filter_form.user.label }}</label>
-        {{ filter_form.user }}
+        <select id="{{ filter_form.user.id_for_label }}" name="{{ filter_form.user.html_name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'activity_people' %}" data-none-selected-text="Anyone">
+            {% if filter_form.selected_user %}
+                <option value="{{ filter_form.selected_user.pk }}" selected="selected">{{ filter_form.selected_user.name }}</option>
+            {% endif %}
+        </select>
     </div>
     <div class="col-6 col-md-2">
         <label class="form-label" for="{{ filter_form.start.id_for_label }}">{{ filter_form.start.label }}</label>

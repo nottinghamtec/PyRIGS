@@ -3,16 +3,19 @@ import datetime
 
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import CharField, Q
-from django.db.models.functions import Cast
-from django.http import Http404, HttpResponseRedirect, StreamingHttpResponse
+from django.core.exceptions import PermissionDenied
+from django.db.models import CharField, Exists, OuterRef, Q, Value
+from django.db.models.functions import Cast, Concat
+from django.http import Http404, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import title
 from django.urls import NoReverseMatch, reverse
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.functional import cached_property
 from django.views import generic
+from reversion.models import Revision
 
 from versioning.forms import ActivityFilterForm
 from versioning.versioning import (
@@ -28,6 +31,13 @@ from versioning.versioning import (
 )
 
 EXPORT_BATCH_SIZE = 500
+PERSON_SEARCH_LIMIT = 20
+
+ACTIVITY_PERMISSIONS = {
+    "RIGS": "RIGS.view_event",
+    "assets": "assets.view_asset",
+    "training": "training.view_trainingitemqualification",
+}
 
 
 class HistoryObjectMixin:
@@ -294,6 +304,25 @@ class ActivityTable(generic.ListView):
             context["override"] = f"base_{self.kwargs['app']}.html"
 
         return context
+
+
+class ActivityPeopleSearch(generic.View):
+    def get(self, request):
+        if not any(request.user.has_perm(permission) for permission in ACTIVITY_PERMISSIONS.values()):
+            raise PermissionDenied
+        query = request.GET.get("q", "").strip()
+        if not query:
+            return JsonResponse([], safe=False)
+        people = (
+            get_user_model()
+            .objects.annotate(
+                full_name=Concat("first_name", Value(" "), "last_name"),
+                has_changes=Exists(Revision.objects.filter(user=OuterRef("pk"))),
+            )
+            .filter(Q(full_name__icontains=query) | Q(initials__icontains=query), has_changes=True)
+            .order_by("first_name", "last_name")[:PERSON_SEARCH_LIMIT]
+        )
+        return JsonResponse([{"pk": person.pk, "text": person.name} for person in people], safe=False)
 
 
 class ActivityFeed(generic.ListView):  # Appears on homepage

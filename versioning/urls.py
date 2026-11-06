@@ -1,14 +1,9 @@
 from django.apps import apps
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from PyRIGS.decorators import permission_required_with_403
 from versioning import views
-
-APP_PERMISSIONS = {
-    "RIGS": "RIGS.view_event",
-    "assets": "assets.view_asset",
-    "training": "training.view_trainingitemqualification",
-}
 
 urlpatterns = [
     path(
@@ -22,6 +17,7 @@ urlpatterns = [
         name="activity_all",
         kwargs={"app": "rigboard", "heading": "All", "models": views.get_models()},
     ),
+    path("activity/people/", login_required(views.ActivityPeopleSearch.as_view()), name="activity_people"),
     path(
         "event/<int:pk>/history/since-authorised/",
         permission_required_with_403("RIGS.change_event")(views.EventSinceAuthorised.as_view()),
@@ -29,7 +25,7 @@ urlpatterns = [
     ),
 ]
 
-for app in [apps.get_app_config(label) for label in APP_PERMISSIONS]:
+for app in [apps.get_app_config(label) for label in views.ACTIVITY_PERMISSIONS]:
     appname = str(app.label)
     if appname == "RIGS":
         appname = "rigboard"
@@ -42,7 +38,7 @@ for app in [apps.get_app_config(label) for label in APP_PERMISSIONS]:
     urlpatterns += [
         path(
             appname + "/activity/",
-            permission_required_with_403(APP_PERMISSIONS[app.label])(views.ActivityTable.as_view()),
+            permission_required_with_403(views.ACTIVITY_PERMISSIONS[app.label])(views.ActivityTable.as_view()),
             name=table_name,
             kwargs={"app": appname, "models": views.get_models(app.label)},
         ),
