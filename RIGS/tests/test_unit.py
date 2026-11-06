@@ -1542,6 +1542,12 @@ def test_deleted_enquiries_show_in_recent_changes(admin_client):
         assert "Deleted enquiry Maybe a ball" in content
 
 
+def test_invoice_page_opens_the_pdf_on_the_print_shortcut(admin_client, basic_event):
+    invoice = models.Invoice.objects.create(event=basic_event)
+    content = admin_client.get(reverse("invoice_detail", kwargs={"pk": invoice.pk})).content.decode()
+    assert f"""window.open("{reverse("invoice_print", kwargs={"pk": invoice.pk})}", '_blank')""" in content
+
+
 def test_checkout_nags(admin_user, basic_event, mailoutbox):
     from django.core.management import call_command
 
