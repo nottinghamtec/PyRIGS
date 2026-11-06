@@ -196,6 +196,12 @@ def test_missing_booleans_are_not_shown_as_no():
     assert FieldComparison(field, False, True).old == "No"
 
 
+def test_boolean_csv_export_says_yes_or_no(admin_client, admin_user):
+    event = make_event(admin_user, dry_hire=False)
+    saved(event, admin_user, dry_hire=True)
+    assert "No -> Yes" in csv_of(admin_client.get(reverse("activity_table"), {"export": "csv"}))
+
+
 def test_revision_comments_are_shown(admin_client, admin_user):
     event = make_event(admin_user)
     saved(event, admin_user, comment="Status changed on the Kanban", notes="x")
@@ -231,6 +237,52 @@ def test_feed_loads_more_from_where_it_stopped(admin_client, django_user_model):
     second = admin_client.get(reverse("activity_feed"), {"before": before}, **AJAX).content.decode()
     assert "Page Event 0" in second and "Page Event 13" not in second
     assert "activity-load-more" not in second
+
+
+def test_activity_table_filters(admin_client, admin_user, django_user_model):
+    other = django_user_model.objects.create(username="other", first_name="Other", last_name="Person")
+    mine = make_event(admin_user, name="Mine Rig", mic=admin_user)
+    make_event(other, name="Their Rig")
+    url = reverse("activity_table")
+
+    def titles(**filters):
+        return {v.object_repr for v in admin_client.get(url, filters).context["object_list"]}
+
+    assert titles() == {str(mine), str(models.Event.objects.get(name="Their Rig"))}
+    assert titles(mine="on") == {str(mine)}
+    assert titles(my_events="on") == {str(mine)}
+    assert titles(user=other.pk) == {str(models.Event.objects.get(name="Their Rig"))}
+    assert titles(q="Mine") == {str(mine)}
+    assert titles(model="person") == set()
+    assert titles(start=(date.today() + timedelta(days=1)).isoformat()) == set()
+    assert len(titles(end=date.today().isoformat())) == 2
+
+
+def test_activity_table_filters_survive_paging(admin_client, admin_user):
+    for i in range(30):
+        make_event(admin_user, name=f"Paged {i}")
+    content = admin_client.get(reverse("activity_table"), {"q": "Paged"}).content.decode()
+    assert "q=Paged" in content.split("pagination")[1]
+
+
+def test_all_activity_covers_every_app(admin_client, admin_user):
+    event = make_event(admin_user, name="All Rig")
+    make_asset(admin_user)
+    content = content_of(admin_client.get(reverse("activity_all")))
+    assert event.display_id in content and "1991" in content
+    assert reverse("activity_all") in content_of(admin_client.get(reverse("index")))
+
+
+def test_csv_export_applies_filters_and_neutralises_formulae(admin_client, admin_user):
+    event = make_event(admin_user, name="=HYPERLINK(1)")
+    saved(event, admin_user, status=models.Event.BOOKED)
+    make_event(admin_user, name="Elsewhere")
+    response = admin_client.get(reverse("activity_table"), {"q": "HYPERLINK", "export": "csv"})
+    assert response["Content-Type"] == "text/csv"
+    body = csv_of(response)
+    assert "Elsewhere" not in body
+    assert "Provisional -> Booked" in body
+    assert ",=HYPERLINK" not in body
 
 
 def test_deleted_objects_keep_their_history(admin_client, admin_user):

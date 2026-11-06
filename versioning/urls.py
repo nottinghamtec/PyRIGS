@@ -10,6 +10,12 @@ urlpatterns = [
         permission_required_with_403("RIGS.view_event")(views.ActivityFeed.as_view()),
         name="activity_feed",
     ),
+    path(
+        "activity/",
+        permission_required_with_403("RIGS.view_event")(views.ActivityTable.as_view()),
+        name="activity_all",
+        kwargs={"app": "rigboard", "heading": "All", "models": views.get_models()},
+    ),
 ]
 
 for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training")]:

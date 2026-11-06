@@ -28,7 +28,10 @@
 {% endblock %}
 
 <div class="card">
-  <h4 class="card-header">Recent Changes</h4>
+  <h4 class="card-header d-flex justify-content-between align-items-center">
+    Recent Changes
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'activity_all' %}">View all</a>
+  </h4>
   <div class="list-group list-group-flush">
     <div id="activity_loading" class="placeholder-glow" role="status" aria-busy="true">
       <span class="visually-hidden">Loading...</span>

@@ -1,0 +1,37 @@
+<form method="get" class="row g-2 mb-3 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label" for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+        {{ filter_form.q }}
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="{{ filter_form.model.id_for_label }}">{{ filter_form.model.label }}</label>
+        {{ filter_form.model }}
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="{{ filter_form.user.id_for_label }}">{{ filter_form.user.label }}</label>
+        {{ filter_form.user }}
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label" for="{{ filter_form.start.id_for_label }}">{{ filter_form.start.label }}</label>
+        {{ filter_form.start }}
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label" for="{{ filter_form.end.id_for_label }}">{{ filter_form.end.label }}</label>
+        {{ filter_form.end }}
+    </div>
+    <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+        <div class="form-check">
+            {{ filter_form.mine }}
+            <label class="form-check-label" for="{{ filter_form.mine.id_for_label }}">{{ filter_form.mine.label }}</label>
+        </div>
+        <div class="form-check">
+            {{ filter_form.my_events }}
+            <label class="form-check-label" for="{{ filter_form.my_events.id_for_label }}">{{ filter_form.my_events.label }}</label>
+        </div>
+        <div class="ms-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a class="btn btn-outline-secondary" href="{{ request.path }}">Clear</a>
+            <a class="btn btn-outline-secondary" href="?{{ export_query }}"><span class="fas fa-file-csv"></span> Export CSV</a>
+        </div>
+    </div>
+</form>

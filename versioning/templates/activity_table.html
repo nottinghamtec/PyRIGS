@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="col-12">
+    {% include 'partials/activity_filters.html' %}
     {% include 'partials/activity_table_body.html' %}
     {% paginator %}
 </div>

@@ -93,6 +93,14 @@ COMMANDS = [
         keywords="activity history edits",
     ),
     Command(
+        "All Recent Changes",
+        RIGBOARD,
+        "activity_all",
+        "fa-history",
+        permission="RIGS.view_event",
+        keywords="activity history edits everything audit",
+    ),
+    Command(
         "H&S Overview",
         RIGBOARD,
         "hs_list",

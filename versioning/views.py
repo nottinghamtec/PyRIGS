@@ -1,14 +1,18 @@
+import csv
 import datetime
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404
+from django.db.models import CharField, Q
+from django.db.models.functions import Cast
+from django.http import Http404, StreamingHttpResponse
 from django.template.defaultfilters import title
 from django.urls import NoReverseMatch, reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.functional import cached_property
 from django.views import generic
 
+from versioning.forms import ActivityFilterForm
 from versioning.versioning import (
     RIGSVersion,
     activity_feed_version,
@@ -17,6 +21,8 @@ from versioning.versioning import (
     get_models,
     prepare_versions,
 )
+
+EXPORT_BATCH_SIZE = 500
 
 
 class HistoryObjectMixin:
@@ -93,18 +99,98 @@ class VersionHistory(HistoryObjectMixin, generic.ListView):
         return context
 
 
+def csv_safe(value):
+    text = str(value)
+    return f"'{text}" if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+
+
+class EchoBuffer:
+    def write(self, value):
+        return value
+
+
 class ActivityTable(generic.ListView):
     model = RIGSVersion
     template_name = "activity_table.html"
     paginate_by = 25
 
+    @cached_property
+    def visible_models(self):
+        return filter_models(self.kwargs.get("models"), self.request.user)
+
+    @cached_property
+    def filter_form(self):
+        return ActivityFilterForm(self.request.GET, models=self.visible_models)
+
     def get_queryset(self):
-        return RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs.get("models"), self.request.user))
+        versions = RIGSVersion.objects.get_for_multiple_models(self.visible_models)
+        if not self.filter_form.is_valid():
+            return versions
+        filters = self.filter_form.cleaned_data
+        if filters["model"]:
+            model = self.filter_form.models[filters["model"]]
+            versions = versions.filter(content_type=ContentType.objects.get_for_model(model))
+        if filters["q"]:
+            versions = versions.filter(
+                Q(object_repr__icontains=filters["q"]) | Q(revision__comment__icontains=filters["q"])
+            )
+        if filters["user"]:
+            versions = versions.filter(revision__user=filters["user"])
+        if filters["start"]:
+            versions = versions.filter(revision__date_created__date__gte=filters["start"])
+        if filters["end"]:
+            versions = versions.filter(revision__date_created__date__lte=filters["end"])
+        if filters["mine"]:
+            versions = versions.filter(revision__user=self.request.user)
+        if filters["my_events"]:
+            Event = apps.get_model("RIGS", "Event")
+            versions = versions.filter(
+                content_type=ContentType.objects.get_for_model(Event),
+                object_id__in=Event.objects.filter(mic=self.request.user)
+                .annotate(object_id=Cast("pk", CharField()))
+                .values("object_id"),
+            )
+        return versions
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("export") == "csv":
+            return self.export()
+        return super().get(request, *args, **kwargs)
+
+    def export_rows(self):
+        writer = csv.writer(EchoBuffer())
+        yield writer.writerow(["Date", "Type", "Object", "Version ID", "User", "Changes"])
+        versions = self.get_queryset()
+        start = 0
+        while batch := list(versions[start : start + EXPORT_BATCH_SIZE]):
+            start += EXPORT_BATCH_SIZE
+            for version in prepare_versions(batch, self.request.user):
+                user = version.revision.user
+                yield writer.writerow(
+                    [
+                        version.revision.date_created.isoformat(),
+                        version._model._meta.verbose_name.title(),
+                        csv_safe(version.object_repr),
+                        version.display_id,
+                        csv_safe(user.name if user else "System"),
+                        csv_safe(version.summary),
+                    ]
+                )
+
+    def export(self):
+        response = StreamingHttpResponse(self.export_rows(), content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="recent-changes.csv"'
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["object_list"] = prepare_versions(context["object_list"], self.request.user)
-        context["page_title"] = f"{title(self.kwargs['app'])} Activity Stream"
+        context["page_title"] = f"{title(self.kwargs.get('heading', self.kwargs['app']))} Activity Stream"
+        context["filter_form"] = self.filter_form
+        query = self.request.GET.copy()
+        query.pop("page", None)
+        query["export"] = "csv"
+        context["export_query"] = query.urlencode()
         if self.kwargs["app"] != "rigboard":
             context["override"] = f"base_{self.kwargs['app']}.html"
 
