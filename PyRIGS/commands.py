@@ -89,7 +89,7 @@ COMMANDS = [
         RIGBOARD,
         "activity_table",
         "fa-random",
-        permission="RIGS.add_event",
+        permission="RIGS.view_event",
         keywords="activity history edits",
     ),
     Command(
@@ -226,7 +226,7 @@ COMMANDS = [
         ASSETS,
         "assets_activity_table",
         "fa-random",
-        permission="RIGS.add_event",
+        permission="assets.view_asset",
         keywords="activity history edits",
     ),
     Command(
@@ -245,7 +245,7 @@ COMMANDS = [
         TRAINING,
         "training_activity_table",
         "fa-random",
-        permission="RIGS.add_event",
+        permission="training.view_trainingitemqualification",
         keywords="activity history edits",
     ),
     Command("My Profile", ACCOUNT, "profile_detail", "fa-id-badge", keywords="me account user"),

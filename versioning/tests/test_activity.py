@@ -2,6 +2,7 @@ import importlib
 from datetime import date, timedelta
 from unittest import mock
 
+import pytest
 from django.apps import apps as global_apps
 from django.contrib.auth.models import Permission
 from django.db import connection, transaction
@@ -384,6 +385,66 @@ def test_changes_since_authorised_needs_an_authorisation(admin_client, admin_use
     event = make_event(admin_user)
     response = admin_client.get(reverse("event_since_authorised", kwargs={"pk": event.pk}))
     assert response.url == reverse("event_history", kwargs={"pk": event.pk})
+
+
+@pytest.mark.parametrize(
+    "url,codename",
+    [
+        ("activity_table", "view_event"),
+        ("activity_all", "view_event"),
+        ("assets_activity_table", "view_asset"),
+        ("training_activity_table", "view_trainingitemqualification"),
+    ],
+)
+def test_activity_tables_need_the_permission_of_their_app(client, django_user_model, url, codename):
+    login_with(client, django_user_model)
+    assert client.get(reverse(url)).status_code == 403
+    client.logout()
+    login_with(client, django_user_model, codename, username="allowed")
+    assert client.get(reverse(url)).status_code == 200
+
+
+def test_activity_only_shows_models_you_can_view(client, django_user_model, admin_user):
+    make_event(admin_user, name="Visible Rig")
+    with reversion.create_revision():
+        models.Person.objects.create(name="Private Person")
+    login_with(client, django_user_model, "view_event")
+    content = content_of(client.get(reverse("activity_feed")))
+    assert "Visible Rig" in content
+    assert "Private Person" not in content
+
+
+def test_asset_finance_fields_are_hidden_not_the_whole_asset(client, django_user_model, admin_user):
+    asset = make_asset(admin_user, purchase_price=100, nickname="Old")
+    saved(asset, admin_user, purchase_price=999, nickname="New")
+    login_with(client, django_user_model, "view_asset")
+    table = reverse("assets_activity_table")
+
+    content = content_of(client.get(table))
+    assert "&lt;ins&gt;New&lt;/ins&gt;" in content
+    assert "999" not in content
+    assert "999" not in csv_of(client.get(table, {"export": "csv"}))
+
+    client.logout()
+    login_with(client, django_user_model, "view_asset", "asset_finance", username="finance")
+    assert "999" in content_of(client.get(table))
+
+
+def test_asset_history_hides_finance_fields(client, django_user_model, admin_user):
+    asset = make_asset(admin_user, purchase_price=100)
+    saved(asset, admin_user, purchase_price=999)
+    login_with(client, django_user_model, "change_asset")
+    assert "999" not in content_of(client.get(reverse("asset_history", kwargs={"pk": asset.asset_id})))
+
+
+def test_feed_cache_separates_finance_and_non_finance_users(client, django_user_model, admin_user):
+    asset = make_asset(admin_user, purchase_price=100)
+    saved(asset, admin_user, purchase_price=999)
+    login_with(client, django_user_model, "view_event", "view_asset", "asset_finance", username="finance")
+    assert "999" in content_of(client.get(reverse("activity_feed")))
+    client.logout()
+    login_with(client, django_user_model, "view_event", "view_asset", username="crew")
+    assert "999" not in content_of(client.get(reverse("activity_feed")))
 
 
 def test_ical_feed_does_not_query_versions_for_each_event(client, admin_user, django_user_model):

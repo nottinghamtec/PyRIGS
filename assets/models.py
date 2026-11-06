@@ -44,6 +44,7 @@ class AssetStatus(models.Model):
 
 @reversion.register
 class Supplier(models.Model, RevisionMixin):
+    reversion_perm = "assets.view_supplier"
     name = models.CharField(max_length=80)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
@@ -169,7 +170,11 @@ class Asset(models.Model, RevisionMixin):
     asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
-    reversion_perm = "assets.asset_finance"
+    reversion_perm = "assets.view_asset"
+    reversion_field_perm = (
+        "assets.asset_finance",
+        ("purchased_from", "date_acquired", "date_sold", "purchase_price", "replacement_cost"),
+    )
 
     search_vector = search_vector_field(description="A", nickname="A", serial_number="B", comments="C")
 

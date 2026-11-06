@@ -33,7 +33,9 @@
     {% if request.user.can_log_training %}
     <li class="nav-item"><a class="nav-link" href="{% url 'session_log' %}"><span class="fas fa-users"></span> Log Session</a></li>
     {% endif %}
+    {% if perms.training.view_trainingitemqualification %}
     <li class="nav-item"><a class="nav-link" href="{% url 'training_activity_table' %}"><span class="fas fa-random"></span> Recent Changes</a></li>
+    {% endif %}
 {% endif %}
 {% endblock %}
 

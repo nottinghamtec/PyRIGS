@@ -181,6 +181,7 @@ class ContactableManager(models.Manager):
 
 
 class Person(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_person"
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
@@ -221,6 +222,7 @@ class Person(models.Model, RevisionMixin):
 
 
 class Organisation(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_organisation"
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
@@ -315,6 +317,7 @@ class VatRate(models.Model, RevisionMixin):
 
 
 class Venue(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_venue"
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
@@ -478,6 +481,7 @@ def validate_sharepoint_url(value):
 
 @reversion.register(follow=["items"])
 class Event(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_event"
     reversion_timeline = (
         "RIGS.EventAuthorisation",
         "RIGS.RiskAssessment",
@@ -916,6 +920,7 @@ class EventItem(models.Model, RevisionMixin):
 
 @reversion.register
 class EventAuthorisation(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_event"
     event = models.OneToOneField("Event", related_name="authorisation", on_delete=models.CASCADE)
     email = models.EmailField()
     name = models.CharField(max_length=255)
@@ -1114,6 +1119,7 @@ class ReviewableModel(models.Model):
 
 @reversion.register
 class RiskAssessment(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_riskassessment"
     SMALL = (0, "Small")
     MEDIUM = (1, "Medium")
     LARGE = (2, "Large")
@@ -1295,6 +1301,7 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
 
 @reversion.register
 class EventChecklist(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_eventchecklist"
     event = models.ForeignKey("Event", related_name="checklists", on_delete=models.CASCADE)
 
     # General
@@ -1340,6 +1347,7 @@ class EventChecklist(ReviewableModel, RevisionMixin):
 
 @reversion.register
 class PowerTestRecord(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_powertestrecord"
     earth_fault_text = "Earth Fault Loop Impedance (Z<small>S</small>) / Ω"
     pssc_text = "Prospective Short Circuit Current / A"
 
@@ -1489,6 +1497,8 @@ class EventCheckIn(models.Model):
 @reversion.register
 class Enquiry(models.Model, RevisionMixin):
     """A placeholder for a rig that has only just been asked about, kept apart from events until it firms up"""
+
+    reversion_perm = "RIGS.view_event"
 
     name = models.CharField(max_length=255)
     start_date = models.DateField()
