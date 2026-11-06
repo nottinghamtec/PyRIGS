@@ -17,10 +17,8 @@ from premailer import Premailer
 from registration.signals import user_activated
 from PyRIGS.pdf import render_rml
 
-from reversion import signals as reversion_signals
 
 from RIGS import models
-from versioning.versioning import bump_activity_feed_version
 
 
 def send_eventauthorisation_success_email(instance):
@@ -157,6 +155,3 @@ def drop_vat_rates(sender, **kwargs):
 
 post_save.connect(drop_vat_rates, sender=models.VatRate)
 post_delete.connect(drop_vat_rates, sender=models.VatRate)
-
-
-reversion_signals.post_revision_commit.connect(bump_activity_feed_version)

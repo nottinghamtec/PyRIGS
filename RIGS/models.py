@@ -1527,5 +1527,6 @@ class Enquiry(models.Model, RevisionMixin):
             description=self.notes,
             status=Event.PROVISIONAL,
         )
+        self.skip_deletion_record = True
         self.delete()
         return event

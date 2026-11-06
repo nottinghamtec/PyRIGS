@@ -1,5 +1,4 @@
 {% block js %}
-{% include 'partials/version_scripts.html' %}
 <script>
   ready(function() {
     var activity = document.getElementById('activity');
@@ -9,7 +8,21 @@
       .then(function (html) {
         setHtml(activity, html);
         loading.remove();
+        rememberActivityVisit();
       });
+
+    on(activity, 'click', '.activity-load-more', function () {
+      var button = this;
+      var holder = button.closest('.list-group-item');
+      button.disabled = true;
+      ajaxFetch(button.dataset.url)
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          var page = document.createElement('div');
+          holder.replaceWith(page);
+          setHtml(page, html);
+        });
+    });
   });
 </script>
 {% endblock %}
@@ -38,7 +51,7 @@
       </div>
       {% endfor %}
     </div>
-    <div id="activity">
+    <div id="activity" data-current-user="{{ request.user.pk }}">
     </div>
   </div>
 </div>

@@ -93,6 +93,7 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "PyRIGS.middleware.DuplicateSubmissionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "PyRIGS.middleware.RevisionUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 )

@@ -2,58 +2,95 @@ import datetime
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.template.defaultfilters import title
+from django.urls import NoReverseMatch, reverse
+from django.utils.dateparse import parse_datetime
+from django.utils.functional import cached_property
 from django.views import generic
-from reversion import revisions as reversion
 
-from versioning.versioning import RIGSVersion, activity_feed_version
+from versioning.versioning import (
+    RIGSVersion,
+    activity_feed_version,
+    feed_audience,
+    filter_models,
+    get_models,
+    prepare_versions,
+)
 
 
-class VersionHistory(generic.ListView):
+class HistoryObjectMixin:
+    @property
+    def history_model(self):
+        return self.kwargs["model"]
+
+    @cached_property
+    def history_lookup(self):
+        # Goddamit, almost got away without specific hacks
+        return {"asset_id": self.kwargs["pk"]} if self.history_model.__name__ == "Asset" else {"pk": self.kwargs["pk"]}
+
+    def deleted_version(self):
+        if "asset_id" in self.history_lookup:
+            return (
+                RIGSVersion.objects.get_for_model(self.history_model)
+                .filter(serialized_data__contains=f'"asset_id": "{self.kwargs["pk"]}"')
+                .first()
+            )
+        return RIGSVersion.objects.get_for_object_reference(self.history_model, self.kwargs["pk"]).first()
+
+    @cached_property
+    def history_object(self):
+        try:
+            obj = self.history_model._base_manager.filter(**self.history_lookup).first()
+        except ValueError:
+            raise Http404
+        if obj is not None:
+            return obj
+        version = self.deleted_version()
+        if version is None:
+            raise Http404
+        return version._object_version.object
+
+    @cached_property
+    def object_deleted(self):
+        return not self.history_model._base_manager.filter(pk=self.history_object.pk).exists()
+
+    def object_versions(self):
+        return RIGSVersion.objects.get_for_object_reference(self.history_model, self.history_object.pk).select_related(
+            "revision", "revision__user", "revision__action"
+        )
+
+    def url_name(self, suffix, **kwargs):
+        name = f"{self.history_model._meta.model_name}_{suffix}"
+        try:
+            reverse(name, kwargs={"pk": self.kwargs["pk"], **kwargs})
+        except NoReverseMatch:
+            return None
+        return name
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["object"] = self.history_object
+        context["object_deleted"] = self.object_deleted
+        context["history_pk"] = self.kwargs["pk"]
+        context["history_url"] = reverse(self.url_name("history"), kwargs={"pk": self.kwargs["pk"]})
+        if self.kwargs["app"] != "rigboard":
+            context["override"] = f"base_{self.kwargs['app']}.html"
+        return context
+
+
+class VersionHistory(HistoryObjectMixin, generic.ListView):
     model = RIGSVersion
     template_name = "version_history.html"
     paginate_by = 25
 
     def get_queryset(self, **kwargs):
-        return (
-            RIGSVersion.objects.get_for_object(self.get_object())
-            .select_related("revision", "revision__user")
-            .all()
-            .order_by("-revision__date_created")
-        )
-
-    def get_object(self, **kwargs):
-        # Goddamit, almost got away without specific hacks
-        if self.kwargs["model"].__name__ == "Asset":
-            return get_object_or_404(self.kwargs["model"], asset_id=self.kwargs["pk"])
-        else:
-            return get_object_or_404(self.kwargs["model"], pk=self.kwargs["pk"])
+        return self.object_versions().order_by("-revision__date_created", "-pk")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["object"] = self.get_object()
-        if self.kwargs["app"] != "rigboard":
-            context["override"] = f"base_{self.kwargs['app']}.html"
-
+        context["object_list"] = prepare_versions(context["object_list"], self.request.user)
         return context
-
-
-def get_models(app=None):
-    models = filter(lambda item: not hasattr(item, "reversion_hide"), reversion.get_registered_models())
-    if app is not None:
-        models = filter(lambda item: item in apps.get_app_config(app).get_models(), models)
-    # Don't allow modifying original list!
-    return list(models).copy()
-
-
-# TODO Default filter of having permission to view associated object
-def filter_models(models, user):
-    if user is not None:
-        models = filter(
-            lambda model: not hasattr(model, "reversion_perm") or user.has_perm(model.reversion_perm), models
-        )
-    return models
 
 
 class ActivityTable(generic.ListView):
@@ -62,12 +99,11 @@ class ActivityTable(generic.ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        return RIGSVersion.objects.get_for_multiple_models(
-            filter_models(self.kwargs.get("models"), self.request.user)
-        ).order_by("-revision__date_created")
+        return RIGSVersion.objects.get_for_multiple_models(filter_models(self.kwargs.get("models"), self.request.user))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["object_list"] = prepare_versions(context["object_list"], self.request.user)
         context["page_title"] = f"{title(self.kwargs['app'])} Activity Stream"
         if self.kwargs["app"] != "rigboard":
             context["override"] = f"base_{self.kwargs['app']}.html"
@@ -83,10 +119,15 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
     collapse_threshold = 3
     collapsible_models = ("trainingitemqualification", "invoice")
 
+    @cached_property
+    def before(self):
+        return parse_datetime(self.request.GET.get("before", ""))
+
     def get_queryset(self):
-        return RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user)).order_by(
-            "-revision__date_created"
-        )[: self.version_limit]
+        versions = RIGSVersion.objects.get_for_multiple_models(filter_models(get_models(), self.request.user))
+        if self.before:
+            versions = versions.filter(revision__date_created__lt=self.before)
+        return versions.order_by("-revision__date_created")[: self.version_limit]
 
     def build_groups(self, versions):
         """Groups consecutive versions by the same user within an hour of each other, newest first"""
@@ -103,6 +144,21 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
                 break
             groups.append({"revision": version.revision, "versions": [version]})
         return groups
+
+    def merge_edits(self, versions):
+        """Reports repeated edits of one object as a single change, from before the first to after the last"""
+        latest = {}
+        merged = []
+        for version in versions:
+            key = (version.content_type_id, version.object_id)
+            if version.action or not version.parent:
+                merged.append(version)
+            elif key in latest:
+                latest[key].absorb(version)
+            else:
+                latest[key] = version
+                merged.append(version)
+        return merged
 
     def collapse_runs(self, versions):
         """Folds long runs of versions of the same kind of object into one expandable entry"""
@@ -128,8 +184,7 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
         for version in versions:
             plain = (
                 ContentType.objects.get_for_id(version.content_type_id).model not in self.collapsible_models
-                or version.converted_enquiry_name
-                or version.deleted_enquiry_name is not None
+                or version.action
             )
             if plain or (run and not self.same_kind(run[0], version)):
                 flush()
@@ -146,12 +201,24 @@ class ActivityFeed(generic.ListView):  # Appears on homepage
             other.changes.old is None
         )
 
+    def build_feed(self):
+        versions = list(self.get_queryset())
+        groups = self.build_groups(versions)
+        consumed = [version for group in groups for version in group["versions"]]
+        prepare_versions(consumed, self.request.user)
+        for group in groups:
+            group["entries"] = self.collapse_runs(self.merge_edits(group["versions"]))
+        more = len(consumed) < len(versions)
+        return {
+            "groups": groups,
+            "next_before": consumed[-1].revision.date_created.isoformat() if more else None,
+        }
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Activity Feed"
         context["feed_version"] = activity_feed_version()
-        groups = self.build_groups(context["object_list"])
-        for group in groups:
-            group["entries"] = self.collapse_runs(group["versions"])
-        context["groups"] = groups
+        context["feed_audience"] = feed_audience(self.request.user)
+        context["feed_before"] = self.before.isoformat() if self.before else ""
+        context["build_feed"] = self.build_feed
         return context

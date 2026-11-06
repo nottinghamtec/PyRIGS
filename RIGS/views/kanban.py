@@ -16,7 +16,7 @@ from django.views import generic
 from PyRIGS.views import get_related, is_ajax
 from RIGS import forms, models
 from RIGS import prefill as prefill_module
-from versioning.versioning import CONVERTED_PREFIX, DELETED_PREFIX, record_deletion
+from versioning.models import RevisionAction
 
 # Finished events leave the board this long after they end, so the finance columns stay short
 FALL_OFF = datetime.timedelta(weeks=2)
@@ -408,7 +408,8 @@ class EnquiryConvert(generic.View):
                 {"error": " ".join(e.messages), "edit_url": reverse("enquiry_update", kwargs={"pk": pk})}, status=409
             )
         reversion.set_user(request.user)
-        reversion.set_comment(f"{CONVERTED_PREFIX}{name}")
+        reversion.set_comment(f"Converted enquiry {name}")
+        reversion.add_meta(RevisionAction, kind=RevisionAction.CONVERTED, name=name)
         return JsonResponse(
             {
                 "pk": event.pk,
@@ -424,6 +425,5 @@ class EnquiryDelete(generic.View):
     @transaction.atomic()
     def post(self, request, pk):
         enquiry = get_object_or_404(models.Enquiry, pk=pk)
-        record_deletion(enquiry, request.user, f"{DELETED_PREFIX}{enquiry.name}")
         enquiry.delete()
         return JsonResponse({"deleted": pk})

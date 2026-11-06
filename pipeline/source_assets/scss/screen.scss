@@ -139,6 +139,92 @@ html {
 .home-activity { grid-area: activity; }
 .home-changelog { grid-area: changelog; }
 
+.version-badge {
+  display: inline-block;
+  margin: 0 .1rem .1rem 0;
+  padding: .05rem .5rem;
+  border: 1px solid var(--bs-info-border-subtle);
+  border-radius: 1rem;
+  background-color: var(--bs-info-bg-subtle);
+  color: var(--bs-info-text-emphasis);
+  font-size: .8125em;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: help;
+  transition: background-color .12s ease-in-out, border-color .12s ease-in-out;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--bs-info);
+    background-color: var(--bs-info-border-subtle);
+  }
+}
+
+.version-popover {
+  --bs-popover-max-width: 22rem;
+  --bs-popover-font-size: .875rem;
+  --bs-popover-header-font-size: .875rem;
+  --bs-popover-header-padding-y: .4rem;
+  --bs-popover-header-padding-x: .75rem;
+  --bs-popover-body-padding-y: .6rem;
+  --bs-popover-body-padding-x: .75rem;
+
+  ins,
+  del {
+    padding: 0 .15rem;
+    border-radius: .2rem;
+  }
+
+  .popover-header {
+    font-weight: 600;
+  }
+}
+
+.version-popover-values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: .3rem .6rem;
+  align-items: baseline;
+}
+
+.version-popover-label,
+.version-popover-name {
+  color: var(--bs-secondary-color);
+  font-size: .75rem;
+}
+
+.version-popover-text {
+  line-height: 1.5;
+}
+
+.version-flag {
+  display: inline-block;
+  padding: .05rem .5rem;
+  border: 1px solid var(--bs-secondary-border-subtle);
+  border-radius: 1rem;
+  background-color: var(--bs-secondary-bg-subtle);
+  color: var(--bs-secondary-text-emphasis);
+  font-size: .8125rem;
+  font-weight: 500;
+}
+
+.version-flag-on {
+  border-color: var(--bs-success-border-subtle);
+  background-color: var(--bs-success-bg-subtle);
+  color: var(--bs-success-text-emphasis);
+}
+
+.version-popover-field + .version-popover-field {
+  margin-top: .5rem;
+  padding-top: .5rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.version-popover-name {
+  margin-bottom: .2rem;
+  font-weight: 600;
+}
+
 .activity-skeleton-avatar {
   display: block;
   width: 3em;

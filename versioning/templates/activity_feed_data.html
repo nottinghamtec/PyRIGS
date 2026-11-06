@@ -7,10 +7,11 @@
 {% load cache %}
 
 {% block content %}
-{# The fragment is cached for an hour (in the database in production), so bump the "bs9" suffix whenever its markup changes (new revisions change feed_version) #}
-{% cache 3600 feed_data_bs9 request.user feed_version %}
-{% for group in groups %}
-<div class="list-group-item">
+{# The fragment is cached for an hour (in the database in production), so bump the "bs14" suffix whenever its markup changes (new revisions change feed_version) #}
+{% cache 3600 feed_data_bs14 feed_audience feed_version feed_before %}
+{% with feed=build_feed %}
+{% for group in feed.groups %}
+<div class="list-group-item" data-activity-time="{{ group.revision.date_created|date:"c" }}" data-activity-user="{{ group.revision.user_id|default:"" }}">
     <div class="d-flex">
         <div class="align-self-start me-3">
         {% if group.revision.user %}
@@ -24,54 +25,37 @@
         <div class="flex-grow-1">
             <h5>
                 {% if group.revision.user %}<a href="{% url 'profile_detail' pk=group.revision.user.pk %}" class="modal-href">{% endif %}{{ group.revision.user.name|default:'System' }}{% if group.revision.user %}</a>{% endif %}
-                <span class="float-end"><small><span class="fas fa-clock"></span> <span class="time">{{group.revision.date_created|date:"c"}}</span> ({{group.revision.date_created}})</small></span>
+                <span class="float-end"><small><span class="fas fa-clock"></span> <time class="time" datetime="{{group.revision.date_created|date:"c"}}">{{group.revision.date_created|date:"c"}}</time> ({{group.revision.date_created}})</small></span>
             </h5>
             {% for entry in group.entries %}
                 {% if entry.collapsed %}
                 <details class="mb-3">
                     <summary>{{ entry.verb }} {{ entry.count }} {{ entry.name }}</summary>
                     {% for version in entry.versions %}
-                    <p class="ms-3 mb-1">
-                        {% if entry.verb == "Created" %}Created{% else %}Changed {% include 'partials/version_changes.html' %} in{% endif %}
-                        {% include 'partials/object_button.html' with object=version.changes.new %}
-                    </p>
+                    <p class="ms-3 mb-1">{% include 'partials/activity_sentence.html' %}</p>
                     {% endfor %}
                 </details>
                 {% else %}
-                {% with version=entry.version %}
-                <p>
-                {% if version.converted_enquiry_name and version.changes.old == None %}
-                    Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.changes.new.get_absolute_url }}">{{ version.changes.new.display_id }}</a>
-                {% elif version.deleted_enquiry_name is not None %}
-                    Deleted enquiry {{ version.deleted_enquiry_name }}
-                {% elif version.changes.new|to_class_name == "EventAuthorisation" %}
-                    {% if version.changes.old == None %}Authorised{% else %}Reauthorised{% endif %}
-                    {% include 'partials/object_button.html' with object=version.changes.new %}
-                    for £{{ version.changes.new.amount }} by {{ version.changes.new.name }}
-                    {% if version.changes.old != None %}({% include 'partials/version_changes.html' %}){% endif %}
-                {% else %}
-                    {% if version.changes.old == None %}Created{% else %}Changed {% include 'partials/version_changes.html' %} in{% endif %}
-                    {% include 'partials/object_button.html' with object=version.changes.new %}
-                {% endif %}
-                </p>
-                {% endwith %}
+                <p>{% include 'partials/activity_sentence.html' with version=entry.version %}</p>
                 {% endif %}
             {% endfor %}
         </div>
     </div>
 </div>
 {% endfor %}
+{% if feed.next_before %}
+<div class="list-group-item text-center">
+    <button type="button" class="btn btn-sm btn-outline-secondary activity-load-more" data-url="{% url 'activity_feed' %}?before={{ feed.next_before|urlencode }}">Load more</button>
+</div>
+{% endif %}
+{% endwith %}
 {% endcache %}
 {% endblock %}
 
 {% block js %}
 <script>
 ready(function() {
-    const times = document.getElementsByClassName("time");
-    var i;
-    for(i = 0; i < times.length; i++) {
-        times[i].innerHTML = moment(times[i].innerHTML).fromNow();
-    }
+    initActivityFeed(document);
 });
 </script>
 {% endblock %}

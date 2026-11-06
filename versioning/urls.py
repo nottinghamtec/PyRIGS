@@ -1,5 +1,5 @@
-from django.urls import path
 from django.apps import apps
+from django.urls import path
 
 from PyRIGS.decorators import permission_required_with_403
 from versioning import views
@@ -17,10 +17,11 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
     if appname == "RIGS":
         appname = "rigboard"
         table_name = "activity_table"
+        prefix = ""
     else:
         table_name = appname + "_activity_table"
+        prefix = f"{appname}/"
 
-    # TODO Proper Permissions
     urlpatterns += [
         path(
             appname + "/activity/",
@@ -32,27 +33,13 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
 
     for model in views.get_models(app=app.label):
         modelname = model.__name__.lower()
-        if appname == "rigboard":
-            urlpatterns += [
-                path(
-                    f"{modelname}/<str:pk>/history/",
-                    permission_required_with_403(f"{app.label}.change_{modelname}")(views.VersionHistory.as_view()),
-                    name=f"{modelname}_history",
-                    kwargs={
-                        "model": model,
-                        "app": appname,
-                    },
-                ),
-            ]
-        else:
-            urlpatterns += [
-                path(
-                    f"{appname}/{modelname}/<str:pk>/history/",
-                    permission_required_with_403(f"{app.label}.change_{modelname}")(views.VersionHistory.as_view()),
-                    name=f"{modelname}_history",
-                    kwargs={
-                        "model": model,
-                        "app": appname,
-                    },
-                ),
-            ]
+        permission = permission_required_with_403(f"{app.label}.change_{modelname}")
+        kwargs = {"model": model, "app": appname}
+        urlpatterns += [
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/",
+                permission(views.VersionHistory.as_view()),
+                name=f"{modelname}_history",
+                kwargs=kwargs,
+            ),
+        ]

@@ -14,13 +14,16 @@
             <tr>
                 <th scope="row">{{ version.revision.date_created }}</th>
                 <td>{{ version.display_id }}</td>
-                <td>{{ version.revision.user.name }}</td>
+                <td>{{ version.revision.user.name|default:'System' }}</td>
                 <td>
-                    {% if version.changes.old is None %}
-                        {{object|to_class_name}} Created
+                    {% if version.deleted_name %}
+                        Deleted {{ version.deleted_name }}
+                    {% elif version.changes.old is None %}
+                        {{ version.changes.new|to_class_name }} Created
                     {% else %}
                         {% include 'partials/version_changes.html' %}
                     {% endif %}
+                    {% include 'partials/version_notes.html' %}
                 </td>
             </tr>
         {% endfor %}

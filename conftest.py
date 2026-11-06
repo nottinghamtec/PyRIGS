@@ -96,6 +96,11 @@ def vat_rate(db):
     vat_rate.delete()
 
 
+@pytest.fixture(autouse=True)
+def activity_feed_bumps_immediately(monkeypatch):
+    monkeypatch.setattr("versioning.versioning.on_commit", lambda callback: callback())
+
+
 def _has_transactional_marker(item):
     db_marker = item.get_closest_marker("django_db")
     if db_marker and db_marker.kwargs.get("transaction"):

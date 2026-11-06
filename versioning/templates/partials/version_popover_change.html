@@ -1,0 +1,12 @@
+{% if change.boolean %}
+    {% include 'partials/version_boolean_change.html' %}
+{% elif change.linebreaks and change.new and change.old %}
+    <div class="version-popover-text dont-break-out">{% for diff in change.compact_diff %}{% include 'partials/version_diff_part.html' %}{% endfor %}</div>
+{% else %}
+    <div class="version-popover-values dont-break-out">
+        <span class="version-popover-label">Before</span>
+        <span>{% if change.old %}<del>{% if change.linebreaks %}{{ change.old|truncatechars:200|linebreaksbr }}{% else %}{{ change.old }}{% endif %}</del>{% else %}<span class="text-body-secondary">Empty</span>{% endif %}</span>
+        <span class="version-popover-label">After</span>
+        <span>{% if change.new %}<ins>{% if change.linebreaks %}{{ change.new|truncatechars:200|linebreaksbr }}{% else %}{{ change.new }}{% endif %}</ins>{% else %}<span class="text-body-secondary">Empty</span>{% endif %}</span>
+    </div>
+{% endif %}
