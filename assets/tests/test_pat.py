@@ -430,3 +430,59 @@ def test_test_program_is_shown(admin_client, pat_asset):
     assert (
         b"Class 1 Appliance W/ thru" in admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk})).content
     )
+
+
+def many_results(count):
+    return b.sss_file(
+        *[b.test_result(tested_at=datetime.datetime(2025, 1, 1) + datetime.timedelta(days=day)) for day in range(count)]
+    )
+
+
+def test_the_upload_page_is_paginated(admin_client, pat_asset):
+    upload(admin_client, many_results(60))
+    batch = models.PATTestBatch.objects.get()
+    url = reverse("pat_batch_detail", kwargs={"pk": batch.pk})
+
+    first = admin_client.get(url)
+    assert len(first.context["records"]) == 25
+    assert first.context["is_paginated"] is True
+    assert first.context["paginator"].num_pages == 3
+    assert b"60 results imported" in first.content
+    assert b'class="pagination"' in first.content
+
+    last = admin_client.get(url, {"page": 3})
+    assert len(last.context["records"]) == 10
+    assert b"60 results imported" in last.content
+
+
+def test_pages_never_repeat_or_skip_a_result(admin_client, pat_asset):
+    upload(admin_client, many_results(60))
+    batch = models.PATTestBatch.objects.get()
+    url = reverse("pat_batch_detail", kwargs={"pk": batch.pk})
+    seen = []
+    for page in (1, 2, 3):
+        seen += [record.pk for record in admin_client.get(url, {"page": page}).context["records"]]
+    assert len(seen) == len(set(seen)) == 60
+
+
+def test_a_small_upload_has_no_pagination(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()))
+    batch = models.PATTestBatch.objects.get()
+    response = admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk}))
+    assert response.context["is_paginated"] is False
+    assert b'class="pagination"' not in response.content
+    assert b"1 result imported" in response.content
+
+
+@pytest.mark.parametrize("page", ["0", "4", "abc", "-1"])
+def test_a_page_that_does_not_exist_is_a_404(admin_client, pat_asset, page):
+    upload(admin_client, many_results(60))
+    batch = models.PATTestBatch.objects.get()
+    assert admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk}), {"page": page}).status_code == 404
+
+
+def test_page_links_keep_you_on_the_same_upload(admin_client, pat_asset):
+    upload(admin_client, many_results(60))
+    batch = models.PATTestBatch.objects.get()
+    url = reverse("pat_batch_detail", kwargs={"pk": batch.pk})
+    assert b"?page=2" in admin_client.get(url).content

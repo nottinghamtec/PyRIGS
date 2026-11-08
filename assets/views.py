@@ -5,9 +5,9 @@ from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
-from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Exists, F, OuterRef, Q, Subquery, Sum
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -675,11 +675,26 @@ class PATBatchList(generic.ListView):
 class PATBatchDetail(generic.DetailView):
     model = models.PATTestBatch
     template_name = "pat_batch_detail.html"
+    paginate_by = 25
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"PAT Upload {self.object.original_filename}"
-        context["records"] = self.object.records.select_related("asset")
+        records = self.object.records.select_related("asset", "batch", "suppressed_by").order_by("-tested_at", "pk")
+        paginator = Paginator(records, self.paginate_by)
+        try:
+            page = paginator.page(self.request.GET.get("page") or 1)
+        except PageNotAnInteger, EmptyPage:
+            raise Http404("That page doesn't exist")
+        context.update(
+            {
+                "page_title": f"PAT Upload {self.object.original_filename}",
+                "records": page.object_list,
+                "record_count": paginator.count,
+                "page_obj": page,
+                "paginator": paginator,
+                "is_paginated": paginator.num_pages > 1,
+            }
+        )
         return context
 
 

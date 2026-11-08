@@ -1,4 +1,5 @@
 {% extends 'base_assets.html' %}
+{% load paginator from filters %}
 
 {% block content %}
 <div class="row my-2">
@@ -70,7 +71,7 @@
 </div>
 {% endif %}
 {% include 'partials/pat_styles.html' %}
-<h3>{{ records|length }} results imported</h3>
+<h3>{{ record_count }} result{{ record_count|pluralize }} imported</h3>
 <div class="table-responsive">
   <table class="table table-hover align-middle pat-table">
     <colgroup>
@@ -84,4 +85,5 @@
     {% endfor %}
   </table>
 </div>
+{% if is_paginated %}{% paginator %}{% endif %}
 {% endblock %}
