@@ -1,3 +1,9 @@
+import json
+import logging
+import time
+from datetime import datetime, timezone
+
+from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 from reversion import revisions as reversion
@@ -91,3 +97,73 @@ class RevisionUserMiddleware:
         if reversion.is_active() and request.user.is_authenticated:
             reversion.set_user(request.user)
         return self.get_response(request)
+
+
+access_logger = logging.getLogger("pyrigs.access")
+
+# Everything an access log line can contain. Each takes (request, response, duration in ms) and the line is made of
+# the ones named in settings.ACCESS_LOG_FIELDS, in that order.
+ACCESS_LOG_FIELD_EXTRACTORS = {
+    "time": lambda request, response, ms: datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+    "ip": lambda request, response, ms: client_ip(request),
+    "user_id": lambda request, response, ms: authenticated_user(request) and authenticated_user(request).pk,
+    "username": lambda request, response, ms: (
+        authenticated_user(request) and authenticated_user(request).get_username()
+    ),
+    "method": lambda request, response, ms: request.method,
+    "path": lambda request, response, ms: request.path,
+    "status": lambda request, response, ms: response.status_code,
+    "duration_ms": lambda request, response, ms: ms,
+    "bytes": lambda request, response, ms: int(response.get("Content-Length") or 0) or None,
+    "query": lambda request, response, ms: request.META.get("QUERY_STRING", ""),
+    "host": lambda request, response, ms: request.META.get("HTTP_HOST", ""),
+    "user_agent": lambda request, response, ms: request.META.get("HTTP_USER_AGENT", ""),
+    "referer": lambda request, response, ms: request.META.get("HTTP_REFERER", ""),
+    "view": lambda request, response, ms: request.resolver_match.view_name if request.resolver_match else None,
+    "forwarded_for": lambda request, response, ms: request.META.get("HTTP_X_FORWARDED_FOR", ""),
+    "http_version": lambda request, response, ms: (
+        request.META.get("HTTP_X_HTTP_VERSION") or request.META.get("SERVER_PROTOCOL")
+    ),
+    "is_staff": lambda request, response, ms: bool(
+        authenticated_user(request) and authenticated_user(request).is_staff
+    ),
+}
+
+
+def client_ip(request):
+    """nginx overwrites X-Real-IP with the address that connected to it, so a client can't spoof it in production"""
+    return request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR")
+
+
+def authenticated_user(request):
+    user = getattr(request, "user", None)
+    return user if user is not None and user.is_authenticated else None
+
+
+class AccessLogMiddleware:
+    """
+    Logs one JSON line per request to the ``pyrigs.access`` logger, including who made it.
+
+    Sits outermost so it sees every response, including redirects and errors from other middleware. The user is read
+    after the response is built, so a request that logs in is attributed to the new user and one that logs out is
+    anonymous. Static files are skipped.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.static_prefix = settings.STATIC_URL
+
+    def __call__(self, request):
+        started = time.monotonic()
+        response = self.get_response(request)
+        if not request.path.startswith(self.static_prefix):
+            self.log(request, response, round((time.monotonic() - started) * 1000, 1))
+        return response
+
+    @staticmethod
+    def log(request, response, duration_ms):
+        entry = {
+            name: ACCESS_LOG_FIELD_EXTRACTORS[name](request, response, duration_ms)
+            for name in settings.ACCESS_LOG_FIELDS
+        }
+        access_logger.info(json.dumps(entry, ensure_ascii=False))

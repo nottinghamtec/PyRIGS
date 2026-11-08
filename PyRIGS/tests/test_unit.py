@@ -210,3 +210,83 @@ def test_footer_shows_h3_only_for_http3(admin_client, version, shown):
     extra = {"HTTP_X_HTTP_VERSION": version} if version else {}
     response = admin_client.get(reverse("index"), **extra)
     assert ("Connected over HTTP/3" in response.content.decode()) is shown
+
+
+@pytest.fixture
+def access_entries():
+    import json
+    import logging
+
+    class Collect(logging.Handler):
+        def __init__(self):
+            super().__init__()
+            self.entries = []
+
+        def emit(self, record):
+            self.entries.append(json.loads(record.getMessage()))
+
+    handler = Collect()
+    logger = logging.getLogger("pyrigs.access")
+    logger.addHandler(handler)
+    yield handler.entries
+    logger.removeHandler(handler)
+
+
+def test_daily_file_handler_rolls_each_day_and_keeps_thirty(tmp_path):
+    import datetime
+    import logging
+
+    from PyRIGS.logging import DailyFileHandler
+
+    def record_on(day):
+        stamp = datetime.datetime.combine(day, datetime.time(12), datetime.timezone.utc).timestamp()
+        record = logging.LogRecord("t", logging.INFO, __file__, 1, "line %s", (day,), None)
+        record.created = stamp
+        return record
+
+    today = datetime.date(2026, 11, 8)
+    for age in (45, 30, 29, 28):
+        (tmp_path / f"access.{today - datetime.timedelta(days=age)}.log").write_text("old\n")
+    (tmp_path / "unrelated.log").write_text("keep\n")
+
+    handler = DailyFileHandler(tmp_path, backup_count=30)
+    handler.emit(record_on(today))
+    handler.emit(record_on(today))
+    handler.emit(record_on(today + datetime.timedelta(days=1)))
+    handler.close()
+
+    assert (tmp_path / "access.2026-11-08.log").read_text().splitlines() == ["line 2026-11-08"] * 2
+    assert (tmp_path / "access.2026-11-09.log").exists()
+    names = {p.name for p in tmp_path.iterdir()}
+    assert "unrelated.log" in names
+    # The last file written is for the 9th, so thirty days means 2026-10-11 onwards: 28 days before the 8th is kept
+    assert f"access.{today - datetime.timedelta(days=28)}.log" in names
+    assert f"access.{today - datetime.timedelta(days=29)}.log" not in names
+    assert f"access.{today - datetime.timedelta(days=30)}.log" not in names
+    assert f"access.{today - datetime.timedelta(days=45)}.log" not in names
+
+
+@pytest.mark.django_db
+def test_access_log_records_user_and_skips_static(admin_client, admin_user, access_entries, settings):
+    settings.ACCESS_LOG_FIELDS = ["ip", "user_id", "username", "method", "path", "status", "query"]
+    admin_client.get(reverse("index") + "?x=1", HTTP_X_REAL_IP="203.0.113.7")
+    admin_client.get("/static/does-not-exist.css")
+    entries = access_entries
+    assert len(entries) == 1
+    assert entries[0] == {
+        "ip": "203.0.113.7",
+        "user_id": admin_user.pk,
+        "username": admin_user.get_username(),
+        "method": "GET",
+        "path": reverse("index"),
+        "status": entries[0]["status"],
+        "query": "x=1",
+    }
+
+
+@pytest.mark.django_db
+def test_access_log_anonymous_user_is_null(client, access_entries):
+    client.get(reverse("index"))
+    entry = access_entries[0]
+    assert entry["user_id"] is None
+    assert entry["username"] is None

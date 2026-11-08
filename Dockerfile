@@ -97,6 +97,11 @@ COPY --from=assets --chown=app:app /app/pipeline/built_assets /app/pipeline/buil
 # DEBUG must never be on in a built image; enable it explicitly via the environment if needed
 ENV DEBUG=false
 
+# Access logs, one file per day. Mount a volume here to keep them across deploys.
+ENV ACCESS_LOG_DIR=/var/log/pyrigs
+RUN mkdir -p /var/log/pyrigs && chown app:app /var/log/pyrigs
+VOLUME /var/log/pyrigs
+
 # Declared last so a new commit SHA does not invalidate any of the layers above
 ARG GIT_SHA=unknown
 ENV GIT_SHA=$GIT_SHA

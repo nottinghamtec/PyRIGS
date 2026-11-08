@@ -85,6 +85,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    "PyRIGS.middleware.AccessLogMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "reversion.middleware.RevisionMiddleware",
@@ -117,6 +118,18 @@ DATABASES = {
     }
 }
 
+# Access log: one JSON line per request, in a file per day under ACCESS_LOG_DIR, keeping ACCESS_LOG_DAYS days.
+# Unset ACCESS_LOG_DIR to turn it off. Available fields are listed in PyRIGS.middleware.ACCESS_LOG_FIELD_EXTRACTORS.
+ACCESS_LOG_DIR = env("ACCESS_LOG_DIR", default="")
+ACCESS_LOG_DAYS = env("ACCESS_LOG_DAYS", cast=int, default=30)
+ACCESS_LOG_FIELDS = [
+    field.strip()
+    for field in env(
+        "ACCESS_LOG_FIELDS", default="time,ip,user_id,username,method,path,status,duration_ms,bytes"
+    ).split(",")
+    if field.strip()
+]
+
 # Logging
 LOGGING = {
     "version": 1,
@@ -137,6 +150,17 @@ LOGGING = {
         "simple": {"format": "%(levelname)s %(message)s"},
     },
     "handlers": {
+        **(
+            {
+                "access": {
+                    "class": "PyRIGS.logging.DailyFileHandler",
+                    "directory": ACCESS_LOG_DIR,
+                    "backup_count": ACCESS_LOG_DAYS,
+                }
+            }
+            if ACCESS_LOG_DIR
+            else {}
+        ),
         "null": {
             "level": "DEBUG",
             "class": "logging.NullHandler",
@@ -150,6 +174,11 @@ LOGGING = {
         },
     },
     "loggers": {
+        "pyrigs.access": {
+            "handlers": ["access"] if ACCESS_LOG_DIR else ["null"],
+            "level": "INFO",
+            "propagate": False,
+        },
         # Again, default Django configuration to email unhandled exceptions
         "django.request": {
             "filters": ["skip_disallowed_host"],
