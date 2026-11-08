@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
+from django.utils.http import content_disposition_header
 from reversion import revisions as reversion
 
 from assets import models
@@ -232,3 +234,28 @@ def restore_result(record, user):
         record.suppressed_by = None
         record.suppressed_reason = ""
         record.save()
+
+
+S3_BACKEND = "storages.backends.s3.S3Storage"
+DOWNLOAD_LINK_SECONDS = 60
+
+
+def signed_download_url(batch, expires=DOWNLOAD_LINK_SECONDS):
+    """
+    A temporary link that lets a browser download an upload's original file straight from the S3 store, or None
+    when files aren't kept there. Signing is done here with no request to the store, so the link has to name an
+    address the browser can reach, which in development isn't the one the app uses.
+    """
+    if settings.STORAGES["default"]["BACKEND"] != S3_BACKEND:
+        return None
+    from storages.backends.s3 import S3Storage
+
+    endpoint = getattr(settings, "AWS_S3_PUBLIC_ENDPOINT_URL", None) or getattr(settings, "AWS_S3_ENDPOINT_URL", None)
+    return S3Storage(endpoint_url=endpoint).url(
+        batch.file.name,
+        parameters={
+            "ResponseContentDisposition": content_disposition_header(True, batch.original_filename),
+            "ResponseContentType": "application/octet-stream",
+        },
+        expire=expires,
+    )

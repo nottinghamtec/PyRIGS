@@ -7,9 +7,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Exists, F, OuterRef, Q, Subquery, Sum
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.cache import add_never_cache_headers
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.shortcuts import get_object_or_404, redirect
@@ -701,7 +702,14 @@ class PATBatchDetail(generic.DetailView):
 class PATBatchDownload(generic.View):
     def get(self, request, pk):
         batch = get_object_or_404(models.PATTestBatch, pk=pk)
-        return FileResponse(batch.file.open("rb"), as_attachment=True, filename=batch.original_filename)
+        url = pat.signed_download_url(batch)
+        if url is None:
+            return FileResponse(batch.file.open("rb"), as_attachment=True, filename=batch.original_filename)
+        if not batch.file.storage.exists(batch.file.name):
+            raise Http404("The original file is no longer in storage")
+        response = HttpResponseRedirect(url)
+        add_never_cache_headers(response)
+        return response
 
 
 class PATBatchDelete(generic.FormView):
