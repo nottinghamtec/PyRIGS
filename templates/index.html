@@ -61,8 +61,6 @@
                 <a class="list-group-item list-group-item-action" href="{% url 'cable_list' %}"><span class="fas fa-plug"></span><span>Cable List</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'cable_type_list' %}"><span class="fas fa-project-diagram"></span><span>Cable Types</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><span class="fas fa-parachute-box"></span><span>Supplier List</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'pat_batch_list' %}"><span class="fas fa-bolt"></span><span>PAT Uploads</span></a>
-                <a class="list-group-item list-group-item-action" href="{% url 'asset_list' %}?pat_status=needs"><span class="fas fa-exclamation-circle"></span><span>Assets Needing PAT</span></a>
             </div>
             <div class="card-footer home-actions">
                 {% if perms.assets.add_asset %}

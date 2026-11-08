@@ -143,11 +143,12 @@ def test_commands_without_a_query_have_plain_urls(admin_user):
     assert "?" not in urls["Asset List"]
 
 
-def test_the_home_page_links_to_pat(admin_client, client, basic_user):
+def test_the_home_page_only_offers_the_pat_upload_button(admin_client, client, basic_user):
     content = admin_client.get(reverse("index")).content.decode()
-    assert reverse("pat_batch_list") in content
-    assert f"{reverse('asset_list')}?pat_status=needs" in content
     assert f'href="{reverse("pat_upload")}"' in content
+    assert f'href="{reverse("pat_batch_list")}"' not in content
+    assert f'href="{reverse("asset_list")}?pat_status=needs"' not in content
+    assert "Assets Needing PAT" in {command["title"] for command in palette(admin_client.get(reverse("index")))}
     client.force_login(basic_user)
     content = client.get(reverse("index")).content.decode()
     assert "You need permission to upload PAT results" in content
