@@ -15,6 +15,7 @@ class Command:
     keywords: str = ""
     method: str = "get"
     url_kwargs: Callable | None = None
+    query: str = ""
 
     def allowed(self, request):
         user = request.user
@@ -24,10 +25,11 @@ class Command:
 
     def as_dict(self, request):
         kwargs = self.url_kwargs(request) if self.url_kwargs else {}
+        url = reverse(self.url_name, kwargs=kwargs)
         return {
             "title": self.title,
             "section": self.section,
-            "url": reverse(self.url_name, kwargs=kwargs),
+            "url": f"{url}?{self.query}" if self.query else url,
             "icon": self.icon,
             "keywords": self.keywords,
             "method": self.method,
@@ -150,6 +152,14 @@ COMMANDS = [
         keywords="add shop vendor",
     ),
     Command(
+        "Upload PAT Results",
+        CREATE,
+        "pat_upload",
+        "fa-upload",
+        permission="assets.add_pattestbatch",
+        keywords="add import sss seaward pat test results",
+    ),
+    Command(
         "New Cable Type",
         CREATE,
         "cable_type_create",
@@ -213,6 +223,21 @@ COMMANDS = [
     Command("Cable List", ASSETS, "cable_list", "fa-plug", keywords="cables leads"),
     Command("Cable Types", ASSETS, "cable_type_list", "fa-project-diagram", keywords="connectors"),
     Command("Supplier List", ASSETS, "supplier_list", "fa-parachute-box", keywords="shops vendors"),
+    Command(
+        "PAT Uploads",
+        ASSETS,
+        "pat_batch_list",
+        "fa-bolt",
+        keywords="pat portable appliance testing seaward results electrical safety",
+    ),
+    Command(
+        "Assets Needing PAT",
+        ASSETS,
+        "asset_list",
+        "fa-exclamation-circle",
+        query="pat_status=needs",
+        keywords="pat overdue retest test due expired",
+    ),
     Command(
         "Audit Assets",
         ASSETS,

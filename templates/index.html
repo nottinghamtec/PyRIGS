@@ -61,6 +61,8 @@
                 <a class="list-group-item list-group-item-action" href="{% url 'cable_list' %}"><span class="fas fa-plug"></span><span>Cable List</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'cable_type_list' %}"><span class="fas fa-project-diagram"></span><span>Cable Types</span></a>
                 <a class="list-group-item list-group-item-action" href="{% url 'supplier_list' %}"><span class="fas fa-parachute-box"></span><span>Supplier List</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'pat_batch_list' %}"><span class="fas fa-bolt"></span><span>PAT Uploads</span></a>
+                <a class="list-group-item list-group-item-action" href="{% url 'asset_list' %}?pat_status=needs"><span class="fas fa-exclamation-circle"></span><span>Assets Needing PAT</span></a>
             </div>
             <div class="card-footer home-actions">
                 {% if perms.assets.add_asset %}
@@ -72,6 +74,11 @@
                 <a class="btn btn-sm btn-outline-success" href="{% url 'supplier_create' %}"><span class="fas fa-plus"></span> New Supplier</a>
                 {% else %}
                 <span class="home-action-disabled" title="You need permission to add suppliers" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-plus"></span> New Supplier</span></span>
+                {% endif %}
+                {% if perms.assets.add_pattestbatch %}
+                <a class="btn btn-sm btn-outline-success" href="{% url 'pat_upload' %}"><span class="fas fa-upload"></span> Upload PAT Results</a>
+                {% else %}
+                <span class="home-action-disabled" title="You need permission to upload PAT results" tabindex="0"><span class="btn btn-sm btn-outline-secondary disabled w-100" aria-disabled="true"><span class="fas fa-upload"></span> Upload PAT Results</span></span>
                 {% endif %}
             </div>
         </div>
