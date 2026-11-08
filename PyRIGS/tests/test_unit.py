@@ -290,3 +290,22 @@ def test_access_log_anonymous_user_is_null(client, access_entries):
     entry = access_entries[0]
     assert entry["user_id"] is None
     assert entry["username"] is None
+
+
+@pytest.mark.django_db
+def test_access_log_records_api_key_user(client, admin_user, access_entries, settings):
+    settings.ACCESS_LOG_FIELDS = ["user_id", "username", "view", "status"]
+    admin_user.api_key = "k3y"
+    admin_user.save()
+    client.get(reverse("ics_calendar", kwargs={"api_pk": admin_user.pk, "api_key": "k3y"}))
+    client.get(
+        reverse("lookup", kwargs={"kind": "venues"}),
+        {"q": "barn"},
+        headers={"Authorization": f"Bearer {admin_user.pk}:k3y"},
+    )
+    client.get(reverse("ics_calendar", kwargs={"api_pk": admin_user.pk, "api_key": "wrong"}))
+    assert [(e["user_id"], e["view"], e["status"]) for e in access_entries] == [
+        (admin_user.pk, "ics_calendar", 200),
+        (admin_user.pk, "lookup", 200),
+        (None, "ics_calendar", 403),
+    ]

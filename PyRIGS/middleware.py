@@ -136,8 +136,11 @@ def client_ip(request):
 
 
 def authenticated_user(request):
+    """The logged-in user, or failing that the user an API key identified (set as ``request.api_user``)"""
     user = getattr(request, "user", None)
-    return user if user is not None and user.is_authenticated else None
+    if user is not None and user.is_authenticated:
+        return user
+    return getattr(request, "api_user", None)
 
 
 class AccessLogMiddleware:

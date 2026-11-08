@@ -108,6 +108,7 @@ def api_key_required(function):
 
         if not user_object.api_key or not hmac.compare_digest(user_object.api_key.encode(), key.encode()):
             return error_resp
+        request.api_user = user_object
         return function(request, *args, **kwargs)
 
     return wrap

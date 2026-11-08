@@ -74,6 +74,7 @@ class LookupView(View):
         user = _authenticate(request)
         if user is None:
             return JsonResponse({"error": "unauthorised"}, status=403)
+        request.api_user = user
         if kind not in KINDS:
             return JsonResponse({"error": "unknown kind"}, status=404)
         model, permission, serialise = KINDS[kind]
