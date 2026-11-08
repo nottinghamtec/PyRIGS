@@ -4,7 +4,7 @@ from collections import Counter
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 from django.urls import reverse
 from django.utils import timezone
 from reversion import revisions as reversion
@@ -304,6 +304,17 @@ class PATTestRecordQuerySet(models.QuerySet):
     def counted(self):
         """The results that count towards an asset's status, which leaves out those that have been suppressed"""
         return self.filter(suppressed_at__isnull=True)
+
+    def by_status(self):
+        """Failed results first, then suppressed ones, then the rest, each newest first"""
+        return self.annotate(
+            status_rank=Case(
+                When(suppressed_at__isnull=False, then=Value(1)),
+                When(passed=False, then=Value(0)),
+                default=Value(2),
+                output_field=IntegerField(),
+            )
+        ).order_by("status_rank", "-tested_at", "asset__asset_id_prefix", "asset__asset_id_number", "pk")
 
 
 @reversion.register

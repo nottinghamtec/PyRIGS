@@ -486,3 +486,82 @@ def test_page_links_keep_you_on_the_same_upload(admin_client, pat_asset):
     batch = models.PATTestBatch.objects.get()
     url = reverse("pat_batch_detail", kwargs={"pk": batch.pk})
     assert b"?page=2" in admin_client.get(url).content
+
+
+def order_of(client, batch, **params):
+    response = client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk}), params)
+    return [(r.passed, r.is_suppressed, r.tested_at.day) for r in response.context["records"]]
+
+
+def test_failed_results_come_first_then_suppressed_then_passed(admin_client, pat_asset, make_asset):
+    make_asset("5555")
+    upload(
+        admin_client,
+        b.sss_file(
+            b.test_result(asset_id="4334", tested_at=datetime.datetime(2025, 11, 1, 10)),
+            b.test_result(asset_id="4334", tested_at=datetime.datetime(2025, 11, 5, 10)),
+            b.test_result(
+                asset_id="5555", tested_at=datetime.datetime(2025, 11, 3, 10), passed=False, steps=[b.polarity(False)]
+            ),
+            b.test_result(
+                asset_id="5555", tested_at=datetime.datetime(2025, 11, 4, 10), passed=False, steps=[b.polarity(False)]
+            ),
+            b.test_result(asset_id="5555", tested_at=datetime.datetime(2025, 11, 6, 10)),
+            b.test_result(
+                asset_id="5555", tested_at=datetime.datetime(2025, 11, 7, 10), passed=False, steps=[b.polarity(False)]
+            ),
+        ),
+    )
+    batch = models.PATTestBatch.objects.get()
+    # suppress one fail (the 7th) and one pass (the 6th)
+    for day in (7, 6):
+        record = models.PATTestRecord.objects.get(tested_at__day=day)
+        admin_client.post(reverse("pat_result_suppress", kwargs={"pk": record.pk}), {"reason": "Wrong asset"})
+
+    assert order_of(admin_client, batch) == [
+        (False, False, 4),  # failed, newest first
+        (False, False, 3),
+        (False, True, 7),  # then suppressed, newest first, whether it had failed or passed
+        (True, True, 6),
+        (True, False, 5),  # then passed, newest first
+        (True, False, 1),
+    ]
+
+
+def test_ties_are_broken_by_asset_id(admin_client, pat_asset, make_asset):
+    make_asset("5555")
+    when = datetime.datetime(2025, 11, 1, 10)
+    upload(
+        admin_client,
+        b.sss_file(b.test_result(asset_id="5555", tested_at=when), b.test_result(asset_id="4334", tested_at=when)),
+    )
+    batch = models.PATTestBatch.objects.get()
+    response = admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk}))
+    assert [r.asset.asset_id for r in response.context["records"]] == ["4334", "5555"]
+
+
+def test_the_order_holds_across_pages(admin_client, pat_asset):
+    results = [
+        b.test_result(tested_at=datetime.datetime(2025, 1, 1) + datetime.timedelta(days=day)) for day in range(30)
+    ]
+    results.append(b.test_result(tested_at=datetime.datetime(2024, 1, 1), passed=False, steps=[b.polarity(False)]))
+    upload(admin_client, b.sss_file(*results))
+    batch = models.PATTestBatch.objects.get()
+    first_page = order_of(admin_client, batch)
+    assert first_page[0] == (False, False, 1)  # the only fail leads, though it's the oldest
+    second_page = order_of(admin_client, batch, page=2)
+    assert len(first_page) + len(second_page) == 31
+    assert all(passed for passed, _, _ in second_page)
+
+
+def test_a_result_with_no_verdict_sorts_with_the_passes(admin_client, pat_asset):
+    upload(
+        admin_client,
+        b.sss_file(
+            b.test_result(tested_at=datetime.datetime(2025, 11, 1, 10)),
+            b.test_result(tested_at=datetime.datetime(2025, 11, 2, 10), passed=False, steps=[b.polarity(False)]),
+        ),
+    )
+    models.PATTestRecord.objects.filter(tested_at__day=1).update(passed=None)
+    batch = models.PATTestBatch.objects.get()
+    assert order_of(admin_client, batch) == [(False, False, 2), (None, False, 1)]

@@ -679,7 +679,7 @@ class PATBatchDetail(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        records = self.object.records.select_related("asset", "batch", "suppressed_by").order_by("-tested_at", "pk")
+        records = self.object.records.select_related("asset", "batch", "suppressed_by").by_status()
         paginator = Paginator(records, self.paginate_by)
         try:
             page = paginator.page(self.request.GET.get("page") or 1)
