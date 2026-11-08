@@ -3,10 +3,46 @@ import datetime
 import pytz
 from django.conf import settings
 from django.db.models import Q
+from django.utils import timezone
 from django_ical.views import ICalFeed
 
 from RIGS import models
 from versioning.versioning import last_edited_subquery
+
+
+class DeactivatedCalendarICS(ICalFeed):
+    product_id = "RIGS"
+    title = "RIGS Calendar"
+    description = "RIGS Profile Deactivated"
+    timezone = settings.TIME_ZONE
+    file_name = "rigs.ics"
+
+    def get_object(self, request, *args, **kwargs):
+        return None
+
+    def items(self, params):
+        return [timezone.now()]
+
+    def item_title(self, item):
+        return "RIGS Profile Deactivated"
+
+    def item_description(self, item):
+        return "Contact it@nottinghamtec.co.uk for assistance on reactivating your account"
+
+    def item_start_datetime(self, item):
+        return item + datetime.timedelta(minutes=30)
+
+    def item_end_datetime(self, item):
+        return item + datetime.timedelta(minutes=30, days=1)
+
+    def item_link(self, item):
+        return "https://rigs.nottinghamtec.co.uk"
+
+    def item_updated(self, item):
+        return item
+
+    def item_guid(self, item):
+        return "rigs-profile-deactivated"
 
 
 class CalendarICS(ICalFeed):
@@ -27,6 +63,11 @@ class CalendarICS(ICalFeed):
     # Provisional = 'provisional' = True
     # Confirmed/Booked = 'confirmed' = True
     # Only MIC = 'mic' = False
+
+    def __call__(self, request, *args, **kwargs):
+        if not kwargs["user"].is_active:
+            return DeactivatedCalendarICS()(request, *args, **kwargs)
+        return super().__call__(request, *args, **kwargs)
 
     def get_object(self, request, *args, **kwargs):
         params = {}

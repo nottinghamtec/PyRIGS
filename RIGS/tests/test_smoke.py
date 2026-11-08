@@ -156,6 +156,18 @@ def test_ical(client, world):
     assert b"VEVENT" in response.content
 
 
+def test_ical_inactive_user(client, world):
+    user = world["user"]
+    user.api_key = "abc123"
+    user.is_active = False
+    user.save()
+    response = client.get(reverse("ics_calendar", kwargs={"api_pk": user.pk, "api_key": "abc123"}))
+    assert response.status_code == 200
+    assert b"RIGS Profile Deactivated" in response.content
+    assert b"it@nottinghamtec.co.uk" in response.content
+    assert response.content.count(b"BEGIN:VEVENT") == 1
+
+
 def test_invoice_payment_flow(admin_client, world):
     inv = world["invoice"]
     response = admin_client.post(

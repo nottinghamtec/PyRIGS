@@ -1,3 +1,5 @@
+import hmac
+
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import HttpResponseRedirect
@@ -104,7 +106,7 @@ def api_key_required(function):
         except models.Profile.DoesNotExist:
             return error_resp
 
-        if user_object.api_key != key:
+        if not user_object.api_key or not hmac.compare_digest(user_object.api_key.encode(), key.encode()):
             return error_resp
         return function(request, *args, **kwargs)
 
