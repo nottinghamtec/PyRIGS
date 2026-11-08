@@ -1,0 +1,15 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-11-08" title="PAT results in RIGS" %}
+<p>Upload a results file from the Seaward PAT tester and every test is matched to its asset, so you can see what has been tested, when it's due and why something failed.</p>
+<details class="mt-2">
+    <summary>All the changes</summary>
+    <ul class="mt-2 mb-0">
+        <li>Upload a <code>.sss</code> file under <em>PAT</em>. Results are matched to assets by ID, repeats are skipped and anything that disagrees with what's already recorded is flagged for review</li>
+        <li>Every asset shows its PAT status and results, and each result opens to show the readings next to the limits the test program set, with the reason for any failure</li>
+        <li>Filter the asset list by PAT status, such as <em>Needs PAT</em> for things tested before that are now overdue, plus supplier, collection, dates and sorting</li>
+        <li>Uploads and results appear in Recent Changes and in each asset's history</li>
+        <li>Uploads can be deleted after confirming and giving a reason, and the audit trail keeps a copy of every result</li>
+        <li>Find it from the command picker with <em>PAT Uploads</em>, <em>Assets Needing PAT</em> and <em>Upload PAT Results</em></li>
+    </ul>
+</details>
+{% endchangelog_entry %}
