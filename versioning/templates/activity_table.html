@@ -1,13 +1,21 @@
 {% extends override|default:'base_rigs.html' %}
+{% load static %}
 {% load paginator from filters %}
 {% load to_class_name from filters %}
 
-{% block js %}
-{% include 'partials/version_scripts.html' %}
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/selects.css' %}"/>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="col-12">
+    {% include 'partials/activity_filters.html' %}
     {% include 'partials/activity_table_body.html' %}
     {% paginator %}
 </div>

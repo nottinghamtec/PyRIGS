@@ -1,5 +1,6 @@
-from django.urls import path
 from django.apps import apps
+from django.contrib.auth.decorators import login_required
+from django.urls import path
 
 from PyRIGS.decorators import permission_required_with_403
 from versioning import views
@@ -10,21 +11,34 @@ urlpatterns = [
         permission_required_with_403("RIGS.view_event")(views.ActivityFeed.as_view()),
         name="activity_feed",
     ),
+    path(
+        "activity/",
+        permission_required_with_403("RIGS.view_event")(views.ActivityTable.as_view()),
+        name="activity_all",
+        kwargs={"app": "rigboard", "heading": "All", "models": views.get_models()},
+    ),
+    path("activity/people/", login_required(views.ActivityPeopleSearch.as_view()), name="activity_people"),
+    path(
+        "event/<int:pk>/history/since-authorised/",
+        permission_required_with_403("RIGS.change_event")(views.EventSinceAuthorised.as_view()),
+        name="event_since_authorised",
+    ),
 ]
 
-for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training")]:
+for app in [apps.get_app_config(label) for label in views.ACTIVITY_PERMISSIONS]:
     appname = str(app.label)
     if appname == "RIGS":
         appname = "rigboard"
         table_name = "activity_table"
+        prefix = ""
     else:
         table_name = appname + "_activity_table"
+        prefix = f"{appname}/"
 
-    # TODO Proper Permissions
     urlpatterns += [
         path(
             appname + "/activity/",
-            permission_required_with_403("RIGS.add_event")(views.ActivityTable.as_view()),
+            permission_required_with_403(views.ACTIVITY_PERMISSIONS[app.label])(views.ActivityTable.as_view()),
             name=table_name,
             kwargs={"app": appname, "models": views.get_models(app.label)},
         ),
@@ -32,27 +46,25 @@ for app in [apps.get_app_config(label) for label in ("RIGS", "assets", "training
 
     for model in views.get_models(app=app.label):
         modelname = model.__name__.lower()
-        if appname == "rigboard":
-            urlpatterns += [
-                path(
-                    f"{modelname}/<str:pk>/history/",
-                    permission_required_with_403(f"{app.label}.change_{modelname}")(views.VersionHistory.as_view()),
-                    name=f"{modelname}_history",
-                    kwargs={
-                        "model": model,
-                        "app": appname,
-                    },
-                ),
-            ]
-        else:
-            urlpatterns += [
-                path(
-                    f"{appname}/{modelname}/<str:pk>/history/",
-                    permission_required_with_403(f"{app.label}.change_{modelname}")(views.VersionHistory.as_view()),
-                    name=f"{modelname}_history",
-                    kwargs={
-                        "model": model,
-                        "app": appname,
-                    },
-                ),
-            ]
+        permission = permission_required_with_403(f"{app.label}.change_{modelname}")
+        kwargs = {"model": model, "app": appname}
+        urlpatterns += [
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/",
+                permission(views.VersionHistory.as_view()),
+                name=f"{modelname}_history",
+                kwargs=kwargs,
+            ),
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/compare/",
+                permission(views.VersionCompare.as_view()),
+                name=f"{modelname}_compare",
+                kwargs=kwargs,
+            ),
+            path(
+                f"{prefix}{modelname}/<str:pk>/history/<int:version_id>/",
+                permission(views.VersionDetail.as_view()),
+                name=f"{modelname}_version",
+                kwargs=kwargs,
+            ),
+        ]

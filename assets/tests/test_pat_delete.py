@@ -156,24 +156,26 @@ def test_another_assets_history_has_only_its_own_deletion(admin_client, two_uplo
     assert "PAT test deleted" not in content
 
 
-def test_asset_ids_that_share_a_prefix_are_not_confused(pat_asset, make_asset):
-    other = make_asset("7777")
-    revision = Revision.objects.create(
-        date_created=timezone.now(), comment="Deleted PAT results x.sss (1 results): test"
-    )
+def test_asset_ids_that_share_a_prefix_are_not_confused(admin_client, pat_asset):
+    revision = Revision.objects.create(date_created=timezone.now(), comment="Uploaded PAT results x.sss")
     record_type = ContentType.objects.get_for_model(models.PATTestRecord)
-    for asset, object_id in ((pat_asset, "9001"), (other, "9002")):
+    # one asset whose database id is the other's followed by a digit
+    for object_id, asset_pk in (("9001", pat_asset.pk), ("9002", int(f"{pat_asset.pk}0"))):
         Version.objects.create(
             revision=revision,
             object_id=object_id,
             content_type=record_type,
             db="default",
             format="json",
-            serialized_data=f'[{{"model": "assets.pattestrecord", "pk": {object_id}, "fields": {{"asset": {asset.pk}, "passed": true}}}}]',
+            serialized_data=(
+                f'[{{"model": "assets.pattestrecord", "pk": {object_id}, "fields": '
+                f'{{"asset": {asset_pk}, "passed": true, "details": {{}}}}}}]'
+            ),
             object_repr="x",
         )
-    assert set(pat_asset.related_history_versions().values_list("object_id", flat=True)) == {"9001"}
-    assert set(other.related_history_versions().values_list("object_id", flat=True)) == {"9002"}
+    response = admin_client.get(reverse("asset_history", kwargs={"pk": pat_asset.asset_id}))
+    record_versions = {v.object_id for v in response.context["object_list"] if v.content_type_id == record_type.pk}
+    assert record_versions == {"9001"}
 
 
 def test_only_users_with_the_delete_permission_can_delete(client, django_user_model, two_uploads):

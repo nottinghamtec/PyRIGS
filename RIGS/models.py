@@ -22,6 +22,8 @@ from django.utils.functional import cached_property
 from reversion import revisions as reversion
 from versioning.versioning import RevisionMixin
 
+from PyRIGS.search_fields import search_indexes, search_vector_field
+
 
 def filter_by_pk(filt, query):
     # try and parse an int
@@ -60,6 +62,7 @@ def validate_initials(value, exclude_pk=None, check_clash=True):
     return value
 
 
+@reversion.register(exclude=("password", "api_key", "last_login"), ignore_duplicates=True)
 class Profile(AbstractUser):
     HS_ORDER_CHOICES = [("oldest", "Earliest date first"), ("newest", "Latest date first")]
     HS_RANGE_CHOICES = [
@@ -86,8 +89,12 @@ class Profile(AbstractUser):
     hs_range = models.CharField(max_length=8, choices=HS_RANGE_CHOICES, default="upcoming")
     hs_only_action = models.BooleanField(default=False)
     kanban_finance = models.BooleanField(default=True, verbose_name="Show invoice columns on the Kanban")
+    search_vector = search_vector_field(first_name="A", last_name="A", initials="A")
 
     reversion_hide = True
+
+    class Meta(AbstractUser.Meta):
+        indexes = search_indexes("profile", trigram_fields=["first_name", "last_name"])
 
     def clean(self):
         super().clean()
@@ -175,13 +182,18 @@ class ContactableManager(models.Manager):
 
 
 class Person(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_person"
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
     address = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("person", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -211,14 +223,19 @@ class Person(models.Model, RevisionMixin):
 
 
 class Organisation(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_organisation"
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
     address = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
     union_account = models.BooleanField(default=False)
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("organisation", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -301,14 +318,19 @@ class VatRate(models.Model, RevisionMixin):
 
 
 class Venue(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_venue"
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
     three_phase_available = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default="")
     address = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
+
+    class Meta:
+        indexes = search_indexes("venue", trigram_fields=["name"])
 
     def __str__(self):
         string = self.name
@@ -460,6 +482,14 @@ def validate_sharepoint_url(value):
 
 @reversion.register(follow=["items"])
 class Event(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_event"
+    reversion_timeline = (
+        "RIGS.EventAuthorisation",
+        "RIGS.RiskAssessment",
+        "RIGS.EventChecklist",
+        "RIGS.PowerTestRecord",
+        "RIGS.Invoice",
+    )
     # Done to make it much nicer on the database
     PROVISIONAL = 0
     CONFIRMED = 1
@@ -761,7 +791,12 @@ class Event(models.Model, RevisionMixin):
             earliest = tz.localize(earliest)
         return not self.dry_hire and not self.status == Event.CANCELLED and earliest <= timezone.now()
 
+    search_vector = search_vector_field(name="A", purchase_order="B", description="B", notes="C")
+
     objects = EventManager()
+
+    class Meta:
+        indexes = search_indexes("event", trigram_fields=["name"])
 
     def get_absolute_url(self):
         return reverse("event_detail", kwargs={"pk": self.pk})
@@ -886,6 +921,7 @@ class EventItem(models.Model, RevisionMixin):
 
 @reversion.register
 class EventAuthorisation(models.Model, RevisionMixin):
+    reversion_perm = "RIGS.view_event"
     event = models.OneToOneField("Event", related_name="authorisation", on_delete=models.CASCADE)
     email = models.EmailField()
     name = models.CharField(max_length=255)
@@ -1084,6 +1120,7 @@ class ReviewableModel(models.Model):
 
 @reversion.register
 class RiskAssessment(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_riskassessment"
     SMALL = (0, "Small")
     MEDIUM = (1, "Medium")
     LARGE = (2, "Large")
@@ -1265,6 +1302,7 @@ class RiskAssessment(ReviewableModel, RevisionMixin):
 
 @reversion.register
 class EventChecklist(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_eventchecklist"
     event = models.ForeignKey("Event", related_name="checklists", on_delete=models.CASCADE)
 
     # General
@@ -1310,6 +1348,7 @@ class EventChecklist(ReviewableModel, RevisionMixin):
 
 @reversion.register
 class PowerTestRecord(ReviewableModel, RevisionMixin):
+    reversion_perm = "RIGS.view_powertestrecord"
     earth_fault_text = "Earth Fault Loop Impedance (Z<small>S</small>) / Ω"
     pssc_text = "Prospective Short Circuit Current / A"
 
@@ -1460,6 +1499,8 @@ class EventCheckIn(models.Model):
 class Enquiry(models.Model, RevisionMixin):
     """A placeholder for a rig that has only just been asked about, kept apart from events until it firms up"""
 
+    reversion_perm = "RIGS.view_event"
+
     name = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
@@ -1504,5 +1545,6 @@ class Enquiry(models.Model, RevisionMixin):
             description=self.notes,
             status=Event.PROVISIONAL,
         )
+        self.skip_deletion_record = True
         self.delete()
         return event

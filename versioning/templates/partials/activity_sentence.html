@@ -1,0 +1,19 @@
+{% load to_class_name from filters %}
+{% if version.converted_enquiry_name and version.changes.old == None %}
+    Converted enquiry {{ version.converted_enquiry_name }} to rig <a href="{{ version.object_url }}">{{ version.changes.new.display_id }}</a>
+{% elif version.deleted_name %}
+    Deleted {{ version.deleted_name }}{% if version.history_url %} (<a href="{{ version.history_url }}">history</a>){% endif %}
+{% elif version.changes.new|to_class_name == "EventAuthorisation" %}
+    {% if version.changes.old == None %}Authorised{% else %}Reauthorised{% endif %}
+    {% include 'partials/object_button.html' with object=version.changes.new %}
+    for £{{ version.changes.new.amount }} by {{ version.changes.new.name }}
+    {% if version.changes.old != None %}{% include 'partials/version_changes.html' %}{% endif %}
+{% elif version.changes.new|to_class_name == "PATTestBatch" %}
+    {% if version.changes.old == None %}Uploaded PAT results{% else %}Updated PAT results in{% endif %}
+    {% if version.object_exists %}<a href="{{ version.object_url }}">{{ version.changes.new.original_filename }}</a> ({{ version.changes.new.records.count }} imported){% else %}{{ version.changes.new.original_filename }} (since deleted){% endif %}
+{% elif version.changes.old == None %}
+    Created {% include 'partials/object_button.html' with object=version.changes.new %}
+{% else %}
+    Changed {% include 'partials/version_changes.html' %} in {% include 'partials/object_button.html' with object=version.changes.new %}
+{% endif %}
+{% include 'partials/version_notes.html' %}

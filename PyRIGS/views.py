@@ -6,7 +6,6 @@ import urllib.parse
 import urllib.request
 
 from functools import reduce
-from itertools import chain
 from io import BytesIO
 
 from pypdf import PdfReader, PdfWriter
@@ -23,7 +22,9 @@ from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views import generic
 from django.template.loader import get_template
 from django.utils import timezone
+from django.utils.html import format_html
 
+from PyRIGS import search
 from RIGS import models
 from RIGS.templatetags import changelog
 from assets import models as asset_models
@@ -290,46 +291,24 @@ class GenericCreateView(generic.CreateView):
 class Search(generic.ListView):
     template_name = "search_results.html"
     paginate_by = 20
-    count = 0
+
+    def get_queryset(self):
+        self.query = self.request.GET.get("q", "").strip()
+        return search.search(self.query, self.request.user)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context["count"] = self.count or 0
-        context["query"] = self.request.GET.get("q")
-        context["page_title"] = f"{context['count']} search results for <b>{context['query']}</b>"
+        page = context["page_obj"]
+        count = page.paginator.count if page else 0
+        context["object_list"] = search.hydrate(context["object_list"], self.query)
+        context["count"] = count
+        context["query"] = self.query
+        context["page_title"] = format_html("{} search results for <b>{}</b>", count, self.query)
+
+        suggestion = search.suggest(self.query)
+        if suggestion and search.search(suggestion, self.request.user)[:1]:
+            context["suggestion"] = suggestion
         return context
-
-    def get_queryset(self):
-        request = self.request
-        query = request.GET.get("q", None)
-
-        if query is not None:
-            event_results = models.Event.objects.search(query).select_related("person", "organisation", "venue", "mic")
-            person_results = models.Person.objects.search(query)
-            organisation_results = models.Organisation.objects.search(query)
-            venue_results = models.Venue.objects.search(query)
-            invoice_results = models.Invoice.objects.search(query).select_related("event")
-            asset_results = asset_models.Asset.objects.search(query).select_related("category", "status")
-            supplier_results = asset_models.Supplier.objects.search(query)
-            trainee_results = training_models.Trainee.objects.search(query)
-            training_item_results = training_models.TrainingItem.objects.search(query)
-
-            # combine querysets
-            queryset_chain = chain(
-                event_results,
-                person_results,
-                organisation_results,
-                venue_results,
-                invoice_results,
-                asset_results,
-                supplier_results,
-                trainee_results,
-                training_item_results,
-            )
-            qs = sorted(queryset_chain, key=lambda instance: instance.pk, reverse=True)
-            self.count = len(qs)  # since qs is actually a list
-            return qs
-        return models.Event.objects.none()  # just an empty queryset as default
 
 
 class SearchHelp(generic.TemplateView):

@@ -70,6 +70,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.postgres",
     "versioning",
     "users",
     "RIGS",
@@ -92,6 +93,7 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "PyRIGS.middleware.DuplicateSubmissionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "PyRIGS.middleware.RevisionUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 )
@@ -103,7 +105,7 @@ WSGI_APPLICATION = "PyRIGS.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.{}".format(env("DATABASE_ENGINE", default="sqlite3")),
+        "ENGINE": "django.db.backends.{}".format(env("DATABASE_ENGINE", default="postgresql")),
         "NAME": env("DATABASE_NAME", default="rigs"),
         "USER": env("DATABASE_USERNAME", default="rigs"),
         "PASSWORD": env("DATABASE_PASSWORD", default="rigs"),

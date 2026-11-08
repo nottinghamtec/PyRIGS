@@ -80,8 +80,12 @@ html {
   min-width: 16rem;
 }
 
-#activity .media-object {
-  max-width: 3em;
+.media-object {
+  display: block;
+  width: 3em;
+  height: 3em;
+  object-fit: cover;
+  background-color: var(--bs-secondary-bg);
 }
 
 // Front page menus: a fixed-width icon column so labels line up whatever the icon
@@ -93,6 +97,24 @@ html {
   > .fas {
     flex: 0 0 1.25em;
     text-align: center;
+  }
+}
+
+// Front page create actions: pinned to the bottom of each card so the three footers line up
+.home-links .home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+
+  > .btn,
+  > .home-action-disabled {
+    flex: 1 1 0;
+    white-space: nowrap;
+  }
+
+  .home-action-disabled {
+    cursor: not-allowed;
   }
 }
 
@@ -120,6 +142,201 @@ html {
 .home-quick-links { grid-area: links; }
 .home-activity { grid-area: activity; }
 .home-changelog { grid-area: changelog; }
+
+.version-badge {
+  display: inline-block;
+  margin: 0 .1rem .1rem 0;
+  padding: .1rem .45rem;
+  border-radius: .25rem;
+  background-color: var(--bs-primary);
+  color: #fff;
+  font-size: .8125em;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: help;
+  transition: background-color .12s ease-in-out;
+
+  &:hover,
+  &:focus-visible {
+    background-color: shade-color($primary, 20%);
+  }
+}
+
+.version-popover {
+  --bs-popover-max-width: 22rem;
+  --bs-popover-font-size: .875rem;
+  --bs-popover-header-font-size: .875rem;
+  --bs-popover-header-padding-y: .4rem;
+  --bs-popover-header-padding-x: .75rem;
+  --bs-popover-body-padding-y: .6rem;
+  --bs-popover-body-padding-x: .75rem;
+
+  ins,
+  del {
+    padding: 0 .15rem;
+    border-radius: .2rem;
+  }
+
+  .popover-header {
+    font-weight: 600;
+  }
+}
+
+.version-popover-values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: .3rem .6rem;
+  align-items: baseline;
+}
+
+.version-popover-label,
+.version-popover-name {
+  color: var(--bs-secondary-color);
+  font-size: .75rem;
+}
+
+.version-popover-text {
+  line-height: 1.5;
+}
+
+.version-flag {
+  display: inline-block;
+  padding: .05rem .5rem;
+  border: 1px solid var(--bs-secondary-border-subtle);
+  border-radius: 1rem;
+  background-color: var(--bs-secondary-bg-subtle);
+  color: var(--bs-secondary-text-emphasis);
+  font-size: .8125rem;
+  font-weight: 500;
+}
+
+.version-flag-on {
+  border-color: var(--bs-success-border-subtle);
+  background-color: var(--bs-success-bg-subtle);
+  color: var(--bs-success-text-emphasis);
+}
+
+.version-popover-field + .version-popover-field {
+  margin-top: .5rem;
+  padding-top: .5rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.version-popover-name {
+  margin-bottom: .2rem;
+  font-weight: 600;
+}
+
+.activity-table {
+  min-width: 46rem;
+  table-layout: fixed;
+
+  .activity-col-date {
+    width: 8rem;
+  }
+
+  .activity-col-object {
+    width: 9rem;
+  }
+
+  .activity-col-version {
+    width: 8rem;
+  }
+
+  .activity-col-user {
+    width: 10rem;
+  }
+
+  td,
+  th {
+    overflow-wrap: anywhere;
+  }
+}
+
+.activity-row-striped > * {
+  --bs-table-bg-type: var(--bs-table-striped-bg);
+}
+
+.session-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--bs-link-hover-color);
+  }
+
+  .fa-chevron-right {
+    font-size: .7em;
+    transition: transform .2s ease;
+  }
+
+  &[aria-expanded="true"] .fa-chevron-right {
+    transform: rotate(90deg);
+  }
+}
+
+.session-detail > td {
+  padding: 0;
+  border-bottom-width: 0;
+}
+
+.session-detail-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .22s ease;
+
+  .session-detail-open & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.session-detail-content {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility .22s;
+
+  .session-detail-open & {
+    visibility: visible;
+  }
+}
+
+.session-table {
+  --bs-table-bg: transparent;
+  margin: .25rem 1rem .75rem;
+  width: calc(100% - 2rem);
+  font-size: .875rem;
+
+  thead th {
+    color: var(--bs-secondary-color);
+    font-size: .75rem;
+    font-weight: 600;
+  }
+
+  .session-col-stage {
+    width: 9rem;
+  }
+
+  .session-col-item {
+    width: 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-detail-reveal,
+  .session-detail-content,
+  .session-toggle .fa-chevron-right {
+    transition: none;
+  }
+}
 
 .activity-skeleton-avatar {
   display: block;
@@ -1103,5 +1320,178 @@ body.kanban-dragging .kanban-cell:not(.kanban-target) {
 
   .sharepoint-icon {
     vertical-align: -0.125em;
+  }
+}
+
+.command-palette-dialog {
+  margin-top: 10vh;
+
+  .modal-body {
+    max-height: 60vh;
+  }
+}
+
+#command-palette-input {
+  font-size: 1.1rem;
+}
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  cursor: pointer;
+  border: 0;
+}
+
+.command-palette-section {
+  border: 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bs-secondary-color);
+}
+
+// Navbar search: one rounded field with its icon and shortcuts inside it, on the navbar's own dark background
+#searchForm.navbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 18rem;
+
+  .navbar-search-icon {
+    position: absolute;
+    left: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.4rem 5.5rem 0.4rem 2.4rem;
+    border: 1px solid transparent;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: background-color 0.15s, border-color 0.15s;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: none;
+    }
+
+    &::-webkit-search-cancel-button {
+      filter: invert(1);
+    }
+  }
+
+  .navbar-search-actions {
+    position: absolute;
+    right: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    > a,
+    > button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.3rem;
+      border: 0;
+      border-radius: 0.4rem;
+      background: none;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+
+    kbd {
+      padding: 0.05rem 0.4rem;
+      font-size: 0.75rem;
+      background-color: rgba(255, 255, 255, 0.12);
+      color: inherit;
+      box-shadow: none;
+    }
+  }
+
+  @include media-breakpoint-down(lg) {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+// First-visit callout pointing up at the command picker shortcut in the navbar search
+.command-palette-hint {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: -0.25rem;
+  z-index: $zindex-dropdown;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.85rem;
+  border-radius: 0.4rem;
+  background-color: $primary;
+  color: #fff;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(-0.25rem);
+  transition: opacity 0.2s, transform 0.2s;
+
+  &.show {
+    opacity: 1;
+    transform: none;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    right: 0.9rem;
+    border: 0.45rem solid transparent;
+    border-bottom-color: $primary;
+  }
+
+  kbd {
+    padding: 0.05rem 0.35rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .btn-close {
+    font-size: 0.65rem;
+  }
+}
+
+.command-palette-quick-key {
+  min-width: 2.4em;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.7rem;
+  text-align: center;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  box-shadow: none;
+
+  .command-palette-item.active & {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
   }
 }

@@ -53,7 +53,7 @@ function styles(done) {
 
 function scripts() {
     const dest = 'pipeline/built_assets/js';
-    const base_scripts = ["src.js", "konami.js"];
+    const base_scripts = ["src.js", "konami.js", "command_palette.js"];
     const bs_select = ["tom-select.complete.js", "autocompleter.js"]
     const interaction = ["html5sortable.min.js", "interaction.js"]
     return gulp.src([/* Bootstrap bundle includes Popper */

@@ -12,6 +12,8 @@ from reversion import revisions as reversion
 from RIGS.models import Profile, ContactableManager
 from versioning.versioning import RevisionMixin
 
+from PyRIGS.search_fields import search_indexes, search_vector_field
+
 
 class AssetCategory(models.Model):
     name = models.CharField(max_length=80)
@@ -45,17 +47,20 @@ class AssetStatus(models.Model):
 
 @reversion.register
 class Supplier(models.Model, RevisionMixin):
+    reversion_perm = "assets.view_supplier"
     name = models.CharField(max_length=80)
     phone = models.CharField(max_length=15, blank=True, default="")
     email = models.EmailField(blank=True, default="")
     address = models.TextField(blank=True, default="")
 
     notes = models.TextField(blank=True, default="")
+    search_vector = search_vector_field(name="A", email="B", address="C", notes="C")
 
     objects = ContactableManager()
 
     class Meta:
         ordering = ["name"]
+        indexes = search_indexes("supplier", trigram_fields=["name"])
 
     def get_absolute_url(self):
         return reverse("supplier_detail", kwargs={"pk": self.pk})
@@ -168,13 +173,22 @@ class Asset(models.Model, RevisionMixin):
     asset_id_prefix = models.CharField(max_length=8, default="")
     asset_id_number = models.IntegerField(default=1)
 
-    reversion_perm = "assets.asset_finance"
+    reversion_perm = "assets.view_asset"
+    # An asset's history includes the PAT results recorded against it
+    reversion_timeline = ("assets.PATTestRecord",)
+    reversion_field_perm = (
+        "assets.asset_finance",
+        ("purchased_from", "date_acquired", "date_sold", "purchase_price", "replacement_cost"),
+    )
+
+    search_vector = search_vector_field(description="A", nickname="A", serial_number="B", comments="C")
 
     objects = AssetManager()
 
     class Meta:
         ordering = ["asset_id_prefix", "asset_id_number"]
         permissions = [("asset_finance", "Can see financial data for assets")]
+        indexes = search_indexes("asset", trigram_fields=["description", "nickname"])
 
     def __str__(self):
         return f"{self.asset_id} | {self.description}"
@@ -225,22 +239,6 @@ class Asset(models.Model, RevisionMixin):
     def display_name(self):
         return f"{self.display_id} | {self.description}"
 
-    def related_history_versions(self):
-        """Versions of other objects that belong in this asset's history"""
-        from django.contrib.contenttypes.models import ContentType
-        from versioning.versioning import PAT_DELETED_PREFIX, RIGSVersion
-
-        record_type = ContentType.objects.get_for_model(PATTestRecord)
-        ids = {str(pk) for pk in self.pat_tests.values_list("pk", flat=True)}
-        # Results that were deleted are gone from the table, but the revision that deleted them kept a copy
-        deleted = RIGSVersion.objects.filter(
-            content_type=record_type,
-            revision__comment__startswith=PAT_DELETED_PREFIX,
-            serialized_data__regex=rf'"asset": {self.pk}[,}}]',
-        )
-        ids.update(deleted.values_list("object_id", flat=True))
-        return RIGSVersion.objects.filter(content_type=record_type, object_id__in=ids)
-
     @property
     def latest_pat_test(self):
         return self.pat_tests.order_by("-tested_at").first()
@@ -285,6 +283,7 @@ class PATTestBatch(models.Model):
 
     class Meta:
         ordering = ["-uploaded_at"]
+        verbose_name = "portable appliance test upload"
 
     def __str__(self):
         return f"{self.original_filename} ({self.uploaded_at:%Y-%m-%d})"
@@ -325,13 +324,19 @@ class PATTestRecord(models.Model):
     details = models.JSONField(default=dict, blank=True)
 
     reversion_hide = True
+    reversion_timeline_field = "asset"
+    reversion_expandable = True
 
     class Meta:
         ordering = ["-tested_at"]
+        verbose_name = "portable appliance test result"
         constraints = [models.UniqueConstraint(fields=["asset", "tested_at"], name="unique_pat_test_per_asset_time")]
 
     def __str__(self):
         return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
+
+    def get_absolute_url(self):
+        return self.asset.get_absolute_url()
 
     @classmethod
     def status_from(cls, tested_at, passed, next_full_test_date):

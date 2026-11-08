@@ -1,4 +1,12 @@
 {# pass in "test" (a PATTestRecord) and "old" (the record it replaced, if any); "version" comes from the loop #}
+{% if version.deleted_name %}
+<div>
+  <strong>PAT test deleted</strong>
+  {% include 'partials/pat_result_badge.html' with passed=test.passed %}
+  {{ test.details.program }}, tested {{ test.tested_at|date:"j M Y, H:i" }} by {{ test.operator|default:"-" }}
+  <div class="text-body-secondary small">Deleted {{ version.deleted_name }}</div>
+</div>
+{% else %}
 <div class="d-flex align-items-start gap-2">
   <button type="button" class="btn btn-link btn-sm p-0 pat-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#pat-v{{ version.pk }}" aria-expanded="false" aria-controls="pat-v{{ version.pk }}" aria-label="Show all test data">
     <span class="fas fa-chevron-right pat-chevron"></span>
@@ -14,3 +22,4 @@
     {% for reason in test.failure_reasons %}<div class="text-danger small">{{ reason }}</div>{% endfor %}
   </div>
 </div>
+{% endif %}

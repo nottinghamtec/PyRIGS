@@ -62,6 +62,56 @@ function initPopovers(root) {
     });
 }
 
+var RELATIVE_TIME_UNITS = [
+    ['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60], ['second', 1]
+];
+
+function relativeTime(date) {
+    var seconds = (date - Date.now()) / 1000;
+    var unit = RELATIVE_TIME_UNITS.find(function (u) { return Math.abs(seconds) >= u[1]; }) || ['second', 1];
+    return new Intl.RelativeTimeFormat('en-GB', {numeric: 'auto'}).format(Math.round(seconds / unit[1]), unit[0]);
+}
+
+var ACTIVITY_VISIT_KEY = 'activity-last-visit';
+
+function previousActivityVisit() {
+    try {
+        return Date.parse(localStorage.getItem(ACTIVITY_VISIT_KEY)) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+var activityLastVisit = previousActivityVisit();
+
+function rememberActivityVisit() {
+    try {
+        localStorage.setItem(ACTIVITY_VISIT_KEY, new Date().toISOString());
+    } catch (e) {
+        return;
+    }
+}
+
+function initActivityFeed(root) {
+    root.querySelectorAll('time.time').forEach(function (time) {
+        time.textContent = relativeTime(Date.parse(time.dateTime));
+    });
+    var feed = document.getElementById('activity');
+    if (!feed || !activityLastVisit) {
+        return;
+    }
+    feed.querySelectorAll('[data-activity-time]:not([data-activity-seen])').forEach(function (group) {
+        group.dataset.activitySeen = 'true';
+        var isNew = Date.parse(group.dataset.activityTime) > activityLastVisit;
+        if (isNew && group.dataset.activityUser !== feed.dataset.currentUser) {
+            var badge = document.createElement('span');
+            badge.className = 'badge text-bg-primary ms-2';
+            badge.textContent = 'New';
+            group.querySelector('h5').prepend(badge);
+        }
+    });
+}
+
 // Load a URL into the shared modal and show it
 function loadModal(url) {
     var modal = document.getElementById('modal');

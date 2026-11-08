@@ -7,7 +7,7 @@ from reversion import revisions as reversion
 
 from assets import models
 from assets.sss import parse_sss
-from versioning.versioning import PAT_DELETED_PREFIX, record_deletions
+from versioning.versioning import record_deletions
 
 RESULT_LABELS = {True: "Pass", False: "Fail", None: "Unknown"}
 
@@ -203,9 +203,8 @@ def delete_batch(batch, user, reason):
     """
     records = list(batch.records.select_related("asset"))
     record_deletions(
-        [batch, *records],
-        user,
-        f"{PAT_DELETED_PREFIX}{batch.original_filename} ({len(records)} results): {reason}",
+        [batch, *records], f"PAT results {batch.original_filename} ({len(records)} results): {reason}", user
     )
+    batch.skip_deletion_record = True  # that revision is the record of it
     batch.delete()
     return len(records)

@@ -38,6 +38,11 @@ ready(function () {
 
     initTooltips();
     initPopovers();
+    on(document, 'click', '.session-toggle', function () {
+        var open = this.getAttribute('aria-expanded') !== 'true';
+        this.setAttribute('aria-expanded', String(open));
+        document.getElementById(this.getAttribute('aria-controls')).classList.toggle('session-detail-open', open);
+    });
     document.querySelectorAll('.navbar-collapse').forEach(function (el) { el.classList.add('collapse'); });
 });
 

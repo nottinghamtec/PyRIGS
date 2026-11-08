@@ -1,16 +1,18 @@
 {% extends "base_rigs.html" %}
 
-{% load to_class_name from filters %}
-{% load markdown_tags %}
+{% load paginator from filters %}
 
 {% block content %}
 {% include 'partials/search.html' %}
-{% for object in object_list %}
-    {% with object|to_class_name as klass %}
+{% if suggestion %}
+<p class="lead m-2">Did you mean <a href="?q={{ suggestion|urlencode }}"><em>{{ suggestion }}</em></a>?</p>
+{% endif %}
+{% for result in object_list %}
+    {% with object=result.object %}
     <div class="card m-2">
-       <h4 class="card-header"><a href='{{ object.get_absolute_url }}'>[{{ klass }}] {{ object }}</a>
+       <h4 class="card-header"><a href='{{ object.get_absolute_url }}'>[{{ result.label }}] {{ result.prefix }} {{ result.title }}</a>
        <small>
-       {% if klass == "Event" %}
+       {% if result.kind == "event" %}
         {% if object.venue %}
         <strong>Venue:</strong> {{ object.venue }}
         {% endif %}
@@ -38,11 +40,18 @@
         {{ object.end_time|date:"H:i" }}
         {% endif %}
        {% endif %}
+       {% if user.is_superuser %}
+        <span class="badge text-bg-secondary float-end" title="Search score">{{ result.score|floatformat:3 }}</span>
+       {% endif %}
        </small>
        </h4>
+       {% if result.snippet %}
+       <div class="card-body py-2 text-body-secondary">{{ result.snippet }}</div>
+       {% endif %}
     </div>
     {% endwith %}
 {% empty %}
 <h3 class="py-3 text-warning">No results found</h3>
 {% endfor %}
+{% paginator %}
 {% endblock content %}

@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
+from reversion import revisions as reversion
 
 # How long a claimed form render stays remembered
 NONCE_TTL = 300
@@ -78,3 +79,15 @@ class DuplicateSubmissionMiddleware:
         key = getattr(request, "_form_nonce_key", None)
         if key is not None:
             cache.delete(key)
+
+
+class RevisionUserMiddleware:
+    """Tells reversion who is acting as soon as they're known, as its own middleware only does so after the view"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if reversion.is_active() and request.user.is_authenticated:
+            reversion.set_user(request.user)
+        return self.get_response(request)

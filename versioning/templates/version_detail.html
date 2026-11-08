@@ -1,0 +1,31 @@
+{% extends override|default:'base_rigs.html' %}
+{% load to_class_name from filters %}
+
+{% block title %}{{object|to_class_name}} {{ object.display_id|default:object.pk }} - Version {{ version.pk }}{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+    <h3>{{object|to_class_name}} {{ object.display_id|default:object.pk }} as of {{ version.revision.date_created }}</h3>
+    <p>Saved by {{ version.revision.user.name|default:'System' }} as {{ version.display_id }}. <a href="{{ history_url }}">Back to history</a></p>
+    {% include 'partials/version_notes.html' %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-dark"><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead>
+            <tbody>
+            {% for change in version.snapshot %}
+                <tr>
+                    <th scope="row">{{ change.field.verbose_name|capfirst }}</th>
+                    <td class="dont-break-out">{% if change.linebreaks %}{{ change.new|linebreaksbr }}{% else %}{{ change.new }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if version.snapshot_items %}
+    <h4>Items</h4>
+    <ul>
+        {% for item in version.snapshot_items %}<li>{{ item.object_repr }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

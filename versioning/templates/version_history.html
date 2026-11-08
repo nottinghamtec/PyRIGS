@@ -4,13 +4,20 @@
 
 {% block title %}{{object|to_class_name}} {{ object.display_id|default:object.pk }} - Revision History{% endblock %}
 
-{% block js %}
-{% include 'partials/version_scripts.html' %}
-{% endblock %}
-
 {% block content %}
 <div class="col-sm-12">
-    <h3><a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.display_id|default:object.pk }}</a> - Revision History</h3>
+    <h3>
+        {% if object_deleted %}{{object|to_class_name}} {{ object.display_id|default:object.pk }} <span class="badge text-bg-danger">Deleted</span>{% else %}<a href="{{ object.get_absolute_url }}">{{object|to_class_name}} {{ object.display_id|default:object.pk }}</a>{% endif %} - {% if timeline %}Timeline{% else %}Revision History{% endif %}
+    </h3>
+    {% if version_url_name %}
+    <form method="get" class="row g-2 mb-3 align-items-end">
+        <div class="col-auto">
+            <label class="form-label" for="history-at">View as of</label>
+            <input class="form-control" id="history-at" type="date" name="at">
+        </div>
+        <div class="col-auto"><button type="submit" class="btn btn-outline-secondary">Go</button></div>
+    </form>
+    {% endif %}
     {% include 'partials/version_history_table.html' %}
     <div>{% paginator %}</div>
 </div>

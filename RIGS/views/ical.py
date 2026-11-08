@@ -6,6 +6,7 @@ from django.db.models import Q
 from django_ical.views import ICalFeed
 
 from RIGS import models
+from versioning.versioning import last_edited_subquery
 
 
 class CalendarICS(ICalFeed):
@@ -95,6 +96,7 @@ class CalendarICS(ICalFeed):
             models.Event.objects.filter(filter)
             .order_by("-start_date")
             .select_related("person", "organisation", "venue", "mic")
+            .annotate(last_edited=last_edited_subquery(models.Event))
         )
 
     def item_title(self, item):
@@ -191,7 +193,7 @@ class CalendarICS(ICalFeed):
         return item.get_absolute_url()
 
     def item_updated(self, item):  # some ical clients will display this
-        return item.last_edited_at
+        return item.last_edited
 
     def item_guid(self, item):  # use the rig-id as the ical unique event identifier
         return item.pk

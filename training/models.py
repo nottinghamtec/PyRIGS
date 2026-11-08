@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from versioning.versioning import RevisionMixin
+from PyRIGS.search_fields import search_indexes, search_vector_field
 from queryable_properties.properties import queryable_property
 from queryable_properties.managers import QueryablePropertiesManager
 
@@ -149,6 +150,7 @@ class TrainingItem(models.Model):
         help_text="Technicians in this item's department who are passed out on it may deliver training up to Training Complete",
     )
     prerequisites = models.ManyToManyField("self", symmetrical=False, blank=True)
+    search_vector = search_vector_field(name="A", description="B")
 
     objects = TrainingItemManager()
 
@@ -195,6 +197,7 @@ class TrainingItem(models.Model):
         return user.qualifications_obtained.only("item", "depth").filter(item=item, depth__gte=depth).exists()
 
     class Meta:
+        indexes = search_indexes("trainingitem", trigram_fields=["name"])
         constraints = [
             models.UniqueConstraint(
                 fields=["reference_number", "active", "category"], name="unique_reference_number_active_category"
@@ -244,6 +247,51 @@ class TrainingItemQualification(models.Model, RevisionMixin):
     # TODO Maximum depth - some things stop at Complete and you can't be passed out in them
 
     objects = TrainingItemQualificationManager()
+
+    session_template = "partials/qualification_session.html"
+    session_detail_template = "partials/qualification_session_detail.html"
+
+    @classmethod
+    def summarise_sessions(cls, sessions):
+        qualifications = [qualification for session in sessions for qualification in session]
+        people = Profile._base_manager.in_bulk(
+            {q.trainee_id for q in qualifications} | {q.supervisor_id for q in qualifications}
+        )
+        items = TrainingItem._base_manager.select_related("category").in_bulk({q.item_id for q in qualifications})
+        return [cls.summarise_session(session, people, items) for session in sessions]
+
+    @classmethod
+    def summarise_session(cls, qualifications, people, items):
+        rows = {}
+        for qualification in qualifications:
+            key = (qualification.item_id, qualification.depth)
+            row = rows.setdefault(
+                key,
+                {
+                    "item": items.get(qualification.item_id),
+                    "depth": qualification.get_depth_display(),
+                    "colour": cls.get_colour_from_depth(qualification.depth),
+                    "trainees": [],
+                },
+            )
+            row["trainees"].append(people.get(qualification.trainee_id))
+        trainees = {qualification.trainee_id for qualification in qualifications}
+        supervisors = {people[q.supervisor_id].name for q in qualifications if q.supervisor_id in people}
+        dates = sorted({qualification.date for qualification in qualifications})
+        notes = {qualification.notes for qualification in qualifications}
+        first = next(iter(rows.values()))
+        return {
+            "title": "Training session" if len(qualifications) > 1 else "Training qualification",
+            "total": len(qualifications),
+            "trainee_count": len(trainees),
+            "item_count": len({qualification.item_id for qualification in qualifications}),
+            "rows": sorted(rows.values(), key=lambda row: (str(row["item"]), row["depth"])),
+            "first": first,
+            "supervisors": sorted(supervisors),
+            "first_date": dates[0],
+            "last_date": dates[-1],
+            "notes": notes.pop() if len(notes) == 1 else "",
+        }
 
     def clean(self):
         errdict = {}

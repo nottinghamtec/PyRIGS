@@ -47,6 +47,7 @@ dev = [
     "pip-audit~=2.10",
     "ruff~=0.16",
     "prek~=0.5",
+    "testcontainers[postgres]~=4.15",
 ]
 
 [tool.ruff]

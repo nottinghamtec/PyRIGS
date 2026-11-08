@@ -1,6 +1,19 @@
 {% extends 'base_rigs.html' %}
 {% load button from filters %}
 
+{% block js %}
+    {{ block.super }}
+
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.keyCode == 80) {
+            window.open("{% url 'invoice_print' object.pk %}", '_blank');
+            e.preventDefault();
+        }
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
 <div class="row py-4">
     <div class="col-sm-12 text-end px-0">

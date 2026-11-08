@@ -1,0 +1,11 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-11-05" title="Smarter search" %}
+<p>The search bar at the top of every page has been rebuilt, so it finds what you meant rather than only exact matches.</p>
+<ul class="mt-2">
+    <li><strong>Best matches first</strong>: results are ranked across events, people, venues, assets and training. A match in a name counts for more than one buried in the notes, and events nearer to today come before similar ones from years ago.</li>
+    <li><strong>Forgiving</strong>: <code>lights</code> finds <em>lighting</em>, <code>cafe</code> finds <em>Café</em>, and small typos or partial names like <code>Portlnd</code> still find <em>Portland</em>. If a word doesn't appear anywhere, you'll get a <em>Did you mean</em> suggestion.</li>
+    <li><strong>Highlights</strong>: the words you searched for are highlighted in each result, with a snippet showing where they matched.</li>
+    <li><strong>Search syntax</strong>: use <code>"main stage"</code> for an exact phrase, <code>-cancelled</code> to leave a word out, and <code>marquee or tent</code> for either. IDs like <code>N01234</code> still jump straight to the top.</li>
+</ul>
+<p class="mt-2">The <a href="{% url 'search_help' %}" class="modal-href">search help</a> has the full details.</p>
+{% endchangelog_entry %}

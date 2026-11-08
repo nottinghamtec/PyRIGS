@@ -143,3 +143,30 @@ def test_other_assets_history_is_unaffected(admin_client, pat_asset, make_asset)
     upload(admin_client, b.sss_file(b.test_result()))
     content = admin_client.get(reverse("asset_history", kwargs={"pk": other.asset_id})).content.decode()
     assert "PAT test" not in content
+
+
+def test_uploads_are_a_readable_type_in_the_activity_filter(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()), "march.sss")
+    content = admin_client.get(reverse("assets_activity_table")).content.decode()
+    assert "Portable Appliance Test Upload" in content
+    assert "Pat Test Batch" not in content
+    filtered = admin_client.get(reverse("assets_activity_table"), {"model": "pattestbatch"})
+    assert "march.sss" in filtered.content.decode()
+
+
+def test_uploads_can_be_exported_with_the_recent_changes(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()), "march.sss")
+    response = admin_client.get(reverse("assets_activity_table"), {"export": "csv"})
+    body = b"".join(response.streaming_content).decode()
+    assert "Portable Appliance Test Upload" in body
+    assert "march.sss" in body
+
+
+def test_an_assets_history_is_a_timeline_that_includes_its_pat_results(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()), "march.sss")
+    response = admin_client.get(reverse("asset_history", kwargs={"pk": pat_asset.asset_id}))
+    content = response.content.decode()
+    assert response.context["timeline"] is True
+    assert "Timeline" in content
+    assert "PATTestRecord" in content
+    assert "Compare selected versions" in content
