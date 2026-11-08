@@ -2,6 +2,13 @@
 {% with rows=test.display_steps visual=test.display_visual_checks program=test.display_program %}
 <div class="pat-detail small {% if test.passed %}pat-ok{% elif test.passed is None %}pat-unknown{% else %}pat-bad{% endif %}">
 
+  {% if test.is_suppressed %}
+  <div class="alert alert-warning py-2 mb-3">
+    <div class="fw-bold mb-1"><span class="fas fa-ban"></span> Suppressed</div>
+    <div>By {{ test.suppressed_by.name|default:"someone who has since been removed" }} on {{ test.suppressed_at|date:"j M Y, H:i" }}: {{ test.suppressed_reason }}</div>
+    <div class="mt-1">It stays listed, but doesn't count towards this asset's PAT status.</div>
+  </div>
+  {% endif %}
   {% if test.failure_reasons %}
   <div class="alert alert-danger py-2 mb-3">
     <div class="fw-bold mb-1"><span class="fas fa-exclamation-triangle"></span> Why it failed</div>
@@ -60,6 +67,16 @@
     </tbody>
   </table>
   {% if test.has_limits %}<div class="text-body-secondary mb-2">Limits are the program's base limits. The tester can allow more for longer leads, so a reading above its limit can still pass.</div>{% endif %}
+  {% endif %}
+
+  {% if actions and perms.assets.change_pattestrecord %}
+  <div class="mt-3">
+    {% if test.is_suppressed %}
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'pat_result_restore' test.pk %}?next={{ request.get_full_path|urlencode }}"><span class="fas fa-undo"></span> Restore this result</a>
+    {% else %}
+    <a class="btn btn-sm btn-outline-danger" href="{% url 'pat_result_suppress' test.pk %}?next={{ request.get_full_path|urlencode }}"><span class="fas fa-ban"></span> Suppress this result</a>
+    {% endif %}
+  </div>
   {% endif %}
 
   <div class="text-body-secondary mt-3">

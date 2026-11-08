@@ -241,7 +241,7 @@ class Asset(models.Model, RevisionMixin):
 
     @property
     def latest_pat_test(self):
-        return self.pat_tests.order_by("-tested_at").first()
+        return self.pat_tests.counted().order_by("-tested_at").first()
 
     @property
     def pat_status(self):
@@ -300,6 +300,12 @@ class PATTestBatch(models.Model):
         return self.original_filename
 
 
+class PATTestRecordQuerySet(models.QuerySet):
+    def counted(self):
+        """The results that count towards an asset's status, which leaves out those that have been suppressed"""
+        return self.filter(suppressed_at__isnull=True)
+
+
 @reversion.register
 class PATTestRecord(models.Model):
     NOT_TESTED = "not_tested"
@@ -322,6 +328,14 @@ class PATTestRecord(models.Model):
     next_full_test_date = models.DateField(null=True, blank=True)
     next_visual_test_date = models.DateField(null=True, blank=True)
     details = models.JSONField(default=dict, blank=True)
+    # A result suppressed by hand, such as one entered against the wrong asset, stays listed but doesn't count
+    suppressed_at = models.DateTimeField(null=True, blank=True)
+    suppressed_by = models.ForeignKey(
+        Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name="suppressed_pat_results"
+    )
+    suppressed_reason = models.TextField(blank=True)
+
+    objects = PATTestRecordQuerySet.as_manager()
 
     reversion_hide = True
     reversion_timeline_field = "asset"
@@ -337,6 +351,10 @@ class PATTestRecord(models.Model):
 
     def get_absolute_url(self):
         return self.asset.get_absolute_url()
+
+    @property
+    def is_suppressed(self):
+        return self.suppressed_at is not None
 
     @classmethod
     def status_from(cls, tested_at, passed, next_full_test_date):

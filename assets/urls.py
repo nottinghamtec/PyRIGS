@@ -91,6 +91,16 @@ urlpatterns = [
         name="pat_batch_delete",
     ),
     path(
+        "pat/result/<int:pk>/suppress/",
+        permission_required_with_403("assets.change_pattestrecord")(views.PATResultSuppress.as_view()),
+        name="pat_result_suppress",
+    ),
+    path(
+        "pat/result/<int:pk>/restore/",
+        permission_required_with_403("assets.change_pattestrecord")(views.PATResultRestore.as_view()),
+        name="pat_result_restore",
+    ),
+    path(
         "pat/<int:pk>/download/",
         permission_required_with_403("assets.view_pattestbatch")(views.PATBatchDownload.as_view()),
         name="pat_batch_download",

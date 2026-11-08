@@ -1,23 +1,23 @@
 {# pass in "test", "colspan", and "show_asset" to add an asset column #}
 <tbody class="pat-result">
-  <tr class="pat-summary">
+  <tr class="pat-summary{% if test.is_suppressed %} pat-suppressed{% endif %}">
     <td class="text-center">
       <button type="button" class="btn btn-link btn-sm p-0 pat-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#pat-{{ test.pk }}" aria-expanded="false" aria-controls="pat-{{ test.pk }}" aria-label="Show all test data">
         <span class="fas fa-chevron-right pat-chevron"></span>
       </button>
     </td>
     {% if show_asset %}<td><a href="{% url 'asset_detail' test.asset.asset_id %}">{{ test.asset.asset_id }}</a></td>{% endif %}
-    <td>{% include 'partials/pat_result_badge.html' with passed=test.passed %}</td>
+    <td>{% include 'partials/pat_result_badge.html' with passed=test.passed suppressed=test.is_suppressed %}</td>
     <td>{{ test.tested_at|date:"d/m/Y H:i" }}</td>
     <td>{{ test.program|default:"-" }}</td>
     <td>{{ test.operator|default:"-" }}</td>
-    <td>{{ test.next_full_test_date|default_if_none:"-" }}</td>
+    <td><span class="pat-struck">{{ test.next_full_test_date|default_if_none:"-" }}</span></td>
     <td>{% include 'partials/pat_reasons.html' %}</td>
   </tr>
   <tr>
     <td colspan="{{ colspan }}" class="p-0 border-0">
       <div class="collapse" id="pat-{{ test.pk }}">
-        <div class="pat-detail-wrap">{% include 'partials/pat_test_details.html' %}</div>
+        <div class="pat-detail-wrap">{% include 'partials/pat_test_details.html' with actions=True %}</div>
       </div>
     </td>
   </tr>

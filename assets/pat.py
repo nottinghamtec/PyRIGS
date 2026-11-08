@@ -208,3 +208,27 @@ def delete_batch(batch, user, reason):
     batch.skip_deletion_record = True  # that revision is the record of it
     batch.delete()
     return len(records)
+
+
+@transaction.atomic
+def suppress_result(record, user, reason):
+    """Stop a result counting towards its asset's status, keeping it listed with who suppressed it and why"""
+    with reversion.create_revision():
+        reversion.set_user(user)
+        reversion.set_comment(f"Suppressed PAT result for {record.asset.asset_id}: {reason}")
+        record.suppressed_at = timezone.now()
+        record.suppressed_by = user
+        record.suppressed_reason = reason
+        record.save()
+
+
+@transaction.atomic
+def restore_result(record, user):
+    """Make a suppressed result count again"""
+    with reversion.create_revision():
+        reversion.set_user(user)
+        reversion.set_comment(f"Restored PAT result for {record.asset.asset_id}")
+        record.suppressed_at = None
+        record.suppressed_by = None
+        record.suppressed_reason = ""
+        record.save()

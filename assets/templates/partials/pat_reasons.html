@@ -1,3 +1,3 @@
-{% for reason in test.failure_reasons %}<div class="text-danger">{{ reason }}</div>{% endfor %}
+{% if test.is_suppressed %}<div class="small"><strong>Suppressed</strong> by {{ test.suppressed_by.name|default:"someone" }} on {{ test.suppressed_at|date:"j M Y" }}: {{ test.suppressed_reason }}</div>{% else %}{% for reason in test.failure_reasons %}<div class="text-danger">{{ reason }}</div>{% endfor %}{% endif %}
 {% for note in test.notes %}<div class="text-muted small">{{ note }}</div>{% endfor %}
-{% if not test.failure_reasons and not test.notes %}-{% endif %}
+{% if not test.is_suppressed and not test.failure_reasons and not test.notes %}-{% endif %}

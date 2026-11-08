@@ -3,6 +3,8 @@
   .pat-table { table-layout: fixed; }
   .pat-table td, .pat-table th { overflow-wrap: anywhere; }
   .pat-table tr.pat-summary { cursor: pointer; }
+  .pat-table tr.pat-suppressed > td { color: var(--bs-secondary-color); }
+  .pat-table tr.pat-suppressed .pat-struck { text-decoration: line-through; }
   .pat-chevron { display: inline-block; transition: transform .2s ease; }
   .pat-toggle[aria-expanded="true"] .pat-chevron { transform: rotate(90deg); }
   .pat-table tbody.pat-result:hover > tr.pat-summary > * { background-color: rgba(var(--bs-emphasis-color-rgb), .05); }

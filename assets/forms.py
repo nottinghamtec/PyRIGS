@@ -134,3 +134,15 @@ class PATBatchDeleteForm(forms.Form):
 
     def clean_reason(self):
         return " ".join(self.cleaned_data["reason"].split())
+
+
+class PATResultSuppressForm(forms.Form):
+    reason = forms.CharField(
+        max_length=500,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        help_text="This is kept in the asset's history, so say why this result shouldn't count, "
+        "such as which asset it really belongs to",
+    )
+
+    def clean_reason(self):
+        return " ".join(self.cleaned_data["reason"].split())

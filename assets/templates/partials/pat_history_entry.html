@@ -16,9 +16,12 @@
     {% include 'partials/pat_result_badge.html' with passed=test.passed %}
     {{ test.details.program }}, tested {{ test.tested_at|date:"j M Y, H:i" }} by {{ test.operator|default:"-" }}
     {% if old %}
-      {% if version.revision.comment|slice:":9" == "Refreshed" %}<span class="badge text-bg-info">Re-read from the file</span>
+      {% if test.is_suppressed and not old.is_suppressed %}<span class="badge text-bg-secondary"><span class="fas fa-ban"></span> Suppressed</span>
+      {% elif old.is_suppressed and not test.is_suppressed %}<span class="badge text-bg-info">Restored</span>
+      {% elif version.revision.comment|slice:":9" == "Refreshed" %}<span class="badge text-bg-info">Re-read from the file</span>
       {% else %}<span class="badge text-bg-warning">Replaced the earlier {% if old.passed %}pass{% elif old.passed is None %}result{% else %}fail{% endif %}</span>{% endif %}
     {% endif %}
+    {% if test.is_suppressed %}<div class="small text-body-secondary">Suppressed by {{ test.suppressed_by.name|default:"someone" }}: {{ test.suppressed_reason }}</div>{% endif %}
     {% for reason in test.failure_reasons %}<div class="text-danger small">{{ reason }}</div>{% endfor %}
   </div>
 </div>

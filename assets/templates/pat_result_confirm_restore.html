@@ -1,0 +1,23 @@
+{% extends 'base_assets.html' %}
+
+{% block content %}
+<div class="alert alert-warning" role="alert">
+  <h2>Restore a suppressed PAT result on {{ asset.asset_id }}</h2>
+  <p>This makes the result count towards the asset's PAT status again. The suppression stays in the asset's history.</p>
+  <dl class="row mb-2">
+    <dt class="col-sm-2">Asset</dt><dd class="col-sm-10"><a href="{% url 'asset_detail' asset.asset_id %}">{{ asset }}</a></dd>
+    <dt class="col-sm-2">Result</dt><dd class="col-sm-10">{% include 'partials/pat_result_badge.html' with passed=record.passed %} {{ record.program|default:"-" }}, tested {{ record.tested_at|date:"j M Y, H:i" }} by {{ record.operator|default:"-" }}</dd>
+    <dt class="col-sm-2">Suppressed</dt><dd class="col-sm-10">By {{ record.suppressed_by.name|default:"someone" }} on {{ record.suppressed_at|date:"j M Y, H:i" }}: {{ record.suppressed_reason }}</dd>
+    <dt class="col-sm-2">Status</dt><dd class="col-sm-10">{{ asset.asset_id }} shows as <strong>{{ current_status }}</strong> now, and would show as <strong>{{ status_after }}</strong>.</dd>
+  </dl>
+  <hr>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="text-end">
+      <button type="submit" class="btn btn-warning"><span class="fas fa-undo"></span> Restore result</button>
+      <a href="{{ next }}" class="btn btn-success">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

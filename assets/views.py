@@ -10,6 +10,7 @@ from django.db.models import Exists, F, OuterRef, Q, Subquery, Sum
 from django.http import FileResponse, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import get_template
@@ -34,7 +35,7 @@ from assets.sss import SSSParseError
 
 
 def latest_pat(field):
-    latest = models.PATTestRecord.objects.filter(asset=OuterRef("pk")).order_by("-tested_at")
+    latest = models.PATTestRecord.objects.counted().filter(asset=OuterRef("pk")).order_by("-tested_at")
     return Subquery(latest.values(field)[:1])
 
 
@@ -242,7 +243,7 @@ class AssetDetail(LoginRequiredMixin, AssetIDUrlMixin, generic.DetailView):
         context["page_title"] = f"Asset {self.object.display_id}"
         pat_tests = list(self.object.pat_tests.all()[:5])
         context["pat_tests"] = pat_tests
-        context["pat_status"] = models.PATTestRecord.status_for(pat_tests[0] if pat_tests else None)
+        context["pat_status"] = models.PATTestRecord.status_for(self.object.latest_pat_test)
         context["pat_status_label"] = models.PATTestRecord.STATUS_LABELS[context["pat_status"]]
         return context
 
@@ -701,7 +702,7 @@ class PATBatchDelete(generic.FormView):
         records = self.batch.records.all()
         affected = models.Asset.objects.filter(pat_tests__batch=self.batch).distinct()
         # assets with results from other uploads go back to their latest remaining result; these would have none
-        untested = affected.exclude(pat_tests__in=models.PATTestRecord.objects.exclude(batch=self.batch))
+        untested = affected.exclude(pat_tests__in=models.PATTestRecord.objects.counted().exclude(batch=self.batch))
         context.update(
             {
                 "page_title": f"Delete PAT upload {self.batch.original_filename}",
@@ -720,3 +721,98 @@ class PATBatchDelete(generic.FormView):
         count = pat.delete_batch(self.batch, self.request.user, form.cleaned_data["reason"])
         messages.success(self.request, f"Deleted {name} and its {count} results")
         return redirect("pat_batch_list")
+
+
+class PATResultMixin:
+    """Shared by the pages that suppress or restore a single PAT result"""
+
+    def dispatch(self, request, *args, **kwargs):
+        self.record = get_object_or_404(models.PATTestRecord.objects.select_related("asset", "batch"), pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    @property
+    def asset_url(self):
+        return reverse("asset_detail", kwargs={"pk": self.record.asset.asset_id})
+
+    def next_url(self):
+        target = self.request.POST.get("next") or self.request.GET.get("next") or ""
+        safe = url_has_allowed_host_and_scheme(
+            target, allowed_hosts={self.request.get_host()}, require_https=self.request.is_secure()
+        )
+        return target if safe else self.asset_url
+
+    def status_label(self, record):
+        return models.PATTestRecord.STATUS_LABELS[models.PATTestRecord.status_for(record)]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "record": self.record,
+                "asset": self.record.asset,
+                "next": self.next_url(),
+                "current_status": models.PATTestRecord.STATUS_LABELS[self.record.asset.pat_status],
+            }
+        )
+        return context
+
+
+class PATResultSuppress(PATResultMixin, generic.FormView):
+    template_name = "pat_result_confirm_suppress.html"
+    form_class = forms.PATResultSuppressForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        remaining = self.record.asset.pat_tests.counted().exclude(pk=self.record.pk).order_by("-tested_at").first()
+        context["status_after"] = self.status_label(remaining)
+        context["page_title"] = f"Suppress PAT result on {self.record.asset.asset_id}"
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.record.is_suppressed:
+            messages.info(request, "That result is already suppressed")
+            return redirect(self.next_url())
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if self.record.is_suppressed:
+            messages.info(request, "That result is already suppressed")
+            return redirect(self.next_url())
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        pat.suppress_result(self.record, self.request.user, form.cleaned_data["reason"])
+        messages.success(
+            self.request,
+            f"Suppressed the PAT result from {timezone.localtime(self.record.tested_at):%d/%m/%Y} on {self.record.asset.asset_id}",
+        )
+        return redirect(self.next_url())
+
+
+class PATResultRestore(PATResultMixin, generic.TemplateView):
+    template_name = "pat_result_confirm_restore.html"
+
+    def get(self, request, *args, **kwargs):
+        if not self.record.is_suppressed:
+            messages.info(request, "That result isn't suppressed")
+            return redirect(self.next_url())
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        latest = self.record.asset.latest_pat_test
+        newest = self.record if latest is None or self.record.tested_at > latest.tested_at else latest
+        context["status_after"] = self.status_label(newest)
+        context["page_title"] = f"Restore PAT result on {self.record.asset.asset_id}"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not self.record.is_suppressed:
+            messages.info(request, "That result isn't suppressed")
+            return redirect(self.next_url())
+        pat.restore_result(self.record, request.user)
+        messages.success(
+            request,
+            f"Restored the PAT result from {timezone.localtime(self.record.tested_at):%d/%m/%Y} on {self.record.asset.asset_id}",
+        )
+        return redirect(self.next_url())
