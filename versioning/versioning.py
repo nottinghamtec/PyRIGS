@@ -486,29 +486,44 @@ def revision_committed(sender=None, versions=(), **kwargs):
         on_commit(bump_activity_feed_version)
 
 
-def record_deletion(obj):
-    """Keep a version of an object that is about to be deleted, as reversion only saves versions of objects that exist"""
-    model = obj.__class__
-    options = _get_options(model)
-    label = f"{obj._meta.verbose_name} {obj}"
+def record_deletions(objects, label, user=None):
+    """
+    Keep a version of each of some objects that are about to be deleted, in one revision, as reversion only saves
+    versions of objects that exist. The revision is called "Deleted <label>".
+    """
     revision = Revision.objects.create(
         date_created=timezone.now(),
-        user=reversion.get_user() if reversion.is_active() else None,
+        user=user or (reversion.get_user() if reversion.is_active() else None),
         comment=f"Deleted {label}",
     )
-    Version.objects.create(
-        revision=revision,
-        object_id=str(getattr(obj, options.object_id_field)),
-        content_type=_get_content_type(model, "default"),
-        db=obj._state.db or "default",
-        format=options.format,
-        serialized_data=serializers.serialize(
-            options.format, (obj,), fields=options.fields, use_natural_foreign_keys=options.use_natural_foreign_keys
-        ),
-        object_repr=str(obj),
-    )
+    versions = []
+    for obj in objects:
+        model = obj.__class__
+        options = _get_options(model)
+        versions.append(
+            Version(
+                revision=revision,
+                object_id=str(getattr(obj, options.object_id_field)),
+                content_type=_get_content_type(model, "default"),
+                db=obj._state.db or "default",
+                format=options.format,
+                serialized_data=serializers.serialize(
+                    options.format,
+                    (obj,),
+                    fields=options.fields,
+                    use_natural_foreign_keys=options.use_natural_foreign_keys,
+                ),
+                object_repr=str(obj),
+            )
+        )
+    Version.objects.bulk_create(versions)
     RevisionAction.objects.create(revision=revision, kind=RevisionAction.DELETED, name=label)
     on_commit(bump_activity_feed_version)
+
+
+def record_deletion(obj):
+    """Keep a version of an object that is about to be deleted, as reversion only saves versions of objects that exist"""
+    record_deletions([obj], f"{obj._meta.verbose_name} {obj}")
 
 
 def record_deleted_object(sender, instance, **kwargs):

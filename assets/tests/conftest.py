@@ -87,3 +87,34 @@ def test_supplier(db):
     supplier, created = models.Supplier.objects.get_or_create(name="Fullmetal Heavy Industry")
     yield supplier
     supplier.delete()
+
+
+@pytest.fixture(autouse=True)
+def local_media_storage(settings, tmp_path):
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    }
+    settings.MEDIA_ROOT = str(tmp_path)
+
+
+@pytest.fixture
+def make_asset(category, status):
+    def make(asset_id, **kwargs):
+        defaults = {
+            "description": f"Asset {asset_id}",
+            "category": category,
+            "status": status,
+            "date_acquired": datetime.date(2020, 1, 1),
+            "replacement_cost": 10,
+        }
+        return models.Asset.objects.create(asset_id=asset_id, **{**defaults, **kwargs})
+
+    return make
+
+
+@pytest.fixture
+def pat_asset(test_asset):
+    test_asset.asset_id = "4334"
+    test_asset.save()
+    return test_asset

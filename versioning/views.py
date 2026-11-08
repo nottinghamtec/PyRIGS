@@ -129,13 +129,17 @@ class VersionHistory(HistoryObjectMixin, generic.ListView):
     def get_queryset(self, **kwargs):
         versions = self.object_versions()
         if self.timeline_models:
-            versions = RIGSVersion.objects.filter(
-                Q(pk__in=versions.values("pk"))
-                | Q(
-                    content_type__in=[ContentType.objects.get_for_model(model) for model in self.timeline_models],
-                    serialized_data__regex=rf'"event": {self.history_object.pk}[,}}]',
+            # Each related model says which of its fields points at this object, "event" unless it says otherwise
+            related = Q(pk__in=versions.values("pk"))
+            for model in self.timeline_models:
+                field = getattr(model, "reversion_timeline_field", "event")
+                related |= Q(
+                    content_type=ContentType.objects.get_for_model(model),
+                    serialized_data__regex=rf'"{field}": {self.history_object.pk}[,}}]',
                 )
-            ).select_related("revision", "revision__user", "revision__action")
+            versions = RIGSVersion.objects.filter(related).select_related(
+                "revision", "revision__user", "revision__action"
+            )
         return versions.order_by("-revision__date_created", "-pk")
 
     def get_context_data(self, **kwargs):
@@ -144,6 +148,10 @@ class VersionHistory(HistoryObjectMixin, generic.ListView):
         for version in context["object_list"]:
             version.is_own = version._model is self.history_model
         context["timeline"] = bool(self.timeline_models)
+        context["expandable_rows"] = any(
+            getattr(model, "reversion_expandable", False) for model in self.timeline_models
+        )
+        context["history_columns"] = 4 + (2 if self.url_name("compare") else 0) + (1 if context["timeline"] else 0)
         context["version_url_name"] = self.version_url_name
         context["compare_url_name"] = self.url_name("compare")
         return context

@@ -115,3 +115,40 @@ def test_quick_jump_keys_match_the_viewers_device(admin_client, user_agent, alt)
     assert f'data-alt="{alt}"' in content
     assert f"<kbd>{alt}</kbd> <kbd>1</kbd>–<kbd>9</kbd> jump" in content
     assert f"press <kbd>{alt}</kbd> and a number" in content
+
+
+def test_pat_commands_follow_permissions(basic_user):
+    titles = titles_for(basic_user)
+    assert {"PAT Uploads", "Assets Needing PAT"} <= titles
+    assert "Upload PAT Results" not in titles
+    basic_user.user_permissions.add(Permission.objects.get(codename="add_pattestbatch"))
+    assert "Upload PAT Results" in titles_for(models.Profile.objects.get(pk=basic_user.pk))
+
+
+def test_assets_needing_pat_opens_the_filtered_list(admin_client, admin_user):
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    command = next(command for command in commands_for(request) if command["title"] == "Assets Needing PAT")
+    assert command["url"] == f"{reverse('asset_list')}?pat_status=needs"
+    response = admin_client.get(command["url"])
+    assert response.status_code == 200
+    assert response.context["form"].cleaned_data["pat_status"] == "needs"
+
+
+def test_commands_without_a_query_have_plain_urls(admin_user):
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    urls = {command["title"]: command["url"] for command in commands_for(request)}
+    assert urls["PAT Uploads"] == reverse("pat_batch_list")
+    assert "?" not in urls["Asset List"]
+
+
+def test_the_home_page_links_to_pat(admin_client, client, basic_user):
+    content = admin_client.get(reverse("index")).content.decode()
+    assert reverse("pat_batch_list") in content
+    assert f"{reverse('asset_list')}?pat_status=needs" in content
+    assert f'href="{reverse("pat_upload")}"' in content
+    client.force_login(basic_user)
+    content = client.get(reverse("index")).content.decode()
+    assert "You need permission to upload PAT results" in content
+    assert f'href="{reverse("pat_upload")}"' not in content

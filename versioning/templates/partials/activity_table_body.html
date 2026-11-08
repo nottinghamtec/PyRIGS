@@ -27,6 +27,8 @@
                     {% elif version.changes.new|to_class_name == "EventAuthorisation" %}
                         {% if version.changes.old == None %}Authorised{% else %}Reauthorised{% endif %} for £{{ version.changes.new.amount }} by {{ version.changes.new.name }}
                         {% if version.changes.old != None %}{% include 'partials/version_changes.html' %}{% endif %}
+                    {% elif version.changes.new|to_class_name == "PATTestBatch" %}
+                        {% if version.changes.old == None %}Uploaded PAT results{% else %}Updated PAT results{% endif %}{% if version.object_exists %} ({{ version.changes.new.records.count }} imported){% else %} (since deleted){% endif %}
                     {% elif version.changes.old == None %}
                         Created {{version.changes.new|to_class_name}}
                     {% else %}

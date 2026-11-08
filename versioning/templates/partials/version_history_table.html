@@ -1,7 +1,14 @@
 {% load to_class_name from filters %}
+{% if expandable_rows %}{% include 'partials/pat_styles.html' %}{% endif %}
 {% if compare_url_name %}<form method="get" action="{% url compare_url_name pk=history_pk %}">{% endif %}
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table {% if expandable_rows %}table-hover pat-table{% else %}table-striped{% endif %}">
+        {% if expandable_rows %}
+        <colgroup>
+            {% if compare_url_name %}<col style="width: 2.25rem"><col style="width: 2.25rem">{% endif %}
+            <col style="width: 12rem"><col style="width: 9rem">{% if timeline %}<col style="width: 9rem">{% endif %}<col style="width: 10rem"><col>
+        </colgroup>
+        {% endif %}
         <thead class="table-dark">
         <tr>
             {% if compare_url_name %}<th scope="col" colspan="2">Compare</th>{% endif %}
@@ -12,9 +19,10 @@
             <th scope="col">Changes</th>
         </tr>
         </thead>
-        <tbody>
+        {% if not expandable_rows %}<tbody>{% endif %}
         {% for version in object_list %}
-            <tr>
+            {% if expandable_rows %}<tbody class="pat-result">{% endif %}
+            <tr{% if expandable_rows and version.changes.new|to_class_name == "PATTestRecord" and not version.deleted_name %} class="pat-summary"{% endif %}>
                 {% if compare_url_name %}
                 {% if version.is_own %}
                 <td><input class="form-check-input" type="radio" name="from" value="{{ version.pk }}" aria-label="Compare from version {{ version.pk }}" {% if forloop.counter == 2 %}checked{% endif %}></td>
@@ -28,18 +36,32 @@
                 {% if timeline %}<td>{% if version.object_url %}<a href="{{ version.object_url }}">{{ version.changes.new|to_class_name }}</a>{% else %}{{ version.changes.new|to_class_name }}{% endif %}</td>{% endif %}
                 <td>{{ version.revision.user.name|default:'System' }}</td>
                 <td>
-                    {% if version.deleted_name %}
-                        Deleted {{ version.deleted_name }}
-                    {% elif version.changes.old is None %}
-                        {{ version.changes.new|to_class_name }} Created
+                    {% if version.changes.new|to_class_name == "PATTestRecord" %}
+                        {% include 'partials/pat_history_entry.html' with test=version.changes.new old=version.changes.old %}
                     {% else %}
-                        {% include 'partials/version_changes.html' %}
+                        {% if version.deleted_name %}
+                            Deleted {{ version.deleted_name }}
+                        {% elif version.changes.old is None %}
+                            {{ version.changes.new|to_class_name }} Created
+                        {% else %}
+                            {% include 'partials/version_changes.html' %}
+                        {% endif %}
+                        {% include 'partials/version_notes.html' %}
                     {% endif %}
-                    {% include 'partials/version_notes.html' %}
                 </td>
             </tr>
+            {% if expandable_rows and version.changes.new|to_class_name == "PATTestRecord" and not version.deleted_name %}
+            <tr>
+                <td colspan="{{ history_columns }}" class="p-0 border-0">
+                    <div class="collapse" id="pat-v{{ version.pk }}">
+                        <div class="pat-detail-wrap">{% include 'partials/pat_test_details.html' with test=version.changes.new %}</div>
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+            {% if expandable_rows %}</tbody>{% endif %}
         {% endfor %}
-        </tbody>
+        {% if not expandable_rows %}</tbody>{% endif %}
     </table>
 </div>
 {% if compare_url_name %}<button type="submit" class="btn btn-outline-secondary mb-3">Compare selected versions</button></form>{% endif %}

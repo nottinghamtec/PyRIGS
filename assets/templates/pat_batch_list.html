@@ -1,0 +1,33 @@
+{% extends 'base_assets.html' %}
+{% load paginator from filters %}
+
+{% block content %}
+<div class="row my-2">
+  <div class="col text-end pe-0">
+    {% if perms.assets.add_pattestbatch %}
+    <a class="btn btn-success" href="{% url 'pat_upload' %}"><span class="fas fa-upload"></span> Upload Results</a>
+    {% endif %}
+  </div>
+</div>
+<div class="row">
+  <table class="table table-striped">
+    <thead>
+      <tr><th>File</th><th>Tester</th><th>Uploaded</th><th>By</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for batch in object_list %}
+      <tr>
+        <td>{{ batch.original_filename }}</td>
+        <td>{{ batch.machine_model }} {{ batch.machine_serial }}</td>
+        <td>{{ batch.uploaded_at }}</td>
+        <td>{{ batch.uploaded_by|default:"-" }}</td>
+        <td><a href="{% url 'pat_batch_detail' batch.pk %}" class="btn btn-primary"><span class="fas fa-eye"></span> View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No PAT results have been uploaded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if is_paginated %}<div class="text-center">{% paginator %}</div>{% endif %}
+{% endblock %}

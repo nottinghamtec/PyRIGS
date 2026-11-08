@@ -15,98 +15,10 @@
     <script src="{% static 'js/selects.js' %}"></script>
 {% endblock %}
 
-{% block js %}
-    {{ block.super }}
-    <script>
-        //Get querystring value
-        function getParameterByName(name) {
-            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(location.search);
-            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-        }
-        //Function used to remove querystring
-        function removeQString(key) {
-	        var urlValue=document.location.href;
-
-	        //Get query string value
-	        var searchUrl=location.search;
-
-	        if(key!=="") {
-		        oldValue = getParameterByName(key);
-		        removeVal=key+"="+oldValue;
-		        if(searchUrl.indexOf('?'+removeVal+'&')!== "-1") {
-			        urlValue=urlValue.replace('?'+removeVal+'&','?');
-		        }
-		        else if(searchUrl.indexOf('&'+removeVal+'&')!== "-1") {
-			        urlValue=urlValue.replace('&'+removeVal+'&','&');
-		        }
-		        else if(searchUrl.indexOf('?'+removeVal)!== "-1") {
-			        urlValue=urlValue.replace('?'+removeVal,'');
-		        }
-		        else if(searchUrl.indexOf('&'+removeVal)!== "-1") {
-			        urlValue=urlValue.replace('&'+removeVal,'');
-		        }
-	        }
-	        else {
-		        var searchUrl=location.search;
-		        urlValue=urlValue.replace(searchUrl,'');
-	        }
-	        history.pushState({state:1, rand: Math.random()}, '', urlValue);
-            window.location.reload(true);
-        }
-    </script>
-{% endblock %}
-
 {% block content %}
 <div class="row">
     <div class="col px-0">
-        <form id="asset-search-form" method="GET">
-            <div class="row g-2">
-                <div class="col">
-                    <div class="input-group px-1 mb-2 mb-sm-0 flex-nowrap">
-                        {% render_field form.q|add_class:'form-control' placeholder='Enter Asset ID/Desc/Serial' %}
-                        <label for="q" class="visually-hidden">Asset ID/Description/Serial Number:</label>
-                        {% button 'search' id="id_search" %}
-                    </div>
-                </div>
-            </div>
-            <div class="row g-2 mt-2">
-                <div class="col">
-                    <div id="category-group" class="mb-3 px-1" style="margin-bottom: 0;">
-                        <label for="category" class="visually-hidden">Category</label>
-                        {% render_field form.category|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Categories" data-header="Categories" data-actions-box="true" %}
-                    </div>
-                </div>
-                <div class="col">
-                    <div id="status-group" class="mb-3 px-1" style="margin-bottom: 0;">
-                        <label for="status" class="visually-hidden">Status</label>
-                        {% render_field form.status|attr:'multiple'|add_class:'ts-select col-sm' data-none-selected-text="Statuses" data-header="Statuses" data-actions-box="true" %}
-                    </div>
-                </div>
-                <div class="col">
-                    <div id="audit-status-group" class="mb-3 px-1" style="margin-bottom: 0;">
-                        <label for="id_audit_status" class="visually-hidden">Audit status</label>
-                        {% render_field form.audit_status|add_class:'form-select' %}
-                    </div>
-                </div>
-                <div class="col mt-2">
-                    <div class="form-check form-check-inline">
-                      {% render_field form.is_cable|add_class:'form-check-input' %}
-                      <label class="form-check-label" for="is_cable">Only Cables?</label>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="mb-3 d-flex flex-nowrap">
-                        <label for="date_acquired" class="text-nowrap mt-auto">Date Acquired</label>
-                        {% render_field form.date_acquired|add_class:'form-control mx-2' %}
-                    </div>
-                </div>
-                <div class="col-auto me-auto">
-                      <button id="filter-submit" type="submit" class="btn btn-secondary" style="width: 6em">Filter</button>
-                </div>
-            </div>
-        </form>
+        {% include 'partials/asset_filters.html' %}
     </div>
 </div>
 <div class="row my-2">
@@ -117,16 +29,7 @@
     {% endif %}
     </div>
 </div>
-<div class="row my-2">
-    <div class="col bg-dark text-white rounded pt-3">
-        {# TODO Gotta be a cleaner way to do this... #}
-        <p><span class="ms-2">Active Filters: </span> {% for filter in category_filters %}<span class="badge text-bg-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ms-1 align-baseline">
-  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('category', '{{filter.id}}')"></span>
-</button></span>{%endfor%}{% for filter in status_filters %}<span class="badge text-bg-info mx-1 ">{{filter}}<button type="button" class="btn btn-link p-0 ms-1 align-baseline">
-  <span aria-hidden="true" class="fas fa-times" onclick="removeQString('status', '{{filter.id}}')"></span>
-</button></span>{%endfor%}</p>
-    </div>
-</div>
+{% include 'partials/active_filters.html' %}
 <h3>{{ object_list.count }} assets</h3>
 <div class="row">
     <div class="col px-0">

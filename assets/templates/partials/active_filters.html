@@ -1,0 +1,12 @@
+{% if active_filters %}
+<div class="row my-2">
+    <div class="col bg-dark text-white rounded py-2">
+        <span class="ms-2">Active filters:</span>
+        {% for chip in active_filters %}
+        <span class="badge text-bg-info mx-1">{{ chip.label }}
+            <a href="{{ chip.url }}" class="text-reset ms-1" aria-label="Remove filter {{ chip.label }}"><span aria-hidden="true" class="fas fa-times"></span></a>
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

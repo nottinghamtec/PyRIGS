@@ -7,8 +7,8 @@
 {% load cache %}
 
 {% block content %}
-{# The fragment is cached for an hour (in the database in production), so bump the "bs14" suffix whenever its markup changes (new revisions change feed_version) #}
-{% cache 3600 feed_data_bs14 feed_audience feed_version feed_before %}
+{# The fragment is cached for an hour (in the database in production), so bump the "bs15" suffix whenever its markup changes (new revisions change feed_version) #}
+{% cache 3600 feed_data_bs15 feed_audience feed_version feed_before %}
 {% with feed=build_feed %}
 {% for group in feed.groups %}
 <div class="list-group-item" data-activity-time="{{ group.revision.date_created|date:"c" }}" data-activity-user="{{ group.revision.user_id|default:"" }}">

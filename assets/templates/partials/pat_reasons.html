@@ -1,0 +1,3 @@
+{% for reason in test.failure_reasons %}<div class="text-danger">{{ reason }}</div>{% endfor %}
+{% for note in test.notes %}<div class="text-muted small">{{ note }}</div>{% endfor %}
+{% if not test.failure_reasons and not test.notes %}-{% endif %}
