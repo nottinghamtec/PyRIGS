@@ -125,7 +125,8 @@ ACCESS_LOG_DAYS = env("ACCESS_LOG_DAYS", cast=int, default=30)
 ACCESS_LOG_FIELDS = [
     field.strip()
     for field in env(
-        "ACCESS_LOG_FIELDS", default="time,ip,user_id,username,method,path,status,duration_ms,bytes"
+        "ACCESS_LOG_FIELDS",
+        default="time,ip,user_id,username,method,host,path,view,status,duration_ms,bytes,referer,http_version",
     ).split(",")
     if field.strip()
 ]
