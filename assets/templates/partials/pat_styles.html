@@ -1,7 +1,7 @@
 {# include once per page that shows PAT results #}
 <style>
   .pat-table { table-layout: fixed; }
-  .pat-table td, .pat-table th { overflow-wrap: anywhere; }
+  .pat-table td, .pat-table th { overflow-wrap: break-word; }
   .pat-table tr.pat-summary { cursor: pointer; }
   .pat-table tr.pat-suppressed > td { color: var(--bs-secondary-color); }
   .pat-table tr.pat-suppressed .pat-struck { text-decoration: line-through; }
@@ -19,6 +19,20 @@
   .pat-detail .pat-label { font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--bs-secondary-color); margin-bottom: .25rem; }
   .pat-detail .pat-chip { display: inline-block; margin: 0 .35rem .35rem 0; padding: .15rem .55rem; border: 1px solid var(--bs-border-color); border-radius: 1rem; background-color: rgba(var(--bs-emphasis-color-rgb), .05); }
   .pat-detail .pat-chip.pat-prompt { border-style: dashed; color: var(--bs-secondary-color); }
+  /* Below the large breakpoint there isn't room for fixed columns, so each result becomes a wrapped line of its key
+     fields with the details on a line of its own, and the fields the expanded panel repeats are left out */
+  @media (max-width: 991.98px) {
+    .pat-table, .pat-table tbody, .pat-table tr, .pat-table td, .pat-table th { display: block; }
+    .pat-table colgroup, .pat-table thead, .pat-table .pat-hide-lg { display: none; }
+    .pat-table tbody { border-bottom: 1px solid var(--bs-border-color); }
+    .pat-table tr > td, .pat-table tr > th { padding: .1rem .75rem; border: 0; }
+    .pat-table tr.pat-summary { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .75rem; row-gap: .15rem; padding: .6rem .25rem; }
+    .pat-table tr.pat-summary > td, .pat-table tr.pat-summary > th { padding: 0; }
+    .pat-table tr.pat-summary > .pat-details-cell { flex: 1 0 100%; }
+    .pat-table td.p-0 { padding: 0; }
+    .pat-detail-wrap { padding: .25rem .25rem 1rem .25rem; }
+    .pat-detail { padding: .75rem; }
+  }
   @media (prefers-reduced-motion: reduce) { .pat-chevron { transition: none; } }
 </style>
 <script>

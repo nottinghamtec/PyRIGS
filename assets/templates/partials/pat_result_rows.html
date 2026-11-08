@@ -9,10 +9,10 @@
     {% if show_asset %}<td><a href="{% url 'asset_detail' test.asset.asset_id %}">{{ test.asset.asset_id }}</a></td>{% endif %}
     <td>{% include 'partials/pat_result_badge.html' with passed=test.passed suppressed=test.is_suppressed %}</td>
     <td>{{ test.tested_at|date:"d/m/Y H:i" }}</td>
-    <td>{{ test.program|default:"-" }}</td>
-    <td>{{ test.operator|default:"-" }}</td>
-    <td><span class="pat-struck">{{ test.next_full_test_date|default_if_none:"-" }}</span></td>
-    <td>{% include 'partials/pat_reasons.html' %}</td>
+    <td class="pat-hide-lg">{{ test.program|default:"-" }}</td>
+    <td class="pat-hide-lg">{{ test.operator|default:"-" }}</td>
+    <td class="pat-hide-lg"><span class="pat-struck">{{ test.next_full_test_date|default_if_none:"-" }}</span></td>
+    <td class="pat-details-cell">{% include 'partials/pat_reasons.html' %}</td>
   </tr>
   <tr>
     <td colspan="{{ colspan }}" class="p-0 border-0">

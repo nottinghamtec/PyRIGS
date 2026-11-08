@@ -565,3 +565,46 @@ def test_a_result_with_no_verdict_sorts_with_the_passes(admin_client, pat_asset)
     models.PATTestRecord.objects.filter(tested_at__day=1).update(passed=None)
     batch = models.PATTestBatch.objects.get()
     assert order_of(admin_client, batch) == [(False, False, 2), (None, False, 1)]
+
+
+def test_the_results_table_stacks_on_narrow_screens_instead_of_squeezing(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result(comments="A long comment about this test " * 6)))
+    batch = models.PATTestBatch.objects.get()
+    content = admin_client.get(reverse("pat_batch_detail", kwargs={"pk": batch.pk})).content.decode()
+    # words wrap at word boundaries, not between letters
+    assert "overflow-wrap: anywhere" not in content
+    assert "overflow-wrap: break-word" in content
+    # below the large breakpoint rows stack, and the columns the expanded panel repeats are dropped
+    assert "@media (max-width: 991.98px)" in content
+    assert ".pat-table .pat-hide-lg { display: none; }" in content.replace("colgroup, .pat-table thead, ", "")
+    assert content.count('<td class="pat-hide-lg">') == 3  # program, operator, next full test in the one row
+    assert content.count('<th class="pat-hide-lg">') == 3
+    assert content.count('<col class="pat-hide-lg"') == 3
+    assert 'class="pat-details-cell"' in content
+
+
+def test_the_asset_page_table_stacks_the_same_way(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()))
+    content = admin_client.get(reverse("asset_detail", kwargs={"pk": pat_asset.asset_id})).content.decode()
+    assert content.count('<th class="pat-hide-lg">') == 3
+    assert 'class="pat-details-cell"' in content
+
+
+def test_the_history_table_drops_its_id_columns_on_narrow_screens(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()))
+    content = admin_client.get(reverse("asset_history", kwargs={"pk": pat_asset.asset_id})).content.decode()
+    assert 'class="pat-hide-lg"' in content
+    assert 'class="pat-details-cell"' in content
+
+
+def test_the_expanded_readings_scroll_sideways_rather_than_squeeze(admin_client, pat_asset):
+    upload(admin_client, b.sss_file(b.test_result()))
+    content = admin_client.get(reverse("asset_detail", kwargs={"pk": pat_asset.asset_id})).content.decode()
+    assert '<div class="table-responsive">\n  <table class="table table-sm align-middle mb-1">' in content
+
+
+def test_other_histories_are_untouched_by_the_narrow_screen_rules(admin_client):
+    supplier = models.Supplier.objects.create(name="Gadgetron")
+    content = admin_client.get(reverse("supplier_history", kwargs={"pk": supplier.pk})).content.decode()
+    assert "pat-hide-lg" not in content
+    assert "table-striped" in content

@@ -47,6 +47,7 @@
 
   {% if rows %}
   <div class="pat-label">Electrical tests</div>
+  <div class="table-responsive">
   <table class="table table-sm align-middle mb-1">
     <thead><tr><th>Test</th><th>Reading</th><th>Limit</th><th class="text-end">Result</th></tr></thead>
     <tbody>
@@ -66,6 +67,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% if test.has_limits %}<div class="text-body-secondary mb-2">Limits are the program's base limits. The tester can allow more for longer leads, so a reading above its limit can still pass.</div>{% endif %}
   {% endif %}
 

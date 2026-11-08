@@ -8,10 +8,10 @@
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0 pat-table">
       <colgroup>
-        <col style="width: 2.75rem"><col style="width: 6.5rem"><col style="width: 9rem"><col style="width: 12rem"><col style="width: 6rem"><col style="width: 7rem"><col>
+        <col style="width: 2.75rem"><col style="width: 6.5rem"><col style="width: 9rem"><col class="pat-hide-lg" style="width: 12rem"><col class="pat-hide-lg" style="width: 6rem"><col class="pat-hide-lg" style="width: 7rem"><col>
       </colgroup>
       <thead>
-        <tr><th></th><th>Result</th><th>Tested</th><th>Program</th><th>Operator</th><th>Next full test</th><th>Details</th></tr>
+        <tr><th></th><th>Result</th><th>Tested</th><th class="pat-hide-lg">Program</th><th class="pat-hide-lg">Operator</th><th class="pat-hide-lg">Next full test</th><th>Details</th></tr>
       </thead>
       {% for test in pat_tests %}
         {% include 'partials/pat_result_rows.html' with test=test colspan=7 %}

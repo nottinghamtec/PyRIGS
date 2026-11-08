@@ -6,15 +6,15 @@
         {% if expandable_rows %}
         <colgroup>
             {% if compare_url_name %}<col style="width: 2.25rem"><col style="width: 2.25rem">{% endif %}
-            <col style="width: 12rem"><col style="width: 9rem">{% if timeline %}<col style="width: 9rem">{% endif %}<col style="width: 10rem"><col>
+            <col style="width: 12rem"><col class="pat-hide-lg" style="width: 9rem">{% if timeline %}<col class="pat-hide-lg" style="width: 9rem">{% endif %}<col style="width: 10rem"><col>
         </colgroup>
         {% endif %}
         <thead class="table-dark">
         <tr>
             {% if compare_url_name %}<th scope="col" colspan="2">Compare</th>{% endif %}
             <th scope="col">Date</th>
-            <th scope="col">Version ID</th>
-            {% if timeline %}<th scope="col">Object</th>{% endif %}
+            <th scope="col"{% if expandable_rows %} class="pat-hide-lg"{% endif %}>Version ID</th>
+            {% if timeline %}<th scope="col"{% if expandable_rows %} class="pat-hide-lg"{% endif %}>Object</th>{% endif %}
             <th scope="col">User</th>
             <th scope="col">Changes</th>
         </tr>
@@ -32,10 +32,10 @@
                 {% endif %}
                 {% endif %}
                 <th scope="row">{{ version.revision.date_created }}</th>
-                <td>{% if version_url_name and version.is_own %}<a href="{% url version_url_name pk=history_pk version_id=version.pk %}">{{ version.display_id }}</a>{% else %}{{ version.display_id }}{% endif %}</td>
-                {% if timeline %}<td>{% if version.object_url %}<a href="{{ version.object_url }}">{{ version.changes.new|to_class_name }}</a>{% else %}{{ version.changes.new|to_class_name }}{% endif %}</td>{% endif %}
+                <td{% if expandable_rows %} class="pat-hide-lg"{% endif %}>{% if version_url_name and version.is_own %}<a href="{% url version_url_name pk=history_pk version_id=version.pk %}">{{ version.display_id }}</a>{% else %}{{ version.display_id }}{% endif %}</td>
+                {% if timeline %}<td{% if expandable_rows %} class="pat-hide-lg"{% endif %}>{% if version.object_url %}<a href="{{ version.object_url }}">{{ version.changes.new|to_class_name }}</a>{% else %}{{ version.changes.new|to_class_name }}{% endif %}</td>{% endif %}
                 <td>{{ version.revision.user.name|default:'System' }}</td>
-                <td>
+                <td{% if expandable_rows %} class="pat-details-cell"{% endif %}>
                     {% if version.changes.new|to_class_name == "PATTestRecord" %}
                         {% include 'partials/pat_history_entry.html' with test=version.changes.new old=version.changes.old %}
                     {% else %}
