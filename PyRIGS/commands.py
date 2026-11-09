@@ -275,6 +275,7 @@ COMMANDS = [
     ),
     Command("My Profile", ACCOUNT, "profile_detail", "fa-id-badge", keywords="me account user"),
     Command("Edit Profile", ACCOUNT, "profile_update_self", "fa-user-edit", keywords="me account settings"),
+    Command("Notifications", ACCOUNT, "notification_list", "fa-bell", keywords="alerts bell push inbox settings"),
     Command("Change Password", ACCOUNT, "password_change", "fa-key", keywords="security"),
     Command("Badges", ACCOUNT, "badge_list", "fa-award", check=_badges_visible, keywords="achievements"),
     Command(

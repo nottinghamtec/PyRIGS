@@ -32,7 +32,7 @@ def palette(response):
 
 def test_basic_users_only_see_what_they_can_open(basic_user):
     titles = titles_for(basic_user)
-    assert {"Rigboard", "Asset List", "My Training Record", "Log Out"} <= titles
+    assert {"Rigboard", "Asset List", "My Training Record", "Notifications", "Log Out"} <= titles
     assert not titles & {"New Event", "Invoice Dashboard", "People", "Audit Assets", "Django Admin", "Check-in Report"}
 
 
