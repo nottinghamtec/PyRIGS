@@ -13,6 +13,7 @@ from badges.awarding import award_badges, earned_badges
 from badges.models import BadgeAward, BadgeSettings
 from badges.registry import BADGES
 from badges.stats import ProfileStats
+from notifications.models import NotificationPreference
 
 
 def aware(*args):
@@ -297,8 +298,7 @@ def test_digest_lists_every_new_badge(member, recent_rig, mailoutbox):
 
 
 def test_opted_out_members_are_not_emailed(member, recent_rig, mailoutbox):
-    member.badge_emails = False
-    member.save()
+    NotificationPreference.objects.create(user=member, kind="badge_earned", push=True, email=False)
     set_live(badges=True)
     call_command("award_badges", "--quiet")
     assert awards_by_slug()["opening-act"].email == BadgeAward.EMAIL_OPTED_OUT

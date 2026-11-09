@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
 
+from notifications.dispatch import notify, preference
 from RIGS.models import Profile
 
 from badges.models import BadgeAward, BadgeSettings
@@ -150,7 +151,19 @@ def send_badge_emails(dry_run=False, live=None, extra=()):
     results = []
     for profile, awards in pending_emails(extra).items():
         ids = [award.pk for award in awards]
-        if not profile.badge_emails or not profile.email or not profile.is_active:
+        if not dry_run:
+            names = ", ".join(award.badge.name for award in awards)
+            notify(
+                profile,
+                "badge_earned",
+                f"You've earned a badge: {names}" if len(awards) == 1 else f"You've earned {len(awards)} new badges",
+                names if len(awards) > 1 else awards[0].badge.blurb,
+                url=reverse("badge_list"),
+                tag="badges",
+                dedupe_key="badges:" + ",".join(str(pk) for pk in ids),
+                send_email=False,
+            )
+        if not preference(profile, "badge_earned", "email") or not profile.email or not profile.is_active:
             if not dry_run:
                 BadgeAward.objects.filter(pk__in=ids).update(email=BadgeAward.EMAIL_OPTED_OUT)
             results.append((profile, awards, "opted out"))
@@ -176,7 +189,7 @@ def _send(profile, awards):
         "awards": awards,
         "profile_url": base + reverse("profile_detail"),
         "badges_url": base + reverse("badge_list"),
-        "settings_url": base + reverse("profile_update_self"),
+        "settings_url": base + reverse("notification_list"),
     }
     if len(awards) == 1:
         subject = f"You've earned a badge: {awards[0].badge.name}"

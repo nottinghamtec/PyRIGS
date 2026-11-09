@@ -9,5 +9,5 @@ See what else is up for grabs: {{ badges_url }}
 
 TEC PA & Lighting
 
-Don't want these emails? Turn them off in your profile: {{ settings_url }}
+Don't want these emails? Turn them off in your notification settings: {{ settings_url }}
 {% endautoescape %}

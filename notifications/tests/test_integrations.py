@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from assets.models import PATTestBatch
+from badges.awarding import send_badge_emails
+from badges.models import BadgeAward, BadgeSettings
 from notifications import triggers
 from notifications.models import Notification, NotificationPreference
 from notifications.tests.conftest import make_user
@@ -242,6 +244,17 @@ def test_ra_reminder_pushes_and_respects_email_preference(mic):
     call_command("send_reminders")
     assert mail.outbox == []
     assert mine(mic, "ra_reminder").count() == 1
+
+
+def test_badges_push_even_when_email_is_off(mic):
+    BadgeSettings.objects.update_or_create(pk=1, defaults={"badges_live": True})
+    NotificationPreference.objects.create(user=mic, kind="badge_earned", push=True, email=False)
+    BadgeAward.objects.create(profile=mic, slug="headliner", awarded_at=timezone.now(), email=BadgeAward.EMAIL_PENDING)
+    send_badge_emails()
+    assert mine(mic, "badge_earned").count() == 1
+    assert mail.outbox == []
+    send_badge_emails()
+    assert mine(mic, "badge_earned").count() == 1
 
 
 def test_admins_are_pushed_when_users_register(settings, db):
