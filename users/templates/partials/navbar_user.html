@@ -2,14 +2,14 @@
 {% load unread_notifications from notification_tags %}
 {% if user.is_authenticated %}
 {% unread_notifications as unread %}
-<li class="nav-item align-self-end" id="notification-bell">
+<li class="nav-item align-self-end align-self-lg-center" id="notification-bell">
     <a class="nav-link d-flex align-items-center gap-2 me-lg-2" href="{% url 'notification_list' %}" role="button" data-bs-toggle="offcanvas" data-bs-target="#notification-tray" aria-controls="notification-tray" title="Notifications">
         <span class="fas fa-bell"></span><span class="d-lg-none">Notifications</span>
         {% if unread %}<span class="badge text-bg-danger rounded-pill" id="navbar-unread">{% if unread > 99 %}99+{% else %}{{ unread }}{% endif %}<span class="visually-hidden"> unread notification{{ unread|pluralize }}</span></span>{% else %}<span class="visually-hidden">No unread notifications</span>{% endif %}
     </a>
 </li>
 {% endif %}
-<li class="nav-item dropdown align-self-end" id="user">
+<li class="nav-item dropdown align-self-end align-self-lg-center" id="user">
 {% if user.is_authenticated %}
     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Hi {{ user.first_name }}

@@ -261,3 +261,9 @@ def test_navbar_count_costs_one_query_however_many_places_show_it(user_client, m
 def test_stylesheet_includes_the_bootstrap_offcanvas_the_tray_needs(settings):
     scss = (settings.BASE_DIR / "pipeline/source_assets/scss/screen.scss").read_text()
     assert '@import "node_modules/bootstrap/scss/offcanvas";' in scss
+
+
+def test_bell_and_user_menu_are_centred_with_the_rest_of_the_navbar(user_client):
+    page = user_client.get(reverse("index")).content.decode()
+    assert 'class="nav-item align-self-end align-self-lg-center" id="notification-bell"' in page
+    assert 'class="nav-item dropdown align-self-end align-self-lg-center" id="user"' in page
