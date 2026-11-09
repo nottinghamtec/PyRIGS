@@ -1,4 +1,5 @@
 {% extends 'base_assets.html' %}
+{% load paginator from filters %}
 {% load button from filters %}
 {% load ids_from_objects from asset_tags %}
 {% load widget_tweaks %}
@@ -15,7 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<h3>{{ object_list.count }} cables with a total length of {{ total_length|default:"0" }}m</h3>
+<h3>{{ paginator.count }} cables with a total length of {{ total_length|default:"0" }}m</h3>
 <div class="row">
     <div class="col px-0">
         {% include 'partials/asset_filters.html' with cables=True %}
@@ -68,4 +69,5 @@
 </div>
     </div>
 </div>
+{% paginator %}
 {% endblock %}
