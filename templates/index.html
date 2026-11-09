@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% load changelog %}
+{% load push_box from notification_tags %}
 
 {% block title %}RIGS{% endblock %}
 
@@ -103,6 +104,7 @@
     {# Quick links and the changelog share the left column on desktop, while on mobile the changelog drops below recent changes #}
     <div class="col-12 home-lower{% if not perms.RIGS.view_event %} home-lower-no-activity{% endif %}">
     <div class="home-quick-links">
+        {% push_box %}
         <div class="card">
             <h4 class="card-header">Quick Links</h4>
             <div class="list-group list-group-flush">

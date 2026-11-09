@@ -27,6 +27,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 0 8 * * * root docker compose -f $REPO_DIR/compose.yml exec -T pyrigs python manage.py send_reminders >> /var/log/pyrigs-reminders.log 2>&1
 0 17 * * * root docker compose -f $REPO_DIR/compose.yml exec -T pyrigs python manage.py send_checkout_nags >> /var/log/pyrigs-checkout-nags.log 2>&1
 0 7-23 * * * root docker compose -f $REPO_DIR/compose.yml exec -T pyrigs python manage.py award_badges --quiet >> /var/log/pyrigs-badges.log 2>&1
+* * * * * root docker compose -f $REPO_DIR/compose.yml exec -T pyrigs python manage.py send_notifications --quiet >> /var/log/pyrigs-notifications.log 2>&1
 EOF
 
 chmod 644 "$CERTBOT_CRON" "$DJANGO_CRON"

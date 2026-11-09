@@ -77,6 +77,7 @@ INSTALLED_APPS = (
     "assets",
     "training",
     "badges",
+    "notifications",
     "registration",
     "reversion",
     "widget_tweaks",
@@ -253,6 +254,18 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_COOLDOWN = datetime.timedelta(minutes=15)
+
+# Web push: generate a key pair with `manage.py generate_vapid_keys`. Push is switched off while these are blank.
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_SUBJECT = env("VAPID_SUBJECT", default=f"mailto:it@{DOMAIN}")
+
+NOTIFICATION_FINANCE_GROUP = "Finance"
+NOTIFICATION_PAT_GROUP = "PAT Testers"
+NOTIFICATION_MEET_REMINDER_HOURS = 2
+NOTIFICATION_CHECKIN_NUDGE_MINUTES = 20
+NOTIFICATION_AUTH_NUDGE_DAYS = 3
+NOTIFICATION_INVOICE_WINDOW_DAYS = 7
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/

@@ -1,4 +1,5 @@
 {% load badges_visible tech_rider_visible from badge_tags %}
+{% load unread_notifications from notification_tags %}
 <li class="nav-item dropdown align-self-end" id="user">
 {% if user.is_authenticated %}
     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -14,6 +15,7 @@
                 </div>
             </a>
         </li>
+        <li><a class="dropdown-item py-2" href="{% url 'notification_list' %}"><span class="fas fa-bell"></span> Notifications{% unread_notifications as unread %}{% if unread %} <span class="badge text-bg-danger rounded-pill">{{ unread }}</span>{% endif %}</a></li>
         {% badges_visible as show_badges %}{% tech_rider_visible as show_tech_rider %}
         {% if show_badges or show_tech_rider %}
         <li><hr class="dropdown-divider m-0"></li>

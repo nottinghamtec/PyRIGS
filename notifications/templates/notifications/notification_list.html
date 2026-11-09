@@ -1,0 +1,129 @@
+{% extends 'base_rigs.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">Recent</h4>
+            <form method="post">{% csrf_token %}
+                <button type="submit" name="mark_read" value="1" class="btn btn-sm btn-outline-secondary">Mark all read</button>
+            </form>
+        </div>
+        {% if notifications %}
+        <div class="list-group">
+            {% for notification in notifications %}
+            <a href="{% url 'notification_open' notification.pk %}" class="list-group-item list-group-item-action {% if not notification.read_at %}fw-bold{% endif %}">
+                <div class="d-flex justify-content-between gap-2">
+                    <span>{{ notification.title }}</span>
+                    <small class="text-muted text-nowrap">{{ notification.created_at|timesince }} ago</small>
+                </div>
+                {% if notification.body %}<div class="small fw-normal text-muted">{{ notification.body }}</div>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">Nothing yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+        <h4>This device</h4>
+        {% if push_available %}
+        <div id="push-panel" data-key="{{ vapid_public_key }}" data-subscribe="{% url 'push_subscribe' %}" data-unsubscribe="{% url 'push_unsubscribe' %}" data-check="{% url 'push_check' %}" data-test="{% url 'push_test' %}" data-sw="{% url 'service_worker' %}">
+            <p id="push-status" class="text-muted">Checking...</p>
+            <ol id="push-steps" class="small text-muted ps-3" hidden></ol>
+            <button type="button" class="btn btn-primary" id="push-toggle" hidden></button>
+            <button type="button" class="btn btn-outline-secondary" id="push-test" hidden>Send a test</button>
+        </div>
+        <p class="small text-muted mt-2">You have {{ device_count }} device{{ device_count|pluralize }} set up.</p>
+        {% else %}
+        <p class="text-muted">Push notifications aren't switched on for this server yet.</p>
+        {% endif %}
+
+        <h4 class="mt-4">What to tell me about</h4>
+        <form method="post">{% csrf_token %}
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Notification</th><th class="text-center">Push</th><th class="text-center">Email</th></tr></thead>
+                <tbody>
+                {% for row in kinds %}
+                <tr>
+                    <td>{{ row.kind.label }}<div class="small text-muted">{{ row.kind.description }}</div></td>
+                    <td class="text-center"><input class="form-check-input" type="checkbox" name="push_{{ row.kind.slug }}" {% if row.push %}checked{% endif %} aria-label="Push: {{ row.kind.label }}"></td>
+                    <td class="text-center">{% if row.kind.email_configurable %}<input class="form-check-input" type="checkbox" name="email_{{ row.kind.slug }}" {% if row.email %}checked{% endif %} aria-label="Email: {{ row.kind.label }}">{% else %}<span class="text-muted">-</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script src="{% url 'push_client' %}"></script>
+<script>
+(function () {
+    const panel = document.getElementById("push-panel");
+    if (!panel) return;
+    const cfg = {
+        key: panel.dataset.key,
+        sw: panel.dataset.sw,
+        subscribe: panel.dataset.subscribe,
+        unsubscribe: panel.dataset.unsubscribe,
+        check: panel.dataset.check,
+        test: panel.dataset.test,
+        csrf: document.querySelector("[name=csrfmiddlewaretoken]").value,
+    };
+    const status = document.getElementById("push-status");
+    const steps = document.getElementById("push-steps");
+    const toggle = document.getElementById("push-toggle");
+    const test = document.getElementById("push-test");
+
+    function show(text, list) {
+        status.textContent = text;
+        steps.replaceChildren(...(list || []).map((step) => Object.assign(document.createElement("li"), {textContent: step})));
+        steps.hidden = !(list && list.length);
+    }
+
+    function render(result) {
+        const text = RigsPush.guidance(result);
+        toggle.hidden = true;
+        test.hidden = true;
+        if (result.state === "on") {
+            show("Push is on for this device.");
+            toggle.textContent = "Turn off for this device";
+            toggle.onclick = () => run(RigsPush.disable);
+            toggle.hidden = false;
+            test.hidden = false;
+        } else {
+            show(text.message, text.steps);
+            if (text.canEnable) {
+                toggle.textContent = "Turn on for this device";
+                toggle.onclick = () => run(RigsPush.enable);
+                toggle.hidden = false;
+            }
+        }
+    }
+
+    async function run(action) {
+        toggle.disabled = true;
+        try {
+            render(await action(cfg));
+        } catch (error) {
+            show("Something went wrong: " + error.message);
+        }
+        toggle.disabled = false;
+    }
+
+    test.onclick = async () => {
+        const sent = await RigsPush.test(cfg);
+        show(sent ? "Test sent." : "The server couldn't reach this device. Try turning notifications off and on again.");
+    };
+
+    RigsPush.status(cfg).then(render, (error) => show("Couldn't check this device: " + error.message));
+})();
+</script>
+{% endblock %}

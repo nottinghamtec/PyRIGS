@@ -1,0 +1,19 @@
+{% if push_available %}
+<div class="card mb-3 border-primary" id="push-box" hidden
+     data-user="{{ user.pk }}" data-key="{{ vapid_public_key }}" data-csrf="{{ csrf_token }}"
+     data-sw="{% url 'service_worker' %}" data-subscribe="{% url 'push_subscribe' %}"
+     data-unsubscribe="{% url 'push_unsubscribe' %}" data-check="{% url 'push_check' %}" data-test="{% url 'push_test' %}">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><span class="fas fa-bell"></span> Notifications</h4>
+        <button type="button" class="btn-close" data-push-dismiss aria-label="Dismiss"></button>
+    </div>
+    <div class="card-body">
+        <p class="mb-2" data-push-message></p>
+        <ol class="small ps-3 mb-2" data-push-steps hidden></ol>
+        <button type="button" class="btn btn-primary btn-sm" data-push-enable hidden>Turn on notifications</button>
+        <a href="{% url 'notification_list' %}" class="btn btn-link btn-sm">Notification settings</a>
+    </div>
+</div>
+<script src="{% url 'push_client' %}"></script>
+<script>RigsPush.box(document.getElementById("push-box"));</script>
+{% endif %}
