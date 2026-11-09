@@ -31,6 +31,7 @@ dependencies = [
     "django-queryable-properties~=1.12",
     "django-mass-edit~=3.5",
     "django-storages[s3]~=1.14",
+    "pywebpush>=2.5.0",
 ]
 
 [dependency-groups]
