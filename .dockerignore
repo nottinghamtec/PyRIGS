@@ -19,6 +19,7 @@
 !RIGS/**
 !assets/**
 !badges/**
+!notifications/**
 !training/**
 !users/**
 !versioning/**
