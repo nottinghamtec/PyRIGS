@@ -9,6 +9,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from django.urls import reverse
 
+from notifications.dispatch import notify, preference
 from RIGS import models
 
 
@@ -35,6 +36,19 @@ class Command(BaseCommand):
                     "event": event,
                     "url": "https://" + settings.DOMAIN + reverse("event_ra", kwargs={"pk": event.pk}),
                 }
+                if event.mic:
+                    notify(
+                        event.mic,
+                        "ra_reminder",
+                        f"{event.display_id} still needs a risk assessment",
+                        f"{event.name} is coming up and has no risk assessment",
+                        url=context["url"],
+                        tag=f"ra-{event.pk}",
+                        dedupe_key=f"ra-reminder:{event.pk}:{timezone.localdate()}",
+                        send_email=False,
+                    )
+                    if not preference(event.mic, "ra_reminder", "email"):
+                        continue
                 target = event.mic.email if event.mic else f"productions@{settings.DOMAIN}"
                 msg = EmailMultiAlternatives(
                     f"{event} - Risk Assessment Incomplete",

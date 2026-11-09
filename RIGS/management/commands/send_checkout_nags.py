@@ -9,6 +9,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
 
+from notifications.dispatch import notify, preference
 from RIGS import models
 
 NAG_AFTER_HOURS = 36
@@ -36,7 +37,17 @@ class Command(BaseCommand):
             )
         css = finders.find("css/email.css")
         for person, items in by_person.items():
-            if not person.email:
+            notify(
+                person,
+                "checkout_nag",
+                "You are still checked in to a rig",
+                ", ".join(str(item["checkin"].event) for item in items),
+                url=items[0]["url"],
+                tag="checkout-nag",
+                dedupe_key=f"checkout-nag:{person.pk}:{timezone.localdate()}",
+                send_email=False,
+            )
+            if not person.email or not preference(person, "checkout_nag", "email"):
                 continue
             context = {"user": person, "checkins": items, "hours": NAG_AFTER_HOURS}
             msg = EmailMultiAlternatives(

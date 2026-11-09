@@ -1,5 +1,6 @@
 import copy
 import datetime
+from smtplib import SMTPException
 import re
 import premailer
 import simplejson
@@ -30,6 +31,7 @@ from django.views.decorators.csrf import csrf_exempt
 from PyRIGS import decorators
 from PyRIGS.views import OEmbedView, is_ajax, ModalURLMixin, PrintView, get_related
 from RIGS import models, forms
+from notifications import triggers
 from RIGS import prefill as prefill_module
 
 __author__ = "ghost"
@@ -390,10 +392,6 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
     def form_valid(self, form):
         email = form.cleaned_data["email"]
         event = self.object
-        event.auth_request_by = self.request.user
-        event.auth_request_at = timezone.now()
-        event.auth_request_to = email
-        event.save()
 
         context = {
             "object": self.object,
@@ -425,7 +423,20 @@ class EventAuthorisationRequest(generic.FormView, generic.detail.SingleObjectMix
         ).transform()
         msg.attach_alternative(html, "text/html")
 
-        msg.send()
+        try:
+            msg.send()
+        except SMTPException, OSError:
+            triggers.auth_bounced(event, self.request.user, email)
+            messages.error(
+                self.request,
+                f"The authorisation request couldn't be delivered to {email}. Check the address and try again.",
+            )
+            return self.form_invalid(form)
+
+        event.auth_request_by = self.request.user
+        event.auth_request_at = timezone.now()
+        event.auth_request_to = email
+        event.save()
 
         return super(EventAuthorisationRequest, self).form_valid(form)
 

@@ -15,6 +15,7 @@ from RIGS import models, forms
 from RIGS.views.rigboard import get_related
 from PyRIGS.views import PrintView, ModalURLMixin
 from django.shortcuts import redirect
+from notifications import triggers
 
 
 class HSCreateView(generic.CreateView):
@@ -35,6 +36,7 @@ class MarkReviewed(generic.RedirectView):
             obj.reviewed_by = self.request.user
             obj.reviewed_at = timezone.now()
             obj.save()
+        triggers.review_complete(obj, self.request.user)
         return self.request.META.get("HTTP_REFERER", reverse("hs_list"))
 
 

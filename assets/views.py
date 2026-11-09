@@ -32,6 +32,7 @@ from PyRIGS.views import (
     OEmbedView,
 )
 from assets import forms, models, pat
+from notifications import triggers
 from assets.sss import SSSParseError
 
 
@@ -615,6 +616,7 @@ class PATUpload(generic.FormView):
         if summary.batch is None:
             messages.warning(self.request, "Nothing was imported and the file wasn't stored")
             return redirect("pat_upload")
+        triggers.pat_batch_complete(summary.batch, summary, self.request.user)
         return redirect("pat_batch_detail", pk=summary.batch.pk)
 
 

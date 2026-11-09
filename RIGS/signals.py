@@ -18,6 +18,9 @@ from registration.signals import user_activated
 from PyRIGS.pdf import render_rml
 
 
+from notifications import triggers
+from notifications.dispatch import notify, preference
+
 from RIGS import models
 
 
@@ -87,12 +90,16 @@ def send_eventauthorisation_success_email(instance):
     )
 
     # Now we have both emails successfully generated, send them out
-    client_email.send(fail_silently=True)
-    mic_email.send(fail_silently=True)
+    client_delivered = client_email.send(fail_silently=True)
+    mic = instance.event.mic
+    if mic is None or preference(mic, "auth_completed", "email"):
+        mic_email.send(fail_silently=True)
 
     # Set event to booked now that it's authorised
     instance.event.status = models.Event.BOOKED
     instance.event.save()
+
+    triggers.auth_completed(instance, bool(client_delivered))
 
 
 def on_revision_commit(sender, instance, created, **kwargs):
@@ -116,20 +123,31 @@ def send_admin_awaiting_approval_email(user, request, **kwargs):
                 "to_name": admin.first_name,
             }
 
-            email = EmailMultiAlternatives(
-                f"{context['number_of_users']} new users awaiting approval on RIGS",
-                get_template("email/admin_awaiting_approval.txt").render(context),
-                to=[admin.email],
-                reply_to=[user.email],
+            notify(
+                admin,
+                "admin_approval",
+                f"{context['number_of_users']} new users awaiting approval",
+                url=context["link_suffix"],
+                tag="admin-approval",
+                coalesce=True,
+                send_email=False,
             )
-            css = finders.find("css/email.css")
-            html = Premailer(
-                get_template("email/admin_awaiting_approval.html").render(context),
-                external_styles=css,
-                allow_loading_external_files=True,
-            ).transform()
-            email.attach_alternative(html, "text/html")
-            email.send()
+
+            if preference(admin, "admin_approval", "email"):
+                email = EmailMultiAlternatives(
+                    f"{context['number_of_users']} new users awaiting approval on RIGS",
+                    get_template("email/admin_awaiting_approval.txt").render(context),
+                    to=[admin.email],
+                    reply_to=[user.email],
+                )
+                css = finders.find("css/email.css")
+                html = Premailer(
+                    get_template("email/admin_awaiting_approval.html").render(context),
+                    external_styles=css,
+                    allow_loading_external_files=True,
+                ).transform()
+                email.attach_alternative(html, "text/html")
+                email.send()
 
             # Update last sent
             admin.last_emailed = timezone.now()
