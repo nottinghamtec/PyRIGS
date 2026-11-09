@@ -1,0 +1,18 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-11-09" title="Notifications" %}
+<p>RIGS can now send notifications straight to your phone or computer when something happens to a rig you're on, so changes don't slip by unseen. Turn them on from the box on the front page, or from <a href="{% url 'notification_list' %}">Notifications</a> in your user menu.</p>
+<details class="mt-2">
+    <summary>All the changes</summary>
+    <ul class="mt-2 mb-0">
+        <li>On a rig you're MIC on, you're told when it's cancelled or its date, times, venue, meet time or access time change, and when you're made MIC or taken off it</li>
+        <li>A reminder two hours before the meet time with the venue and access details, and a nudge 20 minutes after it if you haven't checked in</li>
+        <li>The risk assessment reminder and the "you're still checked in" nag now come as notifications too, and tapping the nag takes you straight to checking out</li>
+        <li>When a client authorises a rig, an authorisation request has gone unanswered for three days, or an authorisation email couldn't be delivered, the person who sent it is told</li>
+        <li>You're told when your risk assessment, checklist or power test is approved</li>
+        <li>You're told when training is logged for you and when you meet the requirements for a level</li>
+        <li>Finance are told when a finished rig is waiting to be invoiced, PAT testers when an upload has finished, and admins when users are waiting for approval</li>
+        <li>Choose push or email for each kind of notification on the Notifications page, which also lists your recent ones. Your badge email setting has moved there from your profile</li>
+        <li>On iPhone and iPad, add RIGS to your Home Screen first. The front page box walks you through it and shows how to unblock notifications if they've been turned off</li>
+    </ul>
+</details>
+{% endchangelog_entry %}
