@@ -24,9 +24,10 @@ class DuplicateSubmissionMiddleware:
     """
     Stops a form being processed twice when it is submitted twice (a double click on a slow page).
 
-    Django masks the CSRF token with a fresh random salt every time it is rendered, so the
-    ``csrfmiddlewaretoken`` posted by a form is unique to that one render of that form. We use it as a nonce:
-    the first POST claims it, and any later POST with the same value never reaches the view. If the first has
+    Django masks the CSRF token with a fresh random salt for each rendered page, so the
+    ``csrfmiddlewaretoken`` posted by a form is unique to that one render of that page. Every form on a page
+    shares it though, so we use the token together with the URL being posted to as a nonce: the first POST
+    claims it, and any later POST with the same value to the same URL never reaches the view. If the first has
     finished successfully it is answered with the first one's redirect; if the first is still running it is
     answered straight away (never waiting, so duplicates can't tie up workers) with a short notice.
 
@@ -40,8 +41,8 @@ class DuplicateSubmissionMiddleware:
         self.get_response = get_response
 
     @staticmethod
-    def cache_key(token):
-        return f"form-nonce:{token}"
+    def cache_key(path, token):
+        return f"form-nonce:{path}:{token}"
 
     def __call__(self, request):
         try:
@@ -56,7 +57,7 @@ class DuplicateSubmissionMiddleware:
         if not token:
             return None
 
-        key = self.cache_key(token)
+        key = self.cache_key(request.path, token)
         if cache.add(key, IN_FLIGHT, NONCE_TTL):
             request._form_nonce_key = key
             return None

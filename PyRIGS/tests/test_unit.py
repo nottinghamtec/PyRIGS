@@ -182,13 +182,43 @@ def test_duplicate_form_submission_is_deduplicated(admin_client):
 
 @pytest.mark.django_db
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+def test_same_token_posted_to_different_urls_is_not_deduplicated(admin_client):
+    from django.core.cache import cache
+    from RIGS.models import Organisation, Person
+
+    cache.clear()
+    token = "shared-page-token"
+    person = admin_client.post(
+        reverse("person_create"),
+        {"name": "Shared Person", "email": "", "phone": "", "address": "", "notes": "", "csrfmiddlewaretoken": token},
+    )
+    organisation = admin_client.post(
+        reverse("organisation_create"),
+        {
+            "name": "Shared Org",
+            "email": "",
+            "phone": "",
+            "address": "",
+            "notes": "",
+            "csrfmiddlewaretoken": token,
+        },
+    )
+    assert person.status_code == 302
+    assert organisation.status_code == 302
+    assert person.url != organisation.url
+    assert Person.objects.filter(name="Shared Person").count() == 1
+    assert Organisation.objects.filter(name="Shared Org").count() == 1
+
+
+@pytest.mark.django_db
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 def test_duplicate_submission_while_in_flight_does_not_block(admin_client):
     from django.core.cache import cache
     from RIGS.models import Person
     from PyRIGS.middleware import DuplicateSubmissionMiddleware, IN_FLIGHT
 
     cache.clear()
-    cache.set(DuplicateSubmissionMiddleware.cache_key("nonce-c"), IN_FLIGHT, 60)
+    cache.set(DuplicateSubmissionMiddleware.cache_key(reverse("person_create"), "nonce-c"), IN_FLIGHT, 60)
     data = {
         "name": "Inflight Tester",
         "email": "",
