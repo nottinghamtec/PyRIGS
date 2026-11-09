@@ -1,5 +1,14 @@
 {% load badges_visible tech_rider_visible from badge_tags %}
 {% load unread_notifications from notification_tags %}
+{% if user.is_authenticated %}
+{% unread_notifications as unread %}
+<li class="nav-item align-self-end" id="notification-bell">
+    <a class="nav-link d-flex align-items-center gap-2 me-lg-2" href="{% url 'notification_list' %}" role="button" data-bs-toggle="offcanvas" data-bs-target="#notification-tray" aria-controls="notification-tray" title="Notifications">
+        <span class="fas fa-bell"></span><span class="d-lg-none">Notifications</span>
+        {% if unread %}<span class="badge text-bg-danger rounded-pill" id="navbar-unread">{% if unread > 99 %}99+{% else %}{{ unread }}{% endif %}<span class="visually-hidden"> unread notification{{ unread|pluralize }}</span></span>{% else %}<span class="visually-hidden">No unread notifications</span>{% endif %}
+    </a>
+</li>
+{% endif %}
 <li class="nav-item dropdown align-self-end" id="user">
 {% if user.is_authenticated %}
     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -15,7 +24,7 @@
                 </div>
             </a>
         </li>
-        <li><a class="dropdown-item py-2" href="{% url 'notification_list' %}"><span class="fas fa-bell"></span> Notifications{% unread_notifications as unread %}{% if unread %} <span class="badge text-bg-danger rounded-pill">{{ unread }}</span>{% endif %}</a></li>
+        <li><a class="dropdown-item py-2" href="{% url 'notification_list' %}"><span class="fas fa-bell"></span> Notifications{% if unread %} <span class="badge text-bg-danger rounded-pill">{{ unread }}</span>{% endif %}</a></li>
         {% badges_visible as show_badges %}{% tech_rider_visible as show_tech_rider %}
         {% if show_badges or show_tech_rider %}
         <li><hr class="dropdown-divider m-0"></li>

@@ -10,12 +10,14 @@ from django.utils import timezone
 from django.views import generic
 from django.views.decorators.cache import cache_control, never_cache
 
+from PyRIGS.views import is_ajax
 from notifications import push
 from notifications.dispatch import preference
 from notifications.kinds import KINDS_LIST, visible_to
 from notifications.models import Notification, NotificationPreference, PushSubscription
 
 RECENT_LIMIT = 50
+TRAY_LIMIT = 15
 
 
 class NotificationList(generic.TemplateView):
@@ -58,6 +60,26 @@ class NotificationList(generic.TemplateView):
             )
         messages.success(request, "Notification preferences saved")
         return redirect("notification_list")
+
+
+class NotificationTray(generic.TemplateView):
+    template_name = "notifications/tray.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["notifications"] = self.request.user.notifications.all()[:TRAY_LIMIT]
+        context["unread"] = self.request.user.notifications.filter(read_at__isnull=True).count()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if not is_ajax(request):
+            return redirect("notification_list")
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        request.user.notifications.filter(read_at__isnull=True).update(read_at=timezone.now())
+        request._unread_notifications = 0
+        return super().get(request, *args, **kwargs)
 
 
 class OpenNotification(generic.View):

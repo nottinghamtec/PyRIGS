@@ -1,0 +1,44 @@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="notification-tray" aria-labelledby="notification-tray-title" data-url="{% url 'notification_tray' %}">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="notification-tray-title"><span class="fas fa-bell"></span> Notifications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0" id="notification-tray-body" aria-live="polite"></div>
+</div>
+<script>
+(function () {
+    const tray = document.getElementById("notification-tray");
+    const body = document.getElementById("notification-tray-body");
+    const headers = {"X-Requested-With": "XMLHttpRequest"};
+
+    function clearBadges() {
+        for (const id of ["navbar-unread", "navbar-unread-dot"]) {
+            const badge = document.getElementById(id);
+            if (badge) badge.remove();
+        }
+    }
+
+    async function show(response) {
+        body.innerHTML = await response.text();
+        const form = body.querySelector("[data-tray-mark-read]");
+        if (form) {
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                show(await fetch(form.action, {method: "POST", body: new FormData(form), headers, credentials: "same-origin"}));
+                clearBadges();
+            });
+        } else if (!body.querySelector(".list-group-item-primary")) {
+            clearBadges();
+        }
+    }
+
+    tray.addEventListener("show.bs.offcanvas", async () => {
+        body.innerHTML = '<p class="text-muted p-3 mb-0">Loading...</p>';
+        try {
+            show(await fetch(tray.dataset.url, {headers, credentials: "same-origin"}));
+        } catch (error) {
+            body.innerHTML = '<p class="text-danger p-3 mb-0">Couldn\'t load notifications.</p>';
+        }
+    });
+})();
+</script>

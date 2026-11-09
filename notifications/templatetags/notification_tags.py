@@ -8,8 +8,13 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def unread_notifications(context):
-    user = context["request"].user
-    return user.notifications.filter(read_at__isnull=True).count() if user.is_authenticated else 0
+    request = context["request"]
+    if not hasattr(request, "_unread_notifications"):
+        user = request.user
+        request._unread_notifications = (
+            user.notifications.filter(read_at__isnull=True).count() if user.is_authenticated else 0
+        )
+    return request._unread_notifications
 
 
 @register.inclusion_tag("notifications/push_box.html", takes_context=True)

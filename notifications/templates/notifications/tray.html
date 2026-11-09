@@ -1,0 +1,23 @@
+{% if notifications %}
+<div class="list-group list-group-flush">
+    {% for notification in notifications %}
+    <a href="{% url 'notification_open' notification.pk %}" class="list-group-item list-group-item-action {% if not notification.read_at %}list-group-item-primary{% endif %}">
+        <div class="d-flex justify-content-between gap-2">
+            <span class="{% if not notification.read_at %}fw-bold{% endif %}">{{ notification.title }}</span>
+            <small class="text-muted text-nowrap">{{ notification.created_at|timesince }} ago</small>
+        </div>
+        {% if notification.body %}<div class="small text-muted">{{ notification.body }}</div>{% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted p-3 mb-0">Nothing yet. Things like changes to rigs you're MIC on will show up here.</p>
+{% endif %}
+<div class="d-flex justify-content-between align-items-center gap-2 p-3 border-top">
+    <a href="{% url 'notification_list' %}" class="btn btn-link ps-0"><span class="fas fa-cog"></span> All and settings</a>
+    {% if unread %}
+    <form method="post" action="{% url 'notification_tray' %}" data-tray-mark-read>{% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary btn-sm">Mark all read</button>
+    </form>
+    {% endif %}
+</div>

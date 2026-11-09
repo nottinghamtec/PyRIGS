@@ -180,3 +180,84 @@ def test_home_page_has_no_box_when_push_is_not_configured(user_client, settings)
     page = user_client.get(reverse("index")).content.decode()
     assert 'id="push-box"' not in page
     assert "Quick Links" in page
+
+
+def test_unread_count_is_in_the_navbar_and_nowhere_when_zero(user_client, mic):
+    page = user_client.get(reverse("index")).content.decode()
+    assert 'id="navbar-unread"' not in page
+    Notification.objects.create(recipient=mic, kind="rig_changed", title="One")
+    Notification.objects.create(recipient=mic, kind="rig_changed", title="Two")
+    page = user_client.get(reverse("index")).content.decode()
+    assert 'id="navbar-unread"' in page
+    assert "2 unread notifications" in page
+
+
+def test_navbar_count_is_capped(user_client, mic):
+    Notification.objects.bulk_create(Notification(recipient=mic, kind="rig_changed", title=str(n)) for n in range(120))
+    page = user_client.get(reverse("index")).content.decode()
+    assert ">99+<" in page
+
+
+AJAX = {"HTTP_X_REQUESTED_WITH": "XMLHttpRequest"}
+
+
+def test_bell_opens_the_tray_overlay(user_client):
+    page = user_client.get(reverse("index")).content.decode()
+    assert 'id="notification-bell"' in page
+    assert 'data-bs-toggle="offcanvas" data-bs-target="#notification-tray"' in page
+    assert 'id="notification-tray"' in page and 'class="offcanvas offcanvas-end"' in page
+    assert page.index('id="notification-bell"') < page.index('id="user"')
+
+
+def test_tray_is_not_on_pages_for_signed_out_users(client):
+    assert 'id="notification-tray"' not in client.get(reverse("login")).content.decode()
+
+
+def test_tray_lists_recent_notifications_as_a_fragment(user_client, mic, other):
+    Notification.objects.create(recipient=mic, kind="rig_changed", title="Mine", body="Date changed", url="/event/1/")
+    Notification.objects.create(recipient=other, kind="rig_changed", title="Theirs")
+    response = user_client.get(reverse("notification_tray"), **AJAX)
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert "Mine" in content and "Date changed" in content and "Theirs" not in content
+    assert "<html" not in content and "modal-dialog" not in content
+    assert "Mark all read" in content
+
+
+def test_tray_without_ajax_goes_to_the_full_page(user_client):
+    assert user_client.get(reverse("notification_tray")).url == reverse("notification_list")
+
+
+def test_tray_is_limited_and_empty_state(user_client, mic):
+    assert "Nothing yet" in user_client.get(reverse("notification_tray"), **AJAX).content.decode()
+    for number in range(20):
+        Notification.objects.create(recipient=mic, kind="rig_changed", title=f"Item {number}")
+    content = user_client.get(reverse("notification_tray"), **AJAX).content.decode()
+    assert content.count("list-group-item ") == 15
+
+
+def test_tray_mark_all_read_returns_the_refreshed_tray(user_client, mic):
+    Notification.objects.create(recipient=mic, kind="rig_changed", title="One")
+    response = user_client.post(reverse("notification_tray"), **AJAX)
+    assert response.status_code == 200
+    assert not Notification.objects.filter(read_at__isnull=True).exists()
+    assert "Mark all read" not in response.content.decode()
+
+
+def test_tray_requires_login(client):
+    assert client.get(reverse("notification_tray")).status_code == 302
+
+
+def test_navbar_count_costs_one_query_however_many_places_show_it(user_client, mic):
+    Notification.objects.create(recipient=mic, kind="rig_changed", title="One")
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    with CaptureQueriesContext(connection) as queries:
+        user_client.get(reverse("notification_list"))
+    assert sum("notifications_notification" in q["sql"] and "COUNT" in q["sql"] for q in queries) == 1
+
+
+def test_stylesheet_includes_the_bootstrap_offcanvas_the_tray_needs(settings):
+    scss = (settings.BASE_DIR / "pipeline/source_assets/scss/screen.scss").read_text()
+    assert '@import "node_modules/bootstrap/scss/offcanvas";' in scss

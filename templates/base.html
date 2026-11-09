@@ -1,4 +1,5 @@
 {% load static %}
+{% load unread_notifications from notification_tags %}
 
 <!DOCTYPE html>
 <html
@@ -42,8 +43,10 @@
       </a>
       {% block titleheader %}
       {% endblock %}
-      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="document.getElementById('logo').classList.toggle('d-none');">
+      {% unread_notifications as unread_count %}
+      <button class="navbar-toggler ms-auto position-relative" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="document.getElementById('logo').classList.toggle('d-none');">
       <span class="navbar-toggler-icon"></span>
+      {% if unread_count %}<span id="navbar-unread-dot" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle"><span class="visually-hidden">{{ unread_count }} unread notification{{ unread_count|pluralize }}</span></span>{% endif %}
       </button>
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
@@ -93,6 +96,7 @@
 <div class="modal fade" id="modal" role="dialog" tabindex=-1></div>
 {% if request.user.is_authenticated %}
 {% include 'partials/command_palette.html' %}
+{% include 'notifications/tray_shell.html' %}
 {% endif %}
 
 <script src="{% static 'js/base.js' %}"></script>
