@@ -4,6 +4,7 @@
     <span>PAT Testing</span>
     {% include 'partials/pat_badge.html' with status=pat_status label=pat_status_label %}
   </div>
+  {% include 'partials/pat_disclaimer.html' with classes='m-3' %}
   {% if pat_tests %}
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0 pat-table">
