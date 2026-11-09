@@ -10,6 +10,12 @@ from RIGS import models
 from versioning.versioning import last_edited_subquery
 
 
+def _as_datetime(value):
+    if isinstance(value, datetime.datetime):
+        return value
+    return pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.combine(value, datetime.time(0, 0)))
+
+
 class DeactivatedCalendarICS(ICalFeed):
     product_id = "RIGS"
     title = "RIGS Calendar"
@@ -162,12 +168,21 @@ class CalendarICS(ICalFeed):
         return title
 
     def item_start_datetime(self, item):
-        return item.earliest_time
+        start = item.earliest_time
+        end = item.latest_time
+        if isinstance(start, datetime.datetime) or isinstance(end, datetime.datetime):
+            return _as_datetime(start)
+        return start
 
     def item_end_datetime(self, item):
-        # if isinstance(item.latest_time, datetime.date):  # Ical end_datetime is non-inclusive, so add a day
-        #    return item.latest_time + datetime.timedelta(days=1)
-        return item.latest_time
+        start = item.earliest_time
+        end = item.latest_time
+        if isinstance(start, datetime.datetime) or isinstance(end, datetime.datetime):
+            if not isinstance(end, datetime.datetime):
+                end = end + datetime.timedelta(days=1)
+            return _as_datetime(end)
+        # ICS all-day end dates are exclusive
+        return end + datetime.timedelta(days=1)
 
     def item_location(self, item):
         return item.venue

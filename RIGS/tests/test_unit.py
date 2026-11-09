@@ -1644,3 +1644,52 @@ def test_currently_checked_in_flags_inactive(admin_client, django_user_model, ba
     models.EventCheckIn.objects.create(event=basic_event, person=gone, time=timezone.now() - timedelta(hours=3))
     response = admin_client.get(reverse("currently_checked_in"))
     assertContains(response, "Inactive", count=1)
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected_start,expected_end",
+    [
+        (
+            dict(start_date=date(2026, 11, 28), end_date=date(2026, 11, 29)),
+            date(2026, 11, 28),
+            date(2026, 11, 30),
+        ),
+        (
+            dict(start_date=date(2026, 11, 24), start_time=time(18, 30)),
+            (2026, 11, 24, 18, 30),
+            (2026, 11, 25, 0, 0),
+        ),
+        (
+            dict(start_date=date(2026, 11, 28), end_date=date(2026, 11, 29), start_time=time(19, 30)),
+            (2026, 11, 28, 19, 30),
+            (2026, 11, 30, 0, 0),
+        ),
+        (
+            dict(start_date=date(2025, 12, 3), end_date=date(2025, 12, 6), end_time=time(23, 0)),
+            (2025, 12, 3, 0, 0),
+            (2025, 12, 6, 23, 0),
+        ),
+        (
+            dict(start_date=date(2026, 6, 1), start_time=time(10, 0), end_time=time(12, 0)),
+            (2026, 6, 1, 10, 0),
+            (2026, 6, 1, 12, 0),
+        ),
+    ],
+)
+def test_ics_start_and_end_are_consistent_types(db, kwargs, expected_start, expected_end):
+    import datetime
+    import pytz
+    from RIGS.views.ical import CalendarICS
+
+    tz = pytz.timezone(settings.TIME_ZONE)
+
+    def expect(value):
+        return value if isinstance(value, date) else tz.localize(datetime.datetime(*value))
+
+    event = models.Event.objects.create(name="ICS", **kwargs)
+    feed = CalendarICS()
+    start, end = feed.item_start_datetime(event), feed.item_end_datetime(event)
+    assert type(start) is type(end)
+    assert start == expect(expected_start)
+    assert end == expect(expected_end)
+    assert end > start
