@@ -20,6 +20,12 @@ def aware(*args):
     return timezone.make_aware(datetime.datetime(*args))
 
 
+@pytest.fixture(autouse=True)
+def fixed_now(monkeypatch):
+    fixed = datetime.datetime(2026, 3, 18, 12, 0, tzinfo=datetime.timezone.utc)
+    monkeypatch.setattr(timezone, "now", lambda: fixed)
+
+
 @pytest.fixture
 def member(db):
     return models.Profile.objects.create(
