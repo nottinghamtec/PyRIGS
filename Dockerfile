@@ -21,7 +21,7 @@ RUN npm run build
 
 
 # ---- Shared Python base: runtime system libraries only ----
-FROM python:3.14-slim-trixie AS python-base
+FROM python:3.15-slim-trixie AS python-base
 
 # Keep downloaded packages between builds (the default Docker config for Debian images deletes them)
 RUN rm -f /etc/apt/apt.conf.d/docker-clean \
