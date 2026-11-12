@@ -280,6 +280,19 @@ def search(query, user):
     return branches[0].union(*branches[1:], all=True).order_by("-score", "kind", "-obj_id")
 
 
+def search_events(query, limit=20):
+    """Events matching the query (by text, or by exact id such as 123 or N00123) as a list, best match first."""
+    from RIGS.models import Event
+
+    parsed = ParsedQuery.parse(query)
+    if not parsed.positive:
+        return []
+    source = next(s for s in _sources() if s.kind == "event")
+    ids = [row["obj_id"] for row in source.ranked(parsed).order_by("-score", "-obj_id")[:limit]]
+    events = Event.objects.select_related("person", "organisation", "venue").in_bulk(ids)
+    return [events[pk] for pk in ids if pk in events]
+
+
 def _highlight(text):
     if not text:
         return ""

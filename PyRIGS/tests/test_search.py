@@ -215,3 +215,17 @@ def test_search_vector_is_not_stored_in_revisions(admin_user, today):
         event = models.Event.objects.create(name="Versioned", start_date=today)
     version = Version.objects.get_for_object(event).get()
     assert "search_vector" not in version.serialized_data
+
+
+def test_event_picker_finds_events_by_text_and_exact_id(admin_client, today):
+    ball = models.Event.objects.create(
+        name="Boat Club Ball", start_date=today, organisation=models.Organisation.objects.create(name="Boat Club")
+    )
+    models.Event.objects.create(name="Something else", start_date=today, organisation=models.Organisation.objects.get())
+    url = reverse("api_secure", kwargs={"model": "event"})
+    by_text = admin_client.get(url, {"q": "boat ball"}).json()
+    assert [r["pk"] for r in by_text] == [ball.pk]
+    assert by_text[0]["text"].startswith(f"N{ball.pk:05d} | Boat Club Ball")
+    assert by_text[0]["text"].endswith("- Boat Club")
+    for query in (str(ball.pk), f"N{ball.pk:05d}"):
+        assert [r["pk"] for r in admin_client.get(url, {"q": query}).json()][0] == ball.pk

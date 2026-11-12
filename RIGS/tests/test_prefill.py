@@ -167,3 +167,12 @@ def test_prefill_is_only_applied_on_get(admin_client, records):
     assert response.status_code == 200
     assert response.context["prefilled"] is False
     assert "has been pre-filled from an enquiry" not in response.content.decode()
+
+
+def test_event_prefill_links_the_event_it_is_based_on(db):
+    base = models.Event.objects.create(
+        name="Ball 2025", start_date="2025-03-14", person=models.Person.objects.create(name="P")
+    )
+    assert prefill.event_initial(encode({"name": "Ball", "based_on_id": base.pk}))["based_on"] == base.pk
+    assert "based_on" not in prefill.event_initial(encode({"name": "Ball", "based_on_id": 99999}))
+    assert "based_on" not in prefill.enquiry_initial(encode({"name": "Ball", "based_on_id": base.pk}))

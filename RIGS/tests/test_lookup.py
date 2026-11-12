@@ -73,5 +73,28 @@ def test_people_by_email_includes_usual_organisations(client, api_user, data):
 
 def test_bad_requests(client, api_user, data):
     assert get(client, api_user, "venues").status_code == 400
-    assert get(client, api_user, "events", q="x").status_code == 404
+    assert get(client, api_user, "widgets", q="x").status_code == 404
     assert get(client, api_user, "venues", email="a@b.com").status_code == 400
+
+
+def test_events_for_the_same_client_are_found_most_recent_first_without_cancelled(client, api_user, data):
+    org = models.Organisation.objects.get(name="Boat Club")
+    models.Event.objects.create(name="Boat Club Ball 2025", start_date="2025-03-14", organisation=org)
+    models.Event.objects.create(
+        name="Boat Club Dinner", start_date="2025-05-01", organisation=org, status=models.Event.CANCELLED
+    )
+    models.Event.objects.create(name="Unrelated Gig", start_date="2025-03-20", person=models.Person.objects.first())
+    results = get(client, api_user, "events", organisation_id=org.pk).json()["results"]
+    assert [r["name"] for r in results] == ["E", "Boat Club Ball 2025"]
+    assert results[1]["organisation"] == "Boat Club"
+    assert results[1]["start_date"] == "2025-03-14"
+
+
+def test_events_can_be_found_by_text(client, api_user, data):
+    models.Event.objects.create(name="Summer Ball", start_date="2025-06-20", person=models.Person.objects.first())
+    names = [r["name"] for r in get(client, api_user, "events", q="summer ball").json()["results"]]
+    assert names == ["Summer Ball"]
+
+
+def test_events_need_a_filter(client, api_user, data):
+    assert get(client, api_user, "events").status_code == 400

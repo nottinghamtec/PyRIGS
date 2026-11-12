@@ -36,6 +36,7 @@ class EventForm(forms.ModelForm):
         "venue": models.Venue,
         "mic": models.Profile,
         "checked_in_by": models.Profile,
+        "based_on": models.Event,
     }
 
     @property
@@ -106,6 +107,12 @@ class EventForm(forms.ModelForm):
 
         return item
 
+    def clean_based_on(self):
+        based_on = self.cleaned_data.get("based_on")
+        if based_on is not None and based_on.pk == self.instance.pk:
+            raise forms.ValidationError("An event can't be based on itself.")
+        return based_on
+
     def clean(self):
         if self.cleaned_data.get("is_rig") and not (
             self.cleaned_data.get("person") or self.cleaned_data.get("organisation")
@@ -173,6 +180,7 @@ class EventForm(forms.ModelForm):
             "sharepoint_url",
             "default_response_sent",
             "parking_and_access",
+            "based_on",
         ]
 
 

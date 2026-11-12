@@ -148,6 +148,14 @@ class SecureAPIRequest(generic.View):
 
         # Supply data for autocomplete ajax request in json form
         term = request.GET.get("q", None)
+        if term and model == "event":
+            return JsonResponse(
+                [
+                    {"pk": e.pk, "value": e.pk, "text": e.picker_label, "update": reverse("event_detail", args=[e.pk])}
+                    for e in search.search_events(term)
+                ],
+                safe=False,
+            )
         if term:
             if fields is None:  # Default to just name
                 fields = ["name"]

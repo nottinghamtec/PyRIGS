@@ -572,6 +572,12 @@ class Event(models.Model, RevisionMixin):
         return "????"
 
     @property
+    def picker_label(self):
+        client = self.organisation or self.person
+        label = f"{self.display_id} | {self.name} ({self.start_date:%d %b %Y})"
+        return f"{label} - {client.name}" if client else label
+
+    @property
     def needs_mic(self):
         return self.is_rig and not self.dry_hire
 

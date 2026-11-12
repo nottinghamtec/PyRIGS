@@ -276,6 +276,28 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mb-3" data-bs-toggle="tooltip" title="The previous event this one is a repeat of. Search by name, or enter an event number (e.g. N01234)">
+                            <label for="{{ form.based_on.id_for_label }}"
+                                   class="col-sm-4 col-form-label">{{ form.based_on.label }}</label>
+
+                            <div class="col-sm-8">
+                                <div class="row">
+                                    <div class="col-sm-9 col-md-7 col-lg-8">
+                                        <select id="{{ form.based_on.id_for_label }}" name="{{ form.based_on.name }}" class="ts-select" data-live-search="true" data-sourceurl="{% url 'api_secure' model='event' %}">
+                                        {% if based_on %}
+                                            <option value="{{ based_on.pk }}" selected="selected" data-update_url="{% url 'event_detail' based_on.pk %}">{{ based_on.picker_label }}</option>
+                                        {% endif %}
+                                        </select>
+                                        {{ form.based_on.errors }}
+                                    </div>
+                                    <div class="col-sm-3 col-md-5 col-lg-4 align-right">
+                                        <a {% if based_on %}href="{% url 'event_detail' based_on.pk %}"{% endif %} class="btn btn-secondary" id="{{ form.based_on.id_for_label }}-update" target="_blank" rel="noopener">
+                                            <span class="fas fa-external-link-alt"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label for="{{ form.start_date.id_for_label }}"
                                    class="col-sm-4 col-form-label">{{ form.start_date.label }}</label>

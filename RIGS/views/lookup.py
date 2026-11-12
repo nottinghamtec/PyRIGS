@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views import View
 
+from PyRIGS import search
 from RIGS import models
 
 STOPWORDS = {"the", "of", "and", "at", "in", "a", "an", "for", "to"}
@@ -62,10 +63,47 @@ def _person(p):
     }
 
 
+def _event(e):
+    return {
+        "id": e.pk,
+        "ref": str(e.display_id),
+        "name": e.name,
+        "start_date": e.start_date.isoformat(),
+        "end_date": e.end_date.isoformat() if e.end_date else None,
+        "organisation": e.organisation.name if e.organisation else None,
+        "person": e.person.name if e.person else None,
+        "venue": e.venue.name if e.venue else None,
+    }
+
+
+def _digits(value):
+    return int(value) if value and value.isdigit() else None
+
+
+def _previous_events(request):
+    """Events for the same client first (most recent first), then text matches, never cancelled ones"""
+    organisation, person = _digits(request.GET.get("organisation_id")), _digits(request.GET.get("person_id"))
+    query = request.GET.get("q", "").strip()
+    events = models.Event.objects.select_related("person", "organisation", "venue").exclude(
+        status=models.Event.CANCELLED
+    )
+    client = Q(pk__in=[])
+    if organisation:
+        client |= Q(organisation_id=organisation)
+    if person:
+        client |= Q(person_id=person)
+    found = list(events.filter(client).order_by("-start_date")[:MAX_RESULTS]) if (organisation or person) else []
+    if query:
+        seen = {e.pk for e in found}
+        found += [e for e in search.search_events(query, MAX_RESULTS) if e.pk not in seen and e.status != e.CANCELLED]
+    return found[:MAX_RESULTS]
+
+
 KINDS = {
     "venues": (models.Venue, "RIGS.view_venue", _venue),
     "organisations": (models.Organisation, "RIGS.view_organisation", _organisation),
     "people": (models.Person, "RIGS.view_person", _person),
+    "events": (models.Event, "RIGS.view_event", _event),
 }
 
 
@@ -83,7 +121,11 @@ class LookupView(View):
 
         email = request.GET.get("email", "").strip()
         query = request.GET.get("q", "").strip()
-        if email and kind in ("people", "organisations"):
+        if kind == "events":
+            results = _previous_events(request)
+            if not results and not (query or request.GET.get("organisation_id") or request.GET.get("person_id")):
+                return JsonResponse({"error": "q, organisation_id or person_id is required"}, status=400)
+        elif email and kind in ("people", "organisations"):
             results = list(model.objects.filter(email__iexact=email)[:MAX_RESULTS])
         elif query:
             results = _rank(model.objects.all(), query)

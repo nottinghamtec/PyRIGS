@@ -47,7 +47,7 @@ def _clean(data):
             clean[key] = datetime.time.fromisoformat(data[key])
         except KeyError, TypeError, ValueError:
             pass
-    for key in ("venue_id", "organisation_id", "person_id"):
+    for key in ("venue_id", "organisation_id", "person_id", "based_on_id"):
         if isinstance(data.get(key), int) and not isinstance(data[key], bool):
             clean[key] = data[key]
     return clean
@@ -82,6 +82,7 @@ def _links(data):
         "person": _existing(models.Person, data.get("person_id")),
         "organisation": _existing(models.Organisation, data.get("organisation_id")),
         "venue": _existing(models.Venue, data.get("venue_id")),
+        "based_on": _existing(models.Event, data.get("based_on_id")),
     }
     return {k: v for k, v in found.items() if v is not None}
 
@@ -106,7 +107,7 @@ def enquiry_initial(value):
     links = _links(data)
     initial = {k: data[k] for k in ("name", "start_date", "end_date") if k in data}
     initial.update({k: v for k, v in links.items() if k in ("person", "organisation")})
-    text = _text(data, {k for k in links if k != "venue"}, include_times=True)
+    text = _text(data, {k for k in links if k in ("person", "organisation")}, include_times=True)
     if text:
         initial["notes"] = text
     return initial
