@@ -73,6 +73,7 @@ def _event(e):
         "organisation": e.organisation.name if e.organisation else None,
         "person": e.person.name if e.person else None,
         "venue": e.venue.name if e.venue else None,
+        "venue_id": e.venue_id,
     }
 
 

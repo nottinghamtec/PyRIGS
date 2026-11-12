@@ -88,6 +88,7 @@ def test_events_for_the_same_client_are_found_most_recent_first_without_cancelle
     assert [r["name"] for r in results] == ["E", "Boat Club Ball 2025"]
     assert results[1]["organisation"] == "Boat Club"
     assert results[1]["start_date"] == "2025-03-14"
+    assert results[1]["venue"] is None and results[1]["venue_id"] is None
 
 
 def test_events_can_be_found_by_text(client, api_user, data):
