@@ -53,15 +53,24 @@
                                 'non-rig': '#25AAE2'
                             };
                             doc.forEach(function (item) {
+                                start = item.earliest
                                 end = item.latest
-                                allDay = false
-                                if(end.indexOf("T") < 0){ //If latest does not contain a time
-                                   end = moment(end + " 23:59").format("YYYY-MM-DD[T]HH:mm:ss")
-                                   allDay = true
+                                startHasTime = start.indexOf("T") >= 0
+                                endHasTime = end.indexOf("T") >= 0
+                                allDay = !startHasTime && !endHasTime
+                                // End dates are exclusive, so a date-only end means "until the end of that day"
+                                if(!endHasTime){
+                                   end = moment(end).add(1, 'days').format("YYYY-MM-DD[T]HH:mm:ss")
+                                }
+                                if(!allDay && !startHasTime){
+                                   start = moment(start).format("YYYY-MM-DD[T]HH:mm:ss")
+                                }
+                                if(allDay){
+                                   end = moment(end).format("YYYY-MM-DD")
                                 }
 
                                 thisEvent = {
-                                    'start': item.earliest,
+                                    'start': start,
                                     'end': end,
                                     'className': 'modal-href',
                                     'contrastColor': 'black',
