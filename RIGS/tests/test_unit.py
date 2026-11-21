@@ -669,7 +669,12 @@ def test_checkin_redirects_to_event(client, admin_user, basic_event):
         models.EventCheckIn.objects.create(event=other, person=admin_user, time=timezone.now(), role="Crew")
     response = client.post(
         reverse("event_checkin", kwargs={"pk": basic_event.pk}),
-        {"event": basic_event.pk, "person": admin_user.pk, "time": timezone.now().strftime("%Y-%m-%d %H:%M:%S"), "role": "Crew"},
+        {
+            "event": basic_event.pk,
+            "person": admin_user.pk,
+            "time": timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "role": "Crew",
+        },
     )
     assert response.status_code == 302
     assert response.url == reverse("event_detail", kwargs={"pk": basic_event.pk})
