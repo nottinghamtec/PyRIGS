@@ -662,6 +662,19 @@ def test_checkin_person_picker_only_for_event_mic(client, admin_user, basic_even
     assertNotContains(client.get(url), "ts-select")
 
 
+def test_checkin_redirects_to_event(client, admin_user, basic_event):
+    client.force_login(admin_user)
+    other = models.Event.objects.create(name="Other", is_rig=True, start_date=date.today())
+    for _ in range(5):
+        models.EventCheckIn.objects.create(event=other, person=admin_user, time=timezone.now(), role="Crew")
+    response = client.post(
+        reverse("event_checkin", kwargs={"pk": basic_event.pk}),
+        {"event": basic_event.pk, "person": admin_user.pk, "time": timezone.now().strftime("%Y-%m-%d %H:%M:%S"), "role": "Crew"},
+    )
+    assert response.status_code == 302
+    assert response.url == reverse("event_detail", kwargs={"pk": basic_event.pk})
+
+
 def _invoiced_event(name, days_ago, cost, payments=(), status=models.Event.BOOKED):
     event = models.Event.objects.create(
         name=name, is_rig=True, status=status, start_date=date.today() - timedelta(days=days_ago)

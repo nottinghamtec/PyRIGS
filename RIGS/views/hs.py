@@ -13,7 +13,7 @@ from reversion import revisions as reversion
 
 from RIGS import models, forms
 from RIGS.views.rigboard import get_related
-from PyRIGS.views import PrintView, ModalURLMixin
+from PyRIGS.views import PrintView, ModalURLMixin, is_ajax
 from django.shortcuts import redirect
 from notifications import triggers
 
@@ -363,7 +363,9 @@ class EventCheckIn(generic.CreateView, ModalURLMixin):
     form_class = forms.EventCheckInForm
 
     def get_success_url(self):
-        return self.get_close_url("event_detail", "event_detail")  # Well, that's one way of doing that...!
+        if is_ajax(self.request):
+            return self.get_close_url("event_detail", "event_detail")
+        return reverse("event_detail", kwargs={"pk": self.object.event_id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -398,7 +400,9 @@ class EventCheckInEdit(generic.UpdateView, ModalURLMixin):
         return super().dispatch(request)
 
     def get_success_url(self):
-        return self.get_close_url("event_detail", "event_detail")  # Well, that's one way of doing that...!
+        if is_ajax(self.request):
+            return self.get_close_url("event_detail", "event_detail")
+        return reverse("event_detail", kwargs={"pk": self.object.event_id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
