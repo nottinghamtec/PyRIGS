@@ -2,6 +2,7 @@ import json
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.template.loader import render_to_string
 from django.test import RequestFactory
 from django.urls import reverse
 
@@ -89,6 +90,12 @@ WINDOWS = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, 
 LINUX = "Mozilla/5.0 (X11; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0"
 
 
+def picker_announcement(user, user_agent):
+    request = RequestFactory().get("/", HTTP_USER_AGENT=user_agent)
+    request.user = user
+    return render_to_string("changelog/entries/2026-11-05-2-command-picker.html", request=request)
+
+
 @pytest.mark.parametrize(
     "user_agent, keys, label",
     [
@@ -99,10 +106,10 @@ LINUX = "Mozilla/5.0 (X11; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0"
         ("", "<kbd>Ctrl</kbd> <kbd>K</kbd>", "Ctrl K"),
     ],
 )
-def test_shortcuts_match_the_viewers_device(admin_client, user_agent, keys, label):
+def test_shortcuts_match_the_viewers_device(admin_client, admin_user, user_agent, keys, label):
     response = admin_client.get(reverse("index"), HTTP_USER_AGENT=user_agent)
     content = response.content.decode()
-    assert f"Press {keys} on any page" in content
+    assert f"Press {keys} on any page" in picker_announcement(admin_user, user_agent)
     assert f'<kbd class="command-palette-shortcut">{label}</kbd>' in content
     assert f'data-shortcut="{label}"' in content
     other = "Ctrl" if "⌘" in label else "⌘"
@@ -110,11 +117,11 @@ def test_shortcuts_match_the_viewers_device(admin_client, user_agent, keys, labe
 
 
 @pytest.mark.parametrize("user_agent, alt", [(MAC, "⌥"), (WINDOWS, "Alt")])
-def test_quick_jump_keys_match_the_viewers_device(admin_client, user_agent, alt):
+def test_quick_jump_keys_match_the_viewers_device(admin_client, admin_user, user_agent, alt):
     content = admin_client.get(reverse("index"), HTTP_USER_AGENT=user_agent).content.decode()
     assert f'data-alt="{alt}"' in content
     assert f"<kbd>{alt}</kbd> <kbd>1</kbd>–<kbd>9</kbd> jump" in content
-    assert f"press <kbd>{alt}</kbd> and a number" in content
+    assert f"press <kbd>{alt}</kbd> and a number" in picker_announcement(admin_user, user_agent)
 
 
 def test_pat_commands_follow_permissions(basic_user):

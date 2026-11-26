@@ -1,0 +1,14 @@
+{% load changelog %}
+{% changelog_entry author="joebanks" date="2026-11-26" title="Export PAT records to PDF" %}
+<p>Pick the assets and tests you want, choose the client organisation and download their PAT records as a PDF, including equipment that isn't in RIGS.</p>
+<details class="mt-2">
+    <summary>All the changes</summary>
+    <ul class="mt-2 mb-0">
+        <li>Use <em>Export Records</em> under <em>PAT</em>, <em>Export</em> on an asset or upload, or <em>Export PAT Records</em> in the command picker</li>
+        <li>Search by asset ID, description, serial number or location, filter by upload or test date, or paste a list of asset IDs</li>
+        <li>For each asset include just the latest test, every test, or only the ones you tick</li>
+        <li>The simple format is one line per test; the detailed format starts each asset on a new page with all of its readings</li>
+        <li>Results for IDs that aren't in RIGS are now kept when a file is uploaded</li>
+    </ul>
+</details>
+{% endchangelog_entry %}
