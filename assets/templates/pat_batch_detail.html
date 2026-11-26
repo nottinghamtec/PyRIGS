@@ -27,6 +27,7 @@
       <div class="card-header">Asset IDs not found in RIGS</div>
       <div class="card-body">
         <p>{{ object.unmatched_asset_ids|join:", " }}</p>
+        {% if unmatched_count %}<p>{{ unmatched_count }} result{{ unmatched_count|pluralize }} for these {{ unmatched_count|pluralize:"is,are" }} kept and can be exported.</p>{% endif %}
         {% if perms.assets.add_pattestbatch %}
         <form method="POST" action="{% url 'pat_batch_reprocess' object.pk %}">
           {% csrf_token %}
@@ -50,7 +51,7 @@
       <tbody>
         {% for conflict in object.conflicts %}
         <tr>
-          <td><a href="{% url 'asset_detail' conflict.asset_id %}">{{ conflict.asset_id }}</a></td>
+          <td>{% if conflict.unmatched %}{{ conflict.asset_id }} <span class="text-body-secondary">(not in RIGS)</span>{% else %}<a href="{% url 'asset_detail' conflict.asset_id %}">{{ conflict.asset_id }}</a>{% endif %}</td>
           <td>{{ conflict.tested_at }}</td>
           <td>{{ conflict.existing }}</td>
           <td>{{ conflict.new }}</td>

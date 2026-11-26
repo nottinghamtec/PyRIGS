@@ -6,6 +6,9 @@
   <h2>Delete PAT upload {{ batch.original_filename }}</h2>
   <p>This removes the upload and <strong>{{ record_count }} result{{ record_count|pluralize }}</strong> for <strong>{{ asset_count }} asset{{ asset_count|pluralize }}</strong>.
      Each asset's PAT status will go back to its latest remaining result.</p>
+  {% if unmatched_count %}
+  <p>It also removes <strong>{{ unmatched_count }} result{{ unmatched_count|pluralize }}</strong> for IDs that aren't in RIGS, which can then no longer be exported.</p>
+  {% endif %}
   {% if untested_count %}
   <p><strong>{{ untested_count }} asset{{ untested_count|pluralize }}</strong> would have no PAT results left and show as never tested:
     {% for asset in untested_assets %}<a href="{% url 'asset_detail' asset.asset_id %}">{{ asset.asset_id }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if more_count %}, and {{ more_count }} more{% endif %}.

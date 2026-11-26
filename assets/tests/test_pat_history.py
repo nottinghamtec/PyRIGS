@@ -41,9 +41,10 @@ def test_upload_creates_a_revision_with_the_batch_and_every_record(admin_client,
 
 
 def test_nothing_new_makes_no_revision(admin_client, pat_asset):
-    upload(admin_client, b.sss_file(b.test_result()))
+    known, unknown = b.test_result(), b.test_result(asset_id="NOPE")
+    upload(admin_client, b.sss_file(known, unknown))
     before = Revision.objects.count()
-    upload(admin_client, b.sss_file(b.test_result(), b.test_result(asset_id="NOPE")), "again.sss")
+    upload(admin_client, b.sss_file(unknown, known), "again.sss")
     assert Revision.objects.count() == before
 
 

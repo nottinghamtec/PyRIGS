@@ -634,13 +634,14 @@ def report_pat_import(request, summary):
             "different outcome. They weren't imported; review them below.",
         )
     if summary.unmatched:
-        advice = (
-            "create them, then use Re-match on this page" if summary.batch else "create them and upload the file again"
-        )
-        messages.warning(
-            request,
-            f"{len(set(summary.unmatched))} asset IDs in the file don't exist in RIGS and were skipped; {advice}",
-        )
+        if summary.batch:
+            advice = (
+                "Their results are kept for export. To add them to assets, create the assets, "
+                "then use Re-match on this page."
+            )
+        else:
+            advice = "Their results are already kept from an earlier upload. To add them to assets, create the assets and re-match that upload."
+        messages.warning(request, f"{len(set(summary.unmatched))} asset IDs in the file don't exist in RIGS. {advice}")
 
 
 class PATBatchReprocess(generic.View):
@@ -693,6 +694,7 @@ class PATBatchDetail(generic.DetailView):
                 "page_title": f"PAT Upload {self.object.original_filename}",
                 "records": page.object_list,
                 "record_count": paginator.count,
+                "unmatched_count": self.object.unmatched_results.count(),
                 "page_obj": page,
                 "paginator": paginator,
                 "is_paginated": paginator.num_pages > 1,
@@ -733,6 +735,7 @@ class PATBatchDelete(generic.FormView):
                 "page_title": f"Delete PAT upload {self.batch.original_filename}",
                 "batch": self.batch,
                 "record_count": records.count(),
+                "unmatched_count": self.batch.unmatched_results.count(),
                 "asset_count": affected.count(),
                 "untested_assets": list(untested.order_by("asset_id_prefix", "asset_id_number")[:30]),
                 "untested_count": untested.count(),

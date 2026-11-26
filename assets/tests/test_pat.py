@@ -282,27 +282,28 @@ def reprocess(client, batch, accept=None):
 
 
 def test_file_with_nothing_new_is_not_stored(admin_client, pat_asset):
-    first = b.sss_file(b.test_result(tested_at=WHEN))
-    upload(admin_client, first)
-    response = upload(
-        admin_client, b.sss_file(b.test_result(tested_at=WHEN), b.test_result(asset_id="NOPE")), "again.sss"
-    )
+    known, unknown = b.test_result(tested_at=WHEN), b.test_result(asset_id="NOPE")
+    upload(admin_client, b.sss_file(known, unknown))
+    response = upload(admin_client, b.sss_file(unknown, known), "again.sss")
 
     assertRedirects(response, reverse("pat_upload"))
     assert models.PATTestBatch.objects.count() == 1
     assert any("Nothing was imported" in m for m in messages_of(response))
-    assert any("upload the file again" in m for m in messages_of(response))
+    assert any("already kept from an earlier upload" in m for m in messages_of(response))
+    assert models.PATUnmatchedResult.objects.count() == 1
 
 
-def test_all_unmatched_file_can_be_uploaded_again_once_assets_exist(admin_client, test_asset):
-    data = b.sss_file(b.test_result(asset_id="4334"))
-    upload(admin_client, data)
-    assert not models.PATTestBatch.objects.exists()
+def test_an_all_unmatched_file_is_kept_and_can_be_rematched_once_assets_exist(admin_client, test_asset):
+    response = upload(admin_client, b.sss_file(b.test_result(asset_id="4334")))
+    batch = models.PATTestBatch.objects.get()
+    assert batch.unmatched_results.get().asset_id == "4334"
+    assert any("kept for export" in m for m in messages_of(response))
 
     test_asset.asset_id = "4334"
     test_asset.save()
-    upload(admin_client, data)
+    reprocess(admin_client, batch)
     assert models.PATTestRecord.objects.filter(asset=test_asset).count() == 1
+    assert not models.PATUnmatchedResult.objects.exists()
 
 
 def test_rejected_duplicate_links_to_existing_upload(admin_client, pat_asset):

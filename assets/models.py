@@ -317,21 +317,7 @@ class PATTestRecordQuerySet(models.QuerySet):
         ).order_by("status_rank", "-tested_at", "asset__asset_id_prefix", "asset__asset_id_number", "pk")
 
 
-@reversion.register
-class PATTestRecord(models.Model):
-    NOT_TESTED = "not_tested"
-    FAILED = "failed"
-    OVERDUE = "overdue"
-    IN_DATE = "in_date"
-    STATUS_LABELS = {
-        NOT_TESTED: "Never PAT tested",
-        FAILED: "Failed PAT",
-        OVERDUE: "PAT overdue",
-        IN_DATE: "PAT in date",
-    }
-
-    batch = models.ForeignKey(PATTestBatch, on_delete=models.CASCADE, related_name="records")
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="pat_tests")
+class PATResultData(models.Model):
     tested_at = models.DateTimeField()
     passed = models.BooleanField(null=True)
     operator = models.CharField(max_length=16, blank=True)
@@ -339,53 +325,9 @@ class PATTestRecord(models.Model):
     next_full_test_date = models.DateField(null=True, blank=True)
     next_visual_test_date = models.DateField(null=True, blank=True)
     details = models.JSONField(default=dict, blank=True)
-    # A result suppressed by hand, such as one entered against the wrong asset, stays listed but doesn't count
-    suppressed_at = models.DateTimeField(null=True, blank=True)
-    suppressed_by = models.ForeignKey(
-        Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name="suppressed_pat_results"
-    )
-    suppressed_reason = models.TextField(blank=True)
-
-    objects = PATTestRecordQuerySet.as_manager()
-
-    reversion_hide = True
-    reversion_timeline_field = "asset"
-    reversion_expandable = True
 
     class Meta:
-        ordering = ["-tested_at"]
-        verbose_name = "portable appliance test result"
-        constraints = [models.UniqueConstraint(fields=["asset", "tested_at"], name="unique_pat_test_per_asset_time")]
-
-    def __str__(self):
-        return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
-
-    def get_absolute_url(self):
-        return self.asset.get_absolute_url()
-
-    @property
-    def is_suppressed(self):
-        return self.suppressed_at is not None
-
-    @classmethod
-    def status_from(cls, tested_at, passed, next_full_test_date):
-        if tested_at is None:
-            return cls.NOT_TESTED
-        if passed is False:
-            return cls.FAILED
-        if next_full_test_date and next_full_test_date < timezone.localdate():
-            return cls.OVERDUE
-        return cls.IN_DATE
-
-    @classmethod
-    def status_for(cls, record):
-        if record is None:
-            return cls.NOT_TESTED
-        return cls.status_from(record.tested_at, record.passed, record.next_full_test_date)
-
-    @property
-    def status(self):
-        return self.status_for(self)
+        abstract = True
 
     @staticmethod
     def describe_reading(item):
@@ -549,6 +491,85 @@ class PATTestRecord(models.Model):
             )
         return rows
 
+
+@reversion.register
+class PATTestRecord(PATResultData):
+    NOT_TESTED = "not_tested"
+    FAILED = "failed"
+    OVERDUE = "overdue"
+    IN_DATE = "in_date"
+    STATUS_LABELS = {
+        NOT_TESTED: "Never PAT tested",
+        FAILED: "Failed PAT",
+        OVERDUE: "PAT overdue",
+        IN_DATE: "PAT in date",
+    }
+
+    batch = models.ForeignKey(PATTestBatch, on_delete=models.CASCADE, related_name="records")
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="pat_tests")
+    # A result suppressed by hand, such as one entered against the wrong asset, stays listed but doesn't count
+    suppressed_at = models.DateTimeField(null=True, blank=True)
+    suppressed_by = models.ForeignKey(
+        Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name="suppressed_pat_results"
+    )
+    suppressed_reason = models.TextField(blank=True)
+
+    objects = PATTestRecordQuerySet.as_manager()
+
+    reversion_hide = True
+    reversion_timeline_field = "asset"
+    reversion_expandable = True
+
+    class Meta:
+        ordering = ["-tested_at"]
+        verbose_name = "portable appliance test result"
+        constraints = [models.UniqueConstraint(fields=["asset", "tested_at"], name="unique_pat_test_per_asset_time")]
+
+    def __str__(self):
+        return f"{self.asset.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"
+
+    def get_absolute_url(self):
+        return self.asset.get_absolute_url()
+
+    @property
+    def is_suppressed(self):
+        return self.suppressed_at is not None
+
+    @classmethod
+    def status_from(cls, tested_at, passed, next_full_test_date):
+        if tested_at is None:
+            return cls.NOT_TESTED
+        if passed is False:
+            return cls.FAILED
+        if next_full_test_date and next_full_test_date < timezone.localdate():
+            return cls.OVERDUE
+        return cls.IN_DATE
+
+    @classmethod
+    def status_for(cls, record):
+        if record is None:
+            return cls.NOT_TESTED
+        return cls.status_from(record.tested_at, record.passed, record.next_full_test_date)
+
+    @property
+    def status(self):
+        return self.status_for(self)
+
     @property
     def status_label(self):
         return self.STATUS_LABELS[self.status]
+
+
+class PATUnmatchedResult(PATResultData):
+    batch = models.ForeignKey(PATTestBatch, on_delete=models.CASCADE, related_name="unmatched_results")
+    asset_id = models.CharField(max_length=32)
+
+    class Meta:
+        ordering = ["-tested_at"]
+        verbose_name = "unmatched portable appliance test result"
+        constraints = [
+            models.UniqueConstraint(fields=["asset_id", "tested_at"], name="unique_unmatched_pat_test_per_id_time")
+        ]
+
+    def __str__(self):
+        return f"{self.asset_id} {'passed' if self.passed else 'failed'} on {self.tested_at:%Y-%m-%d}"

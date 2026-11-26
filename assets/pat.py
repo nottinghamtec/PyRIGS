@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import content_disposition_header
 from reversion import revisions as reversion
@@ -21,6 +22,7 @@ class Plan:
     duplicates: list = field(default_factory=list)
     unmatched: list = field(default_factory=list)
     conflicts: list = field(default_factory=list)
+    new_unmatched: list = field(default_factory=list)
 
 
 @dataclass
@@ -31,14 +33,15 @@ class ImportSummary:
     duplicates: list = field(default_factory=list)
     unmatched: list = field(default_factory=list)
     conflicts: list = field(default_factory=list)
+    kept: list = field(default_factory=list)
 
 
 def normalise_asset_id(raw):
     return raw.strip().upper()
 
 
-def conflict_key(asset, tested_at):
-    return f"{asset.asset_id}|{tested_at.isoformat()}"
+def conflict_key(asset_id, tested_at):
+    return f"{asset_id}|{tested_at.isoformat()}"
 
 
 def record_fields(result):
@@ -57,54 +60,86 @@ def classify(parsed, replace_keys=()):
     asset_ids = {normalise_asset_id(result.asset_id) for result in parsed.results}
     assets = {asset.asset_id: asset for asset in models.Asset.objects.filter(asset_id__in=asset_ids)}
     existing = {
-        (record.asset_id, record.tested_at): record
-        for record in models.PATTestRecord.objects.filter(asset__in=assets.values())
+        (record.asset.asset_id, record.tested_at): record
+        for record in models.PATTestRecord.objects.filter(asset__in=assets.values()).select_related("asset")
+    }
+    existing_unmatched = {
+        (result.asset_id, result.tested_at): result
+        for result in models.PATUnmatchedResult.objects.filter(asset_id__in=asset_ids - assets.keys())
     }
 
     plan = Plan()
     seen = set()
     for result in parsed.results:
-        asset = assets.get(normalise_asset_id(result.asset_id))
+        asset_id = normalise_asset_id(result.asset_id)
+        asset = assets.get(asset_id)
         if asset is None:
             plan.unmatched.append(result.asset_id)
-            continue
+            if not asset_id:
+                continue
         tested_at = timezone.make_aware(result.tested_at)
-        key = (asset.pk, tested_at)
+        key = (asset_id, tested_at)
         if key in seen:
-            plan.duplicates.append(asset.asset_id)
+            if asset is not None:
+                plan.duplicates.append(asset_id)
             continue
         seen.add(key)
 
         fields = record_fields(result)
-        current = existing.get(key)
+        current = existing.get(key) if asset is not None else existing_unmatched.get(key)
         if current is None:
-            plan.new.append(models.PATTestRecord(asset=asset, tested_at=tested_at, **fields))
+            if asset is not None:
+                plan.new.append(models.PATTestRecord(asset=asset, tested_at=tested_at, **fields))
+            else:
+                plan.new_unmatched.append(models.PATUnmatchedResult(asset_id=asset_id, tested_at=tested_at, **fields))
         elif current.passed == fields["passed"] and current.details == fields["details"]:
-            plan.duplicates.append(asset.asset_id)
-        elif conflict_key(asset, tested_at) in replace_keys:
+            if asset is not None:
+                plan.duplicates.append(asset_id)
+        elif conflict_key(asset_id, tested_at) in replace_keys:
             plan.replacements.append((current, fields))
         else:
-            plan.conflicts.append(
-                {
-                    "key": conflict_key(asset, tested_at),
-                    "asset_id": asset.asset_id,
-                    "tested_at": f"{timezone.localtime(tested_at):%d/%m/%Y %H:%M}",
-                    "existing": RESULT_LABELS[current.passed],
-                    "new": RESULT_LABELS[fields["passed"]],
-                    "differs": "result" if current.passed != fields["passed"] else "readings",
-                }
-            )
+            conflict = {
+                "key": conflict_key(asset_id, tested_at),
+                "asset_id": asset_id,
+                "tested_at": f"{timezone.localtime(tested_at):%d/%m/%Y %H:%M}",
+                "existing": RESULT_LABELS[current.passed],
+                "new": RESULT_LABELS[fields["passed"]],
+                "differs": "result" if current.passed != fields["passed"] else "readings",
+            }
+            if asset is None:
+                conflict["unmatched"] = True
+            plan.conflicts.append(conflict)
     return plan
+
+
+def result_asset_id(result):
+    return result.asset.asset_id if isinstance(result, models.PATTestRecord) else result.asset_id
+
+
+def keep_unmatched(batch, results):
+    for result in results:
+        result.batch = batch
+    models.PATUnmatchedResult.objects.bulk_create(results)
+
+
+def discard_unmatched(records):
+    if not records:
+        return
+    matches = Q()
+    for record in records:
+        matches |= Q(asset_id=record.asset.asset_id, tested_at=record.tested_at)
+    models.PATUnmatchedResult.objects.filter(matches).delete()
 
 
 def summarise(plan, batch):
     return ImportSummary(
         batch=batch,
         imported=[record.asset.asset_id for record in plan.new],
-        replaced=[current.asset.asset_id for current, _ in plan.replacements],
+        replaced=[result_asset_id(current) for current, _ in plan.replacements],
         duplicates=plan.duplicates,
         unmatched=plan.unmatched,
         conflicts=plan.conflicts,
+        kept=[result.asset_id for result in plan.new_unmatched],
     )
 
 
@@ -117,7 +152,7 @@ def add_records_to_revision(records):
 def import_sss(parsed, content, filename, sha256, user):
     """Import a parsed file. If it has nothing new and no conflicts, nothing is stored and summary.batch is None."""
     plan = classify(parsed)
-    if not plan.new and not plan.conflicts:
+    if not (plan.new or plan.new_unmatched or plan.conflicts):
         return summarise(plan, None)
 
     batch = models.PATTestBatch(
@@ -138,6 +173,8 @@ def import_sss(parsed, content, filename, sha256, user):
             record.batch = batch
         models.PATTestRecord.objects.bulk_create(plan.new)
         add_records_to_revision(plan.new)
+    keep_unmatched(batch, plan.new_unmatched)
+    discard_unmatched(plan.new)
     return summarise(plan, batch)
 
 
@@ -161,40 +198,56 @@ def reprocess(batch, user, accept=None, refresh=False):
     If accept is the key of one of the batch's conflicts, that result replaces the one already recorded.
     With refresh, every recorded result that differs from what the file now decodes to is brought up to date
     (after the parser has improved), and each stays attached to the upload it came from.
-    Nothing is written, and no revision made, unless something changed.
+    Results for asset IDs still not in RIGS are kept for export if they aren't already.
+    No revision is made unless something recorded in RIGS changed.
     """
     plan = plan_reprocess(batch, accept, refresh)
+    record_replacements = [(c, f) for c, f in plan.replacements if isinstance(c, models.PATTestRecord)]
+    unmatched_replacements = [(c, f) for c, f in plan.replacements if isinstance(c, models.PATUnmatchedResult)]
 
     unmatched = sorted(set(plan.unmatched))
-    if not (
-        plan.new or plan.replacements or unmatched != batch.unmatched_asset_ids or plan.conflicts != batch.conflicts
+    if (
+        plan.new
+        or record_replacements
+        or unmatched_replacements
+        or unmatched != batch.unmatched_asset_ids
+        or plan.conflicts != batch.conflicts
     ):
-        return summarise(plan, batch)
+        with reversion.create_revision():
+            if user is not None:
+                reversion.set_user(user)
+            if refresh:
+                reversion.set_comment(f"Refreshed PAT results from {batch.original_filename}")
+            elif plan.replacements:
+                assets = ", ".join(result_asset_id(current) for current, _ in plan.replacements)
+                reversion.set_comment(
+                    f"Replaced PAT results for {assets} with the version in {batch.original_filename}"
+                )
+            else:
+                reversion.set_comment(f"Re-matched PAT results in {batch.original_filename}")
+            for record in plan.new:
+                record.batch = batch
+            models.PATTestRecord.objects.bulk_create(plan.new)
+            add_records_to_revision(plan.new)
+            for current, fields in record_replacements:
+                apply_replacement(current, fields, batch, refresh)
+            batch.unmatched_asset_ids = unmatched
+            batch.conflicts = plan.conflicts
+            batch.save(update_fields=["unmatched_asset_ids", "conflicts"])
 
-    with reversion.create_revision():
-        if user is not None:
-            reversion.set_user(user)
-        if refresh:
-            reversion.set_comment(f"Refreshed PAT results from {batch.original_filename}")
-        elif plan.replacements:
-            assets = ", ".join(current.asset.asset_id for current, _ in plan.replacements)
-            reversion.set_comment(f"Replaced PAT results for {assets} with the version in {batch.original_filename}")
-        else:
-            reversion.set_comment(f"Re-matched PAT results in {batch.original_filename}")
-        for record in plan.new:
-            record.batch = batch
-        models.PATTestRecord.objects.bulk_create(plan.new)
-        add_records_to_revision(plan.new)
-        for current, fields in plan.replacements:
-            for name, value in fields.items():
-                setattr(current, name, value)
-            if not refresh:
-                current.batch = batch
-            current.save()
-        batch.unmatched_asset_ids = unmatched
-        batch.conflicts = plan.conflicts
-        batch.save(update_fields=["unmatched_asset_ids", "conflicts"])
+    keep_unmatched(batch, plan.new_unmatched)
+    for current, fields in unmatched_replacements:
+        apply_replacement(current, fields, batch, refresh)
+    discard_unmatched(plan.new)
     return summarise(plan, batch)
+
+
+def apply_replacement(current, fields, batch, refresh):
+    for name, value in fields.items():
+        setattr(current, name, value)
+    if not refresh:
+        current.batch = batch
+    current.save()
 
 
 @transaction.atomic
