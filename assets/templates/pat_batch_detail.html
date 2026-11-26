@@ -7,6 +7,9 @@
     {% if perms.assets.delete_pattestbatch %}
     <a class="btn btn-outline-danger" href="{% url 'pat_batch_delete' object.pk %}"><span class="fas fa-trash"></span> Delete Upload</a>
     {% endif %}
+    {% if perms.RIGS.view_organisation %}
+    <a class="btn btn-primary" href="{% url 'pat_export' %}?upload={{ object.pk }}"><span class="fas fa-file-pdf"></span> Export Records</a>
+    {% endif %}
     {% if perms.assets.view_pattestbatch %}
     <a class="btn btn-primary" href="{% url 'pat_batch_download' object.pk %}"><span class="fas fa-download"></span> Download Original</a>
     {% endif %}

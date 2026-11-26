@@ -76,6 +76,16 @@ urlpatterns = [
         name="pat_batch_list",
     ),
     path(
+        "pat/export/",
+        permission_required_with_403("RIGS.view_organisation")(views.PATExport.as_view()),
+        name="pat_export",
+    ),
+    path(
+        "pat/export/assets/",
+        permission_required_with_403("RIGS.view_organisation")(views.PATExportAssets.as_view()),
+        name="pat_export_assets",
+    ),
+    path(
         "pat/<int:pk>/",
         login_required(views.PATBatchDetail.as_view()),
         name="pat_batch_detail",

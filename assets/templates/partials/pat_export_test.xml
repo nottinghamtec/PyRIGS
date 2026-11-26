@@ -1,0 +1,101 @@
+{% load linebreaksxml from filters %}
+{% with rows=test.display_steps visual=test.display_visual_checks program=test.display_program %}
+<condPageBreak height="260"/>
+<spacer length="6"/>
+<blockTable style="patTestBar" colWidths="425,70">
+    <tr>
+        <td><para style="pat.bold">Tested {{ test.tested_at|date:"j F Y, H:i" }}</para></td>
+        <td>{% include 'partials/pat_export_result.xml' with passed=test.passed %}</td>
+    </tr>
+</blockTable>
+<blockTable style="patFacts" colWidths="85,165,85,160">
+    <tr>
+        <td><para style="pat.muted">Tested by</para></td>
+        <td><para style="pat.cell">{{ test.operator|default:"-" }}</para></td>
+        <td><para style="pat.muted">Next full test</para></td>
+        <td><para style="pat.cell">{{ test.next_full_test_date|date:"j F Y"|default:"-" }}</para></td>
+    </tr>
+    <tr>
+        <td><para style="pat.muted">Location</para></td>
+        <td><para style="pat.cell">{{ test.details.location|default:"-" }}{% if test.details.site %}, {{ test.details.site }}{% endif %}</para></td>
+        <td><para style="pat.muted">Next visual test</para></td>
+        <td><para style="pat.cell">{{ test.next_visual_test_date|date:"j F Y"|default:"-" }}</para></td>
+    </tr>
+    <tr>
+        <td><para style="pat.muted">Test program</para></td>
+        <td><para style="pat.cell">{{ test.program|default:"-" }}</para></td>
+        <td><para style="pat.muted">Test instrument</para></td>
+        <td><para style="pat.cell">{{ test.batch.machine_model }} {{ test.batch.machine_serial }}</para></td>
+    </tr>
+</blockTable>
+
+{% if test.failure_reasons %}
+<para style="pat.subheading">Why it failed</para>
+{% for reason in test.failure_reasons %}<para style="pat.fail">{{ reason }}</para>{% endfor %}
+{% endif %}
+{% if test.notes %}
+<para style="pat.subheading">Notes</para>
+{% for note in test.notes %}<para style="pat.cell">{{ note|linebreaksxml }}</para>{% endfor %}
+{% endif %}
+
+{% if program.items %}
+<para style="pat.subheading">Program steps{% if program.sections > 1 %} (repeated for {{ program.sections }} sections){% endif %}</para>
+<para style="pat.cell">{% for item in program.items %}{{ item.text }}{% if not forloop.last %}; {% endif %}{% endfor %}</para>
+{% endif %}
+
+{% if visual %}
+<para style="pat.subheading">Visual inspection</para>
+<blockTable style="patList" colWidths="185,62.5,185,62.5" repeatRows="1">
+    <tr>
+        <td><para style="pat.bold">Check</para></td>
+        <td><para style="pat.bold">Result</para></td>
+        <td><para style="pat.bold">Check</para></td>
+        <td><para style="pat.bold">Result</para></td>
+    </tr>
+    {% for check in visual %}{% cycle 'left' 'right' as side silent %}
+    {% if side == 'left' %}<tr>{% endif %}
+        <td><para style="pat.cell">{{ check.kind }}{% if check.reading %}: {{ check.reading }}{% endif %}</para></td>
+        <td><para style="{% if check.status == 'PASS' %}pat.pass{% elif check.status == 'FAIL' %}pat.fail{% else %}pat.unknown{% endif %}">{{ check.status }}</para></td>
+    {% if side == 'right' %}</tr>{% elif forloop.last %}<td></td><td></td></tr>{% endif %}
+    {% endfor %}
+    {% resetcycle side %}
+</blockTable>
+{% endif %}
+
+{% if rows %}
+<para style="pat.subheading">Electrical tests</para>
+<blockTable style="patList" colWidths="185,140,100,70" repeatRows="1">
+    <tr>
+        <td><para style="pat.bold">Test</para></td>
+        <td><para style="pat.bold">Reading</para></td>
+        <td><para style="pat.bold">Limit</para></td>
+        <td><para style="pat.bold">Result</para></td>
+    </tr>
+    {% for row in rows %}
+    {% if row.section %}
+    <tr>
+        <td><para style="pat.bold">{{ row.section }}</para></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    {% elif row.prompt %}
+    <tr>
+        <td><para style="pat.muted">Prompt: {{ row.prompt }}</para></td>
+        <td></td>
+        <td></td>
+        <td>{% if row.status == 'FAIL' %}<para style="pat.fail">FAIL</para>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td><para style="pat.cell">{{ row.kind }}{% if row.repeat %} ({{ row.repeat }}){% endif %}</para></td>
+        <td><para style="pat.cell">{% if row.reading %}{{ row.reading }}{% if row.setup %} at {{ row.setup }}{% endif %}{% else %}-{% endif %}</para></td>
+        <td><para style="pat.cell">{{ row.limit|default:"-" }}</para></td>
+        <td><para style="{% if row.status == 'PASS' %}pat.pass{% elif row.status == 'FAIL' %}pat.fail{% else %}pat.unknown{% endif %}">{{ row.status }}</para></td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</blockTable>
+{% if test.has_limits %}<para style="pat.muted">Limits are the program's base limits. The tester can allow more for longer leads, so a reading above its limit can still pass.</para>{% endif %}
+{% endif %}
+{% endwith %}

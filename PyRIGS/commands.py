@@ -231,6 +231,14 @@ COMMANDS = [
         keywords="pat portable appliance testing seaward results electrical safety",
     ),
     Command(
+        "Export PAT Records",
+        ASSETS,
+        "pat_export",
+        "fa-file-pdf",
+        permission="RIGS.view_organisation",
+        keywords="pat test results certificate report pdf print client download",
+    ),
+    Command(
         "Assets Needing PAT",
         ASSETS,
         "asset_list",

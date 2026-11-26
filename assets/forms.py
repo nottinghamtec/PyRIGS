@@ -2,9 +2,11 @@ import hashlib
 
 from django import forms
 from django.conf import settings
+from django.utils import timezone
 
-from assets import models
+from assets import models, pat_export
 from assets.sss import SSSParseError, parse_sss
+from RIGS.models import Organisation
 
 
 class AssetForm(forms.ModelForm):
@@ -146,3 +148,37 @@ class PATResultSuppressForm(forms.Form):
 
     def clean_reason(self):
         return " ".join(self.cleaned_data["reason"].split())
+
+
+class PATUploadChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, batch):
+        uploader = batch.uploaded_by.name if batch.uploaded_by else "an unknown user"
+        uploaded = timezone.localtime(batch.uploaded_at)
+        return f"{batch.original_filename} · {uploaded:%d/%m/%Y %H:%M} by {uploader}"
+
+
+class PATExportSearchForm(forms.Form):
+    q = forms.CharField(required=False, max_length=2000, strip=False)
+    upload = PATUploadChoiceField(models.PATTestBatch.objects.select_related("uploaded_by"), required=False)
+    tested_from = forms.DateField(required=False)
+    tested_to = forms.DateField(required=False)
+    source = forms.ChoiceField(
+        required=False, choices=[("", "All assets"), ("rigs", "In RIGS"), ("other", "Not in RIGS")]
+    )
+    offset = forms.IntegerField(required=False, min_value=0)
+
+
+class PATExportForm(forms.Form):
+    organisation = forms.ModelChoiceField(
+        Organisation.objects.all(), error_messages={"required": "Choose the client organisation"}
+    )
+    detail = forms.ChoiceField(
+        choices=[(pat_export.SIMPLE, "Simple"), (pat_export.DETAILED, "Detailed")], initial=pat_export.SIMPLE
+    )
+    selection = forms.JSONField(error_messages={"required": "Select at least one asset to export"})
+
+    def clean_selection(self):
+        try:
+            return pat_export.validate_selection(self.cleaned_data["selection"])
+        except pat_export.SelectionError as error:
+            raise forms.ValidationError(str(error)) from None

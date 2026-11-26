@@ -4,6 +4,9 @@
 {% block content %}
 <div class="row my-2">
   <div class="col text-end pe-0">
+    {% if perms.RIGS.view_organisation %}
+    <a class="btn btn-primary" href="{% url 'pat_export' %}"><span class="fas fa-file-pdf"></span> Export Records</a>
+    {% endif %}
     {% if perms.assets.add_pattestbatch %}
     <a class="btn btn-success" href="{% url 'pat_upload' %}"><span class="fas fa-upload"></span> Upload Results</a>
     {% endif %}

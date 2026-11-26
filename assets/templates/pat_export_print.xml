@@ -1,0 +1,116 @@
+{% extends 'base_print.xml' %}
+{% load linebreaksxml from filters %}
+
+{% block extrastyles %}
+<paraStyle name="pat.cell" fontName="OpenSans" fontSize="8" leading="10"/>
+<paraStyle name="pat.bold" parent="pat.cell" fontName="OpenSans-Bold"/>
+<paraStyle name="pat.muted" parent="pat.cell" textColor="DarkGray"/>
+<paraStyle name="pat.pass" parent="pat.bold" textColor="#146c43"/>
+<paraStyle name="pat.fail" parent="pat.bold" textColor="#b02a37"/>
+<paraStyle name="pat.unknown" parent="pat.bold" textColor="DarkGray"/>
+<paraStyle name="pat.title" fontName="OpenSans-Bold" fontSize="16" leading="20" spaceAfter="8"/>
+<paraStyle name="pat.heading" fontName="OpenSans-Bold" fontSize="13" leading="16" spaceAfter="4"/>
+<paraStyle name="pat.subheading" fontName="OpenSans-Bold" fontSize="9" leading="12" spaceBefore="6" spaceAfter="2" keepWithNext="1"/>
+
+<blockTableStyle id="patList">
+    <blockValign value="top"/>
+    <blockBackground colorName="Tint" start="0,0" stop="-1,0"/>
+    <blockTopPadding start="0,0" stop="-1,-1" length="1"/>
+    <blockBottomPadding start="0,0" stop="-1,-1" length="3"/>
+    <lineStyle kind="LINEBELOW" colorName="LightGrey" start="0,0" stop="-1,-1" thickness="0.5"/>
+</blockTableStyle>
+<blockTableStyle id="patFacts">
+    <blockValign value="top"/>
+    <blockLeftPadding start="0,0" stop="-1,-1" length="0"/>
+    <blockTopPadding start="0,0" stop="-1,-1" length="1"/>
+    <blockBottomPadding start="0,0" stop="-1,-1" length="2"/>
+</blockTableStyle>
+<blockTableStyle id="patTestBar" keepWithNext="true">
+    <blockValign value="middle"/>
+    <blockBackground colorName="Tint" start="0,0" stop="-1,-1"/>
+    <lineStyle kind="LINEABOVE" colorName="Brand" start="0,0" stop="-1,0" thickness="1.5"/>
+</blockTableStyle>
+{% endblock %}
+
+{% block content %}
+<setNextTemplate name="Main"/>
+<para style="pat.title">Portable Appliance Test Records</para>
+
+<blockTable style="patFacts" colWidths="285,210">
+    <tr>
+        <td>
+            <para style="pat.muted">Prepared for</para>
+            <para style="style.Heading2">{{ organisation.name }}</para>
+            {% if organisation.address %}<para style="pat.cell">{{ organisation.address|linebreaksxml }}</para>{% endif %}
+            {% if organisation.email %}<para style="pat.cell">{{ organisation.email }}</para>{% endif %}
+            {% if organisation.phone %}<para style="pat.cell">{{ organisation.phone }}</para>{% endif %}
+        </td>
+        <td>
+            <para style="pat.muted">Exported by</para>
+            <para style="style.Heading2">{{ exported_by }}</para>
+            <para style="pat.cell">{{ exported_at|date:"j F Y, H:i" }}</para>
+            <para style="pat.cell">{{ assets|length }} asset{{ assets|length|pluralize }}, {{ test_count }} test result{{ test_count|pluralize }}</para>
+        </td>
+    </tr>
+</blockTable>
+<spacer length="8"/>
+<para style="pat.muted">These records show the results held when they were exported, and only those chosen for this document. An item may since have been damaged, altered or tested again. A record here does not replace a valid, in-date PAT label, and any item that appears damaged or unfit for use must not be used.</para>
+<spacer length="12"/>
+
+{% if detailed %}
+<para style="style.Heading2">Summary</para>
+<blockTable style="patList" colWidths="80,205,50,90,70" repeatRows="1">
+    <tr>
+        <td><para style="pat.bold">Asset ID</para></td>
+        <td><para style="pat.bold">Description</para></td>
+        <td><para style="pat.bold">Tests</para></td>
+        <td><para style="pat.bold">Latest included</para></td>
+        <td><para style="pat.bold">Result</para></td>
+    </tr>
+    {% for item in assets %}{% with latest=item.tests.0 %}
+    <tr>
+        <td><para style="pat.bold">{{ item.asset_id }}</para></td>
+        <td>{% if item.asset %}<para style="pat.cell">{{ item.asset.description }}</para>{% else %}<para style="pat.muted">{% if latest.details.location %}Location: {{ latest.details.location }}{% else %}-{% endif %}</para>{% endif %}</td>
+        <td><para style="pat.cell">{{ item.tests|length }}</para></td>
+        <td><para style="pat.cell">{{ latest.tested_at|date:"d/m/Y" }}</para></td>
+        <td>{% include 'partials/pat_export_result.xml' with passed=latest.passed %}</td>
+    </tr>
+    {% endwith %}{% endfor %}
+</blockTable>
+
+{% for item in assets %}
+<nextPage/>
+<para style="pat.heading">Asset {{ item.asset_id }}</para>
+{% if item.asset %}
+<para style="pat.cell">{{ item.asset.description }}</para>
+{% if item.asset.serial_number %}<para style="pat.muted">Serial number {{ item.asset.serial_number }}</para>{% endif %}
+{% endif %}
+<spacer length="6"/>
+{% for test in item.tests %}
+{% include 'partials/pat_export_test.xml' %}
+{% endfor %}
+{% endfor %}
+
+{% else %}
+<blockTable style="patList" colWidths="75,150,75,50,70,75" repeatRows="1">
+    <tr>
+        <td><para style="pat.bold">Asset ID</para></td>
+        <td><para style="pat.bold">Description</para></td>
+        <td><para style="pat.bold">Tested</para></td>
+        <td><para style="pat.bold">Result</para></td>
+        <td><para style="pat.bold">Tested by</para></td>
+        <td><para style="pat.bold">Next full test</para></td>
+    </tr>
+    {% for item in assets %}{% for test in item.tests %}
+    <tr>
+        <td>{% if forloop.first %}<para style="pat.bold">{{ item.asset_id }}</para>{% endif %}</td>
+        <td>{% if forloop.first %}{% if item.asset %}<para style="pat.cell">{{ item.asset.description }}</para>{% else %}<para style="pat.muted">{% if test.details.location %}Location: {{ test.details.location }}{% else %}-{% endif %}</para>{% endif %}{% endif %}</td>
+        <td><para style="pat.cell">{{ test.tested_at|date:"d/m/Y H:i" }}</para></td>
+        <td>{% include 'partials/pat_export_result.xml' with passed=test.passed %}</td>
+        <td><para style="pat.cell">{{ test.operator|default:"-" }}</para></td>
+        <td><para style="pat.cell">{{ test.next_full_test_date|date:"d/m/Y"|default:"-" }}</para></td>
+    </tr>
+    {% endfor %}{% endfor %}
+</blockTable>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base_assets.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/selects.css' %}"/>
+    <style>
+      .pat-export-list { max-height: 32rem; overflow-y: auto; }
+      @media (min-width: 992px) {
+        .pat-export-fill { flex: 1 1 0; min-height: 0; max-height: none; }
+      }
+      .pat-export-tests label { cursor: pointer; }
+      .pat-export-chevron { display: inline-block; transition: transform .2s ease; }
+      [aria-expanded="true"] > .pat-export-chevron { transform: rotate(90deg); }
+      @media (prefers-reduced-motion: reduce) { .pat-export-chevron { transition: none; } }
+    </style>
+{% endblock %}
+
+{% block preload_js %}
+    {{ block.super }}
+    <script src="{% static 'js/selects.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div id="pat-export" data-assets-url="{% url 'pat_export_assets' %}" data-organisation-url="{% url 'api_secure' model='organisation' %}" data-max-assets="{{ max_assets }}">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <h2 class="card-header h5 mb-0">1. Find assets</h2>
+        <div class="card-body">
+          <form id="pat-search" class="row g-2" role="search">
+            <div class="col-12">
+              <label class="form-label" for="search_q">Search</label>
+              {% render_field search_form.q class="form-control" type="search" placeholder="Asset ID, description, serial number or location" autocomplete="off" aria-describedby="search-help" %}
+              <div class="form-text" id="search-help">Includes assets that aren't in RIGS. Separate several asset IDs with commas to find exactly those.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="search_upload">From upload</label>
+              {% render_field search_form.upload class="ts-select" data-none-selected-text="Any upload: search by file name, date or uploader" %}
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="search_source">Show</label>
+              {% render_field search_form.source class="form-select" %}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="search_tested_from">Tested from</label>
+              {% render_field search_form.tested_from class="form-control" type="date" %}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="search_tested_to">Tested to</label>
+              {% render_field search_form.tested_to class="form-control" type="date" %}
+            </div>
+          </form>
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-2">
+            <span id="pat-search-status" role="status" class="text-body-secondary"></span>
+            <button type="button" class="btn btn-sm btn-success d-none" id="pat-add-all"></button>
+          </div>
+          <div class="list-group pat-export-list" id="pat-search-results"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-2 d-none" id="pat-more">Show more</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <h2 class="card-header h5 mb-0">2. Choose results</h2>
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <span id="pat-selected-status" role="status" class="text-body-secondary"></span>
+            <div class="btn-group btn-group-sm d-none" id="pat-bulk">
+              <button type="button" class="btn btn-outline-secondary" data-bulk="latest">All to latest only</button>
+              <button type="button" class="btn btn-outline-secondary" data-bulk="all">All to every test</button>
+              <button type="button" class="btn btn-outline-danger" id="pat-clear">Clear</button>
+            </div>
+          </div>
+          <p id="pat-selected-empty" class="text-body-secondary">Add assets from the search. Each one starts with just its latest test, which you can change here.</p>
+          <ul class="list-group pat-export-list pat-export-fill" id="pat-selected"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'pat_export' %}" id="pat-export-form" class="card mt-3" novalidate>
+    {% csrf_token %}
+    <h2 class="card-header h5 mb-0">3. Export</h2>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <label class="form-label" for="{{ export_form.organisation.id_for_label }}">Client organisation</label>
+          <div class="d-flex gap-2">
+            <div class="flex-grow-1">
+              <select id="{{ export_form.organisation.id_for_label }}" name="organisation" class="ts-select" data-none-selected-text="Search for an organisation" data-sourceurl="{% url 'api_secure' model='organisation' %}" required></select>
+            </div>
+            {% if perms.RIGS.add_organisation %}
+            <a href="{% url 'organisation_create' %}" class="btn btn-success modal-href" data-select-target="#{{ export_form.organisation.id_for_label }}" title="New organisation"><span class="fas fa-plus"></span><span class="visually-hidden">New organisation</span></a>
+            {% endif %}
+            {% if perms.RIGS.change_organisation %}
+            <a class="btn btn-warning modal-href disabled" id="{{ export_form.organisation.id_for_label }}-update" data-select-target="#{{ export_form.organisation.id_for_label }}" title="Edit organisation"><span class="fas fa-edit"></span><span class="visually-hidden">Edit organisation</span></a>
+            {% endif %}
+          </div>
+          <div id="pat-organisation-preview" class="border rounded p-2 mt-2 small d-none">
+            <div class="text-body-secondary">Shown on the PDF</div>
+            <div id="pat-organisation-details" style="white-space: pre-line"></div>
+          </div>
+        </div>
+        <fieldset class="col-lg-6">
+          <legend class="form-label fs-6">Format</legend>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="detail" id="detail-simple" value="simple" checked>
+            <label class="form-check-label" for="detail-simple"><strong>Simple</strong><br><span class="text-body-secondary">A table with one line per test: asset, date, result and next test due</span></label>
+          </div>
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="radio" name="detail" id="detail-detailed" value="detailed">
+            <label class="form-check-label" for="detail-detailed"><strong>Detailed</strong><br><span class="text-body-secondary">A summary, then each asset starting on its own page with the full readings of every chosen test</span></label>
+          </div>
+        </fieldset>
+      </div>
+      <p class="small text-body-secondary mt-3 mb-2">The PDF names you ({{ user.name }}) as the person who exported it.</p>
+      <div id="pat-export-errors" class="alert alert-danger d-none" role="alert"></div>
+      <div class="d-flex flex-wrap justify-content-end align-items-center gap-3">
+        <span id="pat-export-hint" class="text-body-secondary"></span>
+        <button type="submit" class="btn btn-primary" id="pat-export-button" disabled><span class="fas fa-file-pdf"></span> <span id="pat-export-label">Export PDF</span></button>
+      </div>
+    </div>
+  </form>
+</div>
+{{ preselected|json_script:"pat-preselected" }}
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'js/pat_export.js' %}"></script>
+{% endblock %}

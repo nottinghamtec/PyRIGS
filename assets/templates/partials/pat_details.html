@@ -2,7 +2,10 @@
 <div class="card {% if pat_status == 'in_date' %}border-success{% elif pat_status == 'not_tested' %}border-secondary{% else %}border-danger{% endif %}">
   <div class="card-header d-flex justify-content-between">
     <span>PAT Testing</span>
-    {% include 'partials/pat_badge.html' with status=pat_status label=pat_status_label %}
+    <span>
+      {% if pat_tests and perms.RIGS.view_organisation %}<a class="btn btn-sm btn-outline-primary me-2" href="{% url 'pat_export' %}?asset={{ object.asset_id|urlencode }}"><span class="fas fa-file-pdf"></span> Export</a>{% endif %}
+      {% include 'partials/pat_badge.html' with status=pat_status label=pat_status_label %}
+    </span>
   </div>
   {% include 'partials/pat_disclaimer.html' with classes='m-3' %}
   {% if pat_tests %}

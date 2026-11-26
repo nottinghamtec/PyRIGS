@@ -7,11 +7,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Exists, F, OuterRef, Q, Subquery, Sum
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.http import content_disposition_header, url_has_allowed_host_and_scheme
 from django.views import generic
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import get_template
@@ -31,7 +31,7 @@ from PyRIGS.views import (
     is_ajax,
     OEmbedView,
 )
-from assets import forms, models, pat
+from assets import forms, models, pat, pat_export
 from notifications import triggers
 from assets.sss import SSSParseError
 
@@ -674,6 +674,66 @@ class PATBatchList(generic.ListView):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "PAT Uploads"
         return context
+
+
+class PATExport(generic.TemplateView):
+    template_name = "pat_export.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        initial = {"upload": self.request.GET.get("upload")}
+        context.update(
+            {
+                "page_title": "Export PAT Records",
+                "search_form": forms.PATExportSearchForm(initial=initial, auto_id="search_%s"),
+                "export_form": forms.PATExportForm(),
+                "preselected": self.request.GET.getlist("asset"),
+                "max_assets": pat_export.MAX_ASSETS,
+            }
+        )
+        return context
+
+    def post(self, request):
+        form = forms.PATExportForm(request.POST)
+        if form.is_valid():
+            try:
+                assets = pat_export.resolve_selection(form.cleaned_data["selection"])
+                pat_export.check_size(assets, form.cleaned_data["detail"])
+            except pat_export.SelectionError as error:
+                form.add_error("selection", str(error))
+        if not form.is_valid():
+            return JsonResponse({"errors": [error for errors in form.errors.values() for error in errors]}, status=400)
+        filename, pdf = pat_export.render_pdf(
+            assets, form.cleaned_data["organisation"], request.user, form.cleaned_data["detail"]
+        )
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = content_disposition_header(True, filename)
+        add_never_cache_headers(response)
+        return response
+
+
+class PATExportAssets(generic.View):
+    page_size = 20
+
+    def get(self, request):
+        ids = request.GET.getlist("id")
+        if ids:
+            ids = list(dict.fromkeys(ids))[: pat_export.MAX_ASSETS]
+            offset, limit = 0, len(ids)
+        else:
+            form = forms.PATExportSearchForm(request.GET)
+            if not form.is_valid():
+                return JsonResponse({"errors": [e for errors in form.errors.values() for e in errors]}, status=400)
+            data = form.cleaned_data
+            ids = pat_export.search_ids(
+                data["q"], data["upload"], data["tested_from"], data["tested_to"], data["source"]
+            )
+            offset = data["offset"] or 0
+            limit = self.page_size
+            if request.GET.get("all"):
+                offset, limit = 0, pat_export.MAX_ASSETS
+        assets = pat_export.load_assets(ids[offset : offset + limit])
+        return JsonResponse({"total": len(ids), "assets": [pat_export.summarise_asset(item) for item in assets]})
 
 
 class PATBatchDetail(generic.DetailView):
